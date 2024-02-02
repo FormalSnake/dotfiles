@@ -329,7 +329,7 @@ require("lazy").setup({
   --   end,
   -- },
   -- Allows you to make the background translucent
-  -- 'xiyaowong/transparent.nvim',
+  'xiyaowong/transparent.nvim',
   -- This adds a scrollbar (doesn't work)
   -- 'petertriho/nvim-scrollbar',
   -- This adds LSP progress indicators

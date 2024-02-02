@@ -64,7 +64,7 @@ program = "/opt/homebrew/bin/fish"
 [window]
 decorations = "buttonless"
 dynamic_padding = false
-opacity = 1.0
+opacity = 0.8
 startup_mode = "Windowed"
 
 [window.dimensions]
