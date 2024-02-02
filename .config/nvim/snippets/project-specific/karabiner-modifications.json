@@ -1,0 +1,17 @@
+{
+  "delay": {
+    "body": "- { key_code: vk_none, hold_down_milliseconds: ${1:50} }",
+    "prefix": [
+      "wait",
+      "delay"
+    ]
+  },
+  "from": {
+    "body": "from: { key_code: ${1:key}, modifiers: { mandatory: [${2:command}] } }",
+    "prefix": "from"
+  },
+  "to": {
+    "body": "- { key_code: ${1:key}, modifiers: [${2:command}] }",
+    "prefix": "to"
+  }
+}
