@@ -1,0 +1,2 @@
+"use strict";(("undefined"!=typeof self?self:global).webpackChunkopen=("undefined"!=typeof self?self:global).webpackChunkopen||[]).push([[6008],{73996:(e,t,n)=>{n.r(t),n.d(t,{SettingsLabel:()=>d.D,SettingsRow:()=>f.Z,SettingsRowEnd:()=>r.m,SettingsRowStart:()=>b.M,default:()=>o});var s=n(50959),l=n(645),i=n(11527);const a=(0,s.lazy)((()=>Promise.resolve().then(n.bind(n,24472)))),o=()=>(0,i.jsx)(l.B,{children:(0,i.jsx)(a,{})});var d=n(2389),f=n(13405),b=n(70522),r=n(19006)}}]);
+//# sourceMappingURL=xpui-desktop-routes-settings.js.map
