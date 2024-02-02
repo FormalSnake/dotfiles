@@ -1,3 +1,4 @@
+![image](https://github.com/FormalSnake/dotfiles/assets/90651091/5205ce26-30e7-4568-a38b-790023d70271)
 # My dotfiles
 This GIT repo contains all of the dotfiles that I mainly use.
 
