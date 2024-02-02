@@ -1,9 +1,9 @@
-![image](https://github.com/FormalSnake/dotfiles/assets/banner-dots.png)
+![image](https://raw.githubusercontent.com/FormalSnake/dotfiles/main/assets/banner-dots.png)
 # My dotfiles
 This GIT repo contains all of the dotfiles that I mainly use.
 
 ## Screenshot
-![image](https://github.com/FormalSnake/dotfiles/assets/screenshot.png)
+![image](https://raw.githubusercontent.com/FormalSnake/dotfiles/main/assets/screenshot.png)
 
 ## Requirements
 Ensure you have the following installed on your system:
