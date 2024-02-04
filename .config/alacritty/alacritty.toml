@@ -66,6 +66,7 @@ decorations = "buttonless"
 dynamic_padding = false
 opacity = 0.8
 startup_mode = "Windowed"
+blur = true
 
 [window.dimensions]
 columns = 85
