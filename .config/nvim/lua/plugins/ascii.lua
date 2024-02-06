@@ -1,0 +1,3 @@
+return {
+  "MaximilianLloyd/ascii.nvim",
+}
