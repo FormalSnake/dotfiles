@@ -1,3 +1,0 @@
-return {
-  { "kosayoda/nvim-lightbulb" },
-}

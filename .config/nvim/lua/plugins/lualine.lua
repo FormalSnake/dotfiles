@@ -11,59 +11,76 @@ return {
   "nvim-lualine/lualine.nvim",
   opts = function(_, opts)
     opts.options = {
-      theme = "auto",
       icons_enabled = true,
+      theme = "catppuccin",
       component_separators = { left = "", right = "" },
       section_separators = { left = "", right = "" },
       disabled_filetypes = {
-        statusline = {
-          "help",
-          "startify",
-          "dashboard",
-          "neo-tree",
-          "packer",
-          "neogitstatus",
-          "NvimTree",
-          "Trouble",
-          "alpha",
-          "lir",
-          "Outline",
-          "spectre_panel",
-          "toggleterm",
-          "qf",
-        },
         winbar = {},
+      },
+      ignore_focus = {},
+      always_divide_middle = true,
+      globalstatus = false,
+      refresh = {
+        statusline = 1000,
+        tabline = 1000,
+        winbar = 1000,
       },
     }
     opts.sections = {
-      lualine_a = {},
-      lualine_b = {},
-      lualine_c = {
-        -- "filename",
+      lualine_a = {
         {
-          "filetype",
-          icon_only = true,
-          separator = "",
-          padding = {
-            left = 1,
-            right = 0,
+          "mode",
+          icon = "",
+          separator = { left = "", right = "" },
+          color = {
+            fg = "#1c1d21",
+            bg = "#b4befe",
+          },
+        },
+      },
+      lualine_b = {
+        {
+          "branch",
+          icon = "",
+          separator = { left = "", right = "" },
+          color = {
+            fg = "#1c1d21",
+            bg = "#7d83ac",
+          },
+        },
+        {
+          "diff",
+          separator = { left = "", right = "" },
+          color = {
+            fg = "#1c1d21",
+            bg = "#7d83ac",
+          },
+        },
+      },
+      lualine_c = {
+        {
+          "diagnostics",
+          separator = { left = "", right = "" },
+          color = {
+            bg = "#45475a",
           },
         },
         {
           "filename",
-          path = 1,
-          symbols = {
-            modified = "  ",
-            readonly = "",
-            unnamed = "",
+        },
+      },
+      lualine_x = { "filesize" },
+      lualine_y = {
+        {
+          "filetype",
+          icons_enabled = false,
+          color = {
+            fg = "#1C1D21",
+            bg = "#eba0ac",
           },
         },
-        { "diagnostics", sources = { "nvim_lsp" }, symbols = { error = " ", warn = " ", info = " " } },
-        { "diff" },
-        { "searchcount" },
       },
-      lualine_x = { { "b:gitsigns_head", icon = "" } },
-      lualine_y = { "progress" },
       lualine_z = {
         progress,
         -- function()

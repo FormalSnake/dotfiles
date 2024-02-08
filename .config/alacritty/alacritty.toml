@@ -1,8 +1,10 @@
-import = ["~/.config/alacritty/base16-alacritty/colors/base16-black-metal.yml"]
+# import = ["~/.config/alacritty/base16-alacritty/colors/base16-black-metal.yml"]
 live_config_reload = true
 
 [colors]
 draw_bold_text_with_bright_colors = false
+[colors.primary]
+background="#1E1D23"
 
 [cursor.style]
 blinking = "On"
@@ -19,7 +21,8 @@ x = 0
 y = 0
 
 [font.normal]
-family = "CommitMono Nerd Font"
+# family = "CommitMono Nerd Font"
+family = "JetBrainsMono Nerd Font"
 # family = "SF Pro"
 
 [font.offset]
@@ -64,9 +67,9 @@ program = "/opt/homebrew/bin/fish"
 [window]
 decorations = "buttonless"
 dynamic_padding = false
-opacity = 0.8
+# opacity = 0.8
 startup_mode = "Windowed"
-blur = true
+# blur = true
 
 [window.dimensions]
 columns = 85
