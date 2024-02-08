@@ -1,6 +1,6 @@
 #!/bin/bash
 
-API_KEY="2781ce3e44db4ad4883164353240102" # insert api key here
+# API_KEY="2781ce3e44db4ad4883164353240102" # insert api key here
 # CITY="$(curl -s ipinfo.io/loc)"
 # CITY="Tahiche, Canarias" # insert city here
 
@@ -57,65 +57,65 @@ API_KEY="2781ce3e44db4ad4883164353240102" # insert api key here
 
 # first comment is description, second is icon number
 weather_icons_day=(
-    [0]=  # Sunny/113
-    [1]=  # Sunny/113
-    [2]=  # Partly cloudy/116
-    [3]=  # Cloudy/119
-    [45]=  # Mist/143
-    [48]=  # Mist/143
-    [51]=  # Patchy rain possible/176
-    [53]=  # Patchy rain possible/176
-    [55]=  # Patchy rain possible/176
-    [56]=  # Patchy sleet possible/182
-    [57]=  # Patchy sleet possible/182
-    [61]=  # Patchy rain possible/176
-    [63]=  # Patchy rain possible/176
-    [65]=  # Patchy rain possible/176
-    [66]=  # Patchy sleet possible/1282
-    [67]=  # Patchy sleet possible/182
-    [71]=  # Patchy snow possible/179
-    [73]=  # Patchy snow possible/179
-    [75]=  # Patchy snow possible/179
-    [77]=  # Patchy snow possible/179
-    [80]=  # Patchy rain possible/1276
-    [81]=  # Patchy rain possible/176
-    [82]=  # Patchy rain possible/176
-    [85]=  # Patchy snow possible/179
-    [86]=  # Patchy snow possible/179
-    [95]=  # Patchy light snow with thunder/392
-    [96]=  # Patchy light snow with thunder/392
-    [99]=  # Ice pellets/350
+	[0]=  # Sunny/113
+	[1]=  # Sunny/113
+	[2]=  # Partly cloudy/116
+	[3]=  # Cloudy/119
+	[45]= # Mist/143
+	[48]= # Mist/143
+	[51]= # Patchy rain possible/176
+	[53]= # Patchy rain possible/176
+	[55]= # Patchy rain possible/176
+	[56]= # Patchy sleet possible/182
+	[57]= # Patchy sleet possible/182
+	[61]= # Patchy rain possible/176
+	[63]= # Patchy rain possible/176
+	[65]= # Patchy rain possible/176
+	[66]= # Patchy sleet possible/1282
+	[67]= # Patchy sleet possible/182
+	[71]= # Patchy snow possible/179
+	[73]= # Patchy snow possible/179
+	[75]= # Patchy snow possible/179
+	[77]= # Patchy snow possible/179
+	[80]= # Patchy rain possible/1276
+	[81]= # Patchy rain possible/176
+	[82]= # Patchy rain possible/176
+	[85]= # Patchy snow possible/179
+	[86]= # Patchy snow possible/179
+	[95]= # Patchy light snow with thunder/392
+	[96]= # Patchy light snow with thunder/392
+	[99]= # Ice pellets/350
 )
 #
 weather_icons_night=(
-    [0]=  # Sunny/113
-    [1]=  # Sunny/113
-    [2]=  # Partly cloudy/116
-    [3]=  # Cloudy/119
-    [45]=   # Mist/143
-    [48]=   # Mist/143
-    [51]=   # Patchy rain possible/176
-    [53]=   # Patchy rain possible/176
-    [55]=   # Patchy rain possible/176
-    [56]=   # Patchy sleet possible/182
-    [57]=   # Patchy sleet possible/182
-    [61]=   # Patchy rain possible/176
-    [63]=   # Patchy rain possible/176
-    [65]=   # Patchy rain possible/176
-    [66]=   # Patchy sleet possible/1282
-    [67]=   # Patchy sleet possible/182
-    [71]=   # Patchy snow possible/179
-    [73]=  # Patchy snow possible/179
-    [75]=   # Patchy snow possible/179
-    [77]=   # Patchy snow possible/179
-    [80]=   # Patchy rain possible/1276
-    [81]=   # Patchy rain possible/176
-    [82]=   # Patchy rain possible/176
-    [85]=   # Patchy snow possible/179
-    [86]=   # Patchy snow possible/179
-    [95]=  # Patchy light snow with thunder/392
-    [96]=  # Patchy light snow with thunder/392
-    [99]=   # Ice pellets/350
+	[0]=  # Sunny/113
+	[1]=  # Sunny/113
+	[2]=  # Partly cloudy/116
+	[3]=  # Cloudy/119
+	[45]= # Mist/143
+	[48]= # Mist/143
+	[51]= # Patchy rain possible/176
+	[53]= # Patchy rain possible/176
+	[55]= # Patchy rain possible/176
+	[56]= # Patchy sleet possible/182
+	[57]= # Patchy sleet possible/182
+	[61]= # Patchy rain possible/176
+	[63]= # Patchy rain possible/176
+	[65]= # Patchy rain possible/176
+	[66]= # Patchy sleet possible/1282
+	[67]= # Patchy sleet possible/182
+	[71]= # Patchy snow possible/179
+	[73]= # Patchy snow possible/179
+	[75]= # Patchy snow possible/179
+	[77]= # Patchy snow possible/179
+	[80]= # Patchy rain possible/1276
+	[81]= # Patchy rain possible/176
+	[82]= # Patchy rain possible/176
+	[85]= # Patchy snow possible/179
+	[86]= # Patchy snow possible/179
+	[95]= # Patchy light snow with thunder/392
+	[96]= # Patchy light snow with thunder/392
+	[99]= # Ice pellets/350
 )
 
 output=$(shortcuts run getCoreLocationData -o /dev/stdout)
@@ -139,11 +139,24 @@ condition=$(echo $data | jq -r '.current_weather.weathercode')
 temp=$(echo $data | jq -r '.current_weather.temperature | floor')
 feelslike=$(echo $data | jq -r '.current_weather.temperature') # Open-Meteo geeft geen 'feels like' temperatuur, dus gebruik gewoon de temperatuur
 humidity=$(echo $data | jq -r '.current_weather.humidity')
-is_day=$(echo $data | jq -r '.current_weather.time')
+# is_day=$(echo $data | jq -r '.current_weather.time')
+# Definieer de uren waarop het dag is
+start_dag=6
+einde_dag=18
+
+# Haal het huidige uur op
+huidig_uur=$(date +"%H")
+
+# Controleer of het huidig uur binnen de dagtijd valt
+if [ "$huidig_uur" -ge "$start_dag" ] && [ "$huidig_uur" -lt "$einde_dag" ]; then
+	is_day="1" # Het is dag
+else
+	is_day="0" # Het is nacht
+fi
 
 [ "$is_day" = "1" ] && icon=${weather_icons_day[$condition]} || icon=${weather_icons_night[$condition]}
 
 sketchybar -m \
-    --set weather \
-        icon="$icon" \
-        label="${temp}°C"
+	--set weather \
+	icon="$icon" \
+	label="${temp}°C"
