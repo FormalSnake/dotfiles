@@ -1,3 +1,13 @@
+#!/bin/bash
+
+# Unload the macOS WindowManager process
+launchctl unload -F /System/Library/LaunchAgents/com.apple.WindowManager.plist >/dev/null 2>&1 &
+
+sudo yabai --load-sa
+yabai -m signal --add event=dock_did_restart action="sudo yabai --load-sa"
+
+yabai -m signal --add event=window_created action='yabai -m query --windows --window $YABAI_WINDOW_ID | jq -er ".\"can-resize\" or .\"is-floating\"" || yabai -m window $YABAI_WINDOW_ID --toggle float'
+
 # default layout (can be bsp, stack or float)
 yabai -m config layout bsp
 
@@ -11,6 +21,8 @@ yabai -m config left_padding 12
 yabai -m config right_padding 12
 yabai -m config window_gap 12
 yabai -m config external_bar all:40:0
+yabai -m config window_shadow on
+yabai -m config focus_follows_mouse autofocus
 
 yabai -m config window_border off
 yabai -m config window_border_width 2
@@ -20,7 +32,7 @@ yabai -m config normal_window_border_color 0xfff7768e # Tokyonight red
 # -- mouse settings --
 
 # center mouse on window with focus
-yabai -m config mouse_follows_focus on
+# yabai -m config mouse_follows_focus on
 
 # modifier for clicking and dragging with mouse
 yabai -m config mouse_modifier alt
@@ -36,12 +48,47 @@ yabai -m config auto_balance on
 yabai -m mouse_drop_action swap
 yabai -m signal --add event=window_focused action="sketchybar -m --trigger window_focus &> /dev/null"
 
+# Setup spaces
+function setup_space {
+	local idx="$1"
+	local name="$2"
+	local space=
+	echo "setup space $idx : $name"
 
-# disable specific apps
-yabai -m rule --add app="^System Settings$" manage=off
-yabai -m rule --add app="^Calculator$" manage=off
-yabai -m rule --add app="^Karabiner-Elements$" manage=off
-yabai -m rule --add app="^QuickTime Player$" manage=off
-yabai -m rule --add app="^Finder$" manage=off
-yabai -m rule --add app="^MyWallpaper$" manage=off
+	space=$(yabai -m query --spaces --space "$idx")
+	if [ -z "$space" ]; then
+		yabai -m space --create
+	fi
 
+	yabai -m space "$idx" --label "$name"
+	echo yabai -m space "$idx" --label "$name"
+}
+
+setup_space 1 Web
+setup_space 2 Todo
+setup_space 3 Code
+setup_space 4 Music
+setup_space 5 Design
+setup_space 6 School
+
+# Assign apps to specific spaces
+yabai -m rule --add app="^(Arc|Discord)$" space=^1
+yabai -m rule --add app="^(VSCode|Alacritty|Zed)$" space=^2
+yabai -m rule --add app="^(Notion|Superlist)$" space=^3
+yabai -m rule --add app="^(Spotify|YouTube Music Desktop App)$" space=^4
+yabai -m rule --add app="^(Figma|After Effects|Lightroom|Photoshop)$" space=^5
+yabai -m rule --add app="^(Keynote|Microsoft PowerPoint|Microsoft Word)$" space=^6
+
+# Manage apps and windows
+yabai -m rule --add app="^(Messages|LuLu|Vimac|Calculator|Software Update|Dictionary|VLC|System Preferences|System Settings|zoom.us|Photo Booth|Archive Utility|Python|LibreOffice|App Store|Alfred|Activity Monitor|Clock|Karabiner-Elements|Plexamp|Alfred Preferences|ImageOptim|The Unarchiver|Transmission|Installer|Hosting AU|Numi|IINA)$" manage=off
+yabai -m rule --add label="Small windows" title="(Co(py|nnect)|Move|Info|Pref)" manage=off
+yabai -m rule --add label="GLMv4" app="^GLMv4$" title="(Preparations for Measurements)" manage=off
+yabai -m rule --add label="Cyberduck" app="^Cyberduck$" title="(Transfers)" manage=off
+yabai -m rule --add label="Mail New Message" app="^Mail$" title="(New Message)" manage=off
+yabai -m rule --add label="Steam Helper" app="^Steam Helper$" manage=off
+yabai -m rule --add label="About This Mac" app="System Information" title="About This Mac" manage=off
+yabai -m rule --add label="Activity Windows" title="^Activity$" manage=off
+yabai -m rule --add app="^Adobe (After Effects|Audition|Media Encoder|Lightroom)$" role="AXLayoutArea" subrole="AXFloatingWindow" manage=on
+yabai -m rule --add app="^IINA$" sticky=on layer=above manage=off
+
+echo "Yabai configuration loaded…"

@@ -47,7 +47,7 @@ sketchybar --default icon.font="JetBrainsMono Nerd Font:Semibold:15.0" \
 # source $ITEM_DIR/menu.sh
 # source $ITEM_DIR/spaces.sh
 source $ITEM_DIR/front_app.sh
-source $ITEM_DIR/svim.sh
+# source $ITEM_DIR/svim.sh
 
 # -- Right Side Of Notch Items --
 source $ITEM_DIR/media.sh
