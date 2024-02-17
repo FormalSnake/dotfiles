@@ -6,9 +6,10 @@ svim=(
 	icon.font.size=20
 	updates=on
 	drawing=off
+	label.font="SF Pro:15.0"
 )
 
 sketchybar --add event svim_update \
-	--add item svim right \
+	--add item svim left \
 	--set svim "${svim[@]}" \
 	--subscribe svim svim_update

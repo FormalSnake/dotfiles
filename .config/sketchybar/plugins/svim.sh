@@ -30,6 +30,7 @@ if [ "$SENDER" = "svim_update" ]; then
 
 	sketchybar --set $NAME drawing="$DRAWING" \
 		label.drawing="$DRAW_CMD" \
+		label.font="SF Pro:15.0" \
 		icon="$ICON" \
 		icon.color="$COLOR" \
 		label="$CMDLINE"
