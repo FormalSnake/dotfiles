@@ -15,13 +15,13 @@ ITEM_DIR="$CONFIG_DIR/items"
 # If you are looking for other colors, see the color picker:
 # https://felixkratz.github.io/SketchyBar/config/tricks#color-picker
 
-sketchybar --bar height=40 \
+sketchybar --bar height=50 \
 	blur_radius=30 \
 	position=top \
 	sticky=off \
 	padding_left=7 \
 	padding_right=7 \
-	color=$BAR_COLOR
+	color=0x00fff
 
 ##### Changing Defaults #####
 # We now change some default values that are applied to all further items
@@ -34,7 +34,9 @@ sketchybar --default icon.font="JetBrainsMono Nerd Font:Semibold:15.0" \
 	label.color=$WHITE \
 	background.color=$ITEM_BG_COLOR \
 	background.corner_radius=5 \
-	background.height=24 \
+	background.height=35 \
+	background.border_width=2 \
+	background.border_color=0xff111314 \
 	padding_left=5 \
 	padding_right=5 \
 	label.padding_left=4 \
@@ -42,6 +44,7 @@ sketchybar --default icon.font="JetBrainsMono Nerd Font:Semibold:15.0" \
 	blur_radius=30 \
 	icon.padding_left=10 \
 	icon.padding_right=4
+# background.shadow.color=0x25000000 # background.shadow.drawing=on \
 
 # -- Left Side Items --
 # source $ITEM_DIR/menu.sh
@@ -51,15 +54,16 @@ source $ITEM_DIR/front_app.sh
 
 # -- Right Side Of Notch Items --
 source $ITEM_DIR/media.sh
-source $ITEM_DIR/calendar.sh
 
 # --- Right Side Items ---
 
 # source $ITEM_DIR/volume.sh
+source $ITEM_DIR/clock.sh
 source $ITEM_DIR/battery.sh
 source $ITEM_DIR/wifi.sh
-source $ITEM_DIR/disk.sh
-source $ITEM_DIR/cpu.sh
+source $ITEM_DIR/bracket.sh
+# source $ITEM_DIR/disk.sh
+# source $ITEM_DIR/cpu.sh
 source $ITEM_DIR/weather.sh
 
 ##### Finalizing Setup #####

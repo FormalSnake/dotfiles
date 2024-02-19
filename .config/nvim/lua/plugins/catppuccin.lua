@@ -2,6 +2,7 @@ return {
   "catppuccin/nvim",
   lazy = true,
   name = "catppuccin",
+  enabled = false,
   opts = {
     transparent_background = true,
     no_italic = true,

@@ -1,6 +1,8 @@
 require("config.lazy")
 
-vim.cmd.colorscheme("catppuccin")
+-- vim.cmd.colorscheme("catppuccin")
+vim.cmd.colorscheme("oxocarbon")
+vim.opt.background = "dark"
 
 -- This is the old line number highlight behaviour
 --vim.api.nvim_set_hl(0, "LineNrAbove", { fg = "#6e738d", bold = false })
