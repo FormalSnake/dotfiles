@@ -15,7 +15,7 @@ ITEM_DIR="$CONFIG_DIR/items"
 # If you are looking for other colors, see the color picker:
 # https://felixkratz.github.io/SketchyBar/config/tricks#color-picker
 
-sketchybar --bar height=50 \
+sketchybar --bar height=54 \
 	blur_radius=30 \
 	position=top \
 	sticky=off \
@@ -65,6 +65,7 @@ source $ITEM_DIR/bracket.sh
 # source $ITEM_DIR/disk.sh
 # source $ITEM_DIR/cpu.sh
 source $ITEM_DIR/weather.sh
+# source $ITEM_DIR/notion.sh
 
 ##### Finalizing Setup #####
 # The below command is only needed at the end of the initial configuration to

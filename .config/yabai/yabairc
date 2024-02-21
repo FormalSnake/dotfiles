@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# yabai -m config menubar_opacity 0.0
+
 # Unload the macOS WindowManager process
 launchctl unload -F /System/Library/LaunchAgents/com.apple.WindowManager.plist >/dev/null 2>&1 &
 
@@ -13,13 +15,15 @@ yabai -m config layout bsp
 
 # new window spawns to the right if vertical split, or bottom if horizontal split
 yabai -m config window_placement second_child
+yabai -m config window_topmost off
+yabai -m config window_shadow off
 
 # padding set to 12px
-yabai -m config top_padding 12
-yabai -m config bottom_padding 12
-yabai -m config left_padding 12
-yabai -m config right_padding 12
-yabai -m config window_gap 12
+yabai -m config top_padding 16
+yabai -m config bottom_padding 16
+yabai -m config left_padding 16
+yabai -m config right_padding 16
+yabai -m config window_gap 16
 yabai -m config external_bar all:40:0
 yabai -m config window_shadow off
 yabai -m config focus_follows_mouse autofocus
@@ -42,7 +46,9 @@ yabai -m config mouse_action1 move
 yabai -m config mouse_action2 resize
 
 # Split ratio
-yabai -m config auto_balance on
+# yabai -m config auto_balance on
+yabai -m config split_ratio 0.50
+yabai -m config auto_balance off
 
 # when window is dropped in center of another window, swap them (on edges it will split it)
 yabai -m mouse_drop_action swap
@@ -65,11 +71,12 @@ function setup_space {
 }
 
 setup_space 1 Web
-setup_space 2 Todo
-setup_space 3 Code
+setup_space 2 Code
+setup_space 3 Todo
 setup_space 4 Music
 setup_space 5 Design
 setup_space 6 School
+setup_space 7 Social
 
 # Assign apps to specific spaces
 yabai -m rule --add app="^(Arc|Discord)$" space=^1
@@ -78,6 +85,7 @@ yabai -m rule --add app="^(Notion|Superlist)$" space=^3
 yabai -m rule --add app="^(Spotify|YouTube Music Desktop App)$" space=^4
 yabai -m rule --add app="^(Figma|After Effects|Lightroom|Photoshop)$" space=^5
 yabai -m rule --add app="^(Keynote|Microsoft PowerPoint|Microsoft Word)$" space=^6
+yabai -m rule --add app="^(Discord|Messages)$" space=^7
 
 # Manage apps and windows
 yabai -m rule --add app="^(Messages|LuLu|Vimac|Calculator|Software Update|Dictionary|VLC|System Preferences|System Settings|zoom.us|Photo Booth|Archive Utility|Python|LibreOffice|App Store|Alfred|Activity Monitor|Clock|Karabiner-Elements|Plexamp|Alfred Preferences|ImageOptim|The Unarchiver|Transmission|Installer|Hosting AU|Numi|IINA)$" manage=off
