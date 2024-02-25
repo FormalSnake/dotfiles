@@ -19,8 +19,8 @@ sketchybar --bar height=54 \
 	blur_radius=30 \
 	position=top \
 	sticky=off \
-	padding_left=7 \
-	padding_right=7 \
+	padding_left=4 \
+	padding_right=4 \
 	color=0x00fff
 
 ##### Changing Defaults #####
@@ -36,7 +36,7 @@ sketchybar --default icon.font="JetBrainsMono Nerd Font:Semibold:15.0" \
 	background.corner_radius=5 \
 	background.height=35 \
 	background.border_width=2 \
-	background.border_color=0xff111314 \
+	background.border_color=0x55111314 \
 	padding_left=5 \
 	padding_right=5 \
 	label.padding_left=4 \

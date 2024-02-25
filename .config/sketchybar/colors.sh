@@ -11,7 +11,7 @@ export WHITE=0xffffffff
 # export BAR_COLOR=0xff101314
 export BAR_COLOR=0xff131313
 # export ITEM_BG_COLOR=0x85353c3f
-export ITEM_BG_COLOR=0xff000000
+export ITEM_BG_COLOR=0x85000000
 export ACCENT_COLOR=0xffffffff
 export SELECTED_COLOR=0xffcc241d
 

@@ -2,7 +2,7 @@ return {
   {
     "tinted-theming/base16-vim",
     priority = 1000,
-    enabled = false,
+    enabled = true,
     config = function()
       local cmd = vim.cmd
       local g = vim.g

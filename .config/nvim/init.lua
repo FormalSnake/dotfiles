@@ -1,7 +1,7 @@
 require("config.lazy")
 
 -- vim.cmd.colorscheme("catppuccin")
-vim.cmd.colorscheme("oxocarbon")
+-- vim.cmd.colorscheme("oxocarbon")
 vim.opt.background = "dark"
 
 -- This is the old line number highlight behaviour
