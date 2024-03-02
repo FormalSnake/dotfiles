@@ -23,7 +23,8 @@ y = 0
 
 [font.normal]
 # family = "CommitMono Nerd Font"
-family = "JetBrainsMono Nerd Font"
+# family = "JetBrainsMono Nerd Font"
+family = "GeistMono Nerd Font"
 # family = "SF Pro"
 
 [font.offset]

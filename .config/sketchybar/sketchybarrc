@@ -7,6 +7,7 @@ source "$CONFIG_DIR/colors.sh" # Loads all defined colors
 
 PLUGIN_DIR="$CONFIG_DIR/plugins"
 ITEM_DIR="$CONFIG_DIR/items"
+export FONT="GeistMono Nerd Font"
 
 ##### Bar Appearance #####
 # Configuring the general appearance of the bar, these are only some of the
@@ -21,16 +22,16 @@ sketchybar --bar height=54 \
 	sticky=off \
 	padding_left=4 \
 	padding_right=4 \
-	color=0x00fff
+	color=$TRANSPARENT
 
 ##### Changing Defaults #####
 # We now change some default values that are applied to all further items
 # For a full list of all available item properties see:
 # https://felixkratz.github.io/SketchyBar/config/items
 
-sketchybar --default icon.font="JetBrainsMono Nerd Font:Semibold:15.0" \
+sketchybar --default icon.font="$FONT:Semibold:15.0" \
 	icon.color=$WHITE \
-	label.font="JetBrainsMono Nerd Font:Semibold:15.0" \
+	label.font="$FONT:Semibold:15.0" \
 	label.color=$WHITE \
 	background.color=$ITEM_BG_COLOR \
 	background.corner_radius=5 \
@@ -61,6 +62,7 @@ source $ITEM_DIR/media.sh
 source $ITEM_DIR/clock.sh
 source $ITEM_DIR/battery.sh
 source $ITEM_DIR/wifi.sh
+# source $ITEM_DIR/github.sh
 source $ITEM_DIR/bracket.sh
 # source $ITEM_DIR/disk.sh
 # source $ITEM_DIR/cpu.sh

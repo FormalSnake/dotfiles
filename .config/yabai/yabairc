@@ -86,7 +86,7 @@ yabai -m rule --add app="^(Notion|Superlist)$" space=^3
 yabai -m rule --add app="^(Spotify|YouTube Music Desktop App)$" space=^4
 yabai -m rule --add app="^(Figma|After Effects|Lightroom|Photoshop)$" space=^5
 yabai -m rule --add app="^(Keynote|Microsoft PowerPoint|Microsoft Word)$" space=^6
-yabai -m rule --add app="^(Discord|Messages)$" space=^7
+yabai -m rule --add app="^(Discord|Messages|Dorion|ArmCord)$" space=^7
 
 # Manage apps and windows
 yabai -m rule --add app="^(Messages|LuLu|Vimac|Calculator|Software Update|Dictionary|VLC|System Preferences|System Settings|zoom.us|Photo Booth|Archive Utility|Python|LibreOffice|App Store|Alfred|Activity Monitor|Clock|Karabiner-Elements|Plexamp|Alfred Preferences|ImageOptim|The Unarchiver|Transmission|Installer|Hosting AU|Numi|IINA)$" manage=off
