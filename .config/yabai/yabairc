@@ -25,7 +25,10 @@ yabai -m config left_padding 12
 yabai -m config right_padding 12
 yabai -m config window_gap 12
 yabai -m config external_bar all:40:0
-yabai -m config window_shadow off
+yabai -m config window_shadow float
+yabai -m config window_opacity on
+yabai -m config active_window_opacity 1.0
+yabai -m config normal_window_opacity 0.7
 # yabai -m config focus_follows_mouse autofocus
 yabai -m config focus_follows_mouse off
 
