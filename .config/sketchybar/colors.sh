@@ -19,8 +19,10 @@ export TRANSPARENT=0x00000000
 # -- Gray Scheme --
 # export BAR_COLOR=0xff101314
 export BAR_COLOR=0xff131313
+# export BAR_COLOR=0xff1E1E2E
 # export ITEM_BG_COLOR=0x85353c3f
-export ITEM_BG_COLOR=0x85000000
+# export ITEM_BG_COLOR=0x85000000
+export ITEM_BG_COLOR=0x851E1E2E
 export ACCENT_COLOR=0xffffffff
 export SELECTED_COLOR=0xffcc241d
 

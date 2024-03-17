@@ -25,6 +25,7 @@ y = 0
 # family = "CommitMono Nerd Font"
 # family = "JetBrainsMono Nerd Font"
 family = "GeistMono Nerd Font"
+# family = "CaskaydiaCove Nerd Font"
 # family = "SF Pro"
 
 [font.offset]

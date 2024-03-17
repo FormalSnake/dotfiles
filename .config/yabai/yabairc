@@ -34,9 +34,9 @@ yabai -m config normal_window_opacity 0.9
 yabai -m config focus_follows_mouse off
 
 yabai -m config window_border off
-yabai -m config window_border_width 2
-yabai -m config active_window_border_color 0xff7aa2f7 # Tokyonight blue
-yabai -m config normal_window_border_color 0xfff7768e # Tokyonight red
+yabai -m config window_border_width 6
+yabai -m config active_window_border_color 0x55111314 # Tokyonight blue
+yabai -m config normal_window_border_color 0x55000000 # Tokyonight red
 
 # -- mouse settings --
 
@@ -103,5 +103,7 @@ yabai -m rule --add label="About This Mac" app="System Information" title="About
 yabai -m rule --add label="Activity Windows" title="^Activity$" manage=off
 yabai -m rule --add app="^Adobe (After Effects|Audition|Media Encoder|Lightroom)$" role="AXLayoutArea" subrole="AXFloatingWindow" manage=on
 yabai -m rule --add app="^IINA$" sticky=on layer=above manage=off
+
+osascript -e 'tell application id "tracesOf.Uebersicht" to refresh'
 
 echo "Yabai configuration loaded…"
