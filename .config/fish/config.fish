@@ -21,6 +21,7 @@ alias rmf="rm -rf"
 alias nograph="python3 -m notion_graph -p 607bb0093c714cb0999bd0ce7f2afe71 -t secret_4IQB8Xw98zZrRVFAj0JBIuKQx3KOvtZGrMcoZQMSnkY -o ./Documents/nograph/graph_out.html"
 alias blahaj="display3d ~/blahaj/blahaj.obj"
 alias clock="tty-clock -c"
+alias tmux-session="~/tmux-session.sh"
 
 # Base16 Shell
 if status --is-interactive

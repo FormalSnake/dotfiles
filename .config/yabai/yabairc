@@ -3,7 +3,7 @@
 # yabai -m config menubar_opacity 0.0
 
 # Unload the macOS WindowManager process
-launchctl unload -F /System/Library/LaunchAgents/com.apple.WindowManager.plist >/dev/null 2>&1 &
+# launchctl unload -F /System/Library/LaunchAgents/com.apple.WindowManager.plist >/dev/null 2>&1 &
 
 sudo yabai --load-sa
 yabai -m signal --add event=dock_did_restart action="sudo yabai --load-sa"
@@ -18,8 +18,10 @@ yabai -m config window_placement second_child
 yabai -m config window_topmost off
 yabai -m config window_shadow off
 
+# yabai -m config menubar_opacity 0.0
+
 # padding set to 12px
-yabai -m config top_padding 16
+yabai -m config top_padding 12
 yabai -m config bottom_padding 12
 yabai -m config left_padding 12
 yabai -m config right_padding 12
@@ -29,7 +31,7 @@ yabai -m config window_shadow float
 yabai -m config window_opacity on
 yabai -m config window_opacity_duration 0.0
 yabai -m config active_window_opacity 1.0
-yabai -m config normal_window_opacity 0.9
+yabai -m config normal_window_opacity 0.8
 # yabai -m config focus_follows_mouse autofocus
 yabai -m config focus_follows_mouse off
 
@@ -104,6 +106,6 @@ yabai -m rule --add label="Activity Windows" title="^Activity$" manage=off
 yabai -m rule --add app="^Adobe (After Effects|Audition|Media Encoder|Lightroom)$" role="AXLayoutArea" subrole="AXFloatingWindow" manage=on
 yabai -m rule --add app="^IINA$" sticky=on layer=above manage=off
 
-osascript -e 'tell application id "tracesOf.Uebersicht" to refresh'
+# osascript -e 'tell application id "tracesOf.Uebersicht" to refresh'
 
 echo "Yabai configuration loaded…"
