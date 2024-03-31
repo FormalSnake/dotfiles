@@ -25,8 +25,8 @@ alias tmux-session="~/tmux-session.sh"
 
 # Base16 Shell
 if status --is-interactive
-    set BASE16_SHELL_PATH "$HOME/.config/base16-shell"
-    set BASE16_SHELL "$HOME/.config/base16-shell"
+    set BASE16_SHELL_PATH "$HOME/.config/tinted-shell"
+    set BASE16_SHELL "$HOME/.config/tinted-shell"
     if test -s "$BASE16_SHELL_PATH"
         source "$BASE16_SHELL_PATH/profile_helper.fish"
     end

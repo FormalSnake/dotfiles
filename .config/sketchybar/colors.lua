@@ -12,17 +12,17 @@ return {
 
 	bar = {
 		-- bg = 0xf02c2e34,
-		bg = 0x851E1E2E,
-		border = 0x852c2e34,
+		bg = 0x90131313,
+		border = 0x90191919,
 	},
 	popup = {
 		-- bg = 0xc02c2e34,
-		bg = 0x851E1E2E,
-		border = 0x857f8490,
+		bg = 0x90131313,
+		border = 0x90191919,
 	},
 	-- bg1 = 0xff363944,
-	bg1 = 0x851E1E2E,
-	bg2 = 0x851E1E2E,
+	bg1 = 0x90131313,
+	bg2 = 0x90131313,
 	-- bg2 = 0xff414550,
 
 	with_alpha = function(color, alpha)
