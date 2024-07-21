@@ -18,20 +18,23 @@ alias g="lazygit"
 alias quote="~/quote.sh"
 alias benchmark="~/tb.sh"
 alias rmf="rm -rf"
-alias nograph="python3 -m notion_graph -p 607bb0093c714cb0999bd0ce7f2afe71 -t secret_4IQB8Xw98zZrRVFAj0JBIuKQx3KOvtZGrMcoZQMSnkY -o ./Documents/nograph/graph_out.html"
-alias blahaj="display3d ~/blahaj/blahaj.obj"
 alias clock="tty-clock -c"
 alias tmux-session="~/tmux-session.sh"
+alias assume="source (brew --prefix)/bin/assume.fish"
+alias neofetch="fastfetch"
 
 # Base16 Shell
-if status --is-interactive
-    set BASE16_SHELL_PATH "$HOME/.config/base16-shell"
-    set BASE16_SHELL "$HOME/.config/base16-shell"
-    if test -s "$BASE16_SHELL_PATH"
-        source "$BASE16_SHELL_PATH/profile_helper.fish"
-    end
-end
+# if status --is-interactive
+#     set BASE16_SHELL_PATH "$HOME/.config/tinted-shell"
+#     set BASE16_SHELL "$HOME/.config/tinted-shell"
+#     if test -s "$BASE16_SHELL_PATH"
+#         source "$BASE16_SHELL_PATH/profile_helper.fish"
+#     end
+# end
 zoxide init fish | source
 starship init fish | source
-neofetch
-quote
+
+nvm use 20
+clear
+# neofetch
+# quote

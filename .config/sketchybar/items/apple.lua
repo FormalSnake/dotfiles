@@ -2,35 +2,75 @@ local colors = require("colors")
 local icons = require("icons")
 local settings = require("settings")
 
--- Padding item required because of bracket
-sbar.add("item", { width = 5 })
 
 local apple = sbar.add("item", {
-  icon = {
-    font = { size = 16.0 },
-    string = icons.apple,
-    padding_right = 8,
-    padding_left = 8,
-  },
-  label = { drawing = false },
-  background = {
-    color = colors.bg2,
-    border_color = colors.black,
-    border_width = 1
-  },
-  padding_left = 1,
-  padding_right = 1,
-  click_script = "$CONFIG_DIR/helpers/menus/bin/menus -s 0"
+	label = {
+		string = "",
+		padding_right = 0,
+		padding_left = 10,
+	},
+	icon = {
+		padding_left = 10,
+		font = {
+			size = 14,
+		},
+		string = "􀆈",
+		color = colors.bar.foreground,
+
+	},
+
+	background = {
+
+		color = colors.bar.bg,
+	},
+
+	click_script = "$CONFIG_DIR/helpers/menus/bin/menus -s 0",
 })
 
--- Double border for apple using a single item bracket
-sbar.add("bracket", { apple.name }, {
-  background = {
-    color = colors.transparent,
-    height = 30,
-    border_color = colors.grey,
-  }
-})
+apple:subscribe("mouse.entered", function(env)
+	local selected = env.SELECTED == "true"
+	sbar.animate("elastic", 10, function()
+		apple:set({
 
--- Padding item required because of bracket
-sbar.add("item", { width = 7 })
+
+
+			label = {
+				color = colors.bar.foreground,
+				padding_right = 12,
+				drawing = true,
+				string = "open",
+				padding_left = 10,
+			},
+			icon = {
+
+
+				color = colors.bar.foreground_dimmed,
+				string = "􀆈",
+				font = {
+					size = 14,
+				},
+			},
+		})
+	end)
+end)
+
+apple:subscribe("mouse.exited", function(env)
+	sbar.animate("elastic", 10, function()
+		apple:set({
+			label = {
+				string = "",
+				padding_right = 0,
+				padding_left = 10,
+			},
+			icon = {
+				padding_left = 10,
+				font = {
+					size = 14,
+				},
+				string = "􀆈",
+				color = colors.bar.foreground,
+
+			},
+		})
+	end)
+end)

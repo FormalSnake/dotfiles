@@ -1,3 +1,0 @@
-return {
-  { "rasulomaroff/reactive.nvim" },
-}

@@ -3,175 +3,178 @@ local icons = require("icons")
 local settings = require("settings")
 local app_icons = require("helpers.app_icons")
 
-local spaces = {}
+local space_colors = {
+	colors.green,     -- Color for space 1
+	colors.yellow,    -- Color for space 2
+	colors.orange,    -- Color for space 3
+	colors.red,       -- Color for space 4
+	colors.magenta,   -- Color for space 5
+	colors.blue,      -- Color for space 6
+	colors.grey,      -- Color for space 7
+	colors.lightgray, -- Color for space 8
+	colors.metalsaurus, -- Color for space 9
+	colors.metalsaurus2, -- Color for space 10
+}
 
-for i = 1, 10, 1 do
-  local space = sbar.add("space", "space." .. i, {
-    space = i,
-    icon = {
-      font = { family = settings.font.numbers },
-      string = i,
-      padding_left = 15,
-      padding_right = 8,
-      color = colors.white,
-      highlight_color = colors.red,
-    },
-    label = {
-      padding_right = 20,
-      color = colors.grey,
-      highlight_color = colors.white,
-      font = "sketchybar-app-font:Regular:16.0",
-      y_offset = -1,
-    },
-    padding_right = 1,
-    padding_left = 1,
-    background = {
-      color = colors.bg1,
-      border_width = 1,
-      height = 26,
-      border_color = colors.black,
-    },
-    popup = { background = { border_width = 5, border_color = colors.black } }
-  })
-
-  spaces[i] = space
-
-  -- Single item bracket for space items to achieve double border on highlight
-  local space_bracket = sbar.add("bracket", { space.name }, {
-    background = {
-      color = colors.transparent,
-      border_color = colors.bg2,
-      height = 28,
-      border_width = 2
-    }
-  })
-
-  -- Padding space
-  sbar.add("space", "space.padding." .. i, {
-    space = i,
-    script = "",
-    width = settings.group_paddings,
-  })
-
-  local space_popup = sbar.add("item", {
-    position = "popup." .. space.name,
-    padding_left= 5,
-    padding_right= 0,
-    background = {
-      drawing = true,
-      image = {
-        corner_radius = 9,
-        scale = 0.2
-      }
-    }
-  })
-
-  space:subscribe("space_change", function(env)
-    local selected = env.SELECTED == "true"
-    local color = selected and colors.grey or colors.bg2
-    space:set({
-      icon = { highlight = selected, },
-      label = { highlight = selected },
-      background = { border_color = selected and colors.black or colors.bg2 }
-    })
-    space_bracket:set({
-      background = { border_color = selected and colors.grey or colors.bg2 }
-    })
-  end)
-
-  space:subscribe("mouse.clicked", function(env)
-    if env.BUTTON == "other" then
-      space_popup:set({ background = { image = "space." .. env.SID } })
-      space:set({ popup = { drawing = "toggle" } })
-    else
-      local op = (env.BUTTON == "right") and "--destroy" or "--focus"
-      sbar.exec("yabai -m space " .. op .. " " .. env.SID)
-    end
-  end)
-
-  space:subscribe("mouse.exited", function(_)
-    space:set({ popup = { drawing = false } })
-  end)
+local function getSpaceColor(spaceNumber)
+	return space_colors[spaceNumber]
 end
 
-local space_window_observer = sbar.add("item", {
-  drawing = false,
-  updates = true,
+local sf_icons_active = {
+	"+", -- Add icons for active spaces if needed
+}
+
+local sf_icons_inactive = {
+	"", -- Add icons for inactive spaces if needed
+}
+
+local function getSpaceIcon(space, active, app_name)
+	if active then
+		return app_icons[app_name]
+	else
+		return sf_icons_inactive[space]
+	end
+end
+
+local spaces = {}
+
+local function log(message)
+	os.execute('echo "' .. message .. '" >> /tmp/sketchybar.log')
+end
+
+local function switchToSpace(spaceNumber)
+	local scriptPath = string.format('"$CONFIG_DIR/items/scripts/switchSpace/switchToSpace%d.scpt"', spaceNumber)
+	log("Switching to space: " .. spaceNumber .. " with script: " .. scriptPath)
+	local command = "osascript " .. scriptPath
+	log("Executing command: " .. command)
+	local result = os.execute(command)
+	log("Result: " .. tostring(result))
+end
+
+-- Add padding before the first space
+local padding_left = sbar.add("item", "padding.left", {
+	position = "left",
+	width = 10,
 })
 
-local spaces_indicator = sbar.add("item", {
-  padding_left = -3,
-  padding_right = 0,
-  icon = {
-    padding_left = 8,
-    padding_right = 9,
-    color = colors.grey,
-    string = icons.switch.on,
-  },
-  label = {
-    width = 0,
-    padding_left = 0,
-    padding_right = 8,
-    string = "Spaces",
-    color = colors.bg1,
-  },
-  background = {
-    color = colors.with_alpha(colors.grey, 0.0),
-    border_color = colors.with_alpha(colors.bg1, 0.0),
-  }
+for i = 1, 10 do
+	local space = sbar.add("space", "space." .. i, {
+		space = i,
+		position = "center",
+	})
+	spaces[i] = space
+
+	space:subscribe("front_app_switched", function(env)
+		local selected = env.SELECTED == "true"
+		sbar.animate("elastic", 10, function()
+			space:set({
+				label = {
+					drawing = false,
+				},
+				icon = {
+					padding_left = selected and 15 or 4,
+					padding_right = selected and 15 or 4,
+					font = {
+						font = "sketchybar-app-font:Regular:16.0",
+						size = selected and 16 or 14,
+					},
+					color = colors.transparent,
+				},
+				background = {
+					height = selected and 10 or 8,
+					corner_radius = selected and 8 or 50,
+					color = selected and colors.bar.foreground or colors.lightgray,
+					padding_left = selected and 10 or 10,
+					padding_right = selected and 10 or 10,
+				},
+			})
+		end)
+	end)
+
+	space:subscribe("mouse.entered", function(env)
+		local selected = env.SELECTED == "true"
+		sbar.animate("elastic", 10, function()
+			space:set({
+				label = {
+					drawing = false,
+				},
+				icon = {
+					string = selected and getSpaceIcon(i, true) or getSpaceIcon(i, false),
+					padding_left = selected and 20 or 10,
+					padding_right = selected and 20 or 10,
+				},
+				background = {
+					color = getSpaceColor(i),
+					height = selected and 12 or 10,
+					width = selected and 10 or 4,
+					corner_radius = selected and 8 or 25,
+					padding_left = selected and 5 or 10,
+					padding_right = selected and 5 or 10,
+				},
+			})
+		end)
+	end)
+
+	space:subscribe("mouse.exited", function(env)
+		local selected = env.SELECTED == "true"
+		sbar.animate("elastic", 10, function()
+			space:set({
+				label = {
+					drawing = false,
+				},
+				icon = {
+					drawing = true,
+					padding_left = selected and 15 or 6,
+					padding_right = selected and 15 or 6,
+					string = selected and getSpaceIcon(i, true) or getSpaceIcon(i, false),
+					font = {
+						font = "sketchybar-app-font:Regular:16.0",
+						size = selected and 16 or 14,
+					},
+					color = colors.transparent,
+				},
+				background = {
+					border_width = 0,
+					border_color = getSpaceColor(i),
+					height = selected and 12 or 12,
+					corner_radius = selected and 8 or 50,
+					color = selected and colors.bar.foreground or colors.lightgray,
+					padding_left = selected and 10 or 10,
+					padding_right = selected and 10 or 10,
+				},
+			})
+		end)
+	end)
+
+	space:subscribe("mouse.clicked", function(env)
+		local selected = env.SELECTED == "true"
+		log("Clicked space: " .. i)
+		switchToSpace(i)
+		icon = {
+			click_script = selected and sbar.exec('osascript "$CONFIG_DIR/items/scripts/newSpace.scpt"'),
+		}
+	end)
+end
+
+-- Add padding after the last space
+local padding_right = sbar.add("item", "padding.right", {
+	position = "right",
+	width = 10,
 })
 
-space_window_observer:subscribe("space_windows_change", function(env)
-  local icon_line = ""
-  local no_app = true
-  for app, count in pairs(env.INFO.apps) do
-    no_app = false
-    local lookup = app_icons[app]
-    local icon = ((lookup == nil) and app_icons["default"] or lookup)
-    icon_line = icon_line .. " " .. icon
-  end
+local space_names = {}
+for i = 1, 10 do
+	table.insert(space_names, spaces[i].name)
+end
 
-  if (no_app) then
-    icon_line = " —"
-  end
-  sbar.animate("tanh", 10, function()
-    spaces[env.INFO.space]:set({ label = icon_line })
-  end)
-end)
+sbar.add("bracket", space_names, {
+	background = {
+		margin = 0,
+		color = colors.bar.bg,
+		corner_radius = 8,
+	},
+})
 
-spaces_indicator:subscribe("swap_menus_and_spaces", function(env)
-  local currently_on = spaces_indicator:query().icon.value == icons.switch.on
-  spaces_indicator:set({
-    icon = currently_on and icons.switch.off or icons.switch.on
-  })
-end)
-
-spaces_indicator:subscribe("mouse.entered", function(env)
-  sbar.animate("tanh", 30, function()
-    spaces_indicator:set({
-      background = {
-        color = { alpha = 1.0 },
-        border_color = { alpha = 1.0 },
-      },
-      icon = { color = colors.bg1 },
-      label = { width = "dynamic" }
-    })
-  end)
-end)
-
-spaces_indicator:subscribe("mouse.exited", function(env)
-  sbar.animate("tanh", 30, function()
-    spaces_indicator:set({
-      background = {
-        color = { alpha = 0.0 },
-        border_color = { alpha = 0.0 },
-      },
-      icon = { color = colors.grey },
-      label = { width = 0, }
-    })
-  end)
-end)
-
-spaces_indicator:subscribe("mouse.clicked", function(env)
-  sbar.trigger("swap_menus_and_spaces")
-end)
+-- Insert padding items into the bracket
+table.insert(space_names, 1, padding_left.name)
+table.insert(space_names, padding_right.name)

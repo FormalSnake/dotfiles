@@ -1,36 +1,44 @@
-require("config.lazy")
-
--- vim.cmd.colorscheme("catppuccin")
--- vim.cmd.colorscheme("oxocarbon")
-vim.opt.background = "dark"
-
--- This is the old line number highlight behaviour
---vim.api.nvim_set_hl(0, "LineNrAbove", { fg = "#6e738d", bold = false })
---vim.api.nvim_set_hl(0, "LineNr", { fg = "#b4befe", bold = true })
---vim.api.nvim_set_hl(0, "LineNrBelow", { fg = "#6e738d", bold = false })
-
--- Function to set a random highlight color for LineNr
-function SetRandomLineNrColor()
-  math.randomseed(os.time())
-
-  local colors = {
-    "#b4befe", -- Lavender
-    "#eba0ac", -- Maroon
-    "#d2fac5", -- Green
-    "#f2cdcd", -- Flamingo
-    "#cba6f7", -- Mauve
-    "#fcc6a7", -- Peach
-    "#89b4fa", -- Blue
-    "#89dceb", -- Sky
-  }
-
-  local index = math.random(#colors)
-  vim.api.nvim_set_hl(0, "LineNr", { fg = colors[index], bold = true })
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.loop.fs_stat(lazypath) then
+	vim.fn.system({
+		"git",
+		"clone",
+		"--filter=blob:none",
+		"https://github.com/folke/lazy.nvim.git",
+		"--branch=stable", -- latest stable release
+		lazypath,
+	})
 end
+vim.opt.rtp:prepend(lazypath)
 
--- Ensure the random color is selected each time Neovim starts
-vim.cmd("autocmd VimEnter * lua SetRandomLineNrColor()")
+require("config.keymaps")
+require("config.options")
 
--- Setting highlights for lines above and below
-vim.api.nvim_set_hl(0, "LineNrAbove", { fg = "#6e738d", bold = false })
-vim.api.nvim_set_hl(0, "LineNrBelow", { fg = "#6e738d", bold = false })
+require("lazy").setup("plugins", {
+	install = {
+		missing = true,
+		colorscheme = { "night-owl" },
+	},
+	checker = {
+		enabled = true,
+		notify = false,
+	},
+	change_detection = {
+		enabled = true,
+		notify = false,
+	},
+	ui = {
+		border = "rounded",
+	},
+	performance = {
+		rtp = {
+			disabled_plugins = {
+				"gzip",
+				"tarPlugin",
+				"tohtml",
+				"tutor",
+				"zipPlugin",
+			},
+		},
+	},
+})

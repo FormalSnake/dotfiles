@@ -1,3 +1,0 @@
-return {
-  "MaximilianLloyd/ascii.nvim",
-}
