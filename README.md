@@ -3,7 +3,7 @@
 This GIT repo contains all of the dotfiles that I mainly use.
 
 ## Screenshot
-![image](https://raw.githubusercontent.com/FormalSnake/dotfiles/main/assets/screenshot.png)
+![image](https://raw.githubusercontent.com/FormalSnake/dotfiles/main/assets/screenshotnew.png)
 
 ## Requirements
 Ensure you have the following installed on your system:
@@ -35,16 +35,10 @@ Yes, it's as easy as that ;)
 
 ## What software does this provide configuration for?
 Note: this can all be installed using brew!
-* TMUX
-* Alacritty
-* Base16-shell by tinted-theming
+* Tmux with Tmuxifier 
+* Wezterm 
 * btop
-* fish
+* zsh 
 * nvim
-* neofetch
-* sketchybar
-* skhd
-* spicetify (this cannot be installed using brew, check out their [documentation](https://spicetify.app/))
-* yabai
-* starship prompt
-* base16 fuzzy finder also by tinted-theming
+* Aerospace 
+* Oh my posh 
