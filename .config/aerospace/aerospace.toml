@@ -1,0 +1,112 @@
+# Reference: https://github.com/i3/i3/blob/next/etc/config
+
+# i3 doesn't have "normalizations" feature that why we disable them here.
+# But the feature is very helpful.
+# Normalizations eliminate all sorts of weird tree configurations that don't make sense.
+# Give normalizations a chance and enable them back.
+enable-normalization-flatten-containers = false
+enable-normalization-opposite-orientation-for-nested-containers = false
+
+after-startup-command = [
+    # JankyBorders has a built-in detection of already running process,
+    # so it won't be run twice on AeroSpace restart
+    'exec-and-forget borders active_color=0xffe1e3e4 inactive_color=0xff494d64 width=5.0'
+]
+
+start-at-login = true
+
+# Mouse follows focus when focused monitor changes
+on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
+[gaps]
+inner.horizontal = 11
+inner.vertical =   11
+outer.left =       11
+outer.bottom =     11
+outer.top =        11
+outer.right =      11
+
+
+[mode.main.binding]
+# See: https://nikitabobko.github.io/AeroSpace/goodness#open-a-new-window-with-applescript
+ctrl-alt-enter = '''exec-and-forget osascript -e '
+tell application "Terminal"
+    do script
+    activate
+end tell'
+'''
+
+ctrl-alt-j = 'focus left'
+ctrl-alt-k = 'focus down'
+ctrl-alt-l = 'focus up'
+ctrl-alt-semicolon = 'focus right'
+
+ctrl-alt-shift-j = 'move left'
+ctrl-alt-shift-k = 'move down'
+ctrl-alt-shift-l = 'move up'
+ctrl-alt-shift-semicolon = 'move right'
+
+# Consider using 'join-with' command as a 'split' replacement if you want to enable normalizations
+ctrl-alt-h = 'split horizontal'
+ctrl-alt-v = 'split vertical'
+
+ctrl-alt-f = 'fullscreen'
+
+ctrl-alt-s = 'layout v_accordion' # 'layout stacking' in i3
+ctrl-alt-w = 'layout h_accordion' # 'layout tabbed' in i3
+ctrl-alt-e = 'layout tiles horizontal vertical' # 'layout toggle split' in i3
+
+ctrl-alt-shift-space = 'layout floating tiling' # 'floating toggle' in i3
+
+# Not supported, because this command is redundant in AeroSpace mental model.
+# See: https://nikitabobko.github.io/AeroSpace/guide#floating-windows
+#ctrl-alt-space = 'focus toggle_tiling_floating'
+
+# `focus parent`/`focus child` are not yet supported, and it's not clear whether they
+# should be supported at all https://github.com/nikitabobko/AeroSpace/issues/5
+# ctrl-alt-a = 'focus parent'
+
+ctrl-alt-1 = 'workspace 1'
+ctrl-alt-2 = 'workspace 2'
+ctrl-alt-3 = 'workspace 3'
+ctrl-alt-4 = 'workspace 4'
+ctrl-alt-5 = 'workspace 5'
+ctrl-alt-6 = 'workspace 6'
+ctrl-alt-7 = 'workspace 7'
+ctrl-alt-8 = 'workspace 8'
+ctrl-alt-9 = 'workspace 9'
+ctrl-alt-0 = 'workspace 10'
+
+ctrl-alt-shift-1 = 'move-node-to-workspace 1'
+ctrl-alt-shift-2 = 'move-node-to-workspace 2'
+ctrl-alt-shift-3 = 'move-node-to-workspace 3'
+ctrl-alt-shift-4 = 'move-node-to-workspace 4'
+ctrl-alt-shift-5 = 'move-node-to-workspace 5'
+ctrl-alt-shift-6 = 'move-node-to-workspace 6'
+ctrl-alt-shift-7 = 'move-node-to-workspace 7'
+ctrl-alt-shift-8 = 'move-node-to-workspace 8'
+ctrl-alt-shift-9 = 'move-node-to-workspace 9'
+ctrl-alt-shift-0 = 'move-node-to-workspace 10'
+
+ctrl-alt-shift-c = 'reload-config'
+
+ctrl-alt-r = 'mode resize'
+
+[mode.resize.binding]
+h = 'resize width -50'
+j = 'resize height +50'
+k = 'resize height -50'
+l = 'resize width +50'
+enter = 'mode main'
+esc = 'mode main'
+
+[[on-window-detected]]
+if.app-id = 'com.github.wez.wezterm'
+run = "move-node-to-workspace 2"
+
+[[on-window-detected]]
+if.app-id = 'com.microsoft.VSCode'
+run = "move-node-to-workspace 2"
+
+[[on-window-detected]]
+if.app-id = 'dev.zed.Zed'
+run = "move-node-to-workspace 2"
