@@ -72,3 +72,7 @@ export PATH="$HOME/.tmuxifier/bin:$PATH"
 eval "$(tmuxifier init -)"
 
 export EDITOR="nvim"
+. "/Users/kyandesutter/.deno/env"
+
+ export DENO_INSTALL="/Users/kyandesutter/.deno"
+  export PATH="/Users/kyandesutter/.deno/bin:$PATH"
