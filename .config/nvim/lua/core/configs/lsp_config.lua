@@ -23,6 +23,14 @@ lspconfig_defaults.capabilities = vim.tbl_deep_extend(
   lspconfig_defaults.capabilities,
   require('cmp_nvim_lsp').default_capabilities()
 )
+-- Prepare capabilities, handlers, and on_attach
+-- local cmp = require("cmp_nvim_lsp")
+-- local capabilities
+-- do
+--   -- Add additional capabilities supported by nvim-cmp
+--   capabilities = vim.lsp.protocol.make_client_capabilities()
+--   vim.tbl_deep_extend("force", capabilities, cmp.default_capabilities())
+-- end
 
 require('mason').setup({})
 require('mason-lspconfig').setup({
@@ -47,3 +55,53 @@ vim.api.nvim_create_autocmd('LspAttach', {
     end
   end
 })
+local lspconfig = require("lspconfig")
+
+require('mason-lspconfig').setup_handlers {
+  -- The first entry (without a key) will be the default handler
+  -- and will be called for each installed server that doesn't have
+  -- a dedicated handler.
+  function(server) -- default handler (optional)
+    lspconfig[server].setup {}
+  end,
+  -- Next, you can provide a dedicated handler for specific servers.
+  -- For example, a handler override for the `rust_analyzer`:
+  ["rust_analyzer"] = function(_)
+    lspconfig.rust_analyzer.setup {
+      settings = {
+        ["rust-analyzer"] = {
+          assist = {
+            emitMustUse = true,
+          },
+          imports = {
+            granularity = {
+              group = "module",
+            },
+            prefix = "self",
+          },
+        }
+      },
+    }
+  end,
+  ["lua_ls"] = function(_)
+    lspconfig.lua_ls.setup {
+      settings = {
+        Lua = {
+          diagnostics = {
+            -- Get the language server to recognize the `vim` global
+            globals = { "vim" },
+          },
+          hint = {
+            enable = true,
+          },
+          workspace = {
+            -- Make the server aware of Neovim runtime files
+            library = vim.api.nvim_get_runtime_file("", true),
+            -- Whether third party libraries can be detected and applied
+            checkThirdParty = false,
+          },
+        },
+      },
+    }
+  end,
+}
