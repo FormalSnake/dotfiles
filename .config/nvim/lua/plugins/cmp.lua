@@ -6,16 +6,17 @@ return {
   --   "hrsh7th/cmp-buffer",
   -- },
   {
-    "hrsh7th/nvim-cmp",
+    "iguanacucumber/magazine.nvim",
+    name = "nvim-cmp", -- Otherwise highlighting gets messed up
     -- load cmp on InsertEnter
     event = "InsertEnter",
     -- these dependencies will only be loaded when cmp loads
     -- dependencies are always lazy-loaded unless specified otherwise
     dependencies = {
-      "hrsh7th/cmp-nvim-lsp",
-      "hrsh7th/cmp-buffer",
+      { "iguanacucumber/mag-nvim-lsp", name = "cmp-nvim-lsp", opts = {} },
+      { "iguanacucumber/mag-buffer",   name = "cmp-buffer" },
       "onsails/lspkind.nvim",
-      { 'hrsh7th/cmp-path' },
+      "https://codeberg.org/FelipeLema/cmp-async-path",
       { 'VonHeikemen/lsp-zero.nvim', branch = 'v4.x' },
     },
     config = function()

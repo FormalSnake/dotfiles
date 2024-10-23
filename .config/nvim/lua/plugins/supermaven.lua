@@ -1,7 +1,8 @@
 return {
   {
     "supermaven-inc/supermaven-nvim",
-    "hrsh7th/cmp-nvim-lsp",
-    "hrsh7th/cmp-buffer",
+    { "iguanacucumber/mag-nvim-lsp", name = "cmp-nvim-lsp", opts = {} },
+    { "iguanacucumber/mag-buffer",   name = "cmp-buffer" },
+    { "iguanacucumber/mag-cmdline",  name = "cmp-cmdline" },
   },
 }
