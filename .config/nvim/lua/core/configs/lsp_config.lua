@@ -50,9 +50,9 @@ vim.api.nvim_create_autocmd('LspAttach', {
     end
 
     -- make sure there is at least one client with formatting capabilities
-    if client.supports_method('textDocument/formatting') then
-      require('lsp-zero').buffer_autoformat()
-    end
+    -- if client.supports_method('textDocument/formatting') then
+    --   require('lsp-zero').buffer_autoformat()
+    -- end
   end
 })
 local lspconfig = require("lspconfig")

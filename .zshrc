@@ -63,6 +63,11 @@ alias ls='ls --color'
 alias vim='nvim'
 alias c='clear'
 
+# Git aliases
+alias add='git add'
+alias commit='git commit'
+alias push='git push'
+
 # Shell integrations
 eval "$(fzf --zsh)"
 eval "$(zoxide init --cmd cd zsh)"
