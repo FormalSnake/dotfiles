@@ -1,0 +1,15 @@
+font-family = "GeistMono Nerd Font"
+font-size = 14
+adjust-cell-height = 40%
+
+theme = Ayu
+background = 0C0E13
+
+cursor-style = block
+cursor-style-blink = false
+
+shell-integration-features = no-cursor
+mouse-hide-while-typing = true
+shell-integration = zsh
+macos-titlebar-style = hidden
+
