@@ -25,27 +25,4 @@ return {
   },
   send_composed_key_when_left_alt_is_pressed = true,
   send_composed_key_when_right_alt_is_pressed = false,
-  -- keys = {
-  -- 	{
-  -- 		key = "U",
-  -- 		mods = "CTRL|SHIFT",
-  -- 		action = wezterm.action({
-  -- 			QuickSelectArgs = {
-  -- 				patterns = {
-  -- 					"https?://\\S+",
-  -- 				},
-  -- 				action = wezterm.action_callback(function(window, pane)
-  -- 					local url = window:get_selection_text_for_pane(pane)
-  -- 					wezterm.log_info("opening: " .. url)
-  -- 					wezterm.open_with(url)
-  -- 				end),
-  -- 			},
-  -- 		}),
-  -- 	},
-  -- 	{
-  -- 		key = "w",
-  -- 		mods = "CMD",
-  -- 		action = wezterm.action.CloseCurrentTab({ confirm = false }),
-  -- 	},
-  -- },
 }
