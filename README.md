@@ -3,7 +3,7 @@
 This GIT repo contains all of the dotfiles that I mainly use.
 
 ## Screenshot
-![image](https://raw.githubusercontent.com/FormalSnake/dotfiles/main/assets/screenshotnew.png)
+![image](https://raw.githubusercontent.com/FormalSnake/dotfiles/main/assets/screenshotnew.webp)
 
 ## Requirements
 Ensure you have the following installed on your system:
