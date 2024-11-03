@@ -12,3 +12,6 @@ shell-integration-features = no-cursor
 mouse-hide-while-typing = true
 shell-integration = zsh
 macos-titlebar-style = hidden
+
+background-opacity = 0.9
+background-blur-radius = 20
