@@ -59,7 +59,7 @@ zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
 zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
 
 # Aliases
-alias ls='ls -a --color'
+alias ls='ls -A --color'
 alias vim='nvim'
 alias c='clear'
 
@@ -67,7 +67,8 @@ alias c='clear'
 alias add='git add'
 alias commit='git commit'
 alias push='git push'
-alias lumen = "lumen draft | pbcopy"
+# alias lumen='lumen draft | pbcopy'
+alias lumes='lumen draft | git commit -avm -'
 
 # Shell integrations
 eval "$(fzf --zsh)"
