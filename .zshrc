@@ -68,7 +68,7 @@ alias add='git add'
 alias commit='git commit'
 alias push='git push'
 # alias lumen='lumen draft | pbcopy'
-alias lumes='lumen draft | git commit -avm -'
+alias commitai='lumen draft | git commit -avm -'
 
 # Shell integrations
 eval "$(fzf --zsh)"
