@@ -1,6 +1,7 @@
 ![image](https://raw.githubusercontent.com/FormalSnake/dotfiles/main/assets/banner-dots.png)
 # My dotfiles
 This GIT repo contains all of the dotfiles that I mainly use.
+(with some AI sprinkled in)
 
 ## Screenshot
 ![image](https://raw.githubusercontent.com/FormalSnake/dotfiles/main/assets/screenshotnew.webp)
