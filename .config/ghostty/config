@@ -15,3 +15,5 @@ macos-titlebar-style = hidden
 
 background-opacity = 0.9
 background-blur-radius = 20
+
+# custom-shader = ./shaders/fallout.glsl
