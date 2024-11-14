@@ -83,3 +83,6 @@ export EDITOR="nvim"
 
  export DENO_INSTALL="/Users/kyandesutter/.deno"
   export PATH="/Users/kyandesutter/.deno/bin:$PATH"
+
+# bun completions
+[ -s "/Users/kyandesutter/.bun/_bun" ] && source "/Users/kyandesutter/.bun/_bun"
