@@ -191,3 +191,15 @@ run = "move-node-to-workspace B"
 [[on-window-detected]]
 if.app-id = 'ea.browser.deta.surf'
 run = "move-node-to-workspace B"
+
+[[on-window-detected]]
+if.app-id = 'com.electron.app'
+run = "move-node-to-workspace B"
+
+[[on-window-detected]]
+if.app-id = 'com.github.th-ch.youtube-music'
+run = "move-node-to-workspace M"
+
+[[on-window-detected]]
+if.app-id = 'dev.vencord.vesktop'
+run = "move-node-to-workspace M"
