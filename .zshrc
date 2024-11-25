@@ -86,3 +86,6 @@ export EDITOR="nvim"
 
 # bun completions
 [ -s "/Users/kyandesutter/.bun/_bun" ] && source "/Users/kyandesutter/.bun/_bun"
+
+# Added by Windsurf
+export PATH="/Users/kyandesutter/.codeium/windsurf/bin:$PATH"

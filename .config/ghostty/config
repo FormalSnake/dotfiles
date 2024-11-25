@@ -2,8 +2,13 @@ font-family = "GeistMono Nerd Font"
 font-size = 14
 adjust-cell-height = 40%
 
-theme = Ayu
-background = 0C0E13
+#theme = Ayu
+#background = 0C0E13
+theme = "Oxocarbon"
+#theme = "pnevma"
+#background = #0f0f0f
+
+window-colorspace = display-p3
 
 cursor-style = block
 cursor-style-blink = false
