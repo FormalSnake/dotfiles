@@ -4,9 +4,11 @@ font-size = 13
 
 #theme = Ayu
 #background = 0C0E13
-theme = "Oxocarbon"
+#theme = "Oxocarbon"
+theme = iceberg-dark
 #theme = "pnevma"
 #background = #0f0f0f
+background = #161616
 
 window-colorspace = display-p3
 
