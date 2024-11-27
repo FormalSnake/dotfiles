@@ -1,6 +1,6 @@
 font-family = "GeistMono Nerd Font"
-font-size = 14
-adjust-cell-height = 40%
+font-size = 13
+ adjust-cell-height = 20%
 
 #theme = Ayu
 #background = 0C0E13
