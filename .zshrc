@@ -67,6 +67,7 @@ alias c='clear'
 alias add='git add'
 alias commit='git commit'
 alias push='git push'
+alias neofetch='fastfetch'
 # alias lumen='lumen draft | pbcopy'
 alias commitai='commit_message=$(lumen draft) && git commit -avm "$commit_message"'
 
