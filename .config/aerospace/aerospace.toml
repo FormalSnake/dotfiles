@@ -193,7 +193,7 @@ if.app-id = 'ea.browser.deta.surf'
 run = "move-node-to-workspace B"
 
 [[on-window-detected]]
-if.app-id = 'com.electron.app'
+if.app-id = 'com.formalsnake.formalsurf'
 run = "move-node-to-workspace B"
 
 [[on-window-detected]]

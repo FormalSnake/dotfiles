@@ -9,6 +9,7 @@ theme = iceberg-dark
 #theme = "pnevma"
 #background = #0f0f0f
 background = #161616
+window-theme = ghostty
 
 window-colorspace = display-p3
 
