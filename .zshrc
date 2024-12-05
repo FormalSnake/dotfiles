@@ -1,4 +1,4 @@
-if [[ -f "/opt/homebrew/bin/brew" ]] then
+if [[ -f "/opt/homebrew/bin/brew" ]]; then
   # If you're using macOS, you'll want this enabled
   eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
@@ -15,41 +15,34 @@ fi
 # Source/Load zinit
 source "${ZINIT_HOME}/zinit.zsh"
 
-# add in zsh plugins
-zinit light zsh-users/zsh-syntax-highlighting 
+# Add zsh plugins
+zinit light zsh-users/zsh-syntax-highlighting
 zinit light zsh-users/zsh-completions
 zinit light zsh-users/zsh-autosuggestions
 zinit light Aloxaf/fzf-tab
 
-# Add in snippets
+# Add snippets
 zinit snippet OMZP::git
 zinit snippet OMZP::sudo
 zinit snippet OMZP::command-not-found
-# zinit snippet OMZP::macos
 zinit snippet OMZP::brew
 
-# Load our completions
+# Load completions
 autoload -Uz compinit && compinit
 
 zinit cdreplay -q
 
-# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+# Customize prompt
 if [ "$TERM_PROGRAM" != "Apple_Terminal" ]; then
   eval "$(oh-my-posh init zsh --config $HOME/.config/ohmyposh/base.toml)"
 fi
 
-# History
+# History settings
 HISTSIZE=5000
-HISTFILE=~/.zsh_history
+HISTFILE="${HOME}/.zsh_history"
 SAVEHIST=$HISTSIZE
 HISTDUP=erase
-setopt appendhistory
-setopt sharehistory
-setopt hist_ignore_space
-setopt hist_ignore_all_dups
-setopt hist_save_no_dups
-setopt hist_ignore_dups
-setopt hist_find_no_dups
+setopt appendhistory sharehistory hist_ignore_space hist_ignore_all_dups hist_save_no_dups hist_ignore_dups hist_find_no_dups
 
 # Completion styling
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
@@ -68,7 +61,6 @@ alias add='git add'
 alias commit='git commit'
 alias push='git push'
 alias neofetch='fastfetch'
-# alias lumen='lumen draft | pbcopy'
 alias commitai='commit_message=$(lumen draft) && git commit -avm "$commit_message"'
 
 # Shell integrations
@@ -79,14 +71,16 @@ eval "$(zoxide init --cmd cd zsh)"
 export PATH="$HOME/.tmuxifier/bin:$PATH"
 eval "$(tmuxifier init -)"
 
+# Set default editor
 export EDITOR="nvim"
-. "/Users/kyandesutter/.deno/env"
 
- export DENO_INSTALL="/Users/kyandesutter/.deno"
-  export PATH="/Users/kyandesutter/.deno/bin:$PATH"
+# Deno
+export DENO_INSTALL="$HOME/.deno"
+export PATH="$HOME/.deno/bin:$PATH"
+[ -s "$DENO_INSTALL/env" ] && . "$DENO_INSTALL/env"
 
-# bun completions
-[ -s "/Users/kyandesutter/.bun/_bun" ] && source "/Users/kyandesutter/.bun/_bun"
+# Bun completions
+[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
-# Added by Windsurf
-export PATH="/Users/kyandesutter/.codeium/windsurf/bin:$PATH"
+# Windsurf
+export PATH="$HOME/.codeium/windsurf/bin:$PATH"
