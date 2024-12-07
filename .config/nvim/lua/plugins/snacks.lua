@@ -6,7 +6,26 @@ return {
   ---@type snacks.Config
   opts = {
     bigfile = { enabled = true },
-    dashboard = { enabled = true },
+    dashboard = {
+      enabled = true,
+      sections = {
+        {
+          section = "header",
+        },
+        { section = "keys",   gap = 1, padding = 1 },
+        { section = "startup" },
+        {
+          section = "terminal",
+          cmd = [[
+    chafa $(find "${XDG_CONFIG_HOME:-$HOME/.config}/wallnvim/" -name "*.png" | sort -R | head -1) \
+    --format symbols --symbols vhalf --size 60x17 --stretch; sleep .1
+  ]],
+          random = 10,
+          pane = 2,
+          height = 17,
+        },
+      },
+    },
     notifier = {
       enabled = true,
       timeout = 3000,
@@ -75,7 +94,7 @@ return {
         Snacks.toggle.diagnostics():map("<leader>ud")
         Snacks.toggle.line_number():map("<leader>ul")
         Snacks.toggle.option("conceallevel", { off = 0, on = vim.o.conceallevel > 0 and vim.o.conceallevel or 2 }):map(
-        "<leader>uc")
+          "<leader>uc")
         Snacks.toggle.treesitter():map("<leader>uT")
         Snacks.toggle.option("background", { off = "light", on = "dark", name = "Dark Background" }):map("<leader>ub")
         Snacks.toggle.inlay_hints():map("<leader>uh")
@@ -83,4 +102,3 @@ return {
     })
   end,
 }
-

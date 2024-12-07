@@ -84,3 +84,4 @@ export PATH="$HOME/.deno/bin:$PATH"
 
 # Windsurf
 export PATH="$HOME/.codeium/windsurf/bin:$PATH"
+alias shuf='gshuf'
