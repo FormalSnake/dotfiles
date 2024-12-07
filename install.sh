@@ -16,7 +16,7 @@ fi
 brew update
 
 # Install desired packages
-PACKAGES=("neovim" "stow" "wezterm" "jandedobbeleer/oh-my-posh/oh-my-posh" "tmux")
+PACKAGES=("neovim" "stow" "wezterm" "jandedobbeleer/oh-my-posh/oh-my-posh" "tmux" "fzf" "zoxide")
 
 for PACKAGE in "${PACKAGES[@]}"; do
     if brew ls --versions "$PACKAGE" >/dev/null; then
