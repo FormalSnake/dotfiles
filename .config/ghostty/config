@@ -5,11 +5,13 @@ font-size = 13
 #theme = Ayu
 #background = 0C0E13
 #theme = "Oxocarbon"
-theme = iceberg-dark
+
+#theme = iceberg-dark
+
 #theme = "pnevma"
 #background = #0f0f0f
-background = #161616
-window-theme = ghostty
+#background = #161616
+#window-theme = ghostty
 
 window-colorspace = display-p3
 
@@ -19,9 +21,41 @@ cursor-style-blink = false
 shell-integration-features = no-cursor
 mouse-hide-while-typing = true
 shell-integration = zsh
-macos-titlebar-style = hidden
+macos-titlebar-style = tabs 
 
-background-opacity = 0.9
-background-blur-radius = 20
+window-padding-x = 4
+window-padding-y = 4
+window-padding-balance = true
+
+#background-opacity = 0.956
+#background-blur-radius = 50
+
+background = #181818
+foreground= #D4D4D4
+
+# black
+palette = 0=#686868
+palette = 8=#686868
+# red
+palette = 1=#FA2C3A
+palette = 9=#FA2C3A
+# green
+palette = 2=#5B9B4C
+palette = 10=#5B9B4C
+# yellow
+palette = 3=#DCDCAA
+palette = 11=#DCDCAA
+# blue
+palette = 4=#3794FF
+palette = 12=#3794FF
+# purple
+palette = 5=#C586C0
+palette = 13=#C586C0
+# aqua
+palette = 6=#4EC9B0
+palette = 14=#4EC9B0
+# white
+palette = 7=#a89984
+palette = 15=#fbf1c7
 
 # custom-shader = ./shaders/fallout.glsl
