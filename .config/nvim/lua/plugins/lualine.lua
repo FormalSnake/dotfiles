@@ -99,7 +99,7 @@ return {
       require('lualine').setup {
         options = {
           icons_enabled = true,
-          theme = 'vscode',
+          theme = 'oxocarbon',
           disabled_filetypes = { 'NvimTree' },
           always_divide_middle = true,
           globalstatus = false,

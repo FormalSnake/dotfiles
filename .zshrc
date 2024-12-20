@@ -86,6 +86,8 @@ export PATH="$HOME/.deno/bin:$PATH"
 export PATH="$HOME/.codeium/windsurf/bin:$PATH"
 alias shuf='gshuf'
 
+export PATH="$HOME/Developer/depot_tools:$PATH"
+
 
 # export OPENAI_API_KEY=
 # export ANTHROPIC_API_KEY=
@@ -201,4 +203,6 @@ export AIDER_FANCY_INPUT="true"
 export AIDER_VOICE_FORMAT="mp3"
 export AIDER_VOICE_LANGUAGE="en"
 # export AIDER_VOICE_INPUT_DEVICE=
-export AIDER_WEAK_MODEL="openai/gpt-4o-mini"
+
+# bun completions
+[ -s "/Users/kyandesutter/.bun/_bun" ] && source "/Users/kyandesutter/.bun/_bun"

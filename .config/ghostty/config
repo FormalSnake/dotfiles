@@ -1,22 +1,20 @@
+clipboard-read = allow
+clipboard-write = allow
+
 font-family = "GeistMono Nerd Font"
 font-size = 13
- adjust-cell-height = 20%
+adjust-cell-height = 20%
 
-#theme = Ayu
-#background = 0C0E13
-#theme = "Oxocarbon"
-
-#theme = iceberg-dark
-
-#theme = "pnevma"
-#background = #0f0f0f
-#background = #161616
-#window-theme = ghostty
+theme = Oxocarbon
+background = #161616
+background-opacity = 0.995
+foreground = #f2f4f8
 
 window-colorspace = display-p3
 
 cursor-style = block
 cursor-style-blink = false
+cursor-color = #ffffff
 
 shell-integration-features = no-cursor
 mouse-hide-while-typing = true
@@ -27,35 +25,19 @@ window-padding-x = 4
 window-padding-y = 4
 window-padding-balance = true
 
-#background-opacity = 0.956
-#background-blur-radius = 50
-
-background = #181818
-foreground= #D4D4D4
-
-# black
-palette = 0=#686868
-palette = 8=#686868
-# red
-palette = 1=#FA2C3A
-palette = 9=#FA2C3A
-# green
-palette = 2=#5B9B4C
-palette = 10=#5B9B4C
-# yellow
-palette = 3=#DCDCAA
-palette = 11=#DCDCAA
-# blue
-palette = 4=#3794FF
-palette = 12=#3794FF
-# purple
-palette = 5=#C586C0
-palette = 13=#C586C0
-# aqua
-palette = 6=#4EC9B0
-palette = 14=#4EC9B0
-# white
-palette = 7=#a89984
-palette = 15=#fbf1c7
-
-# custom-shader = ./shaders/fallout.glsl
+palette = 0=#161616
+palette = 1=#bf4040
+palette = 2=#b07eff
+palette = 3=#ee5396
+palette = 4=#42be65
+palette = 5=#be95ff
+palette = 6=#ff7eb6
+palette = 7=#f2f4f8
+palette = 8=#585858
+palette = 9=#3ddbd9
+palette = 10=#be95ff
+palette = 11=#ee5396
+palette = 12=#42be65
+palette = 13=#be95ff
+palette = 14=#ff7eb6
+palette = 15=#f2f4f8
