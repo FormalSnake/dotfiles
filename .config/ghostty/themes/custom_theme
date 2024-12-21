@@ -1,0 +1,26 @@
+font-family = Consolas
+font-size = 14
+
+background = #1e1e1e
+foreground = #dcdccc
+selection-background = #363636
+selection-foreground = #ffffff
+
+palette = 0=#4d4d4d
+palette = 8=#709080
+palette = 1=#705050
+palette = 9=#dca3a3
+palette = 2=#60b48a
+palette = 10=#c3bf9f
+palette = 3=#f0deae
+palette = 11=#dfcf9f
+palette = 4=#506070
+palette = 12=#94bff3
+palette = 5=#dc8cc3
+palette = 13=#ec93d3
+palette = 6=#8cd0d3
+palette = 14=#93e0e3
+palette = 7=#dcdccc
+palette = 15=#ffffff
+
+# command = "zsh ~/.local/scripts/test_ghostty.sh"

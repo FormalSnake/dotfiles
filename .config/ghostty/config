@@ -5,8 +5,7 @@ font-family = "GeistMono Nerd Font"
 font-size = 13
 adjust-cell-height = 20%
 
-theme = Oxocarbon
-background = #161616
+theme = custom_theme
 background-opacity = 0.995
 foreground = #f2f4f8
 
@@ -14,30 +13,16 @@ window-colorspace = display-p3
 
 cursor-style = block
 cursor-style-blink = false
-cursor-color = #ffffff
+background-opacity = 0.96
+background-blur-radius = 32
 
 shell-integration-features = no-cursor
 mouse-hide-while-typing = true
 shell-integration = zsh
-macos-titlebar-style = tabs 
+macos-titlebar-style = hidden
+macos-option-as-alt = left
 
-window-padding-x = 4
-window-padding-y = 4
-window-padding-balance = true
+window-padding-x = 11
+window-padding-y = 11
+adjust-cell-height = 30%
 
-palette = 0=#161616
-palette = 1=#bf4040
-palette = 2=#b07eff
-palette = 3=#ee5396
-palette = 4=#42be65
-palette = 5=#be95ff
-palette = 6=#ff7eb6
-palette = 7=#f2f4f8
-palette = 8=#585858
-palette = 9=#3ddbd9
-palette = 10=#be95ff
-palette = 11=#ee5396
-palette = 12=#42be65
-palette = 13=#be95ff
-palette = 14=#ff7eb6
-palette = 15=#f2f4f8
