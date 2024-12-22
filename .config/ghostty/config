@@ -20,7 +20,6 @@ shell-integration-features = no-cursor
 mouse-hide-while-typing = true
 shell-integration = zsh
 macos-titlebar-style = hidden
-macos-option-as-alt = left
 
 window-padding-x = 11
 window-padding-y = 11
