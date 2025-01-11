@@ -1,2 +1,5 @@
 require("core.config.lsp_config")
 require("core.config.ghostty")
+require("core.config.yank")
+require("core.config.icons")
+require("core.config.filetype")

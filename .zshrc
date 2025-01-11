@@ -12,6 +12,10 @@ if [ ! -d "$ZINIT_HOME" ]; then
    git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
 fi
 
+#Gitstatus
+source /opt/homebrew/opt/gitstatus/gitstatus.plugin.zsh
+source ~/.config/zsh/gitstatus/mod_gitstatus.prompt.zsh
+
 # Source/Load zinit
 source "${ZINIT_HOME}/zinit.zsh"
 
@@ -33,9 +37,21 @@ autoload -Uz compinit && compinit
 zinit cdreplay -q
 
 # Customize prompt
-if [ "$TERM_PROGRAM" != "Apple_Terminal" ]; then
-  eval "$(oh-my-posh init zsh --config $HOME/.config/ohmyposh/base.toml)"
-fi
+# if [ "$TERM_PROGRAM" != "Apple_Terminal" ]; then
+#   eval "$(oh-my-posh init zsh --config $HOME/.config/ohmyposh/base.toml)"
+# fi
+# source /opt/homebrew/opt/gitstatus/gitstatus.prompt.zsh
+unsetopt PROMPT_SP
+
+my_git_status() {
+   echo $GITSTATUS_PROMPT
+}
+GEOMETRY_STATUS_SYMBOL="󰅟 "             # default prompt symbol
+GEOMETRY_STATUS_SYMBOL_ERROR="󰅣 "       # displayed when exit value is != 0
+GEOMETRY_PATH_SHOW_BASENAME=true
+GEOMETRY_PATH_COLOR="magenta"
+GEOMETRY_RPROMPT=(geometry_exec_time my_git_status geometry_echo)
+source /opt/homebrew/opt/geometry/share/geometry/geometry.zsh
 
 # History settings
 HISTSIZE=5000
@@ -60,8 +76,24 @@ alias c='clear'
 alias add='git add'
 alias commit='git commit'
 alias push='git push'
-alias neofetch='fastfetch'
+alias neofetch='clear && pokeget Psyduck --hide-name | fastfetch --file-raw -'
 alias commitai='commit_message=$(lumen draft) && git commit -avm "$commit_message"'
+alias nah='git reset --hard && git clean -df'
+
+gpush() {
+  git add .
+
+  commit_message=$(lumen draft)
+  
+  if [ -z "$commit_message" ]; then
+    echo "Lumen draft is empty"
+    echo -n "Enter commit message: "
+    read commit_message
+  fi
+  
+  git commit -avm "$commit_message"
+  git push origin main
+}
 
 # Shell integrations
 eval "$(fzf --zsh)"
@@ -97,6 +129,24 @@ function y() {
 	fi
 	rm -f -- "$tmp"
 }
+
+# Pywal
+wal() {
+    # Define the path to your virtual environment directory
+    VENV_DIR="./pywal_env"  # Change this to your specific venv directory if needed
+
+    # Check if the virtual environment directory exists
+    if [ -d "$VENV_DIR" ]; then
+        # Activate the virtual environment
+        source "$VENV_DIR/bin/activate"
+    fi
+
+    # Run the wal command with any arguments passed to this function
+    command wal "$@"
+}
+
+# Pywal which is installed in a virtual environment using pip
+# export wal="$HOME/.pywal_venv/bin/wal"
 
 # export OPENAI_API_KEY=
 # export ANTHROPIC_API_KEY=
@@ -215,3 +265,6 @@ export AIDER_VOICE_LANGUAGE="en"
 
 # bun completions
 [ -s "/Users/kyandesutter/.bun/_bun" ] && source "/Users/kyandesutter/.bun/_bun"
+
+# Created by `pipx` on 2024-12-27 11:26:44
+export PATH="$PATH:/Users/kyandesutter/.local/bin"
