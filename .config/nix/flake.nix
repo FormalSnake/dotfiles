@@ -35,6 +35,7 @@
         pkgs.zoxide
         pkgs.bat
         pkgs.fzf
+            pkgs.raycast
         pkgs.stow
         pkgs.yazi
         pkgs.youtube-music
