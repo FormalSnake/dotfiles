@@ -35,7 +35,7 @@
         pkgs.zoxide
         pkgs.bat
         pkgs.fzf
-            pkgs.raycast
+        pkgs.raycast
         pkgs.stow
         pkgs.yazi
         pkgs.youtube-music
@@ -56,6 +56,7 @@
           "aerospace"
           "notion"
           "notion-calendar"
+          "clop"
         ];
         brews = [
           "geometry"
