@@ -9,13 +9,9 @@ This GIT repo contains all of the dotfiles that I mainly use.
 ## Requirements
 Ensure you have the following installed on your system:
 
-### Brew
+### Nix
 ```sh
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-```
-### Git
-```sh
-brew install git
+curl -L https://nixos.org/nix/install | sh
 ```
 ### Stow
 ```sh
@@ -28,18 +24,22 @@ First, check out the dotfiles repo in your $HOME directory using git
 > git clone https://github.com/FormalSnake/dotfiles/tree/main
 > cd dotfiles
 ```
-Then use GNU stow to create the symlinks
+Then run the install script
 ```sh
-> stow .
+> ./install.sh
+```
+Then go to the .config/nix directory
+```sh
+> cd .config/nix
+> darwin-rebuild switch --flake .
 ```
 Yes, it's as easy as that ;)
 
 ## What software does this provide configuration for?
 Note: this can all be installed using brew!
 * Tmux with Tmuxifier 
-* Wezterm 
+* Ghostty
 * btop
 * zsh 
 * nvim
 * Aerospace 
-* Oh my posh 
