@@ -99,9 +99,6 @@ gpush() {
 eval "$(fzf --zsh)"
 eval "$(zoxide init --cmd cd zsh)"
 
-# TMUXIFIER
-export PATH="$HOME/.tmuxifier/bin:$PATH"
-eval "$(tmuxifier init -)"
 
 # Set default editor
 export EDITOR="nvim"
@@ -117,8 +114,6 @@ export PATH="$HOME/.deno/bin:$PATH"
 # Windsurf
 export PATH="$HOME/.codeium/windsurf/bin:$PATH"
 alias shuf='gshuf'
-
-export PATH="$HOME/Developer/depot_tools:$PATH"
 
 # yazi
 function y() {
@@ -145,123 +140,25 @@ wal() {
     command wal "$@"
 }
 
-# Pywal which is installed in a virtual environment using pip
-# export wal="$HOME/.pywal_venv/bin/wal"
-
-# export OPENAI_API_KEY=
-# export ANTHROPIC_API_KEY=
-# export AIDER_OPENAI_API_KEY=
-# export AIDER_ANTHROPIC_API_KEY=
-# export AIDER_MODEL=
-# export AIDER_OPUS=
-# export AIDER_SONNET=
-# export AIDER_HAIKU=
-# export AIDER_4=
-# export AIDER_4O=
-# export AIDER_MINI=
-# export AIDER_4_TURBO=
-# export AIDER_35TURBO=
-# export AIDER_DEEPSEEK=
-# export AIDER_O1_MINI=
-# export AIDER_O1_PREVIEW=
-# export AIDER_LIST_MODELS=
-# export AIDER_OPENAI_API_BASE=
-# export AIDER_OPENAI_API_TYPE=
-# export AIDER_OPENAI_API_VERSION=
-# export AIDER_OPENAI_API_DEPLOYMENT_ID=
-# export AIDER_OPENAI_ORGANIZATION_ID=
-# export AIDER_MODEL_SETTINGS_FILE=".aider.model.settings.yml"
-# export AIDER_MODEL_METADATA_FILE=".aider.model.metadata.json"
-# export AIDER_ALIAS=
-# export AIDER_VERIFY_SSL="true"
-# export AIDER_TIMEOUT=
-# export AIDER_EDIT_FORMAT=
-# export AIDER_ARCHITECT=
-# export AIDER_WEAK_MODEL=
-# export AIDER_EDITOR_MODEL=
-# export AIDER_EDITOR_EDIT_FORMAT=
-# export AIDER_SHOW_MODEL_WARNINGS="true"
-# export AIDER_MAX_CHAT_HISTORY_TOKENS=
-# export AIDER_ENV_FILE=".env"
+# Aider config
 export AIDER_CACHE_PROMPTS="true"
 export AIDER_CACHE_KEEPALIVE_PINGS="6"
-# export AIDER_MAP_TOKENS=
-# export AIDER_MAP_REFRESH="auto"
 export AIDER_MAP_MULTIPLIER_NO_FILES="2"
 export AIDER_INPUT_HISTORY_FILE=".aiih"
 export AIDER_CHAT_HISTORY_FILE=".aich.md"
-# export AIDER_RESTORE_CHAT_HISTORY="false"
-# export AIDER_LLM_HISTORY_FILE=
 export AIDER_DARK_MODE="true"
-# export AIDER_LIGHT_MODE="false"
-# export AIDER_PRETTY="true"
-# export AIDER_STREAM="true"
-# export AIDER_USER_INPUT_COLOR="#00cc00"
-# export AIDER_TOOL_OUTPUT_COLOR=
-# export AIDER_TOOL_ERROR_COLOR="#FF2222"
-# export AIDER_TOOL_WARNING_COLOR="#FFA500"
-# export AIDER_ASSISTANT_OUTPUT_COLOR="#0088ff"
-# export AIDER_COMPLETION_MENU_COLOR=
-# export AIDER_COMPLETION_MENU_BG_COLOR=
-# export AIDER_COMPLETION_MENU_CURRENT_COLOR=
-# export AIDER_COMPLETION_MENU_CURRENT_BG_COLOR=
 export AIDER_CODE_THEME="monokai"
 export AIDER_SHOW_DIFFS="false"
-# export AIDER_GIT="true"
 export AIDER_GITIGNORE="false"
 export AIDER_AIDERIGNORE=".aig"
-# export AIDER_SUBTREE_ONLY="false"
-# export AIDER_AUTO_COMMITS="true"
-# export AIDER_DIRTY_COMMITS="true"
-# export AIDER_ATTRIBUTE_AUTHOR="true"
-# export AIDER_ATTRIBUTE_COMMITTER="true"
-# export AIDER_ATTRIBUTE_COMMIT_MESSAGE_AUTHOR="false"
-# export AIDER_ATTRIBUTE_COMMIT_MESSAGE_COMMITTER="false"
-# export AIDER_COMMIT="false"
-# export AIDER_COMMIT_PROMPT=
-# export AIDER_DRY_RUN="false"
-# export AIDER_SKIP_SANITY_CHECK_REPO="false"
 export AIDER_WATCH_FILES="true"
-# export AIDER_COPY_PASTE="false"
-# export AIDER_LINT="false"
-# export AIDER_LINT_CMD=
-# export AIDER_AUTO_LINT="true"
-# export AIDER_TEST_CMD=
-# export AIDER_AUTO_TEST="false"
-# export AIDER_TEST="false"
-# export AIDER_ANALYTICS=
-# export AIDER_ANALYTICS_LOG=
-# export AIDER_ANALYTICS_DISABLE="false"
-# export AIDER_FILE=
 export AIDER_READ="CONVENTIONS.md"
 export AIDER_VIM="true"
 export AIDER_CHAT_LANGUAGE="English"
-# export AIDER_JUST_CHECK_UPDATE="false"
-# export AIDER_CHECK_UPDATE="true"
-# export AIDER_SHOW_RELEASE_NOTES=
-# export AIDER_INSTALL_MAIN_BRANCH="false"
-# export AIDER_UPGRADE="false"
-# export AIDER_APPLY=
-# export AIDER_APPLY_CLIPBOARD_EDITS="false"
-# export AIDER_YES_ALWAYS=
-# export AIDER_VERBOSE="false"
-# export AIDER_SHOW_REPO_MAP="false"
-# export AIDER_SHOW_PROMPTS="false"
-# export AIDER_EXIT="false"
-# export AIDER_MESSAGE=
-# export AIDER_MESSAGE_FILE=
-# export AIDER_LOAD=
-# export AIDER_ENCODING="utf-8"
-# export AIDER_GUI="false"
 export AIDER_SUGGEST_SHELL_COMMANDS="true"
 export AIDER_FANCY_INPUT="true"
-# export AIDER_DETECT_URLS="true"
-# export AIDER_EDITOR=
-# export AIDER_SET_ENV=
-# export AIDER_API_KEY=
 export AIDER_VOICE_FORMAT="mp3"
 export AIDER_VOICE_LANGUAGE="en"
-# export AIDER_VOICE_INPUT_DEVICE=
 
 # bun completions
 [ -s "/Users/kyandesutter/.bun/_bun" ] && source "/Users/kyandesutter/.bun/_bun"
