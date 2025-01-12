@@ -42,6 +42,9 @@
             pkgs.stow
             pkgs.yazi
             pkgs.youtube-music
+            pkgs.fastfetch
+            pkgs.lazygit
+            pkgs.gh
           ];
 
           homebrew = {
