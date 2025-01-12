@@ -1,15 +1,21 @@
-font-family = GeistMono Nerd Font
-font-size = 13
-adjust-cell-height = 30%
+#font-family = GeistMono Nerd Font
+font-size = 12
+#adjust-cell-height = 30%
+font-family = Iosevka Custom
 font-feature = -liga
 
 #theme = "/Users/kyandesutter/.cache/wal/colors-ghostty"
-theme = mellow
+#theme = mellow
+theme = GruvboxDarkHard
+cursor-style = bar
+cursor-color = #bbbbbb
+adjust-cursor-thickness = 1
 shell-integration = zsh
+background = #141714
 
 keybind = cmd+shift+space=toggle_quick_terminal
 
-cursor-style = block
+#cursor-style = block
 background-opacity = 0.96
 background-blur-radius = 32
 
@@ -25,6 +31,9 @@ macos-icon = custom-style
 macos-icon-ghost-color = c7c6c6 
 macos-icon-screen-color = 201e1e 
 macos-icon-frame = plastic
+
+clipboard-read = allow
+clipboard-write = allow
 
 #custom-shader = ./shaders/mnoise.glsl
 #custom-shader-animation = always
