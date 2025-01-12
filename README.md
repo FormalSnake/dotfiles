@@ -1,7 +1,7 @@
-![image](https://raw.githubusercontent.com/FormalSnake/dotfiles/main/assets/banner-dots.png)
-# My dotfiles
-This GIT repo contains all of the dotfiles that I mainly use.
-(with some AI sprinkled in)
+# Dotfiles
+This is my personal dotfiles repository, managed using stow and nix.
+It is made for macOS, but because of the nix package manager, it should work on Linux as well.
+If you are having any problems, please open an issue.
 
 ## Screenshot
 ![image](https://raw.githubusercontent.com/FormalSnake/dotfiles/main/assets/screenshot.png)
@@ -12,10 +12,6 @@ Ensure you have the following installed on your system:
 ### Nix
 ```sh
 curl -L https://nixos.org/nix/install | sh
-```
-### Stow
-```sh
-brew install stow
 ```
 
 ## Installation
