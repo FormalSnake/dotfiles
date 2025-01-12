@@ -103,17 +103,8 @@ eval "$(zoxide init --cmd cd zsh)"
 # Set default editor
 export EDITOR="nvim"
 
-# Deno
-export DENO_INSTALL="$HOME/.deno"
-export PATH="$HOME/.deno/bin:$PATH"
-[ -s "$DENO_INSTALL/env" ] && . "$DENO_INSTALL/env"
-
 # Bun completions
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
-
-# Windsurf
-export PATH="$HOME/.codeium/windsurf/bin:$PATH"
-alias shuf='gshuf'
 
 # yazi
 function y() {
