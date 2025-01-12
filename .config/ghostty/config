@@ -3,7 +3,8 @@ font-size = 13
 adjust-cell-height = 30%
 font-feature = -liga
 
-theme = "/Users/kyandesutter/.cache/wal/colors-ghostty"
+#theme = "/Users/kyandesutter/.cache/wal/colors-ghostty"
+theme = mellow
 shell-integration = zsh
 
 keybind = cmd+shift+space=toggle_quick_terminal

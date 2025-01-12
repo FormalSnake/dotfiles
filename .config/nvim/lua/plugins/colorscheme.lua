@@ -1,10 +1,19 @@
 return {
+  -- {
+  --   'uZer/pywal16.nvim',
+  --   -- for local dev replace with:
+  --   -- dir = '~/your/path/pywal16.nvim',
+  --   config = function()
+  --     vim.cmd.colorscheme("pywal16")
+  --   end,
+  -- }
   {
-    'uZer/pywal16.nvim',
-    -- for local dev replace with:
-    -- dir = '~/your/path/pywal16.nvim',
+    "mellow-theme/mellow.nvim",
+    lazy = false,
+    priority = 1000,
     config = function()
-      vim.cmd.colorscheme("pywal16")
+      vim.g.mellow_transparent = true
+      vim.cmd([[colorscheme mellow]])
     end,
   }
 }
