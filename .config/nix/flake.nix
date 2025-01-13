@@ -43,6 +43,10 @@
         pkgs.lazygit
         pkgs.gh
         pkgs.alejandra
+        pkgs.cargo
+        pkgs.devenv
+        pkgs.direnv
+        pkgs.go
       ];
 
       homebrew = {
