@@ -77,7 +77,7 @@ alias add='git add'
 alias commit='git commit'
 alias push='git push'
 # alias neofetch='clear && pokeget Psyduck --hide-name | fastfetch --file-raw -'
-alias neofetch='clear && ftch'
+alias neofetch='clear && ftch && echo'
 alias commitai='commit_message=$(lumen draft) && git commit -avm "$commit_message"'
 alias nah='git reset --hard && git clean -df'
 
@@ -157,3 +157,6 @@ export AIDER_VOICE_LANGUAGE="en"
 
 # Created by `pipx` on 2024-12-27 11:26:44
 export PATH="$PATH:/Users/kyandesutter/.local/bin"
+
+# Ghostty lsp
+export PATH="$PATH:/Users/kyandesutter/Developer/ghostty-lsp/target/release"

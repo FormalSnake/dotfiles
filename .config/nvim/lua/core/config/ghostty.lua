@@ -1,26 +1,12 @@
-vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
-  pattern = { "**/ghostty/config", "*.ghostty", "ghostty.conf" },
-  callback = function()
-    local buffer = vim.api.nvim_get_current_buf()
+function setup_ghostty_lsp()
+  -- Only activate ghostty-lsp when editing the ghostty config
+  if vim.fn.expand("%:p") == vim.fs.normalize("~/.config/ghostty/config") then
+    vim.lsp.start({
+      name = "ghostty-lsp",
+      cmd = { "ghostty-lsp" },
+      root_dir = vim.fs.normalize("~/.config/ghostty")
+    })
+  end
+end
 
-    vim.bo[buffer].filetype = "ghostty"
-
-    vim.cmd.syntax("clear")
-
-    vim.cmd([[
-      syntax keyword GhosttyTodo contained TODO FIXME XXX BUG HACK NOTE WARNING
-      syntax match GhosttyComment "#.*$" contains=GhosttyTodo oneline
-      syntax match GhosttyKey "^\s*[a-zA-Z0-9-]\+" nextgroup=ghosttyEquals
-      syntax match GhosttyEquals "\s*=\s*" contained nextgroup=ghosttyValue
-      syntax match GhosttyValue "[^#\n]*" contained
-    ]])
-
-    vim.api.nvim_set_hl(0, "GhosttyComment", { link = "Comment" })
-    vim.api.nvim_set_hl(0, "GhosttyTodo", { link = "Todo" })
-    vim.api.nvim_set_hl(0, "GhosttyKey", { link = "Identifier" })
-    vim.api.nvim_set_hl(0, "GhosttyOperator", { link = "Operator" })
-    vim.api.nvim_set_hl(0, "GhosttyValue", { link = "String" })
-  end,
-})
-
-return {}
+vim.api.nvim_create_autocmd("BufRead", { pattern = "*", callback = setup_ghostty_lsp })
