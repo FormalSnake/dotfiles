@@ -47,6 +47,8 @@
         pkgs.devenv
         pkgs.direnv
         pkgs.go
+        pkgs.ripgrep
+        pkgs.fd
       ];
 
       homebrew = {
