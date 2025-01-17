@@ -41,6 +41,7 @@
         pkgs.youtube-music
         pkgs.fastfetch
         pkgs.lazygit
+        pkgs.lazydocker
         pkgs.gh
         pkgs.alejandra
         pkgs.cargo
@@ -50,6 +51,7 @@
         pkgs.ripgrep
         pkgs.fd
         pkgs.uv
+        pkgs.aider-chat
       ];
 
       homebrew = {
