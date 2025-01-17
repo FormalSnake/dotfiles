@@ -49,6 +49,7 @@
         pkgs.go
         pkgs.ripgrep
         pkgs.fd
+        pkgs.uv
       ];
 
       homebrew = {
