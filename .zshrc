@@ -160,3 +160,6 @@ export PATH="$PATH:/Users/kyandesutter/.local/bin"
 
 # Ghostty lsp
 export PATH="$PATH:/Users/kyandesutter/Developer/ghostty-lsp/target/release"
+
+# Go executables
+export PATH=$PATH:$HOME/go/bin

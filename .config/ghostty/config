@@ -21,6 +21,9 @@ background-blur-radius = 32
 
 mouse-hide-while-typing = true
 macos-titlebar-style = tabs 
+# Square corners
+# window-decoration = false
+# macos-window-shadow = false
 
 window-padding-x = 11
 window-padding-y = 11
