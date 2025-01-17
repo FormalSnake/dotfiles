@@ -49,7 +49,6 @@ my_git_status() {
 GEOMETRY_STATUS_SYMBOL="󰅟 "             # default prompt symbol
 GEOMETRY_STATUS_SYMBOL_ERROR="󰅣 "       # displayed when exit value is != 0
 GEOMETRY_PATH_SHOW_BASENAME=true
-GEOMETRY_PATH_COLOR="magenta"
 GEOMETRY_RPROMPT=(geometry_exec_time my_git_status geometry_echo)
 source /opt/homebrew/opt/geometry/share/geometry/geometry.zsh
 
@@ -70,31 +69,14 @@ zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
 # Aliases
 alias ls='ls -A --color'
 alias vim='nvim'
-alias c='clear'
 
 # Git aliases
 alias add='git add'
 alias commit='git commit'
 alias push='git push'
-# alias neofetch='clear && pokeget Psyduck --hide-name | fastfetch --file-raw -'
 alias neofetch='clear && ftch && echo'
 alias commitai='commit_message=$(lumen draft) && git commit -avm "$commit_message"'
 alias nah='git reset --hard && git clean -df'
-
-gpush() {
-  git add .
-
-  commit_message=$(lumen draft)
-  
-  if [ -z "$commit_message" ]; then
-    echo "Lumen draft is empty"
-    echo -n "Enter commit message: "
-    read commit_message
-  fi
-  
-  git commit -avm "$commit_message"
-  git push origin main
-}
 
 # Shell integrations
 eval "$(fzf --zsh)"
@@ -106,31 +88,6 @@ export EDITOR="nvim"
 
 # Bun completions
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
-
-# yazi
-function y() {
-	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
-	yazi "$@" --cwd-file="$tmp"
-	if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
-		builtin cd -- "$cwd"
-	fi
-	rm -f -- "$tmp"
-}
-
-# Pywal
-wal() {
-    # Define the path to your virtual environment directory
-    VENV_DIR="./pywal_env"  # Change this to your specific venv directory if needed
-
-    # Check if the virtual environment directory exists
-    if [ -d "$VENV_DIR" ]; then
-        # Activate the virtual environment
-        source "$VENV_DIR/bin/activate"
-    fi
-
-    # Run the wal command with any arguments passed to this function
-    command wal "$@"
-}
 
 # Aider config
 export AIDER_CACHE_PROMPTS="true"
@@ -152,14 +109,53 @@ export AIDER_FANCY_INPUT="true"
 export AIDER_VOICE_FORMAT="mp3"
 export AIDER_VOICE_LANGUAGE="en"
 
-# bun completions
-[ -s "/Users/kyandesutter/.bun/_bun" ] && source "/Users/kyandesutter/.bun/_bun"
-
 # Created by `pipx` on 2024-12-27 11:26:44
-export PATH="$PATH:/Users/kyandesutter/.local/bin"
+export PATH="$PATH:$HOME/.local/bin"
 
 # Ghostty lsp
-export PATH="$PATH:/Users/kyandesutter/Developer/ghostty-lsp/target/release"
+export PATH="$PATH:$HOME/Developer/ghostty-lsp/target/release"
 
 # Go executables
 export PATH=$PATH:$HOME/go/bin
+
+# Functions 
+# Git
+gpush() {
+  git add .
+
+  commit_message=$(lumen draft)
+  
+  if [ -z "$commit_message" ]; then
+    echo "Lumen draft is empty"
+    echo -n "Enter commit message: "
+    read commit_message
+  fi
+  
+  git commit -avm "$commit_message"
+  git push origin main
+}
+
+# yazi
+function y() {
+	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+	yazi "$@" --cwd-file="$tmp"
+	if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+		builtin cd -- "$cwd"
+	fi
+	rm -f -- "$tmp"
+}
+# Pywal
+wal() {
+    # Define the path to your virtual environment directory
+    VENV_DIR="./pywal_env"  # Change this to your specific venv directory if needed
+
+    # Check if the virtual environment directory exists
+    if [ -d "$VENV_DIR" ]; then
+        # Activate the virtual environment
+        source "$VENV_DIR/bin/activate"
+    fi
+
+    # Run the wal command with any arguments passed to this function
+    command wal "$@"
+}
+
