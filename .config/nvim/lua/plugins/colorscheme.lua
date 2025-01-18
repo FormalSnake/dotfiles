@@ -7,13 +7,23 @@ return {
   --     vim.cmd.colorscheme("pywal16")
   --   end,
   -- }
+  -- {
+  --   "mellow-theme/mellow.nvim",
+  --   lazy = false,
+  --   priority = 1000,
+  --   config = function()
+  --     vim.g.mellow_transparent = true
+  --     vim.cmd([[colorscheme mellow]])
+  --   end,
+  -- },
   {
-    "mellow-theme/mellow.nvim",
-    lazy = false,
+    "wtfox/jellybeans.nvim",
     priority = 1000,
     config = function()
-      vim.g.mellow_transparent = true
-      vim.cmd([[colorscheme mellow]])
+      require("jellybeans").setup({
+        transparent = true,
+      })
+      vim.cmd.colorscheme("jellybeans")
     end,
-  },
+  }
 }

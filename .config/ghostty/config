@@ -6,12 +6,12 @@ font-feature = -liga
 
 #theme = "/Users/kyandesutter/.cache/wal/colors-ghostty"
 #theme = mellow
-theme = GruvboxDarkHard
+theme = jellybeans 
 cursor-style = block 
 cursor-color = #bbbbbb
 adjust-cursor-thickness = 1
 shell-integration = zsh
-background = #141714
+# background = #141714
 
 keybind = cmd+shift+space=toggle_quick_terminal
 

@@ -52,6 +52,7 @@
         pkgs.fd
         pkgs.uv
         pkgs.aider-chat
+        pkgs.chafa
       ];
 
       homebrew = {
