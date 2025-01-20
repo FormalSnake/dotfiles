@@ -54,6 +54,8 @@
         pkgs.aider-chat
         pkgs.chafa
         pkgs.btop
+        pkgs.blueutil
+        pkgs.aerospace
       ];
 
       homebrew = {
@@ -64,7 +66,6 @@
           "firefox"
           "google-chrome"
           "the-unarchiver"
-          "aerospace"
           "notion"
           "notion-calendar"
           "clop"
@@ -74,6 +75,7 @@
           "romkatv/gitstatus/gitstatus"
           "jnsahaj/lumen/lumen"
           "imagemagick"
+          "FelixKratz/formulae/borders"
         ];
         onActivation.cleanup = "zap";
         onActivation.autoUpdate = true;
