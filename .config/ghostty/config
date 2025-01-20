@@ -16,7 +16,7 @@ shell-integration = zsh
 keybind = cmd+shift+space=toggle_quick_terminal
 
 #cursor-style = block
-background-opacity = 0.96
+background-opacity = 0.98
 background-blur-radius = 32
 
 mouse-hide-while-typing = true
@@ -37,6 +37,3 @@ macos-icon-frame = plastic
 
 clipboard-read = allow
 clipboard-write = allow
-
-#custom-shader = ./shaders/mnoise.glsl
-#custom-shader-animation = always
