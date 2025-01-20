@@ -24,38 +24,50 @@
       # List packages installed in system profile. To search by name, run:
       # $ nix-env -qaP | grep wget
       environment.systemPackages = [
-        pkgs.neovim
-        pkgs.mkalias
-        pkgs.tmux
-        pkgs.obsidian
-        pkgs.nixfmt-rfc-style
-        pkgs.nodejs
-        pkgs.bun
-        pkgs.ice-bar
-        pkgs.zoxide
-        pkgs.bat
-        pkgs.fzf
-        pkgs.raycast
-        pkgs.stow
-        pkgs.yazi
-        pkgs.youtube-music
-        pkgs.fastfetch
-        pkgs.lazygit
-        pkgs.lazydocker
-        pkgs.gh
-        pkgs.alejandra
-        pkgs.cargo
-        pkgs.devenv
-        pkgs.direnv
-        pkgs.go
-        pkgs.ripgrep
-        pkgs.fd
-        pkgs.uv
-        pkgs.aider-chat
-        pkgs.chafa
-        pkgs.btop
-        pkgs.blueutil
-        pkgs.aerospace
+        # Text Editors
+        pkgs.neovim # Advanced text editor based on Vim
+
+        # Shell Utilities
+        pkgs.mkalias # Create shell aliases
+        pkgs.tmux # Terminal multiplexer
+        pkgs.zoxide # Fast directory jumper
+        pkgs.bat # A cat clone with syntax highlighting
+        pkgs.fzf # Command-line fuzzy finder
+        pkgs.stow # Symlink farm manager
+        pkgs.ripgrep # Fast search tool like grep
+        pkgs.fd # Simple, fast, and user-friendly alternative to find
+        pkgs.direnv # Environment switcher for shell
+        pkgs.aider-chat # Chat-like interface for terminal
+        pkgs.chafa # Terminal graphics generator
+        pkgs.btop # Resource monitor
+        pkgs.blueutil # Bluetooth utility
+
+        # Development Tools
+        pkgs.nodejs # JavaScript runtime
+        pkgs.bun # All-in-one JavaScript runtime
+        pkgs.lazygit # Simple terminal UI for git commands
+        pkgs.lazydocker # Simple terminal UI for Docker
+        pkgs.gh # GitHub CLI
+        pkgs.cargo # Rust package manager
+        pkgs.devenv # Developer environment manager
+        pkgs.go # Go programming language
+
+        # Formatting and Code Style
+        pkgs.nixfmt-rfc-style # Nix code formatter
+        pkgs.alejandra # Nix code formatter
+
+        # Productivity Tools
+        pkgs.obsidian # Note-taking and knowledge management
+        pkgs.raycast # Launcher for productivity
+        pkgs.yazi # File manager
+
+        # Media and Entertainment
+        pkgs.youtube-music # YouTube Music client
+        pkgs.ice-bar # Music player
+
+        # Miscellaneous
+        pkgs.uv # Universal viewer
+        pkgs.aerospace # i3 like window manager for mac 
       ];
 
       homebrew = {
