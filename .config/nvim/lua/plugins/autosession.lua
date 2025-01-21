@@ -15,9 +15,9 @@ return {
             copy_session = { "i", "<C-Y>" },
           },
         },
-        vim.keymap.set('n', '<leader>fs', require('auto-session.session-lens').search_session, {
-          noremap = true,
-        })
+        -- vim.keymap.set('n', '<leader>fs', require('auto-session.session-lens').search_session, {
+        --   noremap = true,
+        -- })
       }
     end,
   },

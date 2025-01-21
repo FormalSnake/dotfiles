@@ -5,6 +5,15 @@ return {
   lazy = false,
   ---@type snacks.Config
   opts = {
+    zen = {
+      enabled = true,
+    },
+    input = {
+      enabled = true,
+    },
+    scroll = {
+      enabled = true,
+    },
     picker = {
       enabled = true,
       -- your picker configuration comes here
@@ -57,13 +66,14 @@ return {
     { "<leader>gg", function() Snacks.lazygit() end,                 desc = "Lazygit" },
     { "<leader>gl", function() Snacks.lazygit.log() end,             desc = "Lazygit Log (cwd)" },
     { "<leader>un", function() Snacks.notifier.hide() end,           desc = "Dismiss All Notifications" },
-    { "<c-/>",      function() Snacks.terminal() end,                desc = "Toggle Terminal" },
+    { "<leader>t",  function() Snacks.terminal() end,                desc = "Toggle Terminal" },
     { "<c-_>",      function() Snacks.terminal() end,                desc = "which_key_ignore" },
     { "]]",         function() Snacks.words.jump(vim.v.count1) end,  desc = "Next Reference",              mode = { "n", "t" } },
     { "[[",         function() Snacks.words.jump(-vim.v.count1) end, desc = "Prev Reference",              mode = { "n", "t" } },
     { "<leader>ff", function() Snacks.picker.files() end,            desc = "Telescope find files" },
     { "<leader>fw", function() Snacks.picker.grep() end,             desc = "Telescope live_grep word" },
     { "<leader>/",  function() Snacks.picker.lines() end,            desc = "Grep" },
+    { "<leader>z",  function() Snacks.zen() end,                     desc = "Zen Mode" },
     {
       "<leader>N",
       desc = "Neovim News",
