@@ -67,7 +67,8 @@
 
         # Miscellaneous
         pkgs.uv # Universal viewer
-        pkgs.aerospace # i3 like window manager for mac 
+        pkgs.aerospace # i3 like window manager for mac
+        pkgs.starfetch # Neofetch but constellations
       ];
 
       homebrew = {

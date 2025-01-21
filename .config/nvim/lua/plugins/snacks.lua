@@ -5,6 +5,12 @@ return {
   lazy = false,
   ---@type snacks.Config
   opts = {
+    picker = {
+      enabled = true,
+      -- your picker configuration comes here
+      -- or leave it empty to use the default settings
+      -- refer to the configuration section below
+    },
     bigfile = { enabled = true },
     dashboard = {
       enabled = true,
@@ -55,6 +61,9 @@ return {
     { "<c-_>",      function() Snacks.terminal() end,                desc = "which_key_ignore" },
     { "]]",         function() Snacks.words.jump(vim.v.count1) end,  desc = "Next Reference",              mode = { "n", "t" } },
     { "[[",         function() Snacks.words.jump(-vim.v.count1) end, desc = "Prev Reference",              mode = { "n", "t" } },
+    { "<leader>ff", function() Snacks.picker.files() end,            desc = "Telescope find files" },
+    { "<leader>fw", function() Snacks.picker.grep() end,             desc = "Telescope live_grep word" },
+    { "<leader>/",  function() Snacks.picker.lines() end,            desc = "Grep" },
     {
       "<leader>N",
       desc = "Neovim News",
