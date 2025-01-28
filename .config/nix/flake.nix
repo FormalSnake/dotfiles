@@ -94,6 +94,7 @@
           "jnsahaj/lumen/lumen"
           "imagemagick"
           "FelixKratz/formulae/borders"
+          "chase/tap/awrit"
         ];
         onActivation.cleanup = "zap";
         onActivation.autoUpdate = true;

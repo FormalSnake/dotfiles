@@ -1,3 +1,7 @@
+cd
+ls /etc
+cat
+exit
 go build
 bat history
 clear
@@ -12,7 +16,4 @@ neofetch
 gpush
 bat
 stow -v
-cd
-ls /etc
-cat
-exit
+git status
