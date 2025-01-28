@@ -51,6 +51,9 @@
         pkgs.cargo # Rust package manager
         pkgs.devenv # Developer environment manager
         pkgs.go # Go programming language
+        pkgs.zig # Zig programming language
+        pkgs.esbuild # JavaScript bundler
+        pkgs.vercel-pkg # pkg
 
         # Formatting and Code Style
         pkgs.nixfmt-rfc-style # Nix code formatter
@@ -69,6 +72,7 @@
         pkgs.uv # Universal viewer
         pkgs.aerospace # i3 like window manager for mac
         pkgs.starfetch # Neofetch but constellations
+        pkgs.arrpc # Discord RPC client
       ];
 
       homebrew = {

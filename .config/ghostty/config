@@ -10,7 +10,7 @@ theme = jellybeans
 cursor-style = block 
 cursor-color = #bbbbbb
 adjust-cursor-thickness = 1
-shell-integration = zsh
+# shell-integration = zsh
 # background = #141714
 
 keybind = cmd+shift+space=toggle_quick_terminal

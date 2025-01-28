@@ -188,6 +188,15 @@ run = "move-node-to-workspace T"
 if.app-id = 'company.thebrowser.Browser'
 run = "move-node-to-workspace B"
 
+# [[on-window-detected]]
+# if.app-id = 'app.zen-browser.zen'
+# run = "move-node-to-workspace B"
+
+[[on-window-detected]]
+if.app-id = 'app.zen-browser.zen'
+if.window-title-regex-substring = 'Picture-in-Picture'
+run = ['layout floating']
+
 [[on-window-detected]]
 if.app-id = 'ea.browser.deta.surf'
 run = "move-node-to-workspace B"
