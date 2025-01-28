@@ -73,6 +73,7 @@
         pkgs.aerospace # i3 like window manager for mac
         pkgs.starfetch # Neofetch but constellations
         pkgs.arrpc # Discord RPC client
+        pkgs.hyperfine # Command-line benchmarking tool
       ];
 
       homebrew = {
