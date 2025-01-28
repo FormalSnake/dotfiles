@@ -1,0 +1,77 @@
+# /bin/bash
+# echo "Welcome to the formal shell!"
+
+if [[ -f "/opt/homebrew/bin/brew" ]]; then
+  # If you're using macOS, you'll want this enabled
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
+
+alias vim='nvim'
+
+# Git aliases
+alias add='git add'
+alias commit='git commit'
+alias push='git push'
+alias neofetch='clear && ftch && echo'
+alias commitai='commit_message=$(lumen draft) && git commit -avm "$commit_message"'
+alias nah='git reset --hard && git clean -df'
+
+# Set default editor
+export EDITOR="nvim"
+
+# Aider config
+export AIDER_CACHE_PROMPTS="true"
+export AIDER_CACHE_KEEPALIVE_PINGS="6"
+export AIDER_MAP_MULTIPLIER_NO_FILES="2"
+export AIDER_INPUT_HISTORY_FILE=".aiih"
+export AIDER_CHAT_HISTORY_FILE=".aich.md"
+export AIDER_DARK_MODE="true"
+export AIDER_CODE_THEME="monokai"
+export AIDER_SHOW_DIFFS="false"
+export AIDER_GITIGNORE="false"
+export AIDER_AIDERIGNORE=".aig"
+export AIDER_WATCH_FILES="true"
+export AIDER_READ="CONVENTIONS.md"
+export AIDER_VIM="true"
+export AIDER_CHAT_LANGUAGE="English"
+export AIDER_SUGGEST_SHELL_COMMANDS="true"
+export AIDER_FANCY_INPUT="true"
+export AIDER_VOICE_FORMAT="mp3"
+export AIDER_VOICE_LANGUAGE="en"
+
+# Created by `pipx` on 2024-12-27 11:26:44
+export PATH="$PATH:$HOME/.local/bin"
+
+# Ghostty lsp
+export PATH="$PATH:$HOME/Developer/ghostty-lsp/target/release"
+
+# Go executables
+export PATH=$PATH:$HOME/go/bin
+
+# Functions 
+# Git
+gpush() {
+  git add .
+
+  commit_message=$(lumen draft)
+  
+  if [ -z "$commit_message" ]; then
+    echo "Lumen draft is empty"
+    echo -n "Enter commit message: "
+    read commit_message
+  fi
+  
+  git commit -avm "$commit_message"
+  git push origin main
+}
+
+# yazi
+function y() {
+	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+	yazi "$@" --cwd-file="$tmp"
+	if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+		builtin cd -- "$cwd"
+	fi
+	rm -f -- "$tmp"
+}
+

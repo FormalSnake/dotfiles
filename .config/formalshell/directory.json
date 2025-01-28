@@ -1,0 +1,64 @@
+{
+  "entries": [
+    {
+      "path": "/Users/kyandesutter/Developer/formalshell",
+      "score": 13,
+      "last_visit": "2025-01-28T17:33:07.314028Z"
+    },
+    {
+      "path": "/Users/kyandesutter/Developer",
+      "score": 8,
+      "last_visit": "2025-01-28T16:38:18.64912Z"
+    },
+    {
+      "path": "/Users/kyandesutter",
+      "score": 6,
+      "last_visit": "2025-01-28T16:38:33.06484Z"
+    },
+    {
+      "path": "/Users/kyandesutter/dotfiles/.config/nix",
+      "score": 6,
+      "last_visit": "2025-01-28T17:30:28.165966Z"
+    },
+    {
+      "path": "/Users/kyandesutter/.config",
+      "score": 3,
+      "last_visit": "2025-01-28T17:25:12.938885Z"
+    },
+    {
+      "path": "/Users/kyandesutter/.config/formalshell",
+      "score": 3,
+      "last_visit": "2025-01-28T17:34:54.451389Z"
+    },
+    {
+      "path": "/Users/kyandesutter/Developer/arrpc",
+      "score": 2,
+      "last_visit": "2025-01-28T14:48:57.976091Z"
+    },
+    {
+      "path": "/Users/kyandesutter/Developer/terminal-doom",
+      "score": 2,
+      "last_visit": "2025-01-28T15:15:53.712693Z"
+    },
+    {
+      "path": "/Users/kyandesutter/Downloads",
+      "score": 2,
+      "last_visit": "2025-01-28T16:38:45.591764Z"
+    },
+    {
+      "path": "/Users/kyandesutter/dotfiles",
+      "score": 2,
+      "last_visit": "2025-01-28T17:46:53.197271Z"
+    },
+    {
+      "path": "/Users/kyandesutter/dotfiles/.config",
+      "score": 1,
+      "last_visit": "2025-01-28T14:59:40.330503Z"
+    },
+    {
+      "path": "/Users/kyandesutter/Downloads/Wallpapers",
+      "score": 1,
+      "last_visit": "2025-01-28T16:38:57.47047Z"
+    }
+  ]
+}

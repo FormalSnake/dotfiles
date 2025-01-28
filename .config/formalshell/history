@@ -1,0 +1,18 @@
+go build
+stow .
+gpush
+bat history
+cd
+cd dotfiles
+ls .config/
+clear
+zsh
+bat
+ls /etc
+nvim
+cat
+stow -v
+cd .config/formalshell
+ls
+neofetch
+exit
