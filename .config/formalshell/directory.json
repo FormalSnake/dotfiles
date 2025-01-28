@@ -2,13 +2,13 @@
   "entries": [
     {
       "path": "/Users/kyandesutter/Developer/formalshell",
-      "score": 14,
-      "last_visit": "2025-01-28T18:08:33.563999Z"
+      "score": 13,
+      "last_visit": "2025-01-28T17:33:07.314028Z"
     },
     {
       "path": "/Users/kyandesutter/Developer",
-      "score": 10,
-      "last_visit": "2025-01-28T18:08:52.820243Z"
+      "score": 8,
+      "last_visit": "2025-01-28T16:38:18.64912Z"
     },
     {
       "path": "/Users/kyandesutter/dotfiles/.config/nix",
@@ -17,8 +17,8 @@
     },
     {
       "path": "/Users/kyandesutter",
-      "score": 7,
-      "last_visit": "2025-01-28T18:33:03.247523Z"
+      "score": 6,
+      "last_visit": "2025-01-28T16:38:33.06484Z"
     },
     {
       "path": "/Users/kyandesutter/.config",
@@ -47,8 +47,8 @@
     },
     {
       "path": "/Users/kyandesutter/dotfiles",
-      "score": 2,
-      "last_visit": "2025-01-28T17:46:53.197271Z"
+      "score": 3,
+      "last_visit": "2025-01-28T18:50:39.98164Z"
     },
     {
       "path": "/Users/kyandesutter/dotfiles/.config",
@@ -59,11 +59,6 @@
       "path": "/Users/kyandesutter/Downloads/Wallpapers",
       "score": 1,
       "last_visit": "2025-01-28T16:38:57.47047Z"
-    },
-    {
-      "path": "/Users/kyandesutter/Developer/ftch",
-      "score": 2,
-      "last_visit": "2025-01-28T18:09:07.32329Z"
     }
   ]
 }

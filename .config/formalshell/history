@@ -1,19 +1,19 @@
-cd
-ls /etc
-cat
-exit
-go build
-bat history
-clear
 zsh
 nvim
 cd .config/formalshell
 ls
+go build
+bat history
+clear
+neofetch
 stow .
 cd dotfiles
 ls .config/
-neofetch
+git status
 gpush
 bat
 stow -v
-git status
+exit
+cd
+ls /etc
+cat
