@@ -1,3 +1,5 @@
+# zmodload zsh/zprof
+
 if [[ -f "/opt/homebrew/bin/brew" ]]; then
   # If you're using macOS, you'll want this enabled
   eval "$(/opt/homebrew/bin/brew shellenv)"
@@ -32,7 +34,13 @@ zinit snippet OMZP::command-not-found
 zinit snippet OMZP::brew
 
 # Load completions
-autoload -Uz compinit && compinit
+# autoload -Uz compinit && compinit
+autoload -Uz compinit
+if [[ -n $HOME/.cache/zsh/zcompdump-$ZSH_VERSION(#qN.mh+24) ]]; then
+compinit -d "$HOME/.cache/zsh/zcompdump-$ZSH_VERSION"
+else
+compinit -C;
+fi; 
 
 zinit cdreplay -q
 
@@ -77,6 +85,7 @@ alias push='git push'
 alias neofetch='clear && ftch && echo'
 alias commitai='commit_message=$(lumen draft) && git commit -avm "$commit_message"'
 alias nah='git reset --hard && git clean -df'
+alias nixrb='clear && darwin-rebuild switch --flake .'
 
 # Shell integrations
 eval "$(fzf --zsh)"
@@ -120,7 +129,7 @@ export PATH=$PATH:$HOME/go/bin
 
 # Functions 
 # Git
-gpush() {
+function gpush() {
   git add .
 
   commit_message=$(lumen draft)
@@ -145,7 +154,7 @@ function y() {
 	rm -f -- "$tmp"
 }
 # Pywal
-wal() {
+function wal() {
     # Define the path to your virtual environment directory
     VENV_DIR="./pywal_env"  # Change this to your specific venv directory if needed
 
@@ -159,3 +168,4 @@ wal() {
     command wal "$@"
 }
 
+# zprof

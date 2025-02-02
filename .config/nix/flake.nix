@@ -63,24 +63,22 @@
         pkgs.obsidian # Note-taking and knowledge management
         pkgs.raycast # Launcher for productivity
         pkgs.yazi # File manager
+        pkgs.ice-bar # Menu bar enhancement
 
         # Media and Entertainment
         pkgs.youtube-music # YouTube Music client
-        pkgs.ice-bar # Music player
 
         # Miscellaneous
-        pkgs.uv # Universal viewer
+        pkgs.uv # A package manager for python 
         pkgs.aerospace # i3 like window manager for mac
-        pkgs.starfetch # Neofetch but constellations
         pkgs.arrpc # Discord RPC client
-        pkgs.hyperfine # Command-line benchmarking tool
       ];
 
       homebrew = {
         enable = true;
         casks = [
           "ghostty"
-          "hammerspoon"
+          # "hammerspoon"
           "firefox"
           "google-chrome"
           "the-unarchiver"

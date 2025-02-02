@@ -1,19 +1,32 @@
-zsh
-nvim
-cd .config/formalshell
-ls
 go build
+cd tmux
+nvim .zshrc
 bat history
-clear
-neofetch
-stow .
-cd dotfiles
 ls .config/
-git status
-gpush
+nvim ~/.zshenv
+cat ~/.zshrc
+cat ~/.config/formalshell/config
+cd dotfiles
 bat
-stow -v
+cd nvim
+cd aerospace
+chsh -s $(which zsh)
+zsh
+ls
 exit
+gpush
+cd nix
+nvim .gitignore
+stow .
 cd
+cd .config
+clear
 ls /etc
+nvim
 cat
+stow -v
+cd dot
+nvim aerospace.toml
+sudo sh -c "echo $(which zsh) >> /etc/shells"
+cd .config/formalshell
+neofetch
