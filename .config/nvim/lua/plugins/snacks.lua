@@ -20,6 +20,10 @@ return {
       -- or leave it empty to use the default settings
       -- refer to the configuration section below
     },
+    explorer = {
+      enabled = true,
+      replace_netrw = true,
+    },
     bigfile = { enabled = true },
     dashboard = {
       enabled = true,
@@ -42,7 +46,7 @@ return {
       },
     },
     notifier = {
-      enabled = false,
+      enabled = true,
       timeout = 3000,
     },
     quickfile = { enabled = true },
@@ -74,6 +78,7 @@ return {
     { "<leader>fw", function() Snacks.picker.grep() end,             desc = "Telescope live_grep word" },
     { "<leader>/",  function() Snacks.picker.lines() end,            desc = "Grep" },
     { "<leader>z",  function() Snacks.zen() end,                     desc = "Zen Mode" },
+    { "<leader>e",  function() Snacks.explorer.open() end,           desc = "Toggle Explorer" },
     {
       "<leader>N",
       desc = "Neovim News",

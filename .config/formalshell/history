@@ -1,32 +1,62 @@
-go build
-cd tmux
-nvim .zshrc
-bat history
-ls .config/
-nvim ~/.zshenv
-cat ~/.zshrc
-cat ~/.config/formalshell/config
-cd dotfiles
-bat
-cd nvim
-cd aerospace
-chsh -s $(which zsh)
-zsh
 ls
-exit
-gpush
-cd nix
-nvim .gitignore
-stow .
-cd
-cd .config
-clear
-ls /etc
+bunx --bun shadcn@latest init
+git commit -avm "Init"
+cd shell
+bun i --save electron-extension-installer
+dir
+cd ftch
+cer
 nvim
-cat
-stow -v
-cd dot
-nvim aerospace.toml
-sudo sh -c "echo $(which zsh) >> /etc/shells"
-cd .config/formalshell
-neofetch
+git branch -M main
+bun install -D babel-plugin-react-compiler
+gpush
+install electron-chrome-web-store
+bun install electron-chrome-web-store
+bunx tailwindcss init -p
+clear
+bun install --save-exact @types/react@^19.0.0 @types/react-dom@^19.0.0
+git init
+bun install tailwindcss @tailwindcss/vite
+pwd
+cd Dev
+bun i uuid4
+bun install electron-chrome-extensions
+bun i jotai
+bun create @quick-start/electron@latest
+bat main.go
+git remote add origin git@github.com:FormalSnake/Formalsurf.git
+bun i electron-chrome-context-menu
+bun i @tailwindcss/vite
+tmux
+cd dev
+bun add -D tailwindcss postcss autoprefixer
+bun i tailwindcss
+bun i motion
+bunx --bun tailwindcss init -p
+bun i @types/uuid4
+bun update
+cd dotfiles
+bunx --bun shadcn@latest add button
+cd ghostty
+bun i babel-plugin-react-compiler
+rm -rf node_modules
+git add .
+cd formalsurf
+bunx --bun shadcn@latest add command
+bun install --save-exact react@^19.0.0 react-dom@^19.0.0
+cd
+python3 brackeys.py
+bun install -D babel-plugin-react-compiler@beta eslint-plugin-react-compiler@beta
+bun install electron-devtools-installer --save-dev
+bat brackeys.py
+git push origin main --force
+l
+bun i
+bar brackeys.py
+bun add tailwindcss-animate class-variance-authority clsx tailwind-merge lucide-react
+bunx --bun shadcn@latest add dropdown-menu
+trae .
+nah
+cd .config
+python3
+tmux attach

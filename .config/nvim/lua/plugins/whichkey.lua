@@ -6,7 +6,7 @@ return {
       local wk = require("which-key")
       wk.add({
         { "<leader>f", group = "telescope" }, -- group
-        { "<leader>e", desc = "Neotree" },
+        -- { "<leader>e", desc = "Neotree" },
         { "<leader>g", group = "git" }
       })
     end,
