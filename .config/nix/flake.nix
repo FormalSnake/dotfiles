@@ -85,6 +85,7 @@
           "notion"
           "notion-calendar"
           "clop"
+          "figma"
         ];
         brews = [
           "geometry"
@@ -127,6 +128,7 @@
         dock.mru-spaces = false;
         dock.persistent-apps = [
           "/Applications/Formalsurf.app"
+          "/Applications/Zen Browser.app"
           "/Applications/Ghostty.app"
           "/Applications/Vesktop.app"
           "${pkgs.obsidian}/Applications/Obsidian.app"
