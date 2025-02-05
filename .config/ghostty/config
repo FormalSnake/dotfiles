@@ -6,7 +6,8 @@ font-feature = -liga
 
 #theme = "/Users/kyandesutter/.cache/wal/colors-ghostty"
 #theme = mellow
-theme = jellybeans 
+# theme = jellybeans 
+theme = flexoki-dark
 cursor-style = block 
 cursor-color = #bbbbbb
 adjust-cursor-thickness = 1

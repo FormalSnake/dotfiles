@@ -13,6 +13,7 @@ after-login-command = []
 # 'after-startup-command' is run after 'after-login-command'
 # Available commands : https://nikitabobko.github.io/AeroSpace/commands
 after-startup-command = [
+  'exec-and-forget sketchybar',
   'exec-and-forget borders',
   'exec-and-forget $HOME/Developer/arrpc/arrpc'
 ]
@@ -60,7 +61,7 @@ inner.horizontal = 12
 inner.vertical =   12
 outer.left =       12
 outer.bottom =     12
-outer.top =        12
+outer.top =        44
 outer.right =      12
 
 # 'main' binding mode declaration

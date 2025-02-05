@@ -72,6 +72,7 @@
         pkgs.uv # A package manager for python 
         pkgs.aerospace # i3 like window manager for mac
         pkgs.arrpc # Discord RPC client
+        pkgs.sketchybar # macOS status bar
       ];
 
       homebrew = {
@@ -86,6 +87,7 @@
           "notion-calendar"
           "clop"
           "figma"
+          "ubersicht"
         ];
         brews = [
           "geometry"
@@ -94,6 +96,10 @@
           "imagemagick"
           "FelixKratz/formulae/borders"
           "chase/tap/awrit"
+          # "FelixKratz/formulae/sketchybar"
+          "lua"
+          "switchaudio-osx"
+          "nowplaying-cli"
         ];
         onActivation.cleanup = "zap";
         onActivation.autoUpdate = true;
@@ -167,7 +173,7 @@
   in {
     # Build darwin flake using:
     # $ darwin-rebuild build --flake .#Kyan
-    darwinConfigurations."Kyan" = nix-darwin.lib.darwinSystem {
+    darwinConfigurations."FormalBook" = nix-darwin.lib.darwinSystem {
       modules = [
         configuration
         nix-homebrew.darwinModules.nix-homebrew
