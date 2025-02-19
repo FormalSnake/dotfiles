@@ -13,8 +13,6 @@ after-login-command = []
 # 'after-startup-command' is run after 'after-login-command'
 # Available commands : https://nikitabobko.github.io/AeroSpace/commands
 after-startup-command = [
-  'exec-and-forget sketchybar',
-  'exec-and-forget borders',
   'exec-and-forget $HOME/Developer/arrpc/arrpc'
 ]
 
@@ -47,7 +45,17 @@ key-mapping.preset = 'qwerty'
 # See https://nikitabobko.github.io/AeroSpace/guide#on-focus-changed-callbacks
 # See https://nikitabobko.github.io/AeroSpace/commands#move-mouse
 on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
-on-focus-changed = "move-mouse window-lazy-center"
+# on-focus-changed = "move-mouse window-lazy-center"
+on-focus-changed = [
+    "exec-and-forget osascript -e 'tell application id \"tracesOf.Uebersicht\" to refresh widget id \"simple-bar-index-jsx\"'",
+  'move-mouse window-lazy-center',
+]
+
+exec-on-workspace-change = [
+  '/bin/zsh',
+  '-c',
+  '/usr/bin/osascript -e "tell application id \"tracesOf.Uebersicht\" to refresh widget id \"simple-bar-index-jsx\""',
+]
 
 # Gaps between windows (inner-*) and between monitor edges (outer-*).
 # Possible values:
@@ -123,6 +131,7 @@ alt-p = 'workspace P'
 alt-t = 'workspace T'
 alt-v = 'workspace V'
 
+
 # See: https://nikitabobko.github.io/AeroSpace/commands#move-node-to-workspace
 # alt-shift-1 = 'move-node-to-workspace 1'
 # alt-shift-2 = 'move-node-to-workspace 2'
@@ -187,6 +196,10 @@ if.app-id = 'com.mitchellh.ghostty'
 run = "move-node-to-workspace T"
 
 [[on-window-detected]]
+if.app-id = 'dev.zed.Zed'
+run = "move-node-to-workspace T"
+
+[[on-window-detected]]
 if.app-id = 'company.thebrowser.Browser'
 run = "move-node-to-workspace B"
 
@@ -223,3 +236,20 @@ run = "move-node-to-workspace M"
 [[on-window-detected]] # Exclude apps
 if.app-id = 'com.apple.iphonesimulator'
 run = 'layout floating'
+
+[[on-window-detected]]
+if.app-id = 'com.spotify.client'
+run = 'move-node-to-workspace M'
+
+[[on-window-detected]]
+if.app-id = 'notion.id'
+run = 'move-node-to-workspace N'
+
+[workspace-to-monitor-force-assignment]
+B = 'main'
+E = 'main'
+M = ['secondary', 'main']
+N = 'main'
+P = 'main'
+T = 'main'
+V = 'main'

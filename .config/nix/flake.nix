@@ -26,27 +26,24 @@
       environment.systemPackages = [
         # Text Editors
         pkgs.neovim # Advanced text editor based on Vim
+        pkgs.zed-editor # Zed IDE
 
         # Shell Utilities
-        pkgs.mkalias # Create shell aliases
         pkgs.tmux # Terminal multiplexer
         pkgs.zoxide # Fast directory jumper
         pkgs.bat # A cat clone with syntax highlighting
         pkgs.fzf # Command-line fuzzy finder
         pkgs.stow # Symlink farm manager
-        pkgs.ripgrep # Fast search tool like grep
-        pkgs.fd # Simple, fast, and user-friendly alternative to find
-        pkgs.direnv # Environment switcher for shell
         pkgs.aider-chat # Chat-like interface for terminal
         pkgs.chafa # Terminal graphics generator
         pkgs.btop # Resource monitor
         pkgs.blueutil # Bluetooth utility
+        pkgs.television # Terminal based fuzzy finder
 
         # Development Tools
         pkgs.nodejs # JavaScript runtime
         pkgs.bun # All-in-one JavaScript runtime
         pkgs.lazygit # Simple terminal UI for git commands
-        pkgs.lazydocker # Simple terminal UI for Docker
         pkgs.gh # GitHub CLI
         pkgs.cargo # Rust package manager
         pkgs.devenv # Developer environment manager
@@ -60,26 +57,23 @@
         pkgs.alejandra # Nix code formatter
 
         # Productivity Tools
-        pkgs.obsidian # Note-taking and knowledge management
         pkgs.raycast # Launcher for productivity
         pkgs.yazi # File manager
         pkgs.ice-bar # Menu bar enhancement
 
         # Media and Entertainment
-        pkgs.youtube-music # YouTube Music client
+        pkgs.spotify # Spotify client
 
         # Miscellaneous
         pkgs.uv # A package manager for python 
         pkgs.aerospace # i3 like window manager for mac
         pkgs.arrpc # Discord RPC client
-        pkgs.sketchybar # macOS status bar
       ];
 
       homebrew = {
         enable = true;
         casks = [
           "ghostty"
-          # "hammerspoon"
           "firefox"
           "google-chrome"
           "the-unarchiver"
@@ -94,9 +88,6 @@
           "romkatv/gitstatus/gitstatus"
           "jnsahaj/lumen/lumen"
           "imagemagick"
-          "FelixKratz/formulae/borders"
-          "chase/tap/awrit"
-          # "FelixKratz/formulae/sketchybar"
           "lua"
           "switchaudio-osx"
           "nowplaying-cli"
@@ -133,12 +124,10 @@
         dock.showhidden = true;
         dock.mru-spaces = false;
         dock.persistent-apps = [
-          "/Applications/Formalsurf.app"
-          "/Applications/Zen Browser.app"
+          "/Applications/Google Chrome.app"
           "/Applications/Ghostty.app"
-          "/Applications/Vesktop.app"
-          "${pkgs.obsidian}/Applications/Obsidian.app"
-          "${pkgs.youtube-music}/Applications/YouTube Music.app"
+          "/Applications/Notion.app"
+          "${pkgs.spotify}/Applications/Spotify.app"
         ];
         finder.FXPreferredViewStyle = "clmv";
         loginwindow.GuestEnabled = false;
