@@ -169,3 +169,5 @@ function wal() {
 }
 
 # zprof
+
+export PATH=$PATH:/Users/kyandesutter/.spicetify

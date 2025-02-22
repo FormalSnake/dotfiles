@@ -245,6 +245,10 @@ run = 'move-node-to-workspace M'
 if.app-id = 'notion.id'
 run = 'move-node-to-workspace N'
 
+[[on-window-detected]]
+if.app-id = 'com.github.Electron'
+run = 'move-node-to-workspace M'
+
 [workspace-to-monitor-force-assignment]
 B = 'main'
 E = 'main'
