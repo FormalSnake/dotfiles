@@ -139,7 +139,7 @@
           hidePodcasts
           shuffle
         ];
-        theme = spicePkgs.themes.defaultDynamic;
+        theme = spicePkgs.themes.text;
       };
     };
   in {
