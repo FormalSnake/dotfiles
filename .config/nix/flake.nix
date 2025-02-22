@@ -48,6 +48,7 @@
         pkgs.uv
         pkgs.aerospace
         pkgs.arrpc
+        pkgs.nixd
       ];
 
       homebrew = {
@@ -137,7 +138,7 @@
           adblockify
           hidePodcasts
           shuffle
-          beautifulLyrics
+          simpleBeautifulLyrics
         ];
         theme = spicePkgs.themes.defaultDynamic;
       };
