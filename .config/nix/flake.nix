@@ -119,9 +119,9 @@
 
       # Enable flakes and necessary daemon settings.
       nix.settings.experimental-features = "nix-command flakes";
-      services.nix-daemon.enable = true;
-      nix.configureBuildUsers = true;
-      nix.useDaemon = true;
+      # services.nix-daemon.enable = true;
+      # nix.configureBuildUsers = true;
+      # nix.useDaemon = true;
 
       programs.zsh.enable = true;
       security.pam.enableSudoTouchIdAuth = true;
@@ -138,7 +138,6 @@
           adblockify
           hidePodcasts
           shuffle
-          simpleBeautifulLyrics
         ];
         theme = spicePkgs.themes.defaultDynamic;
       };
