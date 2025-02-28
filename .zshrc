@@ -171,3 +171,4 @@ function wal() {
 # zprof
 
 export PATH=$PATH:/Users/kyandesutter/.spicetify
+export PATH="/Users/kyandesutter/.bun/bin:$PATH"

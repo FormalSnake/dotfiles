@@ -245,9 +245,19 @@ run = 'move-node-to-workspace M'
 if.app-id = 'notion.id'
 run = 'move-node-to-workspace N'
 
+# [[on-window-detected]]
+# if.app-id = 'com.github.Electron'
+# run = 'move-node-to-workspace M'
+
 [[on-window-detected]]
-if.app-id = 'com.github.Electron'
-run = 'move-node-to-workspace M'
+if.app-id = 'com.google.Chrome'
+if.window-title-regex-substring = 'Picture-in-picture'
+run = 'layout floating'
+check-further-callbacks = true
+
+[[on-window-detected]]
+if.app-id = 'com.google.Chrome'
+run = "move-node-to-workspace B"
 
 [workspace-to-monitor-force-assignment]
 B = 'main'

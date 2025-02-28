@@ -49,6 +49,9 @@
         pkgs.aerospace
         pkgs.arrpc
         pkgs.nixd
+        pkgs.ripgrep
+        pkgs.openssh
+        pkgs.mosh
       ];
 
       homebrew = {
@@ -107,6 +110,7 @@
           "/Applications/Ghostty.app"
           "${pkgs.zed-editor}/Applications/Zed.app"
           "/Applications/Notion.app"
+          "/Applications/Notion Mail.app"
           "${config.programs.spicetify.spicedSpotify}/Applications/Spotify.app"
         ];
         finder.FXPreferredViewStyle = "clmv";
@@ -139,7 +143,7 @@
           hidePodcasts
           shuffle
         ];
-        theme = spicePkgs.themes.text;
+        theme = spicePkgs.themes.hazy;
       };
     };
   in {

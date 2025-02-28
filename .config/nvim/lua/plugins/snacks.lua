@@ -14,6 +14,9 @@ return {
     scroll = {
       enabled = true,
     },
+    image = {
+      enabled = true,
+    },
     picker = {
       enabled = true,
       -- your picker configuration comes here
