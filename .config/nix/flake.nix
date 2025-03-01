@@ -38,20 +38,15 @@
         pkgs.devenv
         pkgs.go
         pkgs.zig
-        pkgs.esbuild
-        pkgs.vercel-pkg
         pkgs.nixfmt-rfc-style
         pkgs.alejandra
         pkgs.raycast
         pkgs.yazi
         pkgs.ice-bar
-        pkgs.uv
         pkgs.aerospace
         pkgs.arrpc
         pkgs.nixd
         pkgs.ripgrep
-        pkgs.openssh
-        pkgs.mosh
       ];
 
       homebrew = {
@@ -66,6 +61,10 @@
           "clop"
           "figma"
           "ubersicht"
+          "bleunlock"
+          "redquits"
+          "darkmodebuddy"
+          "dockey"
         ];
         brews = [
           "geometry"
@@ -101,7 +100,7 @@
 
       system.defaults = {
         dock.autohide = true;
-        dock.orientation = "left";
+        dock.orientation = "bottom";
         dock.show-recents = false;
         dock.showhidden = true;
         dock.mru-spaces = false;
@@ -109,6 +108,7 @@
           "/Applications/Google Chrome.app"
           "/Applications/Ghostty.app"
           "${pkgs.zed-editor}/Applications/Zed.app"
+          "/System/Applications/Calendar.app"
           "/Applications/Notion.app"
           "/Applications/Notion Mail.app"
           "${config.programs.spicetify.spicedSpotify}/Applications/Spotify.app"

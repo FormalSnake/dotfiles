@@ -16,10 +16,6 @@ adjust-cursor-thickness = 1
 
 keybind = cmd+shift+space=toggle_quick_terminal
 
-#cursor-style = block
-background-opacity = 0.98
-background-blur-radius = 32
-
 mouse-hide-while-typing = true
 macos-titlebar-style = tabs 
 # Square corners
