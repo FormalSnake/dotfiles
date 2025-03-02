@@ -65,6 +65,11 @@
           "redquits"
           "darkmodebuddy"
           "dockey"
+          "zerotier-one"
+          "httpie"
+          "modrinth"
+          "balenaetcher"
+          "flux"
         ];
         brews = [
           "geometry"
