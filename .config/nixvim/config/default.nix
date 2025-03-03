@@ -9,6 +9,7 @@
     snacks.enable = true;
     tmux-navigator.enable = true;
     autoclose.enable = true;
+    indent-blankline.enable = true;
   };
 
   plugins.lsp = {

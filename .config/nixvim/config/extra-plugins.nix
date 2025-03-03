@@ -1,10 +1,49 @@
 {pkgs, ...}: let
+auto-dark-mode-nvim = pkgs.vimUtils.buildVimPlugin {
+    name = "auto-dark-mode-nvim";
+    src = pkgs.fetchFromGitHub {
+      owner = "f-person";
+      repo = "auto-dark-mode.nvim";
+      rev = "02ef9553e2a1d6e861bc6955d58ce5883d28a6ad";
+      hash = "sha256-FTXakglUrqifEXjzES6M4L+rthItu5rlw6QyIOLYNOc=";
+    };
+    nvimSkipModule = "outline.providers.norg";
+  };
 in {
   extraPlugins = with pkgs; [
     vimPlugins.supermaven-nvim # AI code completion
+    vimPlugins.cord-nvim
+    vimPlugins.auto-session
+    auto-dark-mode-nvim
   ];
 
   extraConfigLua = ''
+    require('auto-session').setup {
+            suppressed_dirs = { '~/', '~/Projects', '~/Downloads', '/' },
+            -- log_level = 'debug',
+            session_lens = {
+              load_on_setup = true,
+              previewer = false,
+              mappings = {
+                -- Mode can be a string or a table, e.g. {"i", "n"} for both insert and normal mode
+                delete_session = { "i", "<C-D>" },
+                alternate_session = { "i", "<C-S>" },
+                copy_session = { "i", "<C-Y>" },
+              },
+            },
+            -- vim.keymap.set('n', '<leader>fs', require('auto-session.session-lens').search_session, {
+            --   noremap = true,
+            -- })
+          }
+    require("cord").setup()
+    require("auto-dark-mode").setup({
+    set_dark_mode = function()
+            vim.cmd.colorscheme("tokyonight-night")
+          end,
+          set_light_mode = function()
+            vim.cmd.colorscheme("tokyonight-day")
+          end,
+    })
     require("supermaven-nvim").setup({
       keymaps = {
         accept_suggestion = "<Tab>",
