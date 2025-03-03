@@ -1,6 +1,6 @@
 {
   # Import all your configuration modules here
-  imports = [ ./bufferline.nix ./options.nix ./cmp.nix ];
+  imports = [ ./bufferline.nix ./options.nix ./cmp.nix ./nvim-tree ];
 
   plugins = {
     lualine.enable = true;
