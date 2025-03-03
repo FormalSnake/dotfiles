@@ -1,6 +1,6 @@
 {
   # Import all your configuration modules here
-  imports = [ ./bufferline.nix ./options.nix ./cmp.nix ./nvim-tree.nix ./supermaven.nix ];
+  imports = [ ./bufferline.nix ./options.nix ./cmp.nix ./nvim-tree.nix ./extra-plugins.nix ];
 
   plugins = {
     lualine.enable = true;
@@ -8,6 +8,7 @@
     luasnip.enable = true;
     snacks.enable = true;
     tmux-navigator.enable = true;
+    autoclose.enable = true;
   };
 
   plugins.lsp = {

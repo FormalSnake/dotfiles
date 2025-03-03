@@ -42,6 +42,7 @@
             ''
               function(_, item)
                 local icons = {
+                  Supermaven = "",
                   Namespace = "󰌗",
                   Text = "󰉿",
                   Method = "󰆧",
