@@ -2,25 +2,6 @@
 {
   plugins = {
     luasnip.enable = true;
-    copilot-lua = {
-      enable = true;
-      settings = {
-        suggestion.enabled = false;
-        panel.enabled = false;
-        filetypes = {
-          yaml = false;
-          markdown = false;
-          help = false;
-          gleam = false; # Copilot doesn't really help when writing Gleam
-          gitcommit = false;
-          gitrebase = false;
-          hgcommit = false;
-          svn = false;
-          cvs = false;
-          "." = false;
-        };
-      };
-    };
 
     cmp-buffer = { enable = true; };
 
@@ -43,6 +24,7 @@
           end
         '';
         sources = [
+          { name = "supermaven"; }
           { name = "nvim_lsp"; }
           { name = "luasnip"; }
           {
@@ -51,7 +33,6 @@
           }
           { name = "nvim_lua"; }
           { name = "path"; }
-          { name = "copilot"; }
         ];
 
         formatting = {
@@ -108,22 +89,6 @@
                 return item
               end
             '';
-        };
-
-        window = {
-          completion = {
-            winhighlight =
-              "FloatBorder:CmpBorder,Normal:CmpPmenu,CursorLine:CmpSel,Search:PmenuSel";
-            scrollbar = false;
-            sidePadding = 0;
-            border = [ "╭" "─" "╮" "│" "╯" "─" "╰" "│" ];
-          };
-
-          settings.documentation = {
-            border = [ "╭" "─" "╮" "│" "╯" "─" "╰" "│" ];
-            winhighlight =
-              "FloatBorder:CmpBorder,Normal:CmpPmenu,CursorLine:CmpSel,Search:PmenuSel";
-          };
         };
 
         mapping = {

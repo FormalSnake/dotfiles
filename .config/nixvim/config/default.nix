@@ -1,34 +1,26 @@
 {
   # Import all your configuration modules here
-  imports = [ ./bufferline.nix ./options.nix ./cmp.nix ./nvim-tree ];
+  imports = [ ./bufferline.nix ./options.nix ./cmp.nix ./nvim-tree.nix ./supermaven.nix ];
 
   plugins = {
     lualine.enable = true;
     treesitter.enable = true;
     luasnip.enable = true;
+    snacks.enable = true;
+    tmux-navigator.enable = true;
   };
 
   plugins.lsp = {
     enable = true;
     servers = {
-      tsserver.enable = true;
-      lua-ls.enable = true;
-      rust-analyzer.enable = true;
+      ts_ls.enable = true;
+      lua_ls.enable = true;
+      rust_analyzer = {
+        enable = true;
+        installCargo = false;
+        installRustc = false;
+      };
     };
-  };
-
-  # plugins.cmp = {
-  #   enable = true;
-  #   autoEnableSources = true;
-  #   settings.sources = [
-  #     {name = "nvim_lsp";}
-  #     {name = "path";}
-  #     {name = "buffer";}
-  #   ];
-  # };
-
-  plugins.snacks = {
-    enable = true;
   };
 
   colorschemes.tokyonight.enable = true;
@@ -41,7 +33,7 @@
       key = "<leader>/";
     }
     {
-      action = "<CMD>lua Snacks.explorer.open()<CR>";
+      action = "<CMD>NvimTreeToggle<CR>";
       key = "<leader>e";
     }
     {
