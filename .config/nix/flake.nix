@@ -47,6 +47,13 @@
         pkgs.arrpc
         pkgs.nixd
         pkgs.ripgrep
+        pkgs.lua
+        pkgs.switchaudio-osx
+        pkgs.nowplaying-cli
+        pkgs.the-unarchiver
+        pkgs.modrinth-app
+        pkgs.google-chrome
+        pkgs.supabase-cli
       ];
 
       homebrew = {
@@ -54,20 +61,16 @@
         casks = [
           "ghostty"
           "firefox"
-          "google-chrome"
-          "the-unarchiver"
           "notion"
           "notion-calendar"
           "clop"
           "figma"
           "ubersicht"
           "bleunlock"
-          "redquits"
           "darkmodebuddy"
           "dockey"
           "zerotier-one"
           "httpie"
-          "modrinth"
           "balenaetcher"
           "flux"
         ];
@@ -76,9 +79,6 @@
           "romkatv/gitstatus/gitstatus"
           "jnsahaj/lumen/lumen"
           "imagemagick"
-          "lua"
-          "switchaudio-osx"
-          "nowplaying-cli"
         ];
         onActivation.cleanup = "zap";
         onActivation.autoUpdate = true;
@@ -110,7 +110,8 @@
         dock.showhidden = true;
         dock.mru-spaces = false;
         dock.persistent-apps = [
-          "/Applications/Google Chrome.app"
+          # "/Applications/Google Chrome.app"
+          "${pkgs.google-chrome}/Applications/Google Chrome.app"
           "/Applications/Ghostty.app"
           "${pkgs.zed-editor}/Applications/Zed.app"
           "/System/Applications/Calendar.app"
