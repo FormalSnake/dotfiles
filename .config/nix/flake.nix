@@ -54,6 +54,7 @@
         pkgs.modrinth-app
         pkgs.google-chrome
         pkgs.supabase-cli
+	pkgs.nil
       ];
 
       homebrew = {
