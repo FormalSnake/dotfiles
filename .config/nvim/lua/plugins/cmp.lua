@@ -41,11 +41,10 @@ return {
           end,
         },
         sources = cmp.config.sources({
-          { name = "supermaven" },
+          { name = "supermaven",     priority = 69 },
           { name = 'nvim_lsp' },
           { name = 'luasnip' },
           { name = 'render-markdown' },
-          -- { name = "supermaven" },
         }, {
           { name = 'buffer' },
         }),
@@ -61,7 +60,7 @@ return {
           fields = { "kind", "abbr", "menu" },
           format = function(entry, vim_item)
             local kind = require("lspkind").cmp_format({ mode = "symbol_text", maxwidth = 50, symbol_map = { Supermaven = "" } })(
-            entry, vim_item)
+              entry, vim_item)
             local strings = vim.split(kind.kind, "%s", { trimempty = true })
             kind.kind = " " .. (strings[1] or "") .. " "
             kind.menu = "    (" .. (strings[2] or "") .. ")"

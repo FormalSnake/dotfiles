@@ -7,11 +7,9 @@
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
     spicetify-nix.url = "github:Gerg-L/spicetify-nix";
-    # nix-vim.url = "github:FormalSnake/nvim-config";
-    nix-vim.url = "path:/Users/kyandesutter/dotfiles/.config/nixvim"; # Local nix-vim flake
   };
 
-  outputs = inputs @ { self, nix-darwin, nix-homebrew, nixpkgs, nix-vim, ... }: let
+  outputs = inputs @ { self, nix-darwin, nix-homebrew, nixpkgs, ... }: let
     configuration = { pkgs, config, ... }: let
       # Integrate spicetify packages for flakes.
       spicePkgs = inputs.spicetify-nix.legacyPackages.${pkgs.stdenv.system};
@@ -20,6 +18,7 @@
 
       # System packages, homebrew settings, activation scripts, etc.
       environment.systemPackages = [
+        pkgs.neovim
         pkgs.zed-editor
         pkgs.tmux
         pkgs.zoxide
@@ -52,12 +51,9 @@
         pkgs.switchaudio-osx
         pkgs.nowplaying-cli
         pkgs.the-unarchiver
-        pkgs.modrinth-app
         pkgs.google-chrome
         pkgs.supabase-cli
 	pkgs.nil
-	# nix-vim.defaultPackage.${pkgs.system}
-	nix-vim.packages.${pkgs.system}.default
       ];
 
       homebrew = {
@@ -138,7 +134,8 @@
       # nix.useDaemon = true;
 
       programs.zsh.enable = true;
-      security.pam.enableSudoTouchIdAuth = true;
+      # security.pam.enableSudoTouchIdAuth = true;
+      security.pam.services.sudo_local.touchIdAuth = true;
 
       # Set Git commit hash for darwin-version.
       system.configurationRevision = self.rev or self.dirtyRev or null;
