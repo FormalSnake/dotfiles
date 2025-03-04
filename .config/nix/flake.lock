@@ -170,14 +170,17 @@
         "nixvim": "nixvim"
       },
       "locked": {
-        "lastModified": 1741075055,
-        "narHash": "sha256-3UlPfo/SoE8OZy1JVaccrvW4zQpM7cpZa7pDOy6Haag=",
-        "path": "/Users/kyandesutter/dotfiles/.config/nixvim",
-        "type": "path"
+        "lastModified": 1741077417,
+        "narHash": "sha256-ACw0eirRZoAcBj5nHJh7Un8TU20b/RzeEygjr4E4KZU=",
+        "owner": "FormalSnake",
+        "repo": "nvim-config",
+        "rev": "4da8ea8dfc03803819e340f31b4295ea618a5fea",
+        "type": "github"
       },
       "original": {
-        "path": "/Users/kyandesutter/dotfiles/.config/nixvim",
-        "type": "path"
+        "owner": "FormalSnake",
+        "repo": "nvim-config",
+        "type": "github"
       }
     },
     "nixpkgs": {

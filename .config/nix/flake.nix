@@ -7,7 +7,7 @@
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
     spicetify-nix.url = "github:Gerg-L/spicetify-nix";
-    nix-vim.url = "github:FormalSnake/dotfiles/.config/nixvim";
+    nix-vim.url = "github:FormalSnake/nvim-config";
   };
 
   outputs = inputs @ { self, nix-darwin, nix-homebrew, nixpkgs, nix-vim, ... }: let
