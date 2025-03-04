@@ -7,9 +7,10 @@
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
     spicetify-nix.url = "github:Gerg-L/spicetify-nix";
+    nix-vim.url = "github:FormalSnake/dotfiles/.config/nixvim";
   };
 
-  outputs = inputs @ { self, nix-darwin, nix-homebrew, nixpkgs, ... }: let
+  outputs = inputs @ { self, nix-darwin, nix-homebrew, nixpkgs, nix-vim, ... }: let
     configuration = { pkgs, config, ... }: let
       # Integrate spicetify packages for flakes.
       spicePkgs = inputs.spicetify-nix.legacyPackages.${pkgs.stdenv.system};
@@ -54,6 +55,8 @@
         pkgs.google-chrome
         pkgs.supabase-cli
 	pkgs.nil
+	# nix-vim.defaultPackage.${pkgs.system}
+	nix-vim.packages.${pkgs.system}.default
       ];
 
       homebrew = {
