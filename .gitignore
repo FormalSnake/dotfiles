@@ -2,3 +2,4 @@
 .DS_Store
 .config/formalshell/directory.json
 .config/formalshell/history
+.config/nixvim/result/*

@@ -40,7 +40,7 @@ if [[ -n $HOME/.cache/zsh/zcompdump-$ZSH_VERSION(#qN.mh+24) ]]; then
 compinit -d "$HOME/.cache/zsh/zcompdump-$ZSH_VERSION"
 else
 compinit -C;
-fi; 
+fi;
 
 zinit cdreplay -q
 
@@ -127,19 +127,19 @@ export PATH="$PATH:$HOME/Developer/ghostty-lsp/target/release"
 # Go executables
 export PATH=$PATH:$HOME/go/bin
 
-# Functions 
+# Functions
 # Git
 function gpush() {
   git add .
 
   commit_message=$(lumen draft)
-  
+
   if [ -z "$commit_message" ]; then
     echo "Lumen draft is empty"
     echo -n "Enter commit message: "
     read commit_message
   fi
-  
+
   git commit -avm "$commit_message"
   git push origin main
 }
@@ -172,3 +172,5 @@ function wal() {
 
 export PATH=$PATH:/Users/kyandesutter/.spicetify
 export PATH="/Users/kyandesutter/.bun/bin:$PATH"
+# /Users/kyandesutter/dotfiles/.config/nixvim/result/bin
+export PATH="/Users/kyandesutter/dotfiles/.config/nixvim/result/bin:$PATH"

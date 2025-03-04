@@ -18,7 +18,6 @@
 
       # System packages, homebrew settings, activation scripts, etc.
       environment.systemPackages = [
-        pkgs.neovim
         pkgs.zed-editor
         pkgs.tmux
         pkgs.zoxide
