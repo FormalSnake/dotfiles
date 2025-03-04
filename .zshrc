@@ -172,5 +172,4 @@ function wal() {
 
 export PATH=$PATH:/Users/kyandesutter/.spicetify
 export PATH="/Users/kyandesutter/.bun/bin:$PATH"
-# /Users/kyandesutter/dotfiles/.config/nixvim/result/bin
 export PATH="/Users/kyandesutter/dotfiles/.config/nixvim/result/bin:$PATH"

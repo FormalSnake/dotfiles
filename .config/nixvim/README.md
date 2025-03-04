@@ -15,3 +15,21 @@ To test your configuration simply run the following command
 ```
 nix run .
 ```
+
+## Updating
+
+```bash
+nix flake update
+```
+
+### Rebuild your Neovim:
+
+```bash
+nix build
+```
+
+### Run the updated Neovim:
+
+```bash
+./result/bin/nvim
+```
