@@ -9,8 +9,18 @@
     spicetify-nix.url = "github:Gerg-L/spicetify-nix";
   };
 
-  outputs = inputs @ { self, nix-darwin, nix-homebrew, nixpkgs, ... }: let
-    configuration = { pkgs, config, ... }: let
+  outputs = inputs @ {
+    self,
+    nix-darwin,
+    nix-homebrew,
+    nixpkgs,
+    ...
+  }: let
+    configuration = {
+      pkgs,
+      config,
+      ...
+    }: let
       # Integrate spicetify packages for flakes.
       spicePkgs = inputs.spicetify-nix.legacyPackages.${pkgs.stdenv.system};
     in {
@@ -18,39 +28,53 @@
 
       # System packages, homebrew settings, activation scripts, etc.
       environment.systemPackages = [
-        pkgs.neovim
-        pkgs.tmux
-        pkgs.zoxide
-        pkgs.bat
-        pkgs.fzf
-        pkgs.stow
-        pkgs.aider-chat
-        pkgs.chafa
-        pkgs.btop
-        pkgs.blueutil
-        pkgs.nodejs
-        pkgs.bun
-        pkgs.lazygit
-        pkgs.gh
-        pkgs.cargo
-        pkgs.devenv
-        pkgs.go
-        pkgs.zig
-        pkgs.nixfmt-rfc-style
-        pkgs.alejandra
-        pkgs.raycast
-        pkgs.yazi
-        pkgs.ice-bar
-        pkgs.aerospace
-        pkgs.arrpc
-        pkgs.nixd
-        pkgs.ripgrep
-        pkgs.lua
-        pkgs.switchaudio-osx
-        pkgs.nowplaying-cli
-        pkgs.the-unarchiver
-        pkgs.google-chrome
-        pkgs.supabase-cli
+        # Text Editors
+        pkgs.neovim # Modern, extensible Vim-based text editor
+
+        # Terminal Multiplexers
+        pkgs.tmux # Terminal multiplexer for managing multiple terminal sessions
+
+        # Navigation and Search
+        pkgs.zoxide # Smarter 'cd' command for quick navigation
+        pkgs.fzf # Command-line fuzzy finder for interactive search
+        pkgs.ripgrep # Fast search tool for searching text within files
+        pkgs.fd # Simple, fast, user-friendly alternative to 'find'
+
+        # File Management
+        pkgs.stow # Symlink farm manager for managing dotfiles
+        pkgs.yazi # Terminal file manager
+
+        # Development Tools
+        pkgs.nodejs # JavaScript runtime built on Chrome's V8 engine
+        pkgs.bun # All-in-one JavaScript runtime
+        pkgs.lazygit # Simple terminal UI for git commands
+        pkgs.gh # GitHub CLI tool
+        pkgs.cargo # Rust package manager and build system
+        pkgs.devenv # Development environment manager
+        pkgs.go # Go programming language
+        pkgs.zig # Zig programming language
+        pkgs.nixfmt-rfc-style # Nix code formatter following RFC style
+        pkgs.alejandra # Nix code formatter
+        pkgs.nil # Nix code formatter
+        pkgs.nixd # Nix development tool
+        pkgs.lua # Lightweight, embeddable scripting language
+
+        # System Utilities
+        pkgs.bat # Enhanced 'cat' command with syntax highlighting
+        pkgs.chafa # Terminal image viewer and converter
+        pkgs.btop # Resource monitor for system performance
+        pkgs.blueutil # Bluetooth utility for macOS
+        pkgs.switchaudio-osx # macOS utility to switch audio sources
+        pkgs.nowplaying-cli # Command-line tool to display currently playing media
+        pkgs.the-unarchiver # Archive extraction utility
+        pkgs.google-chrome # Web browser
+
+        # Miscellaneous
+        pkgs.aider-chat # AI-assisted code editing tool
+        pkgs.raycast # Launcher and productivity tool
+        pkgs.ice-bar # Status bar utility
+        pkgs.aerospace # Aerospace-related tools
+        pkgs.arrpc # Remote procedure call tool
       ];
 
       homebrew = {
@@ -88,17 +112,18 @@
           paths = config.environment.systemPackages;
           pathsToLink = "/Applications";
         };
-      in pkgs.lib.mkForce ''
-        echo "setting up /Applications..." >&2
-        rm -rf /Applications/Nix\ Apps
-        mkdir -p /Applications/Nix\ Apps
-        find ${env}/Applications -maxdepth 1 -type l -exec readlink '{}' + |
-        while read -r src; do
-          app_name=$(basename "$src")
-          echo "copying $src" >&2
-          ${pkgs.mkalias}/bin/mkalias "$src" "/Applications/Nix Apps/$app_name"
-        done
-      '';
+      in
+        pkgs.lib.mkForce ''
+          echo "setting up /Applications..." >&2
+          rm -rf /Applications/Nix\ Apps
+          mkdir -p /Applications/Nix\ Apps
+          find ${env}/Applications -maxdepth 1 -type l -exec readlink '{}' + |
+          while read -r src; do
+            app_name=$(basename "$src")
+            echo "copying $src" >&2
+            ${pkgs.mkalias}/bin/mkalias "$src" "/Applications/Nix Apps/$app_name"
+          done
+        '';
 
       system.defaults = {
         dock.autohide = true;
