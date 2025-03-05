@@ -110,7 +110,6 @@
           # "/Applications/Google Chrome.app"
           "${pkgs.google-chrome}/Applications/Google Chrome.app"
           "/Applications/Ghostty.app"
-          "${pkgs.zed-editor}/Applications/Zed.app"
           "/System/Applications/Calendar.app"
           "/Applications/Notion.app"
           "/Applications/Notion Mail.app"
