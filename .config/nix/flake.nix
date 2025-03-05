@@ -19,7 +19,6 @@
       # System packages, homebrew settings, activation scripts, etc.
       environment.systemPackages = [
         pkgs.neovim
-        pkgs.zed-editor
         pkgs.tmux
         pkgs.zoxide
         pkgs.bat
@@ -29,7 +28,6 @@
         pkgs.chafa
         pkgs.btop
         pkgs.blueutil
-        pkgs.television
         pkgs.nodejs
         pkgs.bun
         pkgs.lazygit
@@ -53,7 +51,6 @@
         pkgs.the-unarchiver
         pkgs.google-chrome
         pkgs.supabase-cli
-	pkgs.nil
       ];
 
       homebrew = {
