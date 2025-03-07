@@ -1,3 +1,5 @@
 return {
-  { "folke/todo-comments.nvim", opts = {} },
+  {
+    "folke/todo-comments.nvim",
+  }
 }

@@ -85,8 +85,6 @@ return {
         return modes[str] or str
       end
 
-      local git_blame = require('gitblame')
-
       local function getWordsV2()
         local wc = vim.fn.wordcount()
         if wc["visual_words"] then -- text is selected in visual mode
@@ -110,7 +108,7 @@ return {
           lualine_a = {
             { 'mode', separator = { left = '', right = '' }, fmt = short }
           },
-          lualine_c = { { git_blame.get_current_blame_text, cond = git_blame.is_blame_text_available }, lualine_pretty_path() },
+          lualine_c = { { lualine_pretty_path(), separator = { left = '', right = '' } } },
           lualine_z = { { 'location', separator = { left = '', right = '' } }, getWordsV2 },
           lualine_x = {
             { "' ' .. vim.g.xcodebuild_last_status", color = { fg = '#a6e3a1' } },
