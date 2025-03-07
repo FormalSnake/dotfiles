@@ -21,6 +21,10 @@ vim.opt.rtp:prepend(lazypath)
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 vim.opt.termguicolors = true
+-- Disable virtual_text since it's redundant due to lsp_lines.
+vim.diagnostic.config({
+  virtual_text = false,
+})
 
 -- Setup lazy.nvim
 require("lazy").setup({
