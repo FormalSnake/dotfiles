@@ -19,6 +19,7 @@
     home-manager,
     ...
   }: let
+    username = "kyandesutter";
     configuration = {
       pkgs,
       config,
@@ -27,6 +28,13 @@
       # Integrate spicetify packages for flakes.
       spicePkgs = inputs.spicetify-nix.legacyPackages.${pkgs.stdenv.system};
     in {
+      users = {
+        users.${username} = {
+          home = "/Users/${username}";
+          name = "${username}";
+        };
+      };
+
       nixpkgs.config.allowUnfree = true;
 
       # System packages, homebrew settings, activation scripts, etc.
@@ -130,7 +138,7 @@
 
       system.defaults = {
         dock.autohide = true;
-        dock.orientation = "bottom";
+        dock.orientation = "right";
         dock.show-recents = false;
         dock.showhidden = true;
         dock.mru-spaces = false;
@@ -207,9 +215,14 @@
         }
         home-manager.darwinModules.home-manager
         {
-          home-manager.useGlobalPkgs = true;
-          home-manager.useUserPackages = true;
-          home-manager.users.kyandesutter = import ./home.nix;
+          home-manager = {
+            useGlobalPkgs = true;
+            useUserPackages = true;
+            users.${username} = import ./home.nix;
+          };
+          # home-manager.useGlobalPkgs = true;
+          # home-manager.useUserPackages = true;
+          # home-manager.users.kyandesutter = import ./home.nix;
 
           # Optionally, use home-manager.extraSpecialArgs to pass
           # arguments to home.nix
