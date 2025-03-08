@@ -9,6 +9,8 @@
     spicetify-nix.url = "github:Gerg-L/spicetify-nix";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    plugin-auto-dark-mode.url = "github:f-person/auto-dark-mode.nvim";
+    plugin-auto-dark-mode.flake = false;
   };
 
   outputs = inputs @ {
@@ -198,10 +200,11 @@
         home-manager.darwinModules.home-manager
         {
           home-manager = {
-            useGlobalPkgs = true;
+            # useGlobalPkgs = true;
             useUserPackages = true;
             backupFileExtension = "backup";
             users.${username} = import ./home.nix;
+            extraSpecialArgs = {inherit inputs;};
           };
           # home-manager.useGlobalPkgs = true;
           # home-manager.useUserPackages = true;

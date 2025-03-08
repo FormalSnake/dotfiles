@@ -2,8 +2,23 @@
   config,
   pkgs,
   lib,
+  inputs,
   ...
 }: {
+  nixpkgs = {
+    overlays = [
+      (final: prev: {
+        vimPlugins =
+          prev.vimPlugins
+          // {
+            own-auto-dark-mode = prev.vimUtils.buildVimPlugin {
+              name = "auto-dark-mode.nvim";
+              src = inputs.plugin-auto-dark-mode;
+            };
+          };
+      })
+    ];
+  };
   # Home Manager needs a bit of information about you and the
   # paths it should manage.
   home.username = "kyandesutter";
@@ -49,7 +64,6 @@
 
     extraPackages = with pkgs; [
       lua-language-server
-      rnix-lsp
 
       xclip
       wl-clipboard
@@ -59,7 +73,11 @@
       # tokyonight theme
       {
         plugin = tokyonight-nvim;
-        config = toLua "colorscheme tokyonight-night";
+      }
+
+      {
+        plugin = own-auto-dark-mode;
+        config = toLuaFile ./nvim/plugins/colorscheme.lua;
       }
 
       {
@@ -69,7 +87,7 @@
 
       {
         plugin = auto-session;
-        config = toLuaFile ./nvim/plugins/auto-session.lua;
+        config = toLuaFile ./nvim/plugins/autosession.lua;
       }
 
       {
@@ -77,10 +95,38 @@
         config = toLuaFile ./nvim/plugins/autotag.lua;
       }
 
+      {
+        plugin = conform-nvim;
+        config = toLuaFile ./nvim/plugins/conform.lua;
+      }
+
+      {
+        plugin = gitsigns-nvim;
+        config = toLuaFile ./nvim/plugins/git-stuff.lua;
+      }
+
+      {
+        plugin = image-nvim;
+        config = toLuaFile ./nvim/plugins/image.lua;
+      }
+
+      {
+        plugin = lsp_lines-nvim;
+        config = toLua "require(\"lsp_lines\").setup()";
+      }
+
+      ts-comments-nvim
+
+      dropbar-nvim
+
+      telescope-fzf-native-nvim
+
+      cord-nvim
+
       nvim-cmp
       {
         plugin = nvim-cmp;
-        config = toLuaFile ./nvim/plugin/cmp.lua;
+        config = toLuaFile ./nvim/plugins/cmp.lua;
       }
 
       cmp_luasnip
@@ -105,5 +151,9 @@
 
       vim-nix
     ];
+
+    extraLuaConfig = ''
+      ${builtins.readFile ./nvim/options.lua}
+    '';
   };
 }

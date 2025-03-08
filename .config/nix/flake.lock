@@ -156,12 +156,29 @@
         "type": "github"
       }
     },
+    "plugin-auto-dark-mode": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1737842466,
+        "narHash": "sha256-FTXakglUrqifEXjzES6M4L+rthItu5rlw6QyIOLYNOc=",
+        "owner": "f-person",
+        "repo": "auto-dark-mode.nvim",
+        "rev": "02ef9553e2a1d6e861bc6955d58ce5883d28a6ad",
+        "type": "github"
+      },
+      "original": {
+        "owner": "f-person",
+        "repo": "auto-dark-mode.nvim",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "home-manager": "home-manager",
         "nix-darwin": "nix-darwin",
         "nix-homebrew": "nix-homebrew",
         "nixpkgs": "nixpkgs_3",
+        "plugin-auto-dark-mode": "plugin-auto-dark-mode",
         "spicetify-nix": "spicetify-nix"
       }
     },
