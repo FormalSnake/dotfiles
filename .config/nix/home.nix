@@ -1,6 +1,7 @@
 {
   config,
   pkgs,
+  lib,
   ...
 }: {
   # Home Manager needs a bit of information about you and the
@@ -37,11 +38,19 @@
   };
 
   # configure neovim using the existing lua config
-  programs.neovim = {
+  programs.neovim = let
+    toLua = str: "lua << EOF\n${str}\nEOF\n";
+    toLuaFile = file: "lua << EOF\n${builtins.readFile file}\nEOF\n";
+  in {
     enable = true;
-
-    extraLuaConfig = ''
-      ${builtins.readFile ./nvim/init.lua}
-    '';
+    # extraLuaConfig = ''
+    #   ${builtins.readFile ./nvim/init.lua}
+    # '';
+    plugins = with pkgs.vimPlugins; [
+      {
+        plugin = autoclose-nvim;
+        config = toLuaFile ./nvim/plugins/autoclose.lua;
+      }
+    ];
   };
 }
