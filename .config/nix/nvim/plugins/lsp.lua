@@ -30,16 +30,6 @@ require('lazydev').setup()
 require('lspconfig').lua_ls.setup {
     on_attach = on_attach,
     capabilities = capabilities,
-	root_dir = function()
-        return vim.loop.cwd()
-    end,
-	cmd = { "lua-lsp" },
-    settings = {
-        Lua = {
-            workspace = { checkThirdParty = false },
-            telemetry = { enable = false },
-        },
-    }
 }
 
 require('lspconfig').ts_ls.setup {

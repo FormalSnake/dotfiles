@@ -11,8 +11,8 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     plugin-auto-dark-mode.url = "github:f-person/auto-dark-mode.nvim";
     plugin-auto-dark-mode.flake = false;
-    plugin-snacks.url = "github:folke/snacks.nvim";
-    plugin-snacks.flake = false;
+    # plugin-snacks.url = "github:folke/snacks.nvim";
+    # plugin-snacks.flake = false;
   };
 
   outputs = inputs @ {

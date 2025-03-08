@@ -15,10 +15,37 @@
               name = "auto-dark-mode.nvim";
               src = inputs.plugin-auto-dark-mode;
             };
-            own-snacks = prev.vimUtils.buildVimPlugin {
-              name = "snacks.nvim";
-              src = inputs.plugin-snacks;
-            };
+            # own-snacks = prev.vimPlugins.snacks-nvim.overrideAttrs (oldAttrs: rec {
+            #   nvimSkipModule = [
+            #     "snacks.dashboard"
+            #     "snacks.debug"
+            #     "snacks.dim"
+            #     "snacks.git"
+            #     "snacks.image.convert"
+            #     "snacks.image.image"
+            #     "snacks.image.init"
+            #     "snacks.image.placement"
+            #     "snacks.indent"
+            #     "snacks.input"
+            #     "snacks.lazygit"
+            #     "snacks.notifier"
+            #     "snacks.picker.actions"
+            #     "snacks.picker.config.highlights"
+            #     "snacks.picker.core.list"
+            #     "snacks.scratch"
+            #     "snacks.scroll"
+            #     "snacks.terminal"
+            #     "snacks.win"
+            #     "snacks.words"
+            #     "snacks.zen"
+            #     "trouble.sources.profiler"
+            #     "snacks.picker.util.db"
+            #   ];
+            # });
+            # own-snacks = prev.vimUtils.buildVimPlugin {
+            #   name = "snacks.nvim";
+            #   src = inputs.plugin-snacks;
+            # };
           };
       })
     ];
@@ -81,7 +108,8 @@
       }
 
       {
-        plugin = own-snacks;
+        # plugin = own-snacks;
+        plugin = snacks-nvim;
         config = toLuaFile ./nvim/plugins/snacks.lua;
       }
 
@@ -173,6 +201,8 @@
       telescope-fzf-native-nvim
 
       cord-nvim
+
+      nvim-web-devicons
 
       {
         plugin = nvim-cmp;
