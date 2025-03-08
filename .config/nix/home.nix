@@ -21,14 +21,27 @@
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 
+  home.packages = [
+    pkgs.cowsay
+    # Text Editors
+    # pkgs.neovim # Modern, extensible Vim-based text editor
+
+    # Terminal Multiplexers
+    pkgs.tmux # Terminal multiplexer for managing multiple terminal sessions
+  ];
+
   programs.git = {
     enable = true;
     userName = "FormalSnake";
     userEmail = "kyaniserni@gmail.com";
-    aliases = {
-      add = "git add";
-      commit = "git commit";
-      push = "git push";
-    };
+  };
+
+  # configure neovim using the existing lua config
+  programs.neovim = {
+    enable = true;
+
+    extraLuaConfig = ''
+      ${builtins.readFile ./nvim/init.lua}
+    '';
   };
 }

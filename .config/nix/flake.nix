@@ -39,12 +39,6 @@
 
       # System packages, homebrew settings, activation scripts, etc.
       environment.systemPackages = [
-        # Text Editors
-        pkgs.neovim # Modern, extensible Vim-based text editor
-
-        # Terminal Multiplexers
-        pkgs.tmux # Terminal multiplexer for managing multiple terminal sessions
-
         # Navigation and Search
         pkgs.zoxide # Smarter 'cd' command for quick navigation
         pkgs.fzf # Command-line fuzzy finder for interactive search
@@ -206,6 +200,7 @@
           home-manager = {
             useGlobalPkgs = true;
             useUserPackages = true;
+            backupFileExtension = "backup";
             users.${username} = import ./home.nix;
           };
           # home-manager.useGlobalPkgs = true;
