@@ -178,12 +178,11 @@
       programs.spicetify = {
         enable = true;
         enabledExtensions = with spicePkgs.extensions; [
-          beautifulLyrics
+          # beautifulLyrics
           # hidePodcasts
-          # shuffle
+          shuffle
         ];
         enabledCustomApps = with spicePkgs.apps; [
-          lyricsPlus
           newReleases
         ];
         enabledSnippets = with spicePkgs.snippets; [
@@ -202,17 +201,6 @@
     darwinConfigurations."FormalBook" = nix-darwin.lib.darwinSystem {
       modules = [
         configuration
-        nix-homebrew.darwinModules.nix-homebrew
-        # Import the spicetify module from spicetify-nix:
-        inputs.spicetify-nix.nixosModules.spicetify
-        {
-          nix-homebrew = {
-            enable = true;
-            enableRosetta = true;
-            user = "kyandesutter";
-            autoMigrate = true;
-          };
-        }
         home-manager.darwinModules.home-manager
         {
           home-manager = {
@@ -226,6 +214,17 @@
 
           # Optionally, use home-manager.extraSpecialArgs to pass
           # arguments to home.nix
+        }
+        nix-homebrew.darwinModules.nix-homebrew
+        # Import the spicetify module from spicetify-nix:
+        inputs.spicetify-nix.nixosModules.spicetify
+        {
+          nix-homebrew = {
+            enable = true;
+            enableRosetta = true;
+            user = "kyandesutter";
+            autoMigrate = true;
+          };
         }
       ];
     };

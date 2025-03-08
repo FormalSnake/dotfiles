@@ -79,9 +79,9 @@ alias ls='ls -A --color'
 alias vim='nvim'
 
 # Git aliases
-alias add='git add'
-alias commit='git commit'
-alias push='git push'
+# alias add='git add'
+# alias commit='git commit'
+# alias push='git push'
 alias neofetch='clear && ftch && echo'
 alias commitai='commit_message=$(lumen draft) && git commit -avm "$commit_message"'
 alias nah='git reset --hard && git clean -df'
