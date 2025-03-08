@@ -167,11 +167,24 @@
       programs.spicetify = {
         enable = true;
         enabledExtensions = with spicePkgs.extensions; [
-          adblockify
-          hidePodcasts
-          shuffle
+          beautifulLyrics
+          # hidePodcasts
+          # shuffle
         ];
-        theme = spicePkgs.themes.hazy;
+        enabledCustomApps = with spicePkgs.apps; [
+          lyricsPlus
+          newReleases
+        ];
+        enabledSnippets = with spicePkgs.snippets; [
+          # smooth-progress-bar
+          smoothProgressBar
+          autoHideFriends
+          # roundedNowPlayingBar
+          roundedImages
+          roundedButtons
+        ];
+        theme = spicePkgs.themes.starryNight;
+        # colorScheme = "macchiato";
       };
     };
   in {
