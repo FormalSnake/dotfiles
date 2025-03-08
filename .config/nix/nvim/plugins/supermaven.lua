@@ -1,8 +1,4 @@
-return {
-  {
-    {
-      "supermaven-inc/supermaven-nvim",
-      config = function()
+
         require("supermaven-nvim").setup({
           keymaps = {
             accept_suggestion = "<Tab>",
@@ -21,10 +17,3 @@ return {
             return false
           end -- condition to check for stopping supermaven, `true` means to stop supermaven when the condition is true.
         })
-      end
-    },
-    { "iguanacucumber/mag-nvim-lsp", name = "cmp-nvim-lsp", opts = {} },
-    { "iguanacucumber/mag-buffer",   name = "cmp-buffer" },
-    { "iguanacucumber/mag-cmdline",  name = "cmp-cmdline" },
-  },
-}

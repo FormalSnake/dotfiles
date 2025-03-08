@@ -64,15 +64,21 @@
 
     extraPackages = with pkgs; [
       lua-language-server
-
-      xclip
-      wl-clipboard
+      nil
+      astro-language-server
+      alejandra
+      typescript-language-server
     ];
 
     plugins = with pkgs.vimPlugins; [
       # tokyonight theme
       {
         plugin = tokyonight-nvim;
+      }
+
+      {
+        plugin = nvim-lspconfig;
+        config = toLuaFile ./nvim/plugins/lsp.lua;
       }
 
       {
@@ -97,7 +103,7 @@
 
       {
         plugin = conform-nvim;
-        config = toLuaFile ./nvim/plugins/conform.lua;
+        config = toLuaFile ./nvim/plugins/format.lua;
       }
 
       {
@@ -115,6 +121,47 @@
         config = toLua "require(\"lsp_lines\").setup()";
       }
 
+      {
+        plugin = lualine-nvim;
+        config = toLuaFile ./nvim/plugins/lualine.lua;
+      }
+
+      {
+        plugin = render-markdown-nvim;
+        config = toLuaFile ./nvim/plugins/markdown.lua;
+      }
+
+      {
+        plugin = snacks-nvim;
+        config = toLuaFile ./nvim/plugins/snacks.lua;
+      }
+
+      {
+        plugin = supermaven-nvim;
+        config = toLuaFile ./nvim/plugins/supermaven.lua;
+      }
+
+      {
+        plugin = vim-tmux-navigator;
+        config = toLuaFile ./nvim/plugins/tmuxnavigator.lua;
+      }
+
+      {
+        plugin = treesj;
+        config = toLuaFile ./nvim/plugins/treesj.lua;
+      }
+
+      {
+        plugin = which-key-nvim;
+        config = toLuaFile ./nvim/plugins/whichkey.lua;
+      }
+
+      lazydev-nvim
+
+      noice-nvim
+
+      todo-comments-nvim
+
       ts-comments-nvim
 
       dropbar-nvim
@@ -123,7 +170,6 @@
 
       cord-nvim
 
-      nvim-cmp
       {
         plugin = nvim-cmp;
         config = toLuaFile ./nvim/plugins/cmp.lua;
@@ -134,6 +180,10 @@
 
       luasnip
       friendly-snippets
+
+      cmp-buffer
+      lspkind-nvim
+      cmp-path
 
       {
         plugin = nvim-treesitter.withPlugins (p: [

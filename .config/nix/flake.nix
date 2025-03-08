@@ -60,9 +60,6 @@
         pkgs.devenv # Development environment manager
         pkgs.go # Go programming language
         pkgs.zig # Zig programming language
-        pkgs.nixfmt-rfc-style # Nix code formatter following RFC style
-        pkgs.alejandra # Nix code formatter
-        pkgs.nil # Nix code formatter
         pkgs.nixd # Nix development tool
         pkgs.lua # Lightweight, embeddable scripting language
 
