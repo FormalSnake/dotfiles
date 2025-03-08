@@ -7,6 +7,8 @@
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
     spicetify-nix.url = "github:Gerg-L/spicetify-nix";
+    home-manager.url = "github:nix-community/home-manager";
+    home-manager.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = inputs @ {
@@ -14,6 +16,7 @@
     nix-darwin,
     nix-homebrew,
     nixpkgs,
+    home-manager,
     ...
   }: let
     configuration = {
@@ -201,6 +204,15 @@
             user = "kyandesutter";
             autoMigrate = true;
           };
+        }
+        home-manager.darwinModules.home-manager
+        {
+          home-manager.useGlobalPkgs = true;
+          home-manager.useUserPackages = true;
+          home-manager.users.kyandesutter = import ./home.nix;
+
+          # Optionally, use home-manager.extraSpecialArgs to pass
+          # arguments to home.nix
         }
       ];
     };
