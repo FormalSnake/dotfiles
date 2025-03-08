@@ -1,7 +1,3 @@
-return {
-  {
-    'rmagatti/auto-session',
-    config = function()
       require('auto-session').setup {
         suppressed_dirs = { '~/', '~/Projects', '~/Downloads', '/' },
         -- log_level = 'debug',
@@ -19,6 +15,3 @@ return {
         --   noremap = true,
         -- })
       }
-    end,
-  },
-}

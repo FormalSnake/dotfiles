@@ -46,11 +46,64 @@
     # extraLuaConfig = ''
     #   ${builtins.readFile ./nvim/init.lua}
     # '';
+
+    extraPackages = with pkgs; [
+      lua-language-server
+      rnix-lsp
+
+      xclip
+      wl-clipboard
+    ];
+
     plugins = with pkgs.vimPlugins; [
+      # tokyonight theme
+      {
+        plugin = tokyonight-nvim;
+        config = toLua "colorscheme tokyonight-night";
+      }
+
       {
         plugin = autoclose-nvim;
         config = toLuaFile ./nvim/plugins/autoclose.lua;
       }
+
+      {
+        plugin = auto-session;
+        config = toLuaFile ./nvim/plugins/auto-session.lua;
+      }
+
+      {
+        plugin = nvim-ts-autotag;
+        config = toLuaFile ./nvim/plugins/autotag.lua;
+      }
+
+      nvim-cmp
+      {
+        plugin = nvim-cmp;
+        config = toLuaFile ./nvim/plugin/cmp.lua;
+      }
+
+      cmp_luasnip
+      cmp-nvim-lsp
+
+      luasnip
+      friendly-snippets
+
+      {
+        plugin = nvim-treesitter.withPlugins (p: [
+          p.tree-sitter-nix
+          p.tree-sitter-vim
+          p.tree-sitter-bash
+          p.tree-sitter-lua
+          p.tree-sitter-python
+          p.tree-sitter-json
+          p.tree-sitter-astro
+          p.tree-sitter-typescript
+        ]);
+        config = toLuaFile ./nvim/plugins/treesitter.lua;
+      }
+
+      vim-nix
     ];
   };
 }
