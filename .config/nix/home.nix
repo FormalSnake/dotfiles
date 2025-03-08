@@ -15,6 +15,10 @@
               name = "auto-dark-mode.nvim";
               src = inputs.plugin-auto-dark-mode;
             };
+            own-snacks = prev.vimUtils.buildVimPlugin {
+              name = "snacks.nvim";
+              src = inputs.plugin-snacks;
+            };
           };
       })
     ];
@@ -77,6 +81,11 @@
       }
 
       {
+        plugin = own-snacks;
+        config = toLuaFile ./nvim/plugins/snacks.lua;
+      }
+
+      {
         plugin = nvim-lspconfig;
         config = toLuaFile ./nvim/plugins/lsp.lua;
       }
@@ -129,11 +138,6 @@
       {
         plugin = render-markdown-nvim;
         config = toLuaFile ./nvim/plugins/markdown.lua;
-      }
-
-      {
-        plugin = snacks-nvim;
-        config = toLuaFile ./nvim/plugins/snacks.lua;
       }
 
       {
