@@ -11,6 +11,10 @@ in {
   programs.neovim = {
     enable = true;
 
+    viAlias = true;
+    vimAlias = true;
+    vimdiffAlias = true;
+
     extraPackages = with pkgs; [
       lua-language-server
       nil

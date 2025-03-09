@@ -1,0 +1,76 @@
+add_newline = true
+
+format = """\
+  $username\
+  $memory_usage\
+  $hostname\
+  $directory\
+  $git_branch\
+  $git_commit\
+  $git_state\
+  $git_status\
+  $package\
+  $python\
+  $rust\
+  $nix_shell\
+  $env_var\
+  $line_break\
+  $battery\
+  $cmd_duration\
+  $jobs\
+  $time\
+  $character\
+  """
+
+[battery]
+full_symbol = "🔋"
+charging_symbol = "⚡️"
+discharging_symbol = "💀"
+
+[[battery.display]]
+threshold = 10
+style = "bold red"
+
+[[battery.display]]
+threshold = 60
+style = "bold yellow"
+
+[[battery.display]]
+threshold = 100
+style = "bold green"
+
+[character]
+# symbol = "➜"
+error_symbol = "✗"
+use_symbol_for_status = true
+
+[cmd_duration]
+min_time = 500
+format = "took [$duration]($style) "
+
+[directory]
+truncation_length = 6
+truncate_to_repo = true
+disabled = false
+
+[hostname]
+ssh_only = false
+format = "[$hostname]($style) in "
+trim_at = "."
+disabled = false
+
+[line_break]
+disabled = false
+
+[python]
+symbol = "🐍 "
+pyenv_version_name = false
+pyenv_prefix = "pyenv"
+style = "bold yellow"
+disabled = false
+
+[username]
+style_root = "bold red"
+style_user = "bold yellow"
+show_always = false
+disabled = false

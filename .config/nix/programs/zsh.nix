@@ -3,6 +3,11 @@
   pkgs,
   ...
 }: {
+  programs.starship = {
+    enable = true;
+    settings = pkgs.lib.importTOML ./starship.toml;
+  };
+
   programs.zsh = {
     enable = true;
     enableCompletion = true;
@@ -23,10 +28,8 @@
         eval "$(/opt/homebrew/bin/brew shellenv)"
       fi
 
-      # Gitstatus
-      source ${pkgs.gitstatus}/share/gitstatus/gitstatus.plugin.zsh
-
       # Shell integrations
+      eval "$(starship init zsh)"
       eval "$(fzf --zsh)"
       eval "$(zoxide init --cmd cd zsh)"
 
@@ -59,15 +62,6 @@
         fi
         git commit -avm "$commit_message"
         git push origin main
-      }
-
-      function y() {
-        local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
-        yazi "$@" --cwd-file="$tmp"
-        if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
-          builtin cd -- "$cwd"
-        fi
-        rm -f -- "$tmp"
       }
     '';
 
