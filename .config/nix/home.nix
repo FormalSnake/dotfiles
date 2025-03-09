@@ -43,5 +43,6 @@
     ./programs/neovim.nix
     ./programs/tmux.nix
     ./programs/aerospace.nix
+    ./programs/ghostty.nix
   ];
 }
