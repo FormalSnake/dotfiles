@@ -6,6 +6,10 @@
   ...
 }: {
   nixpkgs = {
+    config = {
+      allowUnfree = true;
+      allowUnfreePredicate = _: true;
+    };
     overlays = [
       (final: prev: {
         vimPlugins =
@@ -28,7 +32,13 @@
   programs.home-manager.enable = true;
 
   home.packages = [
-    pkgs.cowsay
+    pkgs.aider-chat # AI-assisted code editing tool
+    pkgs.raycast # Launcher and productivity tool
+    pkgs.ice-bar # Status bar utility
+    pkgs.aerospace # Aerospace-related tools
+    pkgs.mousecape # Custom cursors for macOS
+    pkgs.the-unarchiver # Archive extraction utility
+    pkgs.google-chrome # Web browser
   ];
 
   programs.git = {

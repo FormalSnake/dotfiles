@@ -47,10 +47,6 @@
         pkgs.ripgrep # Fast search tool for searching text within files
         pkgs.fd # Simple, fast, user-friendly alternative to 'find'
 
-        # File Management
-        pkgs.stow # Symlink farm manager for managing dotfiles
-        pkgs.yazi # Terminal file manager
-
         # Development Tools
         pkgs.nodejs # JavaScript runtime built on Chrome's V8 engine
         pkgs.bun # All-in-one JavaScript runtime
@@ -67,19 +63,9 @@
         pkgs.bat # Enhanced 'cat' command with syntax highlighting
         pkgs.chafa # Terminal image viewer and converter
         pkgs.btop # Resource monitor for system performance
-        pkgs.blueutil # Bluetooth utility for macOS
-        pkgs.switchaudio-osx # macOS utility to switch audio sources
-        pkgs.nowplaying-cli # Command-line tool to display currently playing media
-        pkgs.the-unarchiver # Archive extraction utility
-        pkgs.google-chrome # Web browser
-
-        # Miscellaneous
-        pkgs.aider-chat # AI-assisted code editing tool
-        pkgs.raycast # Launcher and productivity tool
-        pkgs.ice-bar # Status bar utility
-        pkgs.aerospace # Aerospace-related tools
-        pkgs.arrpc # Remote procedure call tool
-        pkgs.mousecape # Custom cursors for macOS
+        # pkgs.blueutil # Bluetooth utility for macOS
+        # pkgs.switchaudio-osx # macOS utility to switch audio sources
+        # pkgs.nowplaying-cli # Command-line tool to display currently playing media
       ];
 
       homebrew = {
