@@ -3,11 +3,6 @@
   pkgs,
   ...
 }: {
-  programs.starship = {
-    enable = true;
-    settings = pkgs.lib.importTOML ./starship.toml;
-  };
-
   programs.zsh = {
     enable = true;
     enableCompletion = true;
@@ -23,46 +18,57 @@
     };
 
     initExtra = ''
-      # Set up brew environment if on macOS
-      if [[ -f "/opt/homebrew/bin/brew" ]]; then
-        eval "$(/opt/homebrew/bin/brew shellenv)"
-      fi
+            # Set up brew environment if on macOS
+            if [[ -f "/opt/homebrew/bin/brew" ]]; then
+              eval "$(/opt/homebrew/bin/brew shellenv)"
+            fi
 
-      # Shell integrations
-      eval "$(starship init zsh)"
-      eval "$(fzf --zsh)"
-      eval "$(zoxide init --cmd cd zsh)"
+            # Shell integrations
+            eval "$(fzf --zsh)"
+            eval "$(zoxide init --cmd cd zsh)"
 
-      # Set default editor
-      export EDITOR="nvim"
+      #Gitstatus
+      source /opt/homebrew/opt/gitstatus/gitstatus.plugin.zsh
+      source ~/.config/zsh/gitstatus/mod_gitstatus.prompt.zsh
 
-      # Define LS_COLORS properly
-      zstyle ":completion:*" list-colors "$LS_COLORS"
+      unsetopt PROMPT_SP
 
-      # Aliases
-      alias ls='ls -A --color'
-      alias vim='nvim'
-      alias add='git add'
-      alias commit='git commit'
-      alias push='git push'
-      alias neofetch='clear && ftch && echo'
-      alias commitai='commit_message=$(lumen draft) && git commit -avm "$commit_message"'
-      alias nah='git reset --hard && git clean -df'
-      alias nixrb='clear && darwin-rebuild switch --flake .'
-      alias nixrbgc='clear && darwin-rebuild switch --flake . && nix-store --gc'
-
-      # Functions
-      function gpush() {
-        git add .
-        commit_message=$(lumen draft)
-        if [ -z "$commit_message" ]; then
-          echo "Lumen draft is empty"
-          echo -n "Enter commit message: "
-          read commit_message
-        fi
-        git commit -avm "$commit_message"
-        git push origin main
+      my_git_status() {
+         echo $GITSTATUS_PROMPT
       }
+      GEOMETRY_STATUS_SYMBOL="󰅟 "             # default prompt symbol
+      GEOMETRY_STATUS_SYMBOL_ERROR="󰅣 "       # displayed when exit value is != 0
+      GEOMETRY_PATH_SHOW_BASENAME=true
+      GEOMETRY_RPROMPT=(geometry_exec_time my_git_status geometry_echo)
+      source /opt/homebrew/opt/geometry/share/geometry/geometry.zsh
+
+            # Define LS_COLORS properly
+            zstyle ":completion:*" list-colors "$LS_COLORS"
+
+            # Aliases
+            alias ls='ls -A --color'
+            alias vim='nvim'
+            alias add='git add'
+            alias commit='git commit'
+            alias push='git push'
+            alias neofetch='clear && ftch && echo'
+            alias commitai='commit_message=$(lumen draft) && git commit -avm "$commit_message"'
+            alias nah='git reset --hard && git clean -df'
+            alias nixrb='clear && darwin-rebuild switch --flake .'
+            alias nixrbgc='clear && darwin-rebuild switch --flake . && nix-store --gc'
+
+            # Functions
+            function gpush() {
+              git add .
+              commit_message=$(lumen draft)
+              if [ -z "$commit_message" ]; then
+                echo "Lumen draft is empty"
+                echo -n "Enter commit message: "
+                read commit_message
+              fi
+              git commit -avm "$commit_message"
+              git push origin main
+            }
     '';
 
     plugins = with pkgs; [
