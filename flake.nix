@@ -78,7 +78,6 @@
           "clop"
           "figma"
           "ubersicht"
-          "bleunlock"
           "darkmodebuddy"
           "dockey"
           "zerotier-one"
