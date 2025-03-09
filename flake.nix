@@ -218,7 +218,7 @@
           nix-homebrew = {
             enable = true;
             enableRosetta = true;
-            user = "kyandesutter";
+            user = username;
             autoMigrate = true;
           };
         }
