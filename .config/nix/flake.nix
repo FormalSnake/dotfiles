@@ -79,6 +79,7 @@
         pkgs.ice-bar # Status bar utility
         pkgs.aerospace # Aerospace-related tools
         pkgs.arrpc # Remote procedure call tool
+        pkgs.mousecape # Custom cursors for macOS
       ];
 
       homebrew = {
