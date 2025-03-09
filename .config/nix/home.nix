@@ -29,7 +29,6 @@
 
   home.packages = [
     pkgs.cowsay
-    pkgs.tmux
   ];
 
   programs.git = {
@@ -40,6 +39,7 @@
 
   # Import Neovim config
   imports = [
+    ./programs/zsh.nix
     ./programs/neovim.nix
     ./programs/tmux.nix
   ];
