@@ -58,6 +58,7 @@ Note: this can all be installed using brew!
 * zsh 
 * nvim
 * Aerospace 
+* Spotify using spicetify
 
 ## Contributing
 
