@@ -42,5 +42,6 @@
     ./programs/zsh.nix
     ./programs/neovim.nix
     ./programs/tmux.nix
+    ./programs/aerospace.nix
   ];
 }
