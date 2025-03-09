@@ -41,5 +41,6 @@
   # Import Neovim config
   imports = [
     ./programs/neovim.nix
+    ./programs/tmux.nix
   ];
 }
