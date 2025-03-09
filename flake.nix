@@ -99,6 +99,7 @@
           "httpie"
           "balenaetcher"
           "flux"
+          "legcord"
         ];
         brews = [
           "geometry"
@@ -143,6 +144,7 @@
           "/System/Applications/Calendar.app"
           "/Applications/Notion.app"
           "/Applications/Notion Mail.app"
+          "/Applications/Legcord.app"
           "${config.programs.spicetify.spicedSpotify}/Applications/Spotify.app"
         ];
         finder.FXPreferredViewStyle = "clmv";

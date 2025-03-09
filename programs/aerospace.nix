@@ -15,9 +15,9 @@
     # You can use it to add commands that run after AeroSpace startup.
     # 'after-startup-command' is run after 'after-login-command'
     # Available commands : https://nikitabobko.github.io/AeroSpace/commands
-    after-startup-command = [
-      'exec-and-forget $HOME/Developer/arrpc/arrpc'
-    ]
+    #after-startup-command = [
+    #  'exec-and-forget $HOME/Developer/arrpc/arrpc'
+    #]
 
     # Start AeroSpace at login
     start-at-login = true
@@ -262,6 +262,10 @@
     if.app-id = 'com.google.Chrome'
     run = "move-node-to-workspace B"
 
+    [[on-window-detected]]
+    if.app-id = 'app.legcord.Legcord'
+    run = "move-node-to-workspace V"
+
     [workspace-to-monitor-force-assignment]
     B = 'main'
     E = 'main'
@@ -269,6 +273,6 @@
     N = 'main'
     P = 'main'
     T = 'main'
-    V = 'main'
+    V = ['secondary', 'main']
   '';
 }
