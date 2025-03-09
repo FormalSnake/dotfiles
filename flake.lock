@@ -159,11 +159,11 @@
     "plugin-auto-dark-mode": {
       "flake": false,
       "locked": {
-        "lastModified": 1737842466,
-        "narHash": "sha256-FTXakglUrqifEXjzES6M4L+rthItu5rlw6QyIOLYNOc=",
+        "lastModified": 1741524625,
+        "narHash": "sha256-OQrVwuKfOwzx6Z9I7OaMzZveP2VKQGTG/fZC8Ps0uv4=",
         "owner": "f-person",
         "repo": "auto-dark-mode.nvim",
-        "rev": "02ef9553e2a1d6e861bc6955d58ce5883d28a6ad",
+        "rev": "a321626bf1e31f6a867b3fc5af6a4d7b412fb7d4",
         "type": "github"
       },
       "original": {
