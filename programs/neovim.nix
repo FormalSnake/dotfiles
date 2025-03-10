@@ -98,7 +98,7 @@ in {
       ts-comments-nvim
       dropbar-nvim
       telescope-fzf-native-nvim
-      cord-nvim
+      neocord
       nvim-web-devicons
 
       {
