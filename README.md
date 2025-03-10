@@ -30,12 +30,6 @@ Then, edit these lines in home.nix
 ```nix
 > home.username = "kyandesutter";
 > home.homeDirectory = "/Users/kyandesutter";
-
-> programs.git = {
->   enable = true;
->   userName = "FormalSnake";
->   userEmail = "kyaniserni@gmail.com";
-> };
 ```
 Then rebuild the system using nix-darwin
 ```sh

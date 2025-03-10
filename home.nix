@@ -43,8 +43,6 @@
 
   programs.git = {
     enable = true;
-    userName = "FormalSnake";
-    userEmail = "kyaniserni@gmail.com";
   };
 
   # Import Neovim config
