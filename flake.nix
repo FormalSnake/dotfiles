@@ -9,6 +9,7 @@
     spicetify-nix.url = "github:Gerg-L/spicetify-nix";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    catppuccin.url = "github:catppuccin/nix";
     plugin-auto-dark-mode.url = "github:f-person/auto-dark-mode.nvim";
     plugin-auto-dark-mode.flake = false;
   };
@@ -19,6 +20,7 @@
     nix-homebrew,
     nixpkgs,
     home-manager,
+    catppuccin,
     ...
   }: let
     username = "kyandesutter";
@@ -174,21 +176,27 @@
           roundedImages
           roundedButtons
         ];
-        # theme = spicePkgs.themes.starryNight;
-        # colorScheme = "macchiato";
+        theme = spicePkgs.themes.catppuccin;
+        colorScheme = "mocha";
       };
     };
   in {
     darwinConfigurations."FormalBook" = nix-darwin.lib.darwinSystem {
       modules = [
         configuration
+        # catppuccin.nixosModules.catppuccin
         home-manager.darwinModules.home-manager
         {
           home-manager = {
             # useGlobalPkgs = true;
             useUserPackages = true;
             backupFileExtension = "backup";
-            users.${username} = import ./home.nix;
+            users.${username} = {
+              imports = [
+                ./home.nix
+                catppuccin.homeManagerModules.catppuccin
+              ];
+            };
             extraSpecialArgs = {inherit inputs;};
           };
           # home-manager.useGlobalPkgs = true;

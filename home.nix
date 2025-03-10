@@ -41,6 +41,9 @@
     pkgs.google-chrome # Web browser
   ];
 
+  catppuccin.flavor = "mocha";
+  catppuccin.enable = true;
+
   programs.git = {
     enable = true;
   };

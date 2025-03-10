@@ -6,7 +6,7 @@
     font-feature = -liga
 
     #theme = "/Users/kyandesutter/.cache/wal/colors-ghostty"
-    theme = dark:tokyonight,light:tokyonight-day
+    theme = dark:catppuccin-mocha,light:catppuccin-latte
     cursor-style = block
     cursor-color = #bbbbbb
     adjust-cursor-thickness = 1

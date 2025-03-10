@@ -24,10 +24,10 @@ in {
     ];
 
     plugins = with pkgs.vimPlugins; [
-      {
-        plugin = tokyonight-nvim;
-        config = "colorscheme tokyonight-night";
-      }
+      # {
+      #   plugin = tokyonight-nvim;
+      #   config = "colorscheme tokyonight-night";
+      # }
       {
         plugin = snacks-nvim;
         config = toLuaFile ./nvim/plugins/snacks.lua;
