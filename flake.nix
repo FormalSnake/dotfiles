@@ -174,7 +174,7 @@
           roundedImages
           roundedButtons
         ];
-        theme = spicePkgs.themes.starryNight;
+        # theme = spicePkgs.themes.starryNight;
         # colorScheme = "macchiato";
       };
     };
