@@ -64,10 +64,6 @@
         # System Utilities
         pkgs.bat # Enhanced 'cat' command with syntax highlighting
         pkgs.chafa # Terminal image viewer and converter
-        pkgs.btop # Resource monitor for system performance
-        # pkgs.blueutil # Bluetooth utility for macOS
-        # pkgs.switchaudio-osx # macOS utility to switch audio sources
-        # pkgs.nowplaying-cli # Command-line tool to display currently playing media
       ];
 
       homebrew = {

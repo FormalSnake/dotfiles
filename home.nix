@@ -55,5 +55,6 @@
     ./programs/tmux.nix
     ./programs/aerospace.nix
     ./programs/ghostty.nix
+    ./programs/btop.nix
   ];
 }
