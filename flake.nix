@@ -140,12 +140,8 @@
 
       # Enable flakes and necessary daemon settings.
       nix.settings.experimental-features = "nix-command flakes";
-      # services.nix-daemon.enable = true;
-      # nix.configureBuildUsers = true;
-      # nix.useDaemon = true;
 
       programs.zsh.enable = true;
-      # security.pam.enableSudoTouchIdAuth = true;
       security.pam.services.sudo_local.touchIdAuth = true;
 
       # Set Git commit hash for darwin-version.
@@ -176,12 +172,6 @@
             };
             extraSpecialArgs = {inherit inputs;};
           };
-          # home-manager.useGlobalPkgs = true;
-          # home-manager.useUserPackages = true;
-          # home-manager.users.kyandesutter = import ./home.nix;
-
-          # Optionally, use home-manager.extraSpecialArgs to pass
-          # arguments to home.nix
         }
         nix-homebrew.darwinModules.nix-homebrew
         # Import the spicetify module from spicetify-nix:
