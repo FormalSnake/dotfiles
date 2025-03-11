@@ -146,7 +146,7 @@
 
       system.keyboard = {
         enableKeyMapping = true;
-        remapsCapsLockToEscape = true;
+        remapCapsLockToEscape = true;
       };
 
       # Enable flakes and necessary daemon settings.
