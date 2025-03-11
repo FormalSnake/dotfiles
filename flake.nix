@@ -153,28 +153,9 @@
       system.stateVersion = 5;
       nixpkgs.hostPlatform = "aarch64-darwin";
 
-      # Spicetify integration.
-      programs.spicetify = {
-        enable = true;
-        enabledExtensions = with spicePkgs.extensions; [
-          # beautifulLyrics
-          # hidePodcasts
-          shuffle
-        ];
-        enabledCustomApps = with spicePkgs.apps; [
-          newReleases
-        ];
-        enabledSnippets = with spicePkgs.snippets; [
-          # smooth-progress-bar
-          smoothProgressBar
-          autoHideFriends
-          # roundedNowPlayingBar
-          roundedImages
-          roundedButtons
-        ];
-        theme = spicePkgs.themes.catppuccin;
-        colorScheme = "mocha";
-      };
+      imports = [
+        ./programs/spotify.nix
+      ];
     };
   in {
     darwinConfigurations."FormalBook" = nix-darwin.lib.darwinSystem {

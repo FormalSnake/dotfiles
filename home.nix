@@ -48,7 +48,6 @@
     enable = true;
   };
 
-  # Import Neovim config
   imports = [
     ./programs/zsh.nix
     ./programs/neovim.nix
