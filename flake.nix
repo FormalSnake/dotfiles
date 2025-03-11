@@ -86,6 +86,7 @@
           "cloudflare-warp"
           "whatsapp"
           "slack"
+          "orbstack"
         ];
         brews = [
           "geometry"
