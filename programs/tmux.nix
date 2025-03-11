@@ -21,6 +21,7 @@
       set -g default-command ${pkgs.zsh}/bin/zsh
       if-shell '[ -z "$(tmux ls 2>/dev/null)" ]' 'new-session'
 
+      set -g @continuum-restore 'on'
       set-option -sa terminal-overrides ",xterm*:Tc"
       set-option -g set-titles on
       set-option -g set-titles-string "#S / #W"
