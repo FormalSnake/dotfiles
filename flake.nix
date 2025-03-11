@@ -84,6 +84,8 @@
           "flux"
           "legcord"
           "cloudflare-warp"
+          "whatsapp"
+          "slack"
         ];
         brews = [
           "geometry"
