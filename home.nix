@@ -19,6 +19,10 @@
               name = "auto-dark-mode.nvim";
               src = inputs.plugin-auto-dark-mode;
             };
+            own-visual-whitespace = prev.vimUtils.buildVimPlugin {
+              name = "visual-whitespace.nvim";
+              src = inputs.plugin-visual-whitespace;
+            };
           };
       })
     ];

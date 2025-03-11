@@ -41,6 +41,10 @@ in {
         config = toLuaFile ./nvim/plugins/colorscheme.lua;
       }
       {
+        plugin = own-visual-whitespace;
+        config = toLua "require(\"visual-whitespace\").setup()";
+      }
+      {
         plugin = autoclose-nvim;
         config = toLuaFile ./nvim/plugins/autoclose.lua;
       }

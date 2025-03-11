@@ -12,6 +12,8 @@
     catppuccin.url = "github:catppuccin/nix";
     plugin-auto-dark-mode.url = "github:f-person/auto-dark-mode.nvim";
     plugin-auto-dark-mode.flake = false;
+    plugin-visual-whitespace.url = "github:mcauley-penney/visual-whitespace.nvim";
+    plugin-visual-whitespace.flake = false;
   };
 
   outputs = inputs @ {
