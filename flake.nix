@@ -144,6 +144,11 @@
         NSGlobalDomain.AppleInterfaceStyle = "Dark";
       };
 
+      system.keyboard = {
+        enableKeyMapping = true;
+        remapsCapsLockToEscape = true;
+      };
+
       # Enable flakes and necessary daemon settings.
       nix.settings.experimental-features = "nix-command flakes";
 
