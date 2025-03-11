@@ -45,6 +45,10 @@ in {
         config = toLua "require(\"visual-whitespace\").setup()";
       }
       {
+        plugin = own-tidy;
+        config = toLua "require(\"tidy\").setup()";
+      }
+      {
         plugin = autoclose-nvim;
         config = toLuaFile ./nvim/plugins/autoclose.lua;
       }

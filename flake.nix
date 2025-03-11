@@ -14,6 +14,8 @@
     plugin-auto-dark-mode.flake = false;
     plugin-visual-whitespace.url = "github:mcauley-penney/visual-whitespace.nvim";
     plugin-visual-whitespace.flake = false;
+    plugin-tidy.url = "github:mcauley-penney/tidy.nvim";
+    plugin-tidy.flake = false;
   };
 
   outputs = inputs @ {

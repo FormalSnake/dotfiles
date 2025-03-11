@@ -23,6 +23,10 @@
               name = "visual-whitespace.nvim";
               src = inputs.plugin-visual-whitespace;
             };
+            own-tidy = prev.vimUtils.buildVimPlugin {
+              name = "tidy.nvim";
+              src = inputs.plugin-tidy;
+            };
           };
       })
     ];
