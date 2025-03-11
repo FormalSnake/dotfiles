@@ -1,3 +1,4 @@
+require('treesj').setup({})
 local map = vim.keymap.set
 
 -- Plugin: Wansmer/treesj

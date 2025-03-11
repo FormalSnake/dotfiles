@@ -87,6 +87,8 @@
           "whatsapp"
           "slack"
           "orbstack"
+          "jordanbaird-ice"
+          "betterdisplay"
         ];
         brews = [
           "geometry"
