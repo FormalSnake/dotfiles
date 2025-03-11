@@ -1,8 +1,4 @@
-{
-  config,
-  spicePkgs,
-  ...
-}: {
+{spicePkgs, ...}: {
   # Spicetify integration.
   programs.spicetify = {
     enable = true;

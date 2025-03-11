@@ -154,7 +154,7 @@
       nixpkgs.hostPlatform = "aarch64-darwin";
 
       imports = [
-        ./programs/spotify.nix
+        (import ./programs/spotify.nix {spicePkgs = spicePkgs;})
       ];
     };
   in {
