@@ -83,6 +83,7 @@
           "balenaetcher"
           "flux"
           "legcord"
+          "cloudflare-warp"
         ];
         brews = [
           "geometry"
