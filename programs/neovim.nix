@@ -145,6 +145,7 @@ in {
 
     extraLuaConfig = ''
       ${builtins.readFile ./nvim/options.lua}
+      ${builtins.readFile ./nvim/core/globals.lua}
     '';
   };
 }
