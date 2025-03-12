@@ -46,8 +46,6 @@
     pkgs.mousecape # Custom cursors for macOS
     pkgs.the-unarchiver # Archive extraction utility
     pkgs.google-chrome # Web browser
-    pkgs.podman # Container runtime
-    pkgs.podman-desktop # Podman desktop client
   ];
 
   catppuccin.flavor = "mocha";

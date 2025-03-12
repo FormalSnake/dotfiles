@@ -96,6 +96,7 @@
           "romkatv/gitstatus/gitstatus"
           "jnsahaj/lumen/lumen"
           "imagemagick"
+          "docker"
         ];
         onActivation.cleanup = "zap";
         onActivation.autoUpdate = true;
