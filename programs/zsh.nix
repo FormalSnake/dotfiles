@@ -32,6 +32,8 @@
       GEOMETRY_RPROMPT=(geometry_exec_time geometry_git)
       source /opt/homebrew/opt/geometry/share/geometry/geometry.zsh
 
+      DISABLE_AUTO_UPDATE="true"
+
       # Aliases
       alias ls='ls -A --color'
       alias vim='nvim'
