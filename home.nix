@@ -62,6 +62,7 @@
   imports = [
     ./programs/zsh.nix
     ./programs/neovim.nix
+    ./programs/helix.nix
     ./programs/tmux.nix
     ./programs/aerospace.nix
     ./programs/ghostty.nix
