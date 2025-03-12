@@ -57,8 +57,6 @@
 
   programs.aerospace.enable = true;
 
-  programs.zoxide.enable = true;
-
   programs.lazygit.enable = true;
 
   imports = [
@@ -68,5 +66,6 @@
     ./programs/aerospace.nix
     ./programs/ghostty.nix
     ./programs/btop.nix
+    ./programs/zoxide.nix
   ];
 }
