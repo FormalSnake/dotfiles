@@ -14,6 +14,7 @@
       vim-tmux-navigator
     ];
     extraConfig = ''
+      set -g default-command ${pkgs.zsh}/bin/zsh
       if-shell '[ -z "$(tmux ls 2>/dev/null)" ]' 'new-session'
 
       set-option -sa terminal-overrides ",xterm*:Tc"
