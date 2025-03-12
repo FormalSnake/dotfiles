@@ -9,6 +9,8 @@
     shortcut = "b";
     plugins = with pkgs.tmuxPlugins; [
       continuum
+      sensible
+      yank
       vim-tmux-navigator
     ];
     extraConfig = ''
