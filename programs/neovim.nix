@@ -53,6 +53,10 @@ in {
         config = toLuaFile ./nvim/plugins/autoclose.lua;
       }
       {
+        plugin = statuscol-nvim;
+        config = toLuaFile ./nvim/plugins/statuscol.lua;
+      }
+      {
         plugin = auto-session;
         config = toLuaFile ./nvim/plugins/autosession.lua;
       }

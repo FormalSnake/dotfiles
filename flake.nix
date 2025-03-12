@@ -189,8 +189,6 @@
           };
         }
         nix-homebrew.darwinModules.nix-homebrew
-        # Import the spicetify module from spicetify-nix:
-        inputs.spicetify-nix.nixosModules.spicetify
         {
           nix-homebrew = {
             enable = true;
@@ -199,6 +197,8 @@
             autoMigrate = true;
           };
         }
+        # Import the spicetify module from spicetify-nix:
+        inputs.spicetify-nix.nixosModules.spicetify
       ];
     };
   };

@@ -206,6 +206,22 @@
         "type": "github"
       }
     },
+    "plugin-tidy": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1738451091,
+        "narHash": "sha256-mr6tgetGQOXCVj81545C4YHYlQW12+EzTr1LXPePbn8=",
+        "owner": "mcauley-penney",
+        "repo": "tidy.nvim",
+        "rev": "c3b95bb695887d86ce8712f56e1972f94f29e500",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mcauley-penney",
+        "repo": "tidy.nvim",
+        "type": "github"
+      }
+    },
     "plugin-visual-whitespace": {
       "flake": false,
       "locked": {
@@ -230,6 +246,7 @@
         "nix-homebrew": "nix-homebrew",
         "nixpkgs": "nixpkgs_4",
         "plugin-auto-dark-mode": "plugin-auto-dark-mode",
+        "plugin-tidy": "plugin-tidy",
         "plugin-visual-whitespace": "plugin-visual-whitespace",
         "spicetify-nix": "spicetify-nix"
       }
