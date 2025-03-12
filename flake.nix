@@ -93,7 +93,6 @@
         ];
         brews = [
           "geometry"
-          "romkatv/gitstatus/gitstatus"
           "jnsahaj/lumen/lumen"
           "imagemagick"
           "docker"
