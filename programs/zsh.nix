@@ -18,6 +18,9 @@
     };
 
     initExtra = ''
+      DISABLE_AUTO_UPDATE="true"
+      skip_global_compinit=1
+
       # Set up brew environment if on macOS
       if [[ -f "/opt/homebrew/bin/brew" ]]; then
         eval "$(/opt/homebrew/bin/brew shellenv)"
@@ -31,8 +34,6 @@
       GEOMETRY_PATH_SHOW_BASENAME=true
       GEOMETRY_RPROMPT=(geometry_exec_time geometry_git)
       source /opt/homebrew/opt/geometry/share/geometry/geometry.zsh
-
-      DISABLE_AUTO_UPDATE="true"
 
       # Aliases
       alias ls='ls -A --color'
