@@ -7,6 +7,7 @@
     enable = true;
     baseIndex = 1;
     shortcut = "b";
+    terminal = "screen-256color";
     plugins = with pkgs.tmuxPlugins; [
       {
         plugin = resurrect;
