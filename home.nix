@@ -43,7 +43,6 @@
     pkgs.aider-chat # AI-assisted code editing tool
     pkgs.raycast # Launcher and productivity tool
     pkgs.ice-bar # Status bar utility
-    pkgs.aerospace # Aerospace-related tools
     pkgs.mousecape # Custom cursors for macOS
     pkgs.the-unarchiver # Archive extraction utility
     pkgs.google-chrome # Web browser
@@ -55,6 +54,8 @@
   programs.git = {
     enable = true;
   };
+
+  aerospace.enable = true;
 
   imports = [
     ./programs/zsh.nix
