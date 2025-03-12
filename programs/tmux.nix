@@ -8,11 +8,20 @@
     baseIndex = 1;
     shortcut = "b";
     plugins = with pkgs.tmuxPlugins; [
-      resurrect
       {
-        plugin = continuum;
+        plugin = tmuxPlugins.resurrect;
         extraConfig = ''
-          set -g status-right 'Continuum does say 15 -> #{continuum_status}'
+          set -g @resurrect-strategy-vim 'session'
+          set -g @resurrect-strategy-nvim 'session'
+          set -g @resurrect-capture-pane-contents 'on'
+        '';
+      }
+      {
+        plugin = tmuxPlugins.continuum;
+        extraConfig = ''
+          set -g @continuum-restore 'on'
+          set -g @continuum-boot 'on'
+          set -g @continuum-save-interval '10'
         '';
       }
       sensible
