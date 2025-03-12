@@ -59,8 +59,6 @@
 
   programs.zoxide.enable = true;
 
-  programs.qutebrowser.enable = true;
-
   programs.lazygit.enable = true;
 
   imports = [
