@@ -55,7 +55,6 @@
         # Development Tools
         pkgs.nodejs # JavaScript runtime built on Chrome's V8 engine
         pkgs.bun # All-in-one JavaScript runtime
-        pkgs.lazygit # Simple terminal UI for git commands
         pkgs.gh # GitHub CLI tool
         pkgs.cargo # Rust package manager and build system
         pkgs.devenv # Development environment manager
