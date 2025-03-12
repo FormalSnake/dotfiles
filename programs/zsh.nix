@@ -56,6 +56,7 @@
             alias nah='git reset --hard && git clean -df'
             alias nixrb='clear && darwin-rebuild switch --flake .'
             alias nixrbgc='clear && darwin-rebuild switch --flake . && nix-store --gc'
+            alias docker=podman
 
             # Functions
             function gpush() {
