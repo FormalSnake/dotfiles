@@ -88,7 +88,6 @@
           "cloudflare-warp"
           "whatsapp"
           "slack"
-          "orbstack"
           "jordanbaird-ice"
           "betterdisplay"
         ];
