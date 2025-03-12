@@ -97,6 +97,7 @@
           "jnsahaj/lumen/lumen"
           "imagemagick"
           "docker"
+          "lazydocker"
         ];
         onActivation.cleanup = "zap";
         onActivation.autoUpdate = true;
