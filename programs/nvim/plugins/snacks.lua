@@ -32,7 +32,7 @@ require("snacks").setup({
       {
         section = "terminal",
         cmd = [[
-    chafa $(find "${XDG_CONFIG_HOME:-$HOME/.config}/wallnvim/" -name "*.png" | sort -R | head -1) \
+    chafa $(find "${XDG_CONFIG_HOME:-$HOME/Downloads}/Wallpapers/" -name "*.png" | sort -R | head -1) \
     --format symbols --symbols vhalf --size 60x17 --stretch; sleep .1
   ]],
         height = 17,
