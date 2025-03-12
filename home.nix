@@ -55,7 +55,9 @@
     enable = true;
   };
 
-  aerospace.enable = true;
+  programs.aerospace.enable = true;
+
+  programs.zoxide.enable = true;
 
   imports = [
     ./programs/zsh.nix

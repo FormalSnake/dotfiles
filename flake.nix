@@ -48,7 +48,6 @@
       # System packages, homebrew settings, activation scripts, etc.
       environment.systemPackages = [
         # Navigation and Search
-        pkgs.zoxide # Smarter 'cd' command for quick navigation
         pkgs.fzf # Command-line fuzzy finder for interactive search
         pkgs.ripgrep # Fast search tool for searching text within files
         pkgs.fd # Simple, fast, user-friendly alternative to 'find'
