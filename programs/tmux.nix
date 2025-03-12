@@ -8,7 +8,13 @@
     baseIndex = 1;
     shortcut = "b";
     plugins = with pkgs.tmuxPlugins; [
-      continuum
+      resurrect
+      {
+        plugin = continuum;
+        extraConfig = ''
+          set -g status-right 'Continuum does say 15 -> #{continuum_status}'
+        '';
+      }
       sensible
       yank
       vim-tmux-navigator
@@ -29,7 +35,6 @@
       set-option -g detach-on-destroy off
       setw -g allow-passthrough on
       set-option -g status-position top
-      set-option -g status-right ""
       set-option -g @continuum-restore 'on'
       set -g mouse on
     '';
