@@ -46,7 +46,6 @@
     pkgs.mousecape # Custom cursors for macOS
     pkgs.the-unarchiver # Archive extraction utility
     pkgs.google-chrome # Web browser
-    pkgs.bunnyfetch
   ];
 
   catppuccin.flavor = "mocha";
@@ -66,5 +65,6 @@
     ./programs/ghostty.nix
     ./programs/btop.nix
     ./programs/zoxide.nix
+    ./programs/fastfetch.nix
   ];
 }
