@@ -1,6 +1,7 @@
 {...}: {
   # Source aerospace config from the home-manager store
-  home.file.".aerospace.toml".text = ''
+  # home.file.".aerospace.toml".text = ''
+  xdg.configFile."aerospace/aerospace.toml".text = ''
         # Place a copy of this config to ~/.aerospace.toml
     # After that, you can edit ~/.aerospace.toml to your liking
 

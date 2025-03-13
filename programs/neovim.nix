@@ -21,6 +21,7 @@ in {
       astro-language-server
       alejandra
       typescript-language-server
+      gopls
     ];
 
     plugins = with pkgs.vimPlugins; [
@@ -52,10 +53,10 @@ in {
         plugin = autoclose-nvim;
         config = toLuaFile ./nvim/plugins/autoclose.lua;
       }
-      {
-        plugin = statuscol-nvim;
-        config = toLuaFile ./nvim/plugins/statuscol.lua;
-      }
+      # {
+      #   plugin = statuscol-nvim;
+      #   config = toLuaFile ./nvim/plugins/statuscol.lua;
+      # }
       {
         plugin = auto-session;
         config = toLuaFile ./nvim/plugins/autosession.lua;

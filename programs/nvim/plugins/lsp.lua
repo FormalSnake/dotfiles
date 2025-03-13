@@ -1,5 +1,4 @@
 local on_attach = function(_, bufnr)
-
   local bufmap = function(keys, func)
     vim.keymap.set('n', keys, func, { buffer = bufnr })
   end
@@ -28,21 +27,28 @@ capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
 
 require('lazydev').setup()
 require('lspconfig').lua_ls.setup {
-    on_attach = on_attach,
-    capabilities = capabilities,
+  on_attach = on_attach,
+  capabilities = capabilities,
 }
 
 require('lspconfig').ts_ls.setup {
-    on_attach = on_attach,
-    capabilities = capabilities,
+  on_attach = on_attach,
+  capabilities = capabilities,
 }
 
 require('lspconfig').nil_ls.setup {
-    on_attach = on_attach,
-    capabilities = capabilities,
+  on_attach = on_attach,
+  capabilities = capabilities,
 }
 
 require('lspconfig').astro.setup {
-on_attach = on_attach,
+  on_attach = on_attach,
+  capabilities = capabilities,
+}
+
+require('lspconfig').gopls.setup {
+  cmd = { 'gopls' },
+  filetypes = { 'go' },
+  on_attach = on_attach,
   capabilities = capabilities,
 }
