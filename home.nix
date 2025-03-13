@@ -46,7 +46,7 @@
     pkgs.mousecape # Custom cursors for macOS
     pkgs.the-unarchiver # Archive extraction utility
     pkgs.google-chrome # Web browser
-    pkgs.nerdfetch # A POSIX *nix fetch script using Nerdfonts
+    pkgs.bfetch
   ];
 
   catppuccin.flavor = "mocha";
