@@ -55,8 +55,6 @@
     enable = true;
   };
 
-  programs.aerospace.enable = true;
-
   programs.lazygit.enable = true;
 
   imports = [
