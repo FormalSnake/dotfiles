@@ -44,7 +44,7 @@
       alias commitai='commit_message=$(lumen draft) && git commit -avm "$commit_message"'
       alias nah='git reset --hard && git clean -df'
       alias nixrb='clear && darwin-rebuild switch --flake .'
-      alias nixrbgc='clear && darwin-rebuild switch --flake . && nix-store --gc'
+      alias nixrbgc='clear && darwin-rebuild switch --flake . && sudo nix-collect-garbage -d'
 
       # Functions
       function gpush() {
