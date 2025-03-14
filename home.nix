@@ -57,6 +57,8 @@
 
   programs.lazygit.enable = true;
 
+  programs.steam.enable = true;
+
   imports = [
     ./programs/zsh.nix
     ./programs/neovim.nix
