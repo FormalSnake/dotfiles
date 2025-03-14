@@ -46,7 +46,6 @@
     pkgs.mousecape # Custom cursors for macOS
     pkgs.the-unarchiver # Archive extraction utility
     pkgs.google-chrome # Web browser
-    pkgs.steam # Game
   ];
 
   catppuccin.flavor = "mocha";

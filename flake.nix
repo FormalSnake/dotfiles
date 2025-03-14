@@ -90,6 +90,7 @@
           "slack"
           "jordanbaird-ice"
           "betterdisplay"
+          "steam"
         ];
         brews = [
           "geometry"
