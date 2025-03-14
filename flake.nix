@@ -98,6 +98,7 @@
           "imagemagick"
           "docker"
           "lazydocker"
+          "defaultbrowser"
         ];
         onActivation.cleanup = "zap";
         onActivation.autoUpdate = true;

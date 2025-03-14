@@ -31,6 +31,12 @@ require('lspconfig').lua_ls.setup {
   capabilities = capabilities,
 }
 
+require('lspconfig').tailwindcss.setup {
+  cmd = { 'tailwindcss-language-server', '--stdio' },
+  on_attach = on_attach,
+  capabilities = capabilities,
+}
+
 require('lspconfig').ts_ls.setup {
   on_attach = on_attach,
   capabilities = capabilities,
@@ -51,27 +57,4 @@ require('lspconfig').gopls.setup {
   filetypes = { 'go' },
   on_attach = on_attach,
   capabilities = capabilities,
-}
-
-require('lspconfig').tailwindcss.setup {
-  on_attach = on_attach,
-  capabilities = capabilities,
-  filetypes = { 'html', 'css', 'postcss', 'javascript', 'typescript', 'react', 'astro' },
-  init_options = {
-    userLanguages = {
-      eelixir = "html-eex",
-      eruby = "erb",
-      heex = "html-eex"
-    }
-  },
-  settings = {
-    tailwindCSS = {
-      experimental = {
-        classRegex = {
-          { "clsx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)" }, -- clsx usage
-          { "cva\\(([^)]*)\\)",  "(?:'|\"|`)([^']*)(?:'|\"|`)" }, -- cva usage
-        }
-      }
-    }
-  }
 }

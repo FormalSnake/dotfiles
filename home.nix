@@ -48,6 +48,12 @@
     pkgs.google-chrome # Web browser
   ];
 
+  home.activation.setDefaultBrowser = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    if command -v defaultbrowser &>/dev/null; then
+      defaultbrowser chrome
+    fi
+  '';
+
   catppuccin.flavor = "mocha";
   catppuccin.enable = true;
 
