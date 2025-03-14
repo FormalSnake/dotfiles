@@ -22,6 +22,7 @@ in {
       alejandra
       typescript-language-server
       gopls
+      tailwindcss-language-server
     ];
 
     plugins = with pkgs.vimPlugins; [

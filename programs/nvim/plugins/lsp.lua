@@ -52,3 +52,26 @@ require('lspconfig').gopls.setup {
   on_attach = on_attach,
   capabilities = capabilities,
 }
+
+require('lspconfig').tailwindcss.setup {
+  on_attach = on_attach,
+  capabilities = capabilities,
+  filetypes = { 'html', 'css', 'postcss', 'javascript', 'typescript', 'react', 'astro' },
+  init_options = {
+    userLanguages = {
+      eelixir = "html-eex",
+      eruby = "erb",
+      heex = "html-eex"
+    }
+  },
+  settings = {
+    tailwindCSS = {
+      experimental = {
+        classRegex = {
+          { "clsx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)" }, -- clsx usage
+          { "cva\\(([^)]*)\\)",  "(?:'|\"|`)([^']*)(?:'|\"|`)" }, -- cva usage
+        }
+      }
+    }
+  }
+}
