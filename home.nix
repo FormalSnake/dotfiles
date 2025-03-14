@@ -46,6 +46,7 @@
     pkgs.mousecape # Custom cursors for macOS
     pkgs.the-unarchiver # Archive extraction utility
     pkgs.google-chrome # Web browser
+    pkgs.steam # Game
   ];
 
   catppuccin.flavor = "mocha";
@@ -56,8 +57,6 @@
   };
 
   programs.lazygit.enable = true;
-
-  programs.steam.enable = true;
 
   imports = [
     ./programs/zsh.nix
