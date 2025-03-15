@@ -10,6 +10,7 @@
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     catppuccin.url = "github:catppuccin/nix";
+    matugen.url = "github:/InioX/Matugen";
     plugin-auto-dark-mode.url = "github:f-person/auto-dark-mode.nvim";
     plugin-auto-dark-mode.flake = false;
     plugin-visual-whitespace.url = "github:mcauley-penney/visual-whitespace.nvim";
@@ -182,7 +183,8 @@
             users.${username} = {
               imports = [
                 ./home.nix
-                catppuccin.homeManagerModules.catppuccin
+                # catppuccin.homeManagerModules.catppuccin
+                inputs.matugen.nixosModules.default
               ];
             };
             extraSpecialArgs = {inherit inputs;};

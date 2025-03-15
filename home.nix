@@ -54,8 +54,18 @@
     fi
   '';
 
-  catppuccin.flavor = "mocha";
-  catppuccin.enable = true;
+  # catppuccin.flavor = "mocha";
+  # catppuccin.enable = true;
+
+  programs.matugen = {
+    enable = true;
+    variant = "dark";
+    jsonFormat = "hex";
+    palette = "default";
+  };
+
+  home.configFile."Library/Application Support/legcord/quickCss.css".source = "./programs/matugen/discord.css";
+  # home.configFile."Library/Application Support/legcord/quickCss.css".source = "${config.programs.matugen.theme.files}/path/to/template";
 
   programs.git = {
     enable = true;
