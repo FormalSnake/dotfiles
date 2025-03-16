@@ -10,7 +10,6 @@
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     catppuccin.url = "github:catppuccin/nix";
-    matugen.url = "github:/InioX/Matugen";
     plugin-auto-dark-mode.url = "github:f-person/auto-dark-mode.nvim";
     plugin-auto-dark-mode.flake = false;
     plugin-visual-whitespace.url = "github:mcauley-penney/visual-whitespace.nvim";
@@ -58,6 +57,7 @@
         pkgs.bun # All-in-one JavaScript runtime
         pkgs.gh # GitHub CLI tool
         pkgs.cargo # Rust package manager and build system
+        pkgs.rustc # Rust compiler
         pkgs.devenv # Development environment manager
         pkgs.go # Go programming language
         pkgs.zig # Zig programming language
@@ -73,7 +73,7 @@
         enable = true;
         casks = [
           "ghostty"
-          "firefox"
+          # "firefox"
           "notion"
           "notion-calendar"
           "clop"
@@ -183,8 +183,7 @@
             users.${username} = {
               imports = [
                 ./home.nix
-                # catppuccin.homeManagerModules.catppuccin
-                inputs.matugen.nixosModules.default
+                catppuccin.homeManagerModules.catppuccin
               ];
             };
             extraSpecialArgs = {inherit inputs;};

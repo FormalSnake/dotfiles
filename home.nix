@@ -9,6 +9,7 @@
     config = {
       allowUnfree = true;
       allowUnfreePredicate = _: true;
+      allowBroken = true;
     };
     overlays = [
       (final: prev: {
@@ -46,6 +47,8 @@
     pkgs.mousecape # Custom cursors for macOS
     pkgs.the-unarchiver # Archive extraction utility
     pkgs.google-chrome # Web browser
+    pkgs.repomix
+    pkgs.firefox
   ];
 
   home.activation.setDefaultBrowser = lib.hm.dag.entryAfter ["writeBoundary"] ''
@@ -54,18 +57,8 @@
     fi
   '';
 
-  # catppuccin.flavor = "mocha";
-  # catppuccin.enable = true;
-
-  programs.matugen = {
-    enable = true;
-    variant = "dark";
-    jsonFormat = "hex";
-    palette = "default";
-  };
-
-  home.configFile."Library/Application Support/legcord/quickCss.css".source = "./programs/matugen/discord.css";
-  # home.configFile."Library/Application Support/legcord/quickCss.css".source = "${config.programs.matugen.theme.files}/path/to/template";
+  catppuccin.flavor = "mocha";
+  catppuccin.enable = true;
 
   programs.git = {
     enable = true;
