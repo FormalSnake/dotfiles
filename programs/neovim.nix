@@ -16,13 +16,13 @@ in {
     vimdiffAlias = true;
 
     extraPackages = with pkgs; [
-      lua-language-server
-      nil
-      astro-language-server
+      # lua-language-server
+      # nil
+      # astro-language-server
       alejandra
-      typescript-language-server
-      gopls
-      tailwindcss-language-server
+      # typescript-language-server
+      # gopls
+      # tailwindcss-language-server
     ];
 
     plugins = with pkgs.vimPlugins; [
@@ -34,10 +34,28 @@ in {
         plugin = snacks-nvim;
         config = toLuaFile ./nvim/plugins/snacks.lua;
       }
+      lsp-zero-nvim
+      nvim-lspconfig
       {
-        plugin = nvim-lspconfig;
-        config = toLuaFile ./nvim/plugins/lsp.lua;
+        plugin = lazy-lsp-nvim;
+        config = toLua ''
+                local lsp_zero = require("lsp-zero")
+
+          lsp_zero.on_attach(function(client, bufnr)
+            -- see :help lsp-zero-keybindings to learn the available actions
+            lsp_zero.default_keymaps({
+              buffer = bufnr,
+              preserve_mappings = false
+            })
+          end)
+
+          require("lazy-lsp").setup {}
+        '';
       }
+      # {
+      #   plugin = nvim-lspconfig;
+      #   config = toLuaFile ./nvim/plugins/lsp.lua;
+      # }
       {
         plugin = own-auto-dark-mode;
         config = toLuaFile ./nvim/plugins/colorscheme.lua;
