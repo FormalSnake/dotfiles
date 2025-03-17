@@ -75,14 +75,11 @@
         enable = true;
         casks = [
           "ghostty"
-          # "firefox"
           "notion"
           "notion-calendar"
           "clop"
           "figma"
           "ubersicht"
-          "darkmodebuddy"
-          "dockey"
           "zerotier-one"
           "httpie"
           "balenaetcher"
