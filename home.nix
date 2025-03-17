@@ -75,5 +75,6 @@
     ./programs/btop.nix
     ./programs/zoxide.nix
     ./programs/fastfetch.nix
+    ./programs/matugen.nix
   ];
 }

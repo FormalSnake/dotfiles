@@ -95,10 +95,10 @@
 
             "alt-shift-comma" = "mode service";
             "alt-shift-r" = "mode resize";
-
-            # Resize
-            "minus" = "resize smart -50";
-            "equal" = "resize smart +50";
+            #
+            # # Resize
+            # "minus" = "resize smart -50";
+            # "equal" = "resize smart +50";
           };
         };
 

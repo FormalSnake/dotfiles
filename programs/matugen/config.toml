@@ -1,0 +1,8 @@
+[config.wallpaper]
+command = "swww"
+arguments = ["img", "--transition-type", "center"]
+set = true
+
+[templates.ghostty]
+input_path = './templates/config'
+output_path = '~/.config/ghostty/colors/config'
