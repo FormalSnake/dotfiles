@@ -23,4 +23,5 @@ local colors = require('colors.matugen')
 base16.setup(colors)
 
 -- Set colorscheme (optional, depends on plugin)
-vim.cmd("colorscheme base16-matugen")
+vim.opt.termguicolors = true
+-- vim.cmd("colorscheme base16-matugen")
