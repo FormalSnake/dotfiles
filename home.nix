@@ -28,6 +28,10 @@
               name = "tidy.nvim";
               src = inputs.plugin-tidy;
             };
+            own-base16 = prev.vimUtils.buildVimPlugin {
+              name = "base16.nvim";
+              src = inputs.plugin-base16;
+            };
           };
       })
     ];

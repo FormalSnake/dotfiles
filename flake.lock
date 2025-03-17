@@ -206,6 +206,22 @@
         "type": "github"
       }
     },
+    "plugin-base16": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1740184667,
+        "narHash": "sha256-r7JPksjINhisViWIAXZJphDQKoPtFBB/vVnkA45r1/w=",
+        "owner": "RRethy",
+        "repo": "base16-nvim",
+        "rev": "3f13e15c53ea2aaf79c24ceab725309d87f0619c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "RRethy",
+        "repo": "base16-nvim",
+        "type": "github"
+      }
+    },
     "plugin-tidy": {
       "flake": false,
       "locked": {
@@ -246,6 +262,7 @@
         "nix-homebrew": "nix-homebrew",
         "nixpkgs": "nixpkgs_4",
         "plugin-auto-dark-mode": "plugin-auto-dark-mode",
+        "plugin-base16": "plugin-base16",
         "plugin-tidy": "plugin-tidy",
         "plugin-visual-whitespace": "plugin-visual-whitespace",
         "spicetify-nix": "spicetify-nix"

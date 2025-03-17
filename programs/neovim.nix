@@ -56,8 +56,12 @@ in {
       #   plugin = nvim-lspconfig;
       #   config = toLuaFile ./nvim/plugins/lsp.lua;
       # }
+      # {
+      #   plugin = own-auto-dark-mode;
+      #   config = toLuaFile ./nvim/plugins/colorscheme.lua;
+      # }
       {
-        plugin = own-auto-dark-mode;
+        plugin = own-base16;
         config = toLuaFile ./nvim/plugins/colorscheme.lua;
       }
       {

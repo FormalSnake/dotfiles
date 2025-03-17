@@ -16,6 +16,8 @@
     plugin-visual-whitespace.flake = false;
     plugin-tidy.url = "github:mcauley-penney/tidy.nvim";
     plugin-tidy.flake = false;
+    plugin-base16.url = "github:RRethy/base16-nvim";
+    plugin-base16.flake = false;
   };
 
   outputs = inputs @ {

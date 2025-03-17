@@ -4,5 +4,9 @@ arguments = ["img", "--transition-type", "center"]
 set = true
 
 [templates.ghostty]
-input_path = './templates/config'
-output_path = '~/.config/ghostty/colors/config'
+input_path = '~/.config/matugen/templates/config'
+output_path = '~/.config/ghostty/themes/colors'
+
+[templates.neovim]
+input_path = '~/.config/matugen/templates/neovim.template'
+output_path = '~/.config/nvim/colors/matugen.lua'
