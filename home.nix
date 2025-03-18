@@ -53,6 +53,7 @@
     pkgs.google-chrome # Web browser
     pkgs.repomix
     pkgs.firefox
+    pkgs.spotify-player
   ];
 
   home.activation.setDefaultBrowser = lib.hm.dag.entryAfter ["writeBoundary"] ''
