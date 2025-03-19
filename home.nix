@@ -81,5 +81,6 @@
     ./programs/zoxide.nix
     ./programs/fastfetch.nix
     ./programs/matugen.nix
+    ./programs/nushell.nix
   ];
 }
