@@ -99,6 +99,8 @@
           "docker"
           "lazydocker"
           "defaultbrowser"
+          "docker-compose"
+          "docker-credential-helper"
         ];
         onActivation.cleanup = "zap";
         onActivation.autoUpdate = true;

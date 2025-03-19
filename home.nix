@@ -63,7 +63,7 @@
   '';
 
   catppuccin.flavor = "mocha";
-  catppuccin.enable = true;
+  catppuccin.enable = false;
 
   programs.git = {
     enable = true;

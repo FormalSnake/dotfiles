@@ -18,7 +18,8 @@
       roundedImages
       roundedButtons
     ];
-    theme = spicePkgs.themes.catppuccin;
-    colorScheme = "mocha";
+    # theme = "Comfy";
+    # theme = spicePkgs.themes.catppuccin;
+    # colorScheme = "mocha";
   };
 }
