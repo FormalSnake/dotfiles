@@ -4,7 +4,10 @@
   ...
 }: {
   programs.zsh = {
-    enable = true;
+    enable = false;
+    enableCompletion = false;
+    syntaxHighlighting.enable = false;
+    autosuggestion.enable = false;
     initExtra = ''
       if [[ ! $(ps -T -o "comm" | tail -n +2 | grep "nu$") && -z $ZSH_EXECUTION_STRING ]]; then
           if [[ -o login ]]; then

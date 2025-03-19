@@ -10,7 +10,7 @@
     cursor-style = block
     cursor-color = #bbbbbb
     adjust-cursor-thickness = 1
-    shell-integration = zsh
+    shell-integration = nu
 
     keybind = cmd+shift+space=toggle_quick_terminal
 
