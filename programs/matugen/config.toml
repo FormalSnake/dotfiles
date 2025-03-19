@@ -22,11 +22,3 @@ output_path = '~/Library/Application Support/legcord/quickCss.css' # for flatpak
 [templates.tmux]
 input_path = '~/.config/matugen/templates/tmux-colors.conf'
 output_path = '~/.config/tmux/colors.conf'
-
-[config.custom_colors]
-red = "#f38ba8"
-green = "#a6e3a1"
-yellow = "#f9e2af"
-blue = "#89b4fa"
-orange = "#fab387"
-purple = "#cba6f7"
