@@ -47,18 +47,7 @@
       set-option -g status-position top
       set-option -g @continuum-restore 'on'
 
-      set -g status-style "bg=#1e1e2e,fg=#eeeeee"
-      set -g status-interval 1
-      set -g status-left-length 200
-      set -g status-left "#[fg=cyan] | #[fg=green] #S#[fg=yellow]  #(basename #{pane_current_path})"
-      set -g status-right "#[fg=red] %H:%M #[fg=blue] %D"
-      set -g status-justify "absolute-centre"
-      set -g window-status-current-format "#[fg=green]#[bg=green,fg=#000000] #(bash ~/lq/iconify.bash #W) (#(basename #{pane_current_path})) #[bg=#11111b,fg=green]"
-      set -g window-status-format "#[fg=#1e1e2e]#[bg=#1e1e2e,fg=grey] #(bash ~/lq/iconify.bash #W) (#(basename #{pane_current_path})) #[bg=#1e1e2e,fg=#1e1e2e]"
-      set -g pane-active-border-style "fg=white"
-      set -g pane-border-style "fg=white"
-      set -g message-style "bg=#1e1e2e,fg=blue"
-      set -g mode-style "bg=#b5befe,fg=#1e1e2e"
+      source-file ~/.config/tmux/colors.conf
 
       set -g mouse on
     '';

@@ -56,14 +56,14 @@ in {
       #   plugin = nvim-lspconfig;
       #   config = toLuaFile ./nvim/plugins/lsp.lua;
       # }
-      {
-        plugin = own-auto-dark-mode;
-        config = toLuaFile ./nvim/plugins/colorscheme.lua;
-      }
       # {
-      #   plugin = own-base16;
+      #   plugin = own-auto-dark-mode;
       #   config = toLuaFile ./nvim/plugins/colorscheme.lua;
       # }
+      {
+        plugin = own-base16;
+        config = toLuaFile ./nvim/plugins/colorscheme.lua;
+      }
       {
         plugin = own-visual-whitespace;
         config = toLua "require(\"visual-whitespace\").setup()";
