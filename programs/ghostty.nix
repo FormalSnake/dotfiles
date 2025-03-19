@@ -5,8 +5,8 @@
     font-size = 14
     font-feature = -liga
 
-    theme = colors
-    # theme = dark:catppuccin-mocha,light:catppuccin-latte
+    # theme = colors
+    theme = dark:catppuccin-mocha,light:catppuccin-latte
     cursor-style = block
     cursor-color = #bbbbbb
     adjust-cursor-thickness = 1
