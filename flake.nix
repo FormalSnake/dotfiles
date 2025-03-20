@@ -72,7 +72,7 @@
       ];
 
       homebrew = {
-        enable = true;
+        enable = false;
         casks = [
           "ghostty"
           "notion"
