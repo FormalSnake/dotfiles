@@ -71,6 +71,12 @@
 
   programs.lazygit.enable = true;
 
+  programs.oh-my-posh = {
+    enable = true;
+    useTheme = "catppuccin_mocha";
+    enableNushellIntegration = true;
+  };
+
   imports = [
     ./programs/zsh.nix
     ./programs/neovim.nix
