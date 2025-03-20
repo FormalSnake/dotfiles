@@ -32,6 +32,10 @@
               name = "base16.nvim";
               src = inputs.plugin-base16;
             };
+            own-aider = prev.vimUtils.buildVimPlugin {
+              name = "aider.nvim";
+              src = inputs.plugin-aider;
+            };
           };
       })
     ];

@@ -5,7 +5,8 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nix-darwin.url = "github:LnL7/nix-darwin";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
-    nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
+    # nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
+    nix-homebrew.url = "git+https://github.com/zhaofengli/nix-homebrew?ref=refs/pull/71/merge";
     spicetify-nix.url = "github:Gerg-L/spicetify-nix";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
@@ -18,6 +19,8 @@
     plugin-tidy.flake = false;
     plugin-base16.url = "github:RRethy/base16-nvim";
     plugin-base16.flake = false;
+    plugin-aider.url = "github:GeorgesAlkhouri/nvim-aider";
+    plugin-aider.flake = false;
   };
 
   outputs = inputs @ {

@@ -89,3 +89,12 @@ vim.keymap.set("n", "<leader>N", function()
     },
   })
 end, { desc = "Neovim News" })
+
+local wk = require("which-key")
+wk.add({
+  { "<leader>la", vim.lsp.buf.code_action,       desc = "Code Action" },
+  { "<leader>lA", vim.lsp.buf.range_code_action, desc = "Range Code Actions" },
+  { "<leader>ls", vim.lsp.buf.signature_help,    desc = "Display Signature Information" },
+  { "<leader>lr", vim.lsp.buf.rename,            desc = "Rename all references" },
+  { "<leader>lf", vim.lsp.buf.format,            desc = "Format" },
+})

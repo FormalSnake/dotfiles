@@ -52,6 +52,10 @@ in {
           require("lazy-lsp").setup {
             excluded_servers = {
               "denols",
+              "eslint",
+              "oxlint",
+              "quick_lint_js",
+              "biome"
             },
           }
         '';
@@ -131,6 +135,22 @@ in {
       {
         plugin = noice-nvim;
         config = toLua "require(\"noice\").setup()";
+      }
+      {
+        plugin = own-aider;
+        config = toLua ''
+          local map = vim.api.nvim_set_keymap
+          local opts = { noremap = true, silent = true }
+
+          map("n", "<leader>a/", "<cmd>AiderTerminalToggle<CR>", opts)
+          map("n", "<leader>as", "<cmd>AiderTerminalSend<CR>", opts)
+          map("v", "<leader>as", "<cmd>AiderTerminalSend<CR>", opts)
+          map("n", "<leader>ac", "<cmd>AiderQuickSendCommand<CR>", opts)
+          map("n", "<leader>ab", "<cmd>AiderQuickSendBuffer<CR>", opts)
+          map("n", "<leader>a+", "<cmd>AiderQuickAddFile<CR>", opts)
+          map("n", "<leader>a-", "<cmd>AiderQuickDropFile<CR>", opts)
+          map("n", "<leader>ar", "<cmd>AiderQuickReadOnlyFile<CR>", opts)
+        '';
       }
 
       lazydev-nvim

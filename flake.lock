@@ -3,16 +3,16 @@
     "brew-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1740943974,
-        "narHash": "sha256-2lRLfb6qwoUAsX/XtYmt/ETxtGid6/VaBeFiRsoVMtU=",
+        "lastModified": 1742457334,
+        "narHash": "sha256-Gn7ruyb3NDFr+SsHBfA2NsJI8YkkWdECqLRj/xcjt+E=",
         "owner": "Homebrew",
         "repo": "brew",
-        "rev": "64efed206deeb9c2304d9e5b5910dcbf0a509c15",
+        "rev": "f3bd91d3afe086824d24708230e1f0c7f943135a",
         "type": "github"
       },
       "original": {
         "owner": "Homebrew",
-        "ref": "4.4.23",
+        "ref": "4.4.25",
         "repo": "brew",
         "type": "github"
       }
@@ -100,17 +100,18 @@
         "nixpkgs": "nixpkgs_3"
       },
       "locked": {
-        "lastModified": 1741032878,
-        "narHash": "sha256-s9YOBz8vAxPlI4wORma3D7km8wZOEe/7Hg/u3brmwUQ=",
-        "owner": "zhaofengli-wip",
-        "repo": "nix-homebrew",
-        "rev": "a82c55b07f670a01da5a72b7a07fe41c256a4380",
-        "type": "github"
+        "lastModified": 1742488928,
+        "narHash": "sha256-10OnjzLdaU4/CrdpwJdnuBUI8SUABlD/56zzF3qysL8=",
+        "ref": "refs/pull/71/merge",
+        "rev": "3a344af8ba55e43e8a30fc80b8b720a042d91eaa",
+        "revCount": 68,
+        "type": "git",
+        "url": "https://github.com/zhaofengli/nix-homebrew"
       },
       "original": {
-        "owner": "zhaofengli-wip",
-        "repo": "nix-homebrew",
-        "type": "github"
+        "ref": "refs/pull/71/merge",
+        "type": "git",
+        "url": "https://github.com/zhaofengli/nix-homebrew"
       }
     },
     "nixpkgs": {
@@ -190,6 +191,22 @@
         "type": "github"
       }
     },
+    "plugin-aider": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1741069290,
+        "narHash": "sha256-1ApWcUHUCPOo5H7NAiC/M2fN41j9fgPN6Gt3o4hfYbo=",
+        "owner": "GeorgesAlkhouri",
+        "repo": "nvim-aider",
+        "rev": "3554ffdd7f0f91167f83ab3e3475ba08a090061f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "GeorgesAlkhouri",
+        "repo": "nvim-aider",
+        "type": "github"
+      }
+    },
     "plugin-auto-dark-mode": {
       "flake": false,
       "locked": {
@@ -261,6 +278,7 @@
         "nix-darwin": "nix-darwin",
         "nix-homebrew": "nix-homebrew",
         "nixpkgs": "nixpkgs_4",
+        "plugin-aider": "plugin-aider",
         "plugin-auto-dark-mode": "plugin-auto-dark-mode",
         "plugin-base16": "plugin-base16",
         "plugin-tidy": "plugin-tidy",
