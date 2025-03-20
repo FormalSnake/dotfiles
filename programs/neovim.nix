@@ -139,17 +139,17 @@ in {
       {
         plugin = own-aider;
         config = toLua ''
-          local map = vim.api.nvim_set_keymap
-          local opts = { noremap = true, silent = true }
-
-          map("n", "<leader>a/", "<cmd>AiderTerminalToggle<CR>", opts)
-          map("n", "<leader>as", "<cmd>AiderTerminalSend<CR>", opts)
-          map("v", "<leader>as", "<cmd>AiderTerminalSend<CR>", opts)
-          map("n", "<leader>ac", "<cmd>AiderQuickSendCommand<CR>", opts)
-          map("n", "<leader>ab", "<cmd>AiderQuickSendBuffer<CR>", opts)
-          map("n", "<leader>a+", "<cmd>AiderQuickAddFile<CR>", opts)
-          map("n", "<leader>a-", "<cmd>AiderQuickDropFile<CR>", opts)
-          map("n", "<leader>ar", "<cmd>AiderQuickReadOnlyFile<CR>", opts)
+          require("nvim_aider").setup({})
+          local wk = require("which-key")
+          wk.add({
+            { "<leader>a/", "<cmd>AiderTerminalToggle<CR>", desc = "Open Aider" },
+            { "<leader>as", "<cmd>AiderTerminalSend<CR>", desc = "Send to Aider", mode = { "n", "v" } },
+            { "<leader>ac", "<cmd>AiderQuickSendCommand<CR>", desc = "Send Command To Aider" },
+            { "<leader>ab", "<cmd>AiderQuickSendBuffer<CR>", desc = "Send Buffer To Aider" },
+            { "<leader>a+", "<cmd>AiderQuickAddFile<CR>", desc = "Add File to Aider" },
+            { "<leader>a-", "<cmd>AiderQuickDropFile<CR>", desc = "Drop File from Aider" },
+            { "<leader>ar", "<cmd>AiderQuickReadOnlyFile<CR>", desc = "Add File as Read-Only" },
+          })
         '';
       }
 
