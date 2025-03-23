@@ -136,7 +136,8 @@
         dock.mru-spaces = false;
         dock.persistent-apps = [
           # "/Applications/Google Chrome.app"
-          "${pkgs.google-chrome}/Applications/Google Chrome.app"
+          # "${pkgs.google-chrome}/Applications/Google Chrome.app"
+          "${pkgs.brave}/Applications/Brave Browser.app"
           "/Applications/Ghostty.app"
           "/System/Applications/Calendar.app"
           "/Applications/Notion.app"

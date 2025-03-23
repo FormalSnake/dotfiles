@@ -16,13 +16,7 @@ in {
     vimdiffAlias = true;
 
     extraPackages = with pkgs; [
-      # lua-language-server
-      # nil
-      # astro-language-server
       alejandra
-      # typescript-language-server
-      # gopls
-      # tailwindcss-language-server
     ];
 
     plugins = with pkgs.vimPlugins; [

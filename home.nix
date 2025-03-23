@@ -55,16 +55,17 @@
     pkgs.mousecape # Custom cursors for macOS
     pkgs.the-unarchiver # Archive extraction utility
     pkgs.google-chrome # Web browser
+    pkgs.brave
     pkgs.repomix
     pkgs.firefox
     pkgs.spotify-player
   ];
 
-  home.activation.setDefaultBrowser = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    if command -v defaultbrowser &>/dev/null; then
-      defaultbrowser chrome
-    fi
-  '';
+  # home.activation.setDefaultBrowser = lib.hm.dag.entryAfter ["writeBoundary"] ''
+  #   if command -v defaultbrowser &>/dev/null; then
+  #     defaultbrowser chrome
+  #   fi
+  # '';
 
   catppuccin.flavor = "mocha";
   catppuccin.enable = true;
