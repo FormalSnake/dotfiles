@@ -178,6 +178,7 @@ in {
           p.tree-sitter-json
           p.tree-sitter-astro
           p.tree-sitter-typescript
+          p.tree-sitter-css
         ]);
         config = toLuaFile ./nvim/plugins/treesitter.lua;
       }
