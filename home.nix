@@ -49,7 +49,7 @@
   programs.home-manager.enable = true;
 
   home.packages = [
-    # pkgs.aider-chat # AI-assisted code editing tool
+    pkgs.aider-chat # AI-assisted code editing tool
     pkgs.pyenv
     pkgs.raycast # Launcher and productivity tool
     pkgs.ice-bar # Status bar utility
