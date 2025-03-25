@@ -103,6 +103,7 @@
           "defaultbrowser"
           "docker-compose"
           "docker-credential-helper"
+          "couchdb"
         ];
         onActivation.cleanup = "zap";
         onActivation.autoUpdate = true;
@@ -161,7 +162,6 @@
       # Enable flakes and necessary daemon settings.
       nix.settings.experimental-features = "nix-command flakes";
 
-      # programs.zsh.enable = true;
       security.pam.services.sudo_local.touchIdAuth = true;
 
       # Set Git commit hash for darwin-version.
