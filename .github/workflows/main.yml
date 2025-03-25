@@ -3,7 +3,6 @@ name: Bump flake.lock
 on:
   schedule:
     - cron: "0 6 * * *"
-
   workflow_dispatch:
 
 jobs:
@@ -11,22 +10,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - uses: cachix/install-nix-action@v20
+      - name: Install Nix
+        uses: cachix/install-nix-action@v20
 
-      - run: nix flake update
+      - name: Update flake.lock
+        run: nix flake update
 
-      - uses: stefanzweifel/git-auto-commit-action@v4
+      - name: Configure Git
+        run: |
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+
+      - name: Commit and Push Changes
+        uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Bump flake.lock
           branch: main
           commit_options: '--no-verify --signoff'
           file_pattern: flake.lock
-          commit_user_name: Flake Bot # defaults to "GitHub Actions"
-          #commit_user_email: my-github-actions-bot@example.org # defaults to "actions@github.com"
-          commit_author: Flake Bot <actions@github.com> # defaults to author of the commit that triggered the run
+          commit_user_name: github-actions[bot]
+          commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com
+          commit_author: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
           skip_dirty_check: false
           skip_fetch: true
+          push_options: '--force'
