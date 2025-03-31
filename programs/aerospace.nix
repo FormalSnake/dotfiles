@@ -45,8 +45,8 @@
         };
         outer = {
           left = 12;
-          bottom = 12;
-          top = 12 + 32;
+          bottom = 12 + 32;
+          top = 12;
           right = 12;
         };
       };
