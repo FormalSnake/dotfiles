@@ -196,7 +196,7 @@
         }
         {
           "if" = {
-            app-id = "com.spotify.client";
+            app-id = "com.apple.Safari.WebApp.AB880B1A-4324-4763-AA56-59E9BF885815";
           };
           run = "move-node-to-workspace M";
         }

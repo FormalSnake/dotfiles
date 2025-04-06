@@ -6,7 +6,6 @@
     nix-darwin.url = "github:LnL7/nix-darwin";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
-    spicetify-nix.url = "github:Gerg-L/spicetify-nix";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     catppuccin.url = "github:catppuccin/nix";
@@ -36,10 +35,7 @@
       pkgs,
       config,
       ...
-    }: let
-      # Integrate spicetify packages for flakes.
-      spicePkgs = inputs.spicetify-nix.legacyPackages.${pkgs.stdenv.system};
-    in {
+    }: {
       users = {
         users.${username} = {
           home = "/Users/${username}";
@@ -49,28 +45,22 @@
 
       nixpkgs.config.allowUnfree = true;
 
-      # System packages, homebrew settings, activation scripts, etc.
       environment.systemPackages = [
-        # Navigation and Search
-        pkgs.fzf # Command-line fuzzy finder for interactive search
-        pkgs.ripgrep # Fast search tool for searching text within files
-        pkgs.fd # Simple, fast, user-friendly alternative to 'find'
-
-        # Development Tools
-        pkgs.nodejs # JavaScript runtime built on Chrome's V8 engine
-        pkgs.bun # All-in-one JavaScript runtime
-        pkgs.gh # GitHub CLI tool
-        pkgs.cargo # Rust package manager and build system
-        pkgs.rustc # Rust compiler
-        pkgs.devenv # Development environment manager
-        pkgs.go # Go programming language
-        pkgs.zig # Zig programming language
-        pkgs.nixd # Nix development tool
-        pkgs.lua # Lightweight, embeddable scripting language
-
-        # System Utilities
-        pkgs.bat # Enhanced 'cat' command with syntax highlighting
-        pkgs.chafa # Terminal image viewer and converter
+        pkgs.fzf
+        pkgs.ripgrep
+        pkgs.fd
+        pkgs.nodejs
+        pkgs.bun
+        pkgs.gh
+        pkgs.cargo
+        pkgs.rustc
+        pkgs.devenv
+        pkgs.go
+        pkgs.zig
+        pkgs.nixd
+        pkgs.lua
+        pkgs.bat
+        pkgs.chafa
       ];
 
       homebrew = {
@@ -136,15 +126,13 @@
         dock.showhidden = true;
         dock.mru-spaces = false;
         dock.persistent-apps = [
-          # "/Applications/Google Chrome.app"
-          # "${pkgs.google-chrome}/Applications/Google Chrome.app"
           "${pkgs.brave}/Applications/Brave Browser.app"
           "/Applications/Ghostty.app"
           "/System/Applications/Calendar.app"
           "/Applications/Notion.app"
           "/Applications/Notion Mail.app"
           "/Applications/Legcord.app"
-          "${config.programs.spicetify.spicedSpotify}/Applications/Spotify.app"
+          "/Applications/Spotify.app"
         ];
         finder.FXPreferredViewStyle = "clmv";
         loginwindow.GuestEnabled = false;
@@ -159,29 +147,21 @@
         remapCapsLockToEscape = true;
       };
 
-      # Enable flakes and necessary daemon settings.
       nix.settings.experimental-features = "nix-command flakes";
 
       security.pam.services.sudo_local.touchIdAuth = true;
 
-      # Set Git commit hash for darwin-version.
       system.configurationRevision = self.rev or self.dirtyRev or null;
       system.stateVersion = 5;
       nixpkgs.hostPlatform = "aarch64-darwin";
-
-      imports = [
-        (import ./programs/spotify.nix {spicePkgs = spicePkgs;})
-      ];
     };
   in {
     darwinConfigurations."FormalBook" = nix-darwin.lib.darwinSystem {
       modules = [
         configuration
-        # catppuccin.nixosModules.catppuccin
         home-manager.darwinModules.home-manager
         {
           home-manager = {
-            # useGlobalPkgs = true;
             useUserPackages = true;
             backupFileExtension = "backup";
             users.${username} = {
@@ -202,8 +182,6 @@
             autoMigrate = true;
           };
         }
-        # Import the spicetify module from spicetify-nix:
-        inputs.spicetify-nix.nixosModules.spicetify
       ];
     };
   };
