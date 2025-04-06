@@ -76,7 +76,7 @@
           "httpie"
           "balenaetcher"
           "flux"
-          "legcord"
+          "dorion"
           "cloudflare-warp"
           "whatsapp"
           "slack"
@@ -128,14 +128,14 @@
         dock.persistent-apps = [
           # "${pkgs.brave}/Applications/Brave Browser.app"
           "/Applications/Safari.app"
-          "/Users/kyandesutter/Applications/ManageBac.app"
           "/System/Applications/Calendar.app"
           "/Users/kyandesutter/Applications/Notion.app"
           "/Users/kyandesutter/Applications/Notion Mail.app"
           "/Users/kyandesutter/Applications/FreshRSS.app"
-          "/Applications/Legcord.app"
-          "/Applications/Ghostty.app"
+          "/Applications/Dorion.app"
+          # "/Applications/Legcord.app"
           "/Users/kyandesutter/Applications/Spotify.app"
+          "/Applications/Ghostty.app"
         ];
         finder.FXPreferredViewStyle = "clmv";
         loginwindow.GuestEnabled = false;

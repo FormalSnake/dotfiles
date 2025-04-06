@@ -202,7 +202,13 @@
         }
         {
           "if" = {
-            app-id = "notion.id";
+            app-id = "com.apple.Safari.WebApp.CA73ED29-584D-4D62-9DFA-DCB424D7E420";
+          };
+          run = "move-node-to-workspace N";
+        }
+        {
+          "if" = {
+            app-id = "com.apple.Safari.WebApp.682EC736-F1F9-4B2F-ABF7-9EF76A5A3384";
           };
           run = "move-node-to-workspace N";
         }
@@ -213,6 +219,12 @@
           };
           run = "layout floating";
           check-further-callbacks = true;
+        }
+        {
+          "if" = {
+            app-id = "com.apple.Safari";
+          };
+          run = "move-node-to-workspace B";
         }
         {
           "if" = {
@@ -228,9 +240,22 @@
         }
         {
           "if" = {
-            app-id = "app.legcord.Legcord";
+            # app-id = "app.legcord.Legcord";
+            app-id = "com.spikehd.dorion";
           };
           run = "move-node-to-workspace V";
+        }
+        {
+          "if" = {
+            app-id = "com.apple.Safari.WebApp.D911055C-721B-454E-B79A-45D67D8948ED";
+          };
+          run = "move-node-to-workspace M";
+        }
+        {
+          "if" = {
+            app-id = "com.apple.Safari.WebApp.13F24499-CCF1-4F5F-A27D-EE73F40B867B";
+          };
+          run = "move-node-to-workspace M";
         }
       ];
 
