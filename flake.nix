@@ -126,13 +126,16 @@
         dock.showhidden = true;
         dock.mru-spaces = false;
         dock.persistent-apps = [
-          "${pkgs.brave}/Applications/Brave Browser.app"
-          "/Applications/Ghostty.app"
+          # "${pkgs.brave}/Applications/Brave Browser.app"
+          "/Applications/Safari.app"
+          "/Users/kyandesutter/Applications/ManageBac.app"
           "/System/Applications/Calendar.app"
-          "/Applications/Notion.app"
-          "/Applications/Notion Mail.app"
+          "/Users/kyandesutter/Applications/Notion.app"
+          "/Users/kyandesutter/Applications/Notion Mail.app"
+          "/Users/kyandesutter/Applications/FreshRSS.app"
           "/Applications/Legcord.app"
-          "/Applications/Spotify.app"
+          "/Applications/Ghostty.app"
+          "/Users/kyandesutter/Applications/Spotify.app"
         ];
         finder.FXPreferredViewStyle = "clmv";
         loginwindow.GuestEnabled = false;
