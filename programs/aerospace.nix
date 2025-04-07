@@ -222,6 +222,12 @@
         }
         {
           "if" = {
+            app-id = "company.thebrowser.dia";
+          };
+          run = "move-node-to-workspace B";
+        }
+        {
+          "if" = {
             app-id = "com.apple.Safari";
           };
           run = "move-node-to-workspace B";

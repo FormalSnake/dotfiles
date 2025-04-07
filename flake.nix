@@ -67,8 +67,6 @@
         enable = true;
         casks = [
           "ghostty"
-          "notion"
-          "notion-calendar"
           "clop"
           "figma"
           "ubersicht"
@@ -128,10 +126,8 @@
         dock.persistent-apps = [
           # "${pkgs.brave}/Applications/Brave Browser.app"
           "/Applications/Safari.app"
+          "Applications/Dia.app"
           "/System/Applications/Calendar.app"
-          "/Users/kyandesutter/Applications/Notion.app"
-          "/Users/kyandesutter/Applications/Notion Mail.app"
-          "/Users/kyandesutter/Applications/FreshRSS.app"
           "/Applications/Dorion.app"
           # "/Applications/Legcord.app"
           "/Users/kyandesutter/Applications/Spotify.app"
