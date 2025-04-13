@@ -51,7 +51,6 @@
   home.packages = [
     pkgs.aider-chat # AI-assisted code editing tool
     pkgs.pyenv
-    pkgs.raycast # Launcher and productivity tool
     pkgs.ice-bar # Status bar utility
     pkgs.mousecape # Custom cursors for macOS
     pkgs.the-unarchiver # Archive extraction utility

@@ -66,6 +66,7 @@
       homebrew = {
         enable = true;
         casks = [
+          "raycast"
           "ghostty"
           "clop"
           "figma"
