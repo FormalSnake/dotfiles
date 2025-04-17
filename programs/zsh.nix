@@ -4,19 +4,34 @@
   ...
 }: {
   programs.zsh = {
-    enable = false;
-    enableCompletion = false;
-    syntaxHighlighting.enable = false;
-    autosuggestion.enable = false;
+    enable = true;
+    enableCompletion = true;
+    syntaxHighlighting.enable = true;
+    autosuggestion.enable = true;
     initExtra = ''
-      if [[ ! $(ps -T -o "comm" | tail -n +2 | grep "nu$") && -z $ZSH_EXECUTION_STRING ]]; then
-          if [[ -o login ]]; then
-              LOGIN_OPTION='--login'
-          else
-              LOGIN_OPTION='''
-          fi
-          exec nu "$LOGIN_OPTION"
-      fi
+      alias ls='ls -A --color'
+      alias vim='nvim'
+      alias add='git add'
+      alias commit='git commit'
+      alias push='git push'
+      alias commitai='commit_message=$(lumen draft) && git commit -avm "$commit_message"'
+      alias nah='git reset --hard && git clean -df'
+      alias nixrb='clear && darwin-rebuild switch --flake .'
+      alias nixrbgc='clear && darwin-rebuild switch --flake . && sudo nix-collect-garbage -d'
+      alias wallpaper='matugen -c ~/.config/matugen/config.toml --verbose --contrast 0.2 image'
+
+      # Functions
+      function gpush() {
+        git add .
+        commit_message=$(lumen draft)
+        if [ -z "$commit_message" ]; then
+          echo "Lumen draft is empty"
+          echo -n "Enter commit message: "
+          read commit_message
+        fi
+        git commit -avm "$commit_message"
+        git push origin main
+      }
     '';
     # enableCompletion = true;
     # syntaxHighlighting.enable = true;

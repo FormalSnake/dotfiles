@@ -66,6 +66,7 @@
       homebrew = {
         enable = true;
         casks = [
+          "notion"
           "ghostty"
           "clop"
           "figma"
