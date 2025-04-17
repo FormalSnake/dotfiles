@@ -9,6 +9,7 @@
     syntaxHighlighting.enable = true;
     autosuggestion.enable = true;
     initExtra = ''
+      alias cd='z'
       alias ls='ls -A --color'
       alias vim='nvim'
       alias add='git add'

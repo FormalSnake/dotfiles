@@ -70,12 +70,12 @@
           "ghostty"
           "clop"
           "figma"
+          "claude"
           "ubersicht"
           "zerotier-one"
           "httpie"
           "balenaetcher"
           "flux"
-          "dorion"
           "cloudflare-warp"
           "whatsapp"
           "slack"
@@ -125,11 +125,9 @@
         dock.showhidden = true;
         dock.mru-spaces = false;
         dock.persistent-apps = [
-          # "${pkgs.brave}/Applications/Brave Browser.app"
-          "/Applications/Safari.app"
-          "Applications/Dia.app"
+          "${pkgs.brave}/Applications/Brave Browser.app"
           "/System/Applications/Calendar.app"
-          "/Applications/Dorion.app"
+          "/Applications/Equibop.app"
           # "/Applications/Legcord.app"
           "/Users/kyandesutter/Applications/Spotify.app"
           "/Applications/Ghostty.app"
