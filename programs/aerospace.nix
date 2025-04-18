@@ -259,6 +259,12 @@
         }
         {
           "if" = {
+            app-id = "io.github.equicord.equibop";
+          };
+          run = "move-node-to-workspace V";
+        }
+        {
+          "if" = {
             app-id = "com.apple.Safari.WebApp.13F24499-CCF1-4F5F-A27D-EE73F40B867B";
           };
           run = "move-node-to-workspace M";
