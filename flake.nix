@@ -19,6 +19,8 @@
     plugin-base16.flake = false;
     plugin-aider.url = "github:GeorgesAlkhouri/nvim-aider";
     plugin-aider.flake = false;
+    plugin-bg.url = "github:typicode/bg.nvim";
+    plugin-bg.flake = false;
   };
 
   outputs = inputs @ {
@@ -61,6 +63,7 @@
         pkgs.lua
         pkgs.bat
         pkgs.chafa
+        pkgs.sshfs
       ];
 
       homebrew = {

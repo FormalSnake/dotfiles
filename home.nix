@@ -36,6 +36,10 @@
               name = "aider.nvim";
               src = inputs.plugin-aider;
             };
+            own-bg = prev.vimUtils.buildVimPlugin {
+              name = "bg.nvim";
+              src = inputs.plugin-bg;
+            };
           };
       })
     ];
