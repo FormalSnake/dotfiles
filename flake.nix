@@ -63,7 +63,6 @@
         pkgs.lua
         pkgs.bat
         pkgs.chafa
-        pkgs.sshfs
       ];
 
       homebrew = {
@@ -96,6 +95,7 @@
           "docker-compose"
           "docker-credential-helper"
           "couchdb"
+          "sshfs"
         ];
         onActivation.cleanup = "zap";
         onActivation.autoUpdate = true;

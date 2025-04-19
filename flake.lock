@@ -222,6 +222,22 @@
         "type": "github"
       }
     },
+    "plugin-bg": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1734359929,
+        "narHash": "sha256-H+ZFX0hE9te6qo+fzUuWngHOEf0zGyHkEIQIYvyTzTI=",
+        "owner": "typicode",
+        "repo": "bg.nvim",
+        "rev": "df916e4df2493ee302eea62185ed014ba7ca40d9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "typicode",
+        "repo": "bg.nvim",
+        "type": "github"
+      }
+    },
     "plugin-tidy": {
       "flake": false,
       "locked": {
@@ -264,6 +280,7 @@
         "plugin-aider": "plugin-aider",
         "plugin-auto-dark-mode": "plugin-auto-dark-mode",
         "plugin-base16": "plugin-base16",
+        "plugin-bg": "plugin-bg",
         "plugin-tidy": "plugin-tidy",
         "plugin-visual-whitespace": "plugin-visual-whitespace"
       }
