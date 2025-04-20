@@ -64,7 +64,6 @@
     pkgs.repomix
     pkgs.firefox
     pkgs.spotify-player
-    pkgs.prismlauncher
   ];
 
   # home.activation.setDefaultBrowser = lib.hm.dag.entryAfter ["writeBoundary"] ''
