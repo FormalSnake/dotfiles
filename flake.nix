@@ -5,7 +5,6 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nix-darwin.url = "github:LnL7/nix-darwin";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
-    nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     catppuccin.url = "github:catppuccin/nix";
@@ -26,7 +25,6 @@
   outputs = inputs @ {
     self,
     nix-darwin,
-    nix-homebrew,
     nixpkgs,
     home-manager,
     catppuccin,
@@ -64,44 +62,6 @@
         pkgs.bat
         pkgs.chafa
       ];
-
-      homebrew = {
-        enable = false;
-        casks = [
-          "notion"
-          "ghostty"
-          "clop"
-          "figma"
-          "claude"
-          "ubersicht"
-          "zerotier-one"
-          "httpie"
-          "balenaetcher"
-          "flux"
-          "cloudflare-warp"
-          "whatsapp"
-          "slack"
-          "jordanbaird-ice"
-          "betterdisplay"
-          "steam"
-          "brave-browser"
-        ];
-        brews = [
-          "geometry"
-          "jnsahaj/lumen/lumen"
-          "imagemagick"
-          "docker"
-          "lazydocker"
-          "defaultbrowser"
-          "docker-compose"
-          "docker-credential-helper"
-          "couchdb"
-          "sshfs"
-        ];
-        onActivation.cleanup = "zap";
-        onActivation.autoUpdate = true;
-        onActivation.upgrade = true;
-      };
 
       system.activationScripts.applications.text = let
         env = pkgs.buildEnv {
@@ -173,15 +133,6 @@
               ];
             };
             extraSpecialArgs = {inherit inputs;};
-          };
-        }
-        nix-homebrew.darwinModules.nix-homebrew
-        {
-          nix-homebrew = {
-            enable = true;
-            enableRosetta = true;
-            user = username;
-            autoMigrate = true;
           };
         }
       ];
