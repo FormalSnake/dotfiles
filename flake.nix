@@ -84,6 +84,7 @@
           "jordanbaird-ice"
           "betterdisplay"
           "steam"
+          "brave-browser"
         ];
         brews = [
           "geometry"
@@ -128,7 +129,7 @@
         dock.showhidden = true;
         dock.mru-spaces = false;
         dock.persistent-apps = [
-          "${pkgs.brave}/Applications/Brave Browser.app"
+          "/Applications/Brave Browser.app"
           "/System/Applications/Calendar.app"
           "/Applications/Equibop.app"
           # "/Applications/Legcord.app"
