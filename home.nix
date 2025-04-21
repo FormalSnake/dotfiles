@@ -53,7 +53,6 @@
   programs.home-manager.enable = true;
 
   home.packages = [
-    pkgs.raycast # Launcher for macOS
     pkgs.aider-chat # AI-assisted code editing tool
     pkgs.claude-code # AI-assisted code editing tool
     pkgs.pyenv
