@@ -93,7 +93,7 @@
           "/System/Applications/Calendar.app"
           "/Applications/Equibop.app"
           # "/Applications/Legcord.app"
-          "/Users/kyandesutter/Applications/Spotify.app"
+          "/Applications/Spotify.app"
           "/Applications/Ghostty.app"
         ];
         finder.FXPreferredViewStyle = "clmv";
