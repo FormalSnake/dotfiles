@@ -62,6 +62,7 @@ in {
         plugin = own-auto-dark-mode;
         config = toLuaFile ./nvim/plugins/colorscheme.lua;
       }
+      github-nvim-theme
       # {
       #   plugin = own-base16;
       #   config = toLuaFile ./nvim/plugins/colorscheme.lua;

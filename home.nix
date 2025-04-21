@@ -73,7 +73,7 @@
   # '';
 
   catppuccin.flavor = "mocha";
-  catppuccin.enable = true;
+  catppuccin.enable = false;
 
   programs.git = {
     enable = true;
@@ -83,7 +83,8 @@
 
   programs.oh-my-posh = {
     enable = true;
-    useTheme = "catppuccin_mocha";
+    # useTheme = "catppuccin_mocha";
+    useTheme = "huvix";
     enableNushellIntegration = true;
   };
 

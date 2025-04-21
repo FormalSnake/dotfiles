@@ -6,7 +6,8 @@
     font-feature = -liga
 
     # theme = colors
-    theme = dark:catppuccin-mocha,light:catppuccin-latte
+    # theme = dark:catppuccin-mocha,light:catppuccin-latte
+    theme = dark:GitHub-Dark-High-Contrast,light:GitHub-Light-High-Contrast
     cursor-style = block
     cursor-color = #bbbbbb
     adjust-cursor-thickness = 1
