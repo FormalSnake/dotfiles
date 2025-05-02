@@ -8,7 +8,7 @@
     enableCompletion = true;
     syntaxHighlighting.enable = true;
     autosuggestion.enable = true;
-    initExtra = ''
+    initContent = ''
       alias cd='z'
       alias ls='ls -A --color'
       alias vim='nvim'
