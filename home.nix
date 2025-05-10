@@ -63,6 +63,7 @@
     pkgs.repomix
     pkgs.firefox
     pkgs.spotify-player
+    pkgs.zed-editor # Text editor
   ];
 
   # home.activation.setDefaultBrowser = lib.hm.dag.entryAfter ["writeBoundary"] ''

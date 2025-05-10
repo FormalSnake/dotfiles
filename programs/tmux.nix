@@ -31,7 +31,7 @@
     ];
     extraConfig = ''
       # set -g default-command ${pkgs.nushell}/bin/nu
-      set -g default-command /bin/bash
+      set -g default-command /bin/zsh
       if-shell '[ -z "$(tmux ls 2>/dev/null)" ]' 'new-session'
 
       set-option -sa terminal-overrides ",xterm*:Tc"
