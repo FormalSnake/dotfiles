@@ -64,6 +64,21 @@
     pkgs.firefox
     pkgs.spotify-player
     pkgs.zed-editor # Text editor
+    pkgs.fzf
+    pkgs.ripgrep
+    pkgs.fd
+    pkgs.nodejs
+    pkgs.bun
+    pkgs.gh
+    pkgs.cargo
+    pkgs.rustc
+    pkgs.devenv
+    pkgs.go
+    pkgs.zig
+    pkgs.nixd
+    pkgs.lua
+    pkgs.bat
+    pkgs.chafa
   ];
 
   # home.activation.setDefaultBrowser = lib.hm.dag.entryAfter ["writeBoundary"] ''

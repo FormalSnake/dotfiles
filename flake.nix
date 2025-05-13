@@ -5,6 +5,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nix-darwin.url = "github:LnL7/nix-darwin";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
+    nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     catppuccin.url = "github:catppuccin/nix";
@@ -25,6 +26,7 @@
   outputs = inputs @ {
     self,
     nix-darwin,
+    nix-homebrew,
     nixpkgs,
     home-manager,
     catppuccin,
@@ -45,23 +47,8 @@
 
       nixpkgs.config.allowUnfree = true;
 
-      environment.systemPackages = [
-        pkgs.fzf
-        pkgs.ripgrep
-        pkgs.fd
-        pkgs.nodejs
-        pkgs.bun
-        pkgs.gh
-        pkgs.cargo
-        pkgs.rustc
-        pkgs.devenv
-        pkgs.go
-        pkgs.zig
-        pkgs.nixd
-        pkgs.lua
-        pkgs.bat
-        pkgs.chafa
-      ];
+      # environment.systemPackages = [
+      # ];
 
       system.activationScripts.applications.text = let
         env = pkgs.buildEnv {
@@ -116,6 +103,10 @@
       system.configurationRevision = self.rev or self.dirtyRev or null;
       system.stateVersion = 5;
       nixpkgs.hostPlatform = "aarch64-darwin";
+
+      imports = [
+        ./homebrew.nix
+      ];
     };
   in {
     darwinConfigurations."FormalBook" = nix-darwin.lib.darwinSystem {
@@ -133,6 +124,15 @@
               ];
             };
             extraSpecialArgs = {inherit inputs;};
+          };
+        }
+        nix-homebrew.darwinModules.nix-homebrew
+        {
+          nix-homebrew = {
+            enable = true;
+            enableRosetta = true;
+            user = username;
+            autoMigrate = true;
           };
         }
       ];

@@ -20,7 +20,6 @@
       alias nixrb='clear && darwin-rebuild switch --flake .'
       alias nixrbgc='clear && darwin-rebuild switch --flake . && sudo nix-collect-garbage -d'
       alias wallpaper='matugen -c ~/.config/matugen/config.toml --verbose --contrast 0.2 image'
-      alias brew-manager='~/.config/nix/./brew-manager.sh'
 
       # Functions
       function gpush() {
