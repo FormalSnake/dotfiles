@@ -7,7 +7,6 @@
       "clop"
       "figma"
       "claude"
-      "ubersicht"
       "zerotier-one"
       "balenaetcher"
       "flux"
@@ -22,7 +21,6 @@
       "latest"
       "raycast"
       "spotify"
-      "visual-studio-code"
       "leader-key"
     ];
     brews = [
