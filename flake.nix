@@ -75,6 +75,7 @@
         dock.show-recents = false;
         dock.showhidden = true;
         dock.mru-spaces = false;
+        dock.tilesize = 48;
         dock.persistent-apps = [
           "/Applications/Brave Browser.app"
           "/System/Applications/Calendar.app"
@@ -84,6 +85,7 @@
           "/Applications/Ghostty.app"
         ];
         finder.FXPreferredViewStyle = "clmv";
+        finder._FXShowPosixPathInTitle = true;
         loginwindow.GuestEnabled = false;
         screencapture.location = "~/Pictures/screenshots";
         screensaver.askForPasswordDelay = 10;
