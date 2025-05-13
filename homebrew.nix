@@ -1,6 +1,6 @@
 {nix-homebrew, ...}: {
   homebrew = {
-    enable = false;
+    enable = true;
     casks = [
       "notion"
       "ghostty"
@@ -25,7 +25,6 @@
       "visual-studio-code"
     ];
     brews = [
-      "geometry"
       "jnsahaj/lumen/lumen"
       "imagemagick"
       "docker"
