@@ -23,6 +23,7 @@
       "raycast"
       "spotify"
       "visual-studio-code"
+      "leader-key"
     ];
     brews = [
       "jnsahaj/lumen/lumen"
@@ -32,7 +33,6 @@
       "docker-compose"
       "docker-credential-helper"
       "couchdb"
-      "leader-key"
     ];
     onActivation.cleanup = "zap";
     onActivation.autoUpdate = true;
