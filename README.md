@@ -15,7 +15,7 @@ This is a modular Nix configuration that supports both NixOS and macOS (nix-darw
 │   ├── macbook     # macOS configuration
 │   │   ├── default.nix
 │   │   └── home.nix
-│   └── nixos-vm    # Example NixOS VM configuration
+│   └── homelab     # NixOS homelab configuration
 │       ├── default.nix
 │       └── home.nix
 └── modules         # Shared module configurations
@@ -64,10 +64,10 @@ nix build .#darwinConfigurations.macbook.system
 
 ```bash
 # Build the configuration
-nixos-rebuild build --flake .#nixos-vm
+nixos-rebuild build --flake .#homelab
 
 # Apply the configuration (as root)
-nixos-rebuild switch --flake .#nixos-vm
+nixos-rebuild switch --flake .#homelab
 ```
 
 ## Adding a New Host

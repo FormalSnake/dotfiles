@@ -250,11 +250,11 @@
     };
 
     nixosConfigurations = {
-      # Example NixOS VM
-      "nixos-vm" = mkNixosConfig {
+      # NixOS homelab
+      "homelab" = mkNixosConfig {
         username = "kyandesutter";
-        hostname = "nixos-vm";
-        system = "aarch64-linux";
+        hostname = "homelab";
+        system = "x86_64-linux";
       };
     };
 
