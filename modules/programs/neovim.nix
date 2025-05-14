@@ -112,7 +112,10 @@ in {
         plugin = auto-session;
         config = toLuaFile ./nvim/plugins/autosession.lua;
       }
-      own-bg
+      {
+        plugin = own-bg;
+        config = toLua "require(\"bg\").setup()";
+      }
       {
         plugin = nvim-ts-autotag;
         config = toLuaFile ./nvim/plugins/autotag.lua;

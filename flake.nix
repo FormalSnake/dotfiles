@@ -69,8 +69,49 @@
     # Helper function to generate an attrset by mapping a function onto supportedSystems
     forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
     
-    # Nixpkgs instantiated for supported systems
-    nixpkgsFor = forAllSystems (system: import nixpkgs { inherit system; });
+    # Define custom overlays
+    overlays = [
+      (final: prev: {
+        vimPlugins =
+          prev.vimPlugins
+          // {
+            own-auto-dark-mode = prev.vimUtils.buildVimPlugin {
+              name = "auto-dark-mode.nvim";
+              src = inputs.plugin-auto-dark-mode;
+            };
+            own-visual-whitespace = prev.vimUtils.buildVimPlugin {
+              name = "visual-whitespace.nvim";
+              src = inputs.plugin-visual-whitespace;
+            };
+            own-tidy = prev.vimUtils.buildVimPlugin {
+              name = "tidy.nvim";
+              src = inputs.plugin-tidy;
+            };
+            own-base16 = prev.vimUtils.buildVimPlugin {
+              name = "base16.nvim";
+              src = inputs.plugin-base16;
+            };
+            own-aider = prev.vimUtils.buildVimPlugin {
+              name = "aider.nvim";
+              src = inputs.plugin-aider;
+            };
+            own-bg = prev.vimUtils.buildVimPlugin {
+              name = "bg.nvim";
+              src = inputs.plugin-bg;
+            };
+          };
+      })
+    ];
+    
+    # Nixpkgs instantiated for supported systems with overlays
+    nixpkgsFor = forAllSystems (system: import nixpkgs { 
+      inherit system; 
+      overlays = overlays;
+      config = {
+        allowUnfree = true;
+        allowBroken = true;
+      };
+    });
 
     # Common configuration shared across all systems
     mkCommonConfig = {
@@ -80,8 +121,10 @@
       ...
     }: {
       nixpkgs = {
+        overlays = overlays;
         config = {
           allowUnfree = true;
+          allowBroken = true;
         };
       };
     };
@@ -95,6 +138,12 @@
     }: nixpkgs.lib.nixosSystem {
       inherit system;
       modules = [
+        # Add common Nixpkgs config
+        { 
+          nixpkgs.overlays = overlays; 
+          nixpkgs.config.allowUnfree = true;
+          nixpkgs.config.allowBroken = true;
+        }
         ./hosts/${hostname}
         ./modules/nixos/default.nix
         home-manager.nixosModules.home-manager
@@ -135,6 +184,12 @@
     }: nix-darwin.lib.darwinSystem {
       inherit system;
       modules = [
+        # Add common Nixpkgs config
+        { 
+          nixpkgs.overlays = overlays; 
+          nixpkgs.config.allowUnfree = true;
+          nixpkgs.config.allowBroken = true;
+        }
         ./hosts/${hostname}
         ./modules/darwin/default.nix
         home-manager.darwinModules.home-manager
@@ -174,7 +229,13 @@
     };
   in {
     darwinConfigurations = {
-      # Your current macOS machine
+      # Your current macOS machine with both names for backward compatibility
+      "FormalBook" = mkDarwinConfig {
+        username = "kyandesutter";
+        hostname = "macbook";
+        system = "aarch64-darwin";
+      };
+      
       "macbook" = mkDarwinConfig {
         username = "kyandesutter";
         hostname = "macbook";

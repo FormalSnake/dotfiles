@@ -28,30 +28,4 @@
   programs.oh-my-posh = {
     useTheme = "huvix";
   };
-  
-  # Host-specific homebrew packages
-  # These will be merged with the ones from modules/darwin/homebrew.nix
-  homebrew = {
-    casks = [
-      "notion"
-      "ghostty"
-      "clop"
-      "figma"
-      "claude"
-      "zerotier-one"
-      "balenaetcher"
-      "slack"
-      "jordanbaird-ice"
-      "betterdisplay"
-      "steam"
-      "loop"
-      "latest"
-      "spotify"
-    ];
-    brews = [
-      "jnsahaj/lumen/lumen"
-      "lazydocker"
-      "couchdb"
-    ];
-  };
 }

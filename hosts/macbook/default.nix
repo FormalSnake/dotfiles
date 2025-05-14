@@ -16,5 +16,28 @@
   # Any host-specific overrides can be placed here
   networking.hostName = "macbook";
   
-  # You can override any module settings here
+  # Host-specific homebrew packages
+  homebrew = {
+    casks = [
+      "notion"
+      "ghostty"
+      "clop"
+      "figma"
+      "claude"
+      "zerotier-one"
+      "balenaetcher"
+      "slack"
+      "jordanbaird-ice"
+      "betterdisplay"
+      "steam"
+      "loop"
+      "latest"
+      "spotify"
+    ];
+    brews = [
+      "jnsahaj/lumen/lumen"
+      "lazydocker"
+      "couchdb"
+    ];
+  };
 }
