@@ -9,7 +9,6 @@
     "/Applications/Brave Browser.app"
     "/System/Applications/Calendar.app"
     "/Applications/Equibop.app"
-    "${config.programs.spicetify.spicedSpotify}/Applications/Spotify.app"
     "/Applications/Ghostty.app"
   ];
 
@@ -40,4 +39,3 @@
     ];
   };
 }
-
