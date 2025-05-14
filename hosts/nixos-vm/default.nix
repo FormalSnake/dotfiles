@@ -25,13 +25,6 @@
 
   # VM-specific services
   services = {
-    # Minimal X11 setup for VM
-    xserver = {
-      enable = true;
-      displayManager.gdm.enable = true;
-      desktopManager.gnome.enable = true;
-    };
-
     # Enable SSH for VM access
     openssh = {
       enable = true;
@@ -40,6 +33,12 @@
         PasswordAuthentication = false;
       };
     };
+  };
+  
+  # Use Hyprland for this VM
+  programs.hyprland = {
+    enable = true;
+    xwayland.enable = true;
   };
 
   # Enable ZSH at the system level

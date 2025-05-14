@@ -19,6 +19,15 @@
     go
     zig
 
+    # Hyprland utilities
+    waybar
+    swww
+    dunst
+    rofi-wayland
+    wl-clipboard
+    grim
+    slurp
+
     # GUI applications
     firefox
     brave

@@ -61,13 +61,6 @@
   services = {
     qemuGuest.enable = true;
 
-    # For desktop environments
-    xserver = {
-      enable = true;
-      displayManager.gdm.enable = true;
-      desktopManager.gnome.enable = true;
-    };
-
     # Enable sound
     pipewire = {
       enable = true;
@@ -75,6 +68,12 @@
       alsa.support32Bit = true;
       pulse.enable = true;
     };
+  };
+
+  # Hyprland configuration
+  programs.hyprland = {
+    enable = true;
+    xwayland.enable = true;
   };
 
   # System fonts
