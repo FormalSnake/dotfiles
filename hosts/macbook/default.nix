@@ -9,13 +9,13 @@
     "/Applications/Brave Browser.app"
     "/System/Applications/Calendar.app"
     "/Applications/Equibop.app"
-    "/Applications/Spotify.app"
+    "${config.programs.spicetify.spicedSpotify}/Applications/Spotify.app"
     "/Applications/Ghostty.app"
   ];
 
   # Any host-specific overrides can be placed here
   networking.hostName = "macbook";
-  
+
   # Host-specific homebrew packages
   homebrew = {
     casks = [
@@ -32,7 +32,6 @@
       "steam"
       "loop"
       "latest"
-      "spotify"
     ];
     brews = [
       "jnsahaj/lumen/lumen"
@@ -41,3 +40,4 @@
     ];
   };
 }
+

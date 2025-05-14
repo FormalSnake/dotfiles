@@ -19,7 +19,6 @@
 
     # Applications
     firefox
-    spotify-player
     zed-editor
   ];
 

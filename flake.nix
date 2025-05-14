@@ -18,6 +18,12 @@
       url = "github:zhaofengli-wip/nix-homebrew";
     };
 
+    # NixOS Spicetify
+    spicetify-nix = {
+      url = "github:Gerg-L/spicetify-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Home Manager
     home-manager = {
       url = "github:nix-community/home-manager";
@@ -277,4 +283,3 @@
     formatter = forAllSystems (system: nixpkgsFor.${system}.nixpkgs-fmt);
   };
 }
-
