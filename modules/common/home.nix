@@ -42,5 +42,6 @@
     ../programs/zoxide.nix
     ../programs/fzf.nix
     ../programs/kitty.nix
+    ../programs/spicetify.nix
   ];
 }
