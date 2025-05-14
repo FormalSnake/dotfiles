@@ -22,7 +22,6 @@
     firefox
     spotify-player
     zed-editor
-    utm
   ];
 
   # Enable macOS specific programs
@@ -35,4 +34,3 @@
     ../programs/fastfetch.nix
   ];
 }
-
