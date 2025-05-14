@@ -41,5 +41,6 @@
     ../programs/tmux.nix
     ../programs/zoxide.nix
     ../programs/fzf.nix
+    ../programs/kitty.nix
   ];
 }

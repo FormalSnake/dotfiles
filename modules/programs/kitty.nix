@@ -1,0 +1,21 @@
+{
+  config,
+  pkgs,
+  ...
+}: {
+  programs.kitty = {
+    enable = true;
+    font = {
+      name = "JetBrainsMono Nerd Font";
+      size = 12;
+    };
+    settings = {
+      scrollback_lines = 10000;
+      enable_audio_bell = false;
+      background_opacity = "0.95";
+      window_padding_width = 4;
+      confirm_os_window_close = 0;
+    };
+    theme = "Catppuccin-Mocha";
+  };
+}

@@ -19,14 +19,8 @@
     go
     zig
 
-    # Hyprland utilities
-    waybar
-    swww
-    dunst
-    rofi-wayland
-    wl-clipboard
-    grim
-    slurp
+    # Terminal emulator for Hyprland
+    kitty
 
     # GUI applications
     firefox

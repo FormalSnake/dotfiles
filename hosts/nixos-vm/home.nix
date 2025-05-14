@@ -23,14 +23,8 @@
   # Explicitly enable ZSH for NixOS
   programs.zsh.enable = true;
 
-  # GNOME-specific settings
-  dconf.settings = {
-    "org/gnome/desktop/interface" = {
-      color-scheme = "prefer-dark";
-      enable-hot-corners = false;
-    };
-    "org/gnome/desktop/wm/preferences" = {
-      button-layout = "appmenu:minimize,maximize,close";
-    };
-  };
+  # Import Hyprland configuration
+  imports = [
+    ../../modules/programs/hyprland.nix
+  ];
 }
