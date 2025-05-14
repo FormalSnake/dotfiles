@@ -13,7 +13,7 @@
   home.packages = with pkgs; [
     firefox
     vscode
-    gnome.gnome-tweaks
+    gnome-tweaks
   ];
 
   # VM-specific settings
@@ -35,3 +35,4 @@
     };
   };
 }
+

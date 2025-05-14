@@ -47,7 +47,8 @@
 
   # VM-specific system packages
   environment.systemPackages = with pkgs; [
-    gnome.gnome-tweaks
+    gnome-tweaks
     firefox
   ];
 }
+
