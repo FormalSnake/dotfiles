@@ -1,10 +1,44 @@
-# Dotfiles
-This is my personal dotfiles repository, managed using stow and nix.
-It is made for macOS, but because of the nix package manager, it should work on Linux as well.
-If you are having any problems, please open an issue.
+# Modular Nix Configuration
+
+This is a modular Nix configuration that supports both NixOS and macOS (nix-darwin) systems.
 
 ## Screenshot
 ![image](https://raw.githubusercontent.com/FormalSnake/dotfiles/main/assets/screenshot.png)
+
+## Structure
+
+```
+.
+├── flake.nix       # Main flake configuration
+├── flake.lock      # Locked dependencies
+├── hosts           # Host-specific configurations
+│   ├── macbook     # macOS configuration
+│   │   ├── default.nix
+│   │   └── home.nix
+│   └── nixos-vm    # Example NixOS VM configuration
+│       ├── default.nix
+│       └── home.nix
+└── modules         # Shared module configurations
+    ├── common      # Shared between all systems
+    │   └── home.nix
+    ├── darwin      # macOS specific
+    │   ├── default.nix
+    │   ├── home.nix
+    │   └── homebrew.nix
+    ├── nixos       # NixOS specific
+    │   ├── default.nix
+    │   └── home.nix
+    └── programs    # Program configurations
+        ├── btop.nix
+        ├── fastfetch.nix
+        ├── fzf.nix
+        ├── ghostty.nix
+        ├── matugen.nix
+        ├── neovim.nix
+        ├── tmux.nix
+        ├── zoxide.nix
+        └── zsh.nix
+```
 
 ## Requirements
 Ensure you have the following installed on your system:
@@ -14,28 +48,53 @@ Ensure you have the following installed on your system:
 curl -L https://nixos.org/nix/install | sh
 ```
 
-## Installation
-First, check out the dotfiles repo in your $HOME directory using git
-```sh
-> git clone https://github.com/FormalSnake/dotfiles/tree/main
-> cd dotfiles
-```
-Then, edit these line in flake.nix
-```nix
-> username = "kyandesutter";
+## Usage
 
-> darwinConfigurations."FormalBook" = nix-darwin.lib.darwinSystem { 
+### Building for macOS
+
+```bash
+# Build the configuration
+nix build .#darwinConfigurations.macbook.system
+
+# Apply the configuration
+./result/sw/bin/darwin-rebuild switch --flake .#macbook
 ```
-Then, edit these lines in home.nix
+
+### Building for NixOS
+
+```bash
+# Build the configuration
+nixos-rebuild build --flake .#nixos-vm
+
+# Apply the configuration (as root)
+nixos-rebuild switch --flake .#nixos-vm
+```
+
+## Adding a New Host
+
+1. Create a new directory under `hosts/` with the hostname
+2. Create `default.nix` and `home.nix` files for the system and home-manager configurations
+3. Add the host to the appropriate section in `flake.nix`:
+
 ```nix
-> home.username = "kyandesutter";
-> home.homeDirectory = "/Users/kyandesutter";
+# For NixOS
+nixosConfigurations = {
+  "new-host" = mkNixosConfig {
+    username = "username";
+    hostname = "new-host";
+    system = "x86_64-linux"; # or aarch64-linux
+  };
+};
+
+# For Darwin
+darwinConfigurations = {
+  "new-mac" = mkDarwinConfig {
+    username = "username";
+    hostname = "new-mac";
+    system = "aarch64-darwin"; # or x86_64-darwin
+  };
+};
 ```
-Then rebuild the system using nix-darwin
-```sh
-> darwin-rebuild switch --flake .
-```
-Yes, it's as easy as that ;)
 
 ## Updating Flakes
 
@@ -46,13 +105,11 @@ nix flake update
 ```
 
 ## What software does this provide configuration for?
-Note: this can all be installed using brew!
 * Tmux 
 * Ghostty
 * zsh 
 * nvim
-* Aerospace 
-* Spotify using spicetify
+* And more via homebrew on macOS and system packages on NixOS
 
 ## Contributing
 
