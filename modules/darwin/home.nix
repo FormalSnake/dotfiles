@@ -11,17 +11,18 @@
     aider-chat
     claude-code
     pyenv
-    
+
     # macOS specific utilities
     ice-bar
     mousecape
     the-unarchiver
-    
+
     # Applications
     google-chrome
     firefox
     spotify-player
     zed-editor
+    utm
   ];
 
   # Enable macOS specific programs
@@ -32,6 +33,6 @@
     ../programs/ghostty.nix
     ../programs/btop.nix
     ../programs/fastfetch.nix
-    ../programs/matugen.nix
   ];
 }
+

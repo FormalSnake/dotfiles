@@ -98,9 +98,8 @@
 
   programs.oh-my-posh = {
     enable = true;
-    # useTheme = "catppuccin_mocha";
-    useTheme = "huvix";
-    enableNushellIntegration = true;
+    useTheme = "catppuccin_mocha";
+    # useTheme = "huvix";
   };
 
   imports = [
@@ -111,7 +110,6 @@
     ./programs/btop.nix
     ./programs/zoxide.nix
     ./programs/fastfetch.nix
-    ./programs/matugen.nix
     ./programs/fzf.nix
   ];
 }

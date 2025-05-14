@@ -10,7 +10,7 @@
     # Terminal utilities
     btop
     neofetch
-    
+
     # Development
     nodejs
     bun
@@ -18,15 +18,13 @@
     rustc
     go
     zig
-    
+
     # GUI applications
     firefox
     brave
   ];
 
-  # Enable X11 and Wayland specific configurations if needed
-  programs.oh-my-posh.enableNushellIntegration = true;
-  
   # Import any NixOS specific program configurations here
   imports = [];
 }
+

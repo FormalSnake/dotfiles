@@ -30,7 +30,6 @@
       vim-tmux-navigator
     ];
     extraConfig = ''
-      # set -g default-command ${pkgs.nushell}/bin/nu
       set -g default-command /bin/zsh
       if-shell '[ -z "$(tmux ls 2>/dev/null)" ]' 'new-session'
 
