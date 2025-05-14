@@ -26,10 +26,6 @@
     brews = [
       "jnsahaj/lumen/lumen"
       "imagemagick"
-      "docker"
-      "lazydocker"
-      "docker-compose"
-      "docker-credential-helper"
       "couchdb"
     ];
     onActivation.cleanup = "zap";
