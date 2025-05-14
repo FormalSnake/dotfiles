@@ -59,8 +59,6 @@
 
   # Services
   services = {
-    qemuGuest.enable = true;
-
     # Enable sound
     pipewire = {
       enable = true;
