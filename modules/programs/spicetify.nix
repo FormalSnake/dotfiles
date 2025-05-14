@@ -21,5 +21,8 @@ in {
       trashbin
       playingSource
     ];
+    enabledCustomApps = with spicePkgs.customApps; [
+      newReleases
+    ];
   };
 }
