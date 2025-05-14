@@ -18,11 +18,9 @@
     the-unarchiver
 
     # Applications
-    google-chrome
     firefox
     spotify-player
     zed-editor
-    utm
   ];
 
   # Enable macOS specific programs
