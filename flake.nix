@@ -4,7 +4,7 @@
   inputs = {
     # Core
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    
+
     # NixOS and Darwin
     nixos-generators = {
       url = "github:nix-community/nixos-generators";
@@ -17,13 +17,13 @@
     nix-homebrew = {
       url = "github:zhaofengli-wip/nix-homebrew";
     };
-    
+
     # Home Manager
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    
+
     # Themes & Plugins
     catppuccin.url = "github:catppuccin/nix";
     plugin-auto-dark-mode = {
@@ -61,14 +61,13 @@
     home-manager,
     catppuccin,
     ...
-  }:
-  let
+  }: let
     # System types to support
-    supportedSystems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin" ];
-    
+    supportedSystems = ["x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin"];
+
     # Helper function to generate an attrset by mapping a function onto supportedSystems
     forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
-    
+
     # Define custom overlays
     overlays = [
       (final: prev: {
@@ -102,16 +101,17 @@
           };
       })
     ];
-    
+
     # Nixpkgs instantiated for supported systems with overlays
-    nixpkgsFor = forAllSystems (system: import nixpkgs { 
-      inherit system; 
-      overlays = overlays;
-      config = {
-        allowUnfree = true;
-        allowBroken = true;
-      };
-    });
+    nixpkgsFor = forAllSystems (system:
+      import nixpkgs {
+        inherit system;
+        overlays = overlays;
+        config = {
+          allowUnfree = true;
+          allowBroken = true;
+        };
+      });
 
     # Common configuration shared across all systems
     mkCommonConfig = {
@@ -135,45 +135,48 @@
       hostname,
       system,
       extraModules ? [],
-    }: nixpkgs.lib.nixosSystem {
-      inherit system;
-      modules = [
-        # Add common Nixpkgs config
-        { 
-          nixpkgs.overlays = overlays; 
-          nixpkgs.config.allowUnfree = true;
-          nixpkgs.config.allowBroken = true;
-        }
-        ./hosts/${hostname}
-        ./modules/nixos/default.nix
-        home-manager.nixosModules.home-manager
-        {
-          networking.hostName = hostname;
-          users.users.${username} = {
-            isNormalUser = true;
-            extraGroups = [ "wheel" "networkmanager" "video" "audio" ];
-            shell = nixpkgs.legacyPackages.${system}.zsh;
-            home = "/home/${username}";
-          };
-          
-          home-manager = {
-            useGlobalPkgs = true;
-            useUserPackages = true;
-            backupFileExtension = "backup";
-            extraSpecialArgs = { inherit inputs; };
-            users.${username} = {
-              imports = [
-                ./modules/common/home.nix
-                ./modules/nixos/home.nix
-                ./hosts/${hostname}/home.nix
-                catppuccin.homeModules.catppuccin
-              ];
-            };
-          };
-        }
-      ] ++ extraModules;
-      specialArgs = { inherit inputs; };
-    };
+    }:
+      nixpkgs.lib.nixosSystem {
+        inherit system;
+        modules =
+          [
+            # Add common Nixpkgs config
+            {
+              nixpkgs.overlays = overlays;
+              nixpkgs.config.allowUnfree = true;
+              nixpkgs.config.allowBroken = true;
+            }
+            ./hosts/${hostname}
+            ./modules/nixos/default.nix
+            home-manager.nixosModules.home-manager
+            {
+              networking.hostName = hostname;
+              users.users.${username} = {
+                isNormalUser = true;
+                extraGroups = ["wheel" "networkmanager" "video" "audio"];
+                shell = nixpkgs.legacyPackages.${system}.zsh;
+                home = "/home/${username}";
+              };
+
+              home-manager = {
+                useGlobalPkgs = true;
+                useUserPackages = true;
+                backupFileExtension = "backup";
+                extraSpecialArgs = {inherit inputs;};
+                users.${username} = {
+                  imports = [
+                    ./modules/common/home.nix
+                    ./modules/nixos/home.nix
+                    ./hosts/${hostname}/home.nix
+                    catppuccin.homeModules.catppuccin
+                  ];
+                };
+              };
+            }
+          ]
+          ++ extraModules;
+        specialArgs = {inherit inputs;};
+      };
 
     # Configuration for macOS
     mkDarwinConfig = {
@@ -181,52 +184,55 @@
       hostname,
       system,
       extraModules ? [],
-    }: nix-darwin.lib.darwinSystem {
-      inherit system;
-      modules = [
-        # Add common Nixpkgs config
-        { 
-          nixpkgs.overlays = overlays; 
-          nixpkgs.config.allowUnfree = true;
-          nixpkgs.config.allowBroken = true;
-        }
-        ./hosts/${hostname}
-        ./modules/darwin/default.nix
-        home-manager.darwinModules.home-manager
-        {
-          networking.hostName = hostname;
-          users.users.${username} = {
-            name = username;
-            home = "/Users/${username}";
-          };
-          
-          home-manager = {
-            useGlobalPkgs = true;
-            useUserPackages = true;
-            backupFileExtension = "backup";
-            extraSpecialArgs = { inherit inputs; };
-            users.${username} = {
-              imports = [
-                ./modules/common/home.nix
-                ./modules/darwin/home.nix
-                ./hosts/${hostname}/home.nix
-                catppuccin.homeModules.catppuccin
-              ];
-            };
-          };
-        }
-        nix-homebrew.darwinModules.nix-homebrew
-        {
-          nix-homebrew = {
-            enable = true;
-            enableRosetta = true;
-            user = username;
-            autoMigrate = true;
-          };
-        }
-      ] ++ extraModules;
-      specialArgs = { inherit inputs; };
-    };
+    }:
+      nix-darwin.lib.darwinSystem {
+        inherit system;
+        modules =
+          [
+            # Add common Nixpkgs config
+            {
+              nixpkgs.overlays = overlays;
+              nixpkgs.config.allowUnfree = true;
+              nixpkgs.config.allowBroken = true;
+            }
+            ./hosts/${hostname}
+            ./modules/darwin/default.nix
+            home-manager.darwinModules.home-manager
+            {
+              networking.hostName = hostname;
+              users.users.${username} = {
+                name = username;
+                home = "/Users/${username}";
+              };
+
+              home-manager = {
+                useGlobalPkgs = true;
+                useUserPackages = true;
+                backupFileExtension = "backup";
+                extraSpecialArgs = {inherit inputs;};
+                users.${username} = {
+                  imports = [
+                    ./modules/common/home.nix
+                    ./modules/darwin/home.nix
+                    ./hosts/${hostname}/home.nix
+                    catppuccin.homeModules.catppuccin
+                  ];
+                };
+              };
+            }
+            nix-homebrew.darwinModules.nix-homebrew
+            {
+              nix-homebrew = {
+                enable = true;
+                enableRosetta = true;
+                user = username;
+                autoMigrate = true;
+              };
+            }
+          ]
+          ++ extraModules;
+        specialArgs = {inherit inputs;};
+      };
   in {
     darwinConfigurations = {
       # Your current macOS machine with both names for backward compatibility
@@ -235,7 +241,7 @@
         hostname = "macbook";
         system = "aarch64-darwin";
       };
-      
+
       "macbook" = mkDarwinConfig {
         username = "kyandesutter";
         hostname = "macbook";
@@ -248,16 +254,15 @@
       "nixos-vm" = mkNixosConfig {
         username = "kyandesutter";
         hostname = "nixos-vm";
-        system = "x86_64-linux";
+        system = "aarch64-linux";
       };
     };
 
     # Development shells for each platform
-    devShells = forAllSystems (system:
-      let
+    devShells = forAllSystems (
+      system: let
         pkgs = nixpkgsFor.${system};
-      in
-      {
+      in {
         default = pkgs.mkShell {
           buildInputs = with pkgs; [
             git
@@ -272,3 +277,4 @@
     formatter = forAllSystems (system: nixpkgsFor.${system}.nixpkgs-fmt);
   };
 }
+

@@ -8,7 +8,7 @@
   nix = {
     package = pkgs.nixVersions.stable;
     settings = {
-      experimental-features = [ "nix-command" "flakes" ];
+      experimental-features = ["nix-command" "flakes"];
       auto-optimise-store = true;
     };
     gc = {
@@ -59,13 +59,15 @@
 
   # Services
   services = {
+    qemuGuest.enable = true;
+
     # For desktop environments
     xserver = {
       enable = true;
       displayManager.gdm.enable = true;
       desktopManager.gnome.enable = true;
     };
-    
+
     # Enable sound
     pipewire = {
       enable = true;
@@ -87,9 +89,9 @@
     ];
     fontconfig = {
       defaultFonts = {
-        serif = [ "Noto Serif" ];
-        sansSerif = [ "Noto Sans" ];
-        monospace = [ "Fira Code" ];
+        serif = ["Noto Serif"];
+        sansSerif = ["Noto Sans"];
+        monospace = ["Fira Code"];
       };
     };
   };
@@ -97,3 +99,4 @@
   # System version
   system.stateVersion = "24.05";
 }
+
