@@ -12,7 +12,6 @@
   # Host-specific packages for the VM
   home.packages = with pkgs; [
     firefox
-    vscode
     gnome-tweaks
   ];
 
@@ -35,4 +34,3 @@
     };
   };
 }
-
