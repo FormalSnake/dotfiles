@@ -19,7 +19,7 @@
     remapCapsLockToEscape = true;
   };
 
-  # macOS Applications management 
+  # macOS Applications management
   system.activationScripts.applications.text = let
     env = pkgs.buildEnv {
       name = "system-applications";
@@ -66,5 +66,6 @@
   system.stateVersion = 5;
 
   # Homebrew module common to all darwin machines
-  imports = [ ./homebrew.nix ];
+  imports = [./homebrew.nix];
 }
+

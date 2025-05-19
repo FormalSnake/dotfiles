@@ -1,7 +1,7 @@
 {...}: {
   # Source aerospace config from the home-manager store
   home.file.".config/ghostty/config".text = ''
-        font-family = GeistMono Nerd Font
+    font-family = GeistMono Nerd Font
     font-size = 14
     font-feature = -liga
 
@@ -12,6 +12,9 @@
     cursor-color = #bbbbbb
     adjust-cursor-thickness = 1
     shell-integration = zsh
+    custom-shader = ~/.config/ghostty/shaders/mnoise.glsl
+    background-opacity = 0.70
+    background-blur-radius = 20
 
     keybind = cmd+shift+space=toggle_quick_terminal
 
@@ -34,4 +37,5 @@
     clipboard-read = allow
     clipboard-write = allow
   '';
+  home.file.".config/ghostty/shaders/mnoise.glsl".text = builtins.readFile ./ghostty-shaders/mnoise.glsl;
 }

@@ -11,6 +11,7 @@
     "/Applications/Equibop.app"
     "/Applications/Ghostty.app"
   ];
+  system.primaryUser = "kyandesutter";
 
   # Any host-specific overrides can be placed here
   networking.hostName = "macbook";
