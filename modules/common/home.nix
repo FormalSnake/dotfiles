@@ -31,7 +31,7 @@
 
   programs.oh-my-posh = {
     enable = true;
-    useTheme = "huvix";
+    useTheme = "catppuccin_mocha";
   };
 
   # Common program imports

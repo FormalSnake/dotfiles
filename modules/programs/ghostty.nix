@@ -13,8 +13,6 @@
     adjust-cursor-thickness = 1
     shell-integration = zsh
     custom-shader = ~/.config/ghostty/shaders/mnoise.glsl
-    background-opacity = 0.70
-    background-blur-radius = 20
 
     keybind = cmd+shift+space=toggle_quick_terminal
 
