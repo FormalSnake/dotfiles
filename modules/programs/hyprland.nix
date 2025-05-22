@@ -71,7 +71,6 @@
         "$mod, Return, exec, kitty"
         "$mod, Q, killactive,"
         "$mod, M, exit,"
-        "$mod, E, exec, dolphin"
         "$mod, V, togglefloating,"
         "$mod, R, exec, wofi --show drun"
         "$mod, P, pseudo,"

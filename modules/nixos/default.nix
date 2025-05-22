@@ -48,13 +48,15 @@
     };
   };
 
-  # System packages
+  # Essential system packages
   environment.systemPackages = with pkgs; [
     git
     vim
     curl
     wget
     htop
+    firefox
+    brave
   ];
 
   # Services
@@ -68,7 +70,7 @@
     };
   };
 
-  # Hyprland configuration
+  # Hyprland configuration (default for all NixOS systems)
   programs.hyprland = {
     enable = true;
     xwayland.enable = true;

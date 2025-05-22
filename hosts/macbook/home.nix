@@ -9,19 +9,8 @@
   home.username = "kyandesutter";
   home.homeDirectory = "/Users/kyandesutter";
 
-  # Host-specific packages
-  home.packages = with pkgs; [
-    repomix
-    nodejs
-    bun
-    cargo
-    rustc
-    devenv
-    go
-    zig
-    nixd
-    lua
-    chafa
-  ];
+  # Host-specific settings only
+  programs.oh-my-posh = {
+    useTheme = "catppuccin_mocha";
+  };
 }
-

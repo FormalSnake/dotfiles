@@ -34,11 +34,7 @@
     };
   };
   
-  # Use Hyprland for this machine
-  programs.hyprland = {
-    enable = true;
-    xwayland.enable = true;
-  };
+
 
   # Enable ZSH at the system level
   programs.zsh.enable = true;

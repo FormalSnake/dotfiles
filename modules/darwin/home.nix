@@ -5,30 +5,31 @@
   inputs,
   ...
 }: {
-  # Additional packages specific to macOS
+  # macOS-specific packages only
   home.packages = with pkgs; [
-    # macOS specific developer tools
+    # macOS-specific developer tools
     aider-chat
     claude-code
     pyenv
+    nixd
+    devenv
+    chafa
+    repomix
 
-    # macOS specific utilities
+    # macOS-specific utilities
     ice-bar
     mousecape
     the-unarchiver
 
     # Applications
-    firefox
     zed-editor
   ];
 
   # Enable macOS specific programs
   programs.oh-my-posh.enableZshIntegration = true;
 
-  # Import macOS specific configurations
+  # Import macOS-specific program configurations
   imports = [
-    ../programs/ghostty.nix
-    ../programs/btop.nix
-    ../programs/fastfetch.nix
+    # No macOS-specific programs currently
   ];
 }

@@ -12,17 +12,33 @@
 
   # Common packages for all systems
   home.packages = with pkgs; [
+    # Core utilities
     ripgrep
     fd
     fzf
     gh
     bat
     lazygit
+
+    # Development tools (available on all platforms)
+    nodejs
+    bun
+    cargo
+    rustc
+    go
+    zig
+    lua
+
+    # Browsers (available on all platforms)
+    firefox
+    brave
   ];
 
+  # Global theming
   catppuccin.flavor = "mocha";
   catppuccin.enable = true;
 
+  # Common programs
   programs.git = {
     enable = true;
   };
@@ -34,7 +50,7 @@
     useTheme = "catppuccin_mocha";
   };
 
-  # Common program imports
+  # Common program imports (available on all platforms)
   imports = [
     ../programs/zsh.nix
     ../programs/neovim.nix
@@ -42,6 +58,9 @@
     ../programs/zoxide.nix
     ../programs/fzf.nix
     ../programs/kitty.nix
+    ../programs/ghostty.nix
+    ../programs/btop.nix
+    ../programs/fastfetch.nix
     ../programs/spicetify.nix
   ];
 }

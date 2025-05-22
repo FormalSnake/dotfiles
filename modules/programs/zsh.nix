@@ -1,6 +1,7 @@
 {
   config,
   pkgs,
+  lib,
   ...
 }: {
   programs.zsh = {
@@ -8,18 +9,47 @@
     enableCompletion = true;
     syntaxHighlighting.enable = true;
     autosuggestion.enable = true;
-    initContent = ''
-      alias cd='z'
-      alias ls='ls -A --color'
-      alias vim='nvim'
-      alias add='git add'
-      alias commit='git commit'
-      alias push='git push'
-      alias commitai='commit_message=$(lumen draft) && git commit -avm "$commit_message"'
-      alias nah='git reset --hard && git clean -df'
-      alias nixrb='clear && sudo darwin-rebuild switch --flake .'
-      alias nixrbgc='clear && sudo darwin-rebuild switch --flake . && sudo nix-collect-garbage -d'
-      alias wallpaper='matugen -c ~/.config/matugen/config.toml --verbose --contrast 0.2 image'
+    
+    history = {
+      size = 5000;
+      save = 5000;
+      ignoreDups = true;
+      ignoreAllDups = true;
+      ignoreSpace = true;
+      share = true;
+    };
+
+    shellAliases = {
+      # Navigation
+      cd = "z";
+      ls = "ls -A --color";
+      
+      # Editor
+      vim = "nvim";
+      
+      # Git shortcuts
+      add = "git add";
+      commit = "git commit";
+      push = "git push";
+      nah = "git reset --hard && git clean -df";
+      
+      # AI-powered commits
+      commitai = "commit_message=$(lumen draft) && git commit -avm \"$commit_message\"";
+      
+      # System-specific aliases
+      nixrb = lib.mkIf pkgs.stdenv.isDarwin "clear && sudo darwin-rebuild switch --flake .";
+      nixrbgc = lib.mkIf pkgs.stdenv.isDarwin "clear && sudo darwin-rebuild switch --flake . && sudo nix-collect-garbage -d";
+      nixos-rb = lib.mkIf pkgs.stdenv.isLinux "clear && sudo nixos-rebuild switch --flake .";
+      nixos-rbgc = lib.mkIf pkgs.stdenv.isLinux "clear && sudo nixos-rebuild switch --flake . && sudo nix-collect-garbage -d";
+      
+      # Utility aliases
+      wallpaper = "matugen -c ~/.config/matugen/config.toml --verbose --contrast 0.2 image";
+    };
+
+    initExtra = ''
+      # Shell integrations
+      eval "$(fzf --zsh)"
+      eval "$(zoxide init --cmd cd zsh)"
 
       # Functions
       function gpush() {
@@ -33,85 +63,14 @@
         git commit -avm "$commit_message"
         git push origin main
       }
-    '';
-    # enableCompletion = true;
-    # syntaxHighlighting.enable = true;
-    # autosuggestion.enable = true;
-    # history = {
-    #   size = 5000;
-    #   save = 5000;
-    #   ignoreDups = true;
-    #   ignoreAllDups = true;
-    #   ignoreSpace = true;
-    #   share = true;
-    # };
 
-    # initExtra = ''
-    #   DISABLE_AUTO_UPDATE="true"
-    #   skip_global_compinit=1
-    #
-    #   # Set up brew environment if on macOS
-    #   if [[ -f "/opt/homebrew/bin/brew" ]]; then
-    #     eval "$(/opt/homebrew/bin/brew shellenv)"
-    #   fi
-    #   # Shell integrations
-    #   eval "$(fzf --zsh)"
-    #   eval "$(zoxide init --cmd cd zsh)"
-    #
-    #   GEOMETRY_STATUS_SYMBOL="󰅟 "             # default prompt symbol
-    #   GEOMETRY_STATUS_SYMBOL_ERROR="󰅣 "       # displayed when exit value is != 0
-    #   GEOMETRY_PATH_SHOW_BASENAME=true
-    #   GEOMETRY_RPROMPT=(geometry_exec_time geometry_git)
-    #   source /opt/homebrew/opt/geometry/share/geometry/geometry.zsh
-    #
-    #   # Aliases
-    #   alias ls='ls -A --color'
-    #   alias vim='nvim'
-    #   alias add='git add'
-    #   alias commit='git commit'
-    #   alias push='git push'
-    #   alias commitai='commit_message=$(lumen draft) && git commit -avm "$commit_message"'
-    #   alias nah='git reset --hard && git clean -df'
-    #   alias nixrb='clear && darwin-rebuild switch --flake .'
-    #   alias nixrbgc='clear && darwin-rebuild switch --flake . && sudo nix-collect-garbage -d'
-    #   alias wallpaper='matugen -c ~/.config/matugen/config.toml --verbose --contrast 0.2 image'
-    #
-    #   # Functions
-    #   function gpush() {
-    #     git add .
-    #     commit_message=$(lumen draft)
-    #     if [ -z "$commit_message" ]; then
-    #       echo "Lumen draft is empty"
-    #       echo -n "Enter commit message: "
-    #       read commit_message
-    #     fi
-    #     git commit -avm "$commit_message"
-    #     git push origin main
-    #   }
-    # '';
-    #
-    # plugins = with pkgs; [
-    #   {
-    #     name = "fzf-tab";
-    #     src = fetchFromGitHub {
-    #       owner = "Aloxaf";
-    #       repo = "fzf-tab";
-    #       rev = "master";
-    #       sha256 = "sha256-q26XVS/LcyZPRqDNwKKA9exgBByE0muyuNb0Bbar2lY=";
-    #     };
-    #   }
-    #   {
-    #     name = "zsh-syntax-highlighting";
-    #     src = zsh-syntax-highlighting;
-    #   }
-    #   {
-    #     name = "zsh-completions";
-    #     src = zsh-completions;
-    #   }
-    #   {
-    #     name = "zsh-autosuggestions";
-    #     src = zsh-autosuggestions;
-    #   }
-    # ];
+      # Platform-specific initialization
+      ${lib.optionalString pkgs.stdenv.isDarwin ''
+        # Set up brew environment if on macOS
+        if [[ -f "/opt/homebrew/bin/brew" ]]; then
+          eval "$(/opt/homebrew/bin/brew shellenv)"
+        fi
+      ''}
+    '';
   };
 }

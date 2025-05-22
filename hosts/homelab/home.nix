@@ -9,22 +9,11 @@
   home.username = "kyandesutter";
   home.homeDirectory = "/home/kyandesutter";
 
-  # Host-specific packages
-  home.packages = with pkgs; [
-    firefox
-    brave
-  ];
-
-  # Host-specific settings
+  # Host-specific settings only
   programs.oh-my-posh = {
     useTheme = "huvix";
   };
 
   # Explicitly enable ZSH for NixOS
   programs.zsh.enable = true;
-
-  # Import Hyprland configuration
-  imports = [
-    ../../modules/programs/hyprland.nix
-  ];
 }

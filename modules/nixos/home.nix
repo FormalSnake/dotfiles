@@ -5,29 +5,27 @@
   inputs,
   ...
 }: {
-  # NixOS specific packages
+  # NixOS-specific packages only
   home.packages = with pkgs; [
-    # Terminal utilities
-    btop
+    # Linux-specific terminal utilities
     neofetch
 
-    # Development
-    nodejs
-    bun
-    cargo
-    rustc
-    go
-    zig
+    # Terminal emulator (Linux package only due to macOS signing)
+    ghostty
 
-    # Terminal emulator for Hyprland
-    kitty
-
-    # GUI applications
-    firefox
-    brave
+    # Hyprland utilities (Linux-specific)
+    waybar
+    swww
+    dunst
+    rofi-wayland
+    wl-clipboard
+    grim
+    slurp
+    wofi
   ];
 
-  # Import any NixOS specific program configurations here
-  imports = [];
+  # Import NixOS-specific program configurations
+  imports = [
+    ../programs/hyprland.nix
+  ];
 }
-
