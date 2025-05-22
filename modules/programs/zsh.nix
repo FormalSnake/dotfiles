@@ -46,7 +46,7 @@
       wallpaper = "matugen -c ~/.config/matugen/config.toml --verbose --contrast 0.2 image";
     };
 
-    initExtra = ''
+    initContent = ''
       # Shell integrations
       eval "$(fzf --zsh)"
       eval "$(zoxide init --cmd cd zsh)"
