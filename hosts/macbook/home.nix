@@ -10,7 +10,7 @@
   home.homeDirectory = "/Users/kyandesutter";
 
   # Host-specific settings only
-  programs.oh-my-posh = {
-    useTheme = "catppuccin_mocha";
-  };
+  # programs.oh-my-posh = {
+  #   useTheme = "catppuccin_mocha";
+  # };
 }

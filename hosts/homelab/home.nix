@@ -10,9 +10,9 @@
   home.homeDirectory = "/home/kyandesutter";
 
   # Host-specific settings only
-  programs.oh-my-posh = {
-    useTheme = "huvix";
-  };
+  # programs.oh-my-posh = {
+  #   useTheme = "huvix";
+  # };
 
   # Explicitly enable ZSH for NixOS
   programs.zsh.enable = true;
