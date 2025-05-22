@@ -5,24 +5,12 @@
     # Core
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
-    # NixOS and Darwin
-    nixos-generators = {
-      url = "github:nix-community/nixos-generators";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # System management
     nix-darwin = {
       url = "github:LnL7/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nix-homebrew = {
-      url = "github:zhaofengli-wip/nix-homebrew";
-    };
-
-    # NixOS Spicetify
-    spicetify-nix = {
-      url = "github:Gerg-L/spicetify-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
 
     # Home Manager
     home-manager = {
@@ -30,8 +18,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Themes & Plugins
+    # Themes & Integrations
     catppuccin.url = "github:catppuccin/nix";
+    spicetify-nix = {
+      url = "github:Gerg-L/spicetify-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # Neovim plugins
     plugin-auto-dark-mode = {
       url = "github:f-person/auto-dark-mode.nvim";
       flake = false;
@@ -63,223 +57,188 @@
     nixpkgs,
     nix-darwin,
     nix-homebrew,
-    nixos-generators,
     home-manager,
     catppuccin,
     ...
   }: let
-    # System types to support
+    # System configuration
     supportedSystems = ["x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin"];
-
-    # Helper function to generate an attrset by mapping a function onto supportedSystems
     forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
 
-    # Define custom overlays
+    # Custom overlays for Neovim plugins
     overlays = [
       (final: prev: {
-        vimPlugins =
-          prev.vimPlugins
-          // {
-            own-auto-dark-mode = prev.vimUtils.buildVimPlugin {
-              name = "auto-dark-mode.nvim";
-              src = inputs.plugin-auto-dark-mode;
-            };
-            own-visual-whitespace = prev.vimUtils.buildVimPlugin {
-              name = "visual-whitespace.nvim";
-              src = inputs.plugin-visual-whitespace;
-            };
-            own-tidy = prev.vimUtils.buildVimPlugin {
-              name = "tidy.nvim";
-              src = inputs.plugin-tidy;
-            };
-            own-base16 = prev.vimUtils.buildVimPlugin {
-              name = "base16.nvim";
-              src = inputs.plugin-base16;
-            };
-            own-aider = prev.vimUtils.buildVimPlugin {
-              name = "aider.nvim";
-              src = inputs.plugin-aider;
-            };
-            own-bg = prev.vimUtils.buildVimPlugin {
-              name = "bg.nvim";
-              src = inputs.plugin-bg;
-            };
+        vimPlugins = prev.vimPlugins // {
+          own-auto-dark-mode = prev.vimUtils.buildVimPlugin {
+            name = "auto-dark-mode.nvim";
+            src = inputs.plugin-auto-dark-mode;
           };
+          own-visual-whitespace = prev.vimUtils.buildVimPlugin {
+            name = "visual-whitespace.nvim";
+            src = inputs.plugin-visual-whitespace;
+          };
+          own-tidy = prev.vimUtils.buildVimPlugin {
+            name = "tidy.nvim";
+            src = inputs.plugin-tidy;
+          };
+          own-base16 = prev.vimUtils.buildVimPlugin {
+            name = "base16.nvim";
+            src = inputs.plugin-base16;
+          };
+          own-aider = prev.vimUtils.buildVimPlugin {
+            name = "aider.nvim";
+            src = inputs.plugin-aider;
+          };
+          own-bg = prev.vimUtils.buildVimPlugin {
+            name = "bg.nvim";
+            src = inputs.plugin-bg;
+          };
+        };
       })
     ];
 
-    # Nixpkgs instantiated for supported systems with overlays
-    nixpkgsFor = forAllSystems (system:
-      import nixpkgs {
-        inherit system;
-        overlays = overlays;
-        config = {
-          allowUnfree = true;
-          allowBroken = true;
-        };
-      });
-
-    # Common configuration shared across all systems
-    mkCommonConfig = {
-      username,
-      hostname,
-      system,
-      ...
-    }: {
-      nixpkgs = {
-        overlays = overlays;
-        config = {
-          allowUnfree = true;
-          allowBroken = true;
-        };
+    # Common nixpkgs configuration
+    nixpkgsConfig = {
+      overlays = overlays;
+      config = {
+        allowUnfree = true;
+        allowBroken = true;
       };
     };
 
-    # Configuration for nixOS
+    # NixOS system configuration
     mkNixosConfig = {
       username,
       hostname,
       system,
-      extraModules ? [],
     }:
       nixpkgs.lib.nixosSystem {
         inherit system;
-        modules =
-          [
-            # Add common Nixpkgs config
-            {
-              nixpkgs.overlays = overlays;
-              nixpkgs.config.allowUnfree = true;
-              nixpkgs.config.allowBroken = true;
-            }
-            ./hosts/${hostname}
-            ./modules/nixos/default.nix
-            home-manager.nixosModules.home-manager
-            {
-              networking.hostName = hostname;
-              users.users.${username} = {
-                isNormalUser = true;
-                extraGroups = ["wheel" "networkmanager" "video" "audio"];
-                shell = nixpkgs.legacyPackages.${system}.zsh;
-                home = "/home/${username}";
-              };
-
-              home-manager = {
-                useGlobalPkgs = true;
-                useUserPackages = true;
-                backupFileExtension = "backup";
-                extraSpecialArgs = {inherit inputs;};
-                users.${username} = {
-                  imports = [
-                    ./modules/common/home.nix
-                    ./modules/nixos/home.nix
-                    ./hosts/${hostname}/home.nix
-                    catppuccin.homeModules.catppuccin
-                  ];
-                };
-              };
-            }
-          ]
-          ++ extraModules;
         specialArgs = {inherit inputs;};
+        modules = [
+          {nixpkgs = nixpkgsConfig;}
+          ./hosts/${hostname}
+          ./modules/nixos/default.nix
+          
+          home-manager.nixosModules.home-manager
+          {
+            networking.hostName = hostname;
+            users.users.${username} = {
+              isNormalUser = true;
+              extraGroups = ["wheel" "networkmanager" "video" "audio"];
+              shell = nixpkgs.legacyPackages.${system}.zsh;
+              home = "/home/${username}";
+            };
+
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              backupFileExtension = "backup";
+              extraSpecialArgs = {inherit inputs;};
+              users.${username} = {
+                imports = [
+                  ./modules/common/home.nix
+                  ./modules/nixos/home.nix
+                  ./hosts/${hostname}/home.nix
+                  catppuccin.homeModules.catppuccin
+                ];
+              };
+            };
+          }
+        ];
       };
 
-    # Configuration for macOS
+    # macOS system configuration
     mkDarwinConfig = {
       username,
       hostname,
       system,
-      extraModules ? [],
     }:
       nix-darwin.lib.darwinSystem {
         inherit system;
-        modules =
-          [
-            # Add common Nixpkgs config
-            {
-              nixpkgs.overlays = overlays;
-              nixpkgs.config.allowUnfree = true;
-              nixpkgs.config.allowBroken = true;
-            }
-            ./hosts/${hostname}
-            ./modules/darwin/default.nix
-            home-manager.darwinModules.home-manager
-            {
-              networking.hostName = hostname;
-              users.users.${username} = {
-                name = username;
-                home = "/Users/${username}";
-              };
-
-              home-manager = {
-                useGlobalPkgs = true;
-                useUserPackages = true;
-                backupFileExtension = "backup";
-                extraSpecialArgs = {inherit inputs;};
-                users.${username} = {
-                  imports = [
-                    ./modules/common/home.nix
-                    ./modules/darwin/home.nix
-                    ./hosts/${hostname}/home.nix
-                    catppuccin.homeModules.catppuccin
-                  ];
-                };
-              };
-            }
-            nix-homebrew.darwinModules.nix-homebrew
-            {
-              nix-homebrew = {
-                enable = true;
-                enableRosetta = true;
-                user = username;
-                autoMigrate = true;
-              };
-            }
-          ]
-          ++ extraModules;
         specialArgs = {inherit inputs;};
+        modules = [
+          {nixpkgs = nixpkgsConfig;}
+          ./hosts/${hostname}
+          ./modules/darwin/default.nix
+          
+          home-manager.darwinModules.home-manager
+          {
+            networking.hostName = hostname;
+            users.users.${username} = {
+              name = username;
+              home = "/Users/${username}";
+            };
+
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              backupFileExtension = "backup";
+              extraSpecialArgs = {inherit inputs;};
+              users.${username} = {
+                imports = [
+                  ./modules/common/home.nix
+                  ./modules/darwin/home.nix
+                  ./hosts/${hostname}/home.nix
+                  catppuccin.homeModules.catppuccin
+                ];
+              };
+            };
+          }
+          
+          nix-homebrew.darwinModules.nix-homebrew
+          {
+            nix-homebrew = {
+              enable = true;
+              enableRosetta = true;
+              user = username;
+              autoMigrate = true;
+            };
+          }
+        ];
       };
   in {
-    darwinConfigurations = {
-      # Your current macOS machine with both names for backward compatibility
-      "FormalBook" = mkDarwinConfig {
-        username = "kyandesutter";
-        hostname = "macbook";
-        system = "aarch64-darwin";
-      };
-
-      "macbook" = mkDarwinConfig {
-        username = "kyandesutter";
-        hostname = "macbook";
-        system = "aarch64-darwin";
-      };
-    };
-
+    # System configurations
     nixosConfigurations = {
-      # NixOS homelab
-      "homelab" = mkNixosConfig {
+      homelab = mkNixosConfig {
         username = "kyandesutter";
         hostname = "homelab";
         system = "x86_64-linux";
       };
     };
 
-    # Development shells for each platform
-    devShells = forAllSystems (
-      system: let
-        pkgs = nixpkgsFor.${system};
-      in {
-        default = pkgs.mkShell {
-          buildInputs = with pkgs; [
-            git
-            nixfmt
-            nixpkgs-fmt
-          ];
-        };
-      }
-    );
+    darwinConfigurations = {
+      macbook = mkDarwinConfig {
+        username = "kyandesutter";
+        hostname = "macbook";
+        system = "aarch64-darwin";
+      };
+      
+      # Backward compatibility alias
+      FormalBook = mkDarwinConfig {
+        username = "kyandesutter";
+        hostname = "macbook";
+        system = "aarch64-darwin";
+      };
+    };
 
-    # Formatter for nix files
-    formatter = forAllSystems (system: nixpkgsFor.${system}.nixpkgs-fmt);
+    # Development environments
+    devShells = forAllSystems (system: {
+      default = nixpkgs.legacyPackages.${system}.mkShell {
+        buildInputs = with nixpkgs.legacyPackages.${system}; [
+          git
+          nixfmt-classic
+          nixpkgs-fmt
+          alejandra
+        ];
+        shellHook = ''
+          echo "🚀 Nix development environment loaded!"
+          echo "Available formatters: nixfmt-classic, nixpkgs-fmt, alejandra"
+        '';
+      };
+    });
+
+    # Code formatting
+    formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);
   };
 }
