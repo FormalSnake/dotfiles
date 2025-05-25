@@ -54,6 +54,10 @@
       url = "github:tribela/transparent.nvim";
       flake = false;
     };
+    plugin-codecompanion = {
+      url = "github:olimorris/codecompanion.nvim";
+      flake = false;
+    };
   };
 
   outputs = inputs @ {
@@ -102,6 +106,10 @@
             own-transparent = prev.vimUtils.buildVimPlugin {
               name = "transparent.nvim";
               src = inputs.plugin-transparent;
+            };
+            own-codecompanion = prev.vimUtils.buildVimPlugin {
+              name = "codecompanion.nvim";
+              src = inputs.plugin-codecompanion;
             };
           };
       })
