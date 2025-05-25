@@ -254,6 +254,22 @@
         "type": "github"
       }
     },
+    "plugin-transparent": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1719048669,
+        "narHash": "sha256-TEwT8uzilCzgAZ3F0WvMNxdiigTrYx7gCLAH4RDrINg=",
+        "owner": "tribela",
+        "repo": "transparent.nvim",
+        "rev": "a4145c52f5421f1626a4d7dc0f41e785c4439944",
+        "type": "github"
+      },
+      "original": {
+        "owner": "tribela",
+        "repo": "transparent.nvim",
+        "type": "github"
+      }
+    },
     "plugin-visual-whitespace": {
       "flake": false,
       "locked": {
@@ -282,6 +298,7 @@
         "plugin-base16": "plugin-base16",
         "plugin-bg": "plugin-bg",
         "plugin-tidy": "plugin-tidy",
+        "plugin-transparent": "plugin-transparent",
         "plugin-visual-whitespace": "plugin-visual-whitespace",
         "spicetify-nix": "spicetify-nix"
       }
