@@ -12,8 +12,8 @@
     cursor-color = #bbbbbb
     adjust-cursor-thickness = 1
     shell-integration = zsh
-    background-opacity = 0.70
-    background-blur-radius = 20
+    background-opacity = 0.85
+    background-blur-radius = 32
 
     keybind = cmd+shift+space=toggle_quick_terminal
 
