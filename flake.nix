@@ -51,7 +51,7 @@
       flake = false;
     };
     plugin-transparent = {
-      url = "tribela/transparent.nvim";
+      url = "github:tribela/transparent.nvim";
       flake = false;
     };
   };
@@ -252,4 +252,3 @@
     formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);
   };
 }
-
