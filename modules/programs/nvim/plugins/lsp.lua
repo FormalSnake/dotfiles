@@ -45,6 +45,15 @@ require('lspconfig').ts_ls.setup {
 require('lspconfig').nil_ls.setup {
   on_attach = on_attach,
   capabilities = capabilities,
+  settings = {
+    ['nil'] = {
+      ['nix'] = {
+        flake = {
+          autoArchive = true,
+        }
+      }
+    },
+  },
 }
 
 require('lspconfig').astro.setup {
