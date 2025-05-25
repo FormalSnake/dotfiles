@@ -44,7 +44,6 @@ The configuration follows a hierarchical approach:
         ├── hyprland.nix     # Window manager (Linux-specific)
         ├── kitty.nix        # Terminal emulator (cross-platform)
         ├── neovim.nix       # Text editor (cross-platform)
-        ├── spicetify.nix    # Spotify theming (cross-platform)
         ├── tmux.nix         # Terminal multiplexer (cross-platform)
         ├── zoxide.nix       # Smart cd (cross-platform)
         └── zsh.nix          # Shell configuration (cross-platform)

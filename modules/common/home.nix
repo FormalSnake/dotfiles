@@ -32,6 +32,9 @@
     # Browsers (available on all platforms)
     firefox
     brave
+    
+    # Media
+    spotify
   ];
 
   # Global theming
@@ -61,6 +64,5 @@
     ../programs/ghostty.nix
     ../programs/btop.nix
     ../programs/fastfetch.nix
-    ../programs/spicetify.nix
   ];
 }
