@@ -158,7 +158,7 @@ in {
         plugin = treesj;
         config = toLuaFile ./nvim/plugins/treesj.lua;
       }
-      own-codecompanion
+      codecompanion-nvim
       {
         plugin = which-key-nvim;
         config = toLuaFile ./nvim/plugins/whichkey.lua;

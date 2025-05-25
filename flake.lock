@@ -238,6 +238,22 @@
         "type": "github"
       }
     },
+    "plugin-codecompanion": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1748183920,
+        "narHash": "sha256-06kzZaJuhoLceIaFWD0iYakliYTP0+AaVs6YHmkanQ8=",
+        "owner": "olimorris",
+        "repo": "codecompanion.nvim",
+        "rev": "7a06a862cafe7a19657af55107a644bcff00062d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "olimorris",
+        "repo": "codecompanion.nvim",
+        "type": "github"
+      }
+    },
     "plugin-tidy": {
       "flake": false,
       "locked": {
@@ -297,6 +313,7 @@
         "plugin-auto-dark-mode": "plugin-auto-dark-mode",
         "plugin-base16": "plugin-base16",
         "plugin-bg": "plugin-bg",
+        "plugin-codecompanion": "plugin-codecompanion",
         "plugin-tidy": "plugin-tidy",
         "plugin-transparent": "plugin-transparent",
         "plugin-visual-whitespace": "plugin-visual-whitespace",
