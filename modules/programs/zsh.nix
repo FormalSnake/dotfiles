@@ -58,7 +58,9 @@
           read commit_message
         fi
         git commit -avm "$commit_message"
-        git push origin main
+        
+        branch_name=${1:-main}
+        git push origin "$branch_name"
       }
 
       # Platform-specific initialization
