@@ -42,11 +42,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1748134483,
-        "narHash": "sha256-5PBK1nV8X39K3qUj8B477Aa2RdbLq3m7wRxUKRtggX4=",
+        "lastModified": 1748227609,
+        "narHash": "sha256-SaSdslyo6UGDpPUlmrPA4dWOEuxCy2ihRN9K6BnqYsA=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "c1e671036224089937e111e32ea899f59181c383",
+        "rev": "d23d20f55d49d8818ac1f1b2783671e8a6725022",
         "type": "github"
       },
       "original": {
@@ -62,29 +62,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1748149228,
-        "narHash": "sha256-mmonYFesFo42UUS49Hd0bcbVJRWX/aHBCDYUkkvylf4=",
+        "lastModified": 1748352827,
+        "narHash": "sha256-sNUUP6qxGkK9hXgJ+p362dtWLgnIWwOCmiq72LAWtYo=",
         "owner": "LnL7",
         "repo": "nix-darwin",
-        "rev": "a9939228f661df370c4094fe85f683e45d761dbe",
-        "type": "github"
-      },
-      "original": {
-        "owner": "LnL7",
-        "repo": "nix-darwin",
-        "type": "github"
-      }
-    },
-    "nix-darwin_2": {
-      "inputs": {
-        "nixpkgs": "nixpkgs_2"
-      },
-      "locked": {
-        "lastModified": 1716329735,
-        "narHash": "sha256-ap51w+VqG21vuzyQ04WrhI2YbWHd3UGz0e7dc/QQmoA=",
-        "owner": "LnL7",
-        "repo": "nix-darwin",
-        "rev": "eac4f25028c1975a939c8f8fba95c12f8a25e01c",
+        "rev": "44a7d0e687a87b73facfe94fba78d323a6686a90",
         "type": "github"
       },
       "original": {
@@ -95,16 +77,14 @@
     },
     "nix-homebrew": {
       "inputs": {
-        "brew-src": "brew-src",
-        "nix-darwin": "nix-darwin_2",
-        "nixpkgs": "nixpkgs_3"
+        "brew-src": "brew-src"
       },
       "locked": {
-        "lastModified": 1747444109,
-        "narHash": "sha256-fSufrKr8NdhLMuGZGwjGUfH+TIWrjFTRIBhgCRIyxno=",
+        "lastModified": 1748305448,
+        "narHash": "sha256-G3PvFLCoq5LCcP0rn+6TP5pF1smtRlYCfOS+1Epn2Tk=",
         "owner": "zhaofengli-wip",
         "repo": "nix-homebrew",
-        "rev": "159f21ae77da757bbaeb98c0b16ff2e7b2738350",
+        "rev": "6f94d412d389a7ff8c0b3e295e34558ee6381890",
         "type": "github"
       },
       "original": {
@@ -131,40 +111,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1687274257,
-        "narHash": "sha256-TutzPriQcZ8FghDhEolnHcYU2oHIG5XWF+/SUBNnAOE=",
-        "path": "/nix/store/22qgs3skscd9bmrxv9xv4q5d4wwm5ppx-source",
-        "rev": "2c9ecd1f0400076a4d6b2193ad468ff0a7e7fdc5",
-        "type": "path"
-      },
-      "original": {
-        "id": "nixpkgs",
-        "type": "indirect"
-      }
-    },
-    "nixpkgs_3": {
-      "locked": {
-        "lastModified": 1746328495,
-        "narHash": "sha256-uKCfuDs7ZM3QpCE/jnfubTg459CnKnJG/LwqEVEdEiw=",
+        "lastModified": 1748248602,
+        "narHash": "sha256-LanRAm0IRpL36KpCKSknEwkBFvTLc9mDHKeAmfTrHwg=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "979daf34c8cacebcd917d540070b52a3c2b9b16e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "ref": "nixos-unstable",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
-    "nixpkgs_4": {
-      "locked": {
-        "lastModified": 1747958103,
-        "narHash": "sha256-qmmFCrfBwSHoWw7cVK4Aj+fns+c54EBP8cGqp/yK410=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "fe51d34885f7b5e3e7b59572796e1bcb427eccb1",
+        "rev": "ad331efcaf680eb1c838cb339472399ea7b3cdab",
         "type": "github"
       },
       "original": {
@@ -209,11 +160,11 @@
     "plugin-base16": {
       "flake": false,
       "locked": {
-        "lastModified": 1748134314,
-        "narHash": "sha256-aY+CqqnVphToeZ5pv616IcNFbho3p4J2N2RttUGZRYk=",
+        "lastModified": 1748220405,
+        "narHash": "sha256-leis0Gz7EHd6HjypoGfwbiN6i4sn5KVgLpoXIdQtp7Q=",
         "owner": "RRethy",
         "repo": "base16-nvim",
-        "rev": "755012782c4bb747562e09562563ef5cc7527aef",
+        "rev": "f9ce7474c54803cb0fa308b0b91549d394a07940",
         "type": "github"
       },
       "original": {
@@ -292,7 +243,7 @@
         "home-manager": "home-manager",
         "nix-darwin": "nix-darwin",
         "nix-homebrew": "nix-homebrew",
-        "nixpkgs": "nixpkgs_4",
+        "nixpkgs": "nixpkgs_2",
         "plugin-aider": "plugin-aider",
         "plugin-auto-dark-mode": "plugin-auto-dark-mode",
         "plugin-base16": "plugin-base16",
