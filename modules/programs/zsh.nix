@@ -59,7 +59,7 @@
         fi
         git commit -avm "$commit_message"
         
-        branch_name=${1:-main}
+        branch_name=$${1:-main}
         git push origin "$branch_name"
       }
 
