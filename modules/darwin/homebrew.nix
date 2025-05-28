@@ -27,7 +27,7 @@
       "whatsapp"
       "leader-key"
       "google-drive"
+      "spotify"
     ];
   };
 }
-

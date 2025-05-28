@@ -10,7 +10,8 @@
     "/System/Applications/Calendar.app"
     "/Applications/Equibop.app"
     "/Applications/Ghostty.app"
-    "${pkgs.spotify}/Applications/Spotify.app"
+    # "${pkgs.spotify}/Applications/Spotify.app"
+    "/Applications/Spotify.app"
   ];
   system.primaryUser = "kyandesutter";
 

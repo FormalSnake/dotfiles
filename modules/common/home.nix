@@ -34,7 +34,7 @@
     brave
 
     # Media
-    spotify
+    # spotify
   ];
 
   # Global theming
