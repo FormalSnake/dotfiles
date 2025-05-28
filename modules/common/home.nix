@@ -32,7 +32,7 @@
     # Browsers (available on all platforms)
     firefox
     brave
-    
+
     # Media
     spotify
   ];
