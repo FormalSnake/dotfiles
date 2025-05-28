@@ -9,7 +9,7 @@
     onActivation.cleanup = "zap";
     onActivation.autoUpdate = true;
     onActivation.upgrade = true;
-    
+
     # Common brews for all macOS machines
     brews = [
       "docker"
@@ -17,7 +17,7 @@
       "docker-credential-helper"
       "imagemagick"
     ];
-    
+
     # Common casks for all macOS machines
     casks = [
       "brave-browser"
@@ -26,6 +26,8 @@
       "raycast"
       "whatsapp"
       "leader-key"
+      "google-drive"
     ];
   };
 }
+
