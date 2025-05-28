@@ -38,9 +38,9 @@
 
       # System-specific aliases
       nixrb = lib.mkIf pkgs.stdenv.isDarwin "clear && sudo darwin-rebuild switch --flake .";
-      nixrbgc = lib.mkIf pkgs.stdenv.isDarwin "clear && sudo darwin-rebuild switch --flake . && sudo nix-collect-garbage -d";
+      nixrbgc = lib.mkIf pkgs.stdenv.isDarwin "clear && sudo darwin-rebuild switch --flake . && sudo nix-collect-garbage -d && sudo nix-store --verify --check-contents --repair";
       nixos-rb = lib.mkIf pkgs.stdenv.isLinux "clear && sudo nixos-rebuild switch --flake .";
-      nixos-rbgc = lib.mkIf pkgs.stdenv.isLinux "clear && sudo nixos-rebuild switch --flake . && sudo nix-collect-garbage -d";
+      nixos-rbgc = lib.mkIf pkgs.stdenv.isLinux "clear && sudo nixos-rebuild switch --flake . && sudo nix-collect-garbage -d && sudo nix-store --verify --check-contents --repair";
     };
 
     initContent = ''
@@ -58,7 +58,7 @@
           read commit_message
         fi
         git commit -avm "$commit_message"
-        
+
         branch_name=$${1:-main}
         git push origin "$branch_name"
       }
@@ -73,4 +73,3 @@
     '';
   };
 }
-
