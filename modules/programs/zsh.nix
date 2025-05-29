@@ -59,7 +59,11 @@
         fi
         git commit -avm "$commit_message"
 
-        branch_name=$${1:-main}
+        if [ -n "$1" ]; then
+          branch_name="$1"
+        else
+          branch_name="main"
+        fi
         git push origin "$branch_name"
       }
 
