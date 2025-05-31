@@ -10,6 +10,9 @@
     # Linux-specific terminal utilities
     neofetch
 
+    # Linux-specific dev utilities
+    github-desktop
+
     # Terminal emulator (Linux package only due to macOS signing)
     ghostty
 
@@ -29,3 +32,4 @@
     ../programs/hyprland.nix
   ];
 }
+

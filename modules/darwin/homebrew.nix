@@ -28,6 +28,7 @@
       "leader-key"
       "google-drive"
       "spotify"
+      "github"
     ];
   };
 }
