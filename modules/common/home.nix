@@ -28,6 +28,7 @@
     go
     zig
     lua
+    github-desktop
 
     # Browsers (available on all platforms)
     firefox
