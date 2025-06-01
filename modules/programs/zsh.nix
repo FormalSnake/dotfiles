@@ -67,6 +67,17 @@
         git push origin "$branch_name"
       }
 
+      function gcommit() {
+        git add .
+        commit_message=$(lumen draft)
+        if [ -z "$commit_message" ]; then
+          echo "Lumen draft is empty"
+          echo -n "Enter commit message: "
+          read commit_message
+        fi
+        git commit -avm "$commit_message"
+      }
+
       # Platform-specific initialization
       ${lib.optionalString pkgs.stdenv.isDarwin ''
         # Set up brew environment if on macOS
