@@ -59,6 +59,9 @@
       fish_add_path /nix/var/nix/profiles/default/bin
       fish_add_path ~/.nix-profile/bin
       
+      # Add Python pip bin directory to PATH
+      fish_add_path ~/Library/Python/3.9/bin
+      
       # Shell integrations handled by home-manager fzf.nix and zoxide.nix
 
       # Functions ported from zsh
