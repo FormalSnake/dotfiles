@@ -55,7 +55,7 @@
 
   # Common program imports (available on all platforms)
   imports = [
-    ../programs/zsh.nix
+    ../programs/fish.nix
     ../programs/neovim.nix
     ../programs/tmux.nix
     ../programs/zoxide.nix

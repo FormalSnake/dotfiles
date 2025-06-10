@@ -26,7 +26,7 @@
   ];
 
   # Enable macOS specific programs
-  programs.oh-my-posh.enableZshIntegration = true;
+  programs.oh-my-posh.enableFishIntegration = true;
 
   # Import macOS-specific program configurations
   imports = [
