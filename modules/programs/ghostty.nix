@@ -9,7 +9,7 @@
     theme = dark:catppuccin-mocha,light:catppuccin-latte
     # theme = dark:GitHub-Dark-High-Contrast,light:GitHub-Light-High-Contrast
     cursor-style = block
-    cursor-color = #bbbbbb
+    # cursor-color = #bbbbbb
     adjust-cursor-thickness = 1
     shell-integration = zsh
     background-opacity = 0.85
@@ -28,10 +28,10 @@
     window-padding-balance = true
     window-colorspace = display-p3
 
-    macos-icon = custom-style
-    macos-icon-ghost-color = c7c6c6
-    macos-icon-screen-color = 201e1e
-    macos-icon-frame = plastic
+    # macos-icon = custom-style
+    # macos-icon-ghost-color = c7c6c6
+    # macos-icon-screen-color = 201e1e
+    # macos-icon-frame = plastic
 
     clipboard-read = allow
     clipboard-write = allow
