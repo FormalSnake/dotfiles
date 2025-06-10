@@ -11,7 +11,7 @@
     cursor-style = block
     # cursor-color = #bbbbbb
     adjust-cursor-thickness = 1
-    shell-integration = zsh
+    shell-integration = fish
     background-opacity = 0.85
     background-blur-radius = 32
 

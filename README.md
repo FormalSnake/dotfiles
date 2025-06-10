@@ -46,7 +46,7 @@ The configuration follows a hierarchical approach:
         ├── neovim.nix       # Text editor (cross-platform)
         ├── tmux.nix         # Terminal multiplexer (cross-platform)
         ├── zoxide.nix       # Smart cd (cross-platform)
-        └── zsh.nix          # Shell configuration (cross-platform)
+        └── fish.nix         # Shell configuration (cross-platform)
 ```
 
 ## Package Distribution
@@ -55,7 +55,7 @@ The configuration follows a hierarchical approach:
 - **Development**: nodejs, bun, cargo, rustc, go, zig, lua
 - **Utilities**: ripgrep, fd, fzf, gh, bat, lazygit
 - **Applications**: firefox, brave
-- **Programs**: neovim, tmux, zsh, kitty, ghostty, btop, fastfetch, spicetify, zoxide, fzf
+- **Programs**: neovim, tmux, fish, kitty, ghostty, btop, fastfetch, spicetify, zoxide, fzf
 
 ### macOS-Specific
 - **Development**: aider-chat, claude-code, pyenv, nixd, devenv, chafa, repomix
@@ -137,10 +137,43 @@ To update all flake inputs to their latest versions:
 nix flake update
 ```
 
+## Shell Migration (Zsh to Fish)
+
+If you're migrating from zsh to fish, follow these steps:
+
+### 1. Rebuild your system
+```bash
+sudo darwin-rebuild switch --flake .
+```
+
+### 2. Add fish to allowed shells
+```bash
+echo "/etc/profiles/per-user/$(whoami)/bin/fish" | sudo tee -a /etc/shells
+```
+
+### 3. Set fish as default shell
+```bash
+chsh -s /etc/profiles/per-user/$(whoami)/bin/fish
+```
+
+### 4. Set up secret environment variables
+```bash
+# Copy the template
+cp ~/.config/fish/secrets.fish.template ~/.config/fish/secrets.fish
+
+# Edit the file and add your API keys/tokens
+# Example:
+# set -gx OPENAI_API_KEY "your-api-key-here"
+# set -gx GITHUB_TOKEN "your-github-token-here"
+```
+
+### 5. Restart your terminal
+Fish will now be your default shell with all your aliases and functions ported over.
+
 ## Software Included
 
 ### Cross-Platform
-- **Shell**: ZSH with syntax highlighting, autosuggestions, and oh-my-posh
+- **Shell**: Fish with syntax highlighting, autosuggestions, and oh-my-posh
 - **Editor**: Neovim with comprehensive LSP, completion, and plugin setup
 - **Terminals**: Kitty and Ghostty with Catppuccin theming
 - **Multiplexer**: Tmux with session management and vim navigation

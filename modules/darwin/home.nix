@@ -25,8 +25,6 @@
     zed-editor
   ];
 
-  # Enable macOS specific programs
-  programs.oh-my-posh.enableFishIntegration = true;
 
   # Import macOS-specific program configurations
   imports = [

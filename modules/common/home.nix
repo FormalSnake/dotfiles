@@ -19,6 +19,7 @@
     gh
     bat
     lazygit
+    zoxide
 
     # Development tools (available on all platforms)
     nodejs
@@ -48,10 +49,6 @@
 
   programs.lazygit.enable = true;
 
-  programs.oh-my-posh = {
-    enable = true;
-    useTheme = "catppuccin_mocha";
-  };
 
   # Common program imports (available on all platforms)
   imports = [

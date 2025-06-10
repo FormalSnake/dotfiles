@@ -10,8 +10,8 @@
     # Fish plugins via home-manager
     plugins = with pkgs.fishPlugins; [
       {
-        name = "fzf-fish";
-        src = fzf-fish.src;
+        name = "pure";
+        src = pure.src;
       }
       {
         name = "autopair";
@@ -53,9 +53,13 @@
       # Set fish as default shell
       set -g fish_greeting ""
       
-      # Shell integrations
-      fzf --fish | source
-      zoxide init --cmd cd fish | source
+      # Ensure nix paths are in PATH for fish
+      fish_add_path /etc/profiles/per-user/kyandesutter/bin
+      fish_add_path /run/current-system/sw/bin
+      fish_add_path /nix/var/nix/profiles/default/bin
+      fish_add_path ~/.nix-profile/bin
+      
+      # Shell integrations handled by home-manager fzf.nix and zoxide.nix
 
       # Functions ported from zsh
       function gpush
