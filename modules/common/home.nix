@@ -49,7 +49,6 @@
 
   programs.lazygit.enable = true;
 
-
   # Common program imports (available on all platforms)
   imports = [
     ../programs/fish.nix
