@@ -102,7 +102,12 @@ in {
       }
       {
         plugin = own-bg;
-        config = toLua "require('bg').setup()";
+        config = toLua ''
+          local ok, bg = pcall(require, "bg")
+          if ok then
+            bg.setup()
+          end
+        '';
       }
       {
         plugin = nvim-ts-autotag;
