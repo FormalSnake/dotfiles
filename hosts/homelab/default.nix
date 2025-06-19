@@ -36,12 +36,5 @@
   
 
 
-  # Enable ZSH at the system level
-  programs.zsh.enable = true;
 
-  # System packages
-  environment.systemPackages = with pkgs; [
-    firefox
-    brave
-  ];
 }

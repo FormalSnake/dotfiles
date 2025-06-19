@@ -55,7 +55,6 @@
     curl
     wget
     htop
-    firefox
     brave
   ];
 

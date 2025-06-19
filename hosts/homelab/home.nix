@@ -14,6 +14,4 @@
   #   useTheme = "huvix";
   # };
 
-  # Explicitly enable ZSH for NixOS
-  programs.zsh.enable = true;
 }

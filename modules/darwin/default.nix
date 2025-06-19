@@ -5,7 +5,7 @@
   ...
 }: {
   # macOS specific system configuration
-  nixpkgs.hostPlatform = "aarch64-darwin";
+  nixpkgs.hostPlatform = config.nixpkgs.system;
 
   # Enable experimental Nix command and flakes
   nix.settings.experimental-features = "nix-command flakes";

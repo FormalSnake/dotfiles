@@ -54,19 +54,11 @@ in {
           }
         '';
       }
-      # {
-      #   plugin = nvim-lspconfig;
-      #   config = toLuaFile ./nvim/plugins/lsp.lua;
-      # }
       {
         plugin = own-auto-dark-mode;
         config = toLuaFile ./nvim/plugins/colorscheme.lua;
       }
       github-nvim-theme
-      # {
-      #   plugin = own-base16;
-      #   config = toLuaFile ./nvim/plugins/colorscheme.lua;
-      # }
       {
         plugin = own-visual-whitespace;
         config = toLua ''
@@ -104,23 +96,13 @@ in {
         plugin = autoclose-nvim;
         config = toLuaFile ./nvim/plugins/autoclose.lua;
       }
-      # {
-      #   plugin = statuscol-nvim;
-      #   config = toLuaFile ./nvim/plugins/statuscol.lua;
-      # }
       {
         plugin = auto-session;
         config = toLuaFile ./nvim/plugins/autosession.lua;
       }
       {
         plugin = own-bg;
-        config = toLua ''
-          -- Attempt to lazy load the module or skip if not available
-          local ok, bg = pcall(require, "bg")
-          if ok then
-            bg.setup()
-          end
-        '';
+        config = toLua "require('bg').setup()";
       }
       {
         plugin = nvim-ts-autotag;
@@ -226,8 +208,8 @@ in {
     ];
 
     extraLuaConfig = ''
-      ${builtins.readFile ./nvim/options.lua}
       ${builtins.readFile ./nvim/core/globals.lua}
+      ${builtins.readFile ./nvim/options.lua}
     '';
   };
 }

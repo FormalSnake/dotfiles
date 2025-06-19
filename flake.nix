@@ -132,7 +132,7 @@
             users.users.${username} = {
               isNormalUser = true;
               extraGroups = ["wheel" "networkmanager" "video" "audio"];
-              shell = nixpkgs.legacyPackages.${system}.zsh;
+              shell = nixpkgs.legacyPackages.${system}.fish;
               home = "/home/${username}";
             };
 
@@ -220,12 +220,6 @@
         system = "aarch64-darwin";
       };
 
-      # Backward compatibility alias
-      FormalBook = mkDarwinConfig {
-        username = "kyandesutter";
-        hostname = "macbook";
-        system = "aarch64-darwin";
-      };
     };
 
     # Development environments
