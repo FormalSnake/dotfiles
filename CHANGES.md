@@ -61,48 +61,47 @@ Packages like `firefox` can be centralized. However, `brave` needs to be install
     -   **Find this line:** `nixpkgs.hostPlatform = "aarch64-darwin";`
     -   **Replace with:** `nixpkgs.hostPlatform = config.nixpkgs.system;`
 
-## 2. Neovim Configuration Refactoring
+## 2. Neovim Configuration Refactoring (without lazy.nvim)
 
-The Neovim setup is overly complex, with significant code duplication, dead code, and conflicting strategies for managing plugins and LSPs. These changes will drastically simplify it.
+The Neovim setup is overly complex, with significant code duplication, dead code, and conflicting strategies for managing plugins and LSPs. These changes will drastically simplify it by centralizing configuration and relying solely on Nix for plugin management.
 
-### 2.1. Remove Dead and Unused Code
+### 2.1. Remove Dead, Unused, and Obsolete Code
 
 -   **Action:** Delete the following files, as they are either unused, fully commented out, or their functionality is redundant and will be merged elsewhere:
-    -   `modules/programs/nvim/core/keymaps.lua`
-    -   `modules/programs/nvim/core/config/init.lua`
-    -   `modules/programs/nvim/core/config/dashboard/headers.lua`
-    -   `modules/programs/nvim/plugins/lsp.lua`
-    -   `modules/programs/nvim/core/config/lsp_config.lua`
-    -   `modules/programs/nvim/core/config/ghostty.lua`
-    -   `modules/programs/nvim/core/config/yank.lua`
+    -   `modules/programs/nvim/core/lazy.lua` (We are not using lazy.nvim for plugin management).
+    -   `modules/programs/nvim/core/keymaps.lua` (Content will be merged into `options.lua`).
+    -   `modules/programs/nvim/core/config/init.lua` (Redundant; configuration will be loaded from `neovim.nix`).
+    -   `modules/programs/nvim/core/config/dashboard/headers.lua` (Fully commented out and unused).
+    -   `modules/programs/nvim/plugins/lsp.lua` (Old, unused LSP configuration).
+    -   `modules/programs/nvim/core/config/lsp_config.lua` (Conflicting LSP setup; will be simplified).
+    -   `modules/programs/nvim/core/config/ghostty.lua` (Simple autocommand that is not needed or can be moved).
+    -   `modules/programs/nvim/core/config/yank.lua` (Legacy vimscript settings to be replaced by modern Lua options).
 
 ### 2.2. Consolidate Options and Keymaps
 
-All options and keymaps are scattered and duplicated. They will be consolidated into `options.lua`, which will be loaded correctly before plugins.
+All options and keymaps are scattered and duplicated. They will be consolidated into `options.lua`, which will be loaded directly via `neovim.nix`.
 
 -   **File to modify:** `modules/programs/nvim/options.lua`
-    -   **Action:** Replace its entire content with a clean, unified set of options and keymaps. This file will become the single source of truth for Neovim settings. The complex clipboard mappings will be replaced by the standard `unnamedplus`.
+    -   **Action:** Replace its entire content with a clean, unified set of options and keymaps from the existing `options.lua`, `core/keymaps.lua`, and relevant settings from `core/config/yank.lua`. The complex clipboard mappings will be replaced by the standard `vim.opt.clipboard = "unnamedplus"`. All `snacks` keybindings will be preserved within this file.
 
 -   **File to modify:** `modules/programs/neovim.nix`
-    -   **Action:** Remove the `extraLuaConfig` block. The configurations it loads (`options.lua`, `globals.lua`) will be loaded via the main `lazy.nvim` entrypoint.
-    -   **Remove this entire block:**
+    -   **Action:** Ensure the `extraLuaConfig` block correctly loads the core configuration files. It should load `globals.lua` and the newly consolidated `options.lua`. This block should be the single entry point for non-plugin configuration.
+    -   **Verify this block exists and is correct:**
         ```nix
         extraLuaConfig = ''
-          ${builtins.readFile ./nvim/options.lua}
           ${builtins.readFile ./nvim/core/globals.lua}
+          ${builtins.readFile ./nvim/options.lua}
         '';
         ```
 
--   **File to modify:** `modules/programs/nvim/core/lazy.lua`
-    -   **Action:** Modify this file to load `globals.lua` and `options.lua` before setting up `lazy.nvim`. This ensures all settings are applied correctly before plugins are loaded. Remove the duplicated options that were already in this file.
-
-### 2.3. Simplify LSP and Plugin Configuration
+### 2.3. Simplify Plugin Configuration in `neovim.nix`
 
 The current setup has multiple conflicting LSP management strategies and commented-out plugins.
 
 -   **File to modify:** `modules/programs/neovim.nix`
     -   **Action:** Clean up the `plugins` list by removing commented-out sections.
-    -   **Remove:** The commented-out plugin blocks for `nvim-lspconfig`, `statuscol-nvim`, `own-base16`, and the `bg` plugin's `pcall` wrapper, which is unnecessary with lazy.nvim.
+    -   **Remove:** The commented-out plugin blocks for `nvim-lspconfig`, `statuscol-nvim`, and `own-base16`.
+    -   **Remove:** The `pcall` wrapper for the `own-bg` plugin, which is unnecessary when using Nix to manage plugins.
 
 -   **File to modify:** `modules/programs/nvim/plugins/cmp.lua`
     -   **Action:** Remove the large commented-out section at the top of the file to improve readability.
