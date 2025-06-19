@@ -70,11 +70,30 @@
     };
   };
 
-  # Hyprland configuration (default for all NixOS systems)
-  programs.hyprland = {
+  # GNOME Desktop Environment (minimal setup)
+  services.xserver = {
     enable = true;
-    xwayland.enable = true;
+    displayManager.gdm.enable = true;
+    desktopManager.gnome.enable = true;
   };
+
+  # Disable some GNOME applications for minimal setup
+  environment.gnome.excludePackages = (with pkgs; [
+    gnome-photos
+    gnome-tour
+    gedit
+    cheese
+    gnome-terminal
+    epiphany
+    geary
+    evince
+    gnome-characters
+    totem
+    tali
+    iagno
+    hitori
+    atomix
+  ]);
 
   # System fonts
   fonts = {

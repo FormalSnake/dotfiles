@@ -16,20 +16,9 @@
     # Terminal emulator (Linux package only due to macOS signing)
     ghostty
 
-    # Hyprland utilities (Linux-specific)
-    waybar
-    swww
-    dunst
-    rofi-wayland
-    wl-clipboard
-    grim
-    slurp
-    wofi
-  ];
-
-  # Import NixOS-specific program configurations
-  imports = [
-    ../programs/hyprland.nix
+    # GNOME utilities
+    gnome-tweaks
+    dconf-editor
   ];
 }
 

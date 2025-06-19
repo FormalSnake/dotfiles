@@ -34,14 +34,13 @@ The configuration follows a hierarchical approach:
     │   ├── home.nix     # macOS-specific packages and programs
     │   └── homebrew.nix # Homebrew configuration
     ├── nixos       # NixOS-specific configurations
-    │   ├── default.nix  # NixOS system configuration and Hyprland
-    │   └── home.nix     # Linux-specific packages and Hyprland utilities
+    │   ├── default.nix  # NixOS system configuration and GNOME
+    │   └── home.nix     # Linux-specific packages and GNOME utilities
     └── programs    # Individual program configurations
         ├── btop.nix         # System monitor (cross-platform)
         ├── fastfetch.nix    # System info (cross-platform)
         ├── fzf.nix          # Fuzzy finder (cross-platform)
         ├── ghostty.nix      # Terminal emulator (cross-platform config)
-        ├── hyprland.nix     # Window manager (Linux-specific)
         ├── kitty.nix        # Terminal emulator (cross-platform)
         ├── neovim.nix       # Text editor (cross-platform)
         ├── tmux.nix         # Terminal multiplexer (cross-platform)
@@ -66,12 +65,12 @@ The configuration follows a hierarchical approach:
 ### NixOS-Specific  
 - **Utilities**: neofetch
 - **Applications**: ghostty (via Nix package)
-- **Hyprland Ecosystem**: waybar, swww, dunst, rofi-wayland, wl-clipboard, grim, slurp, wofi
-- **Programs**: hyprland
+- **GNOME Utilities**: gnome-tweaks, dconf-editor
+- **Desktop Environment**: GNOME (minimal setup)
 
 ### Host-Specific Settings
 - **macbook**: Uses `catppuccin_mocha` oh-my-posh theme, homebrew packages
-- **homelab**: Uses `huvix` oh-my-posh theme, Hyprland desktop environment
+- **homelab**: Uses `huvix` oh-my-posh theme, GNOME desktop environment
 
 ## Requirements
 Ensure you have the following installed on your system:
@@ -187,8 +186,8 @@ Fish will now be your default shell with all your aliases and functions ported o
 - **Installation**: Ghostty via Homebrew (due to signing requirements)
 
 ### Linux-Specific  
-- **Desktop**: Hyprland with Wayland support
-- **System**: Complete Hyprland ecosystem (waybar, rofi, etc.)
+- **Desktop**: GNOME with X11/Wayland support
+- **System**: Minimal GNOME setup with essential utilities
 - **Utilities**: Native Linux alternatives for system monitoring
 
 ## Contributing
