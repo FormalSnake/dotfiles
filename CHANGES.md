@@ -24,18 +24,21 @@ The configuration contains setups for both Zsh and Fish, but the default shell f
     -   **Action:** Remove the home-manager Zsh enablement.
     -   **Remove this line:** `programs.zsh.enable = true;`
 
-### 1.2. Centralize Common Packages
+### 1.2. Centralize Common Packages & Handle Platform-Specifics
 
-Packages like `firefox` and `brave` are defined in multiple places. They should be defined once in `modules/common/home.nix` to avoid duplication.
+Packages like `firefox` can be centralized. However, `brave` needs to be installed via Homebrew on macOS due to system issues, so it must be handled on a per-platform basis. This section adjusts the package management strategy accordingly.
+
+-   **File to modify:** `modules/common/home.nix`
+    -   **Action:** Remove `brave` from the common packages list. It will be managed per-platform. `firefox` will remain.
 
 -   **File to modify:** `modules/nixos/default.nix`
-    -   **Action:** In the `environment.systemPackages` list, remove `firefox` and `brave`.
+    -   **Action:** In the `environment.systemPackages` list, remove `firefox` as it is being moved to `modules/common/home.nix`. `brave` should remain in this list for NixOS systems.
 
 -   **File to modify:** `hosts/homelab/default.nix`
-    -   **Action:** In the `environment.systemPackages` list, remove `firefox` and `brave`.
+    -   **Action:** In the `environment.systemPackages` list, remove both `firefox` and `brave` to avoid duplication with the platform-level configurations defined in `modules/common/home.nix` and `modules/nixos/default.nix`.
 
 -   **File to modify:** `modules/darwin/homebrew.nix`
-    -   **Action:** Remove `"brave-browser"` from the `casks` list. The `brave` package from `nixpkgs` is already included in `modules/common/home.nix` and works on both platforms.
+    -   **Action:** The instruction to remove `"brave-browser"` was incorrect and has been removed from this plan. It should remain in the `casks` list for macOS-specific installation. No change is needed for this file.
 
 ### 1.3. Clean up `flake.nix`
 
