@@ -4,6 +4,9 @@
   lib,
   ...
 }: {
+  # Required Darwin system state version
+  system.stateVersion = 6;
+
   # Host-specific dock settings
   system.defaults.dock.persistent-apps = [
     "/Applications/Brave Browser.app"
