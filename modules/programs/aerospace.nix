@@ -32,12 +32,12 @@
 
       # Gaps settings
       gaps = {
-        inner.horizontal = 6;
-        inner.vertical = 6;
-        outer.left = 6;
-        outer.bottom = 6;
-        outer.top = 6;
-        outer.right = 6;
+        inner.horizontal = 16;
+        inner.vertical = 16;
+        outer.left = 16;
+        outer.bottom = 16;
+        outer.top = 16;
+        outer.right = 16;
       };
 
       # Main mode bindings
