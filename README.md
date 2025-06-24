@@ -45,6 +45,7 @@ The configuration follows a hierarchical approach:
         ├── neovim.nix       # Text editor (cross-platform)
         ├── tmux.nix         # Terminal multiplexer (cross-platform)
         ├── zoxide.nix       # Smart cd (cross-platform)
+        ├── aerospace.nix    # Window manager (macOS-specific)
         └── fish.nix         # Shell configuration (cross-platform)
 ```
 
@@ -60,7 +61,7 @@ The configuration follows a hierarchical approach:
 - **Development**: aider-chat, claude-code, pyenv, nixd, devenv, chafa, repomix
 - **Utilities**: ice-bar, mousecape, the-unarchiver
 - **Applications**: zed-editor
-- **Programs**: (none currently - all moved to cross-platform)
+- **Programs**: aerospace (window manager)
 
 ### NixOS-Specific  
 - **Utilities**: neofetch
@@ -183,6 +184,7 @@ Fish will now be your default shell with all your aliases and functions ported o
 
 ### macOS-Specific
 - **Development**: Aider AI, Claude, PyEnv, DevEnv
+- **Window Management**: Aerospace tiling window manager
 - **Installation**: Ghostty via Homebrew (due to signing requirements)
 
 ### Linux-Specific  

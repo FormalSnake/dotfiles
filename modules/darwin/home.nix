@@ -25,9 +25,10 @@
     zed-editor
   ];
 
-
   # Import macOS-specific program configurations
   imports = [
-    # No macOS-specific programs currently
+    # Aerospace
+    ./programs/aerospace.nix
   ];
 }
+
