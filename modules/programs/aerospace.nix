@@ -89,8 +89,8 @@
         alt-tab = "workspace-back-and-forth";
         alt-shift-tab = "move-workspace-to-monitor --wrap-around next";
 
-        # Enter service mode (Spanish keyboard friendly)
-        cmd-shift-s = "mode service";
+        # Enter service mode
+        alt-shift-s = "mode service";
       };
 
       # Service mode bindings
