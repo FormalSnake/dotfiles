@@ -150,7 +150,7 @@
         }
         {
           "if".app-id = "com.spotify.client";
-          run = ["move-node-to-workspace 8" "move-node-to-monitor --wrap-around next"];
+          run = "move-node-to-workspace 8";
         }
         {
           "if".app-id = "com.valvesoftware.steam";
