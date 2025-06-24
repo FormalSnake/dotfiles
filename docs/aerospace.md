@@ -26,7 +26,7 @@ The configuration is optimized for:
 
 ### Window Management
 - `Alt + Q` - Close focused window
-- `Cmd + Shift + F` - Toggle fullscreen
+- `Alt + Shift + F` - Toggle fullscreen
 - `Alt + T` - Force tiles layout (fix any layout issues)
 
 ### Window Resizing
