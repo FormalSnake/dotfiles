@@ -50,15 +50,15 @@
 
   # Common program imports (available on all platforms)
   imports = [
-    ../programs/fish.nix
-    ../programs/neovim.nix
-    ../programs/tmux.nix
-    ../programs/zoxide.nix
-    ../programs/fzf.nix
-    ../programs/kitty.nix
-    ../programs/ghostty.nix
-    ../programs/btop.nix
-    ../programs/fastfetch.nix
-    ../programs/aerospace.nix
+    ../programs/fish
+    ../programs/neovim
+    ../programs/tmux
+    ../programs/zoxide
+    ../programs/fzf
+    ../programs/kitty
+    ../programs/ghostty
+    ../programs/btop
+    ../programs/fastfetch
+    ../programs/aerospace
   ];
 }
