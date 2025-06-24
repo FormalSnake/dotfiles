@@ -40,11 +40,11 @@ The configuration is optimized for:
 - `Alt + Shift + Tab` - Move workspace to next monitor
 
 ### Service Mode
-- `Cmd + Shift + S` - Enter service mode (advanced operations)
+- `Alt + Shift + S` - Enter service mode (advanced operations)
 
 ## Service Mode Commands
 
-Service mode provides advanced window management. After pressing `Cmd + Shift + S`:
+Service mode provides advanced window management. After pressing `Alt + Shift + S`:
 
 - `Esc` - Reload config and exit to main mode
 - `R` - Reset layout (flatten workspace tree) and exit
@@ -109,7 +109,7 @@ Apps are automatically moved to designated workspaces when opened:
 
 ### Spanish Keyboard Users
 - **Special characters**: `Alt + numbers` work normally (no workspace conflicts)
-- **Service mode**: `Cmd + Shift + S` works reliably on Spanish layout
+- **Service mode**: `Alt + Shift + S` avoids conflicts with app shortcuts
 - **All navigation**: Uses `hjkl` instead of arrow keys or problematic combinations
 
 ## Advanced Usage
