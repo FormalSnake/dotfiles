@@ -10,71 +10,112 @@ This is a modular Nix configuration that supports both NixOS and macOS (nix-darw
 The configuration follows a hierarchical approach:
 
 1. **Common**: Shared packages and programs available on all platforms
-2. **Platform-specific**: macOS and NixOS specific packages and configurations
-3. **Host-specific**: Machine-specific settings and overrides
+2. **Platform-specific**: macOS and NixOS specific packages integrated into host configurations
+3. **Host-specific**: Machine-specific settings and overrides organized by user
 
 ## Structure
 
 ```
 .
-├── flake.nix       # Main flake configuration
-├── flake.lock      # Locked dependencies
-├── hosts           # Host-specific configurations (machine-specific settings only)
-│   ├── macbook     # macOS machine configuration
-│   │   ├── default.nix  # System-level settings, homebrew packages
-│   │   └── home.nix     # Host-specific home-manager settings
-│   └── homelab     # NixOS machine configuration  
-│       ├── default.nix  # System-level settings, hardware config
-│       └── home.nix     # Host-specific home-manager settings
-└── modules         # Modular configurations
-    ├── common      # Cross-platform shared configurations
-    │   └── home.nix     # Common packages, programs, and settings
-    ├── darwin      # macOS-specific configurations
-    │   ├── default.nix  # macOS system defaults and settings
-    │   ├── home.nix     # macOS-specific packages and programs
-    │   └── homebrew.nix # Homebrew configuration
-    ├── nixos       # NixOS-specific configurations
-    │   ├── default.nix  # NixOS system configuration and GNOME
-    │   └── home.nix     # Linux-specific packages and GNOME utilities
-    └── programs    # Individual program configurations
-        ├── btop.nix         # System monitor (cross-platform)
-        ├── fastfetch.nix    # System info (cross-platform)
-        ├── fzf.nix          # Fuzzy finder (cross-platform)
-        ├── ghostty.nix      # Terminal emulator (cross-platform config)
-        ├── kitty.nix        # Terminal emulator (cross-platform)
-        ├── neovim.nix       # Text editor (cross-platform)
-        ├── tmux.nix         # Terminal multiplexer (cross-platform)
-        ├── zoxide.nix       # Smart cd (cross-platform)
-        ├── aerospace.nix    # Window manager (macOS-specific)
-        └── fish.nix         # Shell configuration (cross-platform)
+├── flake.nix           # Main flake configuration
+├── flake.lock          # Locked dependencies
+├── overlays/           # External overlays
+│   └── default.nix     # Custom Neovim plugin overlays
+├── home/               # User home configurations
+│   └── kyandesutter/   # User-specific configurations
+│       ├── macbook/    # macOS home configuration
+│       │   └── default.nix  # macOS-specific packages and settings
+│       └── homelab/    # NixOS home configuration
+│           └── default.nix  # Linux-specific packages and settings
+├── hosts/              # Host-specific system configurations
+│   ├── macbook/        # macOS system configuration
+│   │   └── default.nix # System settings, dock, homebrew packages, stateVersion
+│   └── homelab/        # NixOS system configuration
+│       └── default.nix # Boot config, filesystems, services, stateVersion
+└── modules/            # Modular configurations
+    └── home-manager/   # Home Manager modules
+        ├── common/     # Cross-platform shared configurations
+        │   └── default.nix  # Common packages, programs, and settings
+        ├── misc/       # Miscellaneous configurations
+        │   ├── gtk/    # GTK theming
+        │   ├── qt/     # Qt theming
+        │   ├── wallpaper/  # Wallpaper settings
+        │   └── xdg/    # XDG directories
+        ├── programs/   # Individual program configurations
+        │   ├── aerospace/   # Window manager (macOS-specific)
+        │   │   └── default.nix
+        │   ├── btop/        # System monitor (cross-platform)
+        │   │   └── default.nix
+        │   ├── fastfetch/   # System info (cross-platform)
+        │   │   └── default.nix
+        │   ├── fish/        # Shell configuration (cross-platform)
+        │   │   └── default.nix
+        │   ├── fzf/         # Fuzzy finder (cross-platform)
+        │   │   └── default.nix
+        │   ├── ghostty/     # Terminal emulator (cross-platform config)
+        │   │   ├── default.nix
+        │   │   └── ghostty-shaders/  # Custom shaders
+        │   ├── kitty/       # Terminal emulator (cross-platform)
+        │   │   └── default.nix
+        │   ├── neovim/      # Text editor with Lua configurations
+        │   │   ├── default.nix
+        │   │   ├── .luarc.json
+        │   │   ├── core/    # Core Neovim configurations
+        │   │   ├── options.lua
+        │   │   └── plugins/ # Individual plugin configurations
+        │   ├── tmux/        # Terminal multiplexer (cross-platform)
+        │   │   └── default.nix
+        │   └── zoxide/      # Smart cd (cross-platform)
+        │       └── default.nix
+        ├── scripts/    # Custom scripts
+        └── services/   # Background services
 ```
+
+## Key Features
+
+### **Consistent Structure**
+- All programs follow the `{program}/default.nix` pattern
+- No mixed file/directory references
+- Clean, maintainable organization
+
+### **User-Centric Organization**
+- Home configurations organized by `user/host` pattern
+- Platform-specific packages integrated into host configs
+- Clear separation of system vs. user configurations
+
+### **External Overlays**
+- Custom Neovim plugin overlays externalized
+- Modular overlay system for easy extension
+
+### **Modern Nix Features**
+- Experimental features enabled (`nix-command`, `flakes`)
+- Proper store optimization with `nix.optimise.automatic`
+- Required `stateVersion` settings for all hosts
 
 ## Package Distribution
 
 ### Common Packages (All Platforms)
 - **Development**: nodejs, bun, cargo, rustc, go, zig, lua
-- **Utilities**: ripgrep, fd, fzf, gh, bat, lazygit
-- **Applications**: firefox, brave
-- **Programs**: neovim, tmux, fish, kitty, ghostty, btop, fastfetch, spicetify, zoxide, fzf
+- **Utilities**: ripgrep, fd, fzf, gh, bat, lazygit, zoxide
+- **Applications**: firefox
+- **Programs**: neovim, tmux, fish, kitty, ghostty, btop, fastfetch, fzf
 
-### macOS-Specific
+### macOS-Specific (home/kyandesutter/macbook/)
 - **Development**: aider-chat, claude-code, pyenv, nixd, devenv, chafa, repomix
 - **Utilities**: ice-bar, mousecape, the-unarchiver
 - **Applications**: zed-editor
 - **Programs**: aerospace (window manager)
 
-### NixOS-Specific  
+### NixOS-Specific (home/kyandesutter/homelab/)
 - **Utilities**: neofetch
-- **Applications**: ghostty (via Nix package)
+- **Applications**: ghostty (via Nix package), github-desktop
 - **GNOME Utilities**: gnome-tweaks, dconf-editor
-- **Desktop Environment**: GNOME (minimal setup)
 
 ### Host-Specific Settings
-- **macbook**: Uses `catppuccin_mocha` oh-my-posh theme, homebrew packages
-- **homelab**: Uses `huvix` oh-my-posh theme, GNOME desktop environment
+- **macbook**: Dock configuration, Homebrew packages, Darwin system settings
+- **homelab**: Boot configuration, filesystem setup, SSH services
 
 ## Requirements
-Ensure you have the following installed on your system:
 
 ### Nix
 ```sh
@@ -105,8 +146,8 @@ nixos-rebuild switch --flake .#homelab
 
 ## Adding a New Host
 
-1. Create a new directory under `hosts/` with the hostname
-2. Create `default.nix` and `home.nix` files for the system and home-manager configurations
+1. Create system configuration under `hosts/{hostname}/default.nix`
+2. Create user configuration under `home/{username}/{hostname}/default.nix`
 3. Add the host to the appropriate section in `flake.nix`:
 
 ```nix
@@ -128,6 +169,18 @@ darwinConfigurations = {
   };
 };
 ```
+
+## Adding New Programs
+
+1. Create a new directory: `modules/home-manager/programs/{program}/`
+2. Add `default.nix` with your program configuration
+3. Import in `modules/home-manager/common/default.nix`:
+   ```nix
+   imports = [
+     ../programs/{program}
+     # ... other imports
+   ];
+   ```
 
 ## Updating Flakes
 
@@ -173,13 +226,12 @@ Fish will now be your default shell with all your aliases and functions ported o
 ## Software Included
 
 ### Cross-Platform
-- **Shell**: Fish with syntax highlighting, autosuggestions, and oh-my-posh
-- **Editor**: Neovim with comprehensive LSP, completion, and plugin setup
+- **Shell**: Fish with syntax highlighting, autosuggestions, and custom functions
+- **Editor**: Neovim with comprehensive LSP, completion, and custom Lua configurations
 - **Terminals**: Kitty and Ghostty with Catppuccin theming
 - **Multiplexer**: Tmux with session management and vim navigation
 - **Monitoring**: Btop system monitor
 - **System Info**: Fastfetch
-- **Music**: Spicetify for Spotify theming
 - **Utilities**: Git, Lazygit, FZF, Zoxide, Ripgrep, Bat
 
 ### macOS-Specific
