@@ -4,6 +4,9 @@
   lib,
   ...
 }: {
+  # Required NixOS system state version
+  system.stateVersion = "25.05";
+
   # Host-specific settings for the homelab
   networking.hostName = "homelab";
 
