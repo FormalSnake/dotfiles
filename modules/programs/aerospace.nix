@@ -44,9 +44,8 @@
       mode.main.binding = {
         # Window management
         alt-q = "close";
-        alt-slash = "layout tiles horizontal vertical";
-        alt-comma = "layout accordion horizontal vertical";
-        alt-m = "fullscreen";
+        cmd-shift-f = "fullscreen";
+        alt-t = "layout tiles horizontal vertical";
 
         # Focus movement
         alt-h = "focus left";
@@ -90,8 +89,8 @@
         alt-tab = "workspace-back-and-forth";
         alt-shift-tab = "move-workspace-to-monitor --wrap-around next";
 
-        # Enter service mode
-        alt-shift-semicolon = "mode service";
+        # Enter service mode (Spanish keyboard friendly)
+        cmd-shift-s = "mode service";
       };
 
       # Service mode bindings
