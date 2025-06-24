@@ -105,6 +105,11 @@
     screensaver.askForPasswordDelay = 10;
   };
 
+  # Fonts configuration
+  fonts.packages = with pkgs; [
+    nerd-fonts.geist-mono
+  ];
+
   # macOS system version
   system.stateVersion = 6;
 
