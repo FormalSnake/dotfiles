@@ -83,7 +83,7 @@ Apps are automatically moved to designated workspaces when opened:
 - Handles nested containers intelligently
 
 ### Gaps
-- 6px gaps between windows and screen edges
+- 16px gaps between windows and screen edges
 - Consistent spacing for clean appearance
 
 ### Mouse Behavior
