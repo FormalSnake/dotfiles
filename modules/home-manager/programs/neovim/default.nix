@@ -26,7 +26,7 @@ in {
       }
       {
         plugin = snacks-nvim;
-        config = toLuaFile ./nvim/plugins/snacks.lua;
+        config = toLuaFile ./plugins/snacks.lua;
       }
       lsp-zero-nvim
       nvim-lspconfig
@@ -56,7 +56,7 @@ in {
       }
       {
         plugin = own-auto-dark-mode;
-        config = toLuaFile ./nvim/plugins/colorscheme.lua;
+        config = toLuaFile ./plugins/colorscheme.lua;
       }
       github-nvim-theme
       {
@@ -94,11 +94,11 @@ in {
       }
       {
         plugin = autoclose-nvim;
-        config = toLuaFile ./nvim/plugins/autoclose.lua;
+        config = toLuaFile ./plugins/autoclose.lua;
       }
       {
         plugin = auto-session;
-        config = toLuaFile ./nvim/plugins/autosession.lua;
+        config = toLuaFile ./plugins/autosession.lua;
       }
       {
         plugin = own-bg;
@@ -111,15 +111,15 @@ in {
       }
       {
         plugin = nvim-ts-autotag;
-        config = toLuaFile ./nvim/plugins/autotag.lua;
+        config = toLuaFile ./plugins/autotag.lua;
       }
       {
         plugin = conform-nvim;
-        config = toLuaFile ./nvim/plugins/format.lua;
+        config = toLuaFile ./plugins/format.lua;
       }
       {
         plugin = gitsigns-nvim;
-        config = toLuaFile ./nvim/plugins/git-stuff.lua;
+        config = toLuaFile ./plugins/git-stuff.lua;
       }
       {
         plugin = lsp_lines-nvim;
@@ -127,28 +127,28 @@ in {
       }
       {
         plugin = lualine-nvim;
-        config = toLuaFile ./nvim/plugins/lualine.lua;
+        config = toLuaFile ./plugins/lualine.lua;
       }
       {
         plugin = render-markdown-nvim;
-        config = toLuaFile ./nvim/plugins/markdown.lua;
+        config = toLuaFile ./plugins/markdown.lua;
       }
       {
         plugin = supermaven-nvim;
-        config = toLuaFile ./nvim/plugins/supermaven.lua;
+        config = toLuaFile ./plugins/supermaven.lua;
       }
       {
         plugin = vim-tmux-navigator;
-        config = toLuaFile ./nvim/plugins/tmuxnavigator.lua;
+        config = toLuaFile ./plugins/tmuxnavigator.lua;
       }
       {
         plugin = treesj;
-        config = toLuaFile ./nvim/plugins/treesj.lua;
+        config = toLuaFile ./plugins/treesj.lua;
       }
       codecompanion-nvim
       {
         plugin = which-key-nvim;
-        config = toLuaFile ./nvim/plugins/whichkey.lua;
+        config = toLuaFile ./plugins/whichkey.lua;
       }
       {
         plugin = noice-nvim;
@@ -182,7 +182,7 @@ in {
 
       {
         plugin = nvim-cmp;
-        config = toLuaFile ./nvim/plugins/cmp.lua;
+        config = toLuaFile ./plugins/cmp.lua;
       }
 
       cmp_luasnip
@@ -206,15 +206,15 @@ in {
           p.tree-sitter-css
           p.tree-sitter-tsx
         ]);
-        config = toLuaFile ./nvim/plugins/treesitter.lua;
+        config = toLuaFile ./plugins/treesitter.lua;
       }
 
       vim-nix
     ];
 
     extraLuaConfig = ''
-      ${builtins.readFile ./nvim/core/globals.lua}
-      ${builtins.readFile ./nvim/options.lua}
+      ${builtins.readFile ./core/globals.lua}
+      ${builtins.readFile ./options.lua}
     '';
   };
 }
