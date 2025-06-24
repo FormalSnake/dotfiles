@@ -44,7 +44,7 @@
       mode.main.binding = {
         # Window management
         alt-q = "close";
-        cmd-shift-f = "fullscreen";
+        alt-shift-f = "fullscreen";
         alt-t = "layout tiles horizontal vertical";
 
         # Focus movement
