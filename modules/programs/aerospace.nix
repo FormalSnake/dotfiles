@@ -6,94 +6,138 @@
   programs.aerospace = {
     enable = true;
     userSettings = {
-      # Reference: https://github.com/i3/i3/blob/next/etc/config
-      
-      # i3 doesn't have "normalizations" feature that why we disable them here.
-      # But the feature is very helpful.
-      # Normalizations eliminate all sorts of weird tree configurations that don't make sense.
-      # Give normalizations a chance and enable them back.
-      enable-normalization-flatten-containers = false;
-      enable-normalization-opposite-orientation-for-nested-containers = false;
+      # Start AeroSpace at login
+      start-at-login = true;
 
-      # Mouse follows focus when focused monitor changes
+      # Normalization settings
+      enable-normalization-flatten-containers = true;
+      enable-normalization-opposite-orientation-for-nested-containers = true;
+
+      # Accordion layout settings
+      accordion-padding = 30;
+
+      # Default root container settings
+      default-root-container-layout = "tiles";
+      default-root-container-orientation = "auto";
+
+      # Mouse follows focus settings
       on-focused-monitor-changed = ["move-mouse monitor-lazy-center"];
+      on-focus-changed = ["move-mouse window-lazy-center"];
 
+      # Automatically unhide macOS hidden apps
+      automatically-unhide-macos-hidden-apps = true;
+
+      # Key mapping preset
+      key-mapping.preset = "qwerty";
+
+      # Gaps settings
+      gaps = {
+        inner.horizontal = 6;
+        inner.vertical = 6;
+        outer.left = 6;
+        outer.bottom = 6;
+        outer.top = 6;
+        outer.right = 6;
+      };
+
+      # Main mode bindings
       mode.main.binding = {
-        # See: https://nikitabobko.github.io/AeroSpace/goodies#open-a-new-window-with-applescript
-        alt-enter = ''exec-and-forget osascript -e '
-        tell application "Terminal"
-            do script
-            activate
-        end tell'
-        '';
+        # Window management
+        alt-q = "close";
+        alt-slash = "layout tiles horizontal vertical";
+        alt-comma = "layout accordion horizontal vertical";
+        alt-m = "fullscreen";
 
-        # i3 wraps focus by default
-        alt-j = "focus --boundaries-action wrap-around-the-workspace left";
-        alt-k = "focus --boundaries-action wrap-around-the-workspace down";
-        alt-l = "focus --boundaries-action wrap-around-the-workspace up";
-        alt-semicolon = "focus --boundaries-action wrap-around-the-workspace right";
+        # Focus movement
+        alt-h = "focus left";
+        alt-j = "focus down";
+        alt-k = "focus up";
+        alt-l = "focus right";
 
-        alt-shift-j = "move left";
-        alt-shift-k = "move down";
-        alt-shift-l = "move up";
-        alt-shift-semicolon = "move right";
+        # Window movement
+        alt-shift-h = "move left";
+        alt-shift-j = "move down";
+        alt-shift-k = "move up";
+        alt-shift-l = "move right";
 
-        # Consider using 'join-with' command as a 'split' replacement if you want to enable
-        # normalizations
-        alt-h = "split horizontal";
-        alt-v = "split vertical";
+        # Resize windows
+        alt-shift-minus = "resize smart -50";
+        alt-shift-equal = "resize smart +50";
 
-        alt-f = "fullscreen";
+        # Workspace management
+        cmd-1 = "workspace 1";
+        cmd-2 = "workspace 2";
+        cmd-3 = "workspace 3";
+        cmd-4 = "workspace 4";
+        cmd-5 = "workspace 5";
+        cmd-6 = "workspace 6";
+        cmd-7 = "workspace 7";
+        cmd-8 = "workspace 8";
+        cmd-9 = "workspace 9";
 
-        alt-s = "layout v_accordion"; # 'layout stacking' in i3
-        alt-w = "layout h_accordion"; # 'layout tabbed' in i3
-        alt-e = "layout tiles horizontal vertical"; # 'layout toggle split' in i3
+        # Move windows to workspaces
+        cmd-shift-1 = "move-node-to-workspace 1";
+        cmd-shift-2 = "move-node-to-workspace 2";
+        cmd-shift-3 = "move-node-to-workspace 3";
+        cmd-shift-4 = "move-node-to-workspace 4";
+        cmd-shift-5 = "move-node-to-workspace 5";
+        cmd-shift-6 = "move-node-to-workspace 6";
+        cmd-shift-7 = "move-node-to-workspace 7";
+        cmd-shift-8 = "move-node-to-workspace 8";
+        cmd-shift-9 = "move-node-to-workspace 9";
 
-        alt-shift-space = "layout floating tiling"; # 'floating toggle' in i3
+        # Workspace navigation
+        alt-tab = "workspace-back-and-forth";
+        alt-shift-tab = "move-workspace-to-monitor --wrap-around next";
 
-        # Not supported, because this command is redundant in AeroSpace mental model.
-        # See: https://nikitabobko.github.io/AeroSpace/guide#floating-windows
-        #alt-space = 'focus toggle_tiling_floating'
-
-        # `focus parent`/`focus child` are not yet supported, and it's not clear whether they
-        # should be supported at all https://github.com/nikitabobko/AeroSpace/issues/5
-        # alt-a = 'focus parent'
-
-        alt-1 = "workspace 1";
-        alt-2 = "workspace 2";
-        alt-3 = "workspace 3";
-        alt-4 = "workspace 4";
-        alt-5 = "workspace 5";
-        alt-6 = "workspace 6";
-        alt-7 = "workspace 7";
-        alt-8 = "workspace 8";
-        alt-9 = "workspace 9";
-        alt-0 = "workspace 10";
-
-        alt-shift-1 = "move-node-to-workspace 1";
-        alt-shift-2 = "move-node-to-workspace 2";
-        alt-shift-3 = "move-node-to-workspace 3";
-        alt-shift-4 = "move-node-to-workspace 4";
-        alt-shift-5 = "move-node-to-workspace 5";
-        alt-shift-6 = "move-node-to-workspace 6";
-        alt-shift-7 = "move-node-to-workspace 7";
-        alt-shift-8 = "move-node-to-workspace 8";
-        alt-shift-9 = "move-node-to-workspace 9";
-        alt-shift-0 = "move-node-to-workspace 10";
-
-        alt-shift-c = "reload-config";
-
-        alt-r = "mode resize";
+        # Enter service mode
+        alt-shift-semicolon = "mode service";
       };
 
-      mode.resize.binding = {
-        h = "resize width -50";
-        j = "resize height +50";
-        k = "resize height -50";
-        l = "resize width +50";
-        enter = "mode main";
-        esc = "mode main";
+      # Service mode bindings
+      mode.service.binding = {
+        # Reload config and exit service mode
+        esc = ["reload-config" "mode main"];
+
+        # Reset layout
+        r = ["flatten-workspace-tree" "mode main"];
+
+        # Toggle floating/tiling layout
+        f = ["layout floating tiling" "mode main"];
+
+        # Close all windows but current
+        backspace = ["close-all-windows-but-current" "mode main"];
+
+        # Join with adjacent windows
+        alt-shift-h = ["join-with left" "mode main"];
+        alt-shift-j = ["join-with down" "mode main"];
+        alt-shift-k = ["join-with up" "mode main"];
+        alt-shift-l = ["join-with right" "mode main"];
       };
+
+      # Window detection rules
+      on-window-detected = [
+        {
+          "if".app-id = "com.brave.Browser";
+          run = "move-node-to-workspace 1";
+        }
+        {
+          "if".app-id = "org.alacritty";
+          run = "move-node-to-workspace 2";
+        }
+        {
+          "if".app-id = "com.tdesktop.Telegram";
+          run = "move-node-to-workspace 3";
+        }
+        {
+          "if".app-id = "com.obsproject.obs-studio";
+          run = "move-node-to-workspace 4";
+        }
+        {
+          "if".app-id = "us.zoom.xos";
+          run = "move-node-to-workspace 5";
+        }
+      ];
     };
   };
 }
