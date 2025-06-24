@@ -2,6 +2,7 @@
   config,
   pkgs,
   lib,
+  userConfig,
   ...
 }: {
   # macOS specific system configuration
@@ -96,7 +97,11 @@
       _FXSortFoldersFirst = true;
     };
     loginwindow.GuestEnabled = false;
-    screencapture.location = "~/Pictures/screenshots";
+    screencapture = {
+      screencapture.location = "~/Pictures/screenshots";
+      type = "png";
+      disable-shadow = true;
+    };
     screensaver.askForPasswordDelay = 10;
   };
 

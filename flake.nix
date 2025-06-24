@@ -219,7 +219,6 @@
         hostname = "macbook";
         system = "aarch64-darwin";
       };
-
     };
 
     # Development environments
