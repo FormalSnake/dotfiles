@@ -136,7 +136,10 @@
         inherit system;
         specialArgs = {inherit inputs;};
         modules = [
-          {nixpkgs = nixpkgsConfig;}
+          {
+            nixpkgs = nixpkgsConfig;
+            nix.settings = nixSettings;
+          }
           ./hosts/${hostname}
 
           home-manager.darwinModules.home-manager
