@@ -70,7 +70,7 @@ Apps are automatically moved to designated workspaces when opened:
 | 5 | **Notion** - Note-taking and documentation |
 | 6 | **Figma** - Design and prototyping |
 | 7 | **Claude** - AI assistant |
-| 8 | **Spotify** - Music streaming |
+| 8 | **Spotify** - Music streaming (moves to 2nd monitor if available) |
 | 9 | **Steam** - Gaming |
 
 ## Configuration Features
