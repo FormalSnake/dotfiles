@@ -98,7 +98,7 @@
     };
     loginwindow.GuestEnabled = false;
     screencapture = {
-      screencapture.location = "~/Pictures/screenshots";
+      location = "~/Pictures/screenshots";
       type = "png";
       disable-shadow = true;
     };
