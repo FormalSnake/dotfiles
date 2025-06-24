@@ -59,5 +59,6 @@
     ../programs/ghostty.nix
     ../programs/btop.nix
     ../programs/fastfetch.nix
+    ../programs/aerospace.nix
   ];
 }

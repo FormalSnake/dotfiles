@@ -143,9 +143,9 @@
               extraSpecialArgs = {inherit inputs;};
               users.${username} = {
                 imports = [
-                  ./modules/common/home.nix
-                  ./modules/nixos/home.nix
-                  ./hosts/${hostname}/home.nix
+                  ./modules/home-manager/common
+                  ./modules/home-manager/nixos.nix
+                  ./home/${hostname}
                   catppuccin.homeModules.catppuccin
                 ];
               };
@@ -183,9 +183,9 @@
               extraSpecialArgs = {inherit inputs;};
               users.${username} = {
                 imports = [
-                  ./modules/common/home.nix
-                  ./modules/darwin/home.nix
-                  ./hosts/${hostname}/home.nix
+                  ./modules/home-manager/common
+                  ./modules/home-manager/darwin.nix
+                  ./home/${hostname}
                   catppuccin.homeModules.catppuccin
                 ];
               };

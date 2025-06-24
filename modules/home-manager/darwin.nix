@@ -28,7 +28,7 @@
   # Import macOS-specific program configurations
   imports = [
     # Aerospace
-    ../programs/aerospace.nix
+    ./programs/aerospace.nix
   ];
 }
 
