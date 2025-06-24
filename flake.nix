@@ -80,7 +80,6 @@
     # Common Nix settings
     nixSettings = {
       experimental-features = ["nix-command" "flakes"];
-      auto-optimise-store = true;
     };
 
     # NixOS system configuration
