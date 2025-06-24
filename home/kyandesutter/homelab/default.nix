@@ -5,6 +5,10 @@
   inputs,
   ...
 }: {
+  # Configure home directory and username specific to this host
+  home.username = "kyandesutter";
+  home.homeDirectory = "/home/kyandesutter";
+
   # NixOS-specific packages only
   home.packages = with pkgs; [
     # Linux-specific terminal utilities
@@ -21,4 +25,3 @@
     dconf-editor
   ];
 }
-

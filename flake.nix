@@ -65,43 +65,8 @@
     supportedSystems = ["x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin"];
     forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
 
-    # Custom overlays for Neovim plugins
-    overlays = [
-      (final: prev: {
-        vimPlugins =
-          prev.vimPlugins
-          // {
-            own-auto-dark-mode = prev.vimUtils.buildVimPlugin {
-              name = "auto-dark-mode.nvim";
-              src = inputs.plugin-auto-dark-mode;
-            };
-            own-visual-whitespace = prev.vimUtils.buildVimPlugin {
-              name = "visual-whitespace.nvim";
-              src = inputs.plugin-visual-whitespace;
-            };
-            own-tidy = prev.vimUtils.buildVimPlugin {
-              name = "tidy.nvim";
-              src = inputs.plugin-tidy;
-            };
-            own-base16 = prev.vimUtils.buildVimPlugin {
-              name = "base16.nvim";
-              src = inputs.plugin-base16;
-            };
-            own-aider = prev.vimUtils.buildVimPlugin {
-              name = "aider.nvim";
-              src = inputs.plugin-aider;
-            };
-            own-bg = prev.vimUtils.buildVimPlugin {
-              name = "bg.nvim";
-              src = inputs.plugin-bg;
-            };
-            own-transparent = prev.vimUtils.buildVimPlugin {
-              name = "transparent.nvim";
-              src = inputs.plugin-transparent;
-            };
-          };
-      })
-    ];
+    # Import overlays
+    overlays = import ./overlays {inherit inputs;};
 
     # Common nixpkgs configuration
     nixpkgsConfig = {
@@ -124,7 +89,6 @@
         modules = [
           {nixpkgs = nixpkgsConfig;}
           ./hosts/${hostname}
-          ./modules/nixos/default.nix
 
           home-manager.nixosModules.home-manager
           {
@@ -144,8 +108,7 @@
               users.${username} = {
                 imports = [
                   ./modules/home-manager/common
-                  ./modules/home-manager/nixos.nix
-                  ./home/${hostname}
+                  ./home/${username}/${hostname}
                   catppuccin.homeModules.catppuccin
                 ];
               };
@@ -166,7 +129,6 @@
         modules = [
           {nixpkgs = nixpkgsConfig;}
           ./hosts/${hostname}
-          ./modules/darwin/default.nix
 
           home-manager.darwinModules.home-manager
           {
@@ -184,8 +146,7 @@
               users.${username} = {
                 imports = [
                   ./modules/home-manager/common
-                  ./modules/home-manager/darwin.nix
-                  ./home/${hostname}
+                  ./home/${username}/${hostname}
                   catppuccin.homeModules.catppuccin
                 ];
               };

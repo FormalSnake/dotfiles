@@ -5,6 +5,10 @@
   inputs,
   ...
 }: {
+  # Configure home directory and username specific to this host
+  home.username = "kyandesutter";
+  home.homeDirectory = "/Users/kyandesutter";
+
   # macOS-specific packages only
   home.packages = with pkgs; [
     # macOS-specific developer tools
@@ -28,7 +32,6 @@
   # Import macOS-specific program configurations
   imports = [
     # Aerospace
-    ./programs/aerospace
+    ../../modules/home-manager/programs/aerospace
   ];
 }
-
