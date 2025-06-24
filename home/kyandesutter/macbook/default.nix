@@ -32,6 +32,6 @@
   # Import macOS-specific program configurations
   imports = [
     # Aerospace
-    ../../modules/home-manager/programs/aerospace
+    ../../../modules/home-manager/programs/aerospace
   ];
 }
