@@ -121,20 +121,40 @@
           run = "move-node-to-workspace 1";
         }
         {
-          "if".app-id = "org.alacritty";
+          "if".app-id = "com.mitchellh.ghostty";
           run = "move-node-to-workspace 2";
         }
         {
-          "if".app-id = "com.tdesktop.Telegram";
+          "if".app-id = "dev.zed.Zed";
           run = "move-node-to-workspace 3";
         }
         {
-          "if".app-id = "com.obsproject.obs-studio";
+          "if".app-id = "com.tinyspeck.slackmacgui";
           run = "move-node-to-workspace 4";
         }
         {
-          "if".app-id = "us.zoom.xos";
+          "if".app-id = "net.whatsapp.WhatsApp";
+          run = "move-node-to-workspace 4";
+        }
+        {
+          "if".app-id = "notion.id";
           run = "move-node-to-workspace 5";
+        }
+        {
+          "if".app-id = "com.figma.Desktop";
+          run = "move-node-to-workspace 6";
+        }
+        {
+          "if".app-id = "com.anthropic.Claude";
+          run = "move-node-to-workspace 7";
+        }
+        {
+          "if".app-id = "com.spotify.client";
+          run = "move-node-to-workspace 8";
+        }
+        {
+          "if".app-id = "com.valvesoftware.steam";
+          run = "move-node-to-workspace 9";
         }
       ];
     };

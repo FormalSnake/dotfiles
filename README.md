@@ -184,7 +184,7 @@ Fish will now be your default shell with all your aliases and functions ported o
 
 ### macOS-Specific
 - **Development**: Aider AI, Claude, PyEnv, DevEnv
-- **Window Management**: Aerospace tiling window manager
+- **Window Management**: Aerospace tiling window manager ([User Guide](docs/aerospace.md))
 - **Installation**: Ghostty via Homebrew (due to signing requirements)
 
 ### Linux-Specific  
