@@ -104,8 +104,8 @@ Apps are automatically moved to designated workspaces when opened:
 
 ### Troubleshooting
 - **Layout issues**: Press `Alt + T` to force tiles layout
-- **Complex reorganization**: Use `Cmd + Shift + S` then `R` to reset layout
-- **Config not working**: Use `Cmd + Shift + S` then `Esc` to reload
+- **Complex reorganization**: Use `Alt + Shift + S` then `R` to reset layout
+- **Config not working**: Use `Alt + Shift + S` then `Esc` to reload
 
 ### Spanish Keyboard Users
 - **Special characters**: `Alt + numbers` work normally (no workspace conflicts)
@@ -116,7 +116,7 @@ Apps are automatically moved to designated workspaces when opened:
 
 ### Window Joining
 Use service mode join operations to create complex layouts:
-1. Enter service mode: `Cmd + Shift + S`
+1. Enter service mode: `Alt + Shift + S`
 2. Use `Alt + Shift + hjkl` to join windows in specific directions
 3. Creates tabbed or split container layouts
 
