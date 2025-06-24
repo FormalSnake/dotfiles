@@ -74,8 +74,8 @@
         "/Applications/Ghostty.app"
         "/Applications/Spotify.app"
       ];
-      wvous-bl-corner = 2;
-      wvous-br-corner = 1;
+      wvous-bl-corner = 11;
+      wvous-br-corner = 2;
       wvous-tl-corner = 1;
       wvous-tr-corner = 1;
     };
