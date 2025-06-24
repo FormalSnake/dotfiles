@@ -95,6 +95,7 @@
           {
             nixpkgs = nixpkgsConfig;
             nix.settings = nixSettings;
+            nix.optimise.automatic = true;
           }
           ./hosts/${hostname}
 
@@ -138,6 +139,7 @@
           {
             nixpkgs = nixpkgsConfig;
             nix.settings = nixSettings;
+            nix.optimise.automatic = true;
           }
           ./hosts/${hostname}
 
