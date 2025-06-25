@@ -5,6 +5,15 @@
 }: {
   # Host-specific homebrew packages
   homebrew = {
+    enable = true;
+    
+    # Auto-update and cleanup configuration
+    onActivation = {
+      autoUpdate = true;
+      cleanup = "zap";
+      upgrade = true;
+    };
+    
     casks = [
       "notion"
       "ghostty"
@@ -18,6 +27,15 @@
       "betterdisplay"
       "steam"
       "latest"
+      "brave-browser"
+      "google-drive"
+      "leader-key"
+      "github"
+      "cloudflare-warp"
+      "github-desktop"
+      "spotify"
+      "flux"
+      "raycast"
     ];
     brews = [
       "jnsahaj/lumen/lumen"
