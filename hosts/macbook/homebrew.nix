@@ -17,7 +17,6 @@
       "jordanbaird-ice"
       "betterdisplay"
       "steam"
-      "loop"
       "latest"
     ];
     brews = [
@@ -27,3 +26,4 @@
     ];
   };
 }
+
