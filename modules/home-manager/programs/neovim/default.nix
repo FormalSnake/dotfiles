@@ -17,6 +17,18 @@ in {
 
     extraPackages = with pkgs; [
       alejandra
+      # LSP servers
+      lua-language-server
+      nil # Nix LSP
+      nodePackages.typescript-language-server
+      nodePackages.vscode-langservers-extracted # HTML, CSS, JSON
+      nodePackages."@astrojs/language-server"
+      # Formatters
+      nodePackages.prettier
+      stylua
+      # Tools
+      ripgrep
+      fd
     ];
 
     plugins = with pkgs.vimPlugins; [
@@ -28,31 +40,9 @@ in {
         plugin = snacks-nvim;
         config = toLuaFile ./plugins/snacks.lua;
       }
-      lsp-zero-nvim
-      nvim-lspconfig
       {
-        plugin = lazy-lsp-nvim;
-        config = toLua ''
-          local lsp_zero = require("lsp-zero")
-
-          lsp_zero.on_attach(function(client, bufnr)
-            -- see :help lsp-zero-keybindings to learn the available actions
-            lsp_zero.default_keymaps({
-              buffer = bufnr,
-              preserve_mappings = false
-            })
-          end)
-
-          require("lazy-lsp").setup {
-            excluded_servers = {
-              "denols",
-              "eslint",
-              "oxlint",
-              "quick_lint_js",
-              "biome"
-            },
-          }
-        '';
+        plugin = nvim-lspconfig;
+        config = toLuaFile ./plugins/lsp.lua;
       }
       {
         plugin = own-auto-dark-mode;
@@ -179,6 +169,18 @@ in {
       telescope-fzf-native-nvim
       neocord
       nvim-web-devicons
+      
+      # Better diagnostics and quickfix
+      {
+        plugin = trouble-nvim;
+        config = toLua ''
+          require("trouble").setup({
+            auto_close = true,
+            auto_preview = true,
+            indent_guides = true,
+          })
+        '';
+      }
 
       {
         plugin = nvim-cmp;
