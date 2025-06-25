@@ -194,6 +194,7 @@ in {
       cmp-buffer
       lspkind-nvim
       cmp-path
+      cmp-cmdline
 
       {
         plugin = nvim-treesitter.withPlugins (p: [
@@ -207,9 +208,14 @@ in {
           p.tree-sitter-typescript
           p.tree-sitter-css
           p.tree-sitter-tsx
+          p.tree-sitter-html
+          p.tree-sitter-javascript
+          p.tree-sitter-markdown
+          p.tree-sitter-yaml
         ]);
         config = toLuaFile ./plugins/treesitter.lua;
       }
+      nvim-treesitter-textobjects
 
       vim-nix
     ];

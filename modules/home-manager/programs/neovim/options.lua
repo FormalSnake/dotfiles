@@ -24,10 +24,45 @@ vim.opt.expandtab = true
 -- Clipboard
 vim.opt.clipboard = "unnamedplus"
 
--- LSP diagnostics
-vim.diagnostic.config({
-  virtual_text = false,
-})
+-- Enhanced editor settings
+vim.opt.updatetime = 250
+vim.opt.timeoutlen = 300
+vim.opt.conceallevel = 2
+vim.opt.foldmethod = "expr"
+vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
+vim.opt.foldenable = false
+vim.opt.signcolumn = "yes"
+vim.opt.scrolloff = 8
+vim.opt.sidescrolloff = 8
+vim.opt.wrap = false
+vim.opt.linebreak = true
+vim.opt.breakindent = true
+vim.opt.showbreak = "↪ "
+vim.opt.list = true
+vim.opt.listchars = { tab = "→ ", trail = "·", nbsp = "␣" }
+vim.opt.fillchars = { fold = " " }
+
+-- Better search
+vim.opt.ignorecase = true
+vim.opt.smartcase = true
+vim.opt.inccommand = "split"
+
+-- Better splits
+vim.opt.splitright = true
+vim.opt.splitbelow = true
+
+-- Undo and backup
+vim.opt.undofile = true
+vim.opt.undolevels = 10000
+vim.opt.backup = false
+vim.opt.writebackup = false
+vim.opt.swapfile = false
+
+-- Performance
+vim.opt.lazyredraw = false
+vim.opt.synmaxcol = 300
+
+-- LSP diagnostics (moved from above)
 
 -- Basic keymaps
 vim.keymap.set('n', '<leader>h', ':nohlsearch<CR>')
@@ -71,7 +106,7 @@ vim.keymap.set("n", "<leader>N", function()
   })
 end, { desc = "Neovim News" })
 
--- LSP keymaps
+-- LSP and Trouble keymaps
 local wk = require("which-key")
 wk.add({
   { "<leader>la", vim.lsp.buf.code_action,       desc = "Code Action" },
@@ -79,4 +114,10 @@ wk.add({
   { "<leader>ls", vim.lsp.buf.signature_help,    desc = "Display Signature Information" },
   { "<leader>lr", vim.lsp.buf.rename,            desc = "Rename all references" },
   { "<leader>lf", vim.lsp.buf.format,            desc = "Format" },
+  { "<leader>xx", "<cmd>Trouble diagnostics toggle<cr>", desc = "Diagnostics (Trouble)" },
+  { "<leader>xX", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", desc = "Buffer Diagnostics (Trouble)" },
+  { "<leader>cs", "<cmd>Trouble symbols toggle focus=false<cr>", desc = "Symbols (Trouble)" },
+  { "<leader>cl", "<cmd>Trouble lsp toggle focus=false win.position=right<cr>", desc = "LSP Definitions / references / ... (Trouble)" },
+  { "<leader>xL", "<cmd>Trouble loclist toggle<cr>", desc = "Location List (Trouble)" },
+  { "<leader>xQ", "<cmd>Trouble qflist toggle<cr>", desc = "Quickfix List (Trouble)" },
 })
