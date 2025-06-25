@@ -23,7 +23,7 @@ local servers = {
     },
   },
   nil_ls = {},
-  tsserver = {
+  ts_ls = {
     settings = {
       typescript = {
         inlayHints = {
