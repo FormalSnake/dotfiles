@@ -22,7 +22,6 @@
       "claude"
       "zerotier-one"
       "balenaetcher"
-      # "slack"
       "jordanbaird-ice"
       "betterdisplay"
       "steam"
@@ -34,8 +33,6 @@
       "cloudflare-warp"
       "spotify"
       "flux"
-      # "raycast"
-      # "whatsapp"
     ];
     brews = [
       "jnsahaj/lumen/lumen"
