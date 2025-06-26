@@ -84,6 +84,9 @@
     extraGroups = ["networkmanager" "wheel"];
   };
 
+  # Enable fish shell
+  programs.fish.enable = true;
+
   # Nix settings
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   nixpkgs.config.allowUnfree = true;
