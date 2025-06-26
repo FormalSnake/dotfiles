@@ -9,6 +9,10 @@ let
   gemini-cli = pkgs.writeShellScriptBin "gemini" ''
     exec ${pkgs.nodePackages.npm}/bin/npx @google/gemini-cli@latest "$@"
   '';
+  
+  opencode-ai = pkgs.writeShellScriptBin "opencode-ai" ''
+    exec ${pkgs.nodePackages.npm}/bin/npx opencode-ai@latest "$@"
+  '';
 in {
   # Common state version (can be overridden per host if needed)
   home.stateVersion = "25.05";
@@ -37,6 +41,7 @@ in {
 
     # Global npm packages
     gemini-cli
+    opencode-ai
 
     # Browsers (available on all platforms)
     firefox
