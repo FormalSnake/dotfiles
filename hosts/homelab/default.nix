@@ -4,11 +4,6 @@
   lib,
   ...
 }: {
-  imports = [
-    # Import the hardware configuration from the default install
-    ../../nixos-default/hardware-configuration.nix
-  ];
-
   # Desktop Environment - KDE Plasma
   services.xserver.enable = true;
   services.displayManager.sddm.enable = true;
