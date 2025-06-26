@@ -32,7 +32,6 @@
       "github"
       "cloudflare-warp"
       "spotify"
-      "flux"
     ];
     brews = [
       "jnsahaj/lumen/lumen"
