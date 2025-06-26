@@ -27,7 +27,9 @@ in {
     config = {
       modifier = mod;
       terminal = "ghostty";
-      bars = []; # Disable default swaybar
+      bars = [{
+        command = "waybar";
+      }];
 
       # Gaps inspired by Aerospace config
       gaps = {

@@ -29,5 +29,6 @@
 
   imports = [
     ../../../modules/home-manager/programs/sway
+    ../../../modules/home-manager/programs/waybar
   ];
 }
