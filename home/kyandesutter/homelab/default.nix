@@ -22,5 +22,8 @@
 
     # Media
     spotify
+
+    # Internet
+    brave-browser
   ];
 }
