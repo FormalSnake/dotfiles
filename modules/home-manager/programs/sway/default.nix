@@ -61,8 +61,8 @@ in {
 
       # Gaps inspired by Aerospace config
       gaps = {
-        inner = 16;
-        outer = 16;
+        inner = 8;
+        outer = 8;
       };
 
       window = {
