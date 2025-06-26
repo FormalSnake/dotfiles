@@ -20,6 +20,9 @@ in {
 
     # Extra config for settings not in the module
     extraConfig = ''
+      # Remove title bar and add a 2px border
+      default_border pixel 2
+
       # Move mouse to newly focused window
       mouse_warping container
 
