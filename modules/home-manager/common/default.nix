@@ -13,6 +13,10 @@ let
   opencode-ai = pkgs.writeShellScriptBin "opencode-ai" ''
     exec ${pkgs.nodePackages.npm}/bin/npx opencode-ai@latest "$@"
   '';
+  
+  openai-codex = pkgs.writeShellScriptBin "codex" ''
+    exec ${pkgs.nodePackages.npm}/bin/npx @openai/codex@latest "$@"
+  '';
 in {
   # Common state version (can be overridden per host if needed)
   home.stateVersion = "25.05";
@@ -42,6 +46,7 @@ in {
     # Global npm packages
     gemini-cli
     opencode-ai
+    openai-codex
 
     # Browsers (available on all platforms)
     firefox
