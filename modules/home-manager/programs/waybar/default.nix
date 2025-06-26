@@ -79,7 +79,7 @@
       * {
         border: none;
         border-radius: 0;
-        font-family: 'JetBrainsMono Nerd Font', 'Font Awesome 6 Free', monospace;
+        font-family: 'GeistMono Nerd Font', 'Font Awesome 6 Free', monospace;
         font-size: 13px;
         min-height: 0;
       }
