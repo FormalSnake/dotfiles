@@ -50,7 +50,6 @@ in {
     chafa
     repomix
     lazydocker
-    warp-terminal
 
     # Global npm packages
     gemini-cli
