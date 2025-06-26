@@ -22,14 +22,38 @@ in {
     extraConfig = ''
       # Move mouse to newly focused window
       mouse_warping container
+
+      # target                 title     bg    text   indicator  border
+      client.focused           $lavender $base $text  $rosewater $lavender
+      client.focused_inactive  $overlay0 $base $text  $rosewater $overlay0
+      client.unfocused         $overlay0 $base $text  $rosewater $overlay0
+      client.urgent            $peach    $base $peach $overlay0  $peach
+      client.placeholder       $overlay0 $base $text  $overlay0  $overlay0
+      client.background        $base
+
+      # bar
+      bar {
+        colors {
+          background         $base
+          statusline         $text
+          focused_statusline $text
+          focused_separator  $base
+
+          # target           border bg        text
+          focused_workspace  $base  $mauve    $crust
+          active_workspace   $base  $surface2 $text
+          inactive_workspace $base  $base     $text
+          urgent_workspace   $base  $red      $crust
+        }
+      }
     '';
 
     config = {
       modifier = mod;
       terminal = "ghostty";
-      bars = [{
-        command = "waybar";
-      }];
+      # bars = [{
+      #   command = "waybar";
+      # }];
 
       # Gaps inspired by Aerospace config
       gaps = {
