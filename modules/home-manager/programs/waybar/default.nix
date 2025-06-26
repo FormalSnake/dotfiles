@@ -5,60 +5,6 @@
 }: {
   programs.waybar = {
     enable = true;
-    style = ''
-      * {
-        font-family: "GeistMono Nerd Font";
-        font-size: 14px;
-      }
-
-      window#waybar {
-        background-color: rgba(43, 48, 59, 0.5);
-        border-bottom: 3px solid rgba(100, 114, 125, 0.5);
-        color: #ffffff;
-        transition-property: background-color;
-        transition-duration: .5s;
-      }
-
-      #workspaces button {
-        padding: 0 5px;
-        background-color: transparent;
-        color: #ffffff;
-        border-bottom: 3px solid transparent;
-      }
-
-      #workspaces button:hover {
-        background: rgba(0, 0, 0, 0.2);
-        box-shadow: inherit;
-        border-bottom: 3px solid #ffffff;
-      }
-
-      #workspaces button.focused {
-        background-color: #64727D;
-        border-bottom: 3px solid #ffffff;
-      }
-
-      #mode {
-        background-color: #64727D;
-        border-bottom: 3px solid #eb4d4b;
-      }
-
-      #clock,
-      #battery,
-      #cpu,
-      #memory,
-      #temperature,
-      #backlight,
-      #network,
-      #pulseaudio,
-      #custom-media,
-      #tray,
-      #mode,
-      #idle_inhibitor,
-      #mpd {
-        padding: 0 10px;
-        color: #ffffff;
-      }
-    '';
     settings = {
       mainBar = {
         layer = "top";
