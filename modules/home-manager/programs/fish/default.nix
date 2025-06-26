@@ -52,6 +52,11 @@
     interactiveShellInit = ''
       # Set fish as default shell
       set -g fish_greeting ""
+
+      # Set TERM for ghostty to fix ssh issues
+      if test "$TERM_PROGRAM" = "ghostty"
+          set -gx TERM xterm-256color
+      end
       
       # Ensure nix paths are in PATH for fish
       fish_add_path /etc/profiles/per-user/kyandesutter/bin
