@@ -35,11 +35,13 @@
       "spotify"
       "flux"
       "raycast"
+      "whatsapp"
     ];
     brews = [
       "jnsahaj/lumen/lumen"
       "lazydocker"
       "couchdb"
+      "imagemagick"
     ];
   };
 }

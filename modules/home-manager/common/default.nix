@@ -4,7 +4,16 @@
   lib,
   inputs,
   ...
-}: {
+}:
+let
+  gemini-cli = pkgs.runCommand "gemini-cli" {
+    buildInputs = [ pkgs.nodejs pkgs.nodePackages.npm ];
+  } ''
+    mkdir -p $out/bin
+    export HOME=$(mktemp -d)
+    ${pkgs.nodePackages.npm}/bin/npm install -g --prefix $out @google/gemini-cli
+  '';
+in {
   # Common state version (can be overridden per host if needed)
   home.stateVersion = "25.05";
 
@@ -30,6 +39,9 @@
     zig
     lua
 
+    # Global npm packages
+    gemini-cli
+
     # Browsers (available on all platforms)
     firefox
 
@@ -47,6 +59,7 @@
   };
 
   programs.lazygit.enable = true;
+
 
   # Common program imports (available on all platforms)
   imports = [
