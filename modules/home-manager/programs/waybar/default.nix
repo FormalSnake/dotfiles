@@ -7,7 +7,7 @@
   fonts.fontconfig.enable = true;
   home.packages = with pkgs; [
     font-awesome # For waybar icons
-    (nerdfonts.override {fonts = ["JetBrainsMono"];}) # Optional: better font
+    pkgs.nerd-fonts.geist-mono
   ];
 
   programs.waybar = {
