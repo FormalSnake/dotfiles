@@ -70,7 +70,7 @@
       persistent-apps = [
         "/Applications/Brave Browser.app"
         "/System/Applications/Calendar.app"
-        "/Applications/Equibop.app"
+        "${pkgs.discord}/Applications/Discord.app}"
         "/Applications/Ghostty.app"
         "/Applications/Spotify.app"
         # whatsapp-for-mac package with a pkgs.whatsapp-for-mac reference

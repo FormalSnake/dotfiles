@@ -50,6 +50,7 @@ in {
     chafa
     repomix
     lazydocker
+    warp-terminal
 
     # Global npm packages
     gemini-cli
@@ -58,6 +59,9 @@ in {
 
     # Browsers (available on all platforms)
     firefox
+
+    # Internet
+    discord
   ];
 
   # Global theming
