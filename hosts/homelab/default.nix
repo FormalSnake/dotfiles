@@ -58,8 +58,8 @@
   # Desktop Environment - KDE Plasma
   services.xserver.enable = true;
   services.displayManager.sddm.enable = true;
-  services.displayManager.sddm.defaultSession = "plasmawayland";
-  # services.desktopManager.plasma6.enable = true; # Replaced for a more minimal setup
+  services.displayManager.sddm.wayland.enable = true;
+  services.desktopManager.plasma6.enable = true;
   services.xserver.xkb = {
     layout = "us";
     variant = "";
@@ -84,13 +84,6 @@
     description = "kyan de sutter";
     extraGroups = ["networkmanager" "wheel"];
   };
-
-  # Manually install essential KDE packages for a minimal setup
-  environment.systemPackages = with pkgs; [
-    kdePackages.plasma-desktop
-    kdePackages.konsole
-    kdePackages.dolphin
-  ];
 
   # Enable fish shell
   programs.fish.enable = true;
