@@ -24,6 +24,6 @@
     spotify
 
     # Internet
-    brave-browser
+    brave
   ];
 }
