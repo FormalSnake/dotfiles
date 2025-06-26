@@ -17,13 +17,25 @@
     # Terminal emulator (Linux package only due to macOS signing)
     ghostty
 
-    # KDE utilities
-    kdePackages.kate
+    # Sway utilities
+    waybar
+    wofi
+    swaylock
+    swayidle
+    grim
+    slurp
+    wl-clipboard
+    mako
+    nerd-fonts.geist-mono
 
     # Media
     spotify
 
     # Internet
     brave
+  ];
+
+  imports = [
+    ../../modules/home-manager/programs/sway
   ];
 }

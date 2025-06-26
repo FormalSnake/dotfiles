@@ -55,11 +55,16 @@
     LC_TIME = "es_ES.UTF-8";
   };
 
-  # Desktop Environment - KDE Plasma
-  services.xserver.enable = true;
-  services.displayManager.sddm.enable = true;
-  services.displayManager.sddm.wayland.enable = true;
-  services.desktopManager.plasma6.enable = true;
+  # Sway and Wayland environment
+  programs.sway.enable = true;
+  programs.xwayland.enable = true;
+
+  services.greetd = {
+    enable = true;
+    settings.default_session.command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --cmd sway";
+  };
+
+  # Set keyboard layout
   services.xserver.xkb = {
     layout = "us";
     variant = "";
@@ -96,7 +101,4 @@
   # System state version
   system.stateVersion = "25.05";
 
-  imports = [
-    ../../modules/home-manager/programs/sway
-  ];
 }
