@@ -69,13 +69,6 @@ in {
   catppuccin = {
     enable = true;
     flavor = "mocha"; # Options: latte, frappe, macchiato, mocha
-    # accent = "blue";  # Options: rosewater, flamingo, pink, mauve, red, maroon, peach, yellow, green, teal, sky, sapphire, blue, lavender
-
-    # Enable Catppuccin for waybar
-    waybar = {
-      enable = true;
-      mode = "prependImport"; # Options: "prependImport" or "createLink"
-    };
   };
 
   # Common programs
