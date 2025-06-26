@@ -30,7 +30,7 @@
       "brave-browser"
       "google-drive"
       "leader-key"
-      # "github"
+      "github"
       "cloudflare-warp"
       "spotify"
       "flux"
@@ -39,6 +39,7 @@
     ];
     brews = [
       "jnsahaj/lumen/lumen"
+      "lazydocker"
       "couchdb"
       "imagemagick"
     ];
