@@ -18,14 +18,6 @@
     ghostty
 
     # Sway utilities
-    waybar
-    wofi
-    swaylock
-    swayidle
-    grim
-    slurp
-    wl-clipboard
-    mako
     nerd-fonts.geist-mono
 
     # Media
