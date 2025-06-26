@@ -49,6 +49,7 @@ in {
     devenv
     chafa
     repomix
+    lazydocker
 
     # Global npm packages
     gemini-cli
@@ -83,4 +84,3 @@ in {
     ../programs/fastfetch
   ];
 }
-
