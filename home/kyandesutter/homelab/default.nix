@@ -11,9 +11,6 @@
 
   # NixOS-specific packages only
   home.packages = with pkgs; [
-    # Linux-specific terminal utilities
-    neofetch
-
     # Linux-specific dev utilities
     github-desktop
 
@@ -23,5 +20,8 @@
     # GNOME utilities
     gnome-tweaks
     dconf-editor
+
+    # Media
+    spotify
   ];
 }

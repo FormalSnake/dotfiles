@@ -42,6 +42,13 @@ in {
     zig
     lua
     claude-code
+    zed-editor
+    aider-chat
+    pyenv
+    nixd
+    devenv
+    chafa
+    repomix
 
     # Global npm packages
     gemini-cli
@@ -50,9 +57,6 @@ in {
 
     # Browsers (available on all platforms)
     firefox
-
-    # Media
-    # spotify
   ];
 
   # Global theming
