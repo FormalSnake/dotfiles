@@ -52,6 +52,9 @@ in {
 
     config = {
       modifier = mod;
+      startup = [
+        {command = "swaybg -m fill -i ${./bg.png}";}
+      ];
       terminal = "ghostty";
       bars = [
         # {
