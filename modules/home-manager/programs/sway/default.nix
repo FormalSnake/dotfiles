@@ -23,6 +23,8 @@ in {
       # Move mouse to newly focused window
       mouse_warping container
 
+      include catppuccin-mocha
+
       # target                 title     bg    text   indicator  border
       client.focused           $lavender $base $text  $rosewater $lavender
       client.focused_inactive  $overlay0 $base $text  $rosewater $overlay0
