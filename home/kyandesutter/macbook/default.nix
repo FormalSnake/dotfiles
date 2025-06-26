@@ -13,7 +13,6 @@
   home.packages = with pkgs; [
     # macOS-specific developer tools
     aider-chat
-    claude-code
     pyenv
     nixd
     devenv

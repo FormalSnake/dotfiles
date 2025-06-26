@@ -4,16 +4,15 @@
   lib,
   inputs,
   ...
-}:
-let
+}: let
   gemini-cli = pkgs.writeShellScriptBin "gemini" ''
     exec ${pkgs.nodePackages.npm}/bin/npx @google/gemini-cli@latest "$@"
   '';
-  
+
   opencode-ai = pkgs.writeShellScriptBin "opencode" ''
     exec ${pkgs.nodePackages.npm}/bin/npx opencode-ai@latest "$@"
   '';
-  
+
   openai-codex = pkgs.writeShellScriptBin "codex" ''
     exec ${pkgs.nodePackages.npm}/bin/npx @openai/codex@latest "$@"
   '';
@@ -42,6 +41,7 @@ in {
     go
     zig
     lua
+    claude-code
 
     # Global npm packages
     gemini-cli
@@ -66,7 +66,6 @@ in {
 
   programs.lazygit.enable = true;
 
-
   # Common program imports (available on all platforms)
   imports = [
     ../programs/fish
@@ -80,3 +79,4 @@ in {
     ../programs/fastfetch
   ];
 }
+
