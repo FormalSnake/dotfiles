@@ -35,7 +35,7 @@
       "spotify"
       "flux"
       # "raycast"
-      "whatsapp"
+      # "whatsapp"
     ];
     brews = [
       "jnsahaj/lumen/lumen"

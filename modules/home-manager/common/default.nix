@@ -61,7 +61,6 @@ in {
 
     # Work and productivity
     slack
-    raycast
   ];
 
   # Global theming
