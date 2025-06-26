@@ -109,7 +109,7 @@ The configuration follows a hierarchical approach:
 ### NixOS-Specific (home/kyandesutter/homelab/)
 - **Utilities**: neofetch
 - **Applications**: ghostty (via Nix package), github-desktop
-- **GNOME Utilities**: gnome-tweaks, dconf-editor
+- **KDE Utilities**: kde-specific tools and applications
 
 ### Host-Specific Settings
 - **macbook**: Dock configuration, Homebrew packages, Darwin system settings
@@ -143,6 +143,17 @@ nixos-rebuild build --flake .#homelab
 # Apply the configuration (as root)
 nixos-rebuild switch --flake .#homelab
 ```
+
+### Deploying to NixOS Homelab
+
+To deploy your flake configuration to an existing NixOS machine:
+
+1. **On the homelab, switch to the flake configuration:**
+   ```bash
+   sudo nixos-rebuild switch --flake /path/to/nix-config#homelab
+   ```
+
+The homelab configuration will automatically import your existing hardware configuration and set up KDE Plasma as the desktop environment.
 
 ## Adding a New Host
 
@@ -240,8 +251,8 @@ Fish will now be your default shell with all your aliases and functions ported o
 - **Installation**: Ghostty via Homebrew (due to signing requirements)
 
 ### Linux-Specific  
-- **Desktop**: GNOME with X11/Wayland support
-- **System**: Minimal GNOME setup with essential utilities
+- **Desktop**: KDE Plasma 6 with X11 support
+- **System**: Minimal KDE setup with essential utilities
 - **Utilities**: Native Linux alternatives for system monitoring
 
 ## Contributing

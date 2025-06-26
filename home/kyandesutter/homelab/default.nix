@@ -17,9 +17,8 @@
     # Terminal emulator (Linux package only due to macOS signing)
     ghostty
 
-    # GNOME utilities
-    gnome-tweaks
-    dconf-editor
+    # KDE utilities
+    kdePackages.kate
 
     # Media
     spotify

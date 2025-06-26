@@ -4,40 +4,25 @@
   lib,
   ...
 }: {
-  # Required NixOS system state version
-  system.stateVersion = "25.05";
+  imports = [
+    # Import the hardware configuration from the default install
+    ../../nixos-default/hardware-configuration.nix
+  ];
 
-  # Host-specific settings for the homelab
-  networking.hostName = "homelab";
-
-  # Hardware configuration
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-
-  # Physical machine disk configuration
-  fileSystems = {
-    "/" = {
-      device = "/dev/disk/by-label/nixos";
-      fsType = "ext4";
-    };
-    "/boot" = {
-      device = "/dev/disk/by-label/boot";
-      fsType = "vfat";
-    };
-  };
+  # Desktop Environment - KDE Plasma
+  services.xserver.enable = true;
+  services.displayManager.sddm.enable = true;
+  services.desktopManager.plasma6.enable = true;
 
   # Enable SSH for remote access
-  services = {
-    openssh = {
-      enable = true;
-      settings = {
-        PermitRootLogin = "no";
-        PasswordAuthentication = false;
-      };
+  services.openssh = {
+    enable = true;
+    settings = {
+      PermitRootLogin = "no";
+      PasswordAuthentication = false;
     };
   };
-  
 
-
-
+  # System state version
+  system.stateVersion = "25.05";
 }
