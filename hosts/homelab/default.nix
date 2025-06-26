@@ -9,9 +9,9 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   # Kernel modules and firmware
-  boot.initrd.availableKernelModules = [ "xhci_pci" "ehci_pci" "ahci" "usb_storage" "sd_mod" "sr_mod" "sdhci_pci" ];
-  boot.kernelModules = [ "kvm-intel" "wl" ];
-  boot.extraModulePackages = [ config.boot.kernelPackages.broadcom_sta ];
+  boot.initrd.availableKernelModules = ["xhci_pci" "ehci_pci" "ahci" "usb_storage" "sd_mod" "sr_mod" "sdhci_pci"];
+  boot.kernelModules = ["kvm-intel" "wl"];
+  boot.extraModulePackages = [config.boot.kernelPackages.broadcom_sta];
   hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 
   # Filesystems
@@ -22,7 +22,7 @@
   fileSystems."/boot" = {
     device = "/dev/disk/by-uuid/32D9-570C";
     fsType = "vfat";
-    options = [ "fmask=0077" "dmask=0077" ];
+    options = ["fmask=0077" "dmask=0077"];
   };
   swapDevices = [];
 
@@ -77,12 +77,13 @@
 
   # Printing
   services.printing.enable = true;
+  security.polkit.enable = true;
 
   # User account
   users.users.kyandesutter = {
     isNormalUser = true;
     description = "kyan de sutter";
-    extraGroups = ["networkmanager" "wheel"];
+    extraGroups = ["networkmanager" "wheel" "video"];
   };
 
   # Enable fish shell
@@ -94,4 +95,8 @@
 
   # System state version
   system.stateVersion = "25.05";
+
+  imports = [
+    ../../modules/home-manager/programs/sway
+  ];
 }
