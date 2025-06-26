@@ -30,7 +30,6 @@
       "google-drive"
       "leader-key"
       "github"
-      "cloudflare-warp"
       "spotify"
     ];
     brews = [
