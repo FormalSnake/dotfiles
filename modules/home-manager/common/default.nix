@@ -10,7 +10,7 @@ let
     exec ${pkgs.nodePackages.npm}/bin/npx @google/gemini-cli@latest "$@"
   '';
   
-  opencode-ai = pkgs.writeShellScriptBin "opencode-ai" ''
+  opencode-ai = pkgs.writeShellScriptBin "opencode" ''
     exec ${pkgs.nodePackages.npm}/bin/npx opencode-ai@latest "$@"
   '';
   
