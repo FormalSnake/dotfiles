@@ -6,12 +6,8 @@
   ...
 }:
 let
-  gemini-cli = pkgs.runCommand "gemini-cli" {
-    buildInputs = [ pkgs.nodejs pkgs.nodePackages.npm ];
-  } ''
-    mkdir -p $out/bin
-    export HOME=$(mktemp -d)
-    ${pkgs.nodePackages.npm}/bin/npm install -g --prefix $out @google/gemini-cli
+  gemini-cli = pkgs.writeShellScriptBin "gemini" ''
+    exec ${pkgs.nodePackages.npm}/bin/npx @google/gemini-cli@latest "$@"
   '';
 in {
   # Common state version (can be overridden per host if needed)
