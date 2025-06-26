@@ -13,7 +13,6 @@
   home.packages = with pkgs; [
     # macOS-specific utilities
     ice-bar
-    mousecape
     the-unarchiver
   ];
 
