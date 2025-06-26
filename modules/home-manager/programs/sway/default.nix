@@ -27,4 +27,8 @@ in {
       };
     };
   };
+
+  programs.rofi = {
+    enable = true;
+  };
 }
