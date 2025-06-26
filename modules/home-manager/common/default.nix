@@ -6,15 +6,15 @@
   ...
 }: let
   gemini-cli = pkgs.writeShellScriptBin "gemini" ''
-    exec ${pkgs.nodePackages.npm}/bin/npx @google/gemini-cli@latest "$@"
+    exec ${pkgs.bun}/bin/bunx --bun @google/gemini-cli@latest "$@"
   '';
 
   opencode-ai = pkgs.writeShellScriptBin "opencode" ''
-    exec ${pkgs.nodePackages.npm}/bin/npx opencode-ai@latest "$@"
+    exec ${pkgs.bun}/bin/bunx --bun opencode-ai@latest "$@"
   '';
 
   openai-codex = pkgs.writeShellScriptBin "codex" ''
-    exec ${pkgs.nodePackages.npm}/bin/npx @openai/codex@latest "$@"
+    exec ${pkgs.bun}/bin/bunx --bun @openai/codex@latest "$@"
   '';
 in {
   # Common state version (can be overridden per host if needed)
