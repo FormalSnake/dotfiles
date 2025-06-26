@@ -9,6 +9,11 @@
   home.username = "kyandesutter";
   home.homeDirectory = "/home/kyandesutter";
 
+  # Add sudo to path
+  home.sessionPath = [
+    "/run/wrappers/bin"
+  ];
+
   # NixOS-specific packages only
   home.packages = with pkgs; [
     # Linux-specific dev utilities
