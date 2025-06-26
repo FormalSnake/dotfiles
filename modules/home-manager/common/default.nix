@@ -50,6 +50,7 @@ in {
     chafa
     repomix
     lazydocker
+    ghostty
 
     # Global npm packages
     gemini-cli
