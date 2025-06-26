@@ -34,7 +34,7 @@
       "cloudflare-warp"
       "spotify"
       "flux"
-      "raycast"
+      # "raycast"
       "whatsapp"
     ];
     brews = [
