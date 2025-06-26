@@ -22,7 +22,7 @@
       "claude"
       "zerotier-one"
       "balenaetcher"
-      "slack"
+      # "slack"
       "jordanbaird-ice"
       "betterdisplay"
       "steam"

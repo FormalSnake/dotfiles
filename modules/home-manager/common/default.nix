@@ -58,6 +58,9 @@ in {
 
     # Browsers (available on all platforms)
     firefox
+
+    # Work
+    slack
   ];
 
   # Global theming
