@@ -17,6 +17,13 @@ in {
       export _JAVA_AWT_WM_NONREPARENTING=1
       export MOZ_ENABLE_WAYLAND=1
     '';
+
+    # Extra config for settings not in the module
+    extraConfig = ''
+      # Move mouse to newly focused window
+      mouse_warping container
+    '';
+
     config = {
       modifier = mod;
       terminal = "ghostty";
@@ -33,12 +40,6 @@ in {
 
       # Default layout
       defaultWorkspace = "layout splith";
-
-      # Extra config for settings not in the module
-      extraConfig = ''
-        # Move mouse to newly focused window
-        mouse_warping container
-      '';
 
       keybindings = {
         # Your existing bindings
