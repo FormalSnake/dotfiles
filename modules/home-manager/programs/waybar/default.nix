@@ -3,6 +3,13 @@
   pkgs,
   ...
 }: {
+  # Install required fonts for waybar icons
+  fonts.fontconfig.enable = true;
+  home.packages = with pkgs; [
+    font-awesome # For waybar icons
+    (nerdfonts.override {fonts = ["JetBrainsMono"];}) # Optional: better font
+  ];
+
   programs.waybar = {
     enable = true;
     settings = {
@@ -72,7 +79,7 @@
       * {
         border: none;
         border-radius: 0;
-        font-family: 'JetBrains Mono', monospace;
+        font-family: 'JetBrainsMono Nerd Font', 'Font Awesome 6 Free', monospace;
         font-size: 13px;
         min-height: 0;
       }
