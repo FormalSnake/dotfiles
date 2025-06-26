@@ -1,14 +1,15 @@
 # Edit this configuration file to define what should be installed on
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
-
-{ config, pkgs, ... }:
-
 {
-  imports =
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-    ];
+  config,
+  pkgs,
+  ...
+}: {
+  imports = [
+    # Include the results of the hardware scan.
+    ./hardware-configuration.nix
+  ];
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
@@ -82,32 +83,31 @@
   users.users.kyandesutter = {
     isNormalUser = true;
     description = "kyan de sutter";
-    extraGroups = [ "networkmanager" "wheel" ];
-    packages = with pkgs; [
-      kdePackages.kate
-    #  thunderbird
-    ];
+    extraGroups = ["networkmanager" "wheel"];
+    # packages = with pkgs; [
+    #   kdePackages.kate
+    #   #  thunderbird
+    # ];
   };
-
-  # Install firefox.
-  programs.firefox.enable = true;
-
-programs.neovim = {
-  enable = true;
-  defaultEditor = true;
-};
-
+  #
+  # # Install firefox.
+  # programs.firefox.enable = true;
+  #
+  # programs.neovim = {
+  #   enable = true;
+  #   defaultEditor = true;
+  # };
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
-  environment.systemPackages = with pkgs; [
-  #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-  #  wget
-  git
-  ];
+  # environment.systemPackages = with pkgs; [
+  # #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+  # #  wget
+  # git
+  # ];
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
@@ -135,5 +135,4 @@ programs.neovim = {
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "25.05"; # Did you read the comment?
-
 }
