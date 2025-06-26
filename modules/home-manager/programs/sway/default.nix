@@ -53,9 +53,11 @@ in {
     config = {
       modifier = mod;
       terminal = "ghostty";
-      # bars = [{
-      #   command = "waybar";
-      # }];
+      bars = [
+        # {
+        # command = "waybar";
+        # }
+      ];
 
       # Gaps inspired by Aerospace config
       gaps = {
