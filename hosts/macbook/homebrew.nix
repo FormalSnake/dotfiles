@@ -31,6 +31,7 @@
       "leader-key"
       "github"
       "spotify"
+      "logi-options+"
     ];
     brews = [
       "jnsahaj/lumen/lumen"
