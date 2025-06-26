@@ -16,7 +16,7 @@
 
     casks = [
       "notion"
-      # "ghostty"
+      "ghostty"
       "clop"
       "figma"
       "claude"
