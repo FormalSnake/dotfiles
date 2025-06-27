@@ -5,17 +5,6 @@
   inputs,
   ...
 }: let
-  gemini-cli = pkgs.writeShellScriptBin "gemini" ''
-    exec ${pkgs.bun}/bin/bunx --bun @google/gemini-cli@latest "$@"
-  '';
-
-  opencode-ai = pkgs.writeShellScriptBin "opencode" ''
-    exec ${pkgs.bun}/bin/bunx --bun opencode-ai@latest "$@"
-  '';
-
-  openai-codex = pkgs.writeShellScriptBin "codex" ''
-    exec ${pkgs.bun}/bin/bunx --bun @openai/codex@latest "$@"
-  '';
 in {
   # Common state version (can be overridden per host if needed)
   home.stateVersion = "25.05";
@@ -50,11 +39,8 @@ in {
     chafa
     repomix
     lazydocker
-
-    # Global npm packages
-    gemini-cli
-    opencode-ai
-    openai-codex
+    opencode
+    codex
 
     # Browsers (available on all platforms)
     firefox
