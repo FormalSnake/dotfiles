@@ -89,5 +89,6 @@ in {
     ../programs/ghostty
     ../programs/btop
     ../programs/fastfetch
+    ../programs/spotify
   ];
 }
