@@ -30,7 +30,6 @@
       "google-drive"
       "leader-key"
       "github"
-      "spotify"
       "logi-options+"
     ];
     brews = [

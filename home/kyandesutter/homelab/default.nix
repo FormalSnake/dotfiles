@@ -26,7 +26,6 @@
     nerd-fonts.geist-mono
 
     # Media
-    spotify
 
     # Internet
     brave
