@@ -41,6 +41,7 @@ in {
     lazydocker
     opencode
     codex
+    gemini-cli
 
     # Browsers (available on all platforms)
     firefox
