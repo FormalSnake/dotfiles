@@ -12,8 +12,8 @@ local servers = {
   lua_ls = {
     settings = {
       Lua = {
-        runtime = { version = 'LuaJIT' },
-        diagnostics = { globals = {'vim'} },
+        -- runtime = { version = 'LuaJIT' },
+        diagnostics = { globals = { 'vim' } },
         workspace = {
           library = vim.api.nvim_get_runtime_file("", true),
           checkThirdParty = false,
@@ -58,7 +58,7 @@ local servers = {
 -- Common on_attach function
 local on_attach = function(client, bufnr)
   local opts = { buffer = bufnr, silent = true }
-  
+
   -- Enhanced keymaps
   vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
   vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
@@ -121,3 +121,4 @@ for type, icon in pairs(signs) do
   local hl = "DiagnosticSign" .. type
   vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
 end
+
