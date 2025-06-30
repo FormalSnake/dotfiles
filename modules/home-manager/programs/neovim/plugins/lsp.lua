@@ -12,7 +12,7 @@ local servers = {
   lua_ls = {
     settings = {
       Lua = {
-        -- runtime = { version = 'LuaJIT' },
+        runtime = { version = 'LuaJIT' },
         diagnostics = { globals = { 'vim' } },
         workspace = {
           library = vim.api.nvim_get_runtime_file("", true),
@@ -121,4 +121,3 @@ for type, icon in pairs(signs) do
   local hl = "DiagnosticSign" .. type
   vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
 end
-
