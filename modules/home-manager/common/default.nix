@@ -31,7 +31,7 @@ in {
     zig
     lua
     claude-code
-    zed-editor
+    # zed-editor
     aider-chat
     pyenv
     nixd
