@@ -31,6 +31,7 @@
       "leader-key"
       "github"
       "logi-options+"
+      "nordvpn"
     ];
     brews = [
       "jnsahaj/lumen/lumen"
