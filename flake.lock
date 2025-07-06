@@ -132,11 +132,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1751645863,
-        "narHash": "sha256-mGDs2BEr/eaN4qzbj8tbNlgvMjdkUgDIKn64RlE61BE=",
+        "lastModified": 1751790733,
+        "narHash": "sha256-uCc8jre1Hx0LLb6LTy5o1z3VAPhU/2NIS0s3XZTXxIA=",
         "owner": "FormalSnake",
         "repo": "nixcord",
-        "rev": "e52e547ed83a11fdbbcdfc787ccbaa6c30a7656d",
+        "rev": "daeaba39b87bd646644346dfc8ccfe884d627975",
         "type": "github"
       },
       "original": {
