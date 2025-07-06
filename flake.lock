@@ -134,13 +134,13 @@
       "locked": {
         "lastModified": 1751645863,
         "narHash": "sha256-mGDs2BEr/eaN4qzbj8tbNlgvMjdkUgDIKn64RlE61BE=",
-        "owner": "kaylorben",
+        "owner": "FormalSnake",
         "repo": "nixcord",
         "rev": "e52e547ed83a11fdbbcdfc787ccbaa6c30a7656d",
         "type": "github"
       },
       "original": {
-        "owner": "kaylorben",
+        "owner": "FormalSnake",
         "repo": "nixcord",
         "type": "github"
       }
