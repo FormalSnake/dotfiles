@@ -15,6 +15,12 @@
       ];
       # frameless = true; # Set some Vencord options
       plugins = {
+        USRBG = {
+          enable = true;
+          nitroFirst = true;
+          voiceBackground = true;
+        };
+        alwaysTrust.enable = true;
       };
     };
     dorion = {
