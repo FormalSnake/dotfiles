@@ -74,5 +74,6 @@ in {
     ../programs/btop
     ../programs/fastfetch
     ../programs/spotify
+    ../programs/discord
   ];
 }
