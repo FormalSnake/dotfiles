@@ -175,7 +175,6 @@
                   catppuccin.homeModules.catppuccin
                   inputs.spicetify-nix.homeManagerModules.default
                   inputs.nixcord.homeModules.nixcord
-                  inputs.zen-browser.homeModules.beta
                 ];
               };
             };

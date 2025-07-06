@@ -32,6 +32,7 @@
       "github"
       "logi-options+"
       "nordvpn"
+      "zen"
     ];
     brews = [
       "jnsahaj/lumen/lumen"
