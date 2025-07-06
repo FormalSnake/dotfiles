@@ -21,8 +21,8 @@ vim.opt.shiftwidth = 2
 vim.opt.shiftround = true
 vim.opt.expandtab = true
 
--- Clipboard
-vim.opt.clipboard = "unnamedplus"
+-- Clipboard - separate vim and system clipboards
+-- vim.opt.clipboard = "unnamedplus"  -- Commented out to separate clipboards
 
 -- Enhanced editor settings
 vim.opt.updatetime = 250
@@ -66,6 +66,13 @@ vim.opt.synmaxcol = 300
 
 -- Basic keymaps
 vim.keymap.set('n', '<leader>h', ':nohlsearch<CR>')
+
+-- System clipboard keymaps
+vim.keymap.set('n', '<leader>y', '"+y', { desc = "Copy to system clipboard" })
+vim.keymap.set('v', '<leader>y', '"+y', { desc = "Copy to system clipboard" })
+vim.keymap.set('n', '<leader>Y', '"+Y', { desc = "Copy line to system clipboard" })
+vim.keymap.set('n', '<leader>p', '"+p', { desc = "Paste from system clipboard" })
+vim.keymap.set('n', '<leader>P', '"+P', { desc = "Paste from system clipboard before cursor" })
 
 -- Snacks keymaps
 local Snacks = require("snacks")

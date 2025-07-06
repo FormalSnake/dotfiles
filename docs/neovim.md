@@ -85,6 +85,13 @@ The configuration is optimized for:
 - `]]` - Next reference (word under cursor)
 - `[[` - Previous reference (word under cursor)
 
+### Clipboard Management
+- `<leader>y` - Copy to system clipboard (normal/visual mode)
+- `<leader>Y` - Copy whole line to system clipboard
+- `<leader>p` - Paste from system clipboard
+- `<leader>P` - Paste from system clipboard before cursor
+- `y`, `p`, `d` - Use vim's internal clipboard (separate from system)
+
 ## Language Support
 
 ### Supported Languages
@@ -171,8 +178,9 @@ The configuration is optimized for:
 1. **Open project**: `<leader>ff` to find files
 2. **Navigate code**: `gd` to go to definitions, `gr` for references
 3. **Edit efficiently**: Use text objects (`af`, `if`) for quick selections
-4. **Check errors**: `<leader>xx` to see all diagnostics
-5. **Format code**: `<leader>lf` before committing
+4. **Copy/paste**: `<leader>y` to copy to system clipboard, `y` for vim clipboard
+5. **Check errors**: `<leader>xx` to see all diagnostics
+6. **Format code**: `<leader>lf` before committing
 
 ### Debugging Issues
 1. **Check diagnostics**: `<leader>xx` for overview
