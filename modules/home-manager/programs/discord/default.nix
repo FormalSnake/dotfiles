@@ -21,6 +21,9 @@
           voiceBackground = true;
         };
         alwaysTrust.enable = true;
+        favoriteGifSearch.enable = true;
+        gifPaste.enable = true;
+        fakeNitro.enable = true;
       };
     };
     # dorion = {
