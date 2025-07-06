@@ -75,5 +75,6 @@ in {
     ../programs/fastfetch
     ../programs/spotify
     ../programs/discord
+    ../programs/zen
   ];
 }

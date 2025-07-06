@@ -23,6 +23,13 @@
     spicetify-nix.url = "github:Gerg-L/spicetify-nix";
     nixcord.url = "github:FormalSnake/nixcord";
 
+    zen-browser = {
+      url = "github:0xc000022070/zen-browser-flake";
+      # IMPORTANT: we're using "libgbm" and is only available in unstable so ensure
+      # to have it up-to-date or simply don't specify the nixpkgs input
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Neovim plugins
     plugin-auto-dark-mode = {
       url = "github:f-person/auto-dark-mode.nvim";
@@ -123,6 +130,7 @@
                   catppuccin.homeModules.catppuccin
                   inputs.spicetify-nix.homeManagerModules.default
                   inputs.nixcord.homeModules.nixcord
+                  inputs.zen-browser.homeModules.beta
                 ];
               };
             };
@@ -167,6 +175,7 @@
                   catppuccin.homeModules.catppuccin
                   inputs.spicetify-nix.homeManagerModules.default
                   inputs.nixcord.homeModules.nixcord
+                  inputs.zen-browser.homeModules.beta
                 ];
               };
             };
