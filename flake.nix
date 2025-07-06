@@ -21,6 +21,7 @@
     # Themes & Integrations
     catppuccin.url = "github:catppuccin/nix";
     spicetify-nix.url = "github:Gerg-L/spicetify-nix";
+    nixcord.url = "github:kaylorben/nixcord";
 
     # Neovim plugins
     plugin-auto-dark-mode = {
@@ -121,6 +122,7 @@
                   ./home/${username}/${hostname}
                   catppuccin.homeModules.catppuccin
                   inputs.spicetify-nix.homeManagerModules.default
+                  inputs.nixcord.homeModules.nixcord
                 ];
               };
             };
@@ -164,6 +166,7 @@
                   ./home/${username}/${hostname}
                   catppuccin.homeModules.catppuccin
                   inputs.spicetify-nix.homeManagerModules.default
+                  inputs.nixcord.homeModules.nixcord
                 ];
               };
             };

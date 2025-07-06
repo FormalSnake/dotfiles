@@ -45,9 +45,6 @@ in {
 
     # Browsers (available on all platforms)
     firefox
-
-    # Internet
-    discord
   ];
 
   # Global theming

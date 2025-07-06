@@ -70,9 +70,7 @@
       persistent-apps = [
         "/Applications/Brave Browser.app"
         "/System/Applications/Calendar.app"
-        "${pkgs.discord}/Applications/Discord.app"
         "/Applications/Ghostty.app"
-        # whatsapp-for-mac package with a pkgs.whatsapp-for-mac reference
         "${pkgs.whatsapp-for-mac}/Applications/WhatsApp.app"
       ];
       wvous-bl-corner = 11;
