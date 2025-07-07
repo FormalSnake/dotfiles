@@ -62,8 +62,6 @@ in {
 
   programs.lazygit.enable = true;
 
-  programs.zellij.enable = true;
-
   # Common program imports (available on all platforms)
   imports = [
     ../programs/fish
