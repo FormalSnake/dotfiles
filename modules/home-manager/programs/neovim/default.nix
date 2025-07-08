@@ -49,7 +49,14 @@ in {
         config = toLuaFile ./plugins/colorscheme.lua;
       }
       nvim-scrollview
-      minimap-vim
+      {
+        plugin = minimap-vim;
+        config = toLua ''
+          let g:minimap_width = 10
+          let g:minimap_auto_start = 1
+          let g:minimap_auto_start_win_enter = 1
+        '';
+      }
       github-nvim-theme
       {
         plugin = own-visual-whitespace;
