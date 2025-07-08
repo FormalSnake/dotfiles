@@ -52,6 +52,7 @@ in {
       {
         plugin = minimap-vim;
         config = toLua ''
+          vim.cmd("Minimap")
         '';
       }
       github-nvim-theme
