@@ -48,6 +48,8 @@ in {
         plugin = own-auto-dark-mode;
         config = toLuaFile ./plugins/colorscheme.lua;
       }
+      nvim-scrollview
+      minimap-vim
       github-nvim-theme
       {
         plugin = own-visual-whitespace;
@@ -169,7 +171,7 @@ in {
       telescope-fzf-native-nvim
       neocord
       nvim-web-devicons
-      
+
       # Better diagnostics and quickfix
       {
         plugin = trouble-nvim;
