@@ -22,7 +22,6 @@
       "claude"
       "zerotier-one"
       "balenaetcher"
-      "jordanbaird-ice"
       "betterdisplay"
       "steam"
       "latest"
