@@ -28,10 +28,10 @@
       "latest"
       "brave-browser"
       "google-drive"
-      "leader-key"
       "github"
       "logi-options+"
       "nordvpn"
+      "alcove"
     ];
     brews = [
       "jnsahaj/lumen/lumen"
