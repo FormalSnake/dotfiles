@@ -24,7 +24,6 @@
       "balenaetcher"
       "betterdisplay"
       "steam"
-      "latest"
       "brave-browser"
       "google-drive"
       "github"
