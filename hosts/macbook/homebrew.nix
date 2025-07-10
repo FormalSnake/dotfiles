@@ -40,6 +40,8 @@
     masApps = {
       Xcode = 497799835;
       Daisydisk = 411643860;
+      Perplexity = 6714467650;
+      WireGuard = 1451685025;
     };
   };
 }
