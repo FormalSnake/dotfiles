@@ -30,6 +30,7 @@
       "logi-options+"
       "nordvpn"
       "alcove"
+      "daisydisk"
     ];
     brews = [
       "jnsahaj/lumen/lumen"
