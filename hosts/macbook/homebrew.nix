@@ -30,6 +30,7 @@
       "logi-options+"
       "nordvpn"
       "alcove"
+      "microsoft-edge"
     ];
     brews = [
       "jnsahaj/lumen/lumen"
