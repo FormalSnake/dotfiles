@@ -14,12 +14,6 @@
   system.keyboard = {
     enableKeyMapping = true;
     remapCapsLockToEscape = true;
-    userKeyMapping = [
-      {
-        HIDKeyboardModifierMappingSrc = 30064771129; # Fn key
-        HIDKeyboardModifierMappingDst = 30064771296; # Left Control
-      }
-    ];
   };
 
   # macOS Applications management
