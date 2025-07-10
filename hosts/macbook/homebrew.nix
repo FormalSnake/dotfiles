@@ -30,12 +30,16 @@
       "logi-options+"
       "nordvpn"
       "alcove"
-      "daisydisk"
     ];
     brews = [
       "jnsahaj/lumen/lumen"
       "couchdb"
       "imagemagick"
+      "mas"
     ];
+    masApps = {
+      Xcode = 497799835;
+      Daisydisk = 411643860;
+    };
   };
 }
