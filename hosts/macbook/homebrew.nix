@@ -38,7 +38,6 @@
       "imagemagick"
       "mas"
       "cloudflare-wrangler"
-      "httpie"
     ];
     masApps = {
       Xcode = 497799835;

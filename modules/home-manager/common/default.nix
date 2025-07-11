@@ -42,6 +42,7 @@ in {
     opencode
     codex
     gemini-cli
+    httpie
 
     # Browsers (available on all platforms)
     firefox
