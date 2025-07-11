@@ -31,6 +31,7 @@
       "nordvpn"
       "alcove"
       "microsoft-edge"
+      "httpie-desktop"
     ];
     brews = [
       "jnsahaj/lumen/lumen"
