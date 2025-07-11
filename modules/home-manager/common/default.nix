@@ -42,7 +42,6 @@ in {
     opencode
     codex
     gemini-cli
-    wrangler
 
     # Browsers (available on all platforms)
     firefox

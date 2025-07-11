@@ -37,6 +37,7 @@
       "couchdb"
       "imagemagick"
       "mas"
+      "cloudflare-wrangler"
     ];
     masApps = {
       Xcode = 497799835;
