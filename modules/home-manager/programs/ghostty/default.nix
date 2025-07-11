@@ -12,6 +12,7 @@
     # cursor-color = #bbbbbb
     adjust-cursor-thickness = 1
     shell-integration = fish
+    shell-integration-features = true
     background-opacity = 0.85
     background-blur-radius = 32
 
