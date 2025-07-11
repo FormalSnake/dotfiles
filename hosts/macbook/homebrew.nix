@@ -31,7 +31,6 @@
       "nordvpn"
       "alcove"
       "microsoft-edge"
-      "utm"
     ];
     brews = [
       "jnsahaj/lumen/lumen"
