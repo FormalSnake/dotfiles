@@ -21,6 +21,7 @@ in {
     bat
     lazygit
     zoxide
+    nh
 
     # Development tools (available on all platforms)
     nodejs
