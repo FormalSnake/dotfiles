@@ -43,7 +43,7 @@
 
       # System-specific aliases
       nixrb = lib.mkIf pkgs.stdenv.isDarwin "clear && nh darwin switch .";
-      nixrbgc = lib.mkIf pkgs.stdenv.isDarwin "clear && sudo darwin-rebuild switch --flake . && sudo nix-collect-garbage -d && sudo nix-store --verify --check-contents --repair";
+      nixrbgc = lib.mkIf pkgs.stdenv.isDarwin "clear && nh darwin switch . && nh clean all";
       nixos-rb = lib.mkIf pkgs.stdenv.isLinux "clear && sudo nixos-rebuild switch --flake .";
       nixos-rbgc = lib.mkIf pkgs.stdenv.isLinux "clear && sudo nixos-rebuild switch --flake . && sudo nix-collect-garbage -d && sudo nix-store --verify --check-contents --repair";
     };
