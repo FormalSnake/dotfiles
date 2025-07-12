@@ -46,6 +46,9 @@ in {
 
     # Browsers (available on all platforms)
     firefox
+
+    # Gaming
+    prismlauncher
   ];
 
   # Global theming
