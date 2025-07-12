@@ -16,6 +16,7 @@
     the-unarchiver
     whatsapp-for-mac
     raycast
+    appcleaner
   ];
 
   # Import macOS-specific program configurations
