@@ -32,6 +32,7 @@
       "alcove"
       "microsoft-edge"
       "httpie-desktop"
+      "app-cleaner"
     ];
     brews = [
       "jnsahaj/lumen/lumen"
