@@ -6,7 +6,7 @@
 }: {
   programs.fish = {
     enable = true;
-    
+
     # Fish plugins via home-manager
     plugins = with pkgs.fishPlugins; [
       {
@@ -42,7 +42,7 @@
       commitai = "set commit_message (lumen draft); and git commit -avm \"$commit_message\"";
 
       # System-specific aliases
-      nixrb = lib.mkIf pkgs.stdenv.isDarwin "clear && sudo darwin-rebuild switch --flake .";
+      nixrb = lib.mkIf pkgs.stdenv.isDarwin "clear && nh darwin switch .";
       nixrbgc = lib.mkIf pkgs.stdenv.isDarwin "clear && sudo darwin-rebuild switch --flake . && sudo nix-collect-garbage -d && sudo nix-store --verify --check-contents --repair";
       nixos-rb = lib.mkIf pkgs.stdenv.isLinux "clear && sudo nixos-rebuild switch --flake .";
       nixos-rbgc = lib.mkIf pkgs.stdenv.isLinux "clear && sudo nixos-rebuild switch --flake . && sudo nix-collect-garbage -d && sudo nix-store --verify --check-contents --repair";
@@ -57,16 +57,16 @@
       if test "$TERM_PROGRAM" = "ghostty"
           set -gx TERM xterm-256color
       end
-      
+
       # Ensure nix paths are in PATH for fish
       fish_add_path /etc/profiles/per-user/kyandesutter/bin
       fish_add_path /run/current-system/sw/bin
       fish_add_path /nix/var/nix/profiles/default/bin
       fish_add_path ~/.nix-profile/bin
-      
+
       # Add Python pip bin directory to PATH
       fish_add_path ~/Library/Python/3.9/bin
-      
+
       # Shell integrations handled by home-manager fzf.nix and zoxide.nix
 
       # Functions ported from zsh
@@ -118,12 +118,12 @@
       # This is a template for your secret environment variables
       # Copy this file to secrets.fish and add your actual secrets
       # secrets.fish is gitignored and won't be committed to your repository
-      
+
       # Example usage:
       # set -gx OPENAI_API_KEY "your-openai-api-key-here"
       # set -gx ANTHROPIC_API_KEY "your-anthropic-api-key-here"
       # set -gx GITHUB_TOKEN "your-github-token-here"
-      
+
       # Add your secret environment variables below:
     '';
   };
