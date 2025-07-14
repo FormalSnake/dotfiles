@@ -22,7 +22,7 @@
       "claude"
       "zerotier-one"
       "balenaetcher"
-      # "betterdisplay"
+      "betterdisplay"
       "steam"
       "brave-browser"
       "google-drive"
