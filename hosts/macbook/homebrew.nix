@@ -16,7 +16,7 @@
 
     casks = [
       "notion"
-      "ghostty"
+      # "ghostty"
       "clop"
       "figma"
       "claude"
@@ -32,13 +32,14 @@
       "alcove"
       "microsoft-edge"
       "httpie-desktop"
+      "stats"
     ];
     brews = [
       "jnsahaj/lumen/lumen"
       "couchdb"
       "imagemagick"
       "mas"
-      # "cloudflare-wrangler"
+      "cloudflare-wrangler"
     ];
     masApps = {
       Xcode = 497799835;

@@ -43,7 +43,7 @@ in {
     opencode
     codex
     gemini-cli
-    wrangler
+    ghostty
 
     # Browsers (available on all platforms)
     firefox
