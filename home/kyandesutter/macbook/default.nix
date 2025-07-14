@@ -17,6 +17,7 @@
     whatsapp-for-mac
     raycast
     appcleaner
+    betterdisplay
   ];
 
   # Import macOS-specific program configurations
