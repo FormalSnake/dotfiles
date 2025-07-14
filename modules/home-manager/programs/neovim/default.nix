@@ -29,6 +29,10 @@ in {
       # Tools
       ripgrep
       fd
+      # Image and document processing
+      ghostscript
+      tectonic
+      nodePackages.mermaid-cli
     ];
 
     plugins = with pkgs.vimPlugins; [
@@ -216,6 +220,13 @@ in {
           p.tree-sitter-javascript
           p.tree-sitter-markdown
           p.tree-sitter-yaml
+          p.tree-sitter-latex
+          p.tree-sitter-scss
+          p.tree-sitter-svelte
+          p.tree-sitter-vue
+          p.tree-sitter-regex
+          p.tree-sitter-norg
+          p.tree-sitter-typst
         ]);
         config = toLuaFile ./plugins/treesitter.lua;
       }
