@@ -17,7 +17,6 @@
     whatsapp-for-mac
     raycast
     appcleaner
-    utm
   ];
 
   # Import macOS-specific program configurations

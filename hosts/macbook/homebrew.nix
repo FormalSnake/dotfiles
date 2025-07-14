@@ -33,6 +33,7 @@
       "microsoft-edge"
       "httpie-desktop"
       "stats"
+      "utm"
     ];
     brews = [
       "jnsahaj/lumen/lumen"
