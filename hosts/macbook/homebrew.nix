@@ -34,6 +34,7 @@
       "httpie-desktop"
       "stats"
       "utm"
+      "ungoogled-chromium"
     ];
     brews = [
       "jnsahaj/lumen/lumen"
