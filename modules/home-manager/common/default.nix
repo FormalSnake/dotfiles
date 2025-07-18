@@ -43,7 +43,6 @@ in {
     opencode
     codex
     gemini-cli
-    vscode
 
     # Browsers (available on all platforms)
     firefox
@@ -80,5 +79,6 @@ in {
     ../programs/fastfetch
     ../programs/spotify
     ../programs/discord
+    ../programs/vscode
   ];
 }
