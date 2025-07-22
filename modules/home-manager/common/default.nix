@@ -43,6 +43,7 @@ in {
     opencode
     codex
     gemini-cli
+    yaak
 
     # Browsers (available on all platforms)
     firefox
