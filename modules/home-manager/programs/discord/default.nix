@@ -4,7 +4,7 @@
   ...
 }: {
   programs.nixcord = {
-    enable = true; # Enable Nixcord (It also installs Discord)
+    enable = false; # Enable Nixcord (It also installs Discord)
     discord.enable = true;
     vesktop.enable = true; # Vesktop
     # dorion.enable = true; # Dorion
