@@ -21,7 +21,7 @@
     # Themes & Integrations
     catppuccin.url = "github:catppuccin/nix";
     spicetify-nix.url = "github:Gerg-L/spicetify-nix";
-    nixcord.url = "github:FormalSnake/nixcord";
+    nixcord.url = "github:KaylorBen/nixcord";
 
     # Neovim plugins
     plugin-auto-dark-mode = {
