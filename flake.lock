@@ -132,15 +132,15 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1751790733,
-        "narHash": "sha256-uCc8jre1Hx0LLb6LTy5o1z3VAPhU/2NIS0s3XZTXxIA=",
-        "owner": "FormalSnake",
+        "lastModified": 1753321333,
+        "narHash": "sha256-tNh44gumJ+qklzLC5MadpWWK1qvYutZytqaoXpFmjKU=",
+        "owner": "KaylorBen",
         "repo": "nixcord",
-        "rev": "daeaba39b87bd646644346dfc8ccfe884d627975",
+        "rev": "360397778114931ce13e430edc5c07c56edb5454",
         "type": "github"
       },
       "original": {
-        "owner": "FormalSnake",
+        "owner": "KaylorBen",
         "repo": "nixcord",
         "type": "github"
       }
