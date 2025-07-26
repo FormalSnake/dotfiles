@@ -10,9 +10,8 @@ in {
     enable = true;
     theme = spicePkgs.themes.catppuccin;
     colorScheme = "mocha";
-    enabledExtensions = with spicePkgs.extensions; [
-      beautifulLyrics
-    ];
+    # enabledExtensions = with spicePkgs.extensions; [
+    #   beautifulLyrics
+    # ];
   };
 }
-
