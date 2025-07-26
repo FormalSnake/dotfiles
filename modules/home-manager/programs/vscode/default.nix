@@ -15,7 +15,6 @@
         vscodevim.vim
         yzhang.markdown-all-in-one
         astro-build.astro-vscode
-        ms-vscode.vscode-typescript-next
         bradlc.vscode-tailwindcss
         esbenp.prettier-vscode
         ms-vscode.vscode-json
