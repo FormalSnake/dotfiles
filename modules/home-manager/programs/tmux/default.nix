@@ -3,20 +3,7 @@
   pkgs,
   ...
 }: let
-  tmux-claude-status = pkgs.tmuxPlugins.mkTmuxPlugin {
-    pluginName = "tmux-claude-status";
-    version = "unstable-2024-11-21";
-    src = pkgs.fetchFromGitHub {
-      owner = "samleeney";
-      repo = "tmux-claude-status";
-      rev = "main";
-      sha256 = "sha256-JjV106R/cUy63q69TGew783S/DVWj1QLGkr24qqGGmM=";
-    };
-  };
 in {
-  home.file.".config/tmux/plugins/.keep".text = "";
-  home.file.".config/tmux/plugins/tmux-claude-status".source = "${tmux-claude-status}/share/tmux-plugins/tmux-claude-status";
-
   programs.tmux = {
     enable = true;
     keyMode = "vi";
@@ -27,14 +14,14 @@ in {
     terminal = "tmux-256color";
 
     plugins = with pkgs.tmuxPlugins; [
-      # {
-      #   plugin = tmux-sessionx;
-      #   extraConfig = ''
-      #     set -g @sessionx-bind 's'
-      #     set -g @sessionx-auto-accept 'off'
-      #     set -g @sessionx-filter-current 'false'
-      #   '';
-      # }
+      {
+        plugin = tmux-sessionx;
+        extraConfig = ''
+          set -g @sessionx-bind 's'
+          set -g @sessionx-auto-accept 'off'
+          set -g @sessionx-filter-current 'false'
+        '';
+      }
       {
         plugin = resurrect;
         extraConfig = ''
