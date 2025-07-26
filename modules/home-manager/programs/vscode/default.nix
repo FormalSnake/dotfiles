@@ -18,7 +18,6 @@
         bradlc.vscode-tailwindcss
         esbenp.prettier-vscode
         jnoortheen.nix-ide
-        mkhl.direnv
       ];
     };
   };
