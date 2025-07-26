@@ -38,12 +38,6 @@ in {
           set -g @continuum-boot 'on'
         '';
       }
-      {
-        plugin = tmux-claude-status;
-        extraConfig = ''
-          # tmux-claude-status configuration
-        '';
-      }
       vim-tmux-navigator
     ];
 
