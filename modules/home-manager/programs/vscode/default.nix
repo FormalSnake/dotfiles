@@ -17,15 +17,9 @@
         astro-build.astro-vscode
         bradlc.vscode-tailwindcss
         esbenp.prettier-vscode
-        ms-vscode.vscode-json
         jnoortheen.nix-ide
         mkhl.direnv
       ];
     };
   };
-
-  # Ensure VSCode directories exist before activation
-  home.activation.createVSCodeDirs = config.lib.dag.entryBefore ["writeBoundary"] ''
-    run mkdir -p "$HOME/Library/Application Support/Code/User/globalStorage"
-  '';
 }
