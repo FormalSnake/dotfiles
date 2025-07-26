@@ -37,6 +37,21 @@
           set -g @continuum-boot 'on'
         '';
       }
+      {
+        plugin = pkgs.tmuxPlugins.mkTmuxPlugin {
+          pluginName = "tmux-claude-status";
+          version = "unstable-2024-11-21";
+          src = pkgs.fetchFromGitHub {
+            owner = "samleeney";
+            repo = "tmux-claude-status";
+            rev = "main";
+            sha256 = "sha256-JjV106R/cUy63q69TGew783S/DVWj1QLGkr24qqGGmM=";
+          };
+        };
+        extraConfig = ''
+          # tmux-claude-status configuration
+        '';
+      }
       vim-tmux-navigator
     ];
 
