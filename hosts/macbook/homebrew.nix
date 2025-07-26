@@ -35,6 +35,7 @@
       "stats"
       "utm"
       "ungoogled-chromium"
+      "conductor"
     ];
     brews = [
       "jnsahaj/lumen/lumen"
