@@ -27,14 +27,14 @@ in {
     terminal = "tmux-256color";
 
     plugins = with pkgs.tmuxPlugins; [
-      {
-        plugin = tmux-sessionx;
-        extraConfig = ''
-          set -g @sessionx-bind 's'
-          set -g @sessionx-auto-accept 'off'
-          set -g @sessionx-filter-current 'false'
-        '';
-      }
+      # {
+      #   plugin = tmux-sessionx;
+      #   extraConfig = ''
+      #     set -g @sessionx-bind 's'
+      #     set -g @sessionx-auto-accept 'off'
+      #     set -g @sessionx-filter-current 'false'
+      #   '';
+      # }
       {
         plugin = resurrect;
         extraConfig = ''
