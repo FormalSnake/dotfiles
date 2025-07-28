@@ -195,10 +195,6 @@ in {
         plugin = nvim-ufo;
         config = toLuaFile ./plugins/ufo.lua;
       }
-      {
-        plugin = indent-blankline-nvim;
-        config = toLuaFile ./plugins/indent-blankline.lua;
-      }
       promise-async
 
       # Phase 3: Productivity Tools

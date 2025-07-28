@@ -1,8 +1,12 @@
 require("various-textobjs").setup({
-  lookForwardSmall = 5,
-  lookForwardBig = 15,
-  useDefaultKeymaps = true,
-  disabledKeymaps = { "gc" }, -- disable comment textobj, we use ts-comments
+  forwardLooking = {
+    small = 5,
+    big = 15,
+  },
+  keymaps = {
+    useDefaults = true,
+    disabled = { "gc" }, -- disable comment textobj, we use ts-comments
+  },
 })
 
 -- Additional custom keymaps for better text objects
