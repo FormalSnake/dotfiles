@@ -173,29 +173,10 @@ in {
 
       # Phase 1: Essential Navigation Tools
       {
-        plugin = harpoon2;
-        config = toLuaFile ./plugins/harpoon.lua;
-      }
-      {
-        plugin = flash-nvim;
-        config = toLuaFile ./plugins/flash.lua;
-      }
-      {
         plugin = nvim-surround;
         config = toLuaFile ./plugins/surround.lua;
       }
       vim-repeat
-
-      # Phase 2: Code Analysis Tools
-      {
-        plugin = aerial-nvim;
-        config = toLuaFile ./plugins/aerial.lua;
-      }
-      {
-        plugin = nvim-ufo;
-        config = toLuaFile ./plugins/ufo.lua;
-      }
-      promise-async
 
       # Phase 3: Productivity Tools
       {
@@ -210,19 +191,10 @@ in {
         plugin = nvim-various-textobjs;
         config = toLuaFile ./plugins/various-textobjs.lua;
       }
-      {
-        plugin = marks-nvim;
-        config = toLuaFile ./plugins/marks.lua;
-      }
-
       # Phase 4: UI and Visual Feedback
       {
         plugin = fidget-nvim;
         config = toLuaFile ./plugins/fidget.lua;
-      }
-      {
-        plugin = winshift-nvim;
-        config = toLuaFile ./plugins/winshift.lua;
       }
 
       lazydev-nvim
