@@ -53,6 +53,25 @@ local servers = {
   html = { capabilities = capabilities },
   cssls = { capabilities = capabilities },
   jsonls = { capabilities = capabilities },
+  tailwindcss = {
+    capabilities = capabilities,
+    filetypes = { "astro", "html", "css", "scss", "javascript", "javascriptreact", "typescript", "typescriptreact", "vue", "svelte" },
+    settings = {
+      tailwindCSS = {
+        classAttributes = { "class", "className", "class:list", "classList", "ngClass" },
+        lint = {
+          cssConflict = "warning",
+          invalidApply = "error",
+          invalidConfigPath = "error",
+          invalidScreen = "error",
+          invalidTailwindDirective = "error",
+          invalidVariant = "error",
+          recommendedVariantOrder = "warning"
+        },
+        validate = true
+      }
+    }
+  },
 }
 
 -- Common on_attach function

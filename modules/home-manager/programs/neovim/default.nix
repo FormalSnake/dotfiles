@@ -23,6 +23,7 @@ in {
       nodePackages.typescript-language-server
       nodePackages.vscode-langservers-extracted # HTML, CSS, JSON
       nodePackages."@astrojs/language-server"
+      nodePackages."@tailwindcss/language-server"
       # Formatters
       nodePackages.prettier
       stylua
@@ -233,6 +234,32 @@ in {
       nvim-treesitter-textobjects
 
       vim-nix
+      
+      # Tailwind CSS support
+      {
+        plugin = nvim-colorizer-lua;
+        config = toLua ''
+          require("colorizer").setup({
+            filetypes = { "*" },
+            user_default_options = {
+              RGB = true,
+              RRGGBB = true,
+              names = true,
+              RRGGBBAA = false,
+              AARRGGBB = false,
+              rgb_fn = false,
+              hsl_fn = false,
+              css = false,
+              css_fn = false,
+              mode = "background",
+              tailwind = true,
+              sass = { enable = false, parsers = { "css" } },
+              virtualtext = "■",
+            },
+            buftypes = {},
+          })
+        '';
+      }
     ];
 
     extraLuaConfig = ''
