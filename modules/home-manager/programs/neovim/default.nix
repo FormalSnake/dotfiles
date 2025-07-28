@@ -322,7 +322,6 @@ in {
 
     extraLuaConfig = ''
       ${builtins.readFile ./core/globals.lua}
-      ${builtins.readFile ./core/utils.lua}
       ${builtins.readFile ./options.lua}
       ${builtins.readFile ./core/keymaps.lua}
       ${builtins.readFile ./core/autocmds.lua}

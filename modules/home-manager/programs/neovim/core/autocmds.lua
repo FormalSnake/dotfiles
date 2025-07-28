@@ -1,7 +1,5 @@
-local utils = require("core.utils")
-
 -- Auto-resize splits when Vim is resized
-utils.create_augroup("ResizeSplits", { clear = true })
+local resize_group = vim.api.nvim_create_augroup("ResizeSplits", { clear = true })
 vim.api.nvim_create_autocmd("VimResized", {
   group = "ResizeSplits",
   pattern = "*",
@@ -10,7 +8,7 @@ vim.api.nvim_create_autocmd("VimResized", {
 })
 
 -- Highlight on yank
-utils.create_augroup("HighlightYank", { clear = true })
+local highlight_group = vim.api.nvim_create_augroup("HighlightYank", { clear = true })
 vim.api.nvim_create_autocmd("TextYankPost", {
   group = "HighlightYank",
   pattern = "*",
@@ -21,7 +19,7 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 })
 
 -- Remove whitespace on save
-utils.create_augroup("TrimWhitespace", { clear = true })
+local trim_group = vim.api.nvim_create_augroup("TrimWhitespace", { clear = true })
 vim.api.nvim_create_autocmd("BufWritePre", {
   group = "TrimWhitespace",
   pattern = "*",
@@ -34,7 +32,7 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 })
 
 -- Auto create directories when saving files
-utils.create_augroup("AutoCreateDir", { clear = true })
+local auto_dir_group = vim.api.nvim_create_augroup("AutoCreateDir", { clear = true })
 vim.api.nvim_create_autocmd("BufWritePre", {
   group = "AutoCreateDir",
   pattern = "*",
@@ -49,7 +47,7 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 })
 
 -- Close certain windows with 'q'
-utils.create_augroup("CloseWithQ", { clear = true })
+local close_group = vim.api.nvim_create_augroup("CloseWithQ", { clear = true })
 vim.api.nvim_create_autocmd("FileType", {
   group = "CloseWithQ",
   pattern = {
@@ -76,7 +74,7 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 -- Set wrap and spell for text filetypes
-utils.create_augroup("TextFiletypes", { clear = true })
+local text_group = vim.api.nvim_create_augroup("TextFiletypes", { clear = true })
 vim.api.nvim_create_autocmd("FileType", {
   group = "TextFiletypes",
   pattern = { "gitcommit", "markdown", "text" },
@@ -88,7 +86,7 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 -- Fix conceallevel for json files
-utils.create_augroup("JsonConceal", { clear = true })
+local json_group = vim.api.nvim_create_augroup("JsonConceal", { clear = true })
 vim.api.nvim_create_autocmd({ "BufWinEnter", "BufRead" }, {
   group = "JsonConceal",
   pattern = "*.json",
@@ -99,7 +97,7 @@ vim.api.nvim_create_autocmd({ "BufWinEnter", "BufRead" }, {
 })
 
 -- Don't auto comment new line
-utils.create_augroup("NoAutoComment", { clear = true })
+local comment_group = vim.api.nvim_create_augroup("NoAutoComment", { clear = true })
 vim.api.nvim_create_autocmd("BufEnter", {
   group = "NoAutoComment",
   pattern = "*",
@@ -110,7 +108,7 @@ vim.api.nvim_create_autocmd("BufEnter", {
 })
 
 -- Show cursor line only in active window
-utils.create_augroup("CursorLineOnlyInActiveWindow", { clear = true })
+local cursor_group = vim.api.nvim_create_augroup("CursorLineOnlyInActiveWindow", { clear = true })
 vim.api.nvim_create_autocmd({ "VimEnter", "WinEnter", "BufWinEnter" }, {
   group = "CursorLineOnlyInActiveWindow",
   pattern = "*",
@@ -130,7 +128,7 @@ vim.api.nvim_create_autocmd("WinLeave", {
 })
 
 -- Check if we need to reload the file when it changed
-utils.create_augroup("CheckTime", { clear = true })
+local checktime_group = vim.api.nvim_create_augroup("CheckTime", { clear = true })
 vim.api.nvim_create_autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
   group = "CheckTime",
   pattern = "*",
@@ -139,7 +137,7 @@ vim.api.nvim_create_autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
 })
 
 -- Go to last loc when opening a buffer
-utils.create_augroup("LastLoc", { clear = true })
+local lastloc_group = vim.api.nvim_create_augroup("LastLoc", { clear = true })
 vim.api.nvim_create_autocmd("BufReadPost", {
   group = "LastLoc",
   pattern = "*",
@@ -154,7 +152,7 @@ vim.api.nvim_create_autocmd("BufReadPost", {
 })
 
 -- Auto toggle hlsearch
-utils.create_augroup("AutoHlsearch", { clear = true })
+local hlsearch_group = vim.api.nvim_create_augroup("AutoHlsearch", { clear = true })
 vim.api.nvim_create_autocmd("CmdlineEnter", {
   group = "AutoHlsearch",
   pattern = "/,\\?",
