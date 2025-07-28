@@ -1,6 +1,6 @@
 # Neovim Configuration User Guide
 
-This Neovim configuration provides a modern IDE-like experience optimized for speed and productivity. It includes enhanced LSP support, intelligent completion, advanced syntax highlighting, and powerful navigation tools.
+This Neovim configuration provides a modern IDE-like experience optimized for speed and productivity. It includes enhanced LSP support, intelligent completion, advanced syntax highlighting, powerful navigation tools, and numerous productivity enhancements.
 
 ## Overview
 
@@ -8,16 +8,34 @@ The configuration is optimized for:
 - **Fast LSP integration** with multiple language servers
 - **Intelligent completion** with AI assistance (Supermaven)
 - **Advanced syntax highlighting** and code navigation (Treesitter)
+- **Enhanced file navigation** with Harpoon and Flash.nvim
+- **Powerful text manipulation** with surround, yanky, and various text objects
+- **Advanced code analysis** with aerial, ufo folding, and indent guides
 - **IDE-like features** while maintaining Neovim's speed
 - **Modern keybindings** following Neovim conventions
 
 ## Essential Keybindings
 
-### File Navigation (Snacks.nvim)
+### File Navigation (Snacks.nvim + Harpoon)
 - `<leader>ff` - Find files in current directory
 - `<leader>fw` - Live grep search in files
 - `<leader>/` - Search current buffer lines
 - `<leader>e` - Toggle file explorer
+
+#### Harpoon (Quick File Bookmarking)
+- `<leader>ha` - Add current file to harpoon
+- `<leader>hh` - Toggle harpoon menu
+- `<leader>h1-4` - Go to harpoon file 1-4
+- `<Ctrl-1-4>` - Quick navigation to harpoon files 1-4
+- `<leader>hp` - Previous harpoon file
+- `<leader>hn` - Next harpoon file
+
+#### Flash.nvim (Enhanced Navigation)
+- `s` - Flash jump (normal/visual/operator mode)
+- `S` - Flash Treesitter selection (normal/visual/operator mode)
+- `r` - Remote Flash (operator mode)
+- `R` - Treesitter Flash search (operator/visual mode)
+- `<Ctrl-s>` - Toggle Flash search (command mode)
 
 ### LSP Navigation
 - `gd` - Go to definition
@@ -66,6 +84,75 @@ The configuration is optimized for:
 - `]]` - Next class start
 - `[[` - Previous class start
 
+### Text Manipulation (Surround + Yanky)
+
+#### Surround Operations
+- `ys{motion}{char}` - Add surrounding (e.g., `ysiw"` surrounds word with quotes)
+- `yss{char}` - Add surrounding to entire line
+- `yS{motion}{char}` - Add surrounding with newlines
+- `ds{char}` - Delete surrounding (e.g., `ds"` removes quotes)
+- `cs{old}{new}` - Change surrounding (e.g., `cs"'` changes quotes to single quotes)
+- `S{char}` - Add surrounding in visual mode
+
+#### Enhanced Yank/Paste (Yanky)
+- `p` - Paste after cursor (yanky enhanced)
+- `P` - Paste before cursor (yanky enhanced)
+- `<Ctrl-p>` - Cycle to previous yank
+- `<Ctrl-n>` - Cycle to next yank
+- `<leader>yh` - Open yank history
+- `<leader>yc` - Clear yank history
+- `]p`/`[p` - Paste with proper indentation
+- `>p`/`<p` - Paste with indent adjustment
+
+#### Advanced Text Objects (Various Textobjs)
+- `ii`/`ai` - Inside/around indent
+- `iS`/`aS` - Inside/around subword
+- `ik`/`ak` - Inside/around key (in key-value pairs)
+- `iv`/`av` - Inside/around value
+- `in`/`an` - Inside/around number
+- `iU`/`aU` - Inside/around URL
+- `iz`/`az` - Inside/around fold
+- `im`/`am` - Inside/around chain member (method calls)
+- `iB`/`aB` - Inside/around any bracket
+- `iQ`/`aQ` - Inside/around any quote
+
+### Code Analysis & Navigation
+
+#### Aerial (Code Outline)
+- `<leader>o` - Toggle aerial outline
+- `<leader>O` - Open aerial outline
+- `<leader>[` - Previous symbol
+- `<leader>]` - Next symbol
+- `{`/`}` - Navigate symbols in aerial window
+
+#### UFO (Advanced Folding)
+- `zR` - Open all folds
+- `zM` - Close all folds
+- `zr` - Fold less (open some folds)
+- `zm` - Fold more (close some folds)
+- `zp` - Peek folded lines under cursor
+- `zK` - Peek fold or show hover
+
+#### Marks Enhancement
+- `m,` - Set next available mark
+- `m]`/`m[` - Next/previous mark
+- `m:` - Preview mark
+- `dm-` - Delete line marks
+- `dm<space>` - Delete buffer marks
+- `m0-9` - Toggle bookmarks 0-9
+- `m}`/`m{` - Next/previous bookmark
+
+### Search & Replace (Spectre)
+- `<leader>SS` - Toggle Spectre (project-wide search/replace)
+- `<leader>Sw` - Search current word
+- `<leader>Sp` - Search in current file only
+
+### Window Management (WinShift)
+- `<leader>wm` - Start WinShift mode
+- `<leader>wx` - Swap windows
+- `<leader>wh/j/k/l` - Move window left/down/up/right
+- `<leader>wH/J/K/L` - Move window to far edges
+
 ### Terminal & Utilities
 - `<leader>t` - Toggle terminal
 - `<Ctrl-_>` - Toggle terminal (alternative)
@@ -112,6 +199,30 @@ The configuration is optimized for:
 - **Automatic** trigger based on context
 
 ## Advanced Features
+
+### Enhanced Navigation
+- **Harpoon bookmarking** for instant file access across projects
+- **Flash.nvim** for lightning-fast cursor movement and text selection
+- **Enhanced marks** with visual indicators and bookmarks
+- **Aerial code outline** with symbol navigation and filtering
+
+### Text Manipulation
+- **Surround operations** for quotes, brackets, tags, and custom delimiters
+- **Yanky enhancements** with persistent history and smart pasting
+- **100+ text objects** for precise selections (indents, URLs, functions, etc.)
+- **Repeatable actions** with vim-repeat for plugin operations
+
+### Code Intelligence
+- **Advanced folding** with UFO and peek functionality
+- **Indent guides** with scope highlighting and rainbow colors
+- **LSP progress** notifications with Fidget
+- **Project-wide search/replace** with Spectre
+
+### Visual Enhancements
+- **Smart window management** with WinShift for easy rearrangement
+- **Better fold text** with line counts and custom styling
+- **Enhanced status reporting** for all background operations
+- **Improved diagnostic display** with context and severity
 
 ### Inlay Hints (TypeScript/JavaScript)
 - **Parameter names** shown inline
@@ -175,12 +286,15 @@ The configuration is optimized for:
 ## Workflow Examples
 
 ### Daily Development
-1. **Open project**: `<leader>ff` to find files
-2. **Navigate code**: `gd` to go to definitions, `gr` for references
-3. **Edit efficiently**: Use text objects (`af`, `if`) for quick selections
-4. **Copy/paste**: `<leader>y` to copy to system clipboard, `y` for vim clipboard
-5. **Check errors**: `<leader>xx` to see all diagnostics
-6. **Format code**: `<leader>lf` before committing
+1. **Open project**: `<leader>ff` to find files, or use Harpoon (`<leader>hh`) for bookmarked files
+2. **Navigate quickly**: Use Flash (`s`) for precise jumping within files
+3. **Navigate code**: `gd` to go to definitions, `gr` for references, `<leader>o` for code outline
+4. **Edit efficiently**: Use enhanced text objects (`ii` for indent, `iU` for URLs, etc.)
+5. **Text manipulation**: Surround with `ys`, change quotes with `cs"'`, cycle yanks with `<C-p>`
+6. **Copy/paste**: Enhanced yanky with `p` for smart pasting, `<leader>yh` for history
+7. **Check errors**: `<leader>xx` to see all diagnostics, navigate with `]d`/`[d`
+8. **Search/replace**: `<leader>SS` for project-wide find/replace with Spectre
+9. **Format code**: `<leader>lf` before committing
 
 ### Debugging Issues
 1. **Check diagnostics**: `<leader>xx` for overview
@@ -190,9 +304,11 @@ The configuration is optimized for:
 
 ### File Management
 1. **Find files**: `<leader>ff` for fuzzy finding
-2. **Search content**: `<leader>fw` for project-wide search
-3. **Browse structure**: `<leader>e` for file explorer
-4. **Quick buffers**: `<leader>bd` to close, `<leader>.` for scratch
+2. **Bookmark files**: `<leader>ha` to add to Harpoon, `<C-1-4>` for instant access
+3. **Search content**: `<leader>fw` for project-wide search, `<leader>SS` for replace
+4. **Browse structure**: `<leader>e` for file explorer, `<leader>o` for code outline
+5. **Quick buffers**: `<leader>bd` to close, `<leader>.` for scratch
+6. **Navigate efficiently**: Use `s` for Flash jumps, aerial for symbol navigation
 
 ## Troubleshooting
 
@@ -217,9 +333,23 @@ The configuration is optimized for:
 ## Customization
 
 The configuration is modular and stored in:
-- `modules/home-manager/programs/neovim/default.nix` - Plugin management
-- `modules/home-manager/programs/neovim/options.lua` - Editor settings
-- `modules/home-manager/programs/neovim/plugins/` - Individual plugin configs
+- `modules/home-manager/programs/neovim/default.nix` - Plugin management and declarations
+- `modules/home-manager/programs/neovim/options.lua` - Core editor settings and options
+- `modules/home-manager/programs/neovim/core/` - Core modules (keymaps, utils, autocmds)
+- `modules/home-manager/programs/neovim/plugins/` - Individual plugin configurations
+
+### New Modular Structure
+- `core/keymaps.lua` - All keybinding definitions
+- `core/utils.lua` - Utility functions and helpers
+- `core/autocmds.lua` - Autocommands for enhanced behavior
+- `core/globals.lua` - Global variables and settings
+
+### Plugin Organization
+Plugins are organized by category:
+- **Phase 1**: Essential navigation (Harpoon, Flash, Surround, Repeat)
+- **Phase 2**: Code analysis (Aerial, UFO, Indent-blankline)  
+- **Phase 3**: Productivity (Spectre, Yanky, Various-textobjs, Marks)
+- **Phase 4**: UI enhancements (Fidget, WinShift)
 
 ### Adding Languages
 1. Add language server to `extraPackages` in `default.nix`
@@ -228,8 +358,44 @@ The configuration is modular and stored in:
 4. Rebuild Nix configuration
 
 ### Modifying Keybindings
-- **LSP keys**: Edit `plugins/lsp.lua` and `options.lua`
+- **General keybindings**: Edit `core/keymaps.lua`
+- **LSP keys**: Edit `plugins/lsp.lua`
+- **Plugin-specific keys**: Edit individual plugin files in `plugins/`
 - **Completion**: Edit `plugins/cmp.lua`
-- **General navigation**: Edit `options.lua`
+
+### Adding New Plugins
+1. Add plugin to appropriate phase section in `default.nix`
+2. Create configuration file in `plugins/{plugin-name}.lua`
+3. Add keybindings using which-key integration
+4. Update documentation as needed
+
+## New Features Summary
+
+This enhanced configuration adds significant productivity improvements:
+
+### 🚀 Navigation Enhancements
+- **Harpoon**: Instant file bookmarking and switching
+- **Flash.nvim**: Lightning-fast cursor movement and selection
+- **Enhanced marks**: Visual marks with bookmarks and navigation
+
+### ✂️ Text Manipulation
+- **Surround**: Smart surrounding character manipulation  
+- **Yanky**: Enhanced clipboard with persistent history
+- **Various textobjs**: 100+ precise text selection objects
+
+### 🔍 Code Analysis
+- **Aerial**: Code outline with symbol navigation
+- **UFO**: Advanced folding with preview capabilities
+- **Indent guides**: Rainbow indentation with scope highlighting
+
+### 🎨 UI & Productivity
+- **Fidget**: LSP progress notifications
+- **WinShift**: Easy window rearrangement
+- **Spectre**: Project-wide search and replace
+
+### 🏗️ Better Organization
+- **Modular structure**: Separated keymaps, utils, and autocmds
+- **Clear plugin organization**: Grouped by functionality
+- **Enhanced documentation**: Comprehensive feature coverage
 
 This configuration provides a powerful, fast, and modern editing experience while maintaining Neovim's philosophy of efficiency and extensibility.

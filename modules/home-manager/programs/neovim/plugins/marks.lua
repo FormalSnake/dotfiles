@@ -1,0 +1,75 @@
+require('marks').setup({
+  default_mappings = true,
+  builtin_marks = { ".", "<", ">", "^" },
+  cyclic = true,
+  force_write_shada = false,
+  refresh_interval = 250,
+  sign_priority = { lower=10, upper=15, builtin=8, bookmark=20 },
+  excluded_filetypes = {
+    "qf",
+    "NvimTree",
+    "toggleterm",
+    "TelescopePrompt",
+    "alpha",
+    "netrw",
+    "aerial"
+  },
+  excluded_buftypes = {
+    "nofile"
+  },
+  bookmark_0 = {
+    sign = "⚑",
+    virt_text = "hello world",
+    annotate = false,
+  },
+  mappings = {
+    set_next = "m,",
+    next = "m]",
+    prev = "m[",
+    preview = "m:",
+    set = "m",
+    delete_line = "dm-",
+    delete_buf = "dm<space>",
+    delete_bookmark = "dm=",
+    next_bookmark = "m}",
+    prev_bookmark = "m{",
+    toggle_bookmark0 = "m0",
+    toggle_bookmark1 = "m1",
+    toggle_bookmark2 = "m2",
+    toggle_bookmark3 = "m3",
+    toggle_bookmark4 = "m4",
+    toggle_bookmark5 = "m5",
+    toggle_bookmark6 = "m6",
+    toggle_bookmark7 = "m7",
+    toggle_bookmark8 = "m8",
+    toggle_bookmark9 = "m9",
+    annotate = "m<CR>",
+  }
+})
+
+-- Which-key integration
+local wk = require("which-key")
+wk.add({
+  { "m", group = "marks" },
+  { "m,", desc = "Set next available mark" },
+  { "m]", desc = "Next mark" },
+  { "m[", desc = "Previous mark" },
+  { "m:", desc = "Preview mark" },
+  { "dm", group = "delete marks" },
+  { "dm-", desc = "Delete line marks" },
+  { "dm<space>", desc = "Delete buffer marks" },
+  { "dm=", desc = "Delete bookmark" },
+  { "m}", desc = "Next bookmark" },
+  { "m{", desc = "Previous bookmark" },
+  { "m0", desc = "Toggle bookmark 0" },
+  { "m1", desc = "Toggle bookmark 1" },
+  { "m2", desc = "Toggle bookmark 2" },
+  { "m3", desc = "Toggle bookmark 3" },
+  { "m4", desc = "Toggle bookmark 4" },
+  { "m5", desc = "Toggle bookmark 5" },
+  { "m6", desc = "Toggle bookmark 6" },
+  { "m7", desc = "Toggle bookmark 7" },
+  { "m8", desc = "Toggle bookmark 8" },
+  { "m9", desc = "Toggle bookmark 9" },
+  { "m<CR>", desc = "Annotate mark" },
+})
