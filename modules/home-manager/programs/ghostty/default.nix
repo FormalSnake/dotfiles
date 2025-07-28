@@ -3,7 +3,7 @@
   home.file.".config/ghostty/config".text = ''
     command = ${pkgs.fish}/bin/fish --login -c "if command -v ${pkgs.tmux}/bin/tmux >/dev/null 2>&1; ${pkgs.tmux}/bin/tmux attach || ${pkgs.tmux}/bin/tmux; else; ${pkgs.fish}/bin/fish; end"
     font-family = GeistMono Nerd Font
-    font-size = 14
+    font-size = 12
     font-feature = -liga
 
     # theme = colors
