@@ -72,7 +72,6 @@ in {
     ../programs/fish
     ../programs/neovim
     ../programs/tmux
-    ../programs/zellij
     ../programs/zoxide
     ../programs/fzf
     ../programs/kitty
