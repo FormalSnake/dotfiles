@@ -42,6 +42,7 @@
       "imagemagick"
       "mas"
       "cloudflare-wrangler"
+      "pam-reattach"
     ];
     masApps = {
       Xcode = 497799835;
