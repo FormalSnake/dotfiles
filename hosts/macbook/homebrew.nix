@@ -35,6 +35,7 @@
       "stats"
       "utm"
       "ungoogled-chromium"
+      "notion-calendar"
     ];
     brews = [
       "jnsahaj/lumen/lumen"
