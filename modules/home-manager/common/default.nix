@@ -43,6 +43,7 @@ in {
     opencode
     codex
     gemini-cli
+    uv
 
     # Browsers (available on all platforms)
     firefox
@@ -71,6 +72,7 @@ in {
     ../programs/fish
     ../programs/neovim
     ../programs/tmux
+    ../programs/zellij
     ../programs/zoxide
     ../programs/fzf
     ../programs/kitty
