@@ -39,6 +39,9 @@ in {
         '';
       }
       vim-tmux-navigator
+      {
+        plugin = tmux-fzf;
+      }
     ];
 
     extraConfig = ''
