@@ -44,6 +44,7 @@ in {
         extraConfig = ''
           set-environment -g TMUX_FZF_LAUNCH_KEY "C-f"
           set-environment -g TMUX_FZF_ORDER "session|window|pane|command|keybinding|clipboard|process"
+          set-environment -g TMUX_FZF_ACTION_ORDER "switch|attach|rename|kill"
         '';
       }
     ];
