@@ -41,6 +41,10 @@ in {
       vim-tmux-navigator
       {
         plugin = tmux-fzf;
+        extraConfig = ''
+          set-environment -g TMUX_FZF_LAUNCH_KEY "C-f"
+          set-environment -g TMUX_FZF_ORDER "session|window|pane|command|keybinding|clipboard|process"
+        '';
       }
     ];
 
