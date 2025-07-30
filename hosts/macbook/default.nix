@@ -74,9 +74,6 @@
         "${pkgs.whatsapp-for-mac}/Applications/WhatsApp.app"
       ];
       wvous-bl-corner = 11;
-      wvous-br-corner = 2;
-      wvous-tl-corner = 1;
-      wvous-tr-corner = 1;
     };
     trackpad = {
       TrackpadRightClick = true;
