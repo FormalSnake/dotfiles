@@ -44,7 +44,6 @@ in {
     codex
     gemini-cli
     uv
-    wireshark
 
     # Browsers (available on all platforms)
     firefox
