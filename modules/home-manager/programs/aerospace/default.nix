@@ -158,7 +158,7 @@
         }
         {
           "if".app-id = "ai.perplexity.comet";
-          run = "move-node-to-workspace ai";
+          run = "move-node-to-workspace web";
         }
         {
           "if".app-id = "com.spotify.client";
