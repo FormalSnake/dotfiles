@@ -26,5 +26,7 @@
     ../../../modules/home-manager/programs/aerospace
     # Sketchybar
     # ../../../modules/home-manager/programs/sketchybar
+    # Karabiner
+    ../../../modules/home-manager/misc/karabiner
   ];
 }

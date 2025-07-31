@@ -1,0 +1,17 @@
+{
+  "description": "Change right_option to Hyper (Meta) key",
+  "manipulators": [
+    {
+      "type": "basic",
+      "from": {
+        "key_code": "right_option"
+      },
+      "to": [
+        {
+          "key_code": "right_shift",
+          "modifiers": ["right_control", "right_option", "right_command"]
+        }
+      ]
+    }
+  ]
+}
