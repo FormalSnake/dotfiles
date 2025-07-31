@@ -68,6 +68,7 @@
       show-recents = false;
       showhidden = true;
       persistent-apps = [
+        "/Applications/Comet.app"
         "/Applications/Brave Browser.app"
         "/System/Applications/Calendar.app"
         "/Applications/Ghostty.app"
