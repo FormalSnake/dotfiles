@@ -64,26 +64,26 @@
         alt-shift-equal = "resize smart +50";
 
         # Workspace management
-        cmd-1 = "workspace 1";
-        cmd-2 = "workspace 2";
-        cmd-3 = "workspace 3";
-        cmd-4 = "workspace 4";
-        cmd-5 = "workspace 5";
-        cmd-6 = "workspace 6";
-        cmd-7 = "workspace 7";
-        cmd-8 = "workspace 8";
-        cmd-9 = "workspace 9";
+        cmd-1 = "workspace web";
+        cmd-2 = "workspace terminal";
+        cmd-3 = "workspace code";
+        cmd-4 = "workspace communication";
+        cmd-5 = "workspace productivity";
+        cmd-6 = "workspace design";
+        cmd-7 = "workspace ai";
+        cmd-8 = "workspace media";
+        cmd-9 = "workspace gaming";
 
         # Move windows to workspaces
-        cmd-shift-1 = "move-node-to-workspace 1";
-        cmd-shift-2 = "move-node-to-workspace 2";
-        cmd-shift-3 = "move-node-to-workspace 3";
-        cmd-shift-4 = "move-node-to-workspace 4";
-        cmd-shift-5 = "move-node-to-workspace 5";
-        cmd-shift-6 = "move-node-to-workspace 6";
-        cmd-shift-7 = "move-node-to-workspace 7";
-        cmd-shift-8 = "move-node-to-workspace 8";
-        cmd-shift-9 = "move-node-to-workspace 9";
+        cmd-shift-1 = "move-node-to-workspace web";
+        cmd-shift-2 = "move-node-to-workspace terminal";
+        cmd-shift-3 = "move-node-to-workspace code";
+        cmd-shift-4 = "move-node-to-workspace communication";
+        cmd-shift-5 = "move-node-to-workspace productivity";
+        cmd-shift-6 = "move-node-to-workspace design";
+        cmd-shift-7 = "move-node-to-workspace ai";
+        cmd-shift-8 = "move-node-to-workspace media";
+        cmd-shift-9 = "move-node-to-workspace gaming";
 
         # Workspace navigation
         alt-tab = "workspace-back-and-forth";
@@ -118,43 +118,59 @@
       on-window-detected = [
         {
           "if".app-id = "com.brave.Browser";
-          run = "move-node-to-workspace 1";
+          run = "move-node-to-workspace web";
         }
         {
           "if".app-id = "com.mitchellh.ghostty";
-          run = "move-node-to-workspace 2";
+          run = "move-node-to-workspace terminal";
         }
         {
           "if".app-id = "dev.zed.Zed";
-          run = "move-node-to-workspace 3";
+          run = "move-node-to-workspace code";
         }
         {
           "if".app-id = "com.tinyspeck.slackmacgui";
-          run = "move-node-to-workspace 4";
+          run = "move-node-to-workspace communication";
         }
         {
           "if".app-id = "net.whatsapp.WhatsApp";
-          run = "move-node-to-workspace 4";
+          run = "move-node-to-workspace communication";
+        }
+        {
+          "if".app-id = "com.apple.MobileSMS";
+          run = "move-node-to-workspace communication";
         }
         {
           "if".app-id = "notion.id";
-          run = "move-node-to-workspace 5";
+          run = "move-node-to-workspace productivity";
+        }
+        {
+          "if".app-id = "com.cron.electron";
+          run = "move-node-to-workspace productivity";
         }
         {
           "if".app-id = "com.figma.Desktop";
-          run = "move-node-to-workspace 6";
+          run = "move-node-to-workspace design";
         }
         {
           "if".app-id = "com.anthropic.Claude";
-          run = "move-node-to-workspace 7";
+          run = "move-node-to-workspace ai";
+        }
+        {
+          "if".app-id = "ai.perplexity.comet";
+          run = "move-node-to-workspace ai";
         }
         {
           "if".app-id = "com.spotify.client";
-          run = "move-node-to-workspace 8";
+          run = "move-node-to-workspace media";
         }
         {
           "if".app-id = "com.valvesoftware.steam";
-          run = "move-node-to-workspace 9";
+          run = "move-node-to-workspace gaming";
+        }
+        {
+          "if".app-id = "com.nordvpn.macos";
+          run = "move-node-to-workspace productivity";
         }
       ];
     };
