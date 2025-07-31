@@ -17,11 +17,14 @@
     whatsapp-for-mac
     raycast
     appcleaner
+    terminal-notifier
   ];
 
   # Import macOS-specific program configurations
   imports = [
     # Aerospace
     ../../../modules/home-manager/programs/aerospace
+    # Sketchybar
+    ../../../modules/home-manager/programs/sketchybar
   ];
 }
