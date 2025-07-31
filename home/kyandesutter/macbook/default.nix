@@ -25,6 +25,6 @@
     # Aerospace
     ../../../modules/home-manager/programs/aerospace
     # Sketchybar
-    ../../../modules/home-manager/programs/sketchybar
+    # ../../../modules/home-manager/programs/sketchybar
   ];
 }
