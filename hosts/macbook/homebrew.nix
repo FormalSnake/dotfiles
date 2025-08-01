@@ -37,6 +37,7 @@
       "ungoogled-chromium"
       "notion-calendar"
       "wireshark-app"
+      "hyperkey"
     ];
     brews = [
       "jnsahaj/lumen/lumen"
