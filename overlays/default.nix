@@ -1,4 +1,7 @@
 {inputs, ...}: [
+  # NUR overlay
+  inputs.nur.overlays.default
+
   # Custom overlays for Neovim plugins
   (final: prev: {
     vimPlugins =

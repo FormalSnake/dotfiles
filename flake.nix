@@ -4,6 +4,7 @@
   inputs = {
     # Core
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nur.url = "github:nix-community/NUR";
 
     # System management
     nix-darwin = {
@@ -57,6 +58,7 @@
   outputs = inputs @ {
     self,
     nixpkgs,
+    nur,
     nix-darwin,
     nix-homebrew,
     home-manager,
