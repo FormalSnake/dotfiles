@@ -52,7 +52,7 @@ in {
     prismlauncher
 
     # NUR packages - examples (uncomment and modify as needed)
-    nur.repos.mic92.hello-nur
+    # nur.repos.mic92.hello-nur
     nur.repos.charmbracelet.crush
     # nur.repos.some-author.some-package
   ];
