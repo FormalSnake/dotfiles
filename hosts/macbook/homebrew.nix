@@ -38,6 +38,7 @@
       "notion-calendar"
       "wireshark-app"
       "hyperkey"
+      "lm-studio"
     ];
     brews = [
       "jnsahaj/lumen/lumen"

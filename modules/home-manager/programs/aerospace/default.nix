@@ -64,26 +64,26 @@
         alt-shift-equal = "resize smart +50";
 
         # Workspace management
-        cmd-1 = "workspace web";
-        cmd-2 = "workspace terminal";
-        cmd-3 = "workspace code";
-        cmd-4 = "workspace communication";
-        cmd-5 = "workspace productivity";
-        cmd-6 = "workspace design";
-        cmd-7 = "workspace ai";
-        cmd-8 = "workspace media";
-        cmd-9 = "workspace gaming";
+        ctrl-alt-cmd-1 = "workspace web";
+        ctrl-alt-cmd-2 = "workspace terminal";
+        ctrl-alt-cmd-3 = "workspace code";
+        ctrl-alt-cmd-4 = "workspace communication";
+        ctrl-alt-cmd-5 = "workspace productivity";
+        ctrl-alt-cmd-6 = "workspace design";
+        ctrl-alt-cmd-7 = "workspace ai";
+        ctrl-alt-cmd-8 = "workspace media";
+        ctrl-alt-cmd-9 = "workspace gaming";
 
         # Move windows to workspaces
-        cmd-shift-1 = "move-node-to-workspace web";
-        cmd-shift-2 = "move-node-to-workspace terminal";
-        cmd-shift-3 = "move-node-to-workspace code";
-        cmd-shift-4 = "move-node-to-workspace communication";
-        cmd-shift-5 = "move-node-to-workspace productivity";
-        cmd-shift-6 = "move-node-to-workspace design";
-        cmd-shift-7 = "move-node-to-workspace ai";
-        cmd-shift-8 = "move-node-to-workspace media";
-        cmd-shift-9 = "move-node-to-workspace gaming";
+        ctrl-alt-cmd-shift-1 = "move-node-to-workspace web";
+        ctrl-alt-cmd-shift-2 = "move-node-to-workspace terminal";
+        ctrl-alt-cmd-shift-3 = "move-node-to-workspace code";
+        ctrl-alt-cmd-shift-4 = "move-node-to-workspace communication";
+        ctrl-alt-cmd-shift-5 = "move-node-to-workspace productivity";
+        ctrl-alt-cmd-shift-6 = "move-node-to-workspace design";
+        ctrl-alt-cmd-shift-7 = "move-node-to-workspace ai";
+        ctrl-alt-cmd-shift-8 = "move-node-to-workspace media";
+        ctrl-alt-cmd-shift-9 = "move-node-to-workspace gaming";
 
         # Workspace navigation
         alt-tab = "workspace-back-and-forth";
