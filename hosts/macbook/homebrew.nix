@@ -39,6 +39,7 @@
       "wireshark-app"
       "hyperkey"
       "lm-studio"
+      "block-goose"
     ];
     brews = [
       "jnsahaj/lumen/lumen"

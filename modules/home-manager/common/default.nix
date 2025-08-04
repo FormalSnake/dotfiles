@@ -44,6 +44,7 @@ in {
     codex
     gemini-cli
     uv
+    warp-terminal
 
     # Browsers (available on all platforms)
     firefox
