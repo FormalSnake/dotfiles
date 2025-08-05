@@ -57,6 +57,9 @@ in {
       {
         plugin = minimap-vim;
       }
+      {
+        plugin = claudecode-nvim;
+      }
       github-nvim-theme
       {
         plugin = own-visual-whitespace;
@@ -260,7 +263,7 @@ in {
       nvim-treesitter-textobjects
 
       vim-nix
-      
+
       # Tailwind CSS support
       {
         plugin = nvim-colorizer-lua;
