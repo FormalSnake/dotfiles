@@ -59,6 +59,9 @@ in {
       }
       {
         plugin = claudecode-nvim;
+        config = toLua ''
+          require("claudecode").setup()
+        '';
       }
       github-nvim-theme
       {
