@@ -23,6 +23,9 @@ in {
     zoxide
     nh
 
+    # General utilities
+    gimp
+
     # Development tools (available on all platforms)
     nodejs
     bun

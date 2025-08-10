@@ -39,7 +39,6 @@
       "wireshark-app"
       "hyperkey"
       "lm-studio"
-      "paintbrush"
     ];
     brews = [
       "jnsahaj/lumen/lumen"
