@@ -39,6 +39,7 @@
       "wireshark-app"
       "hyperkey"
       "lm-studio"
+      "kindavim"
     ];
     brews = [
       "jnsahaj/lumen/lumen"
