@@ -22,9 +22,14 @@ in {
     lazygit
     zoxide
     nh
+    libcaca
 
     # General utilities
     gimp
+    kew
+    yazi
+    aichat
+    browsh
 
     # Development tools (available on all platforms)
     nodejs
