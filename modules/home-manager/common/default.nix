@@ -26,9 +26,8 @@ in {
 
     # General utilities
     gimp
-    kew
+    spotify-player
     yazi
-    aichat
     browsh
 
     # Development tools (available on all platforms)
