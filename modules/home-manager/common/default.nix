@@ -26,9 +26,7 @@ in {
 
     # General utilities
     gimp
-    spotify-player
     yazi
-    browsh
 
     # Development tools (available on all platforms)
     nodejs
