@@ -57,6 +57,7 @@ in {
       {
         plugin = minimap-vim;
       }
+      opencode-nvim
       {
         plugin = claudecode-nvim;
         config = toLua ''
