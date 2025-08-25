@@ -50,32 +50,48 @@ end, { desc = "Neovim News" })
 -- LSP and Trouble keymaps
 local wk = require("which-key")
 wk.add({
-  { "<leader>l", group = "lsp" },
-  { "<leader>la", vim.lsp.buf.code_action,       desc = "Code Action" },
-  { "<leader>lA", vim.lsp.buf.range_code_action, desc = "Range Code Actions" },
-  { "<leader>ls", vim.lsp.buf.signature_help,    desc = "Display Signature Information" },
-  { "<leader>lr", vim.lsp.buf.rename,            desc = "Rename all references" },
-  { "<leader>lf", vim.lsp.buf.format,            desc = "Format" },
-  { "<leader>x", group = "diagnostics" },
-  { "<leader>xx", "<cmd>Trouble diagnostics toggle<cr>", desc = "Diagnostics (Trouble)" },
-  { "<leader>xX", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", desc = "Buffer Diagnostics (Trouble)" },
-  { "<leader>c", group = "code" },
-  { "<leader>cs", "<cmd>Trouble symbols toggle focus=false<cr>", desc = "Symbols (Trouble)" },
+  { "<leader>l",  group = "lsp" },
+  { "<leader>la", vim.lsp.buf.code_action,                                      desc = "Code Action" },
+  { "<leader>lA", vim.lsp.buf.range_code_action,                                desc = "Range Code Actions" },
+  { "<leader>ls", vim.lsp.buf.signature_help,                                   desc = "Display Signature Information" },
+  { "<leader>lr", vim.lsp.buf.rename,                                           desc = "Rename all references" },
+  { "<leader>lf", vim.lsp.buf.format,                                           desc = "Format" },
+  { "<leader>x",  group = "diagnostics" },
+  { "<leader>xx", "<cmd>Trouble diagnostics toggle<cr>",                        desc = "Diagnostics (Trouble)" },
+  { "<leader>xX", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>",           desc = "Buffer Diagnostics (Trouble)" },
+  { "<leader>c",  group = "code" },
+  { "<leader>cs", "<cmd>Trouble symbols toggle focus=false<cr>",                desc = "Symbols (Trouble)" },
   { "<leader>cl", "<cmd>Trouble lsp toggle focus=false win.position=right<cr>", desc = "LSP Definitions / references / ... (Trouble)" },
-  { "<leader>xL", "<cmd>Trouble loclist toggle<cr>", desc = "Location List (Trouble)" },
-  { "<leader>xQ", "<cmd>Trouble qflist toggle<cr>", desc = "Quickfix List (Trouble)" },
+  { "<leader>xL", "<cmd>Trouble loclist toggle<cr>",                            desc = "Location List (Trouble)" },
+  { "<leader>xQ", "<cmd>Trouble qflist toggle<cr>",                             desc = "Quickfix List (Trouble)" },
 })
 
 -- Claude Code keymaps
 wk.add({
-  { "<leader>a", group = "AI/Claude Code" },
-  { "<leader>ac", "<cmd>ClaudeCode<cr>", desc = "Toggle Claude" },
-  { "<leader>af", "<cmd>ClaudeCodeFocus<cr>", desc = "Focus Claude" },
-  { "<leader>ar", "<cmd>ClaudeCode --resume<cr>", desc = "Resume Claude" },
+  { "<leader>a",  group = "AI/Claude Code" },
+  { "<leader>ac", "<cmd>ClaudeCode<cr>",            desc = "Toggle Claude" },
+  { "<leader>af", "<cmd>ClaudeCodeFocus<cr>",       desc = "Focus Claude" },
+  { "<leader>ar", "<cmd>ClaudeCode --resume<cr>",   desc = "Resume Claude" },
   { "<leader>aC", "<cmd>ClaudeCode --continue<cr>", desc = "Continue Claude" },
   { "<leader>am", "<cmd>ClaudeCodeSelectModel<cr>", desc = "Select Claude model" },
-  { "<leader>ab", "<cmd>ClaudeCodeAdd %<cr>", desc = "Add current buffer" },
-  { "<leader>as", "<cmd>ClaudeCodeSend<cr>", desc = "Send to Claude", mode = "v" },
-  { "<leader>aa", "<cmd>ClaudeCodeDiffAccept<cr>", desc = "Accept diff" },
-  { "<leader>ad", "<cmd>ClaudeCodeDiffDeny<cr>", desc = "Deny diff" },
+  { "<leader>ab", "<cmd>ClaudeCodeAdd %<cr>",       desc = "Add current buffer" },
+  { "<leader>as", "<cmd>ClaudeCodeSend<cr>",        desc = "Send to Claude",     mode = "v" },
+  { "<leader>aa", "<cmd>ClaudeCodeDiffAccept<cr>",  desc = "Accept diff" },
+  { "<leader>ad", "<cmd>ClaudeCodeDiffDeny<cr>",    desc = "Deny diff" },
+})
+
+-- OpenCode
+wk.add({
+  -- Recommended keymaps
+  { '<leader>oA', function() require('opencode').ask() end,                                     desc = 'Ask opencode', },
+  { '<leader>oa', function() require('opencode').ask('@cursor: ') end,                          desc = 'Ask opencode about this',      mode = 'n', },
+  { '<leader>oa', function() require('opencode').ask('@selection: ') end,                       desc = 'Ask opencode about selection', mode = 'v', },
+  { '<leader>ot', function() require('opencode').toggle() end,                                  desc = 'Toggle embedded opencode', },
+  { '<leader>on', function() require('opencode').command('session_new') end,                    desc = 'New session', },
+  { '<leader>oy', function() require('opencode').command('messages_copy') end,                  desc = 'Copy last message', },
+  { '<S-C-u>',    function() require('opencode').command('messages_half_page_up') end,          desc = 'Scroll messages up', },
+  { '<S-C-d>',    function() require('opencode').command('messages_half_page_down') end,        desc = 'Scroll messages down', },
+  { '<leader>op', function() require('opencode').select_prompt() end,                           desc = 'Select prompt',                mode = { 'n', 'v', }, },
+  -- Example: keymap for custom prompt
+  { '<leader>oe', function() require('opencode').prompt("Explain @cursor and its context") end, desc = "Explain code near cursor", },
 })
