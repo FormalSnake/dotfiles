@@ -39,7 +39,6 @@
       "wireshark-app"
       "hyperkey"
       "lm-studio"
-      "whatsapp"
     ];
     brews = [
       "jnsahaj/lumen/lumen"
