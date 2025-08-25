@@ -72,7 +72,6 @@
         "/Applications/Brave Browser.app"
         "/System/Applications/Calendar.app"
         "/Applications/Ghostty.app"
-        "${pkgs.whatsapp-for-mac}/Applications/WhatsApp.app"
       ];
       wvous-bl-corner = 11;
     };

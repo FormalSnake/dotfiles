@@ -14,7 +14,6 @@
     # macOS-specific utilities
     ice-bar
     the-unarchiver
-    whatsapp-for-mac
     raycast
     appcleaner
     terminal-notifier
