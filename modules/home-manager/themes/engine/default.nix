@@ -213,6 +213,9 @@ in {
           update-ghostty-config
         fi
         
+        # Signal neovim instances to reload theme
+        pkill -SIGUSR1 nvim 2>/dev/null || true
+        
         # Update environment for current session
         export THEME_CURRENT="$THEME"
         
@@ -222,11 +225,11 @@ in {
         echo "Applications that update immediately:"
         echo "  • Fish shell (new shells)"
         echo "  • Ghostty (config updated)"
+        echo "  • Neovim (running instances signaled)"
         echo "  • btop (restart btop)"
         echo "  • Tmux (run: tmux source ~/.config/tmux/tmux.conf)"
         echo ""
-        echo "For Neovim theme switching, rebuild your config:"
-        echo "  darwin-rebuild switch --flake .#macbook"
+        echo "Theme switching complete! No rebuild needed."
       '')
       
       (pkgs.writeShellScriptBin "nix-theme-current" ''

@@ -49,11 +49,48 @@ in {
     (map (plugin: { inherit plugin; config = ""; }) allThemePlugins)
     ++
     [
-      # Theme configuration
+      # Dynamic theme configuration
       {
         plugin = themePlugin;
         config = toLua ''
-          vim.cmd.colorscheme("${themeColorscheme}")
+          -- Function to get current theme
+          local function get_current_theme()
+            local theme_file = vim.fn.expand("~/.config/nix-themes/current")
+            if vim.fn.filereadable(theme_file) == 1 then
+              local theme = vim.fn.readfile(theme_file)[1]
+              if theme then
+                return vim.fn.trim(theme)
+              end
+            end
+            return "catppuccin"
+          end
+          
+          -- Function to apply theme based on current selection
+          local function apply_theme()
+            local current_theme = get_current_theme()
+            
+            if current_theme == "catppuccin" then
+              vim.cmd.colorscheme("catppuccin-mocha")
+            elseif current_theme == "everforest" then
+              vim.cmd.colorscheme("everforest")
+            elseif current_theme == "nord" then
+              vim.cmd.colorscheme("nord")
+            else
+              vim.cmd.colorscheme("catppuccin-mocha")
+            end
+          end
+          
+          -- Apply theme on startup
+          apply_theme()
+          
+          -- Watch for theme changes and reload
+          vim.api.nvim_create_autocmd("Signal", {
+            pattern = "SIGUSR1",
+            callback = function()
+              apply_theme()
+              vim.notify("Theme reloaded!", vim.log.levels.INFO)
+            end,
+          })
         '';
       }
       {
