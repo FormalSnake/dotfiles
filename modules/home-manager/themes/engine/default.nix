@@ -7,6 +7,12 @@
   cfg = config.themes;
   inherit (lib) mkOption mkEnableOption mkIf types;
 
+  # Function to get current theme at runtime, fallback to config default
+  getCurrentTheme = 
+    if builtins.pathExists "${config.home.homeDirectory}/.config/nix-themes/current" 
+    then lib.removeSuffix "\n" (builtins.readFile "${config.home.homeDirectory}/.config/nix-themes/current")
+    else cfg.current;
+
   themeType = types.submodule {
     options = {
       name = mkOption {
