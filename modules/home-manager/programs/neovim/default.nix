@@ -57,40 +57,69 @@ in {
           local function get_current_theme()
             local theme_file = vim.fn.expand("~/.config/nix-themes/current")
             if vim.fn.filereadable(theme_file) == 1 then
-              local theme = vim.fn.readfile(theme_file)[1]
-              if theme then
-                return vim.fn.trim(theme)
+              local lines = vim.fn.readfile(theme_file)
+              if lines and #lines > 0 and lines[1] then
+                local theme = vim.fn.trim(lines[1])
+                print("Debug: Read theme from file: " .. theme)
+                return theme
               end
             end
+            print("Debug: Using fallback theme: catppuccin")
             return "catppuccin"
           end
           
           -- Function to apply theme based on current selection
           local function apply_theme()
             local current_theme = get_current_theme()
+            print("Debug: Applying theme: " .. current_theme)
             
             if current_theme == "catppuccin" then
               vim.cmd.colorscheme("catppuccin-mocha")
+              print("Debug: Applied catppuccin-mocha")
             elseif current_theme == "everforest" then
               vim.cmd.colorscheme("everforest")
+              print("Debug: Applied everforest")
             elseif current_theme == "nord" then
               vim.cmd.colorscheme("nord")
+              print("Debug: Applied nord")
             else
               vim.cmd.colorscheme("catppuccin-mocha")
+              print("Debug: Applied fallback catppuccin-mocha")
             end
           end
           
           -- Apply theme on startup
           apply_theme()
           
-          -- Watch for theme changes and reload
+          -- Create user command to reload theme manually
+          vim.api.nvim_create_user_command("ReloadTheme", function()
+            apply_theme()
+            vim.notify("Theme reloaded!", vim.log.levels.INFO)
+          end, {})
+          
+          -- Watch for theme changes and reload (try multiple approaches)
           vim.api.nvim_create_autocmd("Signal", {
             pattern = "SIGUSR1",
             callback = function()
+              print("Debug: Received SIGUSR1 signal")
               apply_theme()
-              vim.notify("Theme reloaded!", vim.log.levels.INFO)
+              vim.notify("Theme reloaded via signal!", vim.log.levels.INFO)
             end,
           })
+          
+          -- Also watch for file changes
+          local function watch_theme_file()
+            local theme_file = vim.fn.expand("~/.config/nix-themes/current")
+            if vim.fn.filereadable(theme_file) == 1 then
+              vim.fn.timer_start(1000, function()
+                apply_theme()
+                watch_theme_file()
+              end)
+            end
+          end
+          
+          -- Start watching (but only check every few seconds to avoid spam)
+          vim.fn.timer_start(3000, watch_theme_file)
         '';
       }
       {
