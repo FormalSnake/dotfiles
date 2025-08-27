@@ -7,6 +7,14 @@
 }: let
   toLua = str: "lua << EOF\n${str}\nEOF\n";
   toLuaFile = file: "lua << EOF\n${builtins.readFile file}\nEOF\n";
+  
+  # Get current theme configuration
+  currentTheme = config.themes.available.${config.themes.current or "catppuccin"} or {};
+  themePlugin = currentTheme.neovim.plugin or pkgs.vimPlugins.catppuccin-nvim;
+  themeColorscheme = currentTheme.neovim.colorscheme or "catppuccin-mocha";
+  
+  # Collect all theme plugins to ensure they're available
+  allThemePlugins = lib.mapAttrsToList (name: theme: theme.neovim.plugin) (config.themes.available or {});
 in {
   programs.neovim = {
     enable = true;
@@ -36,10 +44,17 @@ in {
       nodePackages.mermaid-cli
     ];
 
-    plugins = with pkgs.vimPlugins; [
+    plugins = with pkgs.vimPlugins; 
+    # Theme plugins - all available themes
+    (map (plugin: { inherit plugin; config = ""; }) allThemePlugins)
+    ++
+    [
+      # Theme configuration
       {
-        plugin = catppuccin-nvim;
-        config = "";
+        plugin = themePlugin;
+        config = toLua ''
+          vim.cmd.colorscheme("${themeColorscheme}")
+        '';
       }
       {
         plugin = snacks-nvim;
@@ -48,10 +63,6 @@ in {
       {
         plugin = nvim-lspconfig;
         config = toLuaFile ./plugins/lsp.lua;
-      }
-      {
-        plugin = own-auto-dark-mode;
-        config = toLuaFile ./plugins/colorscheme.lua;
       }
       nvim-scrollview
       {

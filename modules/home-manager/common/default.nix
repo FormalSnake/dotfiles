@@ -63,13 +63,7 @@ in {
     # nur.repos.some-author.some-package
   ];
 
-  # Global theming
-  # catppuccin.flavor = "mocha";
-  # catppuccin.enable = true;
-  catppuccin = {
-    enable = true;
-    flavor = "mocha"; # Options: latte, frappe, macchiato, mocha
-  };
+  # Global theming handled by theme engine
 
   # Common programs
   programs.git = {
@@ -80,6 +74,7 @@ in {
 
   # Common program imports (available on all platforms)
   imports = [
+    ../themes/engine
     ../programs/fish
     ../programs/neovim
     ../programs/tmux
@@ -93,4 +88,11 @@ in {
     ../programs/discord
     ../programs/vscode
   ];
+
+  # Enable theme engine and configure available themes
+  themes = {
+    enable = true;
+    current = "catppuccin"; # Default theme
+    available = import ../themes/definitions {inherit pkgs;};
+  };
 }
