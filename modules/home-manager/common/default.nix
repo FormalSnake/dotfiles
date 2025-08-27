@@ -92,7 +92,7 @@ in {
   # Enable theme engine and configure available themes
   themes = {
     enable = true;
-    current = "everforest"; # Default theme
+    current = "nord"; # Default theme
     available = import ../themes/definitions {inherit pkgs;};
   };
 }
