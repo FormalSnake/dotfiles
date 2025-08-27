@@ -38,7 +38,7 @@ in {
     lua
     claude-code
     # zed-editor
-    aider-chat
+    # aider-chat
     pyenv
     nixd
     devenv

@@ -32,7 +32,7 @@ in {
       fd
       # Image and document processing
       ghostscript
-      tectonic
+      # tectonic
       nodePackages.mermaid-cli
     ];
 
