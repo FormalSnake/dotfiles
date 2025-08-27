@@ -139,6 +139,12 @@ in {
         
         echo "Switching to theme: $THEME"
         
+        # Create theme config directory if it doesn't exist (with proper permissions)
+        if [[ ! -d ~/.config/nix-themes ]]; then
+          sudo mkdir -p ~/.config/nix-themes
+          sudo chown $(whoami):$(id -gn) ~/.config/nix-themes
+        fi
+        
         # Update current theme file
         echo "$THEME" > ~/.config/nix-themes/current
         
