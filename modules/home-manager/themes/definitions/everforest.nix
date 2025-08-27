@@ -33,6 +33,56 @@
   };
 
   ghostty = {
-    theme = "everforest-dark";
+    theme = "Everforest Dark - Hard";
+  };
+
+  btop = {
+    theme = ''
+      theme[main_bg]="#2d353b"
+      theme[main_fg]="#d3c6aa"
+      theme[title]="#d3c6aa"
+      theme[hi_fg]="#a7c080"
+      theme[selected_bg]="#343f44"
+      theme[selected_fg]="#a7c080"
+      theme[inactive_fg]="#859289"
+      theme[graph_text]="#d3c6aa"
+      theme[meter_bg]="#343f44"
+      theme[proc_misc]="#d3c6aa"
+      theme[cpu_box]="#d699b6"
+      theme[mem_box]="#a7c080"
+      theme[net_box]="#e67e80"
+      theme[proc_box]="#7fbbb3"
+      theme[div_line]="#475258"
+      theme[temp_start]="#a7c080"
+      theme[temp_mid]="#dbbc7f"
+      theme[temp_end]="#e67e80"
+      theme[cpu_start]="#83c092"
+      theme[cpu_mid]="#7fbbb3"
+      theme[cpu_end]="#d699b6"
+    '';
+  };
+
+  fish = {
+    colors = {
+      fish_color_normal = "#d3c6aa";
+      fish_color_command = "#7fbbb3";
+      fish_color_param = "#d3c6aa";
+      fish_color_keyword = "#d699b6";
+      fish_color_quote = "#a7c080";
+      fish_color_redirection = "#e69875";
+      fish_color_end = "#e69875";
+      fish_color_error = "#e67e80";
+      fish_color_gray = "#859289";
+      fish_color_selection = "#343f44";
+      fish_color_search_match = "#dbbc7f";
+      fish_color_operator = "#e69875";
+      fish_color_escape = "#83c092";
+      fish_color_autosuggestion = "#859289";
+      fish_color_cancel = "#e67e80";
+      fish_pager_color_progress = "#859289";
+      fish_pager_color_prefix = "#7fbbb3";
+      fish_pager_color_completion = "#d3c6aa";
+      fish_pager_color_description = "#859289";
+    };
   };
 }

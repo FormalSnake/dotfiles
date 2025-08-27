@@ -70,6 +70,28 @@
         };
       };
 
+      btop = mkOption {
+        type = types.submodule {
+          options = {
+            theme = mkOption { 
+              type = types.str; 
+              description = "Btop theme content"; 
+            };
+          };
+        };
+      };
+
+      fish = mkOption {
+        type = types.submodule {
+          options = {
+            colors = mkOption {
+              type = types.attrsOf types.str;
+              description = "Fish shell color configuration";
+            };
+          };
+        };
+      };
+
       wallpapers = mkOption {
         type = types.listOf types.path;
         default = [];
