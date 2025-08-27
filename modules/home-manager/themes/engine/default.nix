@@ -208,12 +208,25 @@ in {
         ln -nsf "$THEME_DIR/tmux.conf" ~/.config/tmux/current-theme.conf
         ln -nsf "$THEME_DIR/neovim" ~/.config/nix-themes/current-neovim
         
+        # Update ghostty config
+        if command -v update-ghostty-config >/dev/null 2>&1; then
+          update-ghostty-config
+        fi
+        
         # Update environment for current session
         export THEME_CURRENT="$THEME"
         
         echo "Theme switched to $THEME!"
-        echo "Symlinks created for dynamic theme loading."
-        echo "Some applications may need restart to pick up new theme."
+        echo "Symlinks created and ghostty config updated."
+        echo ""
+        echo "Applications that update immediately:"
+        echo "  • Fish shell (new shells)"
+        echo "  • Ghostty (config updated)"
+        echo "  • btop (restart btop)"
+        echo "  • Tmux (run: tmux source ~/.config/tmux/tmux.conf)"
+        echo ""
+        echo "For Neovim theme switching, rebuild your config:"
+        echo "  darwin-rebuild switch --flake .#macbook"
       '')
       
       (pkgs.writeShellScriptBin "nix-theme-current" ''
