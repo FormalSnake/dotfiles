@@ -92,7 +92,7 @@ in {
   # Enable theme engine and configure available themes
   themes = {
     enable = true;
-    current = "catppuccin"; # Default theme
+    current = "everforest"; # Default theme
     available = import ../themes/definitions {inherit pkgs;};
   };
 }
