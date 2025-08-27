@@ -14,7 +14,7 @@ in {
     font-size = 12
     font-feature = -liga
 
-    theme = ${ghosttyTheme}
+    theme = $(if [[ -L ~/.config/nix-themes/current-ghostty ]]; then cat ~/.config/nix-themes/current-ghostty; else echo "catppuccin-mocha"; fi)
     cursor-style = block
     # cursor-color = #bbbbbb
     adjust-cursor-thickness = 1

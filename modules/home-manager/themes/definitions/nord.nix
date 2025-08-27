@@ -85,4 +85,20 @@
       fish_pager_color_description = "#4c566a";
     };
   };
+
+  tmux = {
+    config = ''
+      # Nord tmux theme
+      set -g status-bg "#2e3440"
+      set -g status-fg "#d8dee9"
+      set -g status-left-style "fg=#2e3440,bg=#88c0d0"
+      set -g status-right-style "fg=#eceff4,bg=#3b4252"
+      set -g window-status-current-style "fg=#2e3440,bg=#bf616a"
+      set -g window-status-style "fg=#4c566a,bg=#3b4252"
+      set -g pane-border-style "fg=#3b4252"
+      set -g pane-active-border-style "fg=#88c0d0"
+      set -g message-style "fg=#2e3440,bg=#ebcb8b"
+      set -g message-command-style "fg=#2e3440,bg=#a3be8c"
+    '';
+  };
 }

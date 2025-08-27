@@ -85,4 +85,20 @@
       fish_pager_color_description = "#859289";
     };
   };
+
+  tmux = {
+    config = ''
+      # Everforest Dark tmux theme
+      set -g status-bg "#2d353b"
+      set -g status-fg "#d3c6aa"
+      set -g status-left-style "fg=#2d353b,bg=#a7c080"
+      set -g status-right-style "fg=#d3c6aa,bg=#343f44"
+      set -g window-status-current-style "fg=#2d353b,bg=#e67e80"
+      set -g window-status-style "fg=#859289,bg=#343f44"
+      set -g pane-border-style "fg=#343f44"
+      set -g pane-active-border-style "fg=#a7c080"
+      set -g message-style "fg=#2d353b,bg=#dbbc7f"
+      set -g message-command-style "fg=#2d353b,bg=#a7c080"
+    '';
+  };
 }

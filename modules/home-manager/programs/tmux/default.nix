@@ -66,12 +66,6 @@ in {
       set-option -g set-titles on
       set-option -g set-titles-string "#T"
 
-      # Status bar configuration
-      set -g status on
-      set -g status-position bottom
-      set -g status-justify left
-      set -g status-style 'bg=default fg=default'
-
       # Performance optimizations
       set -s escape-time 0
       set -g display-time 1000
@@ -83,6 +77,14 @@ in {
       set -g base-index 1
       setw -g pane-base-index 1
       set -g renumber-windows on
+
+      # Load current theme if symlink exists
+      if-shell '[ -L ~/.config/tmux/current-theme.conf ]' 'source ~/.config/tmux/current-theme.conf'
+      
+      # Status bar configuration (after theme loading)
+      set -g status on
+      set -g status-position bottom
+      set -g status-justify left
 
       # Shortcuts
       bind r source-file ~/.config/tmux/tmux.conf \; display-message "Config reloaded!"

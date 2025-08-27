@@ -56,8 +56,10 @@ in {
       # Set fish as default shell
       set -g fish_greeting ""
 
-      # Theme colors
-      ${lib.concatStringsSep "\n      " (lib.mapAttrsToList (name: value: "set -g ${name} ${value}") fishColors)}
+      # Load theme colors from symlinked file if it exists
+      if test -L ~/.config/fish/current-theme.fish
+          source ~/.config/fish/current-theme.fish
+      end
 
       # Set TERM for ghostty to fix ssh issues
       if test "$TERM_PROGRAM" = "ghostty"

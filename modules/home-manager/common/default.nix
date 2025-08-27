@@ -92,7 +92,7 @@ in {
   # Enable theme engine and configure available themes
   themes = {
     enable = true;
-    current = "nord"; # Default theme
+    current = "catppuccin"; # Fallback theme when no runtime theme is set
     available = import ../themes/definitions {inherit pkgs;};
   };
 }

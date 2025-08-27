@@ -85,4 +85,20 @@
       fish_pager_color_description = "#6c7086";
     };
   };
+
+  tmux = {
+    config = ''
+      # Catppuccin Mocha tmux theme
+      set -g status-bg "#1e1e2e"
+      set -g status-fg "#cdd6f4"
+      set -g status-left-style "fg=#1e1e2e,bg=#89b4fa"
+      set -g status-right-style "fg=#cdd6f4,bg=#313244"
+      set -g window-status-current-style "fg=#1e1e2e,bg=#f38ba8"
+      set -g window-status-style "fg=#6c7086,bg=#313244"
+      set -g pane-border-style "fg=#313244"
+      set -g pane-active-border-style "fg=#89b4fa"
+      set -g message-style "fg=#1e1e2e,bg=#f9e2af"
+      set -g message-command-style "fg=#1e1e2e,bg=#a6e3a1"
+    '';
+  };
 }
