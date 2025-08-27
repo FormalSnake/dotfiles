@@ -12,6 +12,38 @@ This is a modular Nix configuration supporting both NixOS (homelab) and macOS (m
 - **Host-specific**: Machine-specific overrides in `home/kyandesutter/`
 - **Program modules**: Individual program configurations in `modules/home-manager/programs/`
 
+## Theme Engine
+
+This configuration includes a comprehensive theme management system that provides consistent theming across all applications.
+
+### Theme Commands
+
+```bash
+# List available themes
+nix-theme-list
+
+# Check current theme
+nix-theme-current
+
+# Switch theme (requires rebuild to fully apply)
+nix-theme-set <theme-name>
+```
+
+### Available Themes
+
+- **catppuccin**: Catppuccin Mocha (purple-tinted dark theme)
+- **everforest**: Everforest Dark (forest green-inspired theme)  
+- **nord**: Nord (arctic blue-inspired theme)
+
+### Themed Applications
+
+- **Neovim**: Automatic plugin installation and colorscheme
+- **Ghostty**: Terminal theme switching
+- **btop**: System monitor colors
+- **Fish Shell**: Shell colors and syntax highlighting
+
+See `docs/theme-engine.md` for detailed documentation on usage and extending the theme system.
+
 ## Common Development Commands
 
 ### Building and Applying Configurations
