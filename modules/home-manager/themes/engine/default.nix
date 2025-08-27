@@ -134,27 +134,30 @@ in {
   };
 
   config = mkIf cfg.enable {
-    # Create theme state directory
-    home.file.".config/nix-themes/current".text = cfg.current;
-    
-    # Create individual theme directories with all theme files
-    home.file = lib.mkMerge (lib.mapAttrsToList (themeName: themeConfig: {
-      # Ghostty theme reference
-      ".config/nix-themes/themes/${themeName}/ghostty".text = themeConfig.ghostty.theme;
+    # Create theme files
+    home.file = lib.mkMerge [
+      # Theme state directory
+      {".config/nix-themes/current".text = cfg.current;}
       
-      # Btop theme file
-      ".config/nix-themes/themes/${themeName}/btop.theme".text = themeConfig.btop.theme;
-      
-      # Fish colors script
-      ".config/nix-themes/themes/${themeName}/fish.fish".text = 
-        lib.concatStringsSep "\n" (lib.mapAttrsToList (name: value: "set -g ${name} ${value}") themeConfig.fish.colors);
-      
-      # Tmux theme file  
-      ".config/nix-themes/themes/${themeName}/tmux.conf".text = themeConfig.tmux.config;
-      
-      # Neovim colorscheme reference
-      ".config/nix-themes/themes/${themeName}/neovim".text = themeConfig.neovim.colorscheme;
-    }) cfg.available);
+      # Individual theme directories with all theme files
+      (lib.mkMerge (lib.mapAttrsToList (themeName: themeConfig: {
+        # Ghostty theme reference
+        ".config/nix-themes/themes/${themeName}/ghostty".text = themeConfig.ghostty.theme;
+        
+        # Btop theme file
+        ".config/nix-themes/themes/${themeName}/btop.theme".text = themeConfig.btop.theme;
+        
+        # Fish colors script
+        ".config/nix-themes/themes/${themeName}/fish.fish".text = 
+          lib.concatStringsSep "\n" (lib.mapAttrsToList (name: value: "set -g ${name} ${value}") themeConfig.fish.colors);
+        
+        # Tmux theme file  
+        ".config/nix-themes/themes/${themeName}/tmux.conf".text = themeConfig.tmux.config;
+        
+        # Neovim colorscheme reference
+        ".config/nix-themes/themes/${themeName}/neovim".text = themeConfig.neovim.colorscheme;
+      }) cfg.available))
+    ];
     
     # Theme management scripts
     home.packages = [
