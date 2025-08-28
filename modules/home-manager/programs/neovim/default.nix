@@ -305,13 +305,8 @@ in {
       ${builtins.readFile ./core/keymaps.lua}
       ${builtins.readFile ./core/autocmds.lua}
       
-      -- Setup dynamic theme system after plugins load
-      vim.api.nvim_create_autocmd("VimEnter", {
-        callback = function()
-          print("Theme Debug: VimEnter - setting up nix colorscheme")
-          ${builtins.readFile ./plugins/nix-colorscheme.lua}
-        end
-      })
+      -- Setup dynamic theme system immediately
+      ${builtins.readFile ./plugins/nix-colorscheme.lua}
     '';
   };
 }
