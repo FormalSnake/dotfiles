@@ -26,14 +26,33 @@ local function apply_theme()
   end)
   
   if not success then
-    vim.notify("Error applying theme: " .. (err or "unknown error"), vim.log.levels.ERROR)
+    -- Try again after a delay if it fails (plugins might not be loaded yet)
+    vim.defer_fn(function()
+      local retry_success, retry_err = pcall(function()
+        if current_theme == "catppuccin" then
+          vim.cmd.colorscheme("catppuccin-mocha")
+        elseif current_theme == "everforest" then
+          vim.cmd.colorscheme("everforest")
+        elseif current_theme == "nord" then
+          vim.cmd.colorscheme("nord")
+        else
+          vim.cmd.colorscheme("catppuccin-mocha")
+        end
+      end)
+      if not retry_success then
+        vim.notify("Error applying theme: " .. (retry_err or "unknown error"), vim.log.levels.ERROR)
+      end
+    end, 100)
   end
 end
 
--- Apply theme after plugins are loaded
+-- Apply theme immediately (will override any default colorscheme)
+apply_theme()
+
+-- Also apply on VimEnter to ensure it takes effect
 vim.api.nvim_create_autocmd("VimEnter", {
   callback = function()
-    apply_theme()
+    vim.defer_fn(apply_theme, 10)
   end,
 })
 

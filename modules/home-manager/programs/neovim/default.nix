@@ -15,6 +15,9 @@
   
   # Collect all theme plugins to ensure they're available
   allThemePlugins = lib.mapAttrsToList (name: theme: theme.neovim.plugin) (config.themes.available or {});
+  
+  # Create custom theme loader plugin
+  themeLoaderPlugin = import ./theme-loader.nix {inherit pkgs;};
 in {
   programs.neovim = {
     enable = true;
@@ -49,6 +52,8 @@ in {
     (map (plugin: { inherit plugin; config = ""; }) allThemePlugins)
     ++
     [
+      # Theme loader plugin (loads early to override defaults)
+      themeLoaderPlugin
       {
         plugin = snacks-nvim;
         config = toLuaFile ./plugins/snacks.lua;
@@ -304,9 +309,6 @@ in {
       ${builtins.readFile ./options.lua}
       ${builtins.readFile ./core/keymaps.lua}
       ${builtins.readFile ./core/autocmds.lua}
-      
-      -- Setup dynamic theme system immediately
-      ${builtins.readFile ./plugins/nix-colorscheme.lua}
     '';
   };
 }
