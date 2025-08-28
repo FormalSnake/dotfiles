@@ -62,30 +62,6 @@
     '';
   };
 
-  fish = {
-    colors = {
-      fish_color_normal = "#cdd6f4";
-      fish_color_command = "#89b4fa";
-      fish_color_param = "#f2d5cf";
-      fish_color_keyword = "#cba6f7";
-      fish_color_quote = "#a6e3a1";
-      fish_color_redirection = "#f5c2e7";
-      fish_color_end = "#fab387";
-      fish_color_error = "#f38ba8";
-      fish_color_gray = "#6c7086";
-      fish_color_selection = "#313244";
-      fish_color_search_match = "#f9e2af";
-      fish_color_operator = "#f5c2e7";
-      fish_color_escape = "#f2d5cf";
-      fish_color_autosuggestion = "#6c7086";
-      fish_color_cancel = "#f38ba8";
-      fish_pager_color_progress = "#6c7086";
-      fish_pager_color_prefix = "#89b4fa";
-      fish_pager_color_completion = "#cdd6f4";
-      fish_pager_color_description = "#6c7086";
-    };
-  };
-
   tmux = {
     config = ''
       # Catppuccin Mocha tmux theme

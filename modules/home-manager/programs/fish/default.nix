@@ -3,10 +3,7 @@
   pkgs,
   lib,
   ...
-}: let
-  currentTheme = config.themes.available.${config.themes.current or "catppuccin"} or {};
-  fishColors = currentTheme.fish.colors or {};
-in {
+}: {
   programs.fish = {
     enable = true;
 
@@ -55,11 +52,6 @@ in {
     interactiveShellInit = ''
       # Set fish as default shell
       set -g fish_greeting ""
-
-      # Load theme colors from symlinked file if it exists
-      if test -L ~/.config/fish/current-theme.fish
-          source ~/.config/fish/current-theme.fish
-      end
 
       # Set TERM for ghostty to fix ssh issues
       if test "$TERM_PROGRAM" = "ghostty"

@@ -62,30 +62,6 @@
     '';
   };
 
-  fish = {
-    colors = {
-      fish_color_normal = "#d3c6aa";
-      fish_color_command = "#7fbbb3";
-      fish_color_param = "#d3c6aa";
-      fish_color_keyword = "#d699b6";
-      fish_color_quote = "#a7c080";
-      fish_color_redirection = "#e69875";
-      fish_color_end = "#e69875";
-      fish_color_error = "#e67e80";
-      fish_color_gray = "#859289";
-      fish_color_selection = "#343f44";
-      fish_color_search_match = "#dbbc7f";
-      fish_color_operator = "#e69875";
-      fish_color_escape = "#83c092";
-      fish_color_autosuggestion = "#859289";
-      fish_color_cancel = "#e67e80";
-      fish_pager_color_progress = "#859289";
-      fish_pager_color_prefix = "#7fbbb3";
-      fish_pager_color_completion = "#d3c6aa";
-      fish_pager_color_description = "#859289";
-    };
-  };
-
   tmux = {
     config = ''
       # Everforest Dark tmux theme

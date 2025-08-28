@@ -87,17 +87,6 @@
         };
       };
 
-      fish = mkOption {
-        type = types.submodule {
-          options = {
-            colors = mkOption {
-              type = types.attrsOf types.str;
-              description = "Fish shell color configuration";
-            };
-          };
-        };
-      };
-
       tmux = mkOption {
         type = types.submodule {
           options = {
@@ -146,10 +135,6 @@ in {
         
         # Btop theme file
         ".config/nix-themes/themes/${themeName}/btop.theme".text = themeConfig.btop.theme;
-        
-        # Fish colors script
-        ".config/nix-themes/themes/${themeName}/fish.fish".text = 
-          lib.concatStringsSep "\n" (lib.mapAttrsToList (name: value: "set -g ${name} ${value}") themeConfig.fish.colors);
         
         # Tmux theme file  
         ".config/nix-themes/themes/${themeName}/tmux.conf".text = themeConfig.tmux.config;
@@ -204,7 +189,6 @@ in {
         # Create symlinks for each application
         ln -nsf "$THEME_DIR/ghostty" ~/.config/nix-themes/current-ghostty
         ln -nsf "$THEME_DIR/btop.theme" ~/.config/btop/themes/current.theme
-        ln -nsf "$THEME_DIR/fish.fish" ~/.config/fish/current-theme.fish
         ln -nsf "$THEME_DIR/tmux.conf" ~/.config/tmux/current-theme.conf
         ln -nsf "$THEME_DIR/neovim" ~/.config/nix-themes/current-neovim
         
@@ -223,7 +207,6 @@ in {
         echo "Symlinks created and ghostty config updated."
         echo ""
         echo "Applications that update immediately:"
-        echo "  • Fish shell (new shells)"
         echo "  • Ghostty (config updated)"
         echo "  • Neovim (running instances signaled)"
         echo "  • btop (restart btop)"

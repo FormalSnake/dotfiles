@@ -62,30 +62,6 @@
     '';
   };
 
-  fish = {
-    colors = {
-      fish_color_normal = "#d8dee9";
-      fish_color_command = "#81a1c1";
-      fish_color_param = "#eceff4";
-      fish_color_keyword = "#b48ead";
-      fish_color_quote = "#a3be8c";
-      fish_color_redirection = "#d08770";
-      fish_color_end = "#88c0d0";
-      fish_color_error = "#bf616a";
-      fish_color_gray = "#4c566a";
-      fish_color_selection = "#3b4252";
-      fish_color_search_match = "#ebcb8b";
-      fish_color_operator = "#5e81ac";
-      fish_color_escape = "#8fbcbb";
-      fish_color_autosuggestion = "#4c566a";
-      fish_color_cancel = "#bf616a";
-      fish_pager_color_progress = "#4c566a";
-      fish_pager_color_prefix = "#88c0d0";
-      fish_pager_color_completion = "#eceff4";
-      fish_pager_color_description = "#4c566a";
-    };
-  };
-
   tmux = {
     config = ''
       # Nord tmux theme
