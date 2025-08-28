@@ -210,7 +210,7 @@ in {
         # Handle custom ghostty themes by creating a theme file in the ghostty themes directory
         if [[ -f "$THEME_DIR/ghostty-theme.conf" ]]; then
           mkdir -p ~/.config/ghostty/themes
-          cp "$THEME_DIR/ghostty-theme.conf" ~/.config/ghostty/themes/nix-theme-${THEME}.conf
+          cp "$THEME_DIR/ghostty-theme.conf" ~/.config/ghostty/themes/nix-theme-$THEME
         fi
         
         # Update ghostty config
