@@ -51,6 +51,7 @@
       Perplexity = 6714467650;
       WireGuard = 1451685025;
       Crystalfetch = 6454431289;
+      WhatsApp = 310633997;
     };
   };
 }
