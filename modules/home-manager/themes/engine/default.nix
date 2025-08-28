@@ -70,7 +70,12 @@
           options = {
             theme = mkOption { 
               type = types.str; 
-              description = "Ghostty theme name"; 
+              description = "Ghostty theme name or custom theme content"; 
+            };
+            isCustom = mkOption {
+              type = types.bool;
+              default = false;
+              description = "Whether this is a custom theme file content";
             };
           };
         };
@@ -129,19 +134,29 @@ in {
       {".config/nix-themes/current".text = cfg.current;}
       
       # Individual theme directories with all theme files
-      (lib.mkMerge (lib.mapAttrsToList (themeName: themeConfig: {
-        # Ghostty theme reference
-        ".config/nix-themes/themes/${themeName}/ghostty".text = themeConfig.ghostty.theme;
-        
-        # Btop theme file
-        ".config/nix-themes/themes/${themeName}/btop.theme".text = themeConfig.btop.theme;
-        
-        # Tmux theme file  
-        ".config/nix-themes/themes/${themeName}/tmux.conf".text = themeConfig.tmux.config;
-        
-        # Neovim colorscheme reference
-        ".config/nix-themes/themes/${themeName}/neovim".text = themeConfig.neovim.colorscheme;
-      }) cfg.available))
+      (lib.mkMerge (lib.mapAttrsToList (themeName: themeConfig: 
+        let
+          ghosttyFile = if themeConfig.ghostty.isCustom or false
+            then {
+              # Custom theme file content
+              ".config/nix-themes/themes/${themeName}/ghostty-theme.conf".text = themeConfig.ghostty.theme;
+              ".config/nix-themes/themes/${themeName}/ghostty".text = "nix-theme-${themeName}";
+            }
+            else {
+              # Theme name reference  
+              ".config/nix-themes/themes/${themeName}/ghostty".text = themeConfig.ghostty.theme;
+            };
+        in ghosttyFile // {
+          # Btop theme file
+          ".config/nix-themes/themes/${themeName}/btop.theme".text = themeConfig.btop.theme;
+          
+          # Tmux theme file  
+          ".config/nix-themes/themes/${themeName}/tmux.conf".text = themeConfig.tmux.config;
+          
+          # Neovim colorscheme reference
+          ".config/nix-themes/themes/${themeName}/neovim".text = themeConfig.neovim.colorscheme;
+        }
+      ) cfg.available))
     ];
     
     # Theme management scripts
@@ -191,6 +206,12 @@ in {
         ln -nsf "$THEME_DIR/btop.theme" ~/.config/btop/themes/current.theme
         ln -nsf "$THEME_DIR/tmux.conf" ~/.config/tmux/current-theme.conf
         ln -nsf "$THEME_DIR/neovim" ~/.config/nix-themes/current-neovim
+        
+        # Handle custom ghostty themes by creating a theme file in the ghostty themes directory
+        if [[ -f "$THEME_DIR/ghostty-theme.conf" ]]; then
+          mkdir -p ~/.config/ghostty/themes
+          cp "$THEME_DIR/ghostty-theme.conf" ~/.config/ghostty/themes/nix-theme-${THEME}.conf
+        fi
         
         # Update ghostty config
         if command -v update-ghostty-config >/dev/null 2>&1; then

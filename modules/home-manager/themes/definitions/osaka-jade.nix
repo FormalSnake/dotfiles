@@ -2,32 +2,32 @@
   name = "Omarchy Osaka Jade";
   
   colors = {
-    # Base colors from the Omarchy theme
-    background = "#11221C";
-    foreground = "#e6d8ba";
-    surface0 = "#252623";
-    surface1 = "#2f312c";
-    surface2 = "#383b35";
-    overlay0 = "#5b5e5a";
-    overlay1 = "#838781";
-    overlay2 = "#a8ab7c";
-    text = "#f1e9d2";
-    subtext0 = "#e6d8ba";
-    subtext1 = "#dbb651";
+    # Base colors from the actual Omarchy Osaka Jade theme (alacritty.toml)
+    background = "#111c18";
+    foreground = "#C1C497";
+    surface0 = "#23372B";
+    surface1 = "#53685B";
+    surface2 = "#549e6a";
+    overlay0 = "#459451";
+    overlay1 = "#509475";
+    overlay2 = "#2DD5B7";
+    text = "#F6F5DD";
+    subtext0 = "#C1C497";
+    subtext1 = "#9eebb3";
     
-    # Accent colors combining bamboo multiplex with jade theme
-    red = "#e75a7c";
-    green = "#71CEAD";      # Jade accent from hyprland.conf
-    blue = "#57a5e5";
-    yellow = "#dbb651";
-    orange = "#ff9966";
-    pink = "#f08080";
-    purple = "#aaaaff";
-    teal = "#71CEAD";       # Primary jade color
-    sky = "#96c7ef";
-    sapphire = "#70c2be";
-    lavender = "#df73ff";
-    mauve = "#aaaaff";
+    # Accent colors from alacritty.toml
+    red = "#FF5345";
+    green = "#549e6a";
+    blue = "#509475";
+    yellow = "#E5C736";
+    orange = "#db9f9c";
+    pink = "#D2689C";
+    purple = "#75bbb3";
+    teal = "#2DD5B7";
+    sky = "#ACD4CF";
+    sapphire = "#8CD3CB";
+    lavender = "#143614";
+    mauve = "#D2689C";
   };
 
   neovim = {
@@ -36,48 +36,78 @@
   };
 
   ghostty = {
-    theme = "Bamboo";
+    isCustom = true;
+    theme = ''
+      # Omarchy Osaka Jade Theme for Ghostty
+      # Based on the original alacritty configuration
+      
+      background = #111c18
+      foreground = #C1C497
+      
+      cursor-color = #D7C995
+      
+      selection-foreground = #000000
+      selection-background = #C1C497
+      
+      # Palette colors (16 color terminal)
+      palette = 0=#23372B
+      palette = 1=#FF5345
+      palette = 2=#549e6a
+      palette = 3=#459451
+      palette = 4=#509475
+      palette = 5=#D2689C
+      palette = 6=#2DD5B7
+      palette = 7=#F6F5DD
+      palette = 8=#53685B
+      palette = 9=#db9f9c
+      palette = 10=#143614
+      palette = 11=#E5C736
+      palette = 12=#ACD4CF
+      palette = 13=#75bbb3
+      palette = 14=#8CD3CB
+      palette = 15=#9eebb3
+    '';
   };
 
   btop = {
     theme = ''
-      theme[main_bg]="#11221C"
-      theme[main_fg]="#e6d8ba"
-      theme[title]="#f1e9d2"
-      theme[hi_fg]="#71CEAD"
-      theme[selected_bg]="#252623"
-      theme[selected_fg]="#71CEAD"
-      theme[inactive_fg]="#5b5e5a"
-      theme[graph_text]="#e6d8ba"
-      theme[meter_bg]="#252623"
-      theme[proc_misc]="#e6d8ba"
-      theme[cpu_box]="#aaaaff"
-      theme[mem_box]="#71CEAD"
-      theme[net_box]="#e75a7c"
-      theme[proc_box]="#57a5e5"
-      theme[div_line]="#383b35"
-      theme[temp_start]="#71CEAD"
-      theme[temp_mid]="#dbb651"
-      theme[temp_end]="#e75a7c"
-      theme[cpu_start]="#70c2be"
-      theme[cpu_mid]="#96c7ef"
-      theme[cpu_end]="#df73ff"
+      theme[main_bg]="#111c18"
+      theme[main_fg]="#C1C497"
+      theme[title]="#F6F5DD"
+      theme[hi_fg]="#2DD5B7"
+      theme[selected_bg]="#23372B"
+      theme[selected_fg]="#2DD5B7"
+      theme[inactive_fg]="#53685B"
+      theme[graph_text]="#C1C497"
+      theme[meter_bg]="#23372B"
+      theme[proc_misc]="#C1C497"
+      theme[cpu_box]="#D2689C"
+      theme[mem_box]="#549e6a"
+      theme[net_box]="#FF5345"
+      theme[proc_box]="#509475"
+      theme[div_line]="#53685B"
+      theme[temp_start]="#549e6a"
+      theme[temp_mid]="#E5C736"
+      theme[temp_end]="#FF5345"
+      theme[cpu_start]="#2DD5B7"
+      theme[cpu_mid]="#ACD4CF"
+      theme[cpu_end]="#75bbb3"
     '';
   };
 
   tmux = {
     config = ''
       # Omarchy Osaka Jade tmux theme
-      set -g status-bg "#11221C"
-      set -g status-fg "#e6d8ba"
-      set -g status-left-style "fg=#11221C,bg=#71CEAD"
-      set -g status-right-style "fg=#f1e9d2,bg=#252623"
-      set -g window-status-current-style "fg=#11221C,bg=#71CEAD"
-      set -g window-status-style "fg=#5b5e5a,bg=#252623"
-      set -g pane-border-style "fg=#252623"
-      set -g pane-active-border-style "fg=#71CEAD"
-      set -g message-style "fg=#11221C,bg=#dbb651"
-      set -g message-command-style "fg=#11221C,bg=#71CEAD"
+      set -g status-bg "#111c18"
+      set -g status-fg "#C1C497"
+      set -g status-left-style "fg=#111c18,bg=#2DD5B7"
+      set -g status-right-style "fg=#F6F5DD,bg=#23372B"
+      set -g window-status-current-style "fg=#111c18,bg=#2DD5B7"
+      set -g window-status-style "fg=#53685B,bg=#23372B"
+      set -g pane-border-style "fg=#23372B"
+      set -g pane-active-border-style "fg=#2DD5B7"
+      set -g message-style "fg=#111c18,bg=#E5C736"
+      set -g message-command-style "fg=#111c18,bg=#2DD5B7"
     '';
   };
 }
