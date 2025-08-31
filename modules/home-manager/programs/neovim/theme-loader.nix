@@ -26,6 +26,8 @@ pkgs.vimUtils.buildVimPlugin {
           vim.cmd.colorscheme("nord")
         elseif current_theme == "osaka-jade" then
           vim.cmd.colorscheme("bamboo")
+        elseif current_theme == "flexoki" then
+          vim.cmd.colorscheme("flexoki-dark")
         else
           vim.cmd.colorscheme("catppuccin-mocha")
         end
@@ -43,6 +45,8 @@ pkgs.vimUtils.buildVimPlugin {
               vim.cmd.colorscheme("nord")
             elseif current_theme == "osaka-jade" then
               vim.cmd.colorscheme("bamboo")
+            elseif current_theme == "flexoki" then
+              vim.cmd.colorscheme("flexoki-dark")
             else
               vim.cmd.colorscheme("catppuccin-mocha")
             end
