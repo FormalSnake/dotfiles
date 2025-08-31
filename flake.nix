@@ -53,6 +53,10 @@
       url = "github:tribela/transparent.nvim";
       flake = false;
     };
+    plugin-flexoki = {
+      url = "github:kepano/flexoki-neovim";
+      flake = false;
+    };
   };
 
   outputs = inputs @ {

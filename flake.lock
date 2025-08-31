@@ -344,6 +344,22 @@
         "type": "github"
       }
     },
+    "plugin-flexoki": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1756209710,
+        "narHash": "sha256-TlBP99MBAT/H0Uut1MF8SnIDoeetcdHLKrWal2oO2Ug=",
+        "owner": "kepano",
+        "repo": "flexoki-neovim",
+        "rev": "c3e2251e813d29d885a7cbbe9808a7af234d845d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "kepano",
+        "repo": "flexoki-neovim",
+        "type": "github"
+      }
+    },
     "plugin-tidy": {
       "flake": false,
       "locked": {
@@ -405,6 +421,7 @@
         "plugin-auto-dark-mode": "plugin-auto-dark-mode",
         "plugin-base16": "plugin-base16",
         "plugin-bg": "plugin-bg",
+        "plugin-flexoki": "plugin-flexoki",
         "plugin-tidy": "plugin-tidy",
         "plugin-transparent": "plugin-transparent",
         "plugin-visual-whitespace": "plugin-visual-whitespace",

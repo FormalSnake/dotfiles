@@ -35,6 +35,10 @@
           name = "transparent.nvim";
           src = inputs.plugin-transparent;
         };
+        flexoki-nvim = prev.vimUtils.buildVimPlugin {
+          name = "flexoki-neovim";
+          src = inputs.plugin-flexoki;
+        };
       };
   })
 ]
