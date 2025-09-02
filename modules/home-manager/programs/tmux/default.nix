@@ -59,7 +59,7 @@ in {
       set-option -sa terminal-overrides '*:Ss=\E[%p1%d q:Se=\E[2 q'
       set-option -ga terminal-overrides '*:Tc'
       set-option -ga terminal-overrides '*:sitm=\E[3m'
-      set-option -sa terminal-features ',xterm-kitty:RGB'
+      set-option -sa terminal-features ',xterm-ghostty:RGB'
       set-option -g focus-events on
 
       # Window title support
