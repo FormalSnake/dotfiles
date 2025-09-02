@@ -50,9 +50,12 @@ in {
     ];
 
     extraConfig = ''
-      # Kitty image protocol support
+      # Image protocol support (kitty/ghostty)
       set -gq allow-passthrough on
       set -g visual-activity off
+      
+      # Ensure passthrough for nested sessions
+      set -g allow-passthrough all
 
       # Terminal capabilities and true color
       set-option -sa terminal-overrides ",xterm*:Tc"
