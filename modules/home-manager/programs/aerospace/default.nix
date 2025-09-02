@@ -161,6 +161,10 @@
           run = "move-node-to-workspace web";
         }
         {
+          "if".app-id = "sh.cider.genten.mac";
+          run = "move-node-to-workspace media";
+        }
+        {
           "if".app-id = "com.spotify.client";
           run = "move-node-to-workspace media";
         }
