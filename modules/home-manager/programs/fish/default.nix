@@ -56,6 +56,8 @@
       # Set TERM for ghostty to fix ssh issues
       if test "$TERM_PROGRAM" = "ghostty"
           set -gx TERM xterm-256color
+          # Enable Snacks detection for Ghostty
+          set -gx SNACKS_GHOSTTY true
       end
 
       # Ensure nix paths are in PATH for fish
