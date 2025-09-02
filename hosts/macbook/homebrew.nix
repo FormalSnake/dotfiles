@@ -44,6 +44,8 @@
       "cloudflare-wrangler"
       "pam-reattach"
       "ollama"
+      "apple-music-discord-rpc"
+      "gnome-papers"
     ];
     masApps = {
       Xcode = 497799835;
