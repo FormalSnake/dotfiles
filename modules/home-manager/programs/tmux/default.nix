@@ -64,7 +64,8 @@ in {
       set-option -ga terminal-overrides '*:sitm=\E[3m'
       set-option -sa terminal-features ',xterm-ghostty:RGB'
       
-      # Ghostty image protocol support
+      # Ghostty specific overrides for image protocol
+      set-option -ga terminal-overrides ',xterm-ghostty:Tc'
       set-option -ga terminal-overrides ',xterm-ghostty:Ms=\\E]52;%p1%s;%p2%s\\007'
       set-option -ga terminal-overrides ',xterm-ghostty:Sync'
       set-option -g focus-events on
