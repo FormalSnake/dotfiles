@@ -35,6 +35,7 @@
       "ungoogled-chromium"
       "wireshark-app"
       "hyperkey"
+      "discord"
     ];
     brews = [
       "jnsahaj/lumen/lumen"
