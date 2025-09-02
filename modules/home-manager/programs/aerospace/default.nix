@@ -173,6 +173,10 @@
           run = "move-node-to-workspace gaming";
         }
         {
+          "if".app-id = "com.hnc.Discord";
+          run = "move-node-to-workspace gaming";
+        }
+        {
           "if".app-id = "com.nordvpn.macos";
           run = "move-node-to-workspace productivity";
         }
