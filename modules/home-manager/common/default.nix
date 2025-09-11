@@ -24,6 +24,10 @@ in {
     nh
     libcaca
 
+    # ULPGC
+    R
+    rPackages.deepRstudio
+
     # General utilities
     gimp
     yazi
