@@ -39,6 +39,11 @@
           name = "flexoki-neovim";
           src = inputs.plugin-flexoki;
         };
+        own-r = prev.vimUtils.buildVimPlugin {
+          name = "R.nvim";
+          src = inputs.plugin-r;
+        };
       };
   })
 ]
+

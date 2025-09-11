@@ -76,6 +76,12 @@ in {
             require("claudecode").setup()
           '';
         }
+        {
+          plugin = own-r;
+          config = toLua ''
+
+          '';
+        }
         github-nvim-theme
         {
           plugin = own-visual-whitespace;
