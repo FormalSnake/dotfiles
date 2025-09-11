@@ -36,6 +36,7 @@
       "wireshark-app"
       "hyperkey"
       "discord"
+      "rstudio"
     ];
     brews = [
       "jnsahaj/lumen/lumen"

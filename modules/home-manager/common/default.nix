@@ -26,7 +26,6 @@ in {
 
     # ULPGC
     R
-    rPackages.deepRstudio
 
     # General utilities
     gimp
