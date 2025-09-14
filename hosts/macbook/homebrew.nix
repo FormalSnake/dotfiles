@@ -32,11 +32,11 @@
       "httpie-desktop"
       "stats"
       "utm"
-      "ungoogled-chromium"
       "wireshark-app"
       "hyperkey"
       "discord"
       "rstudio"
+      "obsidian"
     ];
     brews = [
       "jnsahaj/lumen/lumen"
@@ -45,7 +45,6 @@
       "mas"
       "cloudflare-wrangler"
       "pam-reattach"
-      "ollama"
     ];
     masApps = {
       Xcode = 497799835;
