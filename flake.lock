@@ -360,6 +360,22 @@
         "type": "github"
       }
     },
+    "plugin-r": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1757600926,
+        "narHash": "sha256-nND2KwotfXosIvZ+cdEKL/B8gmvjgplGtZIpHRL2YCk=",
+        "owner": "R-nvim",
+        "repo": "R.nvim",
+        "rev": "f44b283755f43e31991b691fa046951f6fcfacef",
+        "type": "github"
+      },
+      "original": {
+        "owner": "R-nvim",
+        "repo": "R.nvim",
+        "type": "github"
+      }
+    },
     "plugin-tidy": {
       "flake": false,
       "locked": {
@@ -422,6 +438,7 @@
         "plugin-base16": "plugin-base16",
         "plugin-bg": "plugin-bg",
         "plugin-flexoki": "plugin-flexoki",
+        "plugin-r": "plugin-r",
         "plugin-tidy": "plugin-tidy",
         "plugin-transparent": "plugin-transparent",
         "plugin-visual-whitespace": "plugin-visual-whitespace",

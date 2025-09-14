@@ -57,6 +57,10 @@
       url = "github:kepano/flexoki-neovim";
       flake = false;
     };
+    plugin-r = {
+      url = "github:R-nvim/R.nvim";
+      flake = false;
+    };
   };
 
   outputs = inputs @ {

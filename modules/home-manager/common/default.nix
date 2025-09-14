@@ -24,9 +24,6 @@ in {
     nh
     libcaca
 
-    # ULPGC
-    R
-
     # General utilities
     gimp
     yazi
