@@ -11,7 +11,6 @@ in {
 
   programs.home-manager = {
     enable = true;
-    backupFileExtension = "backup";
   };
 
   # Common packages for all systems
