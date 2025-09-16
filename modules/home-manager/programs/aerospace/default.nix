@@ -93,6 +93,18 @@
         alt-shift-s = "mode service";
       };
 
+      workspace-to-monitor-force-assignment = {
+        "web" = "main";
+        "terminal" = "main";
+        "code" = "main";
+        "productivity" = "main";
+        "design" = "main";
+        "ai" = "main";
+        "media" = ["secondary" "main"];
+        "gaming" = ["secondary" "main"];
+        "communication" = ["secondary" "main"];
+      };
+
       # Service mode bindings
       mode.service.binding = {
         # Reload config and exit service mode
@@ -159,6 +171,10 @@
         {
           "if".app-id = "ai.perplexity.comet";
           run = "move-node-to-workspace web";
+        }
+        {
+          "if".app-id = "com.apple.Music";
+          run = "move-node-to-workspace media";
         }
         {
           "if".app-id = "sh.cider.genten.mac";
