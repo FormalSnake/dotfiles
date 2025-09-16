@@ -45,6 +45,7 @@
       "mas"
       "cloudflare-wrangler"
       "pam-reattach"
+      "stow"
     ];
     masApps = {
       Xcode = 497799835;
