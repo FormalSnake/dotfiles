@@ -4,7 +4,7 @@
   ...
 }: {
   programs.aerospace = {
-    enable = true;
+    enable = false;
     userSettings = {
       # Start AeroSpace at login
       start-at-login = true;

@@ -12,12 +12,12 @@
   # macOS-specific packages only
   home.packages = with pkgs; [
     # macOS-specific utilities
-    ice-bar
-    the-unarchiver
+    # ice-bar
+    # the-unarchiver
     # whatsapp-for-mac
-    raycast
-    appcleaner
-    terminal-notifier
+    # raycast
+    # appcleaner
+    # terminal-notifier
   ];
 
   # Import macOS-specific program configurations

@@ -16,52 +16,52 @@ in {
   # Common packages for all systems
   home.packages = with pkgs; [
     # Core utilities
-    ripgrep
-    fd
-    fzf
-    gh
-    bat
-    lazygit
-    zoxide
+    # ripgrep
+    # fd
+    # fzf
+    # gh
+    # bat
+    # lazygit
+    # zoxide
     nh
-    libcaca
+    # libcaca
 
     # General utilities
-    gimp
-    yazi
+    # gimp
+    # yazi
 
     # Development tools (available on all platforms)
-    nodejs
-    bun
-    cargo
-    rustc
-    go
-    zig
-    lua
-    claude-code
+    # nodejs
+    # bun
+    # cargo
+    # rustc
+    # go
+    # zig
+    # lua
+    # claude-code
     # zed-editor
     # aider-chat
-    pyenv
+    # pyenv
     nixd
     devenv
-    chafa
-    repomix
-    lazydocker
-    opencode
-    codex
-    gemini-cli
-    uv
-    warp-terminal
+    # chafa
+    # repomix
+    # lazydocker
+    # opencode
+    # codex
+    # gemini-cli
+    # uv
+    # warp-terminal
 
     # Browsers (available on all platforms)
-    firefox
+    # firefox
 
     # Gaming
-    prismlauncher
+    # prismlauncher
 
     # NUR packages - examples (uncomment and modify as needed)
     # nur.repos.mic92.hello-nur
-    nur.repos.charmbracelet.crush
+    # nur.repos.charmbracelet.crush
     # nur.repos.some-author.some-package
   ];
 
@@ -69,10 +69,10 @@ in {
 
   # Common programs
   programs.git = {
-    enable = true;
+    enable = false;
   };
 
-  programs.lazygit.enable = true;
+  programs.lazygit.enable = false;
 
   # Common program imports (available on all platforms)
   imports = [

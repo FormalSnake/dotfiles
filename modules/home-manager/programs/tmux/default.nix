@@ -5,7 +5,7 @@
 }: let
 in {
   programs.tmux = {
-    enable = true;
+    enable = false;
     keyMode = "vi";
     prefix = "C-b";
     escapeTime = 0;
@@ -87,7 +87,7 @@ in {
       set -g renumber-windows on
 
       # Load current theme if symlink exists
-      if-shell '[ -L ~/.config/tmux/current-theme.conf ]' 'source ~/.config/tmux/current-theme.conf'
+      # if-shell '[ -L ~/.config/tmux/current-theme.conf ]' 'source ~/.config/tmux/current-theme.conf'
       
       # Status bar configuration (after theme loading)
       set -g status on

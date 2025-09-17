@@ -4,7 +4,7 @@
   ...
 }: {
   programs.kitty = {
-    enable = true;
+    enable = false;
     font = {
       name = "GeistMono Nerd Font";
       size = 12;

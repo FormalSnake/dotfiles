@@ -5,13 +5,13 @@
 }: {
   # Host-specific homebrew packages
   homebrew = {
-    enable = true;
+    enable = false;
 
     # Auto-update and cleanup configuration
     onActivation = {
-      autoUpdate = true;
-      cleanup = "zap";
-      upgrade = true;
+      # autoUpdate = true;
+      # cleanup = "zap";
+      # upgrade = true;
     };
 
     casks = [

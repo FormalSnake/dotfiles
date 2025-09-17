@@ -4,7 +4,7 @@
   ...
 }: {
   programs.fastfetch = {
-    enable = true;
+    enable = false;
     settings = {
       logo = {
         source = "nixos_small";

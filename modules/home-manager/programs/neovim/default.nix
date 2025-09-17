@@ -20,7 +20,7 @@
   themeLoaderPlugin = import ./theme-loader.nix {inherit pkgs;};
 in {
   programs.neovim = {
-    enable = true;
+    enable = false;
 
     viAlias = true;
     vimAlias = true;

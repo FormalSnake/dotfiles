@@ -5,7 +5,7 @@
   ...
 }: {
   programs.fish = {
-    enable = true;
+    enable = false;
 
     # Fish plugins via home-manager
     plugins = with pkgs.fishPlugins; [
