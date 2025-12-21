@@ -11,6 +11,3 @@ alias commitai 'set commit_message (lumen draft); and git commit -avm "$commit_m
 alias ls 'ls -A --color'
 alias vim nvim
 alias cd z
-
-# FormalConf
-alias formalconf 'formalconf.sh'
