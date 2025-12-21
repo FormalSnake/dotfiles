@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "lastUpdated": "2025-12-21T16:22:57.815Z",
+  "lastUpdated": "2025-12-21T17:23:44.600Z",
   "formulas": {
     "bun": {
       "version": "1.3.5",
@@ -24,11 +24,6 @@
     },
     "cloudflare-wrangler": {
       "version": "4.56.0",
-      "tap": "homebrew/core",
-      "installedAt": "2025-12-21T16:22:55.243Z"
-    },
-    "pam-reattach": {
-      "version": "1.3",
       "tap": "homebrew/core",
       "installedAt": "2025-12-21T16:22:55.243Z"
     },
@@ -323,6 +318,10 @@
     "appcleaner": {
       "version": "3.6.8",
       "installedAt": "2025-12-21T16:22:55.243Z"
+    },
+    "aerospace": {
+      "version": "0.20.0-Beta",
+      "installedAt": "2025-12-21T17:14:56.755Z"
     },
     "claude-code": {
       "version": "2.0.75",

@@ -31,11 +31,11 @@ if status is-interactive
 
     # Paths
 
+    # Bun
+    fish_add_path ~/.bun/bin
+
     # Python paths
     fish_add_path ~/Library/Python/3.9/bin
-
-    # FormalConf path
-    fish_add_path ~/formalconf
 
     # Java Home
     set -gx JAVA_HOME /Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home

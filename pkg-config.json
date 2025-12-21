@@ -16,7 +16,6 @@
     "imagemagick",
     "mas",
     "cloudflare-wrangler",
-    "pam-reattach",
     "stow",
     "terminal-notifier",
     "zoxide",
