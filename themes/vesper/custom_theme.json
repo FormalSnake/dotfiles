@@ -1,0 +1,253 @@
+{
+  "name": "Vesper",
+  "created_at": "2025-09-23T20:20:09.864376498+00:00",
+  "modified_at": "2025-09-23T21:01:16.869228705+00:00",
+  "apps": {
+    "alacritty": {
+      "colors": {
+        "bright": {
+          "black": "#505050",
+          "blue": "#D0D0D0",
+          "cyan": "#B8FFF0",
+          "green": "#B8FFF0",
+          "magenta": "#FFB0B0",
+          "red": "#FF9A9A",
+          "white": "#FFFFFF",
+          "yellow": "#FFCFA8"
+        },
+        "cursor": {
+          "cursor": "#343434",
+          "text": "#ffffff"
+        },
+        "normal": {
+          "black": "#1C1C1C",
+          "blue": "#A0A0A0",
+          "cyan": "#99FFE4",
+          "green": "#99FFE4",
+          "magenta": "#FFCFA8",
+          "red": "#FF8080",
+          "white": "#CFCFCF",
+          "yellow": "#FFC799"
+        },
+        "primary": {
+          "background": "#101010",
+          "dim_foreground": "#A0A0A0",
+          "foreground": "#d4d4d4"
+        },
+        "selection": {
+          "background": "#232323"
+        }
+      },
+      "font": {
+        "size": 12
+      },
+      "window": {
+        "padding": {
+          "x": 12,
+          "y": 12
+        }
+      }
+    },
+    "btop": {
+      "available_end": "#b91c1c",
+      "available_mid": "#f59e0b",
+      "available_start": "#8a8a8d",
+      "cached_end": "#b91c1c",
+      "cached_mid": "#f59e0b",
+      "cached_start": "#8a8a8d",
+      "colors": {
+        "basic": {
+          "hi_fg": "#FFC799",
+          "inactive_fg": "#A0A0A0",
+          "main_bg": "#101010",
+          "main_fg": "#FFFFFF",
+          "proc_misc": "#505050",
+          "selected_bg": "#232323",
+          "selected_fg": "#FFFFFF",
+          "title": "#A0A0A0"
+        },
+        "boxes": {
+          "cpu_box": "#343434",
+          "div_line": "#343434",
+          "mem_box": "#343434",
+          "net_box": "#343434",
+          "proc_box": "#343434"
+        },
+        "cpu": {
+          "cpu_end": "#A0A0A0",
+          "cpu_mid": "#FFC799",
+          "cpu_start": "#FF8080"
+        },
+        "memory": {
+          "available_end": "#FF8080",
+          "available_mid": "#FFC799",
+          "available_start": "#A0A0A0",
+          "cached_end": "#FF8080",
+          "cached_mid": "#FFC799",
+          "cached_start": "#A0A0A0",
+          "free_end": "#FF8080",
+          "free_mid": "#FFC799",
+          "free_start": "#A0A0A0",
+          "used_end": "#FF8080",
+          "used_mid": "#FFC799",
+          "used_start": "#A0A0A0"
+        },
+        "network": {
+          "download_end": "#FF8080",
+          "download_mid": "#FFC799",
+          "download_start": "#A0A0A0",
+          "upload_end": "#FF8080",
+          "upload_mid": "#FFC799",
+          "upload_start": "#A0A0A0"
+        },
+        "temperature": {
+          "temp_end": "#FF8080",
+          "temp_mid": "#FFC799",
+          "temp_start": "#A0A0A0"
+        }
+      },
+      "cpu_box": "#8a8a8d",
+      "cpu_end": "#b91c1c",
+      "cpu_mid": "#f59e0b",
+      "cpu_start": "#8a8a8d",
+      "div_line": "#8a8a8d",
+      "download_end": "#b91c1c",
+      "download_mid": "#f59e0b",
+      "download_start": "#8a8a8d",
+      "free_end": "#b91c1c",
+      "free_mid": "#f59e0b",
+      "free_start": "#8a8a8d",
+      "hi_fg": "#f59e0b",
+      "inactive_fg": "#333333",
+      "main_bg": "",
+      "main_fg": "#EAEAEA",
+      "mem_box": "#8a8a8d",
+      "net_box": "#8a8a8d",
+      "proc_box": "#8a8a8d",
+      "proc_misc": "#8a8a8d",
+      "selected_bg": "#f59e0b",
+      "selected_fg": "#EAEAEA",
+      "temp_end": "#b91c1c",
+      "temp_mid": "#f59e0b",
+      "temp_start": "#8a8a8d",
+      "title": "#8a8a8d",
+      "upload_end": "#b91c1c",
+      "upload_mid": "#f59e0b",
+      "upload_start": "#8a8a8d",
+      "used_end": "#b91c1c",
+      "used_mid": "#f59e0b",
+      "used_start": "#8a8a8d"
+    },
+    "chromium": {},
+    "hyprland": {
+      "active_border": "8A8A8D",
+      "decoration": {
+        "rounding": 0
+      },
+      "general": {
+        "active_border": "3e3e3e",
+        "border_size": 2,
+        "gaps_in": 5,
+        "gaps_out": 20,
+        "inactive_border": "161616"
+      }
+    },
+    "hyprlock": {
+      "check_color": "245,158,11,1.0",
+      "color": "12,12,12,1.0",
+      "colors": {
+        "check_color": "255,199,153,1.0",
+        "color": "16,16,16,1.0",
+        "font_color": "255,255,255,1.0",
+        "inner_color": "80,80,80,1.0",
+        "outer_color": "160,160,160,1.0"
+      },
+      "font_color": "234,234,234,1.0",
+      "inner_color": "138,138,141,0.3",
+      "outer_color": "234,234,234,0.5"
+    },
+    "icons": {
+      "theme_name": "Yaru-blue"
+    },
+    "mako": {
+      "anchor": "top-right",
+      "background_color": "#1e1e1e",
+      "border_color": "#8A8A8D",
+      "border_size": 2,
+      "colors": {
+        "normal": {
+          "border_color": "#b3ffeb"
+        }
+      },
+      "default_timeout": 5000,
+      "font": "Liberation Sans 11",
+      "height": 110,
+      "max_icon_size": 32,
+      "outer_margin": 20,
+      "padding": 10,
+      "text_color": "#8a8a8d",
+      "width": 420
+    },
+    "neovim": {
+      "lazy": false,
+      "priority": 1000,
+      "raw_config": "",
+      "theme_name": "matteblack",
+      "theme_repo": "tahayvr/matteblack.nvim"
+    },
+    "swayosd": {
+      "background_color": "#121212",
+      "border_color": "#8A8A8D",
+      "colors": {
+        "background_color": "#101010",
+        "border_color": "#232323",
+        "image": "#A0A0A0",
+        "label": "#FFFFFF",
+        "progress": "#FFC799"
+      },
+      "image": "#8A8A8D",
+      "label": "#8A8A8D",
+      "progress": "#8A8A8D"
+    },
+    "walker": {
+      "background": "#121212",
+      "base": "#121212",
+      "border": "#EAEAEA88",
+      "colors": {
+        "background": "#101010",
+        "base": "#161616",
+        "border": "#c7fff0",
+        "foreground": "#FFFFFF",
+        "selected_text": "#FF8080",
+        "text": "#FFFFFF"
+      },
+      "foreground": "#EAEAEA",
+      "selected_text": "#B91C1C",
+      "text": "#EAEAEA"
+    },
+    "waybar": {
+      "background": "#1e1e1e",
+      "colors": {
+        "main": {
+          "background": "#101010",
+          "foreground": "#B8FFF0"
+        }
+      },
+      "foreground": "#8a8a8d"
+    }
+  },
+  "colors": {
+    "primary": {
+      "background": "#101010",
+      "foreground": "#d4d4d4"
+    },
+    "terminal": {
+      "red": "#ff8080",
+      "green": "#99ffe4",
+      "yellow": "#ffc799",
+      "blue": "#a0a0a0",
+      "magenta": "#ffcfa8",
+      "cyan": "#99ffe4"
+    }
+  }
+}

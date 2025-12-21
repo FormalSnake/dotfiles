@@ -1,1 +1,1 @@
-/Users/kyandesutter/.config/formalconf/themes/rose-pine-dark/neovim.lua
+/Users/kyandesutter/.config/formalconf/themes/matte-black/neovim.lua
