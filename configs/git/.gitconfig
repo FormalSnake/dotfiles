@@ -1,0 +1,14 @@
+[core]
+	precomposeUnicode = true
+[user]
+	name = FormalSnake
+	email = kyaniserni@gmail.com
+[init]
+	defaultBranch = main
+[http]
+	postBuffer = 157286400
+[filter "lfs"]
+	required = true
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process

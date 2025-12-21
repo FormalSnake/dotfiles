@@ -1,0 +1,7 @@
+# Fish shell generated files
+fish_variables
+fish_history
+fish_read_history
+
+# User secrets
+secrets.fish

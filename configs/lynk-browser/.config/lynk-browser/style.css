@@ -1,0 +1,68 @@
+/* Custom CSS for Lynk Browser
+ * Changes will apply after clicking "Refresh Styles" in settings.
+ *
+ * Example:
+ * :root {
+ *   --background: #1a1a1a;
+ *   --foreground: #ffffff;
+ * }
+ */
+
+/* Rosé Pine Theme for Lynk Browser */
+/* Rosé Pine Dawn (Light Mode) */
+.light {
+  --background: #faf4ed !important;
+  --foreground: #575279 !important;
+  --card: #fffaf3 !important;
+  --card-foreground: #575279 !important;
+  --popover: #f2e9e1 !important;
+  --popover-foreground: #575279 !important;
+  --primary: #907aa9 !important;
+  --primary-foreground: #faf4ed !important;
+  --secondary: #f2e9e1 !important;
+  --secondary-foreground: #575279 !important;
+  --muted: #f2e9e1 !important;
+  --muted-foreground: #797593 !important;
+  --accent: #286983 !important;
+  --accent-foreground: #faf4ed !important;
+  --destructive: #b4637a !important;
+  --destructive-foreground: #faf4ed !important;
+  --border: #9893a5 !important;
+  --input: #f2e9e1 !important;
+  --ring: #907aa9 !important;
+
+  --sidebar: #fffaf3 !important;
+  --sidebar-foreground: #575279 !important;
+  --sidebar-accent: #f2e9e1 !important;
+  --sidebar-accent-foreground: #575279 !important;
+  --sidebar-border: #9893a5 !important;
+}
+
+/* Rosé Pine (Dark Mode) */
+.dark {
+  --background: #191724 !important;
+  --foreground: #e0def4 !important;
+  --card: #1f1d2e !important;
+  --card-foreground: #e0def4 !important;
+  --popover: #26233a !important;
+  --popover-foreground: #e0def4 !important;
+  --primary: #c4a7e7 !important;
+  --primary-foreground: #191724 !important;
+  --secondary: #26233a !important;
+  --secondary-foreground: #e0def4 !important;
+  --muted: #26233a !important;
+  --muted-foreground: #908caa !important;
+  --accent: #31748f !important;
+  --accent-foreground: #e0def4 !important;
+  --destructive: #eb6f92 !important;
+  --destructive-foreground: #e0def4 !important;
+  --border: #6e6a86 !important;
+  --input: #26233a !important;
+  --ring: #c4a7e7 !important;
+
+  --sidebar: #1f1d2e !important;
+  --sidebar-foreground: #e0def4 !important;
+  --sidebar-accent: #26233a !important;
+  --sidebar-accent-foreground: #e0def4 !important;
+  --sidebar-border: #6e6a86 !important;
+}

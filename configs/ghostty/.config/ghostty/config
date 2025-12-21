@@ -1,0 +1,38 @@
+font-family = GeistMono Nerd Font
+font-size = 12
+#font-feature = -liga
+
+#theme = Flexoki Dark
+config-file = ?"~/.config/formalconf/current/theme/ghostty.conf"
+cursor-style = "block"
+cursor-style-blink = false
+shell-integration-features = no-cursor
+# cursor-color = #bbbbbb
+shell-integration = fish
+shell-integration-features = true
+background-opacity = 0.9
+background-blur-radius = 32
+
+keybind = global:cmd+shift+space=toggle_quick_terminal
+
+mouse-hide-while-typing = true
+macos-titlebar-style = tabs
+# Square corners
+# window-decoration = false
+# macos-window-shadow = false
+
+window-padding-x = 14
+window-padding-y = 14
+confirm-close-surface=false
+resize-overlay = never
+window-padding-balance = true
+window-colorspace = display-p3
+
+# macos-icon = custom-style
+# macos-icon-ghost-color = c7c6c6
+# macos-icon-screen-color = 201e1e
+# macos-icon-frame = plastic
+
+clipboard-read = allow
+clipboard-write = allow
+keybind = shift+enter=text:\x1b\r
