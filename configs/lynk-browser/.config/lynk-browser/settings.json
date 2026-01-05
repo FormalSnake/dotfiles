@@ -4,7 +4,7 @@
   "general.aiSearchEngine": "perplexity",
   "general.startPageUrl": "https://www.google.com",
   "appearance.theme": "system",
-  "appearance.spaceThemeColoring": true,
+  "appearance.spaceThemeColoring": false,
   "appearance.customCssEnabled": true,
   "appearance.linuxTransparency": false,
   "appearance.transparency": true,
