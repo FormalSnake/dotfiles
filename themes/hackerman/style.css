@@ -1,0 +1,70 @@
+/* Hackerman Theme for Lynk Browser */
+.light {
+  --radius: 0.625rem;
+  --background: #f0f8ff;
+  --foreground: #1a2a3a;
+  --card: #f0f8ff;
+  --card-foreground: #1a2a3a;
+  --popover: #f0f8ff;
+  --popover-foreground: #1a2a3a;
+  --primary: #5080b0;
+  --primary-foreground: #f0f8ff;
+  --secondary: #dbe8f0;
+  --secondary-foreground: #1a2a3a;
+  --muted: #dbe8f0;
+  --muted-foreground: #4a5a6a;
+  --accent: #dbe8f0;
+  --accent-foreground: #1a2a3a;
+  --destructive: #40c070;
+  --border: #c5d5e5;
+  --input: #c5d5e5;
+  --ring: #1a2a3a;
+  --chart-1: #40c070;
+  --chart-2: #60d8d8;
+  --chart-3: #6080b0;
+  --chart-4: #40d0b0;
+  --chart-5: #40c080;
+  --sidebar: #e5f0f8;
+  --sidebar-foreground: #1a2a3a;
+  --sidebar-primary: #5080b0;
+  --sidebar-primary-foreground: #f0f8ff;
+  --sidebar-accent: #f0f8ff;
+  --sidebar-accent-foreground: #1a2a3a;
+  --sidebar-border: #c5d5e5;
+  --sidebar-ring: #c5d5e5;
+}
+
+.dark {
+  --radius: 0.625rem;
+  --background: #0B0C16;
+  --foreground: #ddf7ff;
+  --card: #0B0C16;
+  --card-foreground: #ddf7ff;
+  --popover: #0B0C16;
+  --popover-foreground: #ddf7ff;
+  --primary: #86a7df;
+  --primary-foreground: #0B0C16;
+  --secondary: #1a1c2a;
+  --secondary-foreground: #ddf7ff;
+  --muted: #1a1c2a;
+  --muted-foreground: #6a6e95;
+  --accent: #1a1c2a;
+  --accent-foreground: #ddf7ff;
+  --destructive: #50f872;
+  --border: #2a2c3a;
+  --input: #2a2c3a;
+  --ring: #ddf7ff;
+  --chart-1: #50f872;
+  --chart-2: #7cf8f7;
+  --chart-3: #829dd4;
+  --chart-4: #50f7d4;
+  --chart-5: #4fe88f;
+  --sidebar: #06070e;
+  --sidebar-foreground: #ddf7ff;
+  --sidebar-primary: #86a7df;
+  --sidebar-primary-foreground: #0B0C16;
+  --sidebar-accent: #0B0C16;
+  --sidebar-accent-foreground: #ddf7ff;
+  --sidebar-border: #2a2c3a;
+  --sidebar-ring: #2a2c3a;
+}

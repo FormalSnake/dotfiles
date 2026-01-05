@@ -1,0 +1,70 @@
+/* Everforest Theme for Lynk Browser */
+.light {
+  --radius: 0.625rem;
+  --background: #fdf6e3;
+  --foreground: #5c6a72;
+  --card: #fdf6e3;
+  --card-foreground: #5c6a72;
+  --popover: #fdf6e3;
+  --popover-foreground: #5c6a72;
+  --primary: #df69ba;
+  --primary-foreground: #fdf6e3;
+  --secondary: #e6e2cc;
+  --secondary-foreground: #5c6a72;
+  --muted: #e6e2cc;
+  --muted-foreground: #829181;
+  --accent: #e6e2cc;
+  --accent-foreground: #5c6a72;
+  --destructive: #f85552;
+  --border: #d5d0b9;
+  --input: #d5d0b9;
+  --ring: #5c6a72;
+  --chart-1: #f85552;
+  --chart-2: #35a77c;
+  --chart-3: #7fbbb3;
+  --chart-4: #dfa000;
+  --chart-5: #8da101;
+  --sidebar: #f4edd8;
+  --sidebar-foreground: #5c6a72;
+  --sidebar-primary: #df69ba;
+  --sidebar-primary-foreground: #fdf6e3;
+  --sidebar-accent: #fdf6e3;
+  --sidebar-accent-foreground: #5c6a72;
+  --sidebar-border: #d5d0b9;
+  --sidebar-ring: #d5d0b9;
+}
+
+.dark {
+  --radius: 0.625rem;
+  --background: #2d353b;
+  --foreground: #d3c6aa;
+  --card: #2d353b;
+  --card-foreground: #d3c6aa;
+  --popover: #2d353b;
+  --popover-foreground: #d3c6aa;
+  --primary: #d699b6;
+  --primary-foreground: #2d353b;
+  --secondary: #475258;
+  --secondary-foreground: #d3c6aa;
+  --muted: #475258;
+  --muted-foreground: #9da9a0;
+  --accent: #475258;
+  --accent-foreground: #d3c6aa;
+  --destructive: #e67e80;
+  --border: #56635f;
+  --input: #56635f;
+  --ring: #d3c6aa;
+  --chart-1: #e67e80;
+  --chart-2: #83c092;
+  --chart-3: #7fbbb3;
+  --chart-4: #dbbc7f;
+  --chart-5: #a7c080;
+  --sidebar: #232a2e;
+  --sidebar-foreground: #d3c6aa;
+  --sidebar-primary: #d699b6;
+  --sidebar-primary-foreground: #2d353b;
+  --sidebar-accent: #2d353b;
+  --sidebar-accent-foreground: #d3c6aa;
+  --sidebar-border: #56635f;
+  --sidebar-ring: #56635f;
+}

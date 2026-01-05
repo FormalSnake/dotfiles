@@ -1,0 +1,70 @@
+/* Catppuccin Mocha Theme for Lynk Browser */
+.light {
+  --radius: 0.625rem;
+  --background: #eff1f5;
+  --foreground: #4c4f69;
+  --card: #eff1f5;
+  --card-foreground: #4c4f69;
+  --popover: #eff1f5;
+  --popover-foreground: #4c4f69;
+  --primary: #cba6f7;
+  --primary-foreground: #eff1f5;
+  --secondary: #ccd0da;
+  --secondary-foreground: #4c4f69;
+  --muted: #ccd0da;
+  --muted-foreground: #6c6f85;
+  --accent: #ccd0da;
+  --accent-foreground: #4c4f69;
+  --destructive: #d20f39;
+  --border: #bcc0cc;
+  --input: #bcc0cc;
+  --ring: #4c4f69;
+  --chart-1: #d20f39;
+  --chart-2: #179299;
+  --chart-3: #1e66f5;
+  --chart-4: #df8e1d;
+  --chart-5: #40a02b;
+  --sidebar: #e6e9ef;
+  --sidebar-foreground: #4c4f69;
+  --sidebar-primary: #cba6f7;
+  --sidebar-primary-foreground: #eff1f5;
+  --sidebar-accent: #eff1f5;
+  --sidebar-accent-foreground: #4c4f69;
+  --sidebar-border: #bcc0cc;
+  --sidebar-ring: #bcc0cc;
+}
+
+.dark {
+  --radius: 0.625rem;
+  --background: #1e1e2e;
+  --foreground: #cdd6f4;
+  --card: #1e1e2e;
+  --card-foreground: #cdd6f4;
+  --popover: #1e1e2e;
+  --popover-foreground: #cdd6f4;
+  --primary: #cba6f7;
+  --primary-foreground: #1e1e2e;
+  --secondary: #45475a;
+  --secondary-foreground: #cdd6f4;
+  --muted: #45475a;
+  --muted-foreground: #a6adc8;
+  --accent: #45475a;
+  --accent-foreground: #cdd6f4;
+  --destructive: #f38ba8;
+  --border: #585b70;
+  --input: #585b70;
+  --ring: #cdd6f4;
+  --chart-1: #f38ba8;
+  --chart-2: #94e2d5;
+  --chart-3: #89b4fa;
+  --chart-4: #f9e2af;
+  --chart-5: #a6e3a1;
+  --sidebar: #181825;
+  --sidebar-foreground: #cdd6f4;
+  --sidebar-primary: #cba6f7;
+  --sidebar-primary-foreground: #1e1e2e;
+  --sidebar-accent: #1e1e2e;
+  --sidebar-accent-foreground: #cdd6f4;
+  --sidebar-border: #585b70;
+  --sidebar-ring: #585b70;
+}
