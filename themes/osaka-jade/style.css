@@ -1,0 +1,70 @@
+/* Osaka Jade Theme for Lynk Browser */
+.light {
+  --radius: 0.625rem;
+  --background: #f5f8f5;
+  --foreground: #1a2a1f;
+  --card: #f5f8f5;
+  --card-foreground: #1a2a1f;
+  --popover: #f5f8f5;
+  --popover-foreground: #1a2a1f;
+  --primary: #a55080;
+  --primary-foreground: #f5f8f5;
+  --secondary: #e5ebe5;
+  --secondary-foreground: #1a2a1f;
+  --muted: #e5ebe5;
+  --muted-foreground: #4a5a4f;
+  --accent: #e5ebe5;
+  --accent-foreground: #1a2a1f;
+  --destructive: #d04040;
+  --border: #d0d8d0;
+  --input: #d0d8d0;
+  --ring: #1a2a1f;
+  --chart-1: #d04040;
+  --chart-2: #25a590;
+  --chart-3: #408070;
+  --chart-4: #c0a030;
+  --chart-5: #459050;
+  --sidebar: #eaf0ea;
+  --sidebar-foreground: #1a2a1f;
+  --sidebar-primary: #a55080;
+  --sidebar-primary-foreground: #f5f8f5;
+  --sidebar-accent: #f5f8f5;
+  --sidebar-accent-foreground: #1a2a1f;
+  --sidebar-border: #d0d8d0;
+  --sidebar-ring: #d0d8d0;
+}
+
+.dark {
+  --radius: 0.625rem;
+  --background: #111c18;
+  --foreground: #C1C497;
+  --card: #111c18;
+  --card-foreground: #C1C497;
+  --popover: #111c18;
+  --popover-foreground: #C1C497;
+  --primary: #D2689C;
+  --primary-foreground: #111c18;
+  --secondary: #1a2820;
+  --secondary-foreground: #C1C497;
+  --muted: #1a2820;
+  --muted-foreground: #53685B;
+  --accent: #1a2820;
+  --accent-foreground: #C1C497;
+  --destructive: #FF5345;
+  --border: #23372B;
+  --input: #23372B;
+  --ring: #C1C497;
+  --chart-1: #FF5345;
+  --chart-2: #2DD5B7;
+  --chart-3: #509475;
+  --chart-4: #E5C736;
+  --chart-5: #549e6a;
+  --sidebar: #0a1410;
+  --sidebar-foreground: #C1C497;
+  --sidebar-primary: #D2689C;
+  --sidebar-primary-foreground: #111c18;
+  --sidebar-accent: #111c18;
+  --sidebar-accent-foreground: #C1C497;
+  --sidebar-border: #23372B;
+  --sidebar-ring: #23372B;
+}
