@@ -4,7 +4,7 @@
 # Use "start", "mid" and "end" for three color gradient
 
 # Main background, empty for terminal default, need to be empty if you want transparent background
-theme[main_bg]="#161a22"
+theme[main_bg]="#0c0e13"
 
 # Main text color
 theme[main_fg]="#eeeeee"
@@ -22,13 +22,13 @@ theme[selected_bg]="#2d343f"
 theme[selected_fg]="#e5c07b"
 
 # Color of inactive/disabled text
-theme[inactive_fg]="#808080"
+theme[inactive_fg]="#606060"
 
 # Color of text appearing on top of graphs, i.e uptime and current network graph scaling
 theme[graph_text]="#eeeeee"
 
 # Misc colors for processes box including mini cpu graphs, details memory graph and details status text
-theme[proc_misc]="#7fd88f"
+theme[proc_misc]="#6ba1e6"
 
 # Cpu box outline color
 theme[cpu_box]="#3c3c3c"
@@ -46,37 +46,37 @@ theme[proc_box]="#3c3c3c"
 theme[div_line]="#3c3c3c"
 
 # Temperature graph colors
-theme[temp_start]="#7fd88f"
+theme[temp_start]="#6ba1e6"
 theme[temp_mid]="#e5c07b"
 theme[temp_end]="#e06c75"
 
 # CPU graph colors
-theme[cpu_start]="#7fd88f"
+theme[cpu_start]="#6ba1e6"
 theme[cpu_mid]="#e5c07b"
 theme[cpu_end]="#e06c75"
 
 # Mem/Disk free meter
 theme[free_start]="#e06c75"
 theme[free_mid]="#e5c07b"
-theme[free_end]="#7fd88f"
+theme[free_end]="#6ba1e6"
 
 # Mem/Disk cached meter
 theme[cached_start]="#56b6c2"
-theme[cached_mid]="#7fd88f"
-theme[cached_end]="#7fd88f"
+theme[cached_mid]="#6ba1e6"
+theme[cached_end]="#6ba1e6"
 
 # Mem/Disk available meter
 theme[available_start]="#e06c75"
 theme[available_mid]="#e5c07b"
-theme[available_end]="#7fd88f"
+theme[available_end]="#6ba1e6"
 
 # Mem/Disk used meter
-theme[used_start]="#7fd88f"
+theme[used_start]="#6ba1e6"
 theme[used_mid]="#e5c07b"
 theme[used_end]="#e06c75"
 
 # Download graph colors
-theme[download_start]="#7fd88f"
+theme[download_start]="#6ba1e6"
 theme[download_mid]="#56b6c2"
 theme[download_end]="#56b6c2"
 
@@ -86,6 +86,6 @@ theme[upload_mid]="#EE7948"
 theme[upload_end]="#EC5B2B"
 
 # Process box color gradient for threads, mem and cpu usage
-theme[process_start]="#7fd88f"
+theme[process_start]="#6ba1e6"
 theme[process_mid]="#EC5B2B"
 theme[process_end]="#e06c75"
