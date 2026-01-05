@@ -1,24 +1,29 @@
 {
   "version": 1,
-  "lastUpdated": "2025-12-21T17:23:44.600Z",
+  "lastUpdated": "2026-01-04T09:49:53.455Z",
   "formulas": {
+    "rift": {
+      "version": "0.2.8",
+      "tap": "acsandmann/tap",
+      "installedAt": "2025-12-21T16:22:55.243Z"
+    },
+    "bat": {
+      "version": "0.26.1",
+      "tap": "homebrew/core",
+      "installedAt": "2025-12-21T16:22:55.243Z"
+    },
+    "btop": {
+      "version": "1.4.6",
+      "tap": "homebrew/core",
+      "installedAt": "2026-01-03T13:36:31.002Z"
+    },
     "bun": {
       "version": "1.3.5",
       "tap": "oven-sh/bun",
       "installedAt": "2025-12-21T16:22:55.243Z"
     },
-    "couchdb": {
-      "version": "3.5.1",
-      "tap": "homebrew/core",
-      "installedAt": "2025-12-21T16:22:55.243Z"
-    },
-    "imagemagick": {
-      "version": "7.1.2-11",
-      "tap": "homebrew/core",
-      "installedAt": "2025-12-21T16:22:55.243Z"
-    },
-    "mas": {
-      "version": "4.1.1",
+    "chafa": {
+      "version": "1.18.0",
       "tap": "homebrew/core",
       "installedAt": "2025-12-21T16:22:55.243Z"
     },
@@ -27,23 +32,33 @@
       "tap": "homebrew/core",
       "installedAt": "2025-12-21T16:22:55.243Z"
     },
-    "stow": {
-      "version": "2.4.1",
+    "cocoapods": {
+      "version": "1.16.2_2",
+      "tap": "homebrew/core",
+      "installedAt": "2025-12-27T10:24:16.770Z"
+    },
+    "codex": {
+      "version": "0.46.0",
       "tap": "homebrew/core",
       "installedAt": "2025-12-21T16:22:55.243Z"
     },
-    "terminal-notifier": {
-      "version": "2.0.0",
+    "couchdb": {
+      "version": "3.5.1",
       "tap": "homebrew/core",
       "installedAt": "2025-12-21T16:22:55.243Z"
     },
-    "zoxide": {
-      "version": "0.9.8",
+    "deno": {
+      "version": "2.6.3",
       "tap": "homebrew/core",
-      "installedAt": "2025-12-21T16:22:55.243Z"
+      "installedAt": "2026-01-03T13:36:31.002Z"
     },
-    "ripgrep": {
-      "version": "15.1.0",
+    "dipc": {
+      "version": "1.2.0",
+      "tap": "homebrew/core",
+      "installedAt": "2025-12-23T09:22:07.173Z"
+    },
+    "fastfetch": {
+      "version": "2.56.1",
       "tap": "homebrew/core",
       "installedAt": "2025-12-21T16:22:55.243Z"
     },
@@ -51,6 +66,11 @@
       "version": "10.3.0",
       "tap": "homebrew/core",
       "installedAt": "2025-12-21T16:22:55.243Z"
+    },
+    "fish": {
+      "version": "4.3.2",
+      "tap": "homebrew/core",
+      "installedAt": "2026-01-03T13:36:31.002Z"
     },
     "fzf": {
       "version": "0.67.0",
@@ -62,33 +82,8 @@
       "tap": "homebrew/core",
       "installedAt": "2025-12-21T16:22:55.243Z"
     },
-    "bat": {
-      "version": "0.26.1",
-      "tap": "homebrew/core",
-      "installedAt": "2025-12-21T16:22:55.243Z"
-    },
-    "lazygit": {
-      "version": "0.57.0",
-      "tap": "homebrew/core",
-      "installedAt": "2025-12-21T16:22:55.243Z"
-    },
-    "libcaca": {
-      "version": "0.99b20",
-      "tap": "homebrew/core",
-      "installedAt": "2025-12-21T16:22:55.243Z"
-    },
-    "node": {
-      "version": "25.2.1",
-      "tap": "homebrew/core",
-      "installedAt": "2025-12-21T16:22:55.243Z"
-    },
-    "yazi": {
-      "version": "25.5.31",
-      "tap": "homebrew/core",
-      "installedAt": "2025-12-21T16:22:55.243Z"
-    },
-    "rust": {
-      "version": "1.92.0",
+    "git": {
+      "version": "2.52.0_1",
       "tap": "homebrew/core",
       "installedAt": "2025-12-21T16:22:55.243Z"
     },
@@ -97,83 +92,73 @@
       "tap": "homebrew/core",
       "installedAt": "2025-12-21T16:22:55.243Z"
     },
-    "lua": {
-      "version": "5.4.8",
+    "imagemagick": {
+      "version": "7.1.2-12",
       "tap": "homebrew/core",
-      "installedAt": "2025-12-21T16:22:55.243Z"
-    },
-    "pyenv": {
-      "version": "2.6.17",
-      "tap": "homebrew/core",
-      "installedAt": "2025-12-21T16:22:55.243Z"
-    },
-    "chafa": {
-      "version": "1.18.0",
-      "tap": "homebrew/core",
-      "installedAt": "2025-12-21T16:22:55.243Z"
-    },
-    "repomix": {
-      "version": "1.10.2",
-      "tap": "homebrew/core",
-      "installedAt": "2025-12-21T16:22:55.243Z"
+      "installedAt": "2026-01-03T13:36:31.002Z"
     },
     "lazydocker": {
       "version": "0.24.3",
       "tap": "homebrew/core",
       "installedAt": "2025-12-21T16:22:55.243Z"
     },
-    "opencode": {
-      "version": "1.0.184",
+    "lazygit": {
+      "version": "0.58.0",
+      "tap": "homebrew/core",
+      "installedAt": "2026-01-04T09:49:50.886Z"
+    },
+    "libcaca": {
+      "version": "0.99b20",
       "tap": "homebrew/core",
       "installedAt": "2025-12-21T16:22:55.243Z"
     },
-    "uv": {
-      "version": "0.9.18",
+    "lua": {
+      "version": "5.4.8",
       "tap": "homebrew/core",
       "installedAt": "2025-12-21T16:22:55.243Z"
     },
-    "git": {
-      "version": "2.52.0_1",
+    "mas": {
+      "version": "5.0.2",
       "tap": "homebrew/core",
-      "installedAt": "2025-12-21T16:22:55.243Z"
+      "installedAt": "2026-01-03T13:36:31.002Z"
     },
     "neovim": {
       "version": "0.11.5_1",
       "tap": "homebrew/core",
       "installedAt": "2025-12-21T16:22:55.243Z"
     },
-    "tree-sitter-cli": {
-      "version": "0.26.3",
+    "node": {
+      "version": "25.2.1",
       "tap": "homebrew/core",
       "installedAt": "2025-12-21T16:22:55.243Z"
     },
-    "tmux": {
-      "version": "3.6a",
+    "opencode": {
+      "version": "1.0.220",
+      "tap": "homebrew/core",
+      "installedAt": "2026-01-03T13:36:31.002Z"
+    },
+    "pyenv": {
+      "version": "2.6.17",
       "tap": "homebrew/core",
       "installedAt": "2025-12-21T16:22:55.243Z"
     },
-    "fastfetch": {
-      "version": "2.56.1",
+    "repomix": {
+      "version": "1.11.0",
+      "tap": "homebrew/core",
+      "installedAt": "2025-12-23T09:22:07.173Z"
+    },
+    "ripgrep": {
+      "version": "15.1.0",
       "tap": "homebrew/core",
       "installedAt": "2025-12-21T16:22:55.243Z"
     },
-    "btop": {
-      "version": "1.4.5",
+    "rust": {
+      "version": "1.92.0",
       "tap": "homebrew/core",
       "installedAt": "2025-12-21T16:22:55.243Z"
     },
-    "fish": {
-      "version": "4.2.1",
-      "tap": "homebrew/core",
-      "installedAt": "2025-12-21T16:22:55.243Z"
-    },
-    "xcodegen": {
-      "version": "2.44.1",
-      "tap": "homebrew/core",
-      "installedAt": "2025-12-21T16:22:55.243Z"
-    },
-    "swiftlint": {
-      "version": "0.62.2_1",
+    "stow": {
+      "version": "2.4.1",
       "tap": "homebrew/core",
       "installedAt": "2025-12-21T16:22:55.243Z"
     },
@@ -182,65 +167,78 @@
       "tap": "homebrew/core",
       "installedAt": "2025-12-21T16:22:55.243Z"
     },
-    "xcbeautify": {
-      "version": "3.1.2",
+    "swiftlint": {
+      "version": "0.63.0",
+      "tap": "homebrew/core",
+      "installedAt": "2026-01-04T09:49:50.886Z"
+    },
+    "terminal-notifier": {
+      "version": "2.0.0",
       "tap": "homebrew/core",
       "installedAt": "2025-12-21T16:22:55.243Z"
+    },
+    "tmux": {
+      "version": "3.6a",
+      "tap": "homebrew/core",
+      "installedAt": "2025-12-21T16:22:55.243Z"
+    },
+    "tree-sitter-cli": {
+      "version": "0.26.3",
+      "tap": "homebrew/core",
+      "installedAt": "2025-12-21T16:22:55.243Z"
+    },
+    "uv": {
+      "version": "0.9.21",
+      "tap": "homebrew/core",
+      "installedAt": "2026-01-03T13:36:31.002Z"
+    },
+    "watchman": {
+      "version": "2025.12.29.00",
+      "tap": "homebrew/core",
+      "installedAt": "2026-01-03T13:36:31.002Z"
     },
     "wget": {
       "version": "1.25.0",
       "tap": "homebrew/core",
       "installedAt": "2025-12-21T16:22:55.243Z"
     },
-    "codex": {
-      "version": "0.46.0",
+    "xcbeautify": {
+      "version": "3.1.2",
       "tap": "homebrew/core",
       "installedAt": "2025-12-21T16:22:55.243Z"
     },
-    "cocoapods": {
-      "version": "1.16.2_1",
+    "xcodegen": {
+      "version": "2.44.1",
       "tap": "homebrew/core",
       "installedAt": "2025-12-21T16:22:55.243Z"
     },
-    "watchman": {
-      "version": "2025.12.15.00",
+    "yarn": {
+      "version": "1.22.22",
       "tap": "homebrew/core",
-      "installedAt": "2025-12-21T16:22:55.243Z"
+      "installedAt": "2026-01-03T13:36:31.002Z"
     },
-    "rift": {
-      "version": "0.2.8",
-      "tap": "acsandmann/tap",
-      "installedAt": "2025-12-21T16:22:55.243Z"
+    "yazi": {
+      "version": "26.1.4",
+      "tap": "homebrew/core",
+      "installedAt": "2026-01-04T09:49:50.886Z"
     },
-    "dipc": {
-      "version": "1.1.0",
+    "zoxide": {
+      "version": "0.9.8",
       "tap": "homebrew/core",
       "installedAt": "2025-12-21T16:22:55.243Z"
     }
   },
   "casks": {
-    "raycast": {
-      "version": "1.103.1",
+    "aerospace": {
+      "version": "0.20.1-Beta",
+      "installedAt": "2026-01-03T13:36:31.002Z"
+    },
+    "alcove": {
+      "version": "1.3.3",
       "installedAt": "2025-12-21T16:22:55.243Z"
     },
-    "ghostty": {
-      "version": "1.2.0",
-      "installedAt": "2025-12-21T16:22:55.243Z"
-    },
-    "clop": {
-      "version": "2.10.3",
-      "installedAt": "2025-12-21T16:22:55.243Z"
-    },
-    "figma": {
-      "version": "125.11.6",
-      "installedAt": "2025-12-21T16:22:55.243Z"
-    },
-    "claude": {
-      "version": "0.13.19,8834f14453599cf9d72e9491b956497c28e82ca8",
-      "installedAt": "2025-12-21T16:22:55.243Z"
-    },
-    "zerotier-one": {
-      "version": "1.16.0",
+    "appcleaner": {
+      "version": "3.6.8",
       "installedAt": "2025-12-21T16:22:55.243Z"
     },
     "balenaetcher": {
@@ -251,116 +249,132 @@
       "version": "4.0.4",
       "installedAt": "2025-12-21T16:22:55.243Z"
     },
-    "steam": {
-      "version": "4.0",
-      "installedAt": "2025-12-21T16:22:55.243Z"
-    },
-    "epic-games": {
-      "version": "18.10.0",
-      "installedAt": "2025-12-21T16:22:55.243Z"
-    },
     "brave-browser@nightly": {
       "version": "1.84.76.0",
       "installedAt": "2025-12-21T16:22:55.243Z"
     },
-    "google-drive": {
-      "version": "114.0.1",
+    "claude": {
+      "version": "0.13.19,8834f14453599cf9d72e9491b956497c28e82ca8",
       "installedAt": "2025-12-21T16:22:55.243Z"
-    },
-    "github": {
-      "version": "3.5.2-14087268",
-      "installedAt": "2025-12-21T16:22:55.243Z"
-    },
-    "logi-options+": {
-      "version": "1.93.755983",
-      "installedAt": "2025-12-21T16:22:55.243Z"
-    },
-    "nordvpn": {
-      "version": "9.0.1",
-      "installedAt": "2025-12-21T16:22:55.243Z"
-    },
-    "alcove": {
-      "version": "1.3.3",
-      "installedAt": "2025-12-21T16:22:55.243Z"
-    },
-    "httpie-desktop": {
-      "version": "2025.2.0",
-      "installedAt": "2025-12-21T16:22:55.243Z"
-    },
-    "stats": {
-      "version": "2.11.47",
-      "installedAt": "2025-12-21T16:22:55.243Z"
-    },
-    "utm": {
-      "version": "4.7.4",
-      "installedAt": "2025-12-21T16:22:55.243Z"
-    },
-    "hyperkey": {
-      "version": "0.50",
-      "installedAt": "2025-12-21T16:22:55.243Z"
-    },
-    "rstudio": {
-      "version": "2025.09.2,418",
-      "installedAt": "2025-12-21T16:22:55.243Z"
-    },
-    "obsidian": {
-      "version": "1.9.12",
-      "installedAt": "2025-12-21T16:22:55.243Z"
-    },
-    "jordanbaird-ice": {
-      "version": "0.11.12",
-      "installedAt": "2025-12-21T16:22:55.243Z"
-    },
-    "the-unarchiver": {
-      "version": "4.3.9,147,1742287964",
-      "installedAt": "2025-12-21T16:22:55.243Z"
-    },
-    "appcleaner": {
-      "version": "3.6.8",
-      "installedAt": "2025-12-21T16:22:55.243Z"
-    },
-    "aerospace": {
-      "version": "0.20.0-Beta",
-      "installedAt": "2025-12-21T17:14:56.755Z"
     },
     "claude-code": {
-      "version": "2.0.75",
-      "installedAt": "2025-12-21T16:22:55.243Z"
+      "version": "2.0.76",
+      "installedAt": "2025-12-23T09:22:07.173Z"
     },
-    "firefox": {
-      "version": "143.0",
-      "installedAt": "2025-12-21T16:22:55.243Z"
-    },
-    "prismlauncher": {
-      "version": "9.4",
-      "installedAt": "2025-12-21T16:22:55.243Z"
-    },
-    "displaperture": {
-      "version": "2.3",
-      "installedAt": "2025-12-21T16:22:55.243Z"
-    },
-    "zen": {
-      "version": "1.15.5b",
-      "installedAt": "2025-12-21T16:22:55.243Z"
-    },
-    "warp": {
-      "version": "0.2025.09.24.08.11.stable_03",
-      "installedAt": "2025-12-21T16:22:55.243Z"
-    },
-    "zulu@17": {
-      "version": "17.0.17,17.62.17",
-      "installedAt": "2025-12-21T16:22:55.243Z"
-    },
-    "vesktop": {
-      "version": "1.6.1",
+    "clop": {
+      "version": "2.10.3",
       "installedAt": "2025-12-21T16:22:55.243Z"
     },
     "db-browser-for-sqlite": {
       "version": "3.13.1",
       "installedAt": "2025-12-21T16:22:55.243Z"
     },
+    "displaperture": {
+      "version": "2.3",
+      "installedAt": "2025-12-21T16:22:55.243Z"
+    },
+    "epic-games": {
+      "version": "18.10.0",
+      "installedAt": "2025-12-21T16:22:55.243Z"
+    },
+    "figma": {
+      "version": "125.11.6",
+      "installedAt": "2025-12-21T16:22:55.243Z"
+    },
+    "firefox": {
+      "version": "143.0",
+      "installedAt": "2025-12-21T16:22:55.243Z"
+    },
+    "ghostty": {
+      "version": "1.2.0",
+      "installedAt": "2025-12-21T16:22:55.243Z"
+    },
+    "github": {
+      "version": "3.5.2-14087268",
+      "installedAt": "2025-12-21T16:22:55.243Z"
+    },
+    "google-drive": {
+      "version": "114.0.1",
+      "installedAt": "2025-12-21T16:22:55.243Z"
+    },
+    "httpie-desktop": {
+      "version": "2025.2.0",
+      "installedAt": "2025-12-21T16:22:55.243Z"
+    },
+    "hyperkey": {
+      "version": "0.50",
+      "installedAt": "2025-12-21T16:22:55.243Z"
+    },
+    "jordanbaird-ice": {
+      "version": "0.11.12",
+      "installedAt": "2025-12-21T16:22:55.243Z"
+    },
     "karabiner-elements": {
       "version": "15.5.0",
+      "installedAt": "2025-12-21T16:22:55.243Z"
+    },
+    "logi-options+": {
+      "version": "1.93.755983",
+      "installedAt": "2025-12-21T16:22:55.243Z"
+    },
+    "music-presence": {
+      "version": "2.3.5",
+      "installedAt": "2026-01-03T13:36:31.002Z"
+    },
+    "nordvpn": {
+      "version": "9.0.1",
+      "installedAt": "2025-12-21T16:22:55.243Z"
+    },
+    "obsidian": {
+      "version": "1.9.12",
+      "installedAt": "2025-12-21T16:22:55.243Z"
+    },
+    "prismlauncher": {
+      "version": "9.4",
+      "installedAt": "2025-12-21T16:22:55.243Z"
+    },
+    "raycast": {
+      "version": "1.103.1",
+      "installedAt": "2025-12-21T16:22:55.243Z"
+    },
+    "rstudio": {
+      "version": "2025.09.2,418",
+      "installedAt": "2025-12-21T16:22:55.243Z"
+    },
+    "stats": {
+      "version": "2.11.47",
+      "installedAt": "2025-12-21T16:22:55.243Z"
+    },
+    "steam": {
+      "version": "4.0",
+      "installedAt": "2025-12-21T16:22:55.243Z"
+    },
+    "the-unarchiver": {
+      "version": "4.3.9,147,1742287964",
+      "installedAt": "2025-12-21T16:22:55.243Z"
+    },
+    "utm": {
+      "version": "4.7.5",
+      "installedAt": "2026-01-04T09:49:50.886Z"
+    },
+    "vesktop": {
+      "version": "1.6.1",
+      "installedAt": "2025-12-21T16:22:55.243Z"
+    },
+    "warp": {
+      "version": "0.2025.09.24.08.11.stable_03",
+      "installedAt": "2025-12-21T16:22:55.243Z"
+    },
+    "zen": {
+      "version": "1.15.5b",
+      "installedAt": "2025-12-21T16:22:55.243Z"
+    },
+    "zerotier-one": {
+      "version": "1.16.1",
+      "installedAt": "2025-12-24T09:07:27.738Z"
+    },
+    "zulu@17": {
+      "version": "17.0.17,17.62.17",
       "installedAt": "2025-12-21T16:22:55.243Z"
     }
   }
