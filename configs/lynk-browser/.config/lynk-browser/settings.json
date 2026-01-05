@@ -32,7 +32,6 @@
   "extensions.autoUpdate": true,
   "extensions.updateCheckInterval": 24,
   "ai.enabled": true,
-  "ai.apiKey": "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",
   "ai.model": "openai/gpt-5.2-chat",
   "ai.customModel": "openai/gpt-5.2-chat",
   "ai.userDescription": "My name is Kyan, I am an 18 year old student studying computer science at ULPGC. I also work for a startup as a software engineer."
