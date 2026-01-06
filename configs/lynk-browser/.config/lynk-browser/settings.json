@@ -6,7 +6,7 @@
   "appearance.theme": "system",
   "appearance.spaceThemeColoring": false,
   "appearance.customCssEnabled": true,
-  "appearance.customCssSource": "default",
+  "appearance.customCssSource": "formalconf",
   "appearance.linuxTransparency": false,
   "appearance.transparency": true,
   "appearance.readerModeFontFamily": "serif",
