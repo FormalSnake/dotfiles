@@ -8,6 +8,7 @@
   "modules-left": ["hyprland/workspaces", "custom/spotify"],
   "modules-center": [],
   "modules-right": [
+    "tray",
     "pulseaudio",
     "network",
     "backlight",
