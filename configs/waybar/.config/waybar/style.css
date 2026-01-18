@@ -53,7 +53,7 @@ window#waybar * {
 }
 
 #workspaces button.active {
-  background: @foreground;
+  background: @foreground !important;
   color: @background;
 }
 
@@ -124,6 +124,6 @@ tooltip label {
 
 #network.disconnected {
   color: @background;
-  background-color: #f38ba8;
+  background: #f38ba8 !important;
   border-radius: 5px;
 }
