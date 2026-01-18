@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "lastUpdated": "2026-01-18T18:26:00.399Z",
+  "lastUpdated": "2026-01-18T18:28:56.974Z",
   "packages": {
     "pacman:accountsservice": {
       "version": "23.13.9-2.1",
@@ -192,6 +192,11 @@
       "installedAt": "2026-01-18T18:25:59.886Z",
       "manager": "pacman"
     },
+    "pacman:deno": {
+      "version": "2.6.5-1.1",
+      "installedAt": "2026-01-18T18:28:56.479Z",
+      "manager": "pacman"
+    },
     "pacman:device-mapper": {
       "version": "2.03.38-1.1",
       "installedAt": "2026-01-18T18:25:59.886Z",
@@ -312,6 +317,11 @@
       "installedAt": "2026-01-18T18:25:59.886Z",
       "manager": "pacman"
     },
+    "pacman:go": {
+      "version": "2:1.25.5-2",
+      "installedAt": "2026-01-18T18:28:56.479Z",
+      "manager": "pacman"
+    },
     "pacman:gst-libav": {
       "version": "1.26.10-3",
       "installedAt": "2026-01-18T18:25:59.886Z",
@@ -400,6 +410,16 @@
     "pacman:kvantum": {
       "version": "1.1.5-1.1",
       "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:lazydocker": {
+      "version": "0.24.2-1.1",
+      "installedAt": "2026-01-18T18:28:56.479Z",
+      "manager": "pacman"
+    },
+    "pacman:lazygit": {
+      "version": "0.58.1-1.1",
+      "installedAt": "2026-01-18T18:28:56.479Z",
       "manager": "pacman"
     },
     "pacman:less": {
@@ -812,6 +832,11 @@
       "installedAt": "2026-01-18T18:25:59.886Z",
       "manager": "pacman"
     },
+    "pacman:tmux": {
+      "version": "3.6_a-1.1",
+      "installedAt": "2026-01-18T18:28:56.479Z",
+      "manager": "pacman"
+    },
     "pacman:ttf-bitstream-vera": {
       "version": "1.10-16",
       "installedAt": "2026-01-18T18:25:59.886Z",
@@ -860,6 +885,11 @@
     "pacman:usbutils": {
       "version": "019-1.1",
       "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:uv": {
+      "version": "0.9.26-1.1",
+      "installedAt": "2026-01-18T18:28:56.479Z",
       "manager": "pacman"
     },
     "pacman:uwsm": {
@@ -965,6 +995,16 @@
     "pacman:xorg-xkill": {
       "version": "1.0.6-2.1",
       "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:yazi": {
+      "version": "26.1.4-1.1",
+      "installedAt": "2026-01-18T18:28:56.479Z",
+      "manager": "pacman"
+    },
+    "pacman:zoxide": {
+      "version": "0.9.8-2.1",
+      "installedAt": "2026-01-18T18:28:56.479Z",
       "manager": "pacman"
     },
     "flatpak:com.discordapp.Discord": {

@@ -1,1 +1,1 @@
-/home/kyandesutter/.config/formalconf/themes/orng/neovim.lua
+/home/kyandesutter/.config/formalconf/themes/catppuccin/neovim.lua

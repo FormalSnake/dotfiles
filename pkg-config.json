@@ -15,16 +15,13 @@
       "fd",
       "fish",
       "fzf",
-      "gh",
       "git",
       "go",
       "lazydocker",
       "lazygit",
       "lua",
       "neovim",
-      "node",
       "ripgrep",
-      "rust",
       "stow",
       "tmux",
       "uv",
@@ -40,6 +37,9 @@
       "nikitabobko/tap"
     ],
     "formulas": [
+      "gh",
+      "node",
+      "rust",
       "acsandmann/tap/rift",
       "chafa",
       "cloudflare-wrangler",
@@ -117,6 +117,9 @@
   },
   "archlinux": {
     "pacman": [
+      "github-cli",
+      "nodejs",
+      "rustup",
       "hyprland",
       "hyprpaper",
       "hyprlock",
