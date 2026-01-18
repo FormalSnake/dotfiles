@@ -85,7 +85,8 @@ window#waybar {
 #pulseaudio,
 #network,
 #backlight,
-#power-profiles-daemon {
+#power-profiles-daemon,
+#tray {
   background: transparent;
   color: @foreground;
   padding: 0 6px;

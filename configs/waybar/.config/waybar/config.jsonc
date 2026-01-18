@@ -113,5 +113,10 @@
       "balanced": "󰾅",
       "power-saver": "󰾆"
     }
+  },
+
+  "tray": {
+    "icon-size": 16,
+    "spacing": 8
   }
 }
