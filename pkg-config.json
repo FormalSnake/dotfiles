@@ -6,7 +6,32 @@
     "autoUpdate": true
   },
   "global": {
-    "packages": []
+    "packages": [
+      "bat",
+      "btop",
+      "bun",
+      "deno",
+      "fastfetch",
+      "fd",
+      "fish",
+      "fzf",
+      "gh",
+      "git",
+      "go",
+      "lazydocker",
+      "lazygit",
+      "lua",
+      "neovim",
+      "node",
+      "ripgrep",
+      "rust",
+      "stow",
+      "tmux",
+      "uv",
+      "wget",
+      "yazi",
+      "zoxide"
+    ]
   },
   "macos": {
     "taps": [
@@ -16,52 +41,28 @@
     ],
     "formulas": [
       "acsandmann/tap/rift",
-      "bat",
-      "btop",
-      "bun",
       "chafa",
       "cloudflare-wrangler",
       "cocoapods",
       "codex",
       "couchdb",
-      "deno",
       "dipc",
-      "fastfetch",
-      "fd",
-      "fish",
-      "fzf",
-      "gh",
-      "git",
       "git-filter-repo",
-      "go",
       "imagemagick",
-      "lazydocker",
-      "lazygit",
       "libcaca",
-      "lua",
       "lumen",
       "mas",
-      "neovim",
-      "node",
       "opencode",
       "pyenv",
       "repomix",
-      "ripgrep",
-      "rust",
-      "stow",
       "swiftformat",
       "swiftlint",
       "terminal-notifier",
-      "tmux",
       "tree-sitter-cli",
-      "uv",
       "watchman",
-      "wget",
       "xcbeautify",
       "xcodegen",
-      "yarn",
-      "yazi",
-      "zoxide"
+      "yarn"
     ],
     "casks": [
       "aerospace",
@@ -113,5 +114,31 @@
       "WhatsApp": 310633997,
       "Flighty": 1358823008
     }
+  },
+  "archlinux": {
+    "pacman": [
+      "hyprland",
+      "hyprpaper",
+      "hyprlock",
+      "hypridle",
+      "xdg-desktop-portal-hyprland",
+      "mako",
+      "waybar",
+      "wofi",
+      "grim",
+      "slurp",
+      "wl-clipboard",
+      "brightnessctl",
+      "pamixer",
+      "pipewire",
+      "pipewire-pulse",
+      "wireplumber",
+      "polkit-kde-agent",
+      "qt5-wayland",
+      "qt6-wayland"
+    ],
+    "aur": [
+      "hyprlauncher"
+    ]
   }
 }
