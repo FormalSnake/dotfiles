@@ -29,7 +29,7 @@
   },
 
   "custom/spotify": {
-    "exec": "$HOME/.config/waybar/scripts/mediaplayer.py --player spotify 2>/dev/null",
+    "exec": "$HOME/.config/waybar/scripts/mediaplayer.py",
     "format": "{}",
     "return-type": "json",
     "on-click": "playerctl -p spotify play-pause",
@@ -58,7 +58,7 @@
 
   "backlight": {
     "device": "intel_backlight",
-    "format": "{icon}",
+    "format": "{percent}% {icon}",
     "format-icons": ["", "", "", "", "", "", "", "", ""],
     "tooltip-format": "Brightness: {percent}%",
     "on-scroll-up": "brightnessctl set +5%",
@@ -70,10 +70,10 @@
       "warning": 30,
       "critical": 15
     },
-    "format": "{icon}",
-    "format-charging": "󰂄",
-    "format-plugged": "󰂄",
-    "format-alt": "{capacity}% {icon}",
+    "format": "{capacity}% {icon}",
+    "format-charging": "{capacity}% 󰂄",
+    "format-plugged": "{capacity}% 󰂄",
+    "format-alt": "{icon}",
     "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
     "tooltip-format": "{capacity}% - {timeTo}"
   },
@@ -89,8 +89,8 @@
   },
 
   "pulseaudio": {
-    "format": "{icon}",
-    "format-bluetooth": "󰂯",
+    "format": "{volume}% {icon}",
+    "format-bluetooth": "{volume}% 󰂯",
     "format-muted": "󰖁",
     "format-icons": {
       "headphone": "󰋋",

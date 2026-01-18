@@ -5,7 +5,7 @@ BACKGROUNDS_DIR="$HOME/.config/formalconf/current/backgrounds"
 INDEX_FILE="/tmp/formalconf-wp-idx"
 
 # Get sorted list of wallpaper files
-mapfile -t FILES < <(find "$BACKGROUNDS_DIR" -maxdepth 1 -type f | sort)
+mapfile -t FILES < <(find -L "$BACKGROUNDS_DIR" -maxdepth 1 -type f | sort)
 
 # Exit if no wallpapers
 [[ ${#FILES[@]} -eq 0 ]] && exit 1

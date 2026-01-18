@@ -1,13 +1,22 @@
 @import url("file:///home/kyandesutter/.config/formalconf/current/theme/waybar.css");
 
 * {
-  background-color: @background;
-  color: @foreground;
   border: none;
   border-radius: 0;
   min-height: 0;
-  font-family: "JetBrainsMono Nerd Font";
-  font-size: 12px;
+  font-family: "GeistMono Nerd Font", "JetBrainsMono Nerd Font", monospace;
+  font-size: 14px;
+  font-weight: bold;
+  color: @foreground;
+}
+
+window#waybar {
+  background: @background;
+  color: @foreground;
+}
+
+window#waybar * {
+  background: transparent;
 }
 
 .modules-left {
@@ -18,18 +27,34 @@
   margin-right: 8px;
 }
 
+#workspaces {
+  background-color: transparent;
+}
+
 #workspaces button {
-  all: initial;
-  font-family: "JetBrainsMono Nerd Font";
-  font-size: 12px;
+  background: transparent;
   color: @foreground;
-  padding: 0 6px;
-  margin: 0 1.5px;
-  min-width: 9px;
+  font-family: "GeistMono Nerd Font", "JetBrainsMono Nerd Font", monospace;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 0 10px;
+  margin: 3px 2px;
+  border: none;
+  border-radius: 5px;
+  transition: all 0.2s ease;
+}
+
+#workspaces button:hover {
+  background: alpha(@foreground, 0.1);
 }
 
 #workspaces button.empty {
   opacity: 0.5;
+}
+
+#workspaces button.active {
+  background: @foreground;
+  color: @background;
 }
 
 #workspaces button.special {
@@ -40,55 +65,57 @@
   opacity: 0;
 }
 
-#window {
-  margin-left: 8px;
-  opacity: 0.7;
+#custom-spotify {
+  color: #1db954;
+  padding: 0 6px;
+  margin: 0 2px;
 }
 
-#cpu,
-#battery,
-#pulseaudio,
-#custom-expand-icon {
-  min-width: 12px;
-  margin: 0 7.5px;
-}
-
-#tray {
-  margin-right: 16px;
-}
-
-#bluetooth {
-  margin-right: 17px;
-}
-
-#network {
-  margin-right: 13px;
-}
-
-#custom-expand-icon {
-  margin-right: 18px;
-}
-
-tooltip {
-  padding: 2px;
-  background-color: @background;
+#custom-spotify.paused {
   color: @foreground;
 }
 
-#clock {
-  margin-left: 8.75px;
+#custom-spotify.stopped {
+  color: @foreground;
+  opacity: 0.5;
 }
 
-.hidden {
-  opacity: 0;
+#clock,
+#battery,
+#pulseaudio,
+#network,
+#backlight,
+#power-profiles-daemon {
+  background: transparent;
+  color: @foreground;
+  padding: 0 6px;
+  margin: 0 2px;
+}
+
+tooltip {
+  padding: 8px 12px;
+  background-color: @background;
+  color: @foreground;
+  border-radius: 8px;
+}
+
+tooltip label {
+  color: @foreground;
 }
 
 #battery.warning {
-  color: #e5c07b;
+  color: #f9e2af;
 }
 
 #battery.critical {
-  color: #e06c75;
+  color: #f38ba8;
+  animation: blink 0.5s linear infinite alternate;
+}
+
+@keyframes blink {
+  to {
+    color: @foreground;
+  }
 }
 
 #pulseaudio.muted {
@@ -96,13 +123,7 @@ tooltip {
 }
 
 #network.disconnected {
-  opacity: 0.5;
-}
-
-#tray > .passive {
-  -gtk-icon-effect: dim;
-}
-
-#tray > .needs-attention {
-  -gtk-icon-effect: highlight;
+  color: @background;
+  background-color: #f38ba8;
+  border-radius: 5px;
 }
