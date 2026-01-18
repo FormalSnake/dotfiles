@@ -7,16 +7,11 @@
   font-family: "GeistMono Nerd Font", "JetBrainsMono Nerd Font", monospace;
   font-size: 14px;
   font-weight: bold;
-  color: @foreground;
 }
 
 window#waybar {
   background: @background;
   color: @foreground;
-}
-
-window#waybar * {
-  background: transparent;
 }
 
 .modules-left {
@@ -28,7 +23,7 @@ window#waybar * {
 }
 
 #workspaces {
-  background-color: transparent;
+  background: transparent;
 }
 
 #workspaces button {
@@ -53,7 +48,11 @@ window#waybar * {
 }
 
 #workspaces button.active {
-  background: @foreground !important;
+  background: @foreground;
+  color: @background;
+}
+
+#workspaces button.active label {
   color: @background;
 }
 
@@ -66,6 +65,7 @@ window#waybar * {
 }
 
 #custom-spotify {
+  background: transparent;
   color: #1db954;
   padding: 0 6px;
   margin: 0 2px;
@@ -94,7 +94,7 @@ window#waybar * {
 
 tooltip {
   padding: 8px 12px;
-  background-color: @background;
+  background: @background;
   color: @foreground;
   border-radius: 8px;
 }
@@ -124,6 +124,6 @@ tooltip label {
 
 #network.disconnected {
   color: @background;
-  background: #f38ba8 !important;
+  background: #f38ba8;
   border-radius: 5px;
 }
