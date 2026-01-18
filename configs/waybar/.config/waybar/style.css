@@ -1,0 +1,108 @@
+@import url("file:///home/kyandesutter/.config/formalconf/current/theme/waybar.css");
+
+* {
+  background-color: @background;
+  color: @foreground;
+  border: none;
+  border-radius: 0;
+  min-height: 0;
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 12px;
+}
+
+.modules-left {
+  margin-left: 8px;
+}
+
+.modules-right {
+  margin-right: 8px;
+}
+
+#workspaces button {
+  all: initial;
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 12px;
+  color: @foreground;
+  padding: 0 6px;
+  margin: 0 1.5px;
+  min-width: 9px;
+}
+
+#workspaces button.empty {
+  opacity: 0.5;
+}
+
+#workspaces button.special {
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+  min-height: 0;
+  opacity: 0;
+}
+
+#window {
+  margin-left: 8px;
+  opacity: 0.7;
+}
+
+#cpu,
+#battery,
+#pulseaudio,
+#custom-expand-icon {
+  min-width: 12px;
+  margin: 0 7.5px;
+}
+
+#tray {
+  margin-right: 16px;
+}
+
+#bluetooth {
+  margin-right: 17px;
+}
+
+#network {
+  margin-right: 13px;
+}
+
+#custom-expand-icon {
+  margin-right: 18px;
+}
+
+tooltip {
+  padding: 2px;
+  background-color: @background;
+  color: @foreground;
+}
+
+#clock {
+  margin-left: 8.75px;
+}
+
+.hidden {
+  opacity: 0;
+}
+
+#battery.warning {
+  color: #e5c07b;
+}
+
+#battery.critical {
+  color: #e06c75;
+}
+
+#pulseaudio.muted {
+  opacity: 0.5;
+}
+
+#network.disconnected {
+  opacity: 0.5;
+}
+
+#tray > .passive {
+  -gtk-icon-effect: dim;
+}
+
+#tray > .needs-attention {
+  -gtk-icon-effect: highlight;
+}
