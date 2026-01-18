@@ -1,1042 +1,976 @@
 {
   "version": 2,
-  "lastUpdated": "2026-01-18T17:56:45.553Z",
+  "lastUpdated": "2026-01-18T18:26:00.399Z",
   "packages": {
-    "homebrew:aom": {
-      "version": "3.13.1",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:autoconf": {
-      "version": "2.72",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:bat": {
-      "version": "0.26.1",
-      "installedAt": "2025-12-21T16:22:55.243Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:boost": {
-      "version": "1.90.0",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:brotli": {
-      "version": "1.2.0",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:btop": {
-      "version": "1.4.6",
-      "installedAt": "2026-01-03T13:36:31.002Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:bun": {
-      "version": "1.3.6",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew",
-      "tap": "oven-sh/bun"
-    },
-    "homebrew:c-ares": {
-      "version": "1.34.6",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:ca-certificates": {
-      "version": "2025-12-02",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:cairo": {
-      "version": "1.18.4",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:chafa": {
-      "version": "1.18.0",
-      "installedAt": "2025-12-21T16:22:55.243Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:cloudflare-wrangler": {
-      "version": "4.59.2",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:cocoapods": {
-      "version": "1.16.2_2",
-      "installedAt": "2025-12-27T10:24:16.770Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:codex": {
-      "version": "0.46.0",
-      "installedAt": "2025-12-21T16:22:55.243Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:couchdb": {
-      "version": "3.5.1",
-      "installedAt": "2025-12-21T16:22:55.243Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:dav1d": {
-      "version": "1.5.3",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:deno": {
-      "version": "2.6.5",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:dipc": {
-      "version": "1.2.0",
-      "installedAt": "2025-12-23T09:22:07.173Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:double-conversion": {
-      "version": "3.4.0",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:edencommon": {
-      "version": "2026.01.12.00",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:fastfetch": {
-      "version": "2.57.1",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:fb303": {
-      "version": "2026.01.12.00",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:fbthrift": {
-      "version": "2026.01.12.00",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:fd": {
-      "version": "10.3.0",
-      "installedAt": "2025-12-21T16:22:55.243Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:fish": {
-      "version": "4.3.3",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:fizz": {
-      "version": "2026.01.12.00",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:fmt": {
-      "version": "12.1.0",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:folly": {
-      "version": "2026.01.12.00",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:fontconfig": {
-      "version": "2.17.1",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:freetype": {
-      "version": "2.14.1_1",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:fribidi": {
-      "version": "1.0.16",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:fzf": {
-      "version": "0.67.0",
-      "installedAt": "2025-12-21T16:22:55.243Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:gdk-pixbuf": {
-      "version": "2.44.4",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:gettext": {
-      "version": "0.26_1",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:gflags": {
-      "version": "2.3.0",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:gh": {
-      "version": "2.85.0",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:giflib": {
-      "version": "5.2.2",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:git": {
-      "version": "2.52.0_1",
-      "installedAt": "2025-12-21T16:22:55.243Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:git-filter-repo": {
-      "version": "2.47.0",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:glib": {
-      "version": "2.86.3",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:glog": {
-      "version": "0.6.0_1",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:go": {
-      "version": "1.25.6",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:graphite2": {
-      "version": "1.3.14",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:harfbuzz": {
-      "version": "12.3.0",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:highway": {
-      "version": "1.3.0",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:icu4c@77": {
-      "version": "77.1_1",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:icu4c@78": {
-      "version": "78.1",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:imagemagick": {
-      "version": "7.1.2-12",
-      "installedAt": "2026-01-03T13:36:31.002Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:imath": {
-      "version": "3.2.2",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:imlib2": {
-      "version": "1.12.6",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:jasper": {
-      "version": "4.2.8",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:jpeg-turbo": {
-      "version": "3.1.3",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:jpeg-xl": {
-      "version": "0.11.1_3",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:lazydocker": {
-      "version": "0.24.3",
-      "installedAt": "2025-12-21T16:22:55.243Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:lazygit": {
-      "version": "0.58.1",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:libavif": {
-      "version": "1.3.0",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:libcaca": {
-      "version": "0.99b20",
-      "installedAt": "2025-12-21T16:22:55.243Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:libde265": {
-      "version": "1.0.16",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:libdeflate": {
-      "version": "1.25",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:libevent": {
-      "version": "2.1.12_1",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:libgit2": {
-      "version": "1.9.2",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:libheif": {
-      "version": "1.21.1",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:libiconv": {
-      "version": "1.18",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:libidn2": {
-      "version": "2.3.8",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:liblqr": {
-      "version": "0.4.3",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:libnghttp2": {
-      "version": "1.68.0",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:libnghttp3": {
-      "version": "1.14.0",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:libngtcp2": {
-      "version": "1.19.0",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:libomp": {
-      "version": "21.1.8",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:libpng": {
-      "version": "1.6.54",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:libraw": {
-      "version": "0.21.5",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:librsvg": {
-      "version": "2.61.3_1",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:libsodium": {
-      "version": "1.0.21",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:libssh2": {
-      "version": "1.11.1",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:libtiff": {
-      "version": "4.7.1",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:libtool": {
-      "version": "2.5.4",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:libultrahdr": {
-      "version": "1.4.0",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:libunistring": {
-      "version": "1.4.1",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:libuv": {
-      "version": "1.51.0",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:libvmaf": {
-      "version": "3.0.0",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:libx11": {
-      "version": "1.8.12",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:libxau": {
-      "version": "1.0.12",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:libxcb": {
-      "version": "1.17.0",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:libxdmcp": {
-      "version": "1.1.5",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:libxext": {
-      "version": "1.3.6",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:libxrender": {
-      "version": "0.9.12",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:libyaml": {
-      "version": "0.2.5",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:libzip": {
-      "version": "1.11.4",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:little-cms2": {
-      "version": "2.17",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:llvm": {
-      "version": "21.1.8",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:lpeg": {
-      "version": "1.1.0",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:lua": {
-      "version": "5.4.8",
-      "installedAt": "2025-12-21T16:22:55.243Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:luajit": {
-      "version": "2.1.1767980792",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:lumen": {
-      "version": "2.16.0",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:luv": {
-      "version": "1.51.0-1",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:lz4": {
-      "version": "1.10.0",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:lzo": {
-      "version": "2.10",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:m4": {
-      "version": "1.4.20",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:mas": {
-      "version": "5.0.2",
-      "installedAt": "2026-01-03T13:36:31.002Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:mpdecimal": {
-      "version": "4.0.1",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:ncurses": {
-      "version": "6.6",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:neovim": {
-      "version": "0.11.5_1",
-      "installedAt": "2025-12-21T16:22:55.243Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:node": {
-      "version": "25.2.1",
-      "installedAt": "2025-12-21T16:22:55.243Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:oniguruma": {
-      "version": "6.9.10",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:opencode": {
-      "version": "1.1.20",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:openexr": {
-      "version": "3.4.4_1",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:openjpeg": {
-      "version": "2.5.4",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:openjph": {
-      "version": "0.26.0",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:openssl@3": {
-      "version": "3.6.0",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:pango": {
-      "version": "1.57.0_1",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:pcre2": {
-      "version": "10.47",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:pixman": {
-      "version": "0.46.4",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:pkgconf": {
-      "version": "2.5.1",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:pyenv": {
-      "version": "2.6.20",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:python@3.14": {
-      "version": "3.14.2",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:readline": {
-      "version": "8.3.3",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:repomix": {
-      "version": "1.11.1",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:rift": {
-      "version": "0.3.3",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew",
-      "tap": "acsandmann/tap"
-    },
-    "homebrew:ripgrep": {
-      "version": "15.1.0",
-      "installedAt": "2025-12-21T16:22:55.243Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:ruby": {
-      "version": "4.0.1",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:rust": {
-      "version": "1.92.0",
-      "installedAt": "2025-12-21T16:22:55.243Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:shared-mime-info": {
-      "version": "2.4_1",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:simdjson": {
-      "version": "4.2.4",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:snappy": {
-      "version": "1.2.2",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:sqlite": {
-      "version": "3.51.1",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:stow": {
-      "version": "2.4.1",
-      "installedAt": "2025-12-21T16:22:55.243Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:swiftformat": {
-      "version": "0.58.7",
-      "installedAt": "2025-12-21T16:22:55.243Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:swiftlint": {
-      "version": "0.63.1",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:terminal-notifier": {
-      "version": "2.0.0",
-      "installedAt": "2025-12-21T16:22:55.243Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:tmux": {
-      "version": "3.6a",
-      "installedAt": "2025-12-21T16:22:55.243Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:tree-sitter-cli": {
-      "version": "0.26.3",
-      "installedAt": "2025-12-21T16:22:55.243Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:tree-sitter@0.25": {
-      "version": "0.25.10",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:unibilium": {
-      "version": "2.1.2",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:utf8proc": {
-      "version": "2.11.3",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:uv": {
-      "version": "0.9.26",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:uvwasi": {
-      "version": "0.0.23",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:wangle": {
-      "version": "2026.01.12.00",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:watchman": {
-      "version": "2026.01.12.00",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:webp": {
-      "version": "1.6.0",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:wget": {
-      "version": "1.25.0",
-      "installedAt": "2025-12-21T16:22:55.243Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:x265": {
-      "version": "4.1",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:xcbeautify": {
-      "version": "3.1.2",
-      "installedAt": "2025-12-21T16:22:55.243Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:xcodegen": {
-      "version": "2.44.1",
-      "installedAt": "2025-12-21T16:22:55.243Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:xorgproto": {
-      "version": "2025.1",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:xxhash": {
-      "version": "0.8.3",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:xz": {
-      "version": "5.8.2",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:yarn": {
-      "version": "1.22.22",
-      "installedAt": "2026-01-03T13:36:31.002Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:yazi": {
-      "version": "26.1.4",
-      "installedAt": "2026-01-04T09:49:50.886Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:yyjson": {
-      "version": "0.12.0",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:z3": {
-      "version": "4.15.4",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:zoxide": {
-      "version": "0.9.8",
-      "installedAt": "2025-12-21T16:22:55.243Z",
-      "manager": "homebrew",
-      "tap": "homebrew/core"
-    },
-    "homebrew:zstd": {
-      "version": "1.5.7",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:alcove": {
-      "version": "1.3.3",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:appcleaner": {
-      "version": "3.6.8",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:balenaetcher": {
-      "version": "2.1.4",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:betterdisplay": {
-      "version": "4.0.4",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:brave-browser@nightly": {
-      "version": "1.84.76.0",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:claude": {
-      "version": "0.13.19,8834f14453599cf9d72e9491b956497c28e82ca8",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:claude-code": {
-      "version": "2.1.12",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:clop": {
-      "version": "2.10.3",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:db-browser-for-sqlite": {
-      "version": "3.13.1",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:displaperture": {
-      "version": "2.3",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:epic-games": {
-      "version": "18.10.0",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:figma": {
-      "version": "125.11.6",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:firefox": {
-      "version": "143.0",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:ghostty": {
-      "version": "1.2.0",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:github": {
-      "version": "3.5.2-14087268",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:google-drive": {
-      "version": "114.0.1",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:httpie-desktop": {
-      "version": "2025.2.0",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:hyperkey": {
-      "version": "0.50",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:jordanbaird-ice": {
-      "version": "0.11.12",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:karabiner-elements": {
-      "version": "15.5.0",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:logi-options+": {
-      "version": "1.93.755983",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:music-presence": {
-      "version": "2.3.5",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:aerospace": {
-      "version": "0.20.1-Beta",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:nordvpn": {
-      "version": "9.0.1",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:obsidian": {
-      "version": "1.9.12",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:prismlauncher": {
-      "version": "9.4",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:qmk-toolbox": {
-      "version": "0.3.3",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:raycast": {
-      "version": "1.103.1",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:rstudio": {
-      "version": "2025.09.2,418",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:stats": {
-      "version": "2.11.47",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:steam": {
-      "version": "4.0",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:the-unarchiver": {
-      "version": "4.3.9,147,1742287964",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:utm": {
-      "version": "4.7.5",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:vesktop": {
-      "version": "1.6.1",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:vlc": {
-      "version": "3.0.23",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:warp": {
-      "version": "0.2025.09.24.08.11.stable_03",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:zen": {
-      "version": "1.15.5b",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:zerotier-one": {
-      "version": "1.16.1",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "homebrew:zulu@17": {
-      "version": "17.0.17,17.62.17",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "homebrew"
-    },
-    "mas:6454431289": {
-      "version": "2.2.0",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "mas"
-    },
-    "mas:1358823008": {
-      "version": "4.7.3",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "mas"
-    },
-    "mas:6446206067": {
-      "version": "1.7.2",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "mas"
-    },
-    "mas:6714467650": {
-      "version": "2.251216.0",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "mas"
-    },
-    "mas:1475387142": {
-      "version": "1.92.3",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "mas"
-    },
-    "mas:6746388723": {
-      "version": "1.2.1",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "mas"
-    },
-    "mas:1451685025": {
-      "version": "1.0.16",
-      "installedAt": "2026-01-18T17:40:25.268Z",
-      "manager": "mas"
+    "pacman:accountsservice": {
+      "version": "23.13.9-2.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:adw-gtk-theme": {
+      "version": "6.4-1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:alacritty": {
+      "version": "0.16.1-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:alsa-firmware": {
+      "version": "1.2.4-4",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:amd-ucode": {
+      "version": "1:20260110-1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:awesome-terminal-fonts": {
+      "version": "1.1.0-5",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:base": {
+      "version": "3-2",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:base-devel": {
+      "version": "1-2",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:bash-completion": {
+      "version": "2.17.0-2",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:bind": {
+      "version": "9.20.17-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:bluez": {
+      "version": "5.85-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:bluez-hid2hci": {
+      "version": "5.85-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:bluez-libs": {
+      "version": "5.85-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:bluez-utils": {
+      "version": "5.85-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:btop": {
+      "version": "1.4.6-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:btrfs-assistant": {
+      "version": "2.2-4.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:btrfs-progs": {
+      "version": "6.17.1-2",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:bun": {
+      "version": "1.3.5-2.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:cachyos-fish-config": {
+      "version": "15-1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:cachyos-handheld": {
+      "version": "1.2.5-2",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:cachyos-hello": {
+      "version": "0.19.1-2",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:cachyos-hooks": {
+      "version": "2025.09.22-1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:cachyos-kernel-manager": {
+      "version": "1.16.1-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:cachyos-keyring": {
+      "version": "20240331-1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:cachyos-micro-settings": {
+      "version": "1.0.0-1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:cachyos-mirrorlist": {
+      "version": "22-1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:cachyos-packageinstaller": {
+      "version": "1.5.1-2",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:cachyos-plymouth-bootanimation": {
+      "version": "2-1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:cachyos-rate-mirrors": {
+      "version": "18-1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:cachyos-settings": {
+      "version": "1:1.3.0-1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:cachyos-v3-mirrorlist": {
+      "version": "22-1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:cachyos-v4-mirrorlist": {
+      "version": "22-1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:cachyos-wallpapers": {
+      "version": "r17.022d739-1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:cachyos-zsh-config": {
+      "version": "1.0.3-1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:cantarell-fonts": {
+      "version": "1:0.311-1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:chwd": {
+      "version": "1.17.1-2",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:cpupower": {
+      "version": "6.18-2",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:cryptsetup": {
+      "version": "2.8.3-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:device-mapper": {
+      "version": "2.03.38-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:dhclient": {
+      "version": "4.4.3.P1-4.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:diffutils": {
+      "version": "3.12-2.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:dmraid": {
+      "version": "1.0.0.rc16.3-15.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:dnsmasq": {
+      "version": "2.92-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:dolphin": {
+      "version": "25.12.1-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:dosfstools": {
+      "version": "4.2-5.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:duf": {
+      "version": "0.9.1-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:e2fsprogs": {
+      "version": "1.47.3-2.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:efibootmgr": {
+      "version": "18-3.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:efitools": {
+      "version": "1.9.2-6.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:ethtool": {
+      "version": "1:6.15-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:exfatprogs": {
+      "version": "1.3.1-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:f2fs-tools": {
+      "version": "1.16.0-3.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:fastfetch": {
+      "version": "2.57.1-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:ffmpegthumbnailer": {
+      "version": "2.3.0-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:firefox": {
+      "version": "147.0.1-1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:flatpak": {
+      "version": "1:1.16.2-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:fsarchiver": {
+      "version": "0.8.8-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:galileo-mura": {
+      "version": "0.9-2",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:ghostty": {
+      "version": "1.2.3-2.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:git": {
+      "version": "2.52.0-2.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:github-cli": {
+      "version": "2.85.0-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:glances": {
+      "version": "4.4.1-3",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:gst-libav": {
+      "version": "1.26.10-3",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:gst-plugin-pipewire": {
+      "version": "1:1.4.9-2.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:gst-plugins-bad": {
+      "version": "1.26.10-3",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:gst-plugins-ugly": {
+      "version": "1.26.10-3",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:haveged": {
+      "version": "1.9.19-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:hdparm": {
+      "version": "9.65-3.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:hwdetect": {
+      "version": "2025.08.16.1333-1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:hwinfo": {
+      "version": "25.0-2.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:hyprland": {
+      "version": "0.53.1-1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:hyprlauncher": {
+      "version": "0.1.5-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:hyprpaper": {
+      "version": "0.8.1-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:hyprpolkitagent": {
+      "version": "0.1.3-4.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:inetutils": {
+      "version": "2.6-1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:iptables-nft": {
+      "version": "1:1.8.11-2.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:jfsutils": {
+      "version": "1.1.15-9.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:jupiter-fan-control": {
+      "version": "20240523.3-2",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:kitty": {
+      "version": "0.45.0-4.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:kvantum": {
+      "version": "1.1.5-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:less": {
+      "version": "1:685-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:lib32-mesa": {
+      "version": "1:25.3.3-5",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:lib32-opencl-mesa": {
+      "version": "1:25.3.3-5",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:lib32-vulkan-radeon": {
+      "version": "1:25.3.3-5",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:libdvdcss": {
+      "version": "1.5.0-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:libgsf": {
+      "version": "1.14.55-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:libopenraw": {
+      "version": "0.3.7-2.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:libwnck3": {
+      "version": "43.3-1.2",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:linux-cachyos": {
+      "version": "6.18.6-2",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:linux-cachyos-headers": {
+      "version": "6.18.6-2",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:linux-cachyos-lts": {
+      "version": "6.12.66-2",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:linux-cachyos-lts-headers": {
+      "version": "6.12.66-2",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:linux-firmware": {
+      "version": "1:20260110-1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:logrotate": {
+      "version": "3.22.0-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:lsb-release": {
+      "version": "2.0.r55.a25a4fc-1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:lsscsi": {
+      "version": "0.32-2.2",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:lvm2": {
+      "version": "2.03.38-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:mako": {
+      "version": "1.10.0-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:man-db": {
+      "version": "2.13.1-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:man-pages": {
+      "version": "6.16-1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:mdadm": {
+      "version": "4.4-2",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:meld": {
+      "version": "3.22.3-2",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:micro": {
+      "version": "2.0.14-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:mkinitcpio": {
+      "version": "40-5",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:modemmanager": {
+      "version": "1.24.2-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:mtools": {
+      "version": "1:4.0.49-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:nano": {
+      "version": "8.7-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:nano-syntax-highlighting": {
+      "version": "2025.07.01.r0.g256995b-2",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:neovim": {
+      "version": "0.11.5-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:netctl": {
+      "version": "1.29-2",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:networkmanager-openvpn": {
+      "version": "1.12.5-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:nfs-utils": {
+      "version": "2.8.4-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:nilfs-utils": {
+      "version": "2.2.12-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:noto-color-emoji-fontconfig": {
+      "version": "1.0.0-2",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:noto-fonts": {
+      "version": "1:2026.01.01-1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:noto-fonts-cjk": {
+      "version": "20240730-1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:noto-fonts-emoji": {
+      "version": "1:2.051-1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:npm": {
+      "version": "11.7.0-1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:nss-mdns": {
+      "version": "0.15.1-2.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:ntp": {
+      "version": "4.2.8.p18-6",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:octopi": {
+      "version": "0.18.1-2",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:opencl-mesa": {
+      "version": "1:25.3.3-5",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:openssh": {
+      "version": "10.2p1-2.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:pacman-contrib": {
+      "version": "1.13.1-1.2",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:paru": {
+      "version": "2.1.0-2",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:pavucontrol": {
+      "version": "1:6.2-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:perl": {
+      "version": "5.42.0-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:pipewire-alsa": {
+      "version": "1:1.4.9-2.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:pipewire-pulse": {
+      "version": "1:1.4.9-2.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:pkgfile": {
+      "version": "25-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:playerctl": {
+      "version": "2.4.1-5.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:plocate": {
+      "version": "1.1.24-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:plymouth": {
+      "version": "24.004.60-14.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:polkit-kde-agent": {
+      "version": "6.5.5-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:poppler-glib": {
+      "version": "26.01.0-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:power-profiles-daemon": {
+      "version": "0.30-3",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:pv": {
+      "version": "1.10.3-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:python": {
+      "version": "3.14.2-3",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:python-defusedxml": {
+      "version": "0.7.1-8",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:qt5ct": {
+      "version": "1.9-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:qt6ct": {
+      "version": "0.11-3.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:rebuild-detector": {
+      "version": "4.4.5-1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:refind": {
+      "version": "0.14.2-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:refind-btrfs": {
+      "version": "0.6.5-2",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:reflector": {
+      "version": "2023-4",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:ripgrep": {
+      "version": "15.1.0-2",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:rsync": {
+      "version": "3.4.1-2.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:rtkit": {
+      "version": "0.14-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:s-nail": {
+      "version": "14.9.25-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:sddm": {
+      "version": "0.21.0-8",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:sg3_utils": {
+      "version": "1.48-1.2",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:smartmontools": {
+      "version": "7.5-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:snapper": {
+      "version": "0.13.0-2.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:sof-firmware": {
+      "version": "2025.12-1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:spotify-launcher": {
+      "version": "0.6.4-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:steamdeck-dsp": {
+      "version": "0.80-1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:steamos-manager": {
+      "version": "25.11.0-3",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:steamos-powerbuttond": {
+      "version": "3.4-1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:stow": {
+      "version": "2.4.1-1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:sudo": {
+      "version": "1.9.17.p2-2.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:sysfsutils": {
+      "version": "2.1.1-2.2",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:texinfo": {
+      "version": "7.2-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:ttf-bitstream-vera": {
+      "version": "1.10-16",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:ttf-dejavu": {
+      "version": "2.37+18+g9b5d1b2f-7",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:ttf-liberation": {
+      "version": "2.1.5-2",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:ttf-meslo-nerd": {
+      "version": "3.4.0-1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:ttf-opensans": {
+      "version": "3.003-1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:ufw": {
+      "version": "0.36.2-7",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:unrar": {
+      "version": "1:7.2.3-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:unzip": {
+      "version": "6.0-23.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:usb_modeswitch": {
+      "version": "2.6.2.20251207-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:usbutils": {
+      "version": "019-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:uwsm": {
+      "version": "0.26.0-1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:vi": {
+      "version": "1:070224-6.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:vim": {
+      "version": "9.1.2077-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:vlc-plugins-all": {
+      "version": "3.0.21-32.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:vulkan-radeon": {
+      "version": "1:25.3.3-5",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:waybar": {
+      "version": "0.14.0-6.2",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:wget": {
+      "version": "1.25.0-3.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:which": {
+      "version": "2.23-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:wireless-regdb": {
+      "version": "2025.10.07-1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:wireplumber": {
+      "version": "0.5.13-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:wl-clipboard": {
+      "version": "1:2.2.1-3.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:wofi": {
+      "version": "1.5.3-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:xdg-desktop-portal-hyprland": {
+      "version": "1.3.11-3.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:xf86-input-libinput": {
+      "version": "1.5.0-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:xfsprogs": {
+      "version": "6.17.0-2.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:xl2tpd": {
+      "version": "1.3.19-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:xorg-server": {
+      "version": "21.1.21-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:xorg-xdpyinfo": {
+      "version": "1.4.0-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:xorg-xinit": {
+      "version": "1.4.4-1.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:xorg-xinput": {
+      "version": "1.6.4-2.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "pacman:xorg-xkill": {
+      "version": "1.0.6-2.1",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "pacman"
+    },
+    "flatpak:com.discordapp.Discord": {
+      "version": "0.0.120",
+      "installedAt": "2026-01-18T18:25:59.886Z",
+      "manager": "flatpak"
     }
   }
 }

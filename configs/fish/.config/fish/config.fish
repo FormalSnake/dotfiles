@@ -34,16 +34,29 @@ if status is-interactive
     # Bun
     fish_add_path ~/.bun/bin
 
-    # Python paths
-    fish_add_path ~/Library/Python/3.9/bin
+    # macOS-specific paths
+    if test (uname) = Darwin
+        # Python paths
+        fish_add_path ~/Library/Python/3.9/bin
 
-    # Java Home
-    set -gx JAVA_HOME /Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home
+        # Java Home
+        set -gx JAVA_HOME /Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home
 
-    # Android SDK
-    set -gx ANDROID_HOME $HOME/Library/Android/sdk
-    fish_add_path $ANDROID_HOME/emulator
-    fish_add_path $ANDROID_HOME/platform-tools
+        # Android SDK
+        set -gx ANDROID_HOME $HOME/Library/Android/sdk
+        fish_add_path $ANDROID_HOME/emulator
+        fish_add_path $ANDROID_HOME/platform-tools
+
+        # Added by Antigravity
+        fish_add_path $HOME/.antigravity/antigravity/bin
+    end
+
+    # Linux-specific (CachyOS/Arch)
+    if test (uname) = Linux
+        if test -f /usr/share/cachyos-fish-config/cachyos-config.fish
+            source /usr/share/cachyos-fish-config/cachyos-config.fish
+        end
+    end
 
     # Load secrets
     if test -f ~/.config/fish/secrets.fish
@@ -52,6 +65,3 @@ if status is-interactive
 end
 
 export PATH="$HOME/.local/bin:$PATH"
-
-# Added by Antigravity
-fish_add_path /Users/kyandesutter/.antigravity/antigravity/bin
