@@ -1,165 +1,116 @@
 {
   "reload_style_on_change": true,
   "layer": "top",
-  "position": "top",
+  "position": "bottom",
   "spacing": 0,
-  "height": 26,
+  "height": 30,
 
-  "modules-left": ["hyprland/workspaces", "hyprland/window"],
-  "modules-center": ["clock"],
+  "modules-left": ["hyprland/workspaces", "custom/spotify"],
+  "modules-center": [],
   "modules-right": [
-    "group/tray-expander",
-    "bluetooth",
-    "network",
     "pulseaudio",
-    "cpu",
-    "battery"
+    "network",
+    "backlight",
+    "battery",
+    "clock",
+    "power-profiles-daemon"
   ],
 
   "hyprland/workspaces": {
     "on-click": "activate",
-    "format": "{icon}",
-    "format-icons": {
-      "default": "󱓻",
-      "empty": "󱓻",
-      "active": "󱓻"
-    },
+    "format": "{name}",
     "show-special": false,
     "persistent-workspaces": {
       "1": [],
       "2": [],
       "3": [],
-      "4": [],
-      "5": []
+      "4": []
     }
   },
 
-  "hyprland/window": {
-    "format": "{initialClass}",
-    "rewrite": {
-      "Alacritty": " Alacritty",
-      "kitty": " kitty",
-      "ghostty": " ghostty",
-      "foot": " foot",
-      "firefox": "󰈹 Firefox",
-      "Firefox": "󰈹 Firefox",
-      "chromium": " Chromium",
-      "Google-chrome": " Chrome",
-      "brave-browser": "󰖟 Brave",
-      "zen-browser": "󰈹 Zen",
-      "zen": "󰈹 Zen",
-      "code": "󰨞 Code",
-      "Code": "󰨞 Code",
-      "neovide": " Neovide",
-      "nvim": " Neovim",
-      "Spotify": "󰓇 Spotify",
-      "spotify": "󰓇 Spotify",
-      "discord": "󰙯 Discord",
-      "vesktop": "󰙯 Discord",
-      "slack": "󰒱 Slack",
-      "telegram-desktop": " Telegram",
-      "org.telegram.desktop": " Telegram",
-      "thunar": "󰉋 Thunar",
-      "nautilus": "󰉋 Files",
-      "dolphin": "󰉋 Dolphin",
-      "pcmanfm": "󰉋 PCManFM",
-      "mpv": "󰐌 mpv",
-      "vlc": "󰕼 VLC",
-      "gimp": " GIMP",
-      "inkscape": " Inkscape",
-      "blender": "󰂫 Blender",
-      "obs": "󰑋 OBS",
-      "steam": "󰓓 Steam",
-      "lutris": "󰺵 Lutris",
-      "": ""
-    },
-    "separate-outputs": true,
+  "custom/spotify": {
+    "exec": "$HOME/.config/waybar/scripts/mediaplayer.py --player spotify 2>/dev/null",
+    "format": "{}",
+    "return-type": "json",
+    "on-click": "playerctl -p spotify play-pause",
+    "on-scroll-up": "playerctl -p spotify next",
+    "on-scroll-down": "playerctl -p spotify previous",
     "max-length": 40
   },
 
   "clock": {
-    "format": "{:L%A %H:%M}",
-    "format-alt": "{:L%d %B W%V %Y}",
-    "tooltip": false
-  },
-
-  "cpu": {
-    "interval": 5,
-    "format": "󰍛",
-    "tooltip-format": "CPU: {usage}%"
-  },
-
-  "battery": {
-    "format": "{capacity}% {icon}",
-    "format-discharging": "{icon}",
-    "format-charging": "{icon}",
-    "format-plugged": "",
-    "format-icons": {
-      "charging": ["󰢜", "󰂆", "󰂇", "󰂈", "󰢝", "󰂉", "󰢞", "󰂊", "󰂋", "󰂅"],
-      "default": ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
-    },
-    "format-full": "󰂅",
-    "tooltip-format-discharging": "{power:>1.0f}W↓ {capacity}%",
-    "tooltip-format-charging": "{power:>1.0f}W↑ {capacity}%",
-    "interval": 5,
-    "states": {
-      "warning": 20,
-      "critical": 10
+    "format": "{:%H:%M}",
+    "format-alt": "{:%A, %B %d, %Y}",
+    "tooltip-format": "<tt><small>{calendar}</small></tt>",
+    "calendar": {
+      "mode": "month",
+      "weeks-pos": "right",
+      "on-scroll": 1,
+      "format": {
+        "months": "<span color='#ffead3'><b>{}</b></span>",
+        "days": "<span color='#ecc6d9'>{}</span>",
+        "weeks": "<span color='#99ffdd'><b>W{}</b></span>",
+        "weekdays": "<span color='#ffcc66'><b>{}</b></span>",
+        "today": "<span color='#ff6699'><b><u>{}</u></b></span>"
+      }
     }
   },
 
-  "bluetooth": {
-    "format": "",
-    "format-off": "󰂲",
-    "format-disabled": "󰂲",
-    "format-connected": "󰂱",
-    "format-no-controller": "",
-    "tooltip-format": "Devices connected: {num_connections}",
-    "on-click": "blueman-manager"
+  "backlight": {
+    "device": "intel_backlight",
+    "format": "{icon}",
+    "format-icons": ["", "", "", "", "", "", "", "", ""],
+    "tooltip-format": "Brightness: {percent}%",
+    "on-scroll-up": "brightnessctl set +5%",
+    "on-scroll-down": "brightnessctl set 5%-"
+  },
+
+  "battery": {
+    "states": {
+      "warning": 30,
+      "critical": 15
+    },
+    "format": "{icon}",
+    "format-charging": "󰂄",
+    "format-plugged": "󰂄",
+    "format-alt": "{capacity}% {icon}",
+    "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
+    "tooltip-format": "{capacity}% - {timeTo}"
   },
 
   "network": {
-    "format-icons": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
-    "format": "{icon}",
-    "format-wifi": "{icon}",
+    "format-wifi": "󰖩",
     "format-ethernet": "󰀂",
-    "format-disconnected": "󰤮",
-    "tooltip-format-wifi": "{essid} ({frequency} GHz)\n⇣{bandwidthDownBytes}  ⇡{bandwidthUpBytes}",
-    "tooltip-format-ethernet": "⇣{bandwidthDownBytes}  ⇡{bandwidthUpBytes}",
+    "format-disconnected": "󰖪",
+    "tooltip-format-wifi": "{essid} ({signalStrength}%)",
+    "tooltip-format-ethernet": "{ipaddr}/{cidr}",
     "tooltip-format-disconnected": "Disconnected",
-    "interval": 3,
     "on-click": "nm-connection-editor"
   },
 
   "pulseaudio": {
     "format": "{icon}",
+    "format-bluetooth": "󰂯",
+    "format-muted": "󰖁",
+    "format-icons": {
+      "headphone": "󰋋",
+      "default": ["󰕿", "󰖀", "󰕾"]
+    },
+    "tooltip-format": "Volume: {volume}%",
     "on-click": "pavucontrol",
     "on-click-right": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
-    "tooltip-format": "Volume: {volume}%",
-    "scroll-step": 5,
-    "format-muted": "",
+    "scroll-step": 5
+  },
+
+  "power-profiles-daemon": {
+    "format": "{icon}",
+    "tooltip-format": "Power profile: {profile}",
+    "tooltip": true,
     "format-icons": {
-      "headphone": "",
-      "default": ["", "", ""]
+      "default": "󰗑",
+      "performance": "󰓅",
+      "balanced": "󰾅",
+      "power-saver": "󰾆"
     }
-  },
-
-  "group/tray-expander": {
-    "orientation": "inherit",
-    "drawer": {
-      "transition-duration": 600,
-      "children-class": "tray-group-item"
-    },
-    "modules": ["custom/expand-icon", "tray"]
-  },
-
-  "custom/expand-icon": {
-    "format": "",
-    "tooltip": false
-  },
-
-  "tray": {
-    "icon-size": 12,
-    "spacing": 17
   }
 }

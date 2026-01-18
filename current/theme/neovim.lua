@@ -1,1 +1,1 @@
-/home/kyandesutter/.config/formalconf/themes/catppuccin/neovim.lua
+/home/kyandesutter/.config/formalconf/themes/tokyo-night/neovim.lua
