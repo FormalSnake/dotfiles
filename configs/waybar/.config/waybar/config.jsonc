@@ -9,6 +9,7 @@
   "modules-center": [],
   "modules-right": [
     "tray",
+    "bluetooth",
     "pulseaudio",
     "network",
     "backlight",
@@ -118,5 +119,15 @@
   "tray": {
     "icon-size": 16,
     "spacing": 8
+  },
+
+  "bluetooth": {
+    "format": "󰂯",
+    "format-connected": "󰂱 {num_connections}",
+    "format-disabled": "󰂲",
+    "tooltip-format": "{controller_alias}\t{controller_address}",
+    "tooltip-format-connected": "{controller_alias}\t{controller_address}\n\n{device_enumerate}",
+    "tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
+    "on-click": "ghostty --title=bluetui -e bluetui"
   }
 }
