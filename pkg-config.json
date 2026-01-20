@@ -29,7 +29,9 @@
       "yazi",
       "zoxide"
     ],
-    "cargo": ["lumen"]
+    "cargo": [
+      "lumen"
+    ]
   },
   "macos": {
     "taps": [
@@ -37,9 +39,6 @@
       "nikitabobko/tap"
     ],
     "formulas": [
-      "gh",
-      "node",
-      "rust",
       "acsandmann/tap/rift",
       "chafa",
       "cloudflare-wrangler",
@@ -47,13 +46,16 @@
       "codex",
       "couchdb",
       "dipc",
+      "gh",
       "git-filter-repo",
       "imagemagick",
       "libcaca",
       "mas",
+      "node",
       "opencode",
       "pyenv",
       "repomix",
+      "rust",
       "swiftformat",
       "swiftlint",
       "terminal-notifier",
