@@ -3,6 +3,9 @@ import json
 import subprocess
 import time
 
+MAX_WIDTH = 35
+SCROLL_INTERVAL = 0.5
+
 
 def get_spotify_info():
     try:
@@ -41,22 +44,57 @@ def get_spotify_info():
             css_class = "stopped"
 
         return {
-            "text": f"{icon} {track}",
+            "track": track,
+            "icon": icon,
             "class": css_class,
-            "tooltip": track
+            "status": player_status
         }
     except Exception:
         return None
 
 
+def scroll_text(text, position, max_width):
+    if len(text) <= max_width:
+        return text, 0
+
+    scrolled = text[position:] + "   " + text[:position]
+    return scrolled[:max_width], (position + 1) % (len(text) + 3)
+
+
 def main():
+    scroll_position = 0
+    last_track = None
+
     while True:
         info = get_spotify_info()
+
         if info:
-            print(json.dumps(info), flush=True)
+            track = info["track"]
+            icon = info["icon"]
+            css_class = info["class"]
+            status = info["status"]
+
+            if track != last_track:
+                scroll_position = 0
+                last_track = track
+
+            display_text, new_position = scroll_text(track, scroll_position, MAX_WIDTH)
+
+            if status == "Playing":
+                scroll_position = new_position
+
+            output = {
+                "text": f"{icon} {display_text}",
+                "class": css_class,
+                "tooltip": track
+            }
+            print(json.dumps(output), flush=True)
         else:
+            last_track = None
+            scroll_position = 0
             print(json.dumps({"text": "", "class": "stopped"}), flush=True)
-        time.sleep(1)
+
+        time.sleep(SCROLL_INTERVAL)
 
 
 if __name__ == "__main__":
