@@ -1,0 +1,4 @@
+// Ignore everything except secrets.fish
+*
+!.stignore
+!secrets.fish
