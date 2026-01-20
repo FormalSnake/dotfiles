@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "lastUpdated": "2026-01-20T10:48:14.768Z",
+  "lastUpdated": "2026-01-20T10:48:17.204Z",
   "packages": {
     "pacman:accountsservice": {
       "version": "23.13.9-2.1",
@@ -1101,6 +1101,21 @@
       "version": "0.0.120",
       "installedAt": "2026-01-18T18:25:59.886Z",
       "manager": "flatpak"
+    },
+    "cargo:lumen": {
+      "version": "2.18.0",
+      "installedAt": "2026-01-20T10:48:12.135Z",
+      "manager": "cargo"
+    },
+    "cargo:matugen": {
+      "version": "2.4.1",
+      "installedAt": "2026-01-20T10:48:12.135Z",
+      "manager": "cargo"
+    },
+    "cargo:pokeget": {
+      "version": "1.6.4",
+      "installedAt": "2026-01-20T10:48:12.135Z",
+      "manager": "cargo"
     }
   }
 }
