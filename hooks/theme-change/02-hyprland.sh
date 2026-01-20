@@ -10,4 +10,7 @@ hyprctl reload 2>/dev/null
 # Restart Waybar via Hyprland dispatch
 pkill waybar && hyprctl dispatch exec waybar
 
+# Reload mako notifications
+makoctl reload 2>/dev/null
+
 exit 0
