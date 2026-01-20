@@ -2,6 +2,11 @@
 # Hyprland color configuration
 # Source this file from your main hyprland.conf
 
+# GTK theme (Linux)
+env = GTK_THEME,{{gtk.theme}}
+exec = gsettings set org.gnome.desktop.interface gtk-theme "{{gtk.theme}}"
+exec = gsettings set org.gnome.desktop.interface color-scheme "prefer-{{mode}}"
+
 # General colors
 general {
     col.active_border = {{accent.rgba}} {{color4.rgba}} 45deg
