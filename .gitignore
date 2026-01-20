@@ -1,30 +1,5 @@
-# Lynk Browser - ignore runtime data and settings (synced via Syncthing)
-configs/lynk-browser/.config/lynk-browser/settings.json
-configs/lynk-browser/.config/lynk-browser/secrets.json
-configs/lynk-browser/.config/lynk-browser/.updaterId
-configs/lynk-browser/.config/lynk-browser/Cache/
-configs/lynk-browser/.config/lynk-browser/Code Cache/
-configs/lynk-browser/.config/lynk-browser/Cookies
-configs/lynk-browser/.config/lynk-browser/Cookies-journal
-configs/lynk-browser/.config/lynk-browser/Crashpad/
-configs/lynk-browser/.config/lynk-browser/Dictionaries/
-configs/lynk-browser/.config/lynk-browser/Extensions/
-configs/lynk-browser/.config/lynk-browser/Local Storage/
-configs/lynk-browser/.config/lynk-browser/Network Persistent State
-configs/lynk-browser/.config/lynk-browser/Partitions/
-configs/lynk-browser/.config/lynk-browser/Preferences
-configs/lynk-browser/.config/lynk-browser/Shared Dictionary/
-configs/lynk-browser/.config/lynk-browser/SharedStorage
-configs/lynk-browser/.config/lynk-browser/SharedStorage-wal
-configs/lynk-browser/.config/lynk-browser/SingletonCookie
-configs/lynk-browser/.config/lynk-browser/SingletonLock
-configs/lynk-browser/.config/lynk-browser/SingletonSocket
-configs/lynk-browser/.config/lynk-browser/Trust Tokens
-configs/lynk-browser/.config/lynk-browser/Trust Tokens-journal
-configs/lynk-browser/.config/lynk-browser/favicons/
-configs/lynk-browser/.config/lynk-browser/lynk-browser.db
-configs/lynk-browser/.config/lynk-browser/winState.json
-configs/lynk-browser/.config/lynk-browser/.org.chromium.Chromium.mkfGRI
+# Lynk Browser - synced via Syncthing
+configs/lynk-browser/
 
 # Neovim lazy lock
 configs/neovim/.config/nvim/lazy-lock.json
