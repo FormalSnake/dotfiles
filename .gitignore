@@ -35,3 +35,6 @@ qt/
 
 # Syncthing
 .stfolder/
+
+# macOS
+**/.DS_Store
