@@ -4,32 +4,34 @@
 
 # General colors
 general {
-    col.active_border = {{accent.rgb}} {{color4.rgb}} 45deg
+    col.active_border = {{accent.rgba}} {{color4.rgba}} 45deg
     col.inactive_border = {{border.rgb}}
 }
 
 # Group colors
 group {
-    col.border_active = {{accent}}
-    col.border_inactive = {{border}}
-    col.border_locked_active = {{color3}}
-    col.border_locked_inactive = {{color8}}
+    col.border_active = {{accent.rgba}}
+    col.border_inactive = {{border.rgba}}
+    col.border_locked_active = {{color3.rgba}}
+    col.border_locked_inactive = {{color8.rgba}}
 
     groupbar {
-        col.active = {{accent}}
-        col.inactive = {{color0}}
-        col.locked_active = {{color3}}
-        col.locked_inactive = {{color8}}
+        col.active = {{accent.rgba}}
+        col.inactive = {{color0.rgba}}
+        col.locked_active = {{color3.rgba}}
+        col.locked_inactive = {{color8.rgba}}
     }
 }
 
 # Decoration
 decoration {
-    col.shadow = {{background.rgba}}
-    col.shadow_inactive = {{color0.rgba}}
+    shadow {
+        color = {{background.rgba}}
+        color_inactive = {{color0.rgba}}
+    }
 }
 
 # Misc
 misc {
-    background_color = {{background}}
+    background_color = {{background.rgba}}
 }
