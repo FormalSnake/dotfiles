@@ -1,4 +1,6 @@
-# Lynk Browser - ignore runtime data, keep config files
+# Lynk Browser - ignore runtime data and settings (synced via Syncthing)
+configs/lynk-browser/.config/lynk-browser/settings.json
+configs/lynk-browser/.config/lynk-browser/secrets.json
 configs/lynk-browser/.config/lynk-browser/.updaterId
 configs/lynk-browser/.config/lynk-browser/Cache/
 configs/lynk-browser/.config/lynk-browser/Code Cache/
