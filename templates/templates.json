@@ -3,87 +3,92 @@
   "templates": {
     "alacritty.toml.template": {
       "version": "1.0.0",
-      "installedAt": "2026-01-20T06:34:05.946Z",
+      "installedAt": "2026-01-20T10:26:32.031Z",
       "customOverride": false
     },
     "kitty-dark.conf.template": {
       "version": "1.0.0",
-      "installedAt": "2026-01-20T06:34:05.947Z",
+      "installedAt": "2026-01-20T10:26:32.032Z",
       "customOverride": false
     },
     "kitty-light.conf.template": {
       "version": "1.0.0",
-      "installedAt": "2026-01-20T06:34:05.948Z",
+      "installedAt": "2026-01-20T10:26:32.032Z",
       "customOverride": false
     },
     "ghostty.conf.template": {
       "version": "1.0.0",
-      "installedAt": "2026-01-20T06:34:05.949Z",
+      "installedAt": "2026-01-20T10:26:32.033Z",
       "customOverride": false
     },
     "ghostty-dark.theme.template": {
       "version": "1.0.0",
-      "installedAt": "2026-01-20T06:34:05.950Z",
+      "installedAt": "2026-01-20T10:26:32.033Z",
       "customOverride": false
     },
     "ghostty-light.theme.template": {
       "version": "1.0.0",
-      "installedAt": "2026-01-20T06:34:05.951Z",
+      "installedAt": "2026-01-20T10:26:32.034Z",
       "customOverride": false
     },
     "btop-dark.theme.template": {
       "version": "1.0.0",
-      "installedAt": "2026-01-20T06:34:05.952Z",
+      "installedAt": "2026-01-20T10:26:32.034Z",
       "customOverride": false
     },
     "btop-light.theme.template": {
       "version": "1.0.0",
-      "installedAt": "2026-01-20T06:34:05.953Z",
+      "installedAt": "2026-01-20T10:26:32.035Z",
       "customOverride": false
     },
     "waybar-dark.css.template": {
       "version": "1.0.0",
-      "installedAt": "2026-01-20T06:34:05.954Z",
+      "installedAt": "2026-01-20T10:26:32.035Z",
       "customOverride": false
     },
     "waybar-light.css.template": {
       "version": "1.0.0",
-      "installedAt": "2026-01-20T06:34:05.955Z",
+      "installedAt": "2026-01-20T10:26:32.036Z",
       "customOverride": false
     },
     "wofi.css.template": {
       "version": "1.0.0",
-      "installedAt": "2026-01-20T06:34:05.956Z",
+      "installedAt": "2026-01-20T10:26:32.037Z",
       "customOverride": false
     },
     "walker.css.template": {
       "version": "1.0.0",
-      "installedAt": "2026-01-20T06:34:05.957Z",
+      "installedAt": "2026-01-20T10:26:32.037Z",
       "customOverride": false
     },
     "hyprland.conf.template": {
       "version": "1.0.0",
-      "installedAt": "2026-01-20T06:34:05.957Z",
+      "installedAt": "2026-01-20T10:26:32.038Z",
       "customOverride": false
     },
     "hyprlock.conf.template": {
       "version": "1.0.0",
-      "installedAt": "2026-01-20T06:34:05.958Z",
+      "installedAt": "2026-01-20T10:26:32.038Z",
       "customOverride": false
     },
     "mako.ini.template": {
       "version": "1.0.0",
-      "installedAt": "2026-01-20T06:34:05.958Z",
+      "installedAt": "2026-01-20T10:26:32.038Z",
       "customOverride": false
     },
     "swayosd.css.template": {
       "version": "1.0.0",
-      "installedAt": "2026-01-20T06:34:05.959Z",
+      "installedAt": "2026-01-20T10:26:32.039Z",
       "customOverride": false
     },
     "lynk.css.template": {
       "version": "1.0.0",
-      "installedAt": "2026-01-20T06:42:00.000Z",
+      "installedAt": "2026-01-20T10:26:32.039Z",
+      "customOverride": false
+    },
+    "neovim.lua.template": {
+      "version": "1.0.0",
+      "installedAt": "2026-01-20T10:26:32.040Z",
       "customOverride": false
     }
   }
