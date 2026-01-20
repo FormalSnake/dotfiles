@@ -168,6 +168,7 @@
       "helium-browser-bin"
     ],
     "aur": [
+      "github-desktop-bin",
       "hyprlauncher",
       "awww-git"
     ]
