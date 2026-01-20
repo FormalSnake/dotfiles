@@ -28,12 +28,12 @@
       "wget",
       "yazi",
       "zoxide"
-    ]
+    ],
+    "cargo": ["lumen"]
   },
   "macos": {
     "taps": [
       "oven-sh/bun",
-      "jnsahaj/lumen",
       "nikitabobko/tap"
     ],
     "formulas": [
@@ -50,7 +50,6 @@
       "git-filter-repo",
       "imagemagick",
       "libcaca",
-      "lumen",
       "mas",
       "opencode",
       "pyenv",
