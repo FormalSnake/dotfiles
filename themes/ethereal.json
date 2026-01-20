@@ -1,0 +1,34 @@
+{
+  "title": "ethereal",
+  "description": "Migrated from legacy theme",
+  "version": "1.0.0",
+  "dark": {
+    "color0": "#060b1e",
+    "color1": "#ed5b5a",
+    "color2": "#92a593",
+    "color3": "#e9bb4f",
+    "color4": "#7d82d9",
+    "color5": "#c89dc1",
+    "color6": "#a3bfd1",
+    "color7": "#f99957",
+    "color8": "#6d7db6",
+    "color9": "#faaaa9",
+    "color10": "#c4cfc4",
+    "color11": "#f7dc9c",
+    "color12": "#c2c4f0",
+    "color13": "#ead7e7",
+    "color14": "#dfeaf0",
+    "color15": "#ffcead",
+    "background": "#060b1e",
+    "foreground": "#ffcead",
+    "cursor": "#ffffff",
+    "selection_background": "#060b1e",
+    "selection_foreground": "#ffcead",
+    "accent": "#7d82d9",
+    "border": "#060b1e"
+  },
+  "neovim": {
+    "repo": "bjarneo/ethereal.nvim",
+    "colorscheme": "ethereal"
+  }
+}

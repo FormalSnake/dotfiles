@@ -1,0 +1,34 @@
+{
+  "title": "hackerman",
+  "description": "Migrated from legacy theme",
+  "version": "1.0.0",
+  "dark": {
+    "color0": "#0b0c16",
+    "color1": "#50f872",
+    "color2": "#4fe88f",
+    "color3": "#50f7d4",
+    "color4": "#829dd4",
+    "color5": "#86a7df",
+    "color6": "#7cf8f7",
+    "color7": "#85e1fb",
+    "color8": "#6a6e95",
+    "color9": "#85ff9d",
+    "color10": "#9cf7c2",
+    "color11": "#a4ffec",
+    "color12": "#c4d2ed",
+    "color13": "#cddbf4",
+    "color14": "#d1fffe",
+    "color15": "#ddf7ff",
+    "background": "#0b0c16",
+    "foreground": "#ddf7ff",
+    "cursor": "#ffffff",
+    "selection_background": "#0b0c16",
+    "selection_foreground": "#ddf7ff",
+    "accent": "#829dd4",
+    "border": "#0b0c16"
+  },
+  "neovim": {
+    "repo": "bjarneo/hackerman.nvim",
+    "colorscheme": "hackerman"
+  }
+}

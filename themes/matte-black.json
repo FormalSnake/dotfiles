@@ -1,0 +1,34 @@
+{
+  "title": "matte-black",
+  "description": "Migrated from legacy theme",
+  "version": "1.0.0",
+  "dark": {
+    "color0": "#333333",
+    "color1": "#d35f5f",
+    "color2": "#ffc107",
+    "color3": "#b91c1c",
+    "color4": "#e68e0d",
+    "color5": "#d35f5f",
+    "color6": "#bebebe",
+    "color7": "#bebebe",
+    "color8": "#8a8a8d",
+    "color9": "#b91c1c",
+    "color10": "#ffc107",
+    "color11": "#b90a0a",
+    "color12": "#f59e0b",
+    "color13": "#b91c1c",
+    "color14": "#eaeaea",
+    "color15": "#ffffff",
+    "background": "#121212",
+    "foreground": "#bebebe",
+    "cursor": "#eaeaea",
+    "selection_foreground": "#121212",
+    "selection_background": "#333333",
+    "accent": "#e68e0d",
+    "border": "#333333"
+  },
+  "neovim": {
+    "repo": "tahayvr/matteblack.nvim",
+    "colorscheme": "matteblack"
+  }
+}

@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "templates": {
+    "alacritty.toml.template": {
+      "version": "1.0.0",
+      "installedAt": "2026-01-20T06:34:05.946Z",
+      "customOverride": false
+    },
+    "kitty-dark.conf.template": {
+      "version": "1.0.0",
+      "installedAt": "2026-01-20T06:34:05.947Z",
+      "customOverride": false
+    },
+    "kitty-light.conf.template": {
+      "version": "1.0.0",
+      "installedAt": "2026-01-20T06:34:05.948Z",
+      "customOverride": false
+    },
+    "ghostty.conf.template": {
+      "version": "1.0.0",
+      "installedAt": "2026-01-20T06:34:05.949Z",
+      "customOverride": false
+    },
+    "ghostty-dark.theme.template": {
+      "version": "1.0.0",
+      "installedAt": "2026-01-20T06:34:05.950Z",
+      "customOverride": false
+    },
+    "ghostty-light.theme.template": {
+      "version": "1.0.0",
+      "installedAt": "2026-01-20T06:34:05.951Z",
+      "customOverride": false
+    },
+    "btop-dark.theme.template": {
+      "version": "1.0.0",
+      "installedAt": "2026-01-20T06:34:05.952Z",
+      "customOverride": false
+    },
+    "btop-light.theme.template": {
+      "version": "1.0.0",
+      "installedAt": "2026-01-20T06:34:05.953Z",
+      "customOverride": false
+    },
+    "waybar-dark.css.template": {
+      "version": "1.0.0",
+      "installedAt": "2026-01-20T06:34:05.954Z",
+      "customOverride": false
+    },
+    "waybar-light.css.template": {
+      "version": "1.0.0",
+      "installedAt": "2026-01-20T06:34:05.955Z",
+      "customOverride": false
+    },
+    "wofi.css.template": {
+      "version": "1.0.0",
+      "installedAt": "2026-01-20T06:34:05.956Z",
+      "customOverride": false
+    },
+    "walker.css.template": {
+      "version": "1.0.0",
+      "installedAt": "2026-01-20T06:34:05.957Z",
+      "customOverride": false
+    },
+    "hyprland.conf.template": {
+      "version": "1.0.0",
+      "installedAt": "2026-01-20T06:34:05.957Z",
+      "customOverride": false
+    },
+    "hyprlock.conf.template": {
+      "version": "1.0.0",
+      "installedAt": "2026-01-20T06:34:05.958Z",
+      "customOverride": false
+    },
+    "mako.ini.template": {
+      "version": "1.0.0",
+      "installedAt": "2026-01-20T06:34:05.958Z",
+      "customOverride": false
+    },
+    "swayosd.css.template": {
+      "version": "1.0.0",
+      "installedAt": "2026-01-20T06:34:05.959Z",
+      "customOverride": false
+    },
+    "lynk.css.template": {
+      "version": "1.0.0",
+      "installedAt": "2026-01-20T06:42:00.000Z",
+      "customOverride": false
+    }
+  }
+}
