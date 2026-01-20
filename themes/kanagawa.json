@@ -30,5 +30,10 @@
   "neovim": {
     "repo": "rebelot/kanagawa.nvim",
     "colorscheme": "kanagawa"
+  },
+  "wallpapers": {
+    "dark": [
+      "https://raw.githubusercontent.com/FormalSnake/backgrounds/main/kanagawa/1-kanagawa.jpg"
+    ]
   }
 }

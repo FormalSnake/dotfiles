@@ -58,5 +58,12 @@
     "repo": "EdenEast/nightfox.nvim",
     "colorscheme": "nordfox",
     "light_colorscheme": "dayfox"
+  },
+  "wallpapers": {
+    "dark": [
+      "https://raw.githubusercontent.com/FormalSnake/backgrounds/main/nord/1-nord.png",
+      "https://raw.githubusercontent.com/FormalSnake/backgrounds/main/nord/2-nord.png",
+      "https://raw.githubusercontent.com/FormalSnake/backgrounds/main/nord/3-nord.png"
+    ]
   }
 }

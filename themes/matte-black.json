@@ -30,5 +30,12 @@
   "neovim": {
     "repo": "tahayvr/matteblack.nvim",
     "colorscheme": "matteblack"
+  },
+  "wallpapers": {
+    "dark": [
+      "https://raw.githubusercontent.com/FormalSnake/backgrounds/main/matte-black/0-ship-at-sea.jpg",
+      "https://raw.githubusercontent.com/FormalSnake/backgrounds/main/matte-black/1-matte-black.jpg",
+      "https://raw.githubusercontent.com/FormalSnake/backgrounds/main/matte-black/2-matte-black-hands.jpg"
+    ]
   }
 }

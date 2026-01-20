@@ -30,5 +30,10 @@
   "neovim": {
     "repo": "ellisonleao/gruvbox.nvim",
     "colorscheme": "gruvbox"
+  },
+  "wallpapers": {
+    "dark": [
+      "https://raw.githubusercontent.com/FormalSnake/backgrounds/main/gruvbox/1-grubox.jpg"
+    ]
   }
 }

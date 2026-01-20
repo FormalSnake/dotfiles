@@ -30,5 +30,12 @@
   "neovim": {
     "repo": "folke/tokyonight.nvim",
     "colorscheme": "tokyonight-night"
+  },
+  "wallpapers": {
+    "dark": [
+      "https://raw.githubusercontent.com/FormalSnake/backgrounds/main/tokyo-night/1-scenery-pink-lakeside-sunset-lake-landscape-scenic-panorama-7680x3215-144.png",
+      "https://raw.githubusercontent.com/FormalSnake/backgrounds/main/tokyo-night/2-Pawel-Czerwinski-Abstract-Purple-Blue.jpg",
+      "https://raw.githubusercontent.com/FormalSnake/backgrounds/main/tokyo-night/3-Milad-Fakurian-Abstract-Purple-Blue.jpg"
+    ]
   }
 }

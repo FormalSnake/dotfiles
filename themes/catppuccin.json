@@ -58,5 +58,15 @@
     "repo": "catppuccin/nvim",
     "colorscheme": "catppuccin-mocha",
     "light_colorscheme": "catppuccin-latte"
+  },
+  "wallpapers": {
+    "dark": [
+      "https://raw.githubusercontent.com/FormalSnake/backgrounds/main/catppuccin/1-catppuccin.png",
+      "https://raw.githubusercontent.com/FormalSnake/backgrounds/main/catppuccin/2-cat-waves-mocha.png",
+      "https://raw.githubusercontent.com/FormalSnake/backgrounds/main/catppuccin/3-cat-blue-eye-mocha.png"
+    ],
+    "light": [
+      "https://raw.githubusercontent.com/FormalSnake/backgrounds/main/catppuccin-latte/1-catppuccin-latte.png"
+    ]
   }
 }

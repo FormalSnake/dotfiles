@@ -58,5 +58,11 @@
     "repo": "kepano/flexoki-neovim",
     "colorscheme": "flexoki-dark",
     "light_colorscheme": "flexoki-light"
+  },
+  "wallpapers": {
+    "light": [
+      "https://raw.githubusercontent.com/FormalSnake/backgrounds/main/flexoki-light/1-flexoki-light-orb.png",
+      "https://raw.githubusercontent.com/FormalSnake/backgrounds/main/flexoki-light/2-flexoki-light-omarchy.png"
+    ]
   }
 }

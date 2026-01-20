@@ -30,5 +30,11 @@
   "neovim": {
     "repo": "bjarneo/ethereal.nvim",
     "colorscheme": "ethereal"
+  },
+  "wallpapers": {
+    "dark": [
+      "https://raw.githubusercontent.com/FormalSnake/backgrounds/main/ethereal/1.jpg",
+      "https://raw.githubusercontent.com/FormalSnake/backgrounds/main/ethereal/2.jpg"
+    ]
   }
 }

@@ -30,5 +30,10 @@
   "neovim": {
     "repo": "neanias/everforest-nvim",
     "colorscheme": "everforest"
+  },
+  "wallpapers": {
+    "dark": [
+      "https://raw.githubusercontent.com/FormalSnake/backgrounds/main/everforest/1-everforest.jpg"
+    ]
   }
 }
