@@ -31,6 +31,9 @@ if status is-interactive
 
     # Paths
 
+    # Cargo
+    fish_add_path ~/.cargo/bin
+
     # Bun
     fish_add_path ~/.bun/bin
 
