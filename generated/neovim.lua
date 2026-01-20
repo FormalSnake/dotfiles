@@ -3,27 +3,14 @@
 
 return {
   {
-    "EdenEast/nightfox.nvim",
+    "{{dark.neovim.repo}}",
     name = "formalconf-colorscheme",
     priority = 1000,
   },
   {
     "LazyVim/LazyVim",
     opts = {
-      colorscheme = "nordfox",
-    },
-  },
-
-  {
-    "f-person/auto-dark-mode.nvim",
-    opts = {
-      update_background = false,
-      set_dark_mode = function()
-        vim.cmd("colorscheme nordfox")
-      end,
-      set_light_mode = function()
-        vim.cmd("colorscheme dayfox")
-      end,
+      colorscheme = "{{dark.neovim.colorscheme}}",
     },
   },
 
