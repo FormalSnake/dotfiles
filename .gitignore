@@ -30,3 +30,6 @@ configs/neovim/.config/nvim/lazy-lock.json
 # GTK and QT directories
 gtk/
 qt/
+
+# Syncthing
+.stfolder/
