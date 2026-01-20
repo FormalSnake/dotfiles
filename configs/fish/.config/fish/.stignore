@@ -1,4 +1,3 @@
-// Ignore everything except secrets.fish
+// Sync only secrets.fish
 *
-!.stignore
-!secrets.fish
+!/secrets.fish
