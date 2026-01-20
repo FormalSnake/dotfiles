@@ -128,3 +128,13 @@ tooltip label {
   background: #f38ba8;
   border-radius: 5px;
 }
+
+#custom-power {
+  color: @foreground;
+  padding: 0 10px;
+  margin-left: 4px;
+}
+
+#custom-power:hover {
+  color: #f38ba8;
+}
