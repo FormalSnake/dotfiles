@@ -17,7 +17,7 @@ WALLPAPER="${FILES[$RANDOM_IDX]}"
 case "$(uname -s)" in
   Linux)
     # Linux: use awww (Wayland wallpaper daemon)
-    awww img "$WALLPAPER"
+    awww img "$WALLPAPER" --transition-type center --transition-duration 0.8
     ;;
   *)
     # macOS and other platforms: do nothing
