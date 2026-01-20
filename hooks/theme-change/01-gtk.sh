@@ -32,12 +32,12 @@ case "$THEME_NAME" in
   *dracula*)    TWEAKS="dracula" ;;
 esac
 
-# Determine color variant
+# Determine color variant (lowercase required by Colloid)
 COLOR_OPT=""
 if [[ "$FORMALCONF_THEME_MODE" == "dark" ]]; then
-  COLOR_OPT="-c Dark"
+  COLOR_OPT="-c dark"
 else
-  COLOR_OPT="-c Light"
+  COLOR_OPT="-c light"
 fi
 
 # Regenerate libadwaita CSS (suppress output)
