@@ -124,6 +124,8 @@
       "hyprpaper",
       "hyprlock",
       "hypridle",
+      "hyprshot",
+      "hyprpolkitagent",
       "xdg-desktop-portal-hyprland",
       "mako",
       "waybar",
@@ -138,10 +140,32 @@
       "wireplumber",
       "polkit-kde-agent",
       "qt5-wayland",
-      "qt6-wayland"
+      "qt6-wayland",
+      "ghostty",
+      "nautilus",
+      "playerctl",
+      "pavucontrol",
+      "power-profiles-daemon",
+      "bluetui",
+      "bluez",
+      "bluez-utils",
+      "kvantum",
+      "qt5ct",
+      "qt6ct",
+      "sddm",
+      "python",
+      "networkmanager",
+      "xorg-server",
+      "spotify-launcher",
+      "otf-geist-mono-nerd",
+      "ttf-meslo-nerd",
+      "noto-fonts",
+      "noto-fonts-emoji",
+      "helium-browser-bin"
     ],
     "aur": [
-      "hyprlauncher"
+      "hyprlauncher",
+      "awww-git"
     ]
   }
 }
