@@ -101,6 +101,11 @@
       "targets": [
         "~/.config"
       ]
+    },
+    "eww.scss.template": {
+      "version": "1.0.0",
+      "installedAt": "2026-01-21T00:00:00.000Z",
+      "customOverride": true
     }
   }
 }

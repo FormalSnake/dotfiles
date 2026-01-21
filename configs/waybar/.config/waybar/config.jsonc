@@ -44,7 +44,8 @@
     "exec": "$HOME/.config/waybar/scripts/mediaplayer.py",
     "format": "{}",
     "return-type": "json",
-    "on-click": "playerctl -p spotify play-pause",
+    "on-click": "~/.config/eww/scripts/toggle-spotify-popup.sh",
+    "on-click-right": "playerctl -p spotify play-pause",
     "on-scroll-up": "playerctl -p spotify next",
     "on-scroll-down": "playerctl -p spotify previous"
   },

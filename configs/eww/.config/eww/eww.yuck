@@ -1,0 +1,170 @@
+; Eww Spotify Media Player Popup
+; Horizontal layout with album art left, controls right
+
+; ================
+; POLLING VARIABLES
+; ================
+
+(defpoll spotify-info
+  :interval "500ms"
+  :initial '{"status":"stopped","title":"","artist":"","album":"","art_url":"","position":0,"length":0}'
+  `~/.config/eww/scripts/spotify-info.sh`)
+
+(defpoll album-art
+  :interval "2s"
+  :initial "~/.config/eww/assets/default-album.svg"
+  `~/.config/eww/scripts/album-art.sh`)
+
+(defpoll progress
+  :interval "1s"
+  :initial "0"
+  `~/.config/eww/scripts/spotify-progress.sh get`)
+
+(defpoll position-formatted
+  :interval "1s"
+  :initial "0:00"
+  `~/.config/eww/scripts/spotify-progress.sh format-position`)
+
+(defpoll length-formatted
+  :interval "2s"
+  :initial "0:00"
+  `~/.config/eww/scripts/spotify-progress.sh format-length`)
+
+; ================
+; WIDGET COMPONENTS
+; ================
+
+(defwidget album-cover []
+  (box
+    :class "album-cover-container"
+    :width 150
+    :height 150
+    (image
+      :class "album-cover"
+      :path album-art
+      :image-width 150
+      :image-height 150)))
+
+(defwidget track-info []
+  (box
+    :class "track-info"
+    :orientation "v"
+    :space-evenly false
+    :valign "center"
+    :hexpand true
+    (label
+      :class "track-title"
+      :text {spotify-info.title != "" ? spotify-info.title : "Not Playing"}
+      :limit-width 25
+      :halign "start"
+      :wrap false)
+    (label
+      :class "track-artist"
+      :text {spotify-info.artist != "" ? spotify-info.artist : ""}
+      :limit-width 30
+      :halign "start"
+      :wrap false)))
+
+(defwidget progress-bar []
+  (box
+    :class "progress-container"
+    :orientation "v"
+    :space-evenly false
+    :hexpand true
+    (scale
+      :class "progress-scale"
+      :min 0
+      :max 100
+      :value progress
+      :onchange "~/.config/eww/scripts/spotify-progress.sh set {}"
+      :orientation "h"
+      :hexpand true)
+    (box
+      :class "time-labels"
+      :orientation "h"
+      (label :class "time-current" :text position-formatted :halign "start" :hexpand true)
+      (label :class "time-total" :text length-formatted :halign "end"))))
+
+(defwidget control-button [icon command tooltip]
+  (button
+    :class "control-btn"
+    :onclick command
+    :tooltip tooltip
+    icon))
+
+(defwidget play-pause-button []
+  (button
+    :class "control-btn play-btn"
+    :onclick "playerctl -p spotify play-pause"
+    :tooltip "Play/Pause"
+    {spotify-info.status == "Playing" ? "󰏤" : "󰐊"}))
+
+(defwidget controls []
+  (box
+    :class "controls"
+    :orientation "h"
+    :space-evenly false
+    :spacing 8
+    :halign "center"
+    (control-button
+      :icon "󰒮"
+      :command "playerctl -p spotify previous"
+      :tooltip "Previous")
+    (play-pause-button)
+    (control-button
+      :icon "󰒭"
+      :command "playerctl -p spotify next"
+      :tooltip "Next")))
+
+; ================
+; MAIN WIDGET - HORIZONTAL LAYOUT
+; ================
+
+(defwidget spotify-player []
+  (eventbox
+    :onhoverlost "eww close spotify-popup spotify-popup-1 2>/dev/null"
+    (box
+      :class "spotify-popup"
+      :orientation "h"
+      :space-evenly false
+      :spacing 20
+      :width 460
+      ; Left side - Album art
+      (album-cover)
+      ; Right side - Info, progress, controls
+      (box
+        :class "right-panel"
+        :orientation "v"
+        :space-evenly false
+        :spacing 12
+        :width 260
+        :valign "center"
+        (track-info)
+        (progress-bar)
+        (controls)))))
+
+; ================
+; WINDOW DEFINITION
+; ================
+
+(defwindow spotify-popup
+  :monitor 0
+  :geometry (geometry
+    :x "0px"
+    :y "10px"
+    :anchor "bottom center")
+  :stacking "overlay"
+  :exclusive false
+  :focusable true
+  (spotify-player))
+
+(defwindow spotify-popup-1
+  :monitor 1
+  :geometry (geometry
+    :x "0px"
+    :y "10px"
+    :anchor "bottom center")
+  :stacking "overlay"
+  :exclusive false
+  :focusable true
+  (spotify-player))

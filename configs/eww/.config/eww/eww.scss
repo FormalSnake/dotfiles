@@ -1,0 +1,143 @@
+// Eww Spotify Popup Styles
+// Imports theme colors from formalconf
+// =========================================================
+
+@import "~/.config/formalconf/current/theme/eww.scss";
+
+// =========================================================
+// MAIN POPUP CONTAINER
+// =========================================================
+
+.spotify-popup {
+  background-color: $background;
+  border-radius: 12px;
+  padding: 24px;
+  border: 2px solid $border;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+// =========================================================
+// ALBUM COVER
+// =========================================================
+
+.album-cover-container {
+  border-radius: 8px;
+  min-width: 150px;
+  min-height: 150px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.album-cover {
+  border-radius: 8px;
+}
+
+// =========================================================
+// RIGHT PANEL
+// =========================================================
+
+.right-panel {
+  margin-right: 0;
+}
+
+// =========================================================
+// TRACK INFO
+// =========================================================
+
+.track-info {
+  padding: 0;
+}
+
+.track-title {
+  font-size: 15px;
+  font-weight: bold;
+  color: $foreground;
+}
+
+.track-artist {
+  font-size: 12px;
+  color: $color8;
+  margin-top: 2px;
+}
+
+// =========================================================
+// PROGRESS BAR
+// =========================================================
+
+.progress-container {
+  padding: 0;
+}
+
+.progress-scale {
+  trough {
+    background-color: $color0;
+    border-radius: 3px;
+    min-height: 4px;
+  }
+
+  highlight {
+    background-color: $accent;
+    border-radius: 3px;
+  }
+
+  slider {
+    background-color: $foreground;
+    border-radius: 50%;
+    min-width: 10px;
+    min-height: 10px;
+    margin: -3px 0;
+
+    &:hover {
+      background-color: $accent;
+    }
+  }
+}
+
+.time-labels {
+  margin-top: 4px;
+}
+
+.time-current,
+.time-total {
+  font-size: 10px;
+  color: $color8;
+}
+
+// =========================================================
+// PLAYBACK CONTROLS
+// =========================================================
+
+.controls {
+  margin-top: 4px;
+}
+
+.control-btn {
+  font-size: 22px;
+  color: $foreground;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  padding: 6px 12px;
+  margin: 0 6px;
+  transition: all 0.15s ease;
+
+  &:hover {
+    color: $accent;
+    background-color: $color0;
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.play-btn {
+  font-size: 26px;
+  color: $background;
+  background-color: $accent;
+
+  &:hover {
+    background-color: $color6;
+    color: $background;
+  }
+}
