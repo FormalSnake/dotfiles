@@ -4,7 +4,6 @@
 return {
   {
     "{{dark.neovim.repo}}",
-    name = "formalconf-colorscheme",
     priority = 1000,
   },
   {

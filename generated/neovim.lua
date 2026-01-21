@@ -4,7 +4,6 @@
 return {
   {
     "EdenEast/nightfox.nvim",
-    name = "formalconf-colorscheme",
     priority = 1000,
   },
   {
