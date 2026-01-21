@@ -93,6 +93,14 @@
       "installedAt": "2026-01-20T21:25:41.499Z",
       "customOverride": false,
       "mode": "dual"
+    },
+    "kdeglobals.template": {
+      "version": "1.0.0",
+      "installedAt": "2026-01-21T00:10:00.000Z",
+      "customOverride": true,
+      "targets": [
+        "~/.config"
+      ]
     }
   }
 }
