@@ -2,7 +2,7 @@
 // Imports theme colors from formalconf
 // =========================================================
 
-@import "~/.config/formalconf/current/theme/eww.scss";
+@import "/home/kyandesutter/.config/formalconf/current/theme/eww.scss";
 
 // =========================================================
 // MAIN POPUP CONTAINER
@@ -25,7 +25,6 @@
   min-width: 150px;
   min-height: 150px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  overflow: hidden;
 }
 
 .album-cover {
@@ -126,9 +125,6 @@
     background-color: $color0;
   }
 
-  &:active {
-    transform: scale(0.95);
-  }
 }
 
 .play-btn {
