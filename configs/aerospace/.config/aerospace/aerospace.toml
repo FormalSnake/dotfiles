@@ -53,7 +53,7 @@ alt-tab = "workspace-back-and-forth"
 
 shift-alt-cmd-1 = "workspace web"
 shift-alt-cmd-2 = "workspace terminal"
-shift-alt-cmd-3 = "workspace code"
+shift-alt-cmd-3 = "workspace development"
 shift-alt-cmd-4 = "workspace communication"
 shift-alt-cmd-5 = "workspace productivity"
 shift-alt-cmd-6 = "workspace design"
@@ -62,7 +62,7 @@ shift-alt-cmd-8 = "workspace media"
 shift-alt-cmd-9 = "workspace gaming"
 shift-alt-1 = "move-node-to-workspace web"
 shift-alt-2 = "move-node-to-workspace terminal"
-shift-alt-3 = "move-node-to-workspace code"
+shift-alt-3 = "move-node-to-workspace development"
 shift-alt-4 = "move-node-to-workspace communication"
 shift-alt-5 = "move-node-to-workspace productivity"
 shift-alt-6 = "move-node-to-workspace design"
@@ -99,7 +99,7 @@ run = "move-node-to-workspace terminal"
 app-id = "com.mitchellh.ghostty"
 
 [[on-window-detected]]
-run = "move-node-to-workspace code"
+run = "move-node-to-workspace development"
 
 [on-window-detected.if]
 app-id = "dev.zed.Zed"
@@ -223,9 +223,39 @@ if.app-id = 'app.zen-browser.zen'
 if.window-title-regex-substring = 'Picture-in-Picture'
 run = ['layout floating']
 
+[[on-window-detected]]
+run = "move-node-to-workspace web"
+
+[on-window-detected.if]
+app-id = "net.imput.helium"
+
+[[on-window-detected]]
+run = "move-node-to-workspace productivity"
+
+[on-window-detected.if]
+app-id = "md.obsidian"
+
+[[on-window-detected]]
+run = "move-node-to-workspace communication"
+
+[on-window-detected.if]
+app-id = "com.automattic.beeper.desktop"
+
+[[on-window-detected]]
+run = "move-node-to-workspace development"
+
+[on-window-detected.if]
+app-id = "com.electron.dockerdesktop"
+
+[[on-window-detected]]
+run = "move-node-to-workspace development"
+
+[on-window-detected.if]
+app-id = "com.github.Electron"
+
 [workspace-to-monitor-force-assignment]
 ai = "main"
-code = "main"
+development = "main"
 communication = ["secondary", "main"]
 design = "main"
 gaming = ["secondary", "main"]
