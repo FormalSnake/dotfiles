@@ -8,7 +8,7 @@ anchor=top-right
 margin=20
 
 # Styling
-font=GeistMono Nerd Font 11
+font=BlexMono Nerd Font 11
 border-radius=10
 border-size=2
 max-icon-size=48

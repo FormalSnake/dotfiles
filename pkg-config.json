@@ -62,11 +62,11 @@
       "tree-sitter-cli",
       "watchman",
       "xcbeautify",
-      "xcodegen",
-      "yarn"
+      "xcodegen"
     ],
     "casks": [
       "aerospace",
+      "font-blex-mono-nerd-font",
       "alcove",
       "appcleaner",
       "balenaetcher",
@@ -161,7 +161,7 @@
       "networkmanager",
       "xorg-server",
       "spotify-launcher",
-      "otf-geist-mono-nerd",
+      "ttf-ibmplex-mono-nerd",
       "ttf-meslo-nerd",
       "noto-fonts",
       "noto-fonts-emoji",

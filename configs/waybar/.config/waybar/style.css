@@ -4,7 +4,7 @@
   border: none;
   border-radius: 0;
   min-height: 0;
-  font-family: "GeistMono Nerd Font", "JetBrainsMono Nerd Font", monospace;
+  font-family: "BlexMono Nerd Font", "JetBrainsMono Nerd Font", monospace;
   font-size: 14px;
   font-weight: bold;
 }
@@ -29,7 +29,7 @@ window#waybar {
 #workspaces button {
   background: transparent;
   color: @foreground;
-  font-family: "GeistMono Nerd Font", "JetBrainsMono Nerd Font", monospace;
+  font-family: "BlexMono Nerd Font", "JetBrainsMono Nerd Font", monospace;
   font-size: 14px;
   font-weight: bold;
   padding: 0 10px;
