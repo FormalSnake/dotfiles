@@ -256,10 +256,10 @@ app-id = "com.github.Electron"
 [workspace-to-monitor-force-assignment]
 ai = "main"
 development = "main"
-communication = ["secondary", "main"]
+communication = ["Built-in Retina Display", "main"]
 design = "main"
-gaming = ["secondary", "main"]
-media = ["secondary", "main"]
+gaming = ["Built-in Retina Display", "main"]
+media = "sidecar"
 productivity = "main"
 terminal = "main"
 web = "main"
