@@ -4,6 +4,8 @@
     "lazyvim.plugins.extras.editor.neo-tree",
     "lazyvim.plugins.extras.lang.astro",
     "lazyvim.plugins.extras.lang.tailwind",
+    "lazyvim.plugins.extras.lang.typescript",
+    "lazyvim.plugins.extras.util.mini-hipatterns",
     "lazyvim.plugins.extras.vscode"
   ],
   "install_version": 8,

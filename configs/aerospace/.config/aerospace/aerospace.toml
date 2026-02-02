@@ -150,6 +150,12 @@ app-id = "com.anthropic.Claude"
 run = "move-node-to-workspace ai"
 
 [on-window-detected.if]
+app-id = "com.anthropic.claudefordesktop"
+
+[[on-window-detected]]
+run = "move-node-to-workspace ai"
+
+[on-window-detected.if]
 app-id = "ai.perplexity.comet"
 
 [[on-window-detected]]
@@ -258,8 +264,8 @@ ai = "main"
 development = "main"
 communication = ["Built-in Retina Display", "main"]
 design = "main"
-gaming = ["Built-in Retina Display", "main"]
-media = "sidecar"
+gaming = "sidecar"
+media = ["Built-in Retina Display", "main"]
 productivity = "main"
 terminal = "main"
 web = "main"
