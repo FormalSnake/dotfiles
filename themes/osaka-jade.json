@@ -27,6 +27,13 @@
     "accent": "#509475",
     "border": "#23372b"
   },
+  "gtk": {
+    "theme": "adw-gtk3-dark",
+    "icon_theme": "Adwaita",
+    "cursor_theme": "Adwaita",
+    "cursor_size": 24,
+    "font": "BlexMono Nerd Font 11"
+  },
   "neovim": {
     "repo": "ribru17/bamboo.nvim",
     "colorscheme": "bamboo"

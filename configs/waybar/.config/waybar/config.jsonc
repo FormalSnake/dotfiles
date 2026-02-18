@@ -9,6 +9,7 @@
   "modules-center": ["custom/spotify"],
   "modules-right": [
     "tray",
+    "cpu",
     "bluetooth",
     "pulseaudio",
     "network",
@@ -50,6 +51,13 @@
     "on-scroll-down": "playerctl -p spotify previous"
   },
 
+  "cpu": {
+    "interval": 5,
+    "format": "{usage}% 󰍛",
+    "tooltip-format": "CPU: {usage}% ({avg_frequency} GHz)\n{load} load avg",
+    "on-click": "ghostty --title=tui-float -e btop"
+  },
+
   "clock": {
     "format": "{:%H:%M}",
     "format-alt": "{:%A, %B %d, %Y}",
@@ -87,15 +95,16 @@
     "format-plugged": "{capacity}% 󰂄",
     "format-alt": "{icon}",
     "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
-    "tooltip-format": "{capacity}% - {timeTo}"
+    "tooltip-format": "{capacity}% - {timeTo}\n{power}W draw"
   },
 
   "network": {
-    "format-wifi": "󰖩",
+    "format-wifi": "{icon}",
     "format-ethernet": "󰀂",
     "format-disconnected": "󰖪",
-    "tooltip-format-wifi": "{essid} ({signalStrength}%)",
-    "tooltip-format-ethernet": "{ipaddr}/{cidr}",
+    "format-icons": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
+    "tooltip-format-wifi": "{essid} ({signalStrength}%)\n {bandwidthUpBits}  {bandwidthDownBits}\n{ipaddr}/{cidr}",
+    "tooltip-format-ethernet": "{ipaddr}/{cidr}\n {bandwidthUpBits}  {bandwidthDownBits}",
     "tooltip-format-disconnected": "Disconnected",
     "on-click": "nm-connection-editor"
   },
@@ -108,7 +117,7 @@
       "headphone": "󰋋",
       "default": ["󰕿", "󰖀", "󰕾"]
     },
-    "tooltip-format": "Volume: {volume}%",
+    "tooltip-format": "Volume: {volume}%\n{desc}",
     "on-click": "pavucontrol",
     "on-click-right": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
     "scroll-step": 5
@@ -138,12 +147,12 @@
     "tooltip-format": "{controller_alias}\t{controller_address}",
     "tooltip-format-connected": "{controller_alias}\t{controller_address}\n\n{device_enumerate}",
     "tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
-    "on-click": "ghostty --title=bluetui -e bluetui"
+    "on-click": "ghostty --title=tui-float -e bluetui"
   },
 
   "custom/power": {
     "format": "󰐥",
     "tooltip": false,
-    "on-click": "~/.config/waybar/scripts/powermenu.sh"
+    "on-click": "~/.config/formalconf/scripts/power-menu.sh"
   }
 }

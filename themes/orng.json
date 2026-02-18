@@ -52,6 +52,13 @@
     "accent": "#318795",
     "border": "#1a1a1a"
   },
+  "gtk": {
+    "theme": "adw-gtk3-dark",
+    "icon_theme": "Adwaita",
+    "cursor_theme": "Adwaita",
+    "cursor_size": 24,
+    "font": "BlexMono Nerd Font 11"
+  },
   "neovim": {
     "repo": "bachiitter/orng.nvim",
     "colorscheme": "orng"

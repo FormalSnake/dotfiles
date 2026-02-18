@@ -27,6 +27,13 @@
     "accent": "#829dd4",
     "border": "#0b0c16"
   },
+  "gtk": {
+    "theme": "adw-gtk3-dark",
+    "icon_theme": "Adwaita",
+    "cursor_theme": "Adwaita",
+    "cursor_size": 24,
+    "font": "BlexMono Nerd Font 11"
+  },
   "neovim": {
     "repo": "bjarneo/hackerman.nvim",
     "colorscheme": "hackerman"

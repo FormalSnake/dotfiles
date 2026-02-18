@@ -27,6 +27,13 @@
     "accent": "#7fbbb3",
     "border": "#475258"
   },
+  "gtk": {
+    "theme": "adw-gtk3-dark",
+    "icon_theme": "Adwaita",
+    "cursor_theme": "Adwaita",
+    "cursor_size": 24,
+    "font": "BlexMono Nerd Font 11"
+  },
   "neovim": {
     "repo": "neanias/everforest-nvim",
     "colorscheme": "everforest"

@@ -27,6 +27,13 @@
     "accent": "#458588",
     "border": "#3c3836"
   },
+  "gtk": {
+    "theme": "adw-gtk3-dark",
+    "icon_theme": "Adwaita",
+    "cursor_theme": "Adwaita",
+    "cursor_size": 24,
+    "font": "BlexMono Nerd Font 11"
+  },
   "neovim": {
     "repo": "ellisonleao/gruvbox.nvim",
     "colorscheme": "gruvbox"

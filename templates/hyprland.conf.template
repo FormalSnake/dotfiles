@@ -2,10 +2,14 @@
 # Hyprland color configuration
 # Source this file from your main hyprland.conf
 
-# GTK theme (Linux)
+# GTK/GNOME theme (Linux)
 env = GTK_THEME,{{gtk.theme}}
 exec = gsettings set org.gnome.desktop.interface gtk-theme "{{gtk.theme}}"
 exec = gsettings set org.gnome.desktop.interface color-scheme "prefer-{{mode}}"
+exec = gsettings set org.gnome.desktop.interface icon-theme "{{gtk.icon_theme}}"
+exec = gsettings set org.gnome.desktop.interface cursor-theme "{{gtk.cursor_theme}}"
+exec = gsettings set org.gnome.desktop.interface cursor-size {{gtk.cursor_size}}
+exec = gsettings set org.gnome.desktop.interface font-name "{{gtk.font}}"
 
 # General colors
 general {

@@ -54,6 +54,13 @@
     "accent": "#5e81ac",
     "border": "#d8dee9"
   },
+  "gtk": {
+    "theme": "adw-gtk3-dark",
+    "icon_theme": "Adwaita",
+    "cursor_theme": "Adwaita",
+    "cursor_size": 24,
+    "font": "BlexMono Nerd Font 11"
+  },
   "neovim": {
     "repo": "EdenEast/nightfox.nvim",
     "colorscheme": "nordfox",

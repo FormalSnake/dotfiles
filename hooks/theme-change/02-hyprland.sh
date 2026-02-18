@@ -22,4 +22,10 @@ makoctl reload 2>/dev/null
 # Reload eww widgets
 eww reload 2>/dev/null
 
+# Restart swayosd to pick up new theme
+pkill swayosd-server; swayosd-server &
+
+# Kill walker so it picks up new CSS on next launch
+pkill walker 2>/dev/null
+
 exit 0

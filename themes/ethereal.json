@@ -27,6 +27,13 @@
     "accent": "#7d82d9",
     "border": "#060b1e"
   },
+  "gtk": {
+    "theme": "adw-gtk3-dark",
+    "icon_theme": "Adwaita",
+    "cursor_theme": "Adwaita",
+    "cursor_size": 24,
+    "font": "BlexMono Nerd Font 11"
+  },
   "neovim": {
     "repo": "bjarneo/ethereal.nvim",
     "colorscheme": "ethereal"

@@ -163,12 +163,27 @@
       "ttf-meslo-nerd",
       "noto-fonts",
       "noto-fonts-emoji",
-      "helium-browser-bin"
+      "noto-fonts-cjk",
+      "helium-browser-bin",
+      "cliphist",
+      "swayosd-git",
+      "polkit-gnome",
+      "hyprsunset",
+      "hyprpicker",
+      "gpu-screen-recorder",
+      "satty",
+      "adw-gtk3",
+      "jq",
+      "gum",
+      "libnotify",
+      "xdg-terminal-exec"
     ],
     "aur": [
       "github-desktop-bin",
       "hyprlauncher",
-      "awww-git"
+      "awww-git",
+      "walker-bin",
+      "wayfreeze-git"
     ]
   }
 }

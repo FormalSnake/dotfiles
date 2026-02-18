@@ -27,6 +27,13 @@
     "accent": "#7e9cd8",
     "border": "#16161d"
   },
+  "gtk": {
+    "theme": "adw-gtk3-dark",
+    "icon_theme": "Adwaita",
+    "cursor_theme": "Adwaita",
+    "cursor_size": 24,
+    "font": "BlexMono Nerd Font 11"
+  },
   "neovim": {
     "repo": "rebelot/kanagawa.nvim",
     "colorscheme": "kanagawa"

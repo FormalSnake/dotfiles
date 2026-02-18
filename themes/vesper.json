@@ -27,6 +27,13 @@
     "accent": "#a0a0a0",
     "border": "#1c1c1c"
   },
+  "gtk": {
+    "theme": "adw-gtk3-dark",
+    "icon_theme": "Adwaita",
+    "cursor_theme": "Adwaita",
+    "cursor_size": 24,
+    "font": "BlexMono Nerd Font 11"
+  },
   "neovim": {
     "repo": "datsfilipe/vesper.nvim",
     "colorscheme": "vesper"
