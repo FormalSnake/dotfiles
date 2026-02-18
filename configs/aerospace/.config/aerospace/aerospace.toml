@@ -11,14 +11,14 @@ on-focused-monitor-changed = ["move-mouse monitor-lazy-center"]
 start-at-login = true
 
 [gaps.inner]
-horizontal = 16
-vertical = 16
+horizontal = 8 
+vertical = 8 
 
 [gaps.outer]
-bottom = 16
-left = 16
-right = 16
-top = 16
+bottom = 8 
+left = 8
+right = 8 
+top = 8 
 
 [key-mapping]
 preset = "qwerty"
@@ -264,7 +264,7 @@ ai = "main"
 development = "main"
 communication = ["Built-in Retina Display", "main"]
 design = "main"
-gaming = "sidecar"
+gaming = "yam"
 media = ["Built-in Retina Display", "main"]
 productivity = "main"
 terminal = "main"
