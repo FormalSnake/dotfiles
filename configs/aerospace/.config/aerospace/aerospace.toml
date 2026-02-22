@@ -225,6 +225,10 @@ run = "move-node-to-workspace terminal"
 app-id = "dev.warp.Warp-stable"
 
 [[on-window-detected]]
+if.app-id = 'com.apple.Stickies'
+run = ['layout floating']
+
+[[on-window-detected]]
 if.app-id = 'app.zen-browser.zen'
 if.window-title-regex-substring = 'Picture-in-Picture'
 run = ['layout floating']

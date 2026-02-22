@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "lastUpdated": "2026-02-09T17:46:41.888Z",
+  "lastUpdated": "2026-02-21T09:34:52.327Z",
   "packages": {
     "homebrew:ada-url": {
       "version": "3.4.2",
@@ -67,8 +67,8 @@
       "tap": "homebrew/core"
     },
     "homebrew:cloudflare-wrangler": {
-      "version": "4.63.0",
-      "installedAt": "2026-02-09T17:46:26.977Z",
+      "version": "4.67.0",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew",
       "tap": "homebrew/core"
     },
@@ -106,8 +106,8 @@
       "manager": "homebrew"
     },
     "homebrew:deno": {
-      "version": "2.6.8",
-      "installedAt": "2026-02-09T17:46:26.977Z",
+      "version": "2.6.10",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew",
       "tap": "homebrew/core"
     },
@@ -128,8 +128,8 @@
       "manager": "homebrew"
     },
     "homebrew:fastfetch": {
-      "version": "2.58.0",
-      "installedAt": "2026-01-30T16:58:50.075Z",
+      "version": "2.59.0",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew",
       "tap": "homebrew/core"
     },
@@ -150,8 +150,8 @@
       "tap": "homebrew/core"
     },
     "homebrew:fish": {
-      "version": "4.4.0",
-      "installedAt": "2026-02-09T17:46:26.977Z",
+      "version": "4.5.0",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew",
       "tap": "homebrew/core"
     },
@@ -186,8 +186,8 @@
       "manager": "homebrew"
     },
     "homebrew:fzf": {
-      "version": "0.67.0",
-      "installedAt": "2026-01-20T17:35:37.318Z",
+      "version": "0.68.0",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew",
       "tap": "homebrew/core"
     },
@@ -207,8 +207,8 @@
       "manager": "homebrew"
     },
     "homebrew:gh": {
-      "version": "2.86.0",
-      "installedAt": "2026-01-30T16:58:50.075Z",
+      "version": "2.87.2",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew",
       "tap": "homebrew/core"
     },
@@ -218,8 +218,8 @@
       "manager": "homebrew"
     },
     "homebrew:git": {
-      "version": "2.52.0_1",
-      "installedAt": "2026-01-20T17:35:37.318Z",
+      "version": "2.53.0",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew",
       "tap": "homebrew/core"
     },
@@ -230,8 +230,8 @@
       "tap": "homebrew/core"
     },
     "homebrew:glib": {
-      "version": "2.86.3",
-      "installedAt": "2026-01-20T17:35:37.318Z",
+      "version": "2.86.4",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew"
     },
     "homebrew:glog": {
@@ -245,8 +245,8 @@
       "manager": "homebrew"
     },
     "homebrew:go": {
-      "version": "1.25.7_1",
-      "installedAt": "2026-02-09T17:46:26.977Z",
+      "version": "1.26.0",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew",
       "tap": "homebrew/core"
     },
@@ -297,8 +297,13 @@
       "manager": "homebrew"
     },
     "homebrew:jpeg-xl": {
-      "version": "0.11.1_3",
-      "installedAt": "2026-01-20T17:35:37.318Z",
+      "version": "0.11.2",
+      "installedAt": "2026-02-21T09:34:44.460Z",
+      "manager": "homebrew"
+    },
+    "homebrew:krb5": {
+      "version": "1.22.2",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew"
     },
     "homebrew:lazydocker": {
@@ -314,8 +319,8 @@
       "tap": "homebrew/core"
     },
     "homebrew:libavif": {
-      "version": "1.3.0",
-      "installedAt": "2026-01-20T17:35:37.318Z",
+      "version": "1.3.0_1",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew"
     },
     "homebrew:libcaca": {
@@ -380,13 +385,18 @@
       "manager": "homebrew"
     },
     "homebrew:libpng": {
-      "version": "1.6.54_1",
-      "installedAt": "2026-02-09T17:46:26.977Z",
+      "version": "1.6.55",
+      "installedAt": "2026-02-21T09:34:44.460Z",
+      "manager": "homebrew"
+    },
+    "homebrew:libpq": {
+      "version": "18.2",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew"
     },
     "homebrew:librsvg": {
-      "version": "2.61.3_1",
-      "installedAt": "2026-01-20T17:35:37.318Z",
+      "version": "2.61.4",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew"
     },
     "homebrew:libsodium": {
@@ -420,8 +430,8 @@
       "manager": "homebrew"
     },
     "homebrew:libuv": {
-      "version": "1.51.0",
-      "installedAt": "2026-01-20T17:35:37.318Z",
+      "version": "1.52.0",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew"
     },
     "homebrew:libvmaf": {
@@ -470,13 +480,13 @@
       "manager": "homebrew"
     },
     "homebrew:llhttp": {
-      "version": "9.3.0",
-      "installedAt": "2026-01-30T16:58:50.075Z",
+      "version": "9.3.1",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew"
     },
     "homebrew:llvm": {
-      "version": "21.1.8",
-      "installedAt": "2026-01-20T17:35:37.318Z",
+      "version": "21.1.8_1",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew"
     },
     "homebrew:lpeg": {
@@ -491,8 +501,8 @@
       "tap": "homebrew/core"
     },
     "homebrew:luajit": {
-      "version": "2.1.1767980792",
-      "installedAt": "2026-01-20T17:35:37.318Z",
+      "version": "2.1.1771261233",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew"
     },
     "homebrew:luv": {
@@ -516,8 +526,8 @@
       "manager": "homebrew"
     },
     "homebrew:mas": {
-      "version": "5.1.0",
-      "installedAt": "2026-02-09T17:46:26.977Z",
+      "version": "5.2.0",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew",
       "tap": "homebrew/core"
     },
@@ -538,10 +548,15 @@
       "tap": "homebrew/core"
     },
     "homebrew:node": {
-      "version": "25.6.0",
-      "installedAt": "2026-02-09T17:46:26.977Z",
+      "version": "25.6.1",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew",
       "tap": "homebrew/core"
+    },
+    "homebrew:node@24": {
+      "version": "24.13.1",
+      "installedAt": "2026-02-21T09:34:44.460Z",
+      "manager": "homebrew"
     },
     "homebrew:oniguruma": {
       "version": "6.9.10",
@@ -549,8 +564,8 @@
       "manager": "homebrew"
     },
     "homebrew:opencode": {
-      "version": "1.1.50",
-      "installedAt": "2026-02-09T17:46:26.977Z",
+      "version": "1.2.10",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew",
       "tap": "homebrew/core"
     },
@@ -560,8 +575,8 @@
       "manager": "homebrew"
     },
     "homebrew:openjph": {
-      "version": "0.26.0",
-      "installedAt": "2026-01-20T17:35:37.318Z",
+      "version": "0.26.3",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew"
     },
     "homebrew:openssl@3": {
@@ -590,8 +605,8 @@
       "manager": "homebrew"
     },
     "homebrew:pyenv": {
-      "version": "2.6.22",
-      "installedAt": "2026-02-09T17:46:26.977Z",
+      "version": "2.6.23",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew",
       "tap": "homebrew/core"
     },
@@ -612,8 +627,8 @@
       "tap": "homebrew/core"
     },
     "homebrew:rift": {
-      "version": "0.3.9",
-      "installedAt": "2026-02-09T17:46:26.977Z",
+      "version": "0.4.0-alpha.3",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew",
       "tap": "acsandmann/tap"
     },
@@ -629,8 +644,8 @@
       "manager": "homebrew"
     },
     "homebrew:rust": {
-      "version": "1.93.0",
-      "installedAt": "2026-02-09T17:46:26.977Z",
+      "version": "1.93.1",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew",
       "tap": "homebrew/core"
     },
@@ -706,8 +721,8 @@
       "manager": "homebrew"
     },
     "homebrew:uv": {
-      "version": "0.10.0",
-      "installedAt": "2026-02-09T17:46:26.977Z",
+      "version": "0.10.4",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew",
       "tap": "homebrew/core"
     },
@@ -798,13 +813,18 @@
       "manager": "homebrew"
     },
     "homebrew:alcove": {
-      "version": "1.6.1",
-      "installedAt": "2026-02-09T17:46:26.977Z",
+      "version": "1.6.3",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew"
     },
     "homebrew:appcleaner": {
       "version": "3.6.8",
       "installedAt": "2026-01-20T17:35:37.318Z",
+      "manager": "homebrew"
+    },
+    "homebrew:audacity": {
+      "version": "3.7.7",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew"
     },
     "homebrew:balenaetcher": {
@@ -813,28 +833,23 @@
       "manager": "homebrew"
     },
     "homebrew:betterdisplay": {
-      "version": "4.1.1",
-      "installedAt": "2026-02-09T17:46:26.977Z",
+      "version": "4.1.5",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew"
     },
     "homebrew:brave-browser@nightly": {
-      "version": "1.88.91.0",
-      "installedAt": "2026-02-09T17:46:26.977Z",
+      "version": "1.89.54.0",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew"
     },
     "homebrew:claude": {
-      "version": "1.1.2321,495628f91fbfa276fabd6da835ba226fdf5ec68e",
-      "installedAt": "2026-02-09T17:46:26.977Z",
-      "manager": "homebrew"
-    },
-    "homebrew:claude-code": {
-      "version": "2.1.37",
-      "installedAt": "2026-02-09T17:46:26.977Z",
+      "version": "1.1.3918,a4b368d308b05c425b74c1c19ed47a572d3a90f6",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew"
     },
     "homebrew:clop": {
-      "version": "2.11.2",
-      "installedAt": "2026-02-09T17:46:26.977Z",
+      "version": "2.11.6",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew"
     },
     "homebrew:db-browser-for-sqlite": {
@@ -848,23 +863,23 @@
       "manager": "homebrew"
     },
     "homebrew:docker-desktop": {
-      "version": "4.60.0,218231",
-      "installedAt": "2026-02-09T17:46:26.977Z",
+      "version": "4.61.0,219004",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew"
     },
     "homebrew:epic-games": {
-      "version": "19.1.5",
-      "installedAt": "2026-02-09T17:46:26.977Z",
+      "version": "19.2.0",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew"
     },
     "homebrew:figma": {
-      "version": "126.0.4",
-      "installedAt": "2026-02-09T17:46:26.977Z",
+      "version": "126.1.2",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew"
     },
     "homebrew:firefox": {
-      "version": "147.0.3",
-      "installedAt": "2026-02-09T17:46:26.977Z",
+      "version": "147.0.4",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew"
     },
     "homebrew:font-blex-mono-nerd-font": {
@@ -883,13 +898,13 @@
       "manager": "homebrew"
     },
     "homebrew:github": {
-      "version": "3.5.4-9dfb8d8d",
-      "installedAt": "2026-02-09T17:46:26.977Z",
+      "version": "3.5.5-95c667e3",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew"
     },
     "homebrew:google-drive": {
-      "version": "120.0.1",
-      "installedAt": "2026-02-09T17:46:26.977Z",
+      "version": "121.0.1",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew"
     },
     "homebrew:gstreamer-runtime": {
@@ -918,8 +933,8 @@
       "manager": "homebrew"
     },
     "homebrew:logi-options+": {
-      "version": "1.98.824948",
-      "installedAt": "2026-02-09T17:46:26.977Z",
+      "version": "1.99.834046",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew"
     },
     "homebrew:music-presence": {
@@ -938,8 +953,8 @@
       "manager": "homebrew"
     },
     "homebrew:nordvpn": {
-      "version": "9.12.0",
-      "installedAt": "2026-02-09T17:46:26.977Z",
+      "version": "9.13.0",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew"
     },
     "homebrew:obs": {
@@ -953,8 +968,8 @@
       "manager": "homebrew"
     },
     "homebrew:opencode-desktop": {
-      "version": "1.1.53",
-      "installedAt": "2026-02-09T17:46:26.977Z",
+      "version": "1.2.10",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew"
     },
     "homebrew:orbstack": {
@@ -963,8 +978,8 @@
       "manager": "homebrew"
     },
     "homebrew:prismlauncher": {
-      "version": "10.0.2",
-      "installedAt": "2026-02-09T17:46:26.977Z",
+      "version": "10.0.5",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew"
     },
     "homebrew:qmk-toolbox": {
@@ -973,13 +988,13 @@
       "manager": "homebrew"
     },
     "homebrew:raycast": {
-      "version": "1.104.5",
-      "installedAt": "2026-02-09T17:46:26.977Z",
+      "version": "1.104.6",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew"
     },
     "homebrew:stats": {
-      "version": "2.11.66",
-      "installedAt": "2026-02-09T17:46:26.977Z",
+      "version": "2.11.67",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew"
     },
     "homebrew:steam": {
@@ -1013,8 +1028,8 @@
       "manager": "homebrew"
     },
     "homebrew:zen": {
-      "version": "1.18.5b",
-      "installedAt": "2026-02-09T17:46:26.977Z",
+      "version": "1.18.9b",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "homebrew"
     },
     "homebrew:zerotier-one": {
@@ -1043,8 +1058,8 @@
       "manager": "mas"
     },
     "mas:6714467650": {
-      "version": "2.251216.0",
-      "installedAt": "2026-01-20T17:35:37.318Z",
+      "version": "2.260206.0",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "mas"
     },
     "mas:1475387142": {
@@ -1053,8 +1068,8 @@
       "manager": "mas"
     },
     "mas:6746388723": {
-      "version": "1.2.1",
-      "installedAt": "2026-01-20T17:35:37.318Z",
+      "version": "2.0.0",
+      "installedAt": "2026-02-21T09:34:44.460Z",
       "manager": "mas"
     },
     "mas:1451685025": {
