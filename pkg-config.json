@@ -117,8 +117,8 @@
       "wBlock": 6746388723
     }
   },
-  "archlinux": {
-    "pacman": [
+  "arch": {
+    "packages": [
       "github-cli",
       "nodejs",
       "rustup",

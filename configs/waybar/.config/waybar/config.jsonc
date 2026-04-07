@@ -106,7 +106,7 @@
     "tooltip-format-wifi": "{essid} ({signalStrength}%)\n {bandwidthUpBits}  {bandwidthDownBits}\n{ipaddr}/{cidr}",
     "tooltip-format-ethernet": "{ipaddr}/{cidr}\n {bandwidthUpBits}  {bandwidthDownBits}",
     "tooltip-format-disconnected": "Disconnected",
-    "on-click": "nm-connection-editor"
+    "on-click": "ghostty --title=tui-float -e wifitui"
   },
 
   "pulseaudio": {
