@@ -18,4 +18,4 @@ IDX=$(( (IDX + 1) % ${#FILES[@]} ))
 
 # Save index and set wallpaper
 echo "$IDX" > "$INDEX_FILE"
-awww img "${FILES[$IDX]}" --transition-type center --transition-duration 0.8
+nohup waydeeper set "${FILES[$IDX]}" >/dev/null 2>&1 &

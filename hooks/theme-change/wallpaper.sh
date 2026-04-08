@@ -16,8 +16,8 @@ WALLPAPER="${FILES[$RANDOM_IDX]}"
 # Set wallpaper based on platform
 case "$(uname -s)" in
   Linux)
-    # Linux: use awww (Wayland wallpaper daemon)
-    awww img "$WALLPAPER" --transition-type center --transition-duration 0.8
+    # Linux: use waydeeper (Wayland wallpaper daemon with depth parallax)
+    nohup waydeeper set "$WALLPAPER" >/dev/null 2>&1 &
     ;;
   *)
     # macOS and other platforms: do nothing

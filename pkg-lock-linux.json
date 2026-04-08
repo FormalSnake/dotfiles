@@ -32,11 +32,6 @@
       "installedAt": "2026-01-20T18:46:34.702Z",
       "manager": "pacman"
     },
-    "pacman:awww": {
-      "version": "0.12.0-1.1",
-      "installedAt": "2026-04-07T15:46:29.152Z",
-      "manager": "pacman"
-    },
     "pacman:base": {
       "version": "3-3",
       "installedAt": "2026-04-07T15:34:23.732Z",
