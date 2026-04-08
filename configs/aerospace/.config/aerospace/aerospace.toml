@@ -117,10 +117,8 @@ run = "move-node-to-workspace communication"
 app-id = "net.whatsapp.WhatsApp"
 
 [[on-window-detected]]
-run = "move-node-to-workspace communication"
-
-[on-window-detected.if]
-app-id = "com.apple.MobileSMS"
+if.app-id = 'com.apple.MobileSMS'
+run = ['move-node-to-workspace communication']
 
 [[on-window-detected]]
 run = "move-node-to-workspace productivity"
@@ -268,7 +266,7 @@ ai = "main"
 development = "main"
 communication = ["Built-in Retina Display", "main"]
 design = "main"
-gaming = "yam"
+gaming = ["yam", "MB16QHG", "Built-in Retina Display"]
 media = ["Built-in Retina Display", "main"]
 productivity = "main"
 terminal = "main"

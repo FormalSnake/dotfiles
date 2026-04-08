@@ -1,7 +1,9 @@
 {
   "title": "kanagawa",
-  "description": "Migrated from legacy theme",
+  "description": "A theme inspired by the colors of the famous painting by Katsushika Hokusai",
+  "author": "rebelot",
   "version": "1.0.0",
+  "source": "https://github.com/rebelot/kanagawa.nvim",
   "dark": {
     "color0": "#16161d",
     "color1": "#c34043",
@@ -27,16 +29,41 @@
     "accent": "#7e9cd8",
     "border": "#16161d"
   },
+  "light": {
+    "color0": "#545464",
+    "color1": "#c84053",
+    "color2": "#6f894e",
+    "color3": "#77713f",
+    "color4": "#4d699b",
+    "color5": "#b35b79",
+    "color6": "#597b75",
+    "color7": "#dcd7ba",
+    "color8": "#8a8980",
+    "color9": "#d7474b",
+    "color10": "#6e915f",
+    "color11": "#de9800",
+    "color12": "#6693bf",
+    "color13": "#766b90",
+    "color14": "#5e857a",
+    "color15": "#f2ecbc",
+    "background": "#f2ecbc",
+    "foreground": "#545464",
+    "cursor": "#43436c",
+    "selection_foreground": "#43436c",
+    "selection_background": "#c9cbd1",
+    "accent": "#4d699b",
+    "border": "#d5cea3"
+  },
   "gtk": {
-    "theme": "adw-gtk3-dark",
-    "icon_theme": "Adwaita",
-    "cursor_theme": "Adwaita",
-    "cursor_size": 24,
-    "font": "BlexMono Nerd Font 11"
+    "override": {
+      "dark": "Kanagawa Dark",
+      "light": "Kanagawa Light"
+    }
   },
   "neovim": {
     "repo": "rebelot/kanagawa.nvim",
-    "colorscheme": "kanagawa"
+    "colorscheme": "kanagawa-wave",
+    "light_colorscheme": "kanagawa-lotus"
   },
   "wallpapers": {
     "dark": [
