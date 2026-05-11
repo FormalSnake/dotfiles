@@ -10,7 +10,7 @@ function gpush --description 'Git add, commit with AI message, and push'
     if test -n "$argv[1]"
         set branch_name $argv[1]
     else
-        set branch_name main
+        set branch_name (git symbolic-ref --short HEAD)
     end
     git push origin $branch_name
 end
