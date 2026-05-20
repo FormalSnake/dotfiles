@@ -1,0 +1,63 @@
+{
+  "title": "Farline",
+  "description": "Muted, desaturated dark theme ported from omarchy-farline",
+  "author": "atif-1402",
+  "version": "1.0.0",
+  "source": "https://github.com/atif-1402/omarchy-farline-theme",
+  "dark": {
+    "color0": "#232529",
+    "color1": "#a48484",
+    "color2": "#9bab8c",
+    "color3": "#b1b195",
+    "color4": "#879ab0",
+    "color5": "#bea7ad",
+    "color6": "#7eadac",
+    "color7": "#d6dcda",
+    "color8": "#787c87",
+    "color9": "#ccb8b8",
+    "color10": "#c9d3c0",
+    "color11": "#d9d9c9",
+    "color12": "#92a5ba",
+    "color13": "#e5dbde",
+    "color14": "#90bcba",
+    "color15": "#d6dcd9",
+    "background": "#232529",
+    "foreground": "#d6dcd9",
+    "cursor": "#d6dcd9",
+    "selection_background": "#5f6772",
+    "selection_foreground": "#d6dcd9",
+    "accent": "#7eadac",
+    "border": "#787c87"
+  },
+  "neovim": {
+    "repo": "bjarneo/aether.nvim",
+    "colorscheme": "aether",
+    "opts": {
+      "disable_italics": false,
+      "colors": {
+        "base00": "#232529",
+        "base01": "#787c87",
+        "base02": "#232529",
+        "base03": "#787c87",
+        "base04": "#d6dcda",
+        "base05": "#d6dcd9",
+        "base06": "#d6dcd9",
+        "base07": "#d6dcda",
+        "base08": "#a48484",
+        "base09": "#ccb8b8",
+        "base0A": "#b1b195",
+        "base0B": "#9bab8c",
+        "base0C": "#7eadac",
+        "base0D": "#879ab0",
+        "base0E": "#bea7ad",
+        "base0F": "#d9d9c9"
+      }
+    }
+  },
+  "wallpapers": {
+    "dark": [
+      "https://raw.githubusercontent.com/atif-1402/omarchy-farline-theme/main/backgrounds/1.png",
+      "https://raw.githubusercontent.com/atif-1402/omarchy-farline-theme/main/backgrounds/2.png"
+    ]
+  }
+}

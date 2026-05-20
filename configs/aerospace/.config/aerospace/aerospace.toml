@@ -5,7 +5,10 @@ default-root-container-layout = "tiles"
 default-root-container-orientation = "auto"
 enable-normalization-flatten-containers = true
 enable-normalization-opposite-orientation-for-nested-containers = true
-exec-on-workspace-change = []
+# Keep the Helium Picture-in-Picture window on whatever workspace becomes focused
+exec-on-workspace-change = ['/bin/bash', '-c', '''
+/opt/homebrew/bin/aerospace list-windows --monitor all --app-bundle-id net.imput.helium --format '%{window-id} %{window-title}' | grep -iE 'scherm-in-scherm|picture.?in.?picture' | awk '{print $1}' | xargs -I{} /opt/homebrew/bin/aerospace move-node-to-workspace --window-id {} "$AEROSPACE_FOCUSED_WORKSPACE"
+''']
 on-focus-changed = ["move-mouse window-lazy-center"]
 on-focused-monitor-changed = ["move-mouse monitor-lazy-center"]
 start-at-login = true
@@ -199,6 +202,12 @@ run = "move-node-to-workspace gaming"
 app-id = "com.hnc.Discord"
 
 [[on-window-detected]]
+run = "move-node-to-workspace gaming"
+
+[on-window-detected.if]
+app-id = "org.equicord.equibop"
+
+[[on-window-detected]]
 run = "move-node-to-workspace productivity"
 
 [on-window-detected.if]
@@ -229,6 +238,12 @@ run = ['layout floating']
 [[on-window-detected]]
 if.app-id = 'app.zen-browser.zen'
 if.window-title-regex-substring = 'Picture-in-Picture'
+run = ['layout floating']
+
+# Helium Picture-in-Picture: always float (kept on the focused workspace by exec-on-workspace-change)
+[[on-window-detected]]
+if.app-id = 'net.imput.helium'
+if.window-title-regex-substring = 'Scherm-in-scherm|Picture.?in.?Picture'
 run = ['layout floating']
 
 [[on-window-detected]]

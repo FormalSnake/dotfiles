@@ -1,0 +1,62 @@
+{
+  "title": "Amekoji",
+  "description": "Muted, desaturated dark theme ported from omarchy-amekoji",
+  "author": "atif-1402",
+  "version": "1.0.0",
+  "source": "https://github.com/atif-1402/omarchy-amekoji-theme",
+  "dark": {
+    "color0": "#232829",
+    "color1": "#b39a98",
+    "color2": "#98b3a3",
+    "color3": "#93b3a6",
+    "color4": "#85abbc",
+    "color5": "#bea7b0",
+    "color6": "#98b3b3",
+    "color7": "#d6dcdb",
+    "color8": "#788587",
+    "color9": "#b39898",
+    "color10": "#98b3a3",
+    "color11": "#c8dad3",
+    "color12": "#89b1c3",
+    "color13": "#e5dbdf",
+    "color14": "#98b3b3",
+    "color15": "#dcd6d6",
+    "background": "#232829",
+    "foreground": "#dcd6d6",
+    "cursor": "#dcd6d6",
+    "selection_background": "#5f6c6e",
+    "selection_foreground": "#dcd6d6",
+    "accent": "#85abbc",
+    "border": "#788587"
+  },
+  "neovim": {
+    "repo": "bjarneo/aether.nvim",
+    "colorscheme": "aether",
+    "opts": {
+      "disable_italics": false,
+      "colors": {
+        "base00": "#232829",
+        "base01": "#788587",
+        "base02": "#232829",
+        "base03": "#788587",
+        "base04": "#d6dcdb",
+        "base05": "#dcd6d6",
+        "base06": "#dcd6d6",
+        "base07": "#d6dcdb",
+        "base08": "#b39a98",
+        "base09": "#b39898",
+        "base0A": "#93b3a6",
+        "base0B": "#98b3a3",
+        "base0C": "#98b3b3",
+        "base0D": "#85abbc",
+        "base0E": "#bea7b0",
+        "base0F": "#c8dad3"
+      }
+    }
+  },
+  "wallpapers": {
+    "dark": [
+      "https://raw.githubusercontent.com/atif-1402/omarchy-amekoji-theme/main/backgrounds/2825711.png"
+    ]
+  }
+}
