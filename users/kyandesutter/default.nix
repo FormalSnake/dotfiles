@@ -7,6 +7,13 @@
     ./mixins/gh.nix
     ./mixins/ssh.nix
     ./mixins/claude-code.nix
+    ./mixins/ghostty.nix
+    ./mixins/tmux.nix
+    ./mixins/aerospace.nix
+    ./mixins/karabiner.nix
+    ./mixins/hammerspoon.nix
+    ./mixins/neovim.nix
+    ./mixins/catppuccin.nix
   ];
 
   home = {
