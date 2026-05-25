@@ -63,11 +63,35 @@
       if test -f ~/.orbstack/shell/init2.fish
           source ~/.orbstack/shell/init2.fish
       end
+    '';
 
-      # Secrets — replaced by agenix in Phase 7
-      if test -f ~/.config/fish/secrets.fish
-          source ~/.config/fish/secrets.fish
+    # Runs for ALL fish sessions (including non-interactive). Secrets and env
+    # vars that scripts/subshells need belong here, not in interactiveShellInit.
+    shellInit = ''
+      # Agenix-decrypted secrets (mounted by nix-darwin at /run/agenix/<name>)
+      function __load_agenix_secret -a env_name file
+          if test -r "/run/agenix/$file"
+              set -gx $env_name (cat "/run/agenix/$file")
+          end
       end
+      __load_agenix_secret OPENAI_API_KEY     openai
+      __load_agenix_secret ANTHROPIC_API_KEY  anthropic
+      __load_agenix_secret GEMINI_API_KEY     gemini
+      __load_agenix_secret DEEPSEEK_API_KEY   deepseek
+      __load_agenix_secret NUCLEO_LICENSE_KEY nucleo-license
+      __load_agenix_secret NPM_GITHUB_TOKEN   npm-github-token
+      __load_agenix_secret NPM_REGISTRY_TOKEN npm-registry-token
+
+      # Lumen reuses the OpenAI key under a different name
+      if set -q OPENAI_API_KEY
+          set -gx LUMEN_AI_PROVIDER "openai"
+          set -gx LUMEN_API_KEY $OPENAI_API_KEY
+          set -gx LUMEN_AI_MODEL "gpt-5-mini"
+      end
+
+      # Non-secret AI provider settings (formerly in .zprofile)
+      set -gx OLLAMA_API_BASE "https://ollama.kaiiserni.com"
+      set -gx AIDER_WEAK_MODEL "gemini/gemini-2.0-flash"
     '';
   };
 }
