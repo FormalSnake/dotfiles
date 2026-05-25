@@ -14,6 +14,9 @@
     ./mixins/hammerspoon.nix
     ./mixins/neovim.nix
     ./mixins/catppuccin.nix
+    ./mixins/fastfetch.nix
+    ./mixins/rift.nix
+    ./mixins/lynk-browser.nix
   ];
 
   home = {

@@ -1,0 +1,53 @@
+{
+  "links": [
+    {
+      "name": "Google",
+      "url": "https://www.google.com",
+      "id": "366ca3b4-a5ec-4d4b-978f-1ea598a36777",
+      "position": 0
+    },
+    {
+      "name": "YouTube",
+      "url": "https://www.youtube.com",
+      "id": "ed3770b9-f317-4fd7-9ffc-6a02ef4b3b14",
+      "position": 1
+    },
+    {
+      "name": "GitHub",
+      "url": "https://github.com",
+      "id": "6a8f773f-e61c-4253-8ea5-94ff54dfd258",
+      "position": 2
+    },
+    {
+      "name": "Reddit",
+      "url": "https://www.reddit.com",
+      "id": "179b3ace-9ff6-4183-95c9-df884c89b817",
+      "position": 3
+    },
+    {
+      "name": "Twitter",
+      "url": "https://x.com",
+      "id": "9b63785e-4903-4b7b-bc9a-172334af915d",
+      "position": 4
+    },
+    {
+      "name": "Wikipedia",
+      "url": "https://www.wikipedia.org",
+      "id": "be42c044-0a24-43f6-b57a-5226aeda8922",
+      "position": 5
+    },
+    {
+      "name": "Netflix",
+      "url": "https://www.netflix.com",
+      "id": "f09ddcd2-2fe8-4fae-a5d1-23c17fc28560",
+      "position": 6
+    },
+    {
+      "name": "Gmail",
+      "url": "https://mail.google.com",
+      "id": "2a64e174-4e1b-43a8-9ed1-375eb2e26541",
+      "position": 7
+    }
+  ],
+  "wallpaper": null
+}

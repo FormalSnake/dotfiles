@@ -1,0 +1,207 @@
+# Rift configuration (ported from AeroSpace)
+# Place at ~/.config/rift/config.toml
+
+[settings]
+animate = true
+animation_duration = 0.2
+animation_fps = 144.0
+hot_reload = true
+
+focus_follows_mouse = false 
+mouse_follows_focus = true
+mouse_hides_on_focus = true
+
+[settings.ui.menu_bar]
+# enable menu bar workspace indicators
+enabled = true 
+# if enabled, it will show all workspaces including empty ones. disabled because this
+# tends to take up too much room in the menubar and then is auto hidden by macos
+show_empty = false
+# choose between drawing every workspace or only the active workspace
+mode = "all"
+# when showing workspaces as labels ("index" or "name"), choose which label to render
+active_label = "index"
+# when displaying workspaces, choose whether to draw the layout preview or a set of labels
+# options are "layout" or "label"
+display_style = "label"
+
+[settings.layout]
+mode = "traditional"  # i3-like container-based layout (matches aerospace default)
+
+[settings.layout.gaps.outer]
+top = 16.0
+left = 16.0
+bottom = 16.0
+right = 16.0
+
+[settings.layout.gaps.inner]
+horizontal = 16.0
+vertical = 16.0
+
+[settings.layout.stack]
+stack_offset = 30.0  # equivalent to accordion-padding
+
+# Trackpad gestures
+[settings.gestures]
+# Enable horizontal swipes to switch virtual workspaces
+enabled = true 
+# Invert horizontal direction (swap next/prev)
+invert_horizontal_swipe = false
+# Maximum vertical travel allowed for the horizontal swipe to register.
+# Accepts normalized fraction (0..1) or percent (0..100). Example: 0.4 or 40.0
+swipe_vertical_tolerance = 0.4
+# Skip empty workspaces when swiping
+skip_empty = true
+# Number of fingers required for swipe
+fingers = 3
+# Normalized horizontal distance (0..1) to trigger swipe for NSTouch-based detection
+distance_pct = 0.08
+# Haptic feedback on commit (generic | alignment | level_change)
+haptics_enabled = true
+haptic_pattern = "level_change"
+
+# Virtual workspaces (replacing aerospace named workspaces)
+[virtual_workspaces]
+enabled = true
+default_workspace_count = 9
+auto_assign_windows = true
+preserve_focus_per_workspace = true
+workspace_auto_back_and_forth = true
+workspace_names = [
+    "web",           # 0
+    "terminal",      # 1
+    "code",          # 2
+    "communication", # 3
+    "productivity",  # 4
+    "design",        # 5
+    "ai",            # 6
+    "media",         # 7
+    "gaming"         # 8
+]
+
+# App rules (replacing on-window-detected)
+app_rules = [
+    # Web (workspace 0)
+    { app_id = "com.brave.Browser", workspace = 0 },
+    { app_id = "com.formalsnake.lynk", workspace = 0 },
+
+    # Terminal (workspace 1)
+    { app_id = "com.mitchellh.ghostty", workspace = 1 },
+    { app_id = "dev.warp.Warp-stable", workspace = 1 },
+
+    # Code (workspace 2)
+    { app_id = "dev.zed.Zed", workspace = 2 },
+
+    # Communication (workspace 3)
+    { app_id = "com.tinyspeck.slackmacgui", workspace = 3 },
+    { app_id = "net.whatsapp.WhatsApp", workspace = 3 },
+    { app_id = "com.apple.MobileSMS", workspace = 3 },
+
+    # Productivity (workspace 4)
+    { app_id = "notion.id", workspace = 4 },
+    { app_id = "com.cron.electron", workspace = 4 },
+    { app_id = "com.nordvpn.macos", workspace = 4 },
+    { app_id = "com.apple.Notes", workspace = 4 },
+    { app_id = "com.apple.iCal", workspace = 4 },
+
+    # Design (workspace 5)
+    { app_id = "com.figma.Desktop", workspace = 5 },
+
+    # AI (workspace 6)
+    { app_id = "com.anthropic.Claude", workspace = 6 },
+    { app_id = "ai.perplexity.comet", workspace = 6 },
+
+    # Media (workspace 7)
+    { app_id = "com.apple.Music", workspace = 7 },
+    { app_id = "com.apple.TV", workspace = 7 },
+    { app_id = "sh.cider.genten.mac", workspace = 7 },
+    { app_id = "com.spotify.client", workspace = 7 },
+
+    # Gaming (workspace 8)
+    { app_id = "com.valvesoftware.steam", workspace = 8 },
+    { app_id = "dev.vencord.vesktop", workspace = 8 },
+    { app_id = "com.hnc.Discord", workspace = 8 },
+
+    # Float PiP windows from Zen Browser
+    { app_id = "app.zen-browser.zen", title_regex = "Picture-in-Picture", floating = true },
+]
+
+# Modifier combinations for cleaner keybindings
+[modifier_combinations]
+hyper = "Alt + Shift + Meta"
+
+# Keybindings
+[keys]
+"Alt + Z" = "toggle_space_activated"
+# Focus movement (alt + hjkl)
+"Alt + H" = { move_focus = "left" }
+"Alt + J" = { move_focus = "down" }
+"Alt + K" = { move_focus = "up" }
+"Alt + L" = { move_focus = "right" }
+
+# Window movement (alt + shift + hjkl)
+"Alt + Shift + H" = { move_node = "left" }
+"Alt + Shift + J" = { move_node = "down" }
+"Alt + Shift + K" = { move_node = "up" }
+"Alt + Shift + L" = { move_node = "right" }
+
+# Close window (alt + q) - uses exec since rift doesn't have built-in close
+"Alt + Q" = { exec = ["osascript", "-e", "tell application \"System Events\" to keystroke \"w\" using command down"] }
+
+# Resize (alt + shift + equal/minus)
+"Alt + Shift + Equal" = { resize_window_by = { amount = 50.0 } }
+"Alt + Shift + Minus" = { resize_window_by = { amount = -50.0 } }
+
+# Fullscreen toggle (alt + shift + f)
+# "Alt + Shift + F" = { toggle_fullscreen = true }
+
+# Layout toggle (alt + t)
+# "Alt + T" = { toggle_orientation = true }
+
+# Workspace back and forth (alt + tab)
+# "Alt + Tab" = { switch_to_last_workspace = true }
+"Alt + Tab" = "switch_to_last_workspace"
+
+# Switch to workspace (shift + alt + cmd + 1-9)
+"hyper + 1" = { switch_to_workspace = 0 }
+"hyper + 2" = { switch_to_workspace = 1 }
+"hyper + 3" = { switch_to_workspace = 2 }
+"hyper + 4" = { switch_to_workspace = 3 }
+"hyper + 5" = { switch_to_workspace = 4 }
+"hyper + 6" = { switch_to_workspace = 5 }
+"hyper + 7" = { switch_to_workspace = 6 }
+"hyper + 8" = { switch_to_workspace = 7 }
+"hyper + 9" = { switch_to_workspace = 8 }
+
+# Move window to workspace (shift + alt + 1-9)
+"Alt + Shift + 1" = { move_window_to_workspace = 0 }
+"Alt + Shift + 2" = { move_window_to_workspace = 1 }
+"Alt + Shift + 3" = { move_window_to_workspace = 2 }
+"Alt + Shift + 4" = { move_window_to_workspace = 3 }
+"Alt + Shift + 5" = { move_window_to_workspace = 4 }
+"Alt + Shift + 6" = { move_window_to_workspace = 5 }
+"Alt + Shift + 7" = { move_window_to_workspace = 6 }
+"Alt + Shift + 8" = { move_window_to_workspace = 7 }
+"Alt + Shift + 9" = { move_window_to_workspace = 8 }
+
+# Move workspace to next monitor (alt + shift + tab equivalent)
+"Alt + Shift + Tab" = { move_window_to_display = { selector = "right" } }
+
+# Service mode replacements (direct bindings since rift doesn't have modes)
+# Join with direction (alt + shift + s, then alt + shift + hjkl in aerospace)
+# In rift, we'll use ctrl + alt + shift for join operations
+"Ctrl + Alt + Shift + H" = { join_window = "left" }
+"Ctrl + Alt + Shift + J" = { join_window = "down" }
+"Ctrl + Alt + Shift + K" = { join_window = "up" }
+"Ctrl + Alt + Shift + L" = { join_window = "right" }
+
+"Alt + Shift + Space" = "toggle_window_floating"
+"Alt + F" = "toggle_fullscreen"
+"Alt + Shift + F" = "toggle_fullscreen_within_gaps"
+"hyper + Space" = "toggle_focus_floating" # briefly bring focus to floating window
+
+# Float toggle (service mode 'f')
+# "Ctrl + Alt + F" = { toggle_window_floating = true }
+
+# Unjoin/flatten (service mode 'r')
+# "Ctrl + Alt + R" = { unjoin_windows = true }
