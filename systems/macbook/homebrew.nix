@@ -42,10 +42,7 @@
       "steam"
       "thaw"
       "the-unarchiver"
-      "vesktop"
       "vlc"
-      "warp"
-      "zerotier-one"
 
       # — newly imported from /Applications (previously imperative) —
       "1password"
