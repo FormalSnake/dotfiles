@@ -14,7 +14,6 @@
     coreutils
     deno
     dipc
-    fastfetch
     ffmpeg
     git-filter-repo
     imagemagick
@@ -56,6 +55,7 @@
       enable = true;
       icons = "auto";
     };
+    fastfetch.enable = true;
     fd.enable = true;
     fzf.enable = true;
     go.enable = true;
