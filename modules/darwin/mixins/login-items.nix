@@ -7,7 +7,7 @@ let
   apps = [
     { id = "thaw";          path = "/Applications/Thaw.app"; }
     { id = "alcove";        path = "/Applications/Alcove.app"; }
-    { id = "aerospace";     path = "/Applications/AeroSpace.app"; }
+    # aerospace is launched via programs.aerospace.launchd (see users/kyandesutter/mixins/aerospace.nix)
     { id = "notify";        path = "/Applications/Notify.app"; }
     { id = "linearmouse";   path = "/Applications/LinearMouse.app"; }
     { id = "eqmac";         path = "/Applications/eqMac.app"; }

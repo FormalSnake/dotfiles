@@ -18,7 +18,6 @@
     casks = [
       # — previously-declared casks —
       "1password-cli"
-      "aerospace"
       "alcove"
       "appcleaner"
       "audacity"
