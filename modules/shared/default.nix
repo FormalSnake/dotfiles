@@ -1,0 +1,5 @@
+{
+  imports = [
+    ./mixins/nix.nix
+  ];
+}
