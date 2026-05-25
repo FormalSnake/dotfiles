@@ -15,11 +15,13 @@
     enable = true;
 
     onActivation = {
-      # SAFE defaults for first switch — flip to autoUpdate=true / upgrade=true / cleanup="zap"
-      # once the declared inventory is fully accurate.
+      # Inventory verified in Phase 8 — escalate cleanup to "uninstall".
+      # Anything installed but not declared in systems/macbook/homebrew.nix
+      # will be uninstalled on switch. Use "zap" later to also remove leftover
+      # data dirs.
       autoUpdate = false;
       upgrade = false;
-      cleanup = "none";
+      cleanup = "uninstall";
     };
 
     caskArgs = {
