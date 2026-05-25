@@ -7,7 +7,6 @@ let
   apps = [
     { id = "thaw";          path = "/Applications/Thaw.app"; }
     { id = "alcove";        path = "/Applications/Alcove.app"; }
-    { id = "raycast";       path = "/Applications/Raycast.app"; }
     { id = "aerospace";     path = "/Applications/AeroSpace.app"; }
     { id = "notify";        path = "/Applications/Notify.app"; }
     { id = "linearmouse";   path = "/Applications/LinearMouse.app"; }
