@@ -1,3 +1,4 @@
+{ pkgs, ... }:
 {
   home.sessionVariables = {
     EDITOR = "nvim";
@@ -5,7 +6,7 @@
     PAGER = "less";
     LESS = "-FRX";
 
-    JAVA_HOME = "/Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home";
+    JAVA_HOME = "${pkgs.zulu17.home}";
     ANDROID_HOME = "/Users/kyandesutter/Library/Android/sdk";
   };
 }

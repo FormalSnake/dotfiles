@@ -25,7 +25,7 @@
     };
 
     caskArgs = {
-      no_quarantine = true;
+      # `no_quarantine` was removed in Homebrew 4.5+ — passing it now errors.
       require_sha = false;
     };
 

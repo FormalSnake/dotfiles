@@ -7,6 +7,11 @@ let
   link = sub: config.lib.file.mkOutOfStoreSymlink "${claudeSrc}/${sub}";
 in
 {
+  # Install the `claude` CLI from nixpkgs via the HM module. Settings/agents/commands/
+  # etc. stay symlinked below (live-edit), so we leave the module's settings/context/
+  # *Dir options unset to avoid clobbering those symlinks.
+  programs.claude-code.enable = true;
+
   home.file = {
     # Memory-bank docs
     ".claude/CLAUDE.md".source                 = link "CLAUDE.md";
@@ -23,9 +28,9 @@ in
     ".claude/hooks".source    = link "hooks";
     ".claude/skills".source   = link "skills";
 
-    # Plugin metadata (cache/, data/, marketplaces/, repos/ stay imperative)
-    ".claude/plugins/config.json".source              = link "plugins/config.json";
-    ".claude/plugins/known_marketplaces.json".source  = link "plugins/known_marketplaces.json";
-    ".claude/plugins/installed_plugins.json".source   = link "plugins/installed_plugins.json";
+    # Plugin metadata (config.json, known_marketplaces.json, installed_plugins.json,
+    # cache/, data/, marketplaces/, repos/) stays imperative — claude-code rewrites
+    # these via `mv`, which breaks HM symlinks and trips activation on every rebuild.
+    # See follow-up plan to manage marketplaces declaratively via programs.claude-code.marketplaces.
   };
 }

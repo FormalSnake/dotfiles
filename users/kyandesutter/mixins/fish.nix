@@ -35,6 +35,41 @@
       { name = "done"; src = pkgs.fishPlugins.done.src; }
     ];
 
+    functions = {
+      gcommit = {
+        description = "Git add and commit with AI message";
+        body = ''
+          git add .
+          set commit_message (lumen draft)
+          if test -z "$commit_message"
+              echo "Lumen draft is empty"
+              read -P "Enter commit message: " commit_message
+          end
+          git commit -avm "$commit_message"
+        '';
+      };
+
+      gpush = {
+        description = "Git add, commit with AI message, and push";
+        body = ''
+          git add .
+          set commit_message (lumen draft)
+          if test -z "$commit_message"
+              echo "Lumen draft is empty"
+              read -P "Enter commit message: " commit_message
+          end
+          git commit -avm "$commit_message"
+
+          if test -n "$argv[1]"
+              set branch_name $argv[1]
+          else
+              set branch_name main
+          end
+          git push origin $branch_name
+        '';
+      };
+    };
+
     interactiveShellInit = ''
       # Disable greeting
       set -g fish_greeting ""
