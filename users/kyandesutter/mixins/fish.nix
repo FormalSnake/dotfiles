@@ -50,6 +50,10 @@
           /opt/homebrew/bin/brew shellenv | source
       end
 
+      # Home-manager user profile (declared `home.packages`, e.g. `just`)
+      fish_add_path /etc/profiles/per-user/kyandesutter/bin
+      fish_add_path /run/current-system/sw/bin
+
       # User paths
       fish_add_path ~/.cargo/bin
       fish_add_path ~/.bun/bin

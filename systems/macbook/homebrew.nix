@@ -1,11 +1,9 @@
 {
   homebrew = {
     taps = [
-      "acsandmann/tap"
       "barutsrb/tap"
       "gcenx/wine"
       "jnsahaj/lumen"
-      "nahive/spotify-notify"
       "nikitabobko/tap"
       "oven-sh/bun"
     ];
@@ -47,7 +45,6 @@
       "pyenv"
       "raylib"
       "rclone"
-      "repomix"
       "stow"
       "swiftformat"
       "swiftlint"
@@ -63,7 +60,6 @@
       "yazi"
       "zoxide"
       # tap-qualified formulae
-      "acsandmann/tap/rift"
       "oven-sh/bun/bun"
       # Intentionally dropped (rustup already provides these):
       #   "rust"
@@ -77,11 +73,8 @@
       "audacity"
       "balenaetcher"
       "betterdisplay"
-      "brave-browser@nightly"
       "claude"
       "clop"
-      "db-browser-for-sqlite"
-      "displaperture"
       "docker-desktop"
       "epic-games"
       "equibop"
@@ -91,15 +84,11 @@
       "github"
       "google-drive"
       "gstreamer-runtime"
-      "httpie-desktop"
-      "hyperkey"
       "jordanbaird-ice"
       "karabiner-elements"
       "linearmouse"
       "logi-options+"
-      "macs-fan-control"
       "music-presence"
-      "ngrok"
       "nordvpn"
       "obs"
       "obsidian"
@@ -107,8 +96,6 @@
       "orbstack"
       "prismlauncher"
       "qmk-toolbox"
-      "raycast"
-      "spotify-notify"
       "stats"
       "steam"
       "thaw"
@@ -117,14 +104,27 @@
       "vesktop"
       "vlc"
       "warp"
-      "wine-crossover"
-      "zen"
       "zerotier-one"
       "zulu@17"
     ];
 
-    # masApps populated in a follow-up after `mas list` returns real IDs
-    # (Spotlight reindex was triggered in Phase 0 — see ~/.config/nix.bak/PENDING-mas-ids.md).
-    masApps = { };
+    # Mac App Store apps — managed via `mas`. Add/remove IDs here to install/uninstall.
+    masApps = {
+      "CrystalFetch"         = 6454431289;
+      "DaisyDisk"            =  411643860;
+      "Flighty"              = 1358823008;
+      "Keynote"              =  409183694;
+      "Klack"                = 6446206067;
+      "Microsoft Excel"      =  462058435;
+      "Microsoft PowerPoint" =  462062816;
+      "Microsoft Word"       =  462054704;
+      "Perplexity"           = 6714467650;
+      "Steam Link"           = 1246969117;
+      "Tailscale"            = 1475387142;
+      "wBlock"               = 6746388723;
+      "WhatsApp"             =  310633997;
+      "WireGuard"            = 1451685025;
+      "Xcode"                =  497799835;
+    };
   };
 }

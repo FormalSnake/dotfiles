@@ -1,4 +1,9 @@
+{ pkgs, ... }:
 {
+  home.packages = [
+    pkgs.just
+  ];
+
   programs = {
     man.generateCaches = false;
 
