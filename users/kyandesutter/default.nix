@@ -6,6 +6,7 @@
     ./mixins/git.nix
     ./mixins/gh.nix
     ./mixins/ssh.nix
+    ./mixins/claude-code.nix
   ];
 
   home = {

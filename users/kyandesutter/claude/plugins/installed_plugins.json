@@ -1,0 +1,325 @@
+{
+  "version": 2,
+  "plugins": {
+    "swift-lsp@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/kyandesutter/.claude/plugins/cache/claude-plugins-official/swift-lsp/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-01-04T21:31:44.824Z",
+        "lastUpdated": "2026-01-04T21:31:44.824Z"
+      }
+    ],
+    "ralph-loop@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/kyandesutter/.claude/plugins/cache/claude-plugins-official/ralph-loop/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-01-08T12:47:28.901Z",
+        "lastUpdated": "2026-03-30T15:42:14.607Z"
+      }
+    ],
+    "obsidian@obsidian-skills": [
+      {
+        "scope": "local",
+        "projectPath": "/Users/kyandesutter/Obsidian/Second Brain",
+        "installPath": "/Users/kyandesutter/.claude/plugins/cache/obsidian-skills/obsidian/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-02-02T04:08:01.323Z",
+        "lastUpdated": "2026-02-02T04:08:01.323Z",
+        "gitCommitSha": "34c2cda8b29eaeec6793e342b8b56e96ac29f15c"
+      }
+    ],
+    "frontend-design@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/kyandesutter/.claude/plugins/cache/claude-plugins-official/frontend-design/unknown",
+        "version": "unknown",
+        "installedAt": "2026-02-20T09:22:35.388Z",
+        "lastUpdated": "2026-04-03T07:46:57.104Z",
+        "gitCommitSha": "8deab8460a9d4df5a01315ef722a5ca6b061c074"
+      }
+    ],
+    "context7@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/kyandesutter/.claude/plugins/cache/claude-plugins-official/context7/unknown",
+        "version": "unknown",
+        "installedAt": "2026-02-20T09:22:35.410Z",
+        "lastUpdated": "2026-04-03T07:46:57.102Z",
+        "gitCommitSha": "8deab8460a9d4df5a01315ef722a5ca6b061c074"
+      }
+    ],
+    "code-review@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/kyandesutter/.claude/plugins/cache/claude-plugins-official/code-review/unknown",
+        "version": "unknown",
+        "installedAt": "2026-02-20T09:22:35.416Z",
+        "lastUpdated": "2026-04-03T07:46:57.101Z",
+        "gitCommitSha": "8deab8460a9d4df5a01315ef722a5ca6b061c074"
+      }
+    ],
+    "superpowers@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/kyandesutter/.claude/plugins/cache/claude-plugins-official/superpowers/5.1.0",
+        "version": "5.1.0",
+        "installedAt": "2026-02-20T09:22:37.195Z",
+        "lastUpdated": "2026-05-05T10:27:26.417Z",
+        "gitCommitSha": "a0b9ecce2b25aa7d703138f17650540c2e8b2cde"
+      }
+    ],
+    "feature-dev@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/kyandesutter/.claude/plugins/cache/claude-plugins-official/feature-dev/unknown",
+        "version": "unknown",
+        "installedAt": "2026-02-20T09:22:37.202Z",
+        "lastUpdated": "2026-04-03T07:46:57.103Z",
+        "gitCommitSha": "8deab8460a9d4df5a01315ef722a5ca6b061c074"
+      }
+    ],
+    "code-simplifier@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/kyandesutter/.claude/plugins/cache/claude-plugins-official/code-simplifier/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-02-20T09:22:37.205Z",
+        "lastUpdated": "2026-02-20T09:22:37.205Z",
+        "gitCommitSha": "8deab8460a9d4df5a01315ef722a5ca6b061c074"
+      }
+    ],
+    "typescript-lsp@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/kyandesutter/.claude/plugins/cache/claude-plugins-official/typescript-lsp/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-02-20T09:22:37.208Z",
+        "lastUpdated": "2026-02-20T09:22:37.208Z",
+        "gitCommitSha": "8deab8460a9d4df5a01315ef722a5ca6b061c074"
+      }
+    ],
+    "playwright@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/kyandesutter/.claude/plugins/cache/claude-plugins-official/playwright/unknown",
+        "version": "unknown",
+        "installedAt": "2026-02-20T09:22:37.211Z",
+        "lastUpdated": "2026-04-03T07:46:57.102Z",
+        "gitCommitSha": "8deab8460a9d4df5a01315ef722a5ca6b061c074"
+      }
+    ],
+    "security-guidance@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/kyandesutter/.claude/plugins/cache/claude-plugins-official/security-guidance/unknown",
+        "version": "unknown",
+        "installedAt": "2026-02-20T09:22:37.213Z",
+        "lastUpdated": "2026-04-03T07:46:57.101Z",
+        "gitCommitSha": "8deab8460a9d4df5a01315ef722a5ca6b061c074"
+      }
+    ],
+    "pr-review-toolkit@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/kyandesutter/.claude/plugins/cache/claude-plugins-official/pr-review-toolkit/unknown",
+        "version": "unknown",
+        "installedAt": "2026-02-20T09:22:37.224Z",
+        "lastUpdated": "2026-04-03T07:46:57.104Z",
+        "gitCommitSha": "8deab8460a9d4df5a01315ef722a5ca6b061c074"
+      }
+    ],
+    "claude-md-management@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/kyandesutter/.claude/plugins/cache/claude-plugins-official/claude-md-management/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-02-20T09:22:37.228Z",
+        "lastUpdated": "2026-02-20T09:22:37.228Z",
+        "gitCommitSha": "8deab8460a9d4df5a01315ef722a5ca6b061c074"
+      }
+    ],
+    "claude-code-setup@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/kyandesutter/.claude/plugins/cache/claude-plugins-official/claude-code-setup/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-02-20T09:22:37.233Z",
+        "lastUpdated": "2026-02-20T09:22:37.233Z",
+        "gitCommitSha": "8deab8460a9d4df5a01315ef722a5ca6b061c074"
+      }
+    ],
+    "skill-creator@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/kyandesutter/.claude/plugins/cache/claude-plugins-official/skill-creator/unknown",
+        "version": "unknown",
+        "installedAt": "2026-02-20T09:22:37.241Z",
+        "lastUpdated": "2026-04-03T07:46:57.103Z",
+        "gitCommitSha": "8deab8460a9d4df5a01315ef722a5ca6b061c074"
+      }
+    ],
+    "accessibility-expert@claude-code-marketplace": [
+      {
+        "scope": "user",
+        "installPath": "/Users/kyandesutter/.claude/plugins/cache/claude-code-marketplace/accessibility-expert/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-02-20T09:22:37.245Z",
+        "lastUpdated": "2026-02-20T09:22:37.245Z",
+        "gitCommitSha": "b643305146890bda9b2e694d2c42206ae4d0a4df"
+      }
+    ],
+    "ai-engineer@claude-code-marketplace": [
+      {
+        "scope": "user",
+        "installPath": "/Users/kyandesutter/.claude/plugins/cache/claude-code-marketplace/ai-engineer/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-02-20T09:22:37.248Z",
+        "lastUpdated": "2026-02-20T09:22:37.248Z",
+        "gitCommitSha": "b643305146890bda9b2e694d2c42206ae4d0a4df"
+      }
+    ],
+    "api-integration-specialist@claude-code-marketplace": [
+      {
+        "scope": "user",
+        "installPath": "/Users/kyandesutter/.claude/plugins/cache/claude-code-marketplace/api-integration-specialist/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-02-20T09:22:37.260Z",
+        "lastUpdated": "2026-02-20T09:22:37.260Z",
+        "gitCommitSha": "b643305146890bda9b2e694d2c42206ae4d0a4df"
+      }
+    ],
+    "api-tester@claude-code-marketplace": [
+      {
+        "scope": "user",
+        "installPath": "/Users/kyandesutter/.claude/plugins/cache/claude-code-marketplace/api-tester/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-02-20T09:22:37.263Z",
+        "lastUpdated": "2026-02-20T09:22:37.263Z",
+        "gitCommitSha": "b643305146890bda9b2e694d2c42206ae4d0a4df"
+      }
+    ],
+    "app-store-optimizer@claude-code-marketplace": [
+      {
+        "scope": "user",
+        "installPath": "/Users/kyandesutter/.claude/plugins/cache/claude-code-marketplace/app-store-optimizer/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-02-20T09:22:37.265Z",
+        "lastUpdated": "2026-02-20T09:22:37.265Z",
+        "gitCommitSha": "b643305146890bda9b2e694d2c42206ae4d0a4df"
+      }
+    ],
+    "audit@claude-code-marketplace": [
+      {
+        "scope": "user",
+        "installPath": "/Users/kyandesutter/.claude/plugins/cache/claude-code-marketplace/audit/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-02-20T09:22:37.268Z",
+        "lastUpdated": "2026-02-20T09:22:37.268Z",
+        "gitCommitSha": "b643305146890bda9b2e694d2c42206ae4d0a4df"
+      }
+    ],
+    "backend-architect@claude-code-marketplace": [
+      {
+        "scope": "user",
+        "installPath": "/Users/kyandesutter/.claude/plugins/cache/claude-code-marketplace/backend-architect/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-02-20T09:22:37.272Z",
+        "lastUpdated": "2026-02-20T09:22:37.272Z",
+        "gitCommitSha": "b643305146890bda9b2e694d2c42206ae4d0a4df"
+      }
+    ],
+    "brand-guardian@claude-code-marketplace": [
+      {
+        "scope": "user",
+        "installPath": "/Users/kyandesutter/.claude/plugins/cache/claude-code-marketplace/brand-guardian/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-02-20T09:22:37.275Z",
+        "lastUpdated": "2026-02-20T09:22:37.275Z",
+        "gitCommitSha": "b643305146890bda9b2e694d2c42206ae4d0a4df"
+      }
+    ],
+    "bug-detective@claude-code-marketplace": [
+      {
+        "scope": "user",
+        "installPath": "/Users/kyandesutter/.claude/plugins/cache/claude-code-marketplace/bug-detective/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-02-20T09:22:37.277Z",
+        "lastUpdated": "2026-02-20T09:22:37.277Z",
+        "gitCommitSha": "b643305146890bda9b2e694d2c42206ae4d0a4df"
+      }
+    ],
+    "bug-fix@claude-code-marketplace": [
+      {
+        "scope": "user",
+        "installPath": "/Users/kyandesutter/.claude/plugins/cache/claude-code-marketplace/bug-fix/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-02-20T09:22:37.280Z",
+        "lastUpdated": "2026-02-20T09:22:37.280Z",
+        "gitCommitSha": "b643305146890bda9b2e694d2c42206ae4d0a4df"
+      }
+    ],
+    "codebase-documenter@claude-code-marketplace": [
+      {
+        "scope": "user",
+        "installPath": "/Users/kyandesutter/.claude/plugins/cache/claude-code-marketplace/codebase-documenter/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-02-20T09:22:37.282Z",
+        "lastUpdated": "2026-02-20T09:22:37.282Z",
+        "gitCommitSha": "b643305146890bda9b2e694d2c42206ae4d0a4df"
+      }
+    ],
+    "tmux-agent-notifications@claude-plugin-tmux-notifications": [
+      {
+        "scope": "user",
+        "installPath": "/Users/kyandesutter/.claude/plugins/cache/claude-plugin-tmux-notifications/tmux-agent-notifications/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-02-22T13:34:46.392Z",
+        "lastUpdated": "2026-02-22T13:34:46.392Z",
+        "gitCommitSha": "d3d5d24043fb78c6620e24e2e5df4ec49b52ddd7"
+      }
+    ],
+    "desktop-notifications@claude-plugin-desktop-notifications": [
+      {
+        "scope": "user",
+        "installPath": "/Users/kyandesutter/.claude/plugins/cache/claude-plugin-desktop-notifications/desktop-notifications/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-02-22T20:29:04.751Z",
+        "lastUpdated": "2026-02-22T20:29:04.751Z",
+        "gitCommitSha": "710c9b882350910600257ce6dd0fccd0530ffeea"
+      }
+    ],
+    "clangd-lsp@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/kyandesutter/.claude/plugins/cache/claude-plugins-official/clangd-lsp/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-03-04T10:40:00.771Z",
+        "lastUpdated": "2026-03-04T10:40:00.771Z",
+        "gitCommitSha": "205b6e0b30366a969412d9aab7b99bea99d58db1"
+      }
+    ],
+    "expo@expo-plugins": [
+      {
+        "scope": "user",
+        "installPath": "/Users/kyandesutter/.claude/plugins/cache/expo-plugins/expo/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-03-20T19:43:16.889Z",
+        "lastUpdated": "2026-03-20T19:43:16.889Z",
+        "gitCommitSha": "3cd151c9d96bf481c4fc274f2de758cd2e265261"
+      }
+    ],
+    "expo@claude-plugins-official": [
+      {
+        "scope": "local",
+        "installPath": "/Users/kyandesutter/.claude/plugins/cache/claude-plugins-official/expo/1.0.0",
+        "version": "1.0.0",
+        "installedAt": "2026-05-22T18:38:01.331Z",
+        "lastUpdated": "2026-05-22T18:38:01.331Z",
+        "gitCommitSha": "434c935cfdce54e02b6164148e52cd151b2bc0c0",
+        "projectPath": "/Users/kyandesutter/Developer/befit2sail"
+      }
+    ]
+  }
+}

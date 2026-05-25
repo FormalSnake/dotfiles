@@ -1,0 +1,58 @@
+{
+  "claude-code-marketplace": {
+    "source": {
+      "source": "github",
+      "repo": "ananddtyagi/claude-code-marketplace"
+    },
+    "installLocation": "/Users/kyandesutter/.claude/plugins/marketplaces/claude-code-marketplace",
+    "lastUpdated": "2026-05-25T14:43:29.535Z"
+  },
+  "claude-plugins-official": {
+    "source": {
+      "source": "github",
+      "repo": "anthropics/claude-plugins-official"
+    },
+    "installLocation": "/Users/kyandesutter/.claude/plugins/marketplaces/claude-plugins-official",
+    "lastUpdated": "2026-05-25T14:43:29.707Z"
+  },
+  "obsidian-skills": {
+    "source": {
+      "source": "github",
+      "repo": "kepano/obsidian-skills"
+    },
+    "installLocation": "/Users/kyandesutter/.claude/plugins/marketplaces/obsidian-skills",
+    "lastUpdated": "2026-02-02T04:07:43.246Z"
+  },
+  "claude-plugin-tmux-notifications": {
+    "source": {
+      "source": "github",
+      "repo": "kaiiserni/claude-plugin-tmux-notifications"
+    },
+    "installLocation": "/Users/kyandesutter/.claude/plugins/marketplaces/claude-plugin-tmux-notifications",
+    "lastUpdated": "2026-02-22T13:34:42.094Z"
+  },
+  "claude-code-plugins": {
+    "source": {
+      "source": "github",
+      "repo": "anthropics/claude-code"
+    },
+    "installLocation": "/Users/kyandesutter/.claude/plugins/marketplaces/claude-code-plugins",
+    "lastUpdated": "2026-04-05T06:13:44.574Z"
+  },
+  "claude-plugin-desktop-notifications": {
+    "source": {
+      "source": "github",
+      "repo": "formalsnake/claude-plugin-desktop-notifications"
+    },
+    "installLocation": "/Users/kyandesutter/.claude/plugins/marketplaces/claude-plugin-desktop-notifications",
+    "lastUpdated": "2026-02-22T20:28:36.299Z"
+  },
+  "expo-plugins": {
+    "source": {
+      "source": "github",
+      "repo": "expo/skills"
+    },
+    "installLocation": "/Users/kyandesutter/.claude/plugins/marketplaces/expo-plugins",
+    "lastUpdated": "2026-03-20T19:43:09.032Z"
+  }
+}
