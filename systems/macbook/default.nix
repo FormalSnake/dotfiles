@@ -1,3 +1,4 @@
+{ self, ... }:
 {
   imports = [
     ./homebrew.nix
@@ -7,7 +8,6 @@
 
   system = {
     primaryUser = "kyandesutter";
-    # nix-darwin state version — bump only when nix-darwin's release notes say to.
     stateVersion = 6;
   };
 
@@ -18,6 +18,9 @@
     home = "/Users/kyandesutter";
   };
 
-  # Allow Touch ID for sudo (declarative — nix-darwin writes /etc/pam.d/sudo_local)
+  home-manager.users.kyandesutter = {
+    imports = [ self.homeModules.kyandesutter ];
+  };
+
   security.pam.services.sudo_local.touchIdAuth = true;
 }
