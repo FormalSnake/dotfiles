@@ -23,7 +23,6 @@
     lua
     mas
     mosh
-    neovim
     ninja
     nodejs_24
     pi-coding-agent

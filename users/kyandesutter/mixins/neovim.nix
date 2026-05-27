@@ -17,7 +17,9 @@
       };
       lang.tailwind = {
         enable = true;
-        installDependencies = true;
+        # tailwindcss has no nixpkgs mapping in lazyvim-nix; project's own
+        # node_modules / package manager provides the LSP and CLI.
+        installDependencies = false;
         installRuntimeDependencies = true;
       };
       lang.typescript = {
