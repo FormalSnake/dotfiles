@@ -84,6 +84,26 @@ fi
 log "changes:"
 printf '%s\n' "$summary" | sed 's/^/  /'
 
+# Validate the new lock by build-testing the macbook config. If it fails we
+# revert flake.lock so the next `just rebuild` doesn't trip over upstream
+# regressions (e.g. an unbuildable darwin package landing in nixpkgs).
+build_log=$(mktemp -t nix-weekly-build.XXXXXX.log)
+log "build-testing #macbook (this may take a while)…"
+if ! darwin-rebuild build --flake "${FLAKE_DIR}#macbook" >"$build_log" 2>&1; then
+  log "build FAILED — reverting flake.lock"
+  cp "$before" flake.lock
+  log "--- build log tail ---"
+  tail -50 "$build_log" | sed 's/^/  /'
+  rm -f "$build_log"
+  /usr/bin/osascript <<APPLESCRIPT
+tell me to activate
+display alert "Nix weekly update reverted" message "Updating flake inputs produced a config that does not build. flake.lock has been reverted. See ~/Library/Logs/kyan-nix-weekly-update.log." as critical buttons {"OK"} default button "OK"
+APPLESCRIPT
+  exit 1
+fi
+rm -f "$build_log"
+log "build OK"
+
 set +e
 printf 'Updated inputs:\n%s\n' "$summary" | "$PROMPT"
 choice=$?
