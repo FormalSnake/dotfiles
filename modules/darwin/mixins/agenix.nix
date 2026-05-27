@@ -19,6 +19,7 @@
         anthropic          = mkSecret "anthropic";
         gemini             = mkSecret "gemini";
         deepseek           = mkSecret "deepseek";
+        canaryllm          = mkSecret "canaryllm";
         nucleo-license     = mkSecret "nucleo-license";
         npm-github-token   = mkSecret "npm-github-token";
         npm-registry-token = mkSecret "npm-registry-token";

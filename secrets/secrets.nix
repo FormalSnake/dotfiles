@@ -11,6 +11,7 @@ in
   "anthropic.age".publicKeys          = [ kyan ];
   "gemini.age".publicKeys             = [ kyan ];
   "deepseek.age".publicKeys           = [ kyan ];
+  "canaryllm.age".publicKeys          = [ kyan ];
   "nucleo-license.age".publicKeys     = [ kyan ];
   "npm-github-token.age".publicKeys   = [ kyan ];
   "npm-registry-token.age".publicKeys = [ kyan ];
