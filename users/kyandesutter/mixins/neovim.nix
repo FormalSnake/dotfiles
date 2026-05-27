@@ -1,9 +1,18 @@
-{ config, inputs, ... }:
+{ config, inputs, pkgs, ... }:
 {
   imports = [ inputs.lazyvim.homeManagerModules.default ];
 
   programs.lazyvim = {
     enable = true;
+
+    # LSPs that lazyvim-nix doesn't map to nixpkgs (lang.tailwind, lang.astro,
+    # and HTML/CSS/JSON/Emmet) need to be provided here so they land on nvim's PATH.
+    extraPackages = with pkgs; [
+      tailwindcss-language-server
+      astro-language-server
+      vscode-langservers-extracted   # html, cssls, jsonls, eslint
+      emmet-language-server          # JSX/HTML emmet completions
+    ];
 
     extras = {
       ai.supermaven.enable = true;
@@ -17,12 +26,19 @@
       };
       lang.tailwind = {
         enable = true;
-        # tailwindcss has no nixpkgs mapping in lazyvim-nix; project's own
-        # node_modules / package manager provides the LSP and CLI.
+        # tailwindcss-language-server has no nixpkgs mapping in lazyvim-nix;
+        # provided manually via extraPackages above.
         installDependencies = false;
         installRuntimeDependencies = true;
       };
       lang.typescript = {
+        enable = true;
+        installDependencies = true;
+        installRuntimeDependencies = true;
+      };
+      # vtsls is the real TS LSP — lives under a nested extra, so the bare
+      # lang.typescript options never installed it.
+      lang.typescript.vtsls = {
         enable = true;
         installDependencies = true;
         installRuntimeDependencies = true;
