@@ -2,6 +2,7 @@
   flake.darwinModules.default = {
     imports = [
       ../shared
+      ./mixins/determinate.nix
       ./mixins/homebrew.nix
       ./mixins/home-manager.nix
       ./mixins/system-defaults.nix

@@ -13,8 +13,16 @@
       NSNavPanelExpandedStateForSaveMode = true;
       "com.apple.trackpad.scaling" = 0.6875;
       "com.apple.swipescrolldirection" = true;
-      # `com.apple.mouse.scaling` is not a typed nix-darwin option in this version —
-      # set via activation script below.
+    };
+
+    # Untyped preferences (no dedicated nix-darwin option). Written via
+    # `defaults import` during activation — idempotent, no shell-out needed.
+    CustomUserPreferences = {
+      "NSGlobalDomain"."com.apple.mouse.scaling" = 1.5;
+      "com.apple.screencapture" = {
+        style = "window";
+        showsClicks = true;
+      };
     };
 
     dock = {
@@ -41,13 +49,4 @@
       show-thumbnail = true;
     };
   };
-
-  # Settings without typed nix-darwin options — applied via `defaults write`
-  # during system activation. Idempotent.
-  system.activationScripts.extraUserDefaults.text = ''
-    echo "Applying extra user defaults (mouse scaling, screencapture style)..." >&2
-    sudo -u kyandesutter defaults write NSGlobalDomain com.apple.mouse.scaling -float 1.5
-    sudo -u kyandesutter defaults write com.apple.screencapture style -string "window"
-    sudo -u kyandesutter defaults write com.apple.screencapture showsClicks -bool true
-  '';
 }

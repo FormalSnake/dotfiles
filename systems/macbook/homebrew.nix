@@ -9,13 +9,11 @@
     # CLI tools that genuinely need brew (no Nix equivalent on darwin or version-pinned).
     # Everything else moved to nix/home-manager — see users/kyandesutter/programs.nix.
     brews = [
-      "tree-sitter@0.25" # version pin; nixpkgs only ships current
-      "watchman"         # nixpkgs build pulls folly, which fails to compile on darwin
+      "watchman" # nixpkgs build pulls folly, which fails to compile on darwin
     ];
 
     casks = [
       # — previously-declared casks —
-      "1password-cli"
       "alcove"
       "audacity"
       "balenaetcher"

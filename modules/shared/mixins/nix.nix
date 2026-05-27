@@ -1,8 +1,6 @@
 {
-  # Determinate Nix manages its own daemon + nix.conf. We opt nix-darwin OUT of
-  # touching Nix itself; per-user/per-system Nix settings go in /etc/nix/nix.custom.conf.
-  nix.enable = false;
-
+  # Determinate owns Nix itself — see modules/darwin/mixins/determinate.nix
+  # (determinateNix.enable = true implicitly disables nix-darwin's nix.* mgmt).
   nixpkgs.config = {
     allowUnfree = true;
   };

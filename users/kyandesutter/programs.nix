@@ -4,6 +4,7 @@
   home.packages = with pkgs; [
     just
     zulu17
+    _1password-cli
 
     # — migrated from homebrew formulae —
     assimp

@@ -19,7 +19,7 @@
       # Anything installed but not declared in systems/macbook/homebrew.nix
       # will be uninstalled on switch. Use "zap" later to also remove leftover
       # data dirs.
-      autoUpdate = false;
+      autoUpdate = true;
       upgrade = false;
       cleanup = "uninstall";
     };
@@ -30,7 +30,7 @@
     };
 
     global = {
-      autoUpdate = false;
+      autoUpdate = true;
       brewfile = true;
     };
   };

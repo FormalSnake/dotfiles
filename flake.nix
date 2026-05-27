@@ -40,6 +40,8 @@
       url = "github:zhaofengli/nix-homebrew";
     };
 
+    determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/3";
+
     agenix = {
       url = "github:ryantm/agenix";
       inputs.nixpkgs.follows = "nixpkgs";
