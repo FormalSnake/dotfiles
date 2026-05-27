@@ -52,6 +52,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    lazyvim.url = "github:pfassina/lazyvim-nix";
+    lazyvim = {
+      url = "github:pfassina/lazyvim-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 }
