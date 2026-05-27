@@ -65,6 +65,23 @@
         }
       '';
 
+      # LazyVim's lang.astro extra injects @astrojs/ts-plugin into vtsls via a
+      # hard-coded Mason path. With Mason disabled (Nix setup), that path is
+      # stale leftover data and the resulting plugin load has been observed to
+      # SIGTERM the tsserver child, killing TS completions while leaving the
+      # vtsls client "attached". Strip the entry so tsserver stays healthy.
+      vtsls = ''
+        return {
+          "neovim/nvim-lspconfig",
+          opts = function(_, opts)
+            local vtsls = opts.servers and opts.servers.vtsls
+            if vtsls and vtsls.settings and vtsls.settings.vtsls and vtsls.settings.vtsls.tsserver then
+              vtsls.settings.vtsls.tsserver.globalPlugins = nil
+            end
+          end,
+        }
+      '';
+
       persistence = ''
         return {
           "folke/persistence.nvim",
