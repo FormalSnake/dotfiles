@@ -1,10 +1,16 @@
-{
-  # Add or remove apps here — the dock will be rewritten on every switch.
-  system.defaults.dock.persistent-apps = [
+{ config, ... }:
+let
+  # HM-managed GUI apps land in this trampoline dir (symlinks into the nix
+  # store). Use this prefix for any dock pin whose .app comes from
+  # home-manager so the path tracks the active home generation.
+  hmApps = "${config.users.users.kyandesutter.home}/Applications/Home Manager Apps";
+
+  # Brew casks, system apps, and manual /Applications installs — paths are
+  # stable so we hardcode them.
+  brewApps = [
     "/Applications/LaunchOS.app"
     "/Applications/Helium.app"
     "/Applications/Ghostty.app"
-    "/Applications/Warp.app"
     "/Applications/OrbStack.app"
     "/Applications/Obsidian.app"
     "/Applications/Claude.app"
@@ -13,4 +19,13 @@
     "/System/Applications/Messages.app"
     "/Applications/Spotify.app"
   ];
+
+  # HM / nix-installed apps — resolved dynamically against the current HM
+  # generation.
+  nixApps = [
+    "${hmApps}/PrismLauncher.app"
+  ];
+in
+{
+  system.defaults.dock.persistent-apps = brewApps ++ nixApps;
 }
