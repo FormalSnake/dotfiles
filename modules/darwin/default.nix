@@ -7,6 +7,7 @@
       ./mixins/system-defaults.nix
       ./mixins/dock-pins.nix
       ./mixins/login-items.nix
+      ./mixins/auto-update.nix
       ./mixins/agenix.nix
       ./profiles
     ];
