@@ -67,18 +67,30 @@
       "wispr-flow"
     ];
 
-    # Mac App Store apps — managed via `mas`. Add/remove IDs here to install/uninstall.
-    masApps = {
-      "CrystalFetch"         = 6454431289;
-      "DaisyDisk"            =  411643860;
-      "Flighty"              = 1358823008;
-      "Klack"                = 6446206067;
-      "Microsoft Excel"      =  462058435;
-      "Microsoft PowerPoint" =  462062816;
-      "Microsoft Word"       =  462054704;
-      "Tailscale"            = 1475387142;
-      "WhatsApp"             =  310633997;
-      "Xcode"                =  497799835;
-    };
+    # Mac App Store apps — declaration disabled.
+    #
+    # Upstream brew bundle uses `mas install` which was broken at the OS level
+    # in macOS 26.1 / 15.7.2 / 14.8.2 (Apple-only entitlement now required to
+    # talk to installd):
+    #   https://github.com/orgs/Homebrew/discussions/6550
+    # And separately tracked by:
+    #   https://github.com/Homebrew/brew/issues/21559 (mas install → mas get)
+    #   https://github.com/Homebrew/homebrew-bundle/issues/370
+    #
+    # Apps are still installed at the OS level — re-enable once upstream lands
+    # the `mas get` switch.
+    masApps = { };
+    # masApps = {
+    #   "CrystalFetch"         = 6454431289;
+    #   "DaisyDisk"            =  411643860;
+    #   "Flighty"              = 1358823008;
+    #   "Klack"                = 6446206067;
+    #   "Microsoft Excel"      =  462058435;
+    #   "Microsoft PowerPoint" =  462062816;
+    #   "Microsoft Word"       =  462054704;
+    #   "Tailscale"            = 1475387142;
+    #   "WhatsApp"             =  310633997;
+    #   "Xcode"                =  497799835;
+    # };
   };
 }

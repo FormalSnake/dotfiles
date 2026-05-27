@@ -26,6 +26,7 @@
     neovim
     ninja
     nodejs_24
+    pi-coding-agent
     poppler
     pyenv
     raylib
