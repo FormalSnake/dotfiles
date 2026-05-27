@@ -97,15 +97,14 @@
               end,
             })
 
-            -- nvim-lspconfig and nvim-treesitter lazy-load on BufReadPre /
-            -- BufReadPost. When persistence sources the session, :edit fires
-            -- BufReadPre which loads those plugins — but FileType has already
-            -- fired for the foreground buffer by the time their handlers
-            -- register, so LSP never attaches and TS highlight never starts.
-            -- (Buffers restored via :badd are unaffected: BufRead only fires
-            -- when you navigate to them later, after the plugins are ready.)
-            -- Re-fire FileType on every loaded buffer post-restore; both
-            -- vim.lsp.enable and treesitter's highlight handler are idempotent.
+            -- During session :source the foreground :edit fires BufReadPre,
+            -- which lazy.nvim hijacks to load nvim-lspconfig / nvim-treesitter.
+            -- Empirically the natural :edit continuation (BufRead → filetype
+            -- detect → FileType) does not complete for that buffer — &filetype
+            -- ends up empty, so vim.lsp.enable's FileType autocmd and the TS
+            -- highlighter never match anything. Re-run filetype detection on
+            -- every restored buffer; setting &filetype fires FileType, which
+            -- in turn starts LSP (via vim.lsp.enable's autocmd) and TS.
             vim.api.nvim_create_autocmd("User", {
               pattern = "VeryLazy",
               group = group,
@@ -118,10 +117,9 @@
                 vim.schedule(function()
                   for _, buf in ipairs(vim.api.nvim_list_bufs()) do
                     if vim.api.nvim_buf_is_loaded(buf) and vim.bo[buf].buftype == "" then
-                      local ft = vim.bo[buf].filetype
-                      if ft ~= "" then
-                        vim.api.nvim_exec_autocmds("FileType", { buffer = buf, modeline = false })
-                      end
+                      vim.api.nvim_buf_call(buf, function()
+                        vim.cmd("filetype detect")
+                      end)
                     end
                   end
                 end)
