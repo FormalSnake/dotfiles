@@ -57,6 +57,7 @@
       "microsoft-teams"
       "modrinth"
       "moonlight"
+      "mos"
       "notion"
       "qbittorrent"
       "roblox"
