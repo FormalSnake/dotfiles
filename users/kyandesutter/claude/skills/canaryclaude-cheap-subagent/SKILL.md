@@ -1,6 +1,6 @@
 ---
 name: canaryclaude-cheap-subagent
-description: Offload mechanical, well-specified coding work (refactors, renames, boilerplate, formatting passes, applying a pattern across many files) to `canaryclaude`, which is Claude Code routed through the user's own CanaryLLM proxy. Cheap and fast enough to fan out — pick a small/fast model like `gemini/gemini-2.5-flash` (or `gemini-2.5-flash-lite`, or local `lmstudio/qwen3.6-35b-a3b`) for the subagent. Use whenever a task is execution-heavy but reasoning-light — code transformations where you already know the answer and just need the typing done. Use even if the user hasn't named canaryclaude: if you're about to do a dozen near-identical edits, or apply a clearly-specified refactor across multiple files, this skill applies. Always background canaryclaude calls and parallelize them — even fast models take 15–60s per task, so it shines when many run concurrently while you do real reasoning work.
+description: Offload mechanical, well-specified coding work (refactors, renames, boilerplate, formatting passes, applying a pattern across many files) to `canaryclaude`, which is Claude Code routed through the user's own CanaryLLM proxy. Cheap and fast enough to fan out — pick a small/fast model like `gemini/gemini-2.5-flash` (or `gemini-2.5-flash-lite`, or local `lmstudio/qwen3.6-27b-mlx`) for the subagent. Use whenever a task is execution-heavy but reasoning-light — code transformations where you already know the answer and just need the typing done. Use even if the user hasn't named canaryclaude: if you're about to do a dozen near-identical edits, or apply a clearly-specified refactor across multiple files, this skill applies. Always background canaryclaude calls and parallelize them — even fast models take 15–60s per task, so it shines when many run concurrently while you do real reasoning work.
 ---
 
 # canaryclaude: cheap subagent via CanaryLLM
@@ -50,7 +50,7 @@ Key flags (all of these are real `claude` flags — `canaryclaude` forwards them
 - `--model <id>` — required. Pick by task:
   - `gemini/gemini-2.5-flash` — sensible default, fast and capable enough for most mechanical edits
   - `gemini/gemini-2.5-flash-lite` — when you want the cheapest/fastest possible
-  - `lmstudio/qwen3.6-35b-a3b` — fully local, free, slow (~60–90s), single-file scope
+  - `lmstudio/qwen3.6-27b-mlx` — fully local, free, slow (~60–90s), single-file scope. Counter-intuitively smarter than the 35b variant on the same host. **Needs an unusually explicit, numbered, step-by-step prompt — even by small-model standards** (see "Special handling for local Qwen" below)
   - `gemini/gemini-2.5-pro` — escalation if a flash model keeps failing the spec
   - `openai/gpt-4.1` — alternative mid-tier when you want a non-Gemini, non-Claude option (e.g. you suspect a model-family quirk is biting you)
   - `anthropic/claude-sonnet-4-5` — closest thing to "just use Claude" while still going through the proxy; reach for it when the task is on the edge of mechanical-vs-reasoning and you'd otherwise give up and do it yourself
@@ -108,6 +108,21 @@ Output only code.
 - **Negative constraints**: "Do not add comments. Do not add docstrings. Do not change other functions." The subagent loves to over-deliver.
 - **Single file scope**: one canaryclaude call per file. Spawn many in parallel rather than asking one to touch several.
 
+## Special handling for local Qwen (`lmstudio/qwen3.6-27b-mlx`)
+
+The local Qwen is the trickiest model on the ladder. Observed failure mode: the agent prints something like *"Let me write the summary file based on what I've gathered"* — and then exits successfully without writing anything. It treats describing the action as having done it. Even a prompt that works fine on `gemini-2.5-flash` will fail this way on Qwen.
+
+Treat Qwen as needing **one more level of explicitness** than the other small models. Specifically:
+
+- **Number every step**, including read steps, list steps, and the final write step. "Step 1. Read X. Step 2. List Y. … Step N. Use the Write tool to create file Z with exactly these sections: …"
+- **Put the Write call as a named step**, not as an implicit "then write the summary." Qwen will skip implicit actions; it follows numbered tool invocations.
+- **Spell out the output's section headers verbatim** in the prompt — Qwen does much better when filling in a templated skeleton than when generating one from a description.
+- **Tell it explicitly not to stop until the file exists.** Add a line like "Do not stop until the file is written." Qwen treats "the task" as a conversational obligation that can be discharged by talking about it.
+- **Forbid the discussion-only failure mode by name.** Add something like: "Do not summarise verbally. Do not announce what you are going to do. Invoke the Write tool."
+- Pass `--max-turns 30` or higher when the task involves several reads before the write — Qwen sometimes uses many small tool calls to make up for not being able to hold much in its head.
+
+If after one retry Qwen still won't produce output, switch model: `gemini/gemini-2.5-flash` for cloud-OK work, or `anthropic/claude-sonnet-4-5` if the task turns out to need more reasoning than mechanical execution.
+
 ## Parallelizing canaryclaude calls
 
 The whole point is throughput. When you have N mechanical edits, fire N calls in parallel:
@@ -138,7 +153,7 @@ Rough ladder, cheapest/fastest at the top:
 
 - `gemini/gemini-2.5-flash-lite` — extremely simple tasks, maximum throughput
 - `gemini/gemini-2.5-flash` — **default**. Fast, cheap, capable enough for clearly-specified edits
-- `lmstudio/qwen3.6-35b-a3b` — fully local on the user's own box. Slowest, but zero external calls — pick when the work is sensitive or offline-friendly. Single-file scope only.
+- `lmstudio/qwen3.6-27b-mlx` — fully local on the user's own box. Slowest, but zero external calls — pick when the work is sensitive or offline-friendly. Single-file scope only. **Needs unusually explicit prompts** — see "Special handling for local Qwen" below. (The 35b-a3b variant is also available but counter-intuitively dumber on the same machine; prefer the 27b.)
 - `openai/gpt-4.1` — alternative mid-tier when a Gemini model is stubbornly misreading the spec; sometimes a different model family gets it on the first try
 - `gemini/gemini-2.5-pro` — escalate here when a flash model keeps failing
 - `anthropic/claude-sonnet-4-5` — top of the ladder through the proxy. Reach for it when the task is on the edge of mechanical-vs-reasoning. If you'd genuinely consider doing it yourself rather than dispatching, this is the point on the ladder where the subagent becomes worth it again.
