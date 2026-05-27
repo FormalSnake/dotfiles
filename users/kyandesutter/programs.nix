@@ -30,7 +30,11 @@
     poppler
     pyenv
     raylib
-    rclone
+    # rclone 1.74.2 in nixpkgs unconditionally requires fuse3, which has no
+    # working Darwin path (the postConfigure that patches fuse.h is gated on
+    # !isDarwin). Disabling cmount skips cgofuse; rclone mount on macOS needs
+    # macFUSE (kernel ext, not in nixpkgs) anyway, so nothing useful is lost.
+    (rclone.override { enableCmount = false; })
     stow
     swiftformat
     swiftlint
