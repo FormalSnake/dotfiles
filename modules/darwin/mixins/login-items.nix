@@ -21,6 +21,7 @@ let
     { id = "figma-agent";   path = "/Users/kyandesutter/Library/Application Support/Figma/FigmaAgent.app"; }
     { id = "klack";         path = "/Applications/Klack.app"; }
     { id = "betterdisplay"; path = "/Applications/BetterDisplay.app"; }
+    { id = "mos";           path = "/Applications/Mos.app"; }
   ];
 
   mkLoginAgent = { id, path }:
