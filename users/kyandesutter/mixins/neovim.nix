@@ -97,13 +97,19 @@
               end,
             })
 
-            vim.api.nvim_create_autocmd("VimEnter", {
+            -- Restore on User VeryLazy (after LazyVim finishes loading LSP /
+            -- treesitter / etc). Restoring on VimEnter sources buffers before
+            -- those subsystems are wired, leaving the file with no LSP attach
+            -- and no syntax highlighting.
+            vim.api.nvim_create_autocmd("User", {
+              pattern = "VeryLazy",
               group = group,
               nested = true,
+              once = true,
               callback = function()
-                if vim.fn.argc(-1) == 0 and not vim.g.started_with_stdin then
-                  require("persistence").load()
-                end
+                if vim.fn.argc(-1) ~= 0 then return end
+                if vim.g.started_with_stdin then return end
+                require("persistence").load()
               end,
             })
           end,
