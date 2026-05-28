@@ -216,5 +216,9 @@
   "skipAutoPermissionPrompt": true,
   "feedbackSurveyState": {
     "lastShownTime": 1754320637645
+  },
+  "spinnerVerbs": {
+    "mode": "append",
+    "verbs": ["Gooning", "Jorking it"]
   }
 }
