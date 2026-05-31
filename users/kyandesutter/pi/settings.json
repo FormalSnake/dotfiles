@@ -6,5 +6,8 @@
     "~/.pi/agent/extensions/mode-cycle",
     "~/.pi/agent/extensions/mcp-bridge"
   ],
-  "lastChangelogVersion": "0.75.4"
+  "lastChangelogVersion": "0.75.4",
+  "packages": [
+    "npm:pi-web-access"
+  ]
 }
