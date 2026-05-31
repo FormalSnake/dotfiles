@@ -115,6 +115,7 @@ in
         (workspaceFor "com.cron.electron" "productivity")
         (workspaceFor "com.figma.Desktop" "productivity")
         (workspaceFor "co.ambercreative.nucleo" "productivity")
+        (workspaceFor "es.canarycoders.canarybrowser" "productivity")
         (workspaceFor "com.bambulab.bambu-studio" "print")
         (workspaceFor "com.google.Chrome" "development")
         (workspaceFor "com.google.chrome.for.testing" "development")
