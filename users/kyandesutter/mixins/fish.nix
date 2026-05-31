@@ -98,6 +98,13 @@
           /opt/homebrew/bin/brew shellenv | source
       end
 
+      # Nix itself (Determinate owns the install; nix-darwin's set-environment
+      # adds this for zsh/bash but fish builds PATH by hand, so source the
+      # official profile script — sets PATH, NIX_PROFILES, NIX_SSL_CERT_FILE).
+      if test -f /nix/var/nix/profiles/default/etc/profile.d/nix.fish
+          source /nix/var/nix/profiles/default/etc/profile.d/nix.fish
+      end
+
       # Home-manager user profile (declared `home.packages`, e.g. `just`)
       fish_add_path /etc/profiles/per-user/kyandesutter/bin
       fish_add_path /run/current-system/sw/bin
