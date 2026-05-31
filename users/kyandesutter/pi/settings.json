@@ -4,11 +4,7 @@
   "defaultThinkingLevel": "high",
   "extensions": [
     "~/.pi/agent/extensions/mode-cycle",
-    "~/.pi/agent/extensions/mcp-bridge",
-    "npm:pi-web-access"
+    "~/.pi/agent/extensions/mcp-bridge"
   ],
-  "lastChangelogVersion": "0.75.4",
-  "packages": [
-    "npm:pi-web-access"
-  ]
+  "lastChangelogVersion": "0.75.4"
 }
