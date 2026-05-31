@@ -4,6 +4,7 @@
       "barutsrb/tap"
       "jnsahaj/lumen"
       "nikitabobko/tap"
+      "pluk-inc/tap"
     ];
 
     # CLI tools that genuinely need brew (no Nix equivalent on darwin or version-pinned).
@@ -54,6 +55,7 @@
       "eqmac"
       "google-chrome"
       "jump-desktop-connect"
+      "markdown-preview"  # pluk-inc/tap
       "microsoft-teams"
       "modrinth"
       "moonlight"
