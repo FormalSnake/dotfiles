@@ -1,0 +1,10 @@
+{
+  "defaultProvider": "canary",
+  "defaultModel": "anthropic/claude-opus-4-8",
+  "defaultThinkingLevel": "high",
+  "extensions": [
+    "~/.pi/agent/extensions/mode-cycle",
+    "~/.pi/agent/extensions/mcp-bridge"
+  ],
+  "lastChangelogVersion": "0.75.4"
+}

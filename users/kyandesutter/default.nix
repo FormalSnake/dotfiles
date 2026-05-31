@@ -7,6 +7,7 @@
     ./mixins/gh.nix
     ./mixins/ssh.nix
     ./mixins/claude-code.nix
+    ./mixins/pi.nix
     ./mixins/ghostty.nix
     ./mixins/tmux.nix
     ./mixins/aerospace.nix

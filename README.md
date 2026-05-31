@@ -13,6 +13,15 @@ Declarative macOS configuration for `macbook` (and eventually `homelab`). Inspir
 - `users/` — per-user home-manager configurations (`kyandesutter/`)
 - `secrets/` — agenix-encrypted secrets
 
+## ⚠️ Rebuild policy
+
+**Only the repository owner (kyandesutter) may run rebuilds.** AI assistants and
+automated tooling must **never** run `darwin-rebuild`, `nixos-rebuild`,
+`home-manager switch`, `just r`, `just b`, `just rebuild`, `just build`,
+`just bootstrap`, or any equivalent build/activation command — not even
+`build`-only variants. Stage and document changes, then stop and let the owner
+rebuild manually.
+
 ## Usage
 
 ```sh

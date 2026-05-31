@@ -1,0 +1,2 @@
+# MCP bridge runtime deps (installed via `bun install`)
+extensions/mcp-bridge/node_modules/
