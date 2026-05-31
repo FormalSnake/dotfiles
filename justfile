@@ -1,3 +1,7 @@
+# Ensure nix and darwin-rebuild are found even when `just` runs recipes
+# with a bare `sh` that hasn't sourced the nix profile.
+export PATH := "/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:" + env_var('PATH')
+
 alias r := rebuild
 alias b := build
 alias u := update
