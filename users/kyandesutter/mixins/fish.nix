@@ -63,7 +63,7 @@
           if test -n "$argv[1]"
               set branch_name $argv[1]
           else
-              set branch_name main
+              set branch_name (git rev-parse --abbrev-ref HEAD)
           end
           git push origin $branch_name
         '';
