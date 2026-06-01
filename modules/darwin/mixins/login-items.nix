@@ -4,6 +4,10 @@ let
   # NOTE: these do NOT show up in System Settings → Login Items.
   # After first activation, manually clear any duplicates from
   # System Settings → General → Login Items to avoid double-launching.
+  #
+  # Launched with `open -g -j`: -g keeps the app out of the foreground and
+  # -j launches it hidden, so menu-bar utilities start silently instead of
+  # bombarding you with windows on login.
   apps = [
     { id = "thaw";          path = "/Applications/Thaw.app"; }
     { id = "alcove";        path = "/Applications/Alcove.app"; }
@@ -22,13 +26,14 @@ let
     { id = "klack";         path = "/Applications/Klack.app"; }
     { id = "betterdisplay"; path = "/Applications/BetterDisplay.app"; }
     { id = "mos";           path = "/Applications/Mos.app"; }
+    { id = "wispr-flow";    path = "/Applications/Wispr Flow.app"; }
   ];
 
   mkLoginAgent = { id, path }:
     lib.nameValuePair "kyan-login-${id}" {
       serviceConfig = {
         Label = "kyan.login.${id}";
-        ProgramArguments = [ "/usr/bin/open" "-a" path ];
+        ProgramArguments = [ "/usr/bin/open" "-g" "-j" "-a" path ];
         RunAtLoad = true;
         KeepAlive = false;
       };
