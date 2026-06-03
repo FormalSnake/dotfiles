@@ -20,7 +20,7 @@
       # will be uninstalled on switch. Use "zap" later to also remove leftover
       # data dirs.
       autoUpdate = true;
-      upgrade = false;
+      upgrade = true;
       cleanup = "uninstall";
     };
 
