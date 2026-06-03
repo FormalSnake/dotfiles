@@ -34,6 +34,8 @@
       minimize-to-application = true;
     };
 
+    trackpad.TrackpadThreeFingerDrag = true;
+
     finder = {
       AppleShowAllFiles = true;
       ShowPathbar = true;
