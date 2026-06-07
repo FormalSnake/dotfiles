@@ -1,4 +1,13 @@
-{ pkgs, inputs, ... }:
+{ config, pkgs, inputs, ... }:
+let
+  # herdr only ships two catppuccin variants — `catppuccin` (mocha/dark) and
+  # `catppuccin-latte` (light); it has no frappe/macchiato themes. Map our
+  # global catppuccin.flavor onto those: latte -> light, anything else -> dark.
+  # herdr's config.toml has no light/dark "auto" key (unlike ghostty/neovim), so
+  # this is a static follow of the flavor, not a runtime macOS-appearance swap.
+  herdrTheme =
+    if config.catppuccin.flavor == "latte" then "catppuccin-latte" else "catppuccin";
+in
 {
   # herdr — terminal workspace manager for AI coding agents.
   # Not in nixpkgs; installed straight from the upstream flake (nixpkgs follows
@@ -16,7 +25,7 @@
     onboarding = false
 
     [theme]
-    name = "catppuccin"
+    name = "${herdrTheme}"
 
     [ui.toast]
     delivery = "system"
