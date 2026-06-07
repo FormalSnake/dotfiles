@@ -1,11 +1,12 @@
-{ ... }:
+{ config, lib, ... }:
 {
   programs.ghostty = {
     enable = true;
     # ghostty is not packaged on darwin in nixpkgs; the binary comes from the
     # `ghostty` homebrew cask. We still use programs.ghostty for the declarative
-    # ~/.config/ghostty/config file. Theme is set globally by the catppuccin
-    # home-module (see users/kyandesutter/mixins/catppuccin.nix).
+    # ~/.config/ghostty/config file. The catppuccin home-module installs the
+    # dark theme file and a single-flavor `theme` line; we override that line
+    # below so the dark variant tracks catppuccin.flavor and light stays latte.
     package = null;
     enableFishIntegration = false;
 
@@ -40,6 +41,18 @@
         "global:cmd+shift+space=toggle_quick_terminal"
         "shift+enter=text:\\x1b\\r"
       ];
+
+      # Follow the macOS appearance: latte in Light, catppuccin.flavor in Dark.
+      # mkForce overrides the catppuccin module's "light:<flavor>,dark:<flavor>".
+      theme = lib.mkForce "light:catppuccin-latte,dark:catppuccin-${config.catppuccin.flavor}";
     };
+  };
+
+  # The catppuccin module only installs the active (dark) flavor's theme file;
+  # ghostty also needs the latte file for the Light side. Guarded so it doesn't
+  # collide with the module's own install if flavor is ever set to latte.
+  xdg.configFile = lib.mkIf (config.catppuccin.flavor != "latte") {
+    "ghostty/themes/catppuccin-latte".source =
+      "${config.catppuccin.sources.ghostty}/catppuccin-latte.conf";
   };
 }

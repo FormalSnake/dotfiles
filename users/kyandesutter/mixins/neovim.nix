@@ -54,13 +54,42 @@
             lazy = false,
             priority = 1000,
             opts = {
-              flavour = "${config.catppuccin.flavor}",
+              -- flavour = "auto" follows vim.o.background; the dark variant is
+              -- driven by catppuccin.flavor (see mixins/catppuccin.nix), the
+              -- light variant is pinned to latte. Defaults to dark; reach light
+              -- with `:set background=light`.
+              flavour = "auto",
+              background = { light = "latte", dark = "${config.catppuccin.flavor}" },
               transparent_background = true,
             },
           },
           {
             "LazyVim/LazyVim",
             opts = { colorscheme = "catppuccin" },
+          },
+        }
+      '';
+
+      # Follow the macOS appearance at runtime. Toggling vim.o.background makes
+      # catppuccin (flavour = "auto") swap latte <-> the dark flavor. We also
+      # re-run :colorscheme so the ColorScheme autocmd fires and the
+      # transparency backstop below re-applies on every flip.
+      auto-dark-mode = ''
+        return {
+          "f-person/auto-dark-mode.nvim",
+          lazy = false,
+          priority = 999,
+          dependencies = { "catppuccin/nvim" },
+          opts = {
+            update_interval = 1000,
+            set_dark_mode = function()
+              vim.o.background = "dark"
+              vim.cmd.colorscheme("catppuccin")
+            end,
+            set_light_mode = function()
+              vim.o.background = "light"
+              vim.cmd.colorscheme("catppuccin")
+            end,
           },
         }
       '';
