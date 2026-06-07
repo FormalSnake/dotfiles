@@ -18,6 +18,7 @@
     ./mixins/fastfetch.nix
     ./mixins/rift.nix
     ./mixins/lynk-browser.nix
+    ./mixins/herdr.nix
   ];
 
   home = {
