@@ -27,7 +27,7 @@
 
     dock = {
       autohide = true;
-      orientation = "left";
+      orientation = "bottom";
       tilesize = 48;
       magnification = true;
       largesize = 57;
