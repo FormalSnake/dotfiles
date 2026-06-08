@@ -19,6 +19,7 @@
     ./mixins/rift.nix
     ./mixins/lynk-browser.nix
     ./mixins/herdr.nix
+    ./mixins/jankyborders.nix
   ];
 
   home = {
