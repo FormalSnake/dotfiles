@@ -14,10 +14,10 @@ let
     "/Applications/OrbStack.app"
     "/Applications/Obsidian.app"
     "/Applications/Claude.app"
+    "/System/Applications/Calendar.app"
     "/Applications/Equibop.app"
     "/Applications/Beeper Desktop.app"
     "/System/Applications/Messages.app"
-    "/System/Applications/Calendar.app"
     "/Applications/Spotify.app"
   ];
 
