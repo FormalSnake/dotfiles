@@ -17,6 +17,7 @@ let
     "/Applications/Equibop.app"
     "/Applications/Beeper Desktop.app"
     "/System/Applications/Messages.app"
+    "/System/Applications/Calendar.app"
     "/Applications/Spotify.app"
   ];
 

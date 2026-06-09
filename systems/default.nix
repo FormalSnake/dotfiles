@@ -9,4 +9,14 @@
       ];
     };
   };
+
+  flake.nixosConfigurations = {
+    g815 = inputs.nixpkgs.lib.nixosSystem {
+      specialArgs = { inherit inputs self; };
+      modules = [
+        self.nixosModules.default
+        ./g815
+      ];
+    };
+  };
 }

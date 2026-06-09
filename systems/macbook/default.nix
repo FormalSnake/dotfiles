@@ -19,7 +19,10 @@
   };
 
   home-manager.users.kyandesutter = {
-    imports = [ self.homeModules.kyandesutter ];
+    imports = [
+      self.homeModules.kyandesutter
+      self.homeModules.kyandesutter-darwin
+    ];
   };
 
   security.pam.services.sudo_local.touchIdAuth = true;

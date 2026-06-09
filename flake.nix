@@ -61,5 +61,24 @@
       url = "github:ogulcancelik/herdr";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # — NixOS (g815 gaming laptop) inputs —
+
+    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+
+    # CachyOS kernel + scx schedulers. nyxpkgs-unstable tracks nixpkgs-unstable.
+    chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
+
+    # caelestia Quickshell desktop shell — official flake (home-manager module).
+    caelestia-shell = {
+      url = "github:caelestia-dots/shell";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # Helium browser (Chromium fork) — exposes overlays.default -> pkgs.helium.
+    helium = {
+      url = "github:schembriaiden/helium-browser-nix-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 }

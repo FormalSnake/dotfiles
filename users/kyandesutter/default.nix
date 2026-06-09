@@ -1,4 +1,8 @@
+{ pkgs, ... }:
 {
+  # Cross-platform base only. Platform-specific mixins live in ./darwin.nix and
+  # ./linux.nix, wired per-host (self.homeModules.kyandesutter-{darwin,linux}) —
+  # imports must not depend on `pkgs`/`config` (that causes infinite recursion).
   imports = [
     ./programs.nix
     ./shell.nix
@@ -10,21 +14,15 @@
     ./mixins/pi.nix
     ./mixins/ghostty.nix
     ./mixins/tmux.nix
-    ./mixins/aerospace.nix
-    ./mixins/karabiner.nix
-    ./mixins/hammerspoon.nix
     ./mixins/neovim.nix
     ./mixins/catppuccin.nix
     ./mixins/fastfetch.nix
-    ./mixins/rift.nix
-    ./mixins/lynk-browser.nix
     ./mixins/herdr.nix
-    ./mixins/jankyborders.nix
   ];
 
   home = {
     username = "kyandesutter";
-    homeDirectory = "/Users/kyandesutter";
+    homeDirectory = if pkgs.stdenv.isDarwin then "/Users/kyandesutter" else "/home/kyandesutter";
     stateVersion = "26.05";
     # nixpkgs tracks unstable; home-manager master still reports 26.05.
     # The mismatch is transient — silence until HM master bumps to 26.11.
