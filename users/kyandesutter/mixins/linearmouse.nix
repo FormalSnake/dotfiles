@@ -2,13 +2,32 @@
 
 {
   xdg.configFile."linearmouse/linearmouse.json".text = builtins.toJSON {
-    "$schema" = "https://app.linearmouse.org/schema/0.7.2";
+    "$schema" = "https://schema.linearmouse.app/0.11.2";
     schemes = [
       {
-        pointer = {
-          acceleration = "unset";
-          speed = 0.75;
+        buttons.universalBackForward = true;
+        "if".device = {
+          category = "mouse";
+          productID = "0xc54d";
+          productName = "USB Receiver";
+          serialNumber = "335D376D3135";
+          vendorID = "0x46d";
         };
+        pointer.disableAcceleration = true;
+        scrolling.reverse = {
+          vertical = true;
+          horizontal = false;
+        };
+      }
+      {
+        "if".device = {
+          category = "trackpad";
+          productID = "0x343";
+          productName = "Apple Internal Keyboard / Trackpad";
+          serialNumber = "FM7148604WZNX0QA8+RMZ";
+          vendorID = "0x5ac";
+        };
+        pointer.disableAcceleration = false;
         scrolling.reverse = {
           vertical = true;
           horizontal = false;
