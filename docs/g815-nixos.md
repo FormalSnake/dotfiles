@@ -20,7 +20,7 @@ G18 G815LP-S9034** (Intel Core Ultra 9 275HX "Arrow Lake-HX", RTX 5070 Laptop "B
   Fortnite doesn't require it; only tournaments do). Laptop ships with no OS → install
   Win11 into its own partition, then NixOS alongside.
 - **Browser:** Helium via `github:schembriaiden/helium-browser-nix-flake` overlay → `web` ws.
-- **Home mixins:** `herdr` is cross-platform (comes to laptop). `rift` + `lynk-browser` stay
+- **Home mixins:** `herdr` is cross-platform (comes to laptop). `aerospace` + `lynk-browser` stay
   macOS-only. Shared dev env (fish, neovim, git, gh, ssh, claude-code, pi, tmux, catppuccin,
   fastfetch, ghostty, programs.nix tools) comes to the laptop.
 
