@@ -7,7 +7,7 @@
       {
         pointer = {
           acceleration = "unset";
-          speed = "unset";
+          speed = 0.75;
         };
         scrolling.reverse = {
           vertical = true;
