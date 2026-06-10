@@ -148,7 +148,7 @@ Need just current directory?
 
 ## React useEffect Policy — NO DIRECT useEffect
 
-**Direct `useEffect` calls are banned in component files.** Most useEffect usage compensates for something React already gives better primitives for. This rule is enforced by ESLint (`no-restricted-imports` for `useEffect`) and by a grep-based CI guard.
+**Direct `useEffect` calls are banned in component files.** Most useEffect usage compensates for something React already gives better primitives for. This rule is enforced by `yarn verify:no-raw-useeffect` (a grep-based guard script at `scripts/verify-no-raw-useeffect.sh`) — there is **no** ESLint rule for it and it is not wired into CI; run it yourself before finishing a session.
 
 ### The only approved escape hatches
 
@@ -175,8 +175,8 @@ Need just current directory?
 ### Guardrail
 
 ```bash
-# CI check — fails if any UNTAGGED useEffect exists in component/page files
-bun run verify:no-raw-useeffect
+# Guard script — fails if any UNTAGGED useEffect exists in component/page files
+yarn verify:no-raw-useeffect
 ```
 Every `useEffect` call in `apps/web/src/components/**` and `apps/web/src/pages/**` must be either:
 1. **Refactored away** (preferred) — use the five patterns above
@@ -188,6 +188,6 @@ Every `useEffect` call in `apps/web/src/components/**` and `apps/web/src/pages/*
 useEffect(() => { ... }, [...]);
 ```
 
-Custom hooks in `apps/web/src/hooks/` are exempt (they are the approved encapsulation boundary). The `unaudited-useeffect` category is also tracked in `bun run ci:antipatterns`.
+Custom hooks in `apps/web/src/hooks/` are exempt (they are the approved encapsulation boundary).
 
-**If you add a new useEffect:** You must either refactor it to a better pattern or tag it with `// effect:audited — <reason>`. Untagged calls fail CI.
+**If you add a new useEffect:** You must either refactor it to a better pattern or tag it with `// effect:audited — <reason>`. Untagged calls fail `yarn verify:no-raw-useeffect`.
