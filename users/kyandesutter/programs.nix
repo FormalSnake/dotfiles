@@ -83,7 +83,7 @@
     vscode = {
       enable = true;
       package = pkgs.vscode;
-      extensions = [
+      profiles.default.extensions = [
         pkgs.vscode-extensions.anthropic.claude-code
         (pkgs.vscode-utils.extensionFromVscodeMarketplace {
           name = "kickbacks-ai";
