@@ -30,7 +30,7 @@
         pointer.disableAcceleration = false;
         scrolling.reverse = {
           vertical = true;
-          horizontal = false;
+          horizontal = true;
         };
       }
     ];
