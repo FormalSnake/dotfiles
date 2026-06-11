@@ -80,6 +80,19 @@
       package = pkgs.prismlauncher.override { jdks = [ pkgs.zulu17 ]; };
     };
     ripgrep.enable = true;
+    vscode = {
+      enable = true;
+      package = pkgs.vscode;
+      extensions = [
+        pkgs.vscode-extensions.anthropic.claude-code
+        (pkgs.vscode-utils.extensionFromVscodeMarketplace {
+          name = "kickbacks-ai";
+          publisher = "Kickbacksai";
+          version = "0.3.171";
+          hash = "sha256-vrKfZ92t5/hKxB14aOT3V3F8/3+Vk+ssPvHodTsp4MM=";
+        })
+      ];
+    };
     yazi.enable = true;
     zoxide.enable = true;
   };
