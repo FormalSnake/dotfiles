@@ -39,6 +39,7 @@
       tree-sitter
       uv
       wget
+      zig
     ]
     # macOS-only dev toolchain (Swift/Xcode/CocoaPods, Mac App Store CLI).
     # These packages are Darwin-only in nixpkgs, so guard them off on Linux.
