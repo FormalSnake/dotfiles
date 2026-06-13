@@ -11,6 +11,7 @@
     # Everything else moved to nix/home-manager — see users/kyandesutter/programs.nix.
     brews = [
       "watchman" # nixpkgs build pulls folly, which fails to compile on darwin
+      "wireguard-tools"
     ];
 
     casks = [
@@ -42,7 +43,6 @@
       "thaw"
       "the-unarchiver"
       "vlc"
-      "wireguard"
 
       # — newly imported from /Applications (previously imperative) —
       "1password"
