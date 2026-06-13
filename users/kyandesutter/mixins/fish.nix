@@ -104,6 +104,20 @@
           claude $argv
         '';
       };
+
+      wgtunnel = {
+        description = "WireGuard-over-wstunnel client (endpoint + path prefix from agenix)";
+        body = ''
+          if not set -q WSTUNNEL_ENDPOINT; or not set -q WSTUNNEL_PATH_PREFIX
+              echo "WSTUNNEL_ENDPOINT / WSTUNNEL_PATH_PREFIX not set (agenix secret missing?)" >&2
+              return 1
+          end
+          wstunnel client \
+              -L 'udp://51820:localhost:51820?timeout_sec=0' \
+              --http-upgrade-path-prefix $WSTUNNEL_PATH_PREFIX \
+              $WSTUNNEL_ENDPOINT $argv
+        '';
+      };
     };
 
     interactiveShellInit = ''
@@ -164,6 +178,8 @@
       __load_agenix_secret NUCLEO_LICENSE_KEY nucleo-license
       __load_agenix_secret NPM_GITHUB_TOKEN   npm-github-token
       __load_agenix_secret NPM_REGISTRY_TOKEN npm-registry-token
+      __load_agenix_secret WSTUNNEL_PATH_PREFIX wstunnel-path-prefix
+      __load_agenix_secret WSTUNNEL_ENDPOINT    wstunnel-endpoint
 
       # Lumen reuses the OpenAI key under a different name
       if set -q OPENAI_API_KEY

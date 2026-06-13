@@ -15,4 +15,6 @@ in
   "nucleo-license.age".publicKeys     = [ kyan ];
   "npm-github-token.age".publicKeys   = [ kyan ];
   "npm-registry-token.age".publicKeys = [ kyan ];
+  "wstunnel-path-prefix.age".publicKeys = [ kyan ];
+  "wstunnel-endpoint.age".publicKeys    = [ kyan ];
 }
