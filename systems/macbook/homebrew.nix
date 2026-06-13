@@ -42,6 +42,7 @@
       "thaw"
       "the-unarchiver"
       "vlc"
+      "wireguard"
 
       # — newly imported from /Applications (previously imperative) —
       "1password"
