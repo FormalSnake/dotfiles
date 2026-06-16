@@ -2,23 +2,54 @@
 let
   cfg = config.kyan.desktop;
 
-  # Throwaway Hyprland config for the login greeter. Its only job is to bring up
-  # every connected output (so the dGPU-wired external monitor lights up — the
-  # old tuigreet was a TTY app stuck on the iGPU's internal panel), run ReGreet,
-  # then tear the greeter compositor down so greetd can launch the real session.
+  # Store paths referenced inside the greeter Hyprland config below.
+  hyprctl = "${config.programs.hyprland.package}/bin/hyprctl";
+  regreetExe = lib.getExe config.programs.regreet.package;
+  dbusRun = "${pkgs.dbus}/bin/dbus-run-session";
+
+  # Throwaway Hyprland config for the login greeter: it brings up the outputs
+  # (so the dGPU-wired external lights up — the old tuigreet was a TTY app stuck
+  # on the iGPU's internal panel), pins the single ReGreet window to the external
+  # monitor, then exits so greetd can launch the chosen session. ReGreet is a
+  # single-monitor app, so without the pin it lands on whatever output is at the
+  # origin (previously eDP-1) — hence the login never showing on the desk screen.
   greeterHyprConf = pkgs.writeText "greeter-hyprland.conf" ''
-    # Match the session's panel scaling so text isn't tiny on the hidpi internal
-    # display; everything else (incl. the external) auto-detects at scale 1.
-    monitor = eDP-1, preferred, 0x0, 1.25
+    # Outputs: external (HDMI-A-1, on the dGPU) at the origin, internal to its
+    # right (scaled to match the session). The trailing catch-all also covers the
+    # laptop-only case — with no external connected the window rule below is
+    # ignored and ReGreet opens on eDP-1 instead.
+    monitor = HDMI-A-1, preferred, 0x0, 1
+    monitor = eDP-1, preferred, auto, 1.25
     monitor = , preferred, auto, 1
 
-    # No idle/animation noise on the login screen.
-    animations { enabled = false }
-    cursor { no_hardware_cursors = true }
+    # Chromeless, quiet greeter: the lone ReGreet window fills the screen, and the
+    # Hyprland splash/logo is off so the bare compositor isn't visible behind it.
+    general {
+      gaps_in = 0
+      gaps_out = 0
+      border_size = 0
+    }
+    decoration {
+      rounding = 0
+    }
+    animations {
+      enabled = false
+    }
+    cursor {
+      no_hardware_cursors = true
+    }
+    misc {
+      disable_hyprland_logo = true
+      disable_splash_rendering = true
+    }
 
-    # Run the greeter; when it returns (a session was picked) exit the greeter
-    # compositor so greetd hands off to the chosen session.
-    exec-once = ${lib.getExe config.programs.regreet.package}; hyprctl dispatch exit
+    # Put the login on the external monitor (ignored → internal when no external).
+    windowrule = monitor HDMI-A-1, class:.*
+
+    # Launch ReGreet in its own D-Bus session (upstream recommendation); when a
+    # session is picked and ReGreet exits, tear the greeter down so greetd hands
+    # off to the chosen session.
+    exec-once = ${dbusRun} ${regreetExe}; ${hyprctl} dispatch exit
   '';
 in
 {
@@ -45,7 +76,17 @@ in
     # connected monitors, so the prompt now appears on the external too.
     programs.regreet = {
       enable = true;
-      settings.GTK.application_prefer_dark_theme = true;
+      settings = {
+        # After the first login ReGreet remembers the user + session and skips
+        # both pickers, dropping straight to the password prompt for the last-used
+        # session — i.e. a sticky default. On the very first login pick
+        # "Hyprland (uwsm-managed)" so that becomes the remembered default; the
+        # plain "Hyprland" entry launches without start-hyprland (the warning you
+        # saw) and is best avoided.
+        skip_selection = true;
+        GTK.application_prefer_dark_theme = true;
+        appearance.greeting_msg = "Welcome back";
+      };
     };
 
     # The regreet module defaults the greetd command to cage (via mkDefault);
