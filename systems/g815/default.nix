@@ -23,12 +23,12 @@
   # Intel Core Ultra 9 275HX (Arrow Lake-HX).
   hardware.cpu.intel.updateMicrocode = true;
 
-  # PRIME offload bus IDs — the iGPU is usually PCI:0:2:0; the dGPU varies.
-  # TODO (first boot): `lspci -D | grep -E "VGA|3D"`, convert the hex
-  # domain:bus:dev.fn to NixOS's decimal PCI:bus:dev:fn, and replace these.
+  # PRIME offload bus IDs — verified on the real hardware via `lspci -D`:
+  #   0000:00:02.0 Intel Arrow Lake-S iGPU → PCI:0:2:0
+  #   0000:02:00.0 NVIDIA GB206M (RTX 5070 Mobile, Blackwell) → PCI:2:0:0
   hardware.nvidia.prime = {
-    intelBusId = "PCI:0:2:0"; # TODO verify
-    nvidiaBusId = "PCI:1:0:0"; # TODO verify
+    intelBusId = "PCI:0:2:0";
+    nvidiaBusId = "PCI:2:0:0";
   };
 
   # Profiles (enable the desktop + gaming stacks for this host).

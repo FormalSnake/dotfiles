@@ -28,8 +28,10 @@ G18 G815LP-S9034** (Intel Core Ultra 9 275HX "Arrow Lake-HX", RTX 5070 Laptop "B
 
 - [ ] `nixos-generate-config` → real `systems/g815/hardware-configuration.nix` (fileSystems,
       LUKS, swap, initrd modules). The committed file is a **placeholder template**.
-- [ ] Read PCI bus IDs: `lspci -D | grep -E "VGA|3D"`, convert hex→decimal, fill
+- [x] Read PCI bus IDs: `lspci -D | grep -E "VGA|3D"`, convert hex→decimal, fill
       `prime.intelBusId` / `prime.nvidiaBusId` in `systems/g815/default.nix`.
+      Verified on hardware: Intel `0000:00:02.0` → `PCI:0:2:0`, NVIDIA `0000:02:00.0`
+      → `PCI:2:0:0`.
 - [ ] Generate a host age key and add it to `secrets/secrets.nix`, then `agenix -r`
       (linux secrets are stubbed until then).
 - [ ] Verify G815**LP** speaker audio (upstream quirk is documented for G815**LR**).
