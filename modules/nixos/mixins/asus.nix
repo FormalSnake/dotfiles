@@ -50,15 +50,15 @@ let
     text = ''
       action="''${1:-toggle}"
 
-      current() { asusctl profile -p 2>/dev/null | grep -oiE 'Performance|Balanced|Quiet' | head -n1; }
+      current() { asusctl profile get 2>/dev/null | grep -oiE 'Performance|Balanced|Quiet' | head -n1; }
 
       on() {
-        asusctl profile -P Performance
+        asusctl profile set Performance
         notify-send -a "game-mode" "Game mode ON" "asusd profile → Performance" || true
         echo "Game mode ON (Performance)"
       }
       off() {
-        asusctl profile -P Balanced
+        asusctl profile set Balanced
         notify-send -a "game-mode" "Game mode OFF" "asusd profile → Balanced" || true
         echo "Game mode OFF (Balanced)"
       }
@@ -70,6 +70,68 @@ let
         toggle)
           if [ "$(current)" = "Performance" ]; then off; else on; fi ;;
         *) echo "usage: game-mode [on|off|toggle|status]" >&2; exit 1 ;;
+      esac
+    '';
+  };
+
+  # night-mode: a quiet overnight-download mode. Sets the asusd platform profile
+  # to Quiet (gentlest fan curve) and PPD to power-saver (caps CPU boost → less
+  # heat → fans stay down), turns the displays off, and — crucially — holds a
+  # Wayland idle-inhibit lock for the duration so caelestia's idle daemon never
+  # fires its timeouts. Those default to lock@3m, dpms-off@5m and
+  # `systemctl suspend-then-hibernate`@10m, and all of them `respectInhibitors`;
+  # the 10-minute suspend is what would otherwise pause a Steam download
+  # overnight. We blank the screens ourselves (dpms off) since the inhibitor
+  # also suppresses caelestia's own auto screen-off — they wake on any input.
+  night-mode = pkgs.writeShellApplication {
+    name = "night-mode";
+    runtimeInputs = [
+      pkgs.asusctl
+      config.services.power-profiles-daemon.package # powerprofilesctl
+      pkgs.wlinhibit
+      pkgs.hyprland # hyprctl
+      pkgs.libnotify
+      pkgs.coreutils
+    ];
+    text = ''
+      action="''${1:-toggle}"
+      pidfile="''${XDG_RUNTIME_DIR:-/tmp}/night-mode-inhibit.pid"
+      ppctl=${config.services.power-profiles-daemon.package}/bin/powerprofilesctl
+
+      # ON iff a recorded wlinhibit process is still alive.
+      is_on() { [ -f "$pidfile" ] && kill -0 "$(cat "$pidfile" 2>/dev/null)" 2>/dev/null; }
+
+      on() {
+        asusctl profile set Quiet || true
+        "$ppctl" set power-saver || true
+        if ! is_on; then
+          # Foreground tool that holds the idle inhibitor until killed; background
+          # it and remember the PID so `off` can release it.
+          wlinhibit >/dev/null 2>&1 &
+          echo "$!" > "$pidfile"
+        fi
+        notify-send -a "night-mode" "Night mode ON" \
+          "Quiet fans · idle suspend blocked · screens off" || true
+        hyprctl dispatch dpms off || true
+        echo "Night mode ON"
+      }
+
+      off() {
+        if is_on; then kill "$(cat "$pidfile")" 2>/dev/null || true; fi
+        rm -f "$pidfile"
+        hyprctl dispatch dpms on || true
+        asusctl profile set Performance || true
+        "$ppctl" set performance 2>/dev/null || "$ppctl" set balanced || true
+        notify-send -a "night-mode" "Night mode OFF" "Restored Performance" || true
+        echo "Night mode OFF"
+      }
+
+      case "$action" in
+        on)     on ;;
+        off)    off ;;
+        status) if is_on; then echo "Night mode ON"; else echo "Night mode OFF"; fi ;;
+        toggle) if is_on; then off; else on; fi ;;
+        *) echo "usage: night-mode [on|off|toggle|status]" >&2; exit 1 ;;
       esac
     '';
   };
@@ -140,8 +202,11 @@ in
     })
 
     (lib.mkIf config.kyan.gaming.enable {
-      # game-mode needs asusctl/asusd; the g815 host enables kyan.asus too.
-      environment.systemPackages = [ game-mode ];
+      # game-mode / night-mode need asusctl/asusd; the g815 host enables kyan.asus too.
+      environment.systemPackages = [
+        game-mode
+        night-mode
+      ];
     })
   ];
 }

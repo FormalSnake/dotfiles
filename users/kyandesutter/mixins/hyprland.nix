@@ -219,6 +219,10 @@ in
     hl.bind(mod .. " + SHIFT + F", hl.dsp.window.fullscreen({ action = "toggle", mode = "fullscreen" }))
     hl.bind(mod .. " + V", hl.dsp.window.float({ action = "toggle" }))
     hl.bind(mod .. " + B", hl.dsp.exec_cmd("helium"))
+    -- Overnight quiet-download mode: Quiet fan profile + power-saver, blanks the
+    -- displays, and holds a Wayland idle-inhibit lock so caelestia's idle daemon
+    -- doesn't suspend mid-download. SUPER+SHIFT+N again to restore.
+    hl.bind(mod .. " + SHIFT + N", hl.dsp.exec_cmd("night-mode toggle"))
 
     -- Vim-style focus (aerospace alt-hjkl → SUPER+hjkl).
     hl.bind(mod .. " + H", hl.dsp.focus({ direction = "l" }))
