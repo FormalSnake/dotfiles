@@ -31,6 +31,14 @@ in
     security.polkit.enable = true;
     services.gnome.gnome-keyring.enable = true;
 
+    # GNOME/GTK desktop plumbing the apps and file manager rely on:
+    #   • gvfs:  Nautilus trash, removable-drive / network mounting, MTP.
+    #   • tumbler (+ ffmpegthumbnailer): thumbnails, including video, in Nautilus.
+    #   • dconf: the settings backend every GTK/GNOME app reads and writes.
+    services.gvfs.enable = true;
+    services.tumbler.enable = true;
+    programs.dconf.enable = true;
+
     # UPower: the D-Bus power daemon caelestia reads battery state from. Enable
     # it explicitly — relying on D-Bus auto-activation made battery detection
     # in the caelestia bar flaky.
@@ -75,6 +83,7 @@ in
       wl-clipboard
       grim
       slurp
+      ffmpegthumbnailer # video thumbnails for tumbler/Nautilus
     ];
   };
 }

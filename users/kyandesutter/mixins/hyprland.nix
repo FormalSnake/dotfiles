@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 let
   # Cursor-aware brightness control. Adjusts whichever monitor the cursor is
   # currently over: the internal panel via the kernel backlight (brightnessctl),
@@ -287,19 +287,51 @@ in
   '';
 
   # Clipboard history for the SUPER-launcher / cliphist; Nautilus as the GUI
-  # file manager.
+  # file manager, plus the GNOME companions that make it feel complete:
+  # file-roller (extract/create archives from the right-click menu), sushi
+  # (Spacebar quick-preview), and loupe (the GNOME image viewer).
   home.packages = with pkgs; [
     cliphist
     hyprpolkitagent
     nautilus
+    file-roller
+    sushi
+    loupe
+
+    # GNOME/GTK apps that round out the desktop.
+    papers # PDF / document viewer (default for application/pdf)
+    gnome-text-editor # plain-text editor (default for text/plain)
+    gnome-calendar
+    gnome-clocks
+    gnome-maps
+    snapshot # camera
   ];
 
-  # Make Nautilus the default file manager: anything that opens a folder via
-  # xdg-open / the inode/directory MIME (file pickers, "open containing folder",
-  # caelestia, etc.) launches Nautilus. enable writes ~/.config/mimeapps.list.
+  # Default apps by MIME. enable writes ~/.config/mimeapps.list.
+  #   • Folders → Nautilus (xdg-open, file pickers, "open containing folder",
+  #     caelestia, etc. all launch it).
+  #   • Images → Loupe, so double-clicking an image in Nautilus opens it.
+  #   • PDFs → Papers; plain text → GNOME Text Editor.
   xdg.mimeApps = {
     enable = true;
-    defaultApplications."inode/directory" = [ "org.gnome.Nautilus.desktop" ];
+    defaultApplications =
+      {
+        "inode/directory" = [ "org.gnome.Nautilus.desktop" ];
+        "application/pdf" = [ "org.gnome.Papers.desktop" ];
+        "text/plain" = [ "org.gnome.TextEditor.desktop" ];
+      }
+      // lib.genAttrs [
+        "image/png"
+        "image/jpeg"
+        "image/gif"
+        "image/webp"
+        "image/bmp"
+        "image/tiff"
+        "image/x-icon"
+        "image/heif"
+        "image/avif"
+        "image/svg+xml"
+      ] (_: [ "org.gnome.Loupe.desktop" ]);
   };
 
   # Cursor theme — Catppuccin Mocha (Mauve accent), matching the Aura RGB theme.
