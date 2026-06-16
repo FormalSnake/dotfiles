@@ -6,7 +6,7 @@
     PAGER = "less";
     LESS = "-FRX";
 
-    JAVA_HOME = "${pkgs.zulu17.home}";
+    JAVA_HOME = "${pkgs.zulu21.home}";
     ANDROID_HOME = "/Users/kyandesutter/Library/Android/sdk";
   };
 }

@@ -5,7 +5,7 @@
     with pkgs;
     [
       just
-      zulu17
+      zulu21
       _1password-cli
 
       # — migrated from homebrew formulae —
@@ -79,9 +79,10 @@
     opencode.enable = true;
     prismlauncher = {
       enable = true;
-      # Bundle only zulu17 (matches what was on brew). The default jdk21/17/8
-      # triple would pull a lot of extra JDKs we don't need.
-      package = pkgs.prismlauncher.override { jdks = [ pkgs.zulu17 ]; };
+      # Bundle zulu17 (older MC) and zulu21 (MC 1.20.5+/1.21 require Java 21).
+      # Prism auto-selects the right JDK per instance. We skip the default
+      # jdk21/17/8 triple to avoid pulling the extra Java 8 JDK we don't need.
+      package = pkgs.prismlauncher.override { jdks = [ pkgs.zulu17 pkgs.zulu21 ]; };
     };
     ripgrep.enable = true;
     yazi.enable = true;
