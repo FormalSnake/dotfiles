@@ -16,6 +16,23 @@ let
     esac
   '';
 
+  # Follow AC state with the power-profiles-daemon profile: Performance on AC,
+  # Balanced on battery. PPD is the backend the caelestia bar reads/writes
+  # (Quickshell UPower → net.hadess.PowerProfiles), so this is what makes the
+  # shell show "Performance" plugged in without manual toggling. Reads ADP0
+  # itself so a single udev rule on any power_supply change does the right thing.
+  # `performance` can be unavailable when the daemon reports degradation, so we
+  # fall back to balanced rather than fail.
+  powerProfileSync = pkgs.writeShellScript "power-profile-ac" ''
+    ppctl=${config.services.power-profiles-daemon.package}/bin/powerprofilesctl
+    online=$(cat /sys/class/power_supply/ADP0/online 2>/dev/null || echo 1)
+    if [ "$online" = "1" ]; then
+      "$ppctl" set performance 2>/dev/null || "$ppctl" set balanced || true
+    else
+      "$ppctl" set balanced || true
+    fi
+  '';
+
   # game-mode: a no-relog runtime toggle. Flips the asusd platform profile
   # (fans/power) between Performance and Balanced. Per-game CPU governor/niceness
   # is handled separately by `gamemode` when a title launches. No GPU mode switch
@@ -60,9 +77,29 @@ in
 
   config = lib.mkMerge [
     (lib.mkIf config.kyan.asus.enable {
-      # asusd: fan curves, power/platform profiles, Aura keyboard LEDs.
+      # asusd: fan curves, Aura keyboard LEDs, battery charge limit.
       # (supergfxd is intentionally omitted — MUX switching needs a relog.)
       services.asusd.enable = true;
+
+      # power-profiles-daemon: the profile backend the caelestia bar reads and
+      # writes. The bare Hyprland session doesn't pull it in (no desktop manager
+      # does), so without it the bar is stuck showing a static "Balanced" it
+      # can't change. Coexists with asusd, which keeps Aura/fan/charge-limit
+      # duties; PPD owns the platform profile (the kernel asus-wmi interface).
+      services.power-profiles-daemon.enable = true;
+
+      # Drive PPD from AC state: Performance on AC, Balanced on battery. Runs at
+      # boot (wantedBy multi-user) and on every AC plug/unplug (udev rule below).
+      systemd.services.power-profile-ac = {
+        description = "Power profile follows AC (Performance on AC, Balanced on battery)";
+        after = [ "power-profiles-daemon.service" ];
+        wants = [ "power-profiles-daemon.service" ];
+        wantedBy = [ "multi-user.target" ];
+        serviceConfig = {
+          Type = "oneshot";
+          ExecStart = powerProfileSync;
+        };
+      };
 
       # After asusd is up: paint the keyboard Catppuccin Mauve and cap the
       # battery charge at 80% for longevity. `|| true` so a CLI/permission
@@ -87,6 +124,7 @@ in
       services.udev.extraRules = ''
         SUBSYSTEM=="power_supply", KERNEL=="ADP0", ATTR{online}=="0", RUN+="${kbdDim} off"
         SUBSYSTEM=="power_supply", KERNEL=="ADP0", ATTR{online}=="1", RUN+="${kbdDim} on"
+        SUBSYSTEM=="power_supply", KERNEL=="ADP0", RUN+="${config.systemd.package}/bin/systemctl --no-block restart power-profile-ac.service"
       '';
     })
 

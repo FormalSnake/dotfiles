@@ -4,6 +4,8 @@
     imports = [
       # CachyOS kernel overlay + binary cache + git scx schedulers.
       inputs.chaotic.nixosModules.default
+      # Declarative Flatpak (Sober / Roblox) — see ./mixins/sober.nix.
+      inputs.nix-flatpak.nixosModules.nix-flatpak
       ../shared
       ./mixins/nix.nix
       ./mixins/users.nix
@@ -20,6 +22,7 @@
       ./mixins/hyprland.nix
       ./mixins/gaming.nix
       ./mixins/asus.nix
+      ./mixins/sober.nix
       ./profiles
     ];
   };

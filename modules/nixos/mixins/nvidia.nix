@@ -27,6 +27,19 @@
     };
   };
 
+  # Force the dGPU's PowerMizer to prefer maximum performance on AC, and fall
+  # back to adaptive on battery — mirroring the CPU power policy (max unless on
+  # battery). The driver switches between the two itself based on the power
+  # source, so no udev/session hook is needed, and it works headless/Wayland
+  # (nvidia-settings would need an X server). PerfLevelSrc=0x2222 tells the
+  # driver to honour the PowerMizerDefault* levels instead of its own heuristic;
+  # AC=0x1 is "maximum performance", battery=0x3 is "adaptive". This governs
+  # clocks only while the GPU is awake — RTD3 (finegrained, above) still powers
+  # it down when idle, so it's "max when in use", not "always on".
+  boot.extraModprobeConfig = ''
+    options nvidia NVreg_RegistryDwords="PowerMizerEnable=0x1; PerfLevelSrc=0x2222; PowerMizerDefaultAC=0x1; PowerMizerDefault=0x3"
+  '';
+
   environment.sessionVariables = {
     # NVIDIA + Wayland: hardware video decode through the dGPU.
     LIBVA_DRIVER_NAME = "nvidia";

@@ -20,6 +20,10 @@ in
     settings = {
       bar.status.showBattery = true;
 
+      # Translucent panels (bar, popouts, dashboard). enabled is off by default;
+      # base/layers keep the shell's own defaults (0.85 main / 0.4 overlays).
+      appearance.transparency.enabled = true;
+
       # System font: Geist for UI text, GeistMono (Nerd Font) for monospace.
       # appearance.font.<style>.family overrides the shell's defaults
       # (GoogleSansFlex / CaskaydiaCove NF). icon stays Material Symbols, and

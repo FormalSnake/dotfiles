@@ -39,6 +39,9 @@
   # battery charge limit, dim-LEDs-on-battery.
   kyan.asus.enable = true;
 
+  # Sober — Roblox client for Linux (Flatpak-only, managed declaratively).
+  kyan.sober.enable = true;
+
   home-manager.users.kyandesutter = {
     imports = [
       self.homeModules.kyandesutter

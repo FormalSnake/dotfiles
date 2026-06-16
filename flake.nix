@@ -71,6 +71,10 @@
     # CachyOS kernel + scx schedulers. nyxpkgs-unstable tracks nixpkgs-unstable.
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
 
+    # Declarative Flatpak management (used for Sober, the Roblox client, which
+    # is only distributed as a Flatpak — not packaged in nixpkgs).
+    nix-flatpak.url = "github:gmodena/nix-flatpak";
+
     # caelestia Quickshell desktop shell — official flake (home-manager module).
     caelestia-shell = {
       url = "github:caelestia-dots/shell";

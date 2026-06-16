@@ -41,6 +41,10 @@
     local terminal = "ghostty"
 
     -- — Environment —
+    -- Cursor theme/size for XWayland (X11) clients — without XCURSOR_THEME they
+    -- fall back to a default theme and show a *different* cursor than native
+    -- Wayland apps (which read it from home.pointerCursor / hyprcursor below).
+    hl.env("XCURSOR_THEME", "catppuccin-mocha-mauve-cursors")
     hl.env("XCURSOR_SIZE", "24")
     -- NVIDIA + Wayland hints (explicit-sync is automatic on recent drivers).
     hl.env("__GL_GSYNC_ALLOWED", "1")
@@ -57,6 +61,11 @@
     hl.config({
       input = {
         kb_layout = "es",
+        -- Mac keyboards have no AltGr key; map the left Option/Alt (LALT) to the
+        -- XKB level-3 selector so it types the es layout's AltGr glyphs
+        -- (@ # ~ [ ] { } \ € …). Trade-off: left Alt no longer acts as a plain
+        -- Alt modifier (SUPER is the primary mod here anyway).
+        kb_options = "lv3:lalt_switch",
         follow_mouse = 1,
         sensitivity = 0,
         touchpad = { natural_scroll = true },
@@ -76,6 +85,14 @@
       misc = {
         disable_hyprland_logo = true,
         disable_splash_rendering = true,
+      },
+      -- eDP-1 runs at fractional scale (1.25). XWayland can't do fractional
+      -- scaling, so Hyprland upscales X11 surfaces → blurry/"weird" scaling and
+      -- per-frame upscale overhead that drops their framerate. force_zero_scaling
+      -- makes XWayland render at scale 1 (crisp, native rate); X11 apps that look
+      -- small can be nudged with GDK_SCALE / per-app DPI.
+      xwayland = {
+        force_zero_scaling = true,
       },
     })
 
@@ -123,6 +140,13 @@
     hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("brightnessctl set 5%+"), { repeating = true })
     hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl set 5%-"), { repeating = true })
 
+    -- Media playback (G815 dedicated keys) via the active MPRIS player.
+    hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"))
+    hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"))
+    hl.bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"))
+    hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"))
+    hl.bind("XF86AudioStop", hl.dsp.exec_cmd("playerctl stop"))
+
     -- Mouse drag/resize (aerospace SUPER+LMB move, SUPER+RMB resize).
     hl.bind(mod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
     hl.bind(mod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
@@ -147,4 +171,16 @@
     cliphist
     hyprpolkitagent
   ];
+
+  # Cursor theme — Catppuccin Mocha (Mauve accent), matching the Aura RGB theme.
+  # Sets it for GTK, native Wayland (hyprcursor) and X11/XWayland (x11.enable
+  # exports XCURSOR_THEME/SIZE) so every app shows the same pretty cursor.
+  home.pointerCursor = {
+    package = pkgs.catppuccin-cursors.mochaMauve;
+    name = "catppuccin-mocha-mauve-cursors";
+    size = 24;
+    gtk.enable = true;
+    x11.enable = true;
+    hyprcursor.enable = true;
+  };
 }
