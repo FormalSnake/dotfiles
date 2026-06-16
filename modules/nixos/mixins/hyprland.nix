@@ -54,6 +54,20 @@ in
       monospace = [ "GeistMono Nerd Font" ];
     };
 
+    # Backlight permissions: let the `video` group (which kyandesutter is in)
+    # write the panel brightness node so `brightnessctl` works without root.
+    # brightnessctl ships its own udev rule, but it hardcodes `/bin/chgrp`,
+    # which doesn't exist on NixOS — so spell the rule out with store paths.
+    # %S%p is the device's sysfs path; the writable attribute is .../brightness.
+    services.udev.extraRules = ''
+      ACTION=="add", SUBSYSTEM=="backlight", RUN+="${pkgs.coreutils}/bin/chgrp video %S%p/brightness", RUN+="${pkgs.coreutils}/bin/chmod g+w %S%p/brightness"
+    '';
+
+    # External-monitor brightness over DDC/CI (ddcutil). Loads the i2c-dev
+    # module, creates the `i2c` group and grants it access to /dev/i2c-*.
+    # kyandesutter is added to that group in ../mixins/users.nix.
+    hardware.i2c.enable = true;
+
     environment.systemPackages = with pkgs; [
       brightnessctl
       ddcutil # external-monitor brightness (caelestia uses it)

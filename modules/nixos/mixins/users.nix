@@ -16,6 +16,7 @@
       "wheel" # sudo
       "networkmanager"
       "video"
+      "i2c" # DDC/CI access to /dev/i2c-* for external-monitor brightness (ddcutil)
       "audio"
       "input"
       "gamemode" # gamemode renice/governor without root

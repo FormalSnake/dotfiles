@@ -1,4 +1,114 @@
 { pkgs, ... }:
+let
+  # Cursor-aware brightness control. Adjusts whichever monitor the cursor is
+  # currently over: the internal panel via the kernel backlight (brightnessctl),
+  # external monitors via DDC/CI (ddcutil). External monitors are addressed by
+  # mapping the Hyprland connector name (e.g. HDMI-A-1) to its /dev/i2c-N bus,
+  # since ddcutil's own display numbering doesn't track Hyprland's.
+  monitorBrightness = pkgs.writeShellApplication {
+    name = "monitor-brightness";
+    runtimeInputs = with pkgs; [
+      hyprland # hyprctl
+      jq
+      gawk
+      coreutils # tr
+      util-linux # flock
+      brightnessctl
+      ddcutil
+    ];
+    text = ''
+      # usage: monitor-brightness up|down [stepPercent]
+      dir="''${1:?usage: monitor-brightness up|down [step]}"
+      step="''${2:-5}"
+      cache="''${XDG_RUNTIME_DIR:-/tmp}/ddc-bus.cache"
+
+      # Cursor position in global layout coords ("x, y" → "x y").
+      read -r cx cy < <(hyprctl cursorpos 2>/dev/null | tr -d ',') || true
+      if [ -z "''${cx:-}" ] || [ -z "''${cy:-}" ]; then exit 0; fi
+
+      # The monitor whose logical rectangle contains the cursor. width/height are
+      # physical pixels, so divide by scale to get the logical size that cursorpos
+      # is expressed in.
+      mon=$(hyprctl -j monitors | jq -c --argjson cx "$cx" --argjson cy "$cy" '
+        first(.[] | select(
+          $cx >= .x and $cx < (.x + (.width / .scale)) and
+          $cy >= .y and $cy < (.y + (.height / .scale))
+        )) // empty') || true
+      # Fallback: the focused monitor (follow_mouse=1 ⇒ it tracks the cursor).
+      if [ -z "$mon" ]; then
+        mon=$(hyprctl -j monitors | jq -c 'first(.[] | select(.focused)) // empty') || true
+      fi
+      if [ -z "$mon" ]; then exit 0; fi
+
+      name=$(jq -r '.name'          <<<"$mon")
+      model=$(jq -r '.model // ""'  <<<"$mon")
+      serial=$(jq -r '.serial // ""' <<<"$mon")
+
+      # Internal panel → kernel backlight.
+      case "$name" in
+        eDP-*|LVDS-*|DSI-*)
+          if [ "$dir" = up ]; then
+            brightnessctl set "$step%+" >/dev/null || true
+          else
+            brightnessctl set "$step%-" >/dev/null || true
+          fi
+          exit 0
+          ;;
+      esac
+
+      # External monitor → DDC/CI. Build a connector→bus table from `ddcutil
+      # detect` (slow, so cache it for the session), keyed by DRM connector with
+      # EDID serial then model as fallbacks.
+      build_cache() {
+        ddcutil detect --terse 2>/dev/null | awk '
+          function flush() {
+            if (bus != "") printf "%s|%s|%s|%s\n", drm, bus, model, serial
+            drm=""; bus=""; model=""; serial=""
+          }
+          /^Display/       { flush() }
+          /I2C bus:/       { b=$0; sub(/.*i2c-/, "", b); bus=b }
+          /DRM connector:/ { d=$NF; sub(/^card[0-9]+-/, "", d); drm=d }
+          /Model:/         { m=$0; sub(/^[^:]*:[ \t]*/, "", m); model=m }
+          /Serial number:/ { s=$0; sub(/^[^:]*:[ \t]*/, "", s); serial=s }
+          END              { flush() }
+        ' >"$cache" || true
+      }
+
+      lookup_bus() {
+        [ -s "$cache" ] || return 1
+        local b
+        b=$(awk -F'|' -v c="$name" '$1==c{print $2; exit}' "$cache")
+        if [ -n "$b" ]; then printf '%s\n' "$b"; return 0; fi
+        if [ -n "$serial" ]; then
+          b=$(awk -F'|' -v s="$serial" '$4==s{print $2; exit}' "$cache")
+          if [ -n "$b" ]; then printf '%s\n' "$b"; return 0; fi
+        fi
+        if [ -n "$model" ]; then
+          b=$(awk -F'|' -v m="$model" '$3==m{print $2; exit}' "$cache")
+          if [ -n "$b" ]; then printf '%s\n' "$b"; return 0; fi
+        fi
+        return 1
+      }
+
+      bus=$(lookup_bus) || true
+      if [ -z "$bus" ]; then build_cache; bus=$(lookup_bus) || true; fi
+      if [ -z "$bus" ]; then exit 0; fi
+
+      # Holding the key fires many events, but each DDC write takes ~100ms on the
+      # i2c bus. flock -n drops overlapping events so they don't pile up; the
+      # monitor visibly changing is the feedback.
+      lock="''${XDG_RUNTIME_DIR:-/tmp}/ddc-brightness.lock"
+      exec 9>"$lock"
+      flock -n 9 || exit 0
+
+      if [ "$dir" = up ]; then
+        ddcutil --bus="$bus" --noverify setvcp 10 + "$step" >/dev/null 2>&1 || true
+      else
+        ddcutil --bus="$bus" --noverify setvcp 10 - "$step" >/dev/null 2>&1 || true
+      fi
+    '';
+  };
+in
 {
   # Hyprland is enabled at the system level (programs.hyprland in
   # modules/nixos/mixins/hyprland.nix); here we only manage the user config.
@@ -137,8 +247,10 @@
     hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"), { repeating = true })
     hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"), { repeating = true })
     hl.bind("XF86AudioMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"))
-    hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("brightnessctl set 5%+"), { repeating = true })
-    hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl set 5%-"), { repeating = true })
+    -- Brightness adjusts whichever monitor the cursor is on (internal panel via
+    -- brightnessctl, external monitors via ddcutil/DDC-CI). See monitorBrightness.
+    hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("${monitorBrightness}/bin/monitor-brightness up"), { repeating = true })
+    hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("${monitorBrightness}/bin/monitor-brightness down"), { repeating = true })
 
     -- Media playback (G815 dedicated keys) via the active MPRIS player.
     hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"))

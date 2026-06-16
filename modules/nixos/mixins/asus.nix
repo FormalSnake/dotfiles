@@ -1,7 +1,10 @@
 { config, lib, pkgs, ... }:
 let
   # Catppuccin Mocha "Mauve" — the accent painted on the Aura keyboard.
-  auraColour = "cba6f7";
+  # Deepened from the on-screen value (cba6f7) to compensate for the LEDs: the
+  # pastel mauve renders too white on the keyboard, so we drop lightness and
+  # bump saturation (HSL 272/89/66) to read as the intended purple.
+  auraColour = "b15bf5";
 
   # Toggle the keyboard backlight brightness node directly (0..max). Driven by
   # the udev rule below so dimming on battery works in the udev run context
