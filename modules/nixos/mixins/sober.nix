@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 let
   cfg = config.kyan.sober;
 in
@@ -21,6 +21,12 @@ in
       ];
 
       packages = [ "org.vinegarhq.Sober" ];
+
+      # Roblox-via-Sober renders on the iGPU by default like every other app
+      # under PRIME offload. A Flatpak env override carries the same render-
+      # offload vars the native launchers use (pkgs.nvidiaOffloadEnv, from
+      # ../mixins/nvidia.nix) into the sandbox so it uses the RTX 5070.
+      overrides."org.vinegarhq.Sober".Environment = pkgs.nvidiaOffloadEnv;
     };
   };
 }

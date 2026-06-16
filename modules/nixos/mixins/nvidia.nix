@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, lib, ... }:
 {
   # Builds the NVIDIA kernel module against boot.kernelPackages (CachyOS).
   services.xserver.videoDrivers = [ "nvidia" ];
@@ -46,4 +46,53 @@
     # Electron/Chromium apps run native Wayland.
     NIXOS_OZONE_WL = "1";
   };
+
+  # PRIME render-offload plumbing for the gaming stack.
+  #
+  # In offload mode the iGPU drives the desktop and the dGPU is parked (RTD3)
+  # until a process opts in via these env vars — the same set `nvidia-offload`
+  # exports. There is no driver-level "this is a game → use the dGPU" detection;
+  # selection is per-process. But a child inherits its parent's environment, so
+  # carrying these vars on each game *launcher* (Steam, Prism, Lutris, Heroic,
+  # Sober) makes every game they spawn land on the RTX 5070 automatically, while
+  # the desktop and everything else stay on the iGPU and the dGPU still sleeps
+  # when idle. Trade-off: a launcher (and its dGPU) is awake while open.
+  #
+  # Exposed as an overlay so both NixOS modules and home-manager (useGlobalPkgs)
+  # can reach them through `pkgs`:
+  #   • pkgs.nvidiaOffloadEnv — the attrset, for env-style consumers
+  #     (Steam's extraEnv / gamescopeSession.env, the Sober flatpak override).
+  #   • pkgs.gpuOffloadWrap   — wraps a package's executables to always render on
+  #     the dGPU, for native launchers (Lutris, Heroic, Prism).
+  nixpkgs.overlays = [
+    (final: _prev: {
+      nvidiaOffloadEnv = {
+        __NV_PRIME_RENDER_OFFLOAD = "1";
+        __NV_PRIME_RENDER_OFFLOAD_PROVIDER = "NVIDIA-G0";
+        __GLX_VENDOR_LIBRARY_NAME = "nvidia";
+        __VK_LAYER_NV_optimus = "NVIDIA_only";
+      };
+
+      gpuOffloadWrap =
+        pkg:
+        final.symlinkJoin {
+          name = "${pkg.pname or pkg.name}-offload";
+          paths = [ pkg ];
+          nativeBuildInputs = [ final.makeWrapper ];
+          # Re-wrap each executable so the offload env is prepended (Qt/GApp
+          # wrappers underneath are preserved — makeWrapper just execs them).
+          postBuild = ''
+            for bin in "$out"/bin/*; do
+              [ -e "$bin" ] || continue
+              target=$(readlink -f "$bin")
+              rm "$bin"
+              makeWrapper "$target" "$bin" \
+                ${lib.concatStringsSep " \\\n                " (
+                  lib.mapAttrsToList (k: v: "--set ${k} ${lib.escapeShellArg v}") final.nvidiaOffloadEnv
+                )}
+            done
+          '';
+        };
+    })
+  ];
 }
