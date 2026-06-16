@@ -32,13 +32,22 @@ in
     services.gnome.gnome-keyring.enable = true;
 
     # Fonts caelestia/Hyprland expect (Material Symbols, a Nerd Font, emoji).
+    # System UI font is Geist; monospace is GeistMono patched with Nerd Font
+    # glyphs (terminal/caelestia mono + powerline icons).
     fonts.packages = with pkgs; [
       material-symbols
-      nerd-fonts.caskaydia-cove
-      nerd-fonts.blex-mono
+      geist-font # "Geist" (sans) + "Geist Mono"
+      nerd-fonts.geist-mono # "GeistMono Nerd Font"
       noto-fonts
       noto-fonts-color-emoji
     ];
+
+    # Make Geist / GeistMono the default sans/monospace for the whole system
+    # (GTK apps, anything resolving the generic sans-serif/monospace families).
+    fonts.fontconfig.defaultFonts = {
+      sansSerif = [ "Geist" ];
+      monospace = [ "GeistMono Nerd Font" ];
+    };
 
     environment.systemPackages = with pkgs; [
       brightnessctl

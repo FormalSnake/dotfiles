@@ -15,7 +15,7 @@ in
     enableFishIntegration = false;
 
     settings = {
-      font-family = "BlexMono Nerd Font";
+      font-family = "GeistMono Nerd Font";
       font-size = 12;
 
       cursor-style = "block";
