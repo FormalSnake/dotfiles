@@ -91,13 +91,21 @@ in
       # duties; PPD owns the platform profile (the kernel asus-wmi interface).
       services.power-profiles-daemon.enable = true;
 
-      # Drive PPD from AC state: Performance on AC, Balanced on battery. Runs at
-      # boot (wantedBy multi-user) and on every AC plug/unplug (udev rule below).
+      # Drive PPD from AC state: Performance on AC, Balanced on battery. Bound to
+      # PPD itself (wantedBy power-profiles-daemon), so it runs right after PPD
+      # comes up at boot, plus on every AC plug/unplug (udev rule below).
+      #
+      # NOTE: do NOT use `wantedBy = multi-user.target` here. nixpkgs orders PPD
+      # `After=multi-user.target` (it belongs to graphical.target), so pinning a
+      # unit that is `After=power-profiles-daemon.service` to multi-user.target
+      # closes an ordering loop (multi-user → power-profile-ac → PPD →
+      # multi-user). systemd can't break it and drops the whole transaction,
+      # failing sysinit/basic/NetworkManager at switch/boot.
       systemd.services.power-profile-ac = {
         description = "Power profile follows AC (Performance on AC, Balanced on battery)";
         after = [ "power-profiles-daemon.service" ];
         wants = [ "power-profiles-daemon.service" ];
-        wantedBy = [ "multi-user.target" ];
+        wantedBy = [ "power-profiles-daemon.service" ];
         serviceConfig = {
           Type = "oneshot";
           ExecStart = powerProfileSync;

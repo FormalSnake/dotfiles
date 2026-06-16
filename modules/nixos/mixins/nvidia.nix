@@ -18,6 +18,13 @@
       finegrained = true; # RTD3 — dGPU powers down when idle (laptop battery)
     };
 
+    # Dynamic Boost — runs nvidia-powerd, which shifts power budget from the CPU
+    # to the dGPU under load. Without it the 5070 is pinned to its 50W base TGP
+    # and never reaches its 115W max (clocks cap at ~1515 vs 3090 MHz boost),
+    # roughly halving GPU-bound performance (e.g. Minecraft + shaders + Distant
+    # Horizons). nvidia-smi confirmed SW Power Cap active at the 50W default.
+    dynamicBoost.enable = true;
+
     # PRIME offload: iGPU drives the desktop, dGPU spins up on demand (and when
     # the external monitor — wired to the dGPU — is connected). busIDs are set
     # per-host in systems/g815/default.nix.
