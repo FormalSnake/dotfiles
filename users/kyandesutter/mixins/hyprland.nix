@@ -286,11 +286,21 @@ in
     hl.window_rule({ match = { title = "^(Picture-in-Picture)$" }, float = true })                 -- floating PiP
   '';
 
-  # Clipboard history for the SUPER-launcher / cliphist.
+  # Clipboard history for the SUPER-launcher / cliphist; Nautilus as the GUI
+  # file manager.
   home.packages = with pkgs; [
     cliphist
     hyprpolkitagent
+    nautilus
   ];
+
+  # Make Nautilus the default file manager: anything that opens a folder via
+  # xdg-open / the inode/directory MIME (file pickers, "open containing folder",
+  # caelestia, etc.) launches Nautilus. enable writes ~/.config/mimeapps.list.
+  xdg.mimeApps = {
+    enable = true;
+    defaultApplications."inode/directory" = [ "org.gnome.Nautilus.desktop" ];
+  };
 
   # Cursor theme — Catppuccin Mocha (Mauve accent), matching the Aura RGB theme.
   # Sets it for GTK, native Wayland (hyprcursor) and X11/XWayland (x11.enable

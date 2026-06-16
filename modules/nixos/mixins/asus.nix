@@ -76,7 +76,8 @@ let
 
   # night-mode: a quiet overnight-download mode. Sets the asusd platform profile
   # to Quiet (gentlest fan curve) and PPD to power-saver (caps CPU boost → less
-  # heat → fans stay down), turns the displays off, and — crucially — holds a
+  # heat → fans stay down), turns the displays and Aura keyboard LEDs off, and —
+  # crucially — holds a
   # Wayland idle-inhibit lock for the duration so caelestia's idle daemon never
   # fires its timeouts. Those default to lock@3m, dpms-off@5m and
   # `systemctl suspend-then-hibernate`@10m, and all of them `respectInhibitors`;
@@ -104,6 +105,9 @@ let
       on() {
         asusctl profile set Quiet || true
         "$ppctl" set power-saver || true
+        # Blank the Aura keyboard LEDs (static black) so they aren't glowing
+        # overnight. `off` repaints them the Catppuccin Mauve set at boot.
+        asusctl aura effect static -c 000000 || true
         if ! is_on; then
           # Foreground tool that holds the idle inhibitor until killed; background
           # it and remember the PID so `off` can release it.
@@ -111,17 +115,19 @@ let
           echo "$!" > "$pidfile"
         fi
         notify-send -a "night-mode" "Night mode ON" \
-          "Quiet fans · idle suspend blocked · screens off" || true
-        hyprctl dispatch dpms off || true
+          "Quiet fans · idle suspend blocked · screens + RGB off" || true
+        hyprctl dispatch 'hl.dsp.dpms({ action = "disable" })' || true
         echo "Night mode ON"
       }
 
       off() {
         if is_on; then kill "$(cat "$pidfile")" 2>/dev/null || true; fi
         rm -f "$pidfile"
-        hyprctl dispatch dpms on || true
+        hyprctl dispatch 'hl.dsp.dpms({ action = "enable" })' || true
         asusctl profile set Performance || true
         "$ppctl" set performance 2>/dev/null || "$ppctl" set balanced || true
+        # Repaint the Aura keyboard the Catppuccin Mauve set by the asus-aura unit.
+        asusctl aura effect static -c ${auraColour} || true
         notify-send -a "night-mode" "Night mode OFF" "Restored Performance" || true
         echo "Night mode OFF"
       }
