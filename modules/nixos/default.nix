@@ -16,6 +16,7 @@
       ./mixins/graphics.nix
       ./mixins/nvidia.nix
       ./mixins/audio.nix
+      ./mixins/bluetooth.nix
       ./mixins/hyprland.nix
       ./mixins/gaming.nix
       ./mixins/asus.nix

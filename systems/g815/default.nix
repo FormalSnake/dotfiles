@@ -35,6 +35,10 @@
   kyan.profiles.desktop.enable = true;
   kyan.profiles.gaming.enable = true;
 
+  # ASUS laptop support: asusd, Aura keyboard RGB (Catppuccin Mauve), 80%
+  # battery charge limit, dim-LEDs-on-battery.
+  kyan.asus.enable = true;
+
   home-manager.users.kyandesutter = {
     imports = [
       self.homeModules.kyandesutter

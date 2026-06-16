@@ -31,6 +31,11 @@ in
     security.polkit.enable = true;
     services.gnome.gnome-keyring.enable = true;
 
+    # UPower: the D-Bus power daemon caelestia reads battery state from. Enable
+    # it explicitly — relying on D-Bus auto-activation made battery detection
+    # in the caelestia bar flaky.
+    services.upower.enable = true;
+
     # Fonts caelestia/Hyprland expect (Material Symbols, a Nerd Font, emoji).
     # System UI font is Geist; monospace is GeistMono patched with Nerd Font
     # glyphs (terminal/caelestia mono + powerline icons).

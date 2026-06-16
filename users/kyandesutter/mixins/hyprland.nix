@@ -110,9 +110,11 @@
 
     hl.bind(mod .. " + Tab", hl.dsp.focus({ workspace = "previous" }))
 
-    -- Screenshots (grim/slurp; caelestia also ships its own if preferred).
-    hl.bind("Print", hl.dsp.exec_cmd("grim - | wl-copy"))
-    hl.bind(mod .. " + SHIFT + S", hl.dsp.exec_cmd('grim -g "$(slurp)" - | wl-copy'))
+    -- Screenshots (caelestia's integrated tool: saves to ~/Pictures, copies to
+    -- the clipboard and shows a notification). Print = whole screen; SUPER+SHIFT+S
+    -- = region picker with the screen frozen while you select (macOS Cmd+Shift+4).
+    hl.bind("Print", hl.dsp.exec_cmd("caelestia screenshot"))
+    hl.bind(mod .. " + SHIFT + S", hl.dsp.exec_cmd("caelestia screenshot -r -f"))
 
     -- Volume / brightness (repeat while held).
     hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"), { repeating = true })
@@ -127,14 +129,17 @@
 
     -- — Window → workspace rules (ported from the aerospace setup; Linux app
     --   classes. Verify exact classes on hardware with `hyprctl clients`). —
-    hl.window_rule({ match = { class = "^([Hh]elium)$" }, workspace = "1 silent" })                       -- web
-    hl.window_rule({ match = { class = "^(com.mitchellh.ghostty)$" }, workspace = "2 silent" })           -- terminal
-    hl.window_rule({ match = { class = "^([Cc]ode|[Zz]ed|dev.zed.Zed)$" }, workspace = "3 silent" })      -- development
-    hl.window_rule({ match = { class = "^([Ss]lack|WhatsApp)$" }, workspace = "4 silent" })               -- communication
-    hl.window_rule({ match = { class = "^([Cc]laude)$" }, workspace = "7 silent" })                       -- ai
-    hl.window_rule({ match = { class = "^([Ss]potify)$" }, workspace = "8 silent" })                      -- media
-    hl.window_rule({ match = { class = "^([Ss]team|steam|[Ee]quibop|discord)$" }, workspace = "9 silent" })  -- gaming
-    hl.window_rule({ match = { title = "^(Picture-in-Picture)$" }, float = true })                        -- floating PiP
+    -- No `silent`: when one of these apps opens, Hyprland follows the window to
+    -- its assigned workspace (add "silent" back to a rule to keep it in the
+    -- background instead).
+    hl.window_rule({ match = { class = "^([Hh]elium)$" }, workspace = "1" })                       -- web
+    hl.window_rule({ match = { class = "^(com.mitchellh.ghostty)$" }, workspace = "2" })           -- terminal
+    hl.window_rule({ match = { class = "^([Cc]ode|[Zz]ed|dev.zed.Zed)$" }, workspace = "3" })      -- development
+    hl.window_rule({ match = { class = "^([Ss]lack|WhatsApp)$" }, workspace = "4" })               -- communication
+    hl.window_rule({ match = { class = "^([Cc]laude)$" }, workspace = "7" })                       -- ai
+    hl.window_rule({ match = { class = "^([Ss]potify)$" }, workspace = "8" })                      -- media
+    hl.window_rule({ match = { class = "^([Ss]team|steam|[Ee]quibop|discord)$" }, workspace = "9" })  -- gaming
+    hl.window_rule({ match = { title = "^(Picture-in-Picture)$" }, float = true })                 -- floating PiP
   '';
 
   # Clipboard history for the SUPER-launcher / cliphist.
