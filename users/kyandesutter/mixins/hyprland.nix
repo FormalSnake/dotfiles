@@ -17,8 +17,24 @@
     -- — Monitors —
     -- Internal 18" WQXGA 240Hz panel. Adjust scale to taste (1.0–1.5).
     hl.monitor({ output = "eDP-1", mode = "2560x1600@240", position = "0x0", scale = 1.25 })
-    -- Catch-all: any external display at its native res, placed to the right.
-    hl.monitor({ output = "", mode = "preferred", position = "auto", scale = 1.0 })
+    -- Desk monitor: ASUS PA278CGV (1440p144) wired to the dGPU. Its EDID-preferred
+    -- timing is 60Hz, so pin the 144Hz mode explicitly. Sits to the LEFT of eDP-1
+    -- (eDP-1 is at 0x0; this panel is 2560px wide at scale 1.0 → x = -2560).
+    hl.monitor({ output = "HDMI-A-1", mode = "2560x1440@144", position = "-2560x0", scale = 1.0 })
+    -- Catch-all: any other external display at its highest refresh rate ("preferred"
+    -- picks the EDID-preferred timing, which is usually 60Hz; "highrr" forces
+    -- the panel's max refresh — e.g. 144Hz). Placed to the right of eDP-1.
+    hl.monitor({ output = "", mode = "highrr", position = "auto", scale = 1.0 })
+
+    -- — Workspace → monitor binding —
+    -- Make the desk monitor (HDMI-A-1) the primary display: pin all nine named
+    -- workspaces to it so that, when connected, it takes over the principal
+    -- workspaces/windows (ws1 shown by default) instead of grabbing a stray new
+    -- workspace. When HDMI-A-1 is absent, Hyprland relocates these to eDP-1
+    -- automatically, and moves them back when it reconnects.
+    for i = 1, 9 do
+      hl.workspace_rule({ workspace = tostring(i), monitor = "HDMI-A-1", default = (i == 1) })
+    end
 
     -- — Variables —
     local mod = "SUPER"        -- primary modifier (the physical Cmd-position key)
@@ -117,7 +133,7 @@
     hl.window_rule({ match = { class = "^([Ss]lack|WhatsApp)$" }, workspace = "4 silent" })               -- communication
     hl.window_rule({ match = { class = "^([Cc]laude)$" }, workspace = "7 silent" })                       -- ai
     hl.window_rule({ match = { class = "^([Ss]potify)$" }, workspace = "8 silent" })                      -- media
-    hl.window_rule({ match = { class = "^([Ss]team|steam|vesktop|discord)$" }, workspace = "9 silent" })  -- gaming
+    hl.window_rule({ match = { class = "^([Ss]team|steam|[Ee]quibop|discord)$" }, workspace = "9 silent" })  -- gaming
     hl.window_rule({ match = { title = "^(Picture-in-Picture)$" }, float = true })                        -- floating PiP
   '';
 

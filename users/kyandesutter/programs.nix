@@ -28,6 +28,9 @@
       pi-coding-agent
       poppler
       pyenv
+      # python3 on PATH for Claude Code's security-guidance plugin and the herdr
+      # agent-state hook (both `exec python3`; without it they fail loudly).
+      python3
       raylib
       # rclone 1.74.2 in nixpkgs unconditionally requires fuse3, which has no
       # working Darwin path (the postConfigure that patches fuse.h is gated on

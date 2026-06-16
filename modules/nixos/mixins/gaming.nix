@@ -42,7 +42,7 @@ in
       heroic
 
       # Comms / streaming.
-      vesktop # Discord client
+      equibop # Discord client (Vesktop fork)
       obs-studio
     ];
   };

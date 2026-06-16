@@ -5,5 +5,6 @@
     ./mixins/hyprland.nix
     ./mixins/caelestia.nix
     ./mixins/helium.nix
+    ./mixins/spicetify.nix
   ];
 }
