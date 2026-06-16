@@ -39,6 +39,15 @@ in
     services.tumbler.enable = true;
     programs.dconf.enable = true;
 
+    # Nautilus is installed via home-manager (home.packages), so it isn't wrapped
+    # with the GNOME GIO module environment the NixOS gnome session would provide.
+    # Without gvfs's client module (libgvfsdbus.so) on GIO_EXTRA_MODULES, GIO only
+    # knows local backends — so `trash://` is unavailable and Nautilus reports
+    # "Trash locations are not supported" when you open Trash. Put gvfs's gio
+    # modules on the session search path (this list merges with dconf's, which is
+    # already there) so the trash backend (gvfsd-trash) loads and D-Bus-activates.
+    environment.sessionVariables.GIO_EXTRA_MODULES = [ "${pkgs.gvfs}/lib/gio/modules" ];
+
     # UPower: the D-Bus power daemon caelestia reads battery state from. Enable
     # it explicitly — relying on D-Bus auto-activation made battery detection
     # in the caelestia bar flaky.
