@@ -165,6 +165,10 @@ in
     hl.on("hyprland.start", function()
       hl.exec_cmd("systemctl --user start hyprpolkitagent")
       hl.exec_cmd("wl-paste --watch cliphist store")
+      -- Always-running apps on this host: launch minimized to the tray so they
+      -- don't grab focus at login. Window rules send them to workspace 9.
+      hl.exec_cmd("steam -silent")
+      hl.exec_cmd("equibop --start-minimized")
     end)
 
     -- — General options —

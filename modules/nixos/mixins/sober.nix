@@ -22,11 +22,17 @@ in
 
       packages = [ "org.vinegarhq.Sober" ];
 
-      # Roblox-via-Sober renders on the iGPU by default like every other app
-      # under PRIME offload. A Flatpak env override carries the same render-
-      # offload vars the native launchers use (pkgs.nvidiaOffloadEnv, from
-      # ../mixins/nvidia.nix) into the sandbox so it uses the RTX 5070.
-      overrides."org.vinegarhq.Sober".Environment = pkgs.nvidiaOffloadEnv;
+      overrides."org.vinegarhq.Sober" = {
+        # Roblox-via-Sober renders on the iGPU by default like every other app
+        # under PRIME offload. A Flatpak env override carries the same render-
+        # offload vars the native launchers use (pkgs.nvidiaOffloadEnv, from
+        # ../mixins/nvidia.nix) into the sandbox so it uses the RTX 5070.
+        Environment = pkgs.nvidiaOffloadEnv;
+
+        # Grant the sandbox access to input devices (/dev/input) — declarative
+        # equivalent of `flatpak override --device=input org.vinegarhq.Sober`.
+        Context.devices = [ "input" ];
+      };
     };
   };
 }
