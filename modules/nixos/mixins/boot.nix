@@ -5,6 +5,9 @@
       systemd-boot = {
         enable = true;
         configurationLimit = 10;
+        # Render the boot menu at the panel's highest available resolution so
+        # the text is crisp instead of a stretched low-res framebuffer.
+        consoleMode = "max";
       };
       efi.canTouchEfiVariables = true;
       # systemd-boot auto-detects the Windows EFI entry for dual-boot.

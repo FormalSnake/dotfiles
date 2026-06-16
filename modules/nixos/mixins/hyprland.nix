@@ -1,6 +1,25 @@
 { config, lib, pkgs, ... }:
 let
   cfg = config.kyan.desktop;
+
+  # Throwaway Hyprland config for the login greeter. Its only job is to bring up
+  # every connected output (so the dGPU-wired external monitor lights up — the
+  # old tuigreet was a TTY app stuck on the iGPU's internal panel), run ReGreet,
+  # then tear the greeter compositor down so greetd can launch the real session.
+  greeterHyprConf = pkgs.writeText "greeter-hyprland.conf" ''
+    # Match the session's panel scaling so text isn't tiny on the hidpi internal
+    # display; everything else (incl. the external) auto-detects at scale 1.
+    monitor = eDP-1, preferred, 0x0, 1.25
+    monitor = , preferred, auto, 1
+
+    # No idle/animation noise on the login screen.
+    animations { enabled = false }
+    cursor { no_hardware_cursors = true }
+
+    # Run the greeter; when it returns (a session was picked) exit the greeter
+    # compositor so greetd hands off to the chosen session.
+    exec-once = ${lib.getExe config.programs.regreet.package}; hyprctl dispatch exit
+  '';
 in
 {
   options.kyan.desktop.enable = lib.mkEnableOption "Hyprland desktop (system side)";
@@ -18,11 +37,23 @@ in
       extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
     };
 
-    # greetd + tuigreet: minimal login that launches the Hyprland uwsm session.
+    # Graphical login: ReGreet (GTK greeter) running inside a minimal Hyprland
+    # instead of tuigreet. tuigreet rendered into the kernel TTY framebuffer,
+    # which only exists on the iGPU's internal panel — so the dGPU-wired external
+    # monitor stayed blank at login. Running the greeter under a real Wayland
+    # compositor wakes the dGPU and drives every output, and ReGreet draws on all
+    # connected monitors, so the prompt now appears on the external too.
+    programs.regreet = {
+      enable = true;
+      settings.GTK.application_prefer_dark_theme = true;
+    };
+
+    # The regreet module defaults the greetd command to cage (via mkDefault);
+    # override it to launch our greeter Hyprland config instead.
     services.greetd = {
       enable = true;
       settings.default_session = {
-        command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --cmd 'uwsm start hyprland-uwsm.desktop'";
+        command = "${lib.getExe config.programs.hyprland.package} --config ${greeterHyprConf}";
         user = "greeter";
       };
     };
