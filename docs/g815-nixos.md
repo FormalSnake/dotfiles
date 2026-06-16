@@ -96,7 +96,7 @@ verification is hardware-only (see the checklist above).
 
 ## Install runbook (owner, on the hardware)
 
-1. Partition 1 TB: EFI (~1 GB), Windows (~200 GB for Win11 + Fortnite), rest for NixOS.
+1. Partition 1 TB: EFI (~1 GB), Windows (~256 GB for Win11 + Fortnite), rest for NixOS.
    Install **Windows first**, then NixOS.
 2. Boot NixOS installer, `nixos-generate-config`, copy `hardware-configuration.nix` into
    `systems/g815/`, `git add` it.
@@ -147,7 +147,7 @@ Create (in gdisk: `n` per partition, `w` to write):
 |---|--------|--------|-------------------------------|
 | 1 | +1G    | `ef00` | EFI System Partition (shared) |
 | 2 | +16M   | `0c01` | Microsoft Reserved (MSR)      |
-| 3 | +200G  | `0700` | Windows C:                    |
+| 3 | +256G  | `0700` | Windows C:                    |
 | 4 | (rest) | `8300` | NixOS root                    |
 
 Then **install Windows 11**: select partition **3**, format it, install. Windows reuses the
