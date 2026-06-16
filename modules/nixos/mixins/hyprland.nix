@@ -37,7 +37,7 @@ in
       nerd-fonts.caskaydia-cove
       nerd-fonts.blex-mono
       noto-fonts
-      noto-fonts-emoji
+      noto-fonts-color-emoji
     ];
 
     environment.systemPackages = with pkgs; [

@@ -145,6 +145,9 @@
       # Home-manager user profile (declared `home.packages`, e.g. `just`)
       fish_add_path /etc/profiles/per-user/kyandesutter/bin
       fish_add_path /run/current-system/sw/bin
+      if test -d /run/wrappers/bin
+        fish_add_path /run/wrappers/bin
+      end
 
       # User paths
       fish_add_path ~/.cargo/bin
