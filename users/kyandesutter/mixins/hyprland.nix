@@ -183,4 +183,32 @@
     x11.enable = true;
     hyprcursor.enable = true;
   };
+
+  # Dark mode for GTK / X11 / browsers.
+  #
+  # caelestia already sets the *Wayland* dark signal: the xdg-desktop-portal
+  # `org.freedesktop.appearance color-scheme` reports prefer-dark, and dconf
+  # `org/gnome/desktop/interface` has color-scheme=prefer-dark + gtk-theme=
+  # adw-gtk3-dark. That's enough for native-Wayland libadwaita/GTK4 apps.
+  #
+  # But two classes of app don't read the portal/dconf and were staying light:
+  #   • X11 / XWayland GTK apps — they read XSettings or ~/.config/gtk-3.0/
+  #     settings.ini (neither existed here; no xsettingsd is running).
+  #   • Browsers running under XWayland — same story, they derive
+  #     prefers-color-scheme from the GTK theme.
+  # On top of that, `adw-gtk3-dark` was named in dconf but the theme package was
+  # never actually installed, so even dconf readers couldn't resolve it.
+  #
+  # The gtk module fixes both: it installs adw-gtk3 (so the theme resolves) and
+  # writes the gtk-3.0/gtk-4.0 settings.ini files with the dark theme and
+  # gtk-application-prefer-dark-theme — which is exactly what X11 apps read.
+  gtk = {
+    enable = true;
+    theme = {
+      name = "adw-gtk3-dark";
+      package = pkgs.adw-gtk3;
+    };
+    gtk3.extraConfig.gtk-application-prefer-dark-theme = 1;
+    gtk4.extraConfig.gtk-application-prefer-dark-theme = 1;
+  };
 }
