@@ -10,8 +10,11 @@
     # RTX 5070 is Blackwell → ONLY the open kernel modules support it.
     open = true;
 
-    # nixpkgs-unstable's production driver is well past the 570+ Blackwell floor.
-    package = config.boot.kernelPackages.nvidiaPackages.production;
+    # Forza Horizon 6 gates at a 596+ NVIDIA driver and crashes on the splash
+    # screen below it. production/stable are pinned at 595.80, so use `latest`
+    # (610.43.02 in this nixpkgs) — comfortably past the 570+ Blackwell floor
+    # and the FH6 596 floor.
+    package = config.boot.kernelPackages.nvidiaPackages.latest;
 
     powerManagement = {
       enable = true;

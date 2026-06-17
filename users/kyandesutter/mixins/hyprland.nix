@@ -141,12 +141,17 @@ in
   # hl.monitor, hl.env, hl.bind, hl.dsp.*, hl.window_rule, hl.on).
   xdg.configFile."hypr/hyprland.lua".text = ''
     -- — Monitors —
-    -- Internal 18" WQXGA 240Hz panel. Adjust scale to taste (1.0–1.5).
-    hl.monitor({ output = "eDP-1", mode = "2560x1600@240", position = "0x0", scale = 1.25 })
     -- Desk monitor: ASUS PA278CGV (1440p144) wired to the dGPU. Its EDID-preferred
-    -- timing is 60Hz, so pin the 144Hz mode explicitly. Sits to the LEFT of eDP-1
-    -- (eDP-1 is at 0x0; this panel is 2560px wide at scale 1.0 → x = -2560).
-    hl.monitor({ output = "HDMI-A-1", mode = "2560x1440@144", position = "-2560x0", scale = 1.0 })
+    -- timing is 60Hz, so pin the 144Hz mode explicitly. Placed at the ORIGIN (0x0) so
+    -- it is the *primary* display. This matters for fullscreen games that have no
+    -- monitor selector (e.g. Forza Horizon): they target the monitor at (0,0) and
+    -- enumerate only its modes. With eDP-1 at the origin, Forza fullscreened onto the
+    -- internal panel and locked to its 240Hz/2560x1600 instead of this 1440p144 panel.
+    hl.monitor({ output = "HDMI-A-1", mode = "2560x1440@144", position = "0x0", scale = 1.0 })
+    -- Internal 18" WQXGA 240Hz panel, to the RIGHT of the desk monitor (same physical
+    -- arrangement as before, just shifted so HDMI-A-1 owns the origin). HDMI-A-1 is
+    -- 2560px wide at scale 1.0 → this sits at x = 2560. Adjust scale to taste (1.0–1.5).
+    hl.monitor({ output = "eDP-1", mode = "2560x1600@240", position = "2560x0", scale = 1.25 })
     -- Catch-all: any other external display at its highest refresh rate ("preferred"
     -- picks the EDID-preferred timing, which is usually 60Hz; "highrr" forces
     -- the panel's max refresh — e.g. 144Hz). Placed to the right of eDP-1.
@@ -308,6 +313,13 @@ in
     hl.window_rule({ match = { class = "^([Cc]laude)$" }, workspace = "7" })                       -- ai
     hl.window_rule({ match = { class = "^([Ss]potify)$" }, workspace = "8" })                      -- media
     hl.window_rule({ match = { class = "^([Ss]team|steam|[Ee]quibop|discord)$" }, workspace = "9" })  -- gaming
+    -- Forza Horizon 6 (Steam app 2483190). Must run on XWayland — i.e. launch options
+    -- WITHOUT PROTON_ENABLE_WAYLAND (that mode hard-targets output 0 / the internal
+    -- panel and Hyprland can't relocate its fullscreen). On XWayland Hyprland controls
+    -- the window, so pinning it to ws9 (tied to HDMI-A-1) makes its in-game Fullscreen
+    -- land on the external desk monitor while eDP-1 stays active. Launch options:
+    --   PROTON_VKD3D_HEAP=1 VKD3D_CONFIG=enable_experimental_features,descriptor_heap %command%
+    hl.window_rule({ match = { class = "^(steam_app_2483190)$" }, workspace = "9" })                -- forza → gaming/HDMI
     hl.window_rule({ match = { title = "^(Picture-in-Picture)$" }, float = true })                 -- floating PiP
   '';
 
