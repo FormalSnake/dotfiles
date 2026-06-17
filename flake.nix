@@ -64,6 +64,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # areofyl/fetch — animated 3D terminal fetch tool. Linux-only; ships a flake
+    # with a home-manager module (programs.fetch). Not in nixpkgs.
+    fetch = {
+      url = "github:areofyl/fetch";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # — NixOS (g815 gaming laptop) inputs —
 
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";

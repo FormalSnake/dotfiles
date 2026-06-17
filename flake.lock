@@ -230,6 +230,26 @@
         "url": "https://install.determinate.systems/determinate-nixd/tag/v3.21.1/x86_64-linux"
       }
     },
+    "fetch": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1781728701,
+        "narHash": "sha256-JWbr6WNid6oxsHXK/ewDULQNznkv6eVg+xuXK7XOH0Q=",
+        "owner": "areofyl",
+        "repo": "fetch",
+        "rev": "fbcdf8145be7a025060cf00331353a7221d948d2",
+        "type": "github"
+      },
+      "original": {
+        "owner": "areofyl",
+        "repo": "fetch",
+        "type": "github"
+      }
+    },
     "flake-compat": {
       "flake": false,
       "locked": {
@@ -914,6 +934,7 @@
         "catppuccin": "catppuccin",
         "chaotic": "chaotic",
         "determinate": "determinate",
+        "fetch": "fetch",
         "flake-parts": "flake-parts_2",
         "helium": "helium",
         "herdr": "herdr",

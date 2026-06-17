@@ -7,5 +7,6 @@
     ./mixins/caelestia.nix
     ./mixins/helium.nix
     ./mixins/spicetify.nix
+    ./mixins/fetch.nix
   ];
 }
