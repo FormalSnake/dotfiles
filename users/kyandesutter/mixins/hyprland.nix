@@ -327,6 +327,12 @@ in
     -- land on the external desk monitor while eDP-1 stays active. Launch options:
     --   PROTON_VKD3D_HEAP=1 VKD3D_CONFIG=enable_experimental_features,descriptor_heap %command%
     hl.window_rule({ match = { class = "^(steam_app_2483190)$" }, workspace = "9" })                -- forza → gaming/HDMI
+    -- Force fullscreen on map. FH6 restores its last *floating* window geometry,
+    -- and a position saved under a previous monitor layout (HDMI-A-1 was at -2560,0)
+    -- lands the window off the left edge once HDMI-A-1 owns the 0,0 origin — visible
+    -- only as audio. Fullscreening on map snaps it to HDMI-A-1 (0,0..2560) regardless
+    -- of the remembered coordinate, so a stale position can never hide it again.
+    hl.window_rule({ match = { class = "^(steam_app_2483190)$" }, fullscreen = true })              -- forza → always fullscreen
     hl.window_rule({ match = { title = "^(Picture-in-Picture)$" }, float = true })                 -- floating PiP
   '';
 
@@ -352,6 +358,16 @@ in
     gnome-clocks
     gnome-maps
     snapshot # camera
+
+    # Media + office, so double-clicking these files in Nautilus opens something.
+    #   • celluloid: GTK4/libadwaita mpv frontend — plays every common video
+    #     format. GNOME Videos (totem) is the "native" app but has weak codec
+    #     support; mpv handles everything, so this is the reliable GTK choice.
+    #   • libreoffice-fresh: the only real office suite here (GNOME has none).
+    #     The -fresh build renders through the gtk3 VCL backend, so it follows
+    #     the adw-gtk3-dark theme set below. Opens Word/Excel/PowerPoint + ODF.
+    celluloid
+    libreoffice-fresh
   ];
 
   # Default apps by MIME. enable writes ~/.config/mimeapps.list.
@@ -359,6 +375,8 @@ in
   #     caelestia, etc. all launch it).
   #   • Images → Loupe, so double-clicking an image in Nautilus opens it.
   #   • PDFs → Papers; plain text → GNOME Text Editor.
+  #   • Video → Celluloid.
+  #   • Office docs → the matching LibreOffice component (Writer/Calc/Impress).
   xdg.mimeApps = {
     enable = true;
     defaultApplications =
@@ -378,7 +396,40 @@ in
         "image/heif"
         "image/avif"
         "image/svg+xml"
-      ] (_: [ "org.gnome.Loupe.desktop" ]);
+      ] (_: [ "org.gnome.Loupe.desktop" ])
+      // lib.genAttrs [
+        "video/mp4"
+        "video/x-matroska" # .mkv
+        "video/webm"
+        "video/quicktime" # .mov
+        "video/x-msvideo" # .avi
+        "video/mpeg"
+        "video/ogg"
+        "video/x-m4v"
+        "video/3gpp"
+        "video/x-flv"
+        "video/x-ms-wmv"
+      ] (_: [ "io.github.celluloid_player.Celluloid.desktop" ])
+      // lib.genAttrs [
+        # Word-processor documents (.doc/.docx/.odt/.rtf) → Writer.
+        "application/msword"
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        "application/vnd.oasis.opendocument.text"
+        "application/rtf"
+      ] (_: [ "writer.desktop" ])
+      // lib.genAttrs [
+        # Spreadsheets (.xls/.xlsx/.ods/.csv) → Calc.
+        "application/vnd.ms-excel"
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        "application/vnd.oasis.opendocument.spreadsheet"
+        "text/csv"
+      ] (_: [ "calc.desktop" ])
+      // lib.genAttrs [
+        # Presentations (.ppt/.pptx/.odp) → Impress.
+        "application/vnd.ms-powerpoint"
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+        "application/vnd.oasis.opendocument.presentation"
+      ] (_: [ "impress.desktop" ]);
   };
 
   # Cursor theme — Catppuccin Mocha (Mauve accent), matching the Aura RGB theme.

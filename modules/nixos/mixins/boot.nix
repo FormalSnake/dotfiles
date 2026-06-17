@@ -36,7 +36,5 @@
   # Cap crash-dump storage. Games/compositor crashes (Proton, gamescope, …)
   # produce large coredumps that are rarely useful here and otherwise grow
   # unbounded under /var/lib/systemd/coredump.
-  systemd.coredump.extraConfig = ''
-    MaxUse=256M
-  '';
+  systemd.coredump.settings.Coredump.MaxUse = "256M";
 }
