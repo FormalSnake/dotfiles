@@ -237,6 +237,10 @@ in
         border_size = 2,
         layout = "dwindle",
         resize_on_border = true,
+        -- Master switch for screen tearing. Does nothing on its own — a window must
+        -- also carry the `immediate` rule (see the game rules below). Used here as a
+        -- VRR-free fix for 120fps-into-144Hz judder on the desk monitor; see misc.vrr.
+        allow_tearing = true,
       },
       decoration = {
         rounding = 10,
@@ -246,14 +250,19 @@ in
       misc = {
         disable_hyprland_logo = true,
         disable_splash_rendering = true,
-        -- Adaptive sync. With two monitors at different refresh rates (HDMI-A-1
-        -- 144Hz on the dGPU, eDP-1 240Hz on the iGPU) and VRR off, the compositor's
-        -- single present loop beats between the two vblanks and the focused monitor
-        -- hitches every few seconds — in games that reads as periodic slow-motion.
-        -- vrr=2 enables adaptive sync only for fullscreen apps (the PA278CGV is a
-        -- FreeSync panel), so the gaming monitor follows the game's frame cadence
-        -- while the desktop stays at a fixed rate (avoids VRR flicker on the panel).
-        vrr = 2,
+        -- VRR is OFF. Games here run ~120fps; on the 240Hz internal panel that's a
+        -- clean 2:1 cadence (smooth), but on the fixed 144Hz desk monitor (HDMI-A-1)
+        -- 120 doesn't divide 144 — frames are held for 1 or 2 refreshes in an uneven
+        -- pattern, which reads as judder at the *same* fps. Rather than adaptive sync,
+        -- we fix it with screen tearing: allow_tearing (general, below) + an
+        -- `immediate` window rule per game lets fullscreen frames present the instant
+        -- they're ready instead of waiting for the 144Hz vblank, killing the judder at
+        -- the cost of a visible tear line. direct_scanout (render, below) additionally
+        -- hands a fullscreen game's buffer straight to the display plane.
+        vrr = 0,
+      },
+      render = {
+        direct_scanout = 1,
       },
       -- eDP-1 runs at fractional scale (1.25). XWayland can't do fractional
       -- scaling, so Hyprland upscales X11 surfaces → blurry/"weird" scaling and
@@ -363,6 +372,12 @@ in
     -- only as audio. Fullscreening on map snaps it to HDMI-A-1 (0,0..2560) regardless
     -- of the remembered coordinate, so a stale position can never hide it again.
     hl.window_rule({ match = { class = "^(steam_app_2483190)$" }, fullscreen = true })              -- forza → always fullscreen
+    -- Allow tearing for Steam games (any steam_app_<id> window). Pairs with
+    -- general.allow_tearing to present frames immediately instead of on the 144Hz
+    -- vblank — the VRR-free cure for the 120/144 judder on the desk monitor. Tearing
+    -- only actually happens when the game itself presents without vsync, so launch
+    -- games with vsync OFF (in-game setting, or Vulkan IMMEDIATE / __GL_SYNC_TO_VBLANK=0).
+    hl.window_rule({ match = { class = "^(steam_app_.*)$" }, immediate = true })                    -- games → allow tearing
     hl.window_rule({ match = { title = "^(Picture-in-Picture)$" }, float = true })                 -- floating PiP
   '';
 
