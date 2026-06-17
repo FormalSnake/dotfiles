@@ -207,7 +207,15 @@ in
       -- users/kyandesutter/mixins/alttab.nix). Started here rather than via a
       -- systemd unit so it inherits Hyprland's Wayland env. It registers the
       -- alttab:next / alttab:prev global shortcuts driven by the binds below.
-      hl.exec_cmd("${pkgs.quickshell}/bin/qs -c alttab")
+      -- Guarded with pgrep so a re-fire of hyprland.start (restart-without-
+      -- logout, manual relaunch, crash recovery) can't stack duplicate
+      -- instances — each would re-register the global shortcuts and keep its
+      -- own always-alive Overlay surface + live ScreencopyView captures, which
+      -- pegs the compositor on every Alt+Tab (periodic in-game slow-motion).
+      -- The `qs` wrapper execs into the `quickshell` binary, so match that in
+      -- the running args; the `[q]uickshell` bracket keeps the guard's own
+      -- shell (whose argv carries this pattern) from matching itself.
+      hl.exec_cmd("pgrep -f '[q]uickshell -c alttab' >/dev/null || ${pkgs.quickshell}/bin/qs -c alttab")
     end)
 
     -- — General options —
