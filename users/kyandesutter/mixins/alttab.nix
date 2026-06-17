@@ -43,6 +43,9 @@
       property int index: 0
       property bool open: false
       property int pendingDir: 1
+      // Set when AltGr is released before the window list has loaded (a very fast
+      // tap); the commit then happens as soon as the list arrives.
+      property bool pendingCommit: false
 
       // Resolve a Hyprland window address to its Wayland Toplevel handle, which
       // ScreencopyView uses as a capture source. `hyprctl clients` reports
@@ -74,8 +77,17 @@
       function begin(dir) {
         if (root.open) { root.step(dir); return; }
         root.pendingDir = dir;
+        root.entries = [];
+        root.index = 0;
+        root.pendingCommit = false;
+        // Open (and grab the keyboard) IMMEDIATELY, before fetching the window
+        // list. Otherwise the grab only arms after the `hyprctl clients`
+        // subprocess returns and the window maps, and a fast tap-and-release
+        // lands in that gap — the release leaks to Hyprland, which (in lua mode)
+        // won't act on a modifier release, so the overlay gets stuck open.
+        root.open = true;
         Hyprland.refreshToplevels();
-        clientsProc.running = true; // fetch → onStreamFinished opens the overlay
+        clientsProc.running = true; // fills entries in parallel
       }
 
       function step(delta) {
@@ -85,13 +97,16 @@
       }
 
       function commit() {
-        if (root.open && root.entries.length > 0)
-          focusProc.focus(root.entries[root.index].address);
+        if (!root.open) return;
+        // Released before the list loaded — defer until clientsProc fills it.
+        if (root.entries.length === 0) { root.pendingCommit = true; return; }
+        focusProc.focus(root.entries[root.index].address);
         root.cancel();
       }
 
       function cancel() {
         root.open = false;
+        root.pendingCommit = false;
       }
 
       GlobalShortcut {
@@ -120,12 +135,13 @@
         }
       }
 
-      // Fetch the window list and open the overlay.
+      // Fetch the window list (the overlay is already open by this point).
       Process {
         id: clientsProc
         command: ["hyprctl", "clients", "-j"]
         stdout: StdioCollector {
           onStreamFinished: {
+            if (!root.open) return; // cancelled before the list arrived
             var list = [];
             try { list = JSON.parse(this.text); } catch (e) { list = []; }
             list = list.filter(function (c) {
@@ -144,12 +160,13 @@
               });
             }
             root.entries = out;
-            if (out.length === 0) { root.open = false; return; }
+            if (out.length === 0) { root.cancel(); return; }
 
             // 'next' starts on the previously-focused window (classic single
             // tap-and-release → previous window); 'prev' starts on the last.
             root.index = root.pendingDir > 0 ? Math.min(1, out.length - 1) : out.length - 1;
-            root.open = true;
+            // If AltGr was already released before the list arrived, commit now.
+            if (root.pendingCommit) root.commit();
           }
         }
       }
@@ -202,6 +219,7 @@
             Rectangle {
               id: panel
               anchors.centerIn: parent
+              visible: root.entries.length > 0 // hidden during the brief load
               radius: 10
               color: "#1e1e2e"          // base
               border.color: "#cba6f7"   // mauve
