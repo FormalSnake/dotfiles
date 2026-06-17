@@ -158,13 +158,19 @@ in
     hl.monitor({ output = "", mode = "highrr", position = "auto", scale = 1.0 })
 
     -- — Workspace → monitor binding —
-    -- Make the desk monitor (HDMI-A-1) the primary display: pin all nine named
-    -- workspaces to it so that, when connected, it takes over the principal
-    -- workspaces/windows (ws1 shown by default) instead of grabbing a stray new
-    -- workspace. When HDMI-A-1 is absent, Hyprland relocates these to eDP-1
-    -- automatically, and moves them back when it reconnects.
+    -- Distribute the nine named workspaces across the two monitors, mirroring the
+    -- macOS/aerospace `workspace-to-monitor-force-assignment`: communication (4)
+    -- and media (8) live on the internal panel (eDP-1); the other seven (web,
+    -- terminal, development, productivity, print, ai, gaming) live on the desk
+    -- monitor (HDMI-A-1). Each monitor gets one `default` workspace shown when it
+    -- comes up (ws1 on HDMI-A-1, ws4 on eDP-1). When HDMI-A-1 is absent, Hyprland
+    -- relocates its workspaces to eDP-1 automatically and moves them back on
+    -- reconnect; the eDP-1 assignments keep 4/8 on the internal panel whenever
+    -- both displays are present.
+    local internalWorkspaces = { [4] = true, [8] = true }
     for i = 1, 9 do
-      hl.workspace_rule({ workspace = tostring(i), monitor = "HDMI-A-1", default = (i == 1) })
+      local monitor = internalWorkspaces[i] and "eDP-1" or "HDMI-A-1"
+      hl.workspace_rule({ workspace = tostring(i), monitor = monitor, default = (i == 1 or i == 4) })
     end
 
     -- — Variables —
@@ -193,7 +199,8 @@ in
       hl.exec_cmd("wl-paste --type image --watch cliphist store")
       hl.exec_cmd("wl-clip-persist --clipboard regular")
       -- Always-running apps on this host: launch minimized to the tray so they
-      -- don't grab focus at login. Window rules send them to workspace 9.
+      -- don't grab focus at login. Window rules send steam to workspace 9 (gaming,
+      -- HDMI-A-1) and equibop to workspace 4 (communication, eDP-1).
       hl.exec_cmd("steam -silent")
       hl.exec_cmd("equibop --start-minimized")
     end)
@@ -309,10 +316,10 @@ in
     hl.window_rule({ match = { class = "^([Hh]elium)$" }, workspace = "1" })                       -- web
     hl.window_rule({ match = { class = "^(com.mitchellh.ghostty)$" }, workspace = "2" })           -- terminal
     hl.window_rule({ match = { class = "^([Cc]ode|[Zz]ed|dev.zed.Zed)$" }, workspace = "3" })      -- development
-    hl.window_rule({ match = { class = "^([Ss]lack|WhatsApp)$" }, workspace = "4" })               -- communication
+    hl.window_rule({ match = { class = "^([Ss]lack|WhatsApp|[Ee]quibop|discord)$" }, workspace = "4" })  -- communication (incl. Discord/equibop, internal panel)
     hl.window_rule({ match = { class = "^([Cc]laude)$" }, workspace = "7" })                       -- ai
     hl.window_rule({ match = { class = "^([Ss]potify)$" }, workspace = "8" })                      -- media
-    hl.window_rule({ match = { class = "^([Ss]team|steam|[Ee]quibop|discord)$" }, workspace = "9" })  -- gaming
+    hl.window_rule({ match = { class = "^([Ss]team|steam)$" }, workspace = "9" })                 -- gaming
     -- Forza Horizon 6 (Steam app 2483190). Must run on XWayland — i.e. launch options
     -- WITHOUT PROTON_ENABLE_WAYLAND (that mode hard-targets output 0 / the internal
     -- panel and Hyprland can't relocate its fullscreen). On XWayland Hyprland controls
