@@ -4,7 +4,7 @@
     loader = {
       systemd-boot = {
         enable = true;
-        configurationLimit = 10;
+        configurationLimit = 3;
         # Render the boot menu at the panel's highest available resolution so
         # the text is crisp instead of a stretched low-res framebuffer.
         consoleMode = "max";

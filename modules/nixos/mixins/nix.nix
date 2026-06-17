@@ -23,8 +23,8 @@
 
   nix.gc = {
     automatic = true;
-    dates = "weekly";
-    options = "--delete-older-than 30d";
+    dates = "daily";
+    options = "--delete-older-than 2d";
   };
 
   # Helium browser overlay (pkgs.helium). Set at the system level so it is also
