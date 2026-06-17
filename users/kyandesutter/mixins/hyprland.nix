@@ -203,6 +203,11 @@ in
       -- HDMI-A-1) and equibop to workspace 4 (communication, eDP-1).
       hl.exec_cmd("steam -silent")
       hl.exec_cmd("equibop --start-minimized")
+      -- Alt-Tab window switcher (standalone Quickshell instance; config in
+      -- users/kyandesutter/mixins/alttab.nix). Started here rather than via a
+      -- systemd unit so it inherits Hyprland's Wayland env. It registers the
+      -- alttab:next / alttab:prev global shortcuts driven by the binds below.
+      hl.exec_cmd("${pkgs.quickshell}/bin/qs -c alttab")
     end)
 
     -- — General options —
@@ -281,6 +286,15 @@ in
     end
 
     hl.bind(mod .. " + Tab", hl.dsp.focus({ workspace = "previous" }))
+
+    -- Alt-Tab window switcher (Quickshell; config in alttab.nix). The es layout
+    -- remaps left Alt to AltGr (lv3:lalt_switch above), which Hyprland sees as the
+    -- MOD5 modifier. Hold MOD5 (left Alt) + Tab to open and cycle most-recently-
+    -- used windows; release MOD5 to focus the selection. SHIFT reverses. Hyprland
+    -- only fires the first press — once open, the Quickshell overlay grabs the
+    -- keyboard and handles further Tab / SHIFT+Tab / release itself.
+    hl.bind("MOD5 + Tab", hl.dsp.global("alttab:next"))
+    hl.bind("MOD5 + SHIFT + Tab", hl.dsp.global("alttab:prev"))
 
     -- Screenshots (caelestia's integrated tool: saves to ~/Pictures, copies to
     -- the clipboard and shows a notification). Print = whole screen; SUPER+SHIFT+S

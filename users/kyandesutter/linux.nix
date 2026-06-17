@@ -3,6 +3,7 @@
   # self.homeModules.kyandesutter-linux.
   imports = [
     ./mixins/hyprland.nix
+    ./mixins/alttab.nix
     ./mixins/caelestia.nix
     ./mixins/helium.nix
     ./mixins/spicetify.nix
