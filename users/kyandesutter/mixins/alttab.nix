@@ -80,11 +80,14 @@
         root.entries = [];
         root.index = 0;
         root.pendingCommit = false;
-        // Open (and grab the keyboard) IMMEDIATELY, before fetching the window
-        // list. Otherwise the grab only arms after the `hyprctl clients`
-        // subprocess returns and the window maps, and a fast tap-and-release
-        // lands in that gap — the release leaks to Hyprland, which (in lua mode)
-        // won't act on a modifier release, so the overlay gets stuck open.
+        // Map the (already-built) overlay and grab the keyboard IMMEDIATELY,
+        // before fetching the window list. The surface is kept alive from
+        // startup (see PanelWindow below), so this only re-maps it — the
+        // exclusive grab arms within a frame, fast enough to catch even a quick
+        // tap-and-release. (If the grab armed only after `hyprctl clients`
+        // returned and the tree was built, a fast tap would land in that gap;
+        // the release would leak to Hyprland, which in lua mode ignores a
+        // modifier release, leaving the overlay stuck open.)
         root.open = true;
         Hyprland.refreshToplevels();
         clientsProc.running = true; // fills entries in parallel
@@ -171,25 +174,49 @@
         }
       }
 
+      // Build the overlay surface ONCE at startup (active: true) and keep it
+      // alive; map it only while a switch is in progress (visible: root.open).
+      // Re-mapping an already-built surface arms the exclusive keyboard grab in
+      // ~a frame, whereas the old LazyLoader rebuilt the whole tree on every
+      // open — that construction latency was wide enough for a fast
+      // tap-and-release to land before the grab armed, leaking the release to
+      // Hyprland and leaving the overlay stuck open.
       LazyLoader {
-        active: root.open
+        active: true
 
         PanelWindow {
           id: win
+          visible: root.open
           anchors { top: true; bottom: true; left: true; right: true }
           color: "transparent"
           exclusionMode: ExclusionMode.Ignore
           WlrLayershell.layer: WlrLayer.Overlay
-          WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
+          // Only hold the exclusive keyboard grab while actually switching,
+          // otherwise the always-present surface would swallow all keyboard
+          // input. (When hidden the surface is unmapped, but gate the focus
+          // mode too as a belt-and-braces guard.)
+          WlrLayershell.keyboardFocus: root.open ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
           WlrLayershell.namespace: "alttab"
 
           // Subtle dim behind the panel.
           Rectangle { anchors.fill: parent; color: "#66000000" }
 
           FocusScope {
+            id: scope
             anchors.fill: parent
             focus: true
             Component.onCompleted: forceActiveFocus()
+
+            // The surface is built once at startup, so onCompleted fires while
+            // it is still hidden. Re-grab the keyboard every time the overlay is
+            // actually shown — otherwise the FocusScope wouldn't hold focus and
+            // Tab / Escape / the AltGr release would never reach it.
+            Connections {
+              target: win
+              function onVisibleChanged() {
+                if (win.visible) scope.forceActiveFocus();
+              }
+            }
 
             Keys.onPressed: function (e) {
               if (e.key === Qt.Key_Tab) {
