@@ -1,7 +1,7 @@
 { inputs, config, lib, ... }:
 let
   # Wallpaper tracked in-repo so it resolves to an immutable store path.
-  wallpaper = ../wallpapers/river-city.jpg;
+  wallpaper = ../wallpapers/storm.jpg;
 in
 {
   # Official caelestia flake home-manager module. Installs the Quickshell-based

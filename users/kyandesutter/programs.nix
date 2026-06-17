@@ -17,6 +17,7 @@
       deno
       dipc
       ffmpeg
+      file
       git-filter-repo
       imagemagick
       libcaca
@@ -42,6 +43,7 @@
       tree-sitter
       uv
       wget
+      tinyxxd # provides the `xxd` binary (no standalone `xxd` package in nixpkgs)
       zig
     ]
     # macOS-only dev toolchain (Swift/Xcode/CocoaPods, Mac App Store CLI).
