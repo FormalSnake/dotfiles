@@ -259,10 +259,18 @@
                 anchors.centerIn: parent
                 spacing: 12
 
-                Row {
+                Grid {
                   id: previews
                   spacing: 12
                   anchors.horizontalCenter: parent.horizontalCenter
+                  // Wrap previews into a grid so every window stays on-screen
+                  // instead of overflowing a single row. Fit as many 200px-wide
+                  // cells (212px incl. spacing) as the usable width allows —
+                  // win.width minus the panel's ~112px screen-margin + padding —
+                  // capped at the number of windows so few windows don't spread
+                  // into a sparse grid.
+                  columns: Math.max(1, Math.min(root.entries.length,
+                           Math.floor((win.width - 100) / 212)))
 
                   Repeater {
                     model: root.entries
