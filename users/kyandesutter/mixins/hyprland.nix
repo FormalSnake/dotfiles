@@ -246,6 +246,14 @@ in
       misc = {
         disable_hyprland_logo = true,
         disable_splash_rendering = true,
+        -- Adaptive sync. With two monitors at different refresh rates (HDMI-A-1
+        -- 144Hz on the dGPU, eDP-1 240Hz on the iGPU) and VRR off, the compositor's
+        -- single present loop beats between the two vblanks and the focused monitor
+        -- hitches every few seconds — in games that reads as periodic slow-motion.
+        -- vrr=2 enables adaptive sync only for fullscreen apps (the PA278CGV is a
+        -- FreeSync panel), so the gaming monitor follows the game's frame cadence
+        -- while the desktop stays at a fixed rate (avoids VRR flicker on the panel).
+        vrr = 2,
       },
       -- eDP-1 runs at fractional scale (1.25). XWayland can't do fractional
       -- scaling, so Hyprland upscales X11 surfaces → blurry/"weird" scaling and
