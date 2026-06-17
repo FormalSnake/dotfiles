@@ -381,6 +381,53 @@ in
     hl.window_rule({ match = { title = "^(Picture-in-Picture)$" }, float = true })                 -- floating PiP
   '';
 
+  # — Multi-GPU primary selection (hybrid laptop) —
+  #
+  # This G815 is a hybrid laptop: the Intel iGPU (PCI 0000:00:02.0) drives the
+  # internal panel (eDP-1), while the NVIDIA dGPU (PCI 0000:02:00.0) drives the
+  # external ports — including HDMI-A-1, the 1440p144 desk monitor games run on.
+  #
+  # By default Hyprland's Aquamarine backend makes the *boot* GPU (the iGPU,
+  # which owns fb0) its primary render/allocator device. With both the game and
+  # its monitor on the dGPU, every frame then crosses PCIe twice — dGPU renders →
+  # copied to the iGPU to composite → copied back to the dGPU to scan out on
+  # HDMI-A-1. That starves the dGPU (it stalls on the copies, so it never
+  # saturates — "GPU isn't being fully used") and surfaces in games as periodic
+  # slow-motion every few seconds — the symptom the disk/alt-tab/VRR/tearing
+  # changes were all chasing without addressing the cross-GPU copy itself.
+  #
+  # AQ_DRM_DEVICES is a ':'-separated device list; the FIRST entry becomes the
+  # primary GPU (aquamarine src/backend/drm/DRM.cpp). Listing the dGPU first
+  # makes the gaming path zero-copy (game → dGPU → HDMI-A-1 directly); only the
+  # iGPU's internal panel then needs a cross-GPU copy.
+  #
+  # Battery trade-off: a primary dGPU can't RTD3-sleep, which fights the
+  # finegrained NVIDIA power management in modules/nixos/mixins/nvidia.nix. So
+  # only opt in when a display is actually lit on the dGPU (i.e. docked to the
+  # external monitor); undocked, leave AQ_DRM_DEVICES unset so the iGPU stays
+  # primary and the dGPU powers down as before. The choice is made ONCE at
+  # session start — uwsm sources env-${XDG_CURRENT_DESKTOP,,} (→ env-hyprland)
+  # as a POSIX shell script before launching Hyprland — so dock *before* logging
+  # in to get the zero-copy path; plugging the monitor in afterwards needs a relog.
+  #
+  # GPUs are resolved through the stable by-path PCI symlinks (DRM card numbers
+  # can reorder across boots) back to the canonical /dev/dri/cardN nodes that
+  # aquamarine enumerates and matches against.
+  xdg.configFile."uwsm/env-hyprland".text = ''
+    dgpu=$(readlink -f /dev/dri/by-path/pci-0000:02:00.0-card 2>/dev/null)
+    igpu=$(readlink -f /dev/dri/by-path/pci-0000:00:02.0-card 2>/dev/null)
+    if [ -n "$dgpu" ] && [ -n "$igpu" ]; then
+      card=$(basename "$dgpu")
+      for status in /sys/class/drm/"$card"-*/status; do
+        [ -r "$status" ] || continue
+        if [ "$(cat "$status")" = connected ]; then
+          export AQ_DRM_DEVICES="$dgpu:$igpu"
+          break
+        fi
+      done
+    fi
+  '';
+
   # Clipboard manager: cliphist (history store), wl-clip-persist (keep the
   # selection alive after the source app exits). The picker UI is fuzzel,
   # configured via programs.fuzzel below. Nautilus is the GUI file manager, plus
