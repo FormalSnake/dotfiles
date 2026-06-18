@@ -181,7 +181,7 @@ in
     -- Cursor theme/size for XWayland (X11) clients — without XCURSOR_THEME they
     -- fall back to a default theme and show a *different* cursor than native
     -- Wayland apps (which read it from home.pointerCursor / hyprcursor below).
-    hl.env("XCURSOR_THEME", "catppuccin-mocha-mauve-cursors")
+    hl.env("XCURSOR_THEME", "Bibata-Modern-Ice")
     hl.env("XCURSOR_SIZE", "24")
     -- NVIDIA + Wayland hints (explicit-sync is automatic on recent drivers).
     hl.env("__GL_GSYNC_ALLOWED", "1")
@@ -567,12 +567,12 @@ in
       ] (_: [ "impress.desktop" ]);
   };
 
-  # Cursor theme — Catppuccin Mocha (Mauve accent), matching the Aura RGB theme.
+  # Cursor theme — Bibata Modern Ice (https://www.opendesktop.org/p/1197198/).
   # Sets it for GTK, native Wayland (hyprcursor) and X11/XWayland (x11.enable
   # exports XCURSOR_THEME/SIZE) so every app shows the same pretty cursor.
   home.pointerCursor = {
-    package = pkgs.catppuccin-cursors.mochaMauve;
-    name = "catppuccin-mocha-mauve-cursors";
+    package = pkgs.bibata-cursors;
+    name = "Bibata-Modern-Ice";
     size = 24;
     gtk.enable = true;
     x11.enable = true;
