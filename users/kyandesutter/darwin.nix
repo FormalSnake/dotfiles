@@ -3,10 +3,12 @@
   # self.homeModules.kyandesutter-darwin (kept out of ./default.nix so imports
   # don't depend on the platform).
   imports = [
-    ./mixins/aerospace.nix
+    # Disabled for a lighter dev host — using Apple's Stage Manager instead of
+    # aerospace tiling. Configs are kept; just not imported.
+    # ./mixins/aerospace.nix
     ./mixins/karabiner.nix
     ./mixins/hammerspoon.nix
-    ./mixins/jankyborders.nix
+    # ./mixins/jankyborders.nix
     ./mixins/linearmouse.nix
     ./mixins/lynk-browser.nix
   ];
