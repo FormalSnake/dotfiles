@@ -16,7 +16,7 @@ in
 
     settings = {
       font-family = "GeistMono Nerd Font";
-      font-size = 12;
+      font-size = 10;
 
       cursor-style = "block";
       cursor-style-blink = false;
