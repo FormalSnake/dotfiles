@@ -55,20 +55,39 @@ in
 
     # Fonts caelestia/Hyprland expect (Material Symbols, a Nerd Font, emoji).
     # System UI font is Geist; monospace is GeistMono patched with Nerd Font
-    # glyphs (terminal/caelestia mono + powerline icons).
+    # glyphs (terminal/caelestia mono + powerline icons). The rest are general
+    # coverage fonts so apps don't fall back to Geist (which carries no emoji,
+    # CJK, or serif glyphs) for anything outside basic Latin.
     fonts.packages = with pkgs; [
       material-symbols
       geist-font # "Geist" (sans) + "Geist Mono"
       nerd-fonts.geist-mono # "GeistMono Nerd Font"
-      noto-fonts
-      noto-fonts-color-emoji
+
+      # Broad Latin/symbol coverage + metric-compatible Arial/Times/Courier
+      # replacements (lots of web/office content references these by name).
+      noto-fonts # "Noto Sans" / "Noto Serif" — huge Unicode coverage
+      liberation_ttf # "Liberation Sans/Serif/Mono" (Arial/Times/Courier metrics)
+      dejavu_fonts # "DejaVu Sans/Serif/Sans Mono" — last-resort wide coverage
+
+      # CJK (Chinese/Japanese/Korean) so those scripts render instead of tofu.
+      noto-fonts-cjk-sans
+      noto-fonts-cjk-serif
+
+      # Emoji.
+      noto-fonts-color-emoji # "Noto Color Emoji" — color glyphs
+      noto-fonts-monochrome-emoji # "Noto Emoji" — monochrome fallback
     ];
 
     # Make Geist / GeistMono the default sans/monospace for the whole system
     # (GTK apps, anything resolving the generic sans-serif/monospace families).
+    # Noto Serif fills the serif generic, and "Noto Color Emoji" is appended to
+    # every family so emoji render even in apps that don't consult fontconfig's
+    # emoji generic directly (which is why emoji weren't showing up before).
     fonts.fontconfig.defaultFonts = {
-      sansSerif = [ "Geist" ];
-      monospace = [ "GeistMono Nerd Font" ];
+      sansSerif = [ "Geist" "Noto Sans" "Noto Color Emoji" ];
+      serif = [ "Noto Serif" "Noto Color Emoji" ];
+      monospace = [ "GeistMono Nerd Font" "Noto Sans Mono" "Noto Color Emoji" ];
+      emoji = [ "Noto Color Emoji" ];
     };
 
     # Backlight permissions: let the `video` group (which kyandesutter is in)
