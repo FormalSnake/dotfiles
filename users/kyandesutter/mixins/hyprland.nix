@@ -50,7 +50,8 @@ let
           $cx >= .x and $cx < (.x + (.width / .scale)) and
           $cy >= .y and $cy < (.y + (.height / .scale))
         )) // empty') || true
-      # Fallback: the focused monitor (follow_mouse=1 ⇒ it tracks the cursor).
+      # Fallback: the focused monitor (used only when the cursor isn't inside
+      # any monitor rect; with follow_mouse=0 focus follows clicks, not hover).
       if [ -z "$mon" ]; then
         mon=$(hyprctl -j monitors | jq -c 'first(.[] | select(.focused)) // empty') || true
       fi
@@ -237,7 +238,8 @@ in
         -- (@ # ~ [ ] { } \ € …). Trade-off: left Alt no longer acts as a plain
         -- Alt modifier (SUPER is the primary mod here anyway).
         kb_options = "lv3:lalt_switch",
-        follow_mouse = 1,
+        -- 0 = focus only changes on click, never on hover (focus-follows-mouse off).
+        follow_mouse = 0,
         sensitivity = 0,
         touchpad = { natural_scroll = true },
       },
