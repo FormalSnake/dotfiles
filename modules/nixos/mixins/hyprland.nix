@@ -1,6 +1,88 @@
 { config, lib, pkgs, ... }:
 let
   cfg = config.kyan.desktop;
+
+  # The SDDM greeter runs as the unprivileged `sddm` user before any user logs
+  # in, so it can't read caelestia's runtime wallpaper/scheme state. Instead we
+  # bake both into the theme statically, mirroring what caelestia is pinned to
+  # in ../../../users/kyandesutter/mixins/caelestia.nix:
+  #   • wallpaper → wallpapers/storm.jpg
+  #   • scheme    → Catppuccin Mocha
+  # If either of those changes there, update them here too.
+
+  # In-repo wallpaper, copied to the store as its own path. file:// so the
+  # theme's QML (Main.qml) loads it as an absolute local file rather than
+  # resolving it relative to the theme directory.
+  loginWallpaper = "file://${../../../users/kyandesutter/wallpapers/storm.jpg}";
+
+  # Catppuccin Mocha palette (subset used below). Mauve is the accent.
+  mocha = {
+    base = "#1e1e2e";
+    mantle = "#181825";
+    crust = "#11111b";
+    surface0 = "#313244";
+    surface1 = "#45475a";
+    text = "#cdd6f4";
+    subtext0 = "#a6adc8";
+    overlay0 = "#6c7086";
+    mauve = "#cba6f7";
+    red = "#f38ba8";
+  };
+
+  # sddm-astronaut, "pixel_sakura" layout, themed with the wallpaper + Mocha.
+  # `themeConfig` is written to pixel_sakura.conf.user and merged over the
+  # bundled pixel_sakura.conf, so unset keys keep their upstream defaults.
+  sddmAstronaut = pkgs.sddm-astronaut.override {
+    embeddedTheme = "pixel_sakura";
+    themeConfig = {
+      # Use our wallpaper instead of the bundled pixel_sakura.gif, cropped to
+      # fill the screen. PartialBlur softens the area behind the login form so
+      # the Mocha text stays legible over an arbitrary photo.
+      Background = loginWallpaper;
+      CropBackground = "true";
+      DimBackground = "0.0";
+      PartialBlur = "true";
+
+      # Mocha colors.
+      HeaderTextColor = mocha.text;
+      DateTextColor = mocha.subtext0;
+      TimeTextColor = mocha.text;
+
+      BackgroundColor = mocha.base;
+      FormBackgroundColor = mocha.mantle;
+      DimBackgroundColor = mocha.crust;
+
+      LoginFieldBackgroundColor = mocha.surface0;
+      PasswordFieldBackgroundColor = mocha.surface0;
+      LoginFieldTextColor = mocha.text;
+      PasswordFieldTextColor = mocha.text;
+      UserIconColor = mocha.subtext0;
+      PasswordIconColor = mocha.subtext0;
+
+      PlaceholderTextColor = mocha.overlay0;
+      WarningColor = mocha.red;
+
+      LoginButtonTextColor = mocha.base;
+      LoginButtonBackgroundColor = mocha.mauve;
+      SystemButtonsIconsColor = mocha.subtext0;
+      SessionButtonTextColor = mocha.subtext0;
+      VirtualKeyboardButtonTextColor = mocha.subtext0;
+
+      DropdownTextColor = mocha.text;
+      DropdownSelectedBackgroundColor = mocha.surface1;
+      DropdownBackgroundColor = mocha.surface0;
+
+      HighlightTextColor = mocha.text;
+      HighlightBackgroundColor = mocha.mauve;
+      HighlightBorderColor = "transparent";
+
+      HoverUserIconColor = mocha.mauve;
+      HoverPasswordIconColor = mocha.mauve;
+      HoverSystemButtonsIconsColor = mocha.mauve;
+      HoverSessionButtonTextColor = mocha.mauve;
+      HoverVirtualKeyboardButtonTextColor = mocha.mauve;
+    };
+  };
 in
 {
   options.kyan.desktop.enable = lib.mkEnableOption "Hyprland desktop (system side)";
@@ -18,13 +100,21 @@ in
       extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
     };
 
-    # greetd + tuigreet: minimal login that launches the Hyprland uwsm session.
-    services.greetd = {
+    # SDDM (Qt6, Wayland) with the Keyitdev "sddm-astronaut" theme. SDDM lists the
+    # Hyprland uwsm session from /run/current-system/sw/share/wayland-sessions, so
+    # logging in launches the same hyprland-uwsm.desktop session greetd used to.
+    services.displayManager.sddm = {
       enable = true;
-      settings.default_session = {
-        command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --remember --cmd 'uwsm start hyprland-uwsm.desktop'";
-        user = "greeter";
-      };
+      wayland.enable = true;
+      package = pkgs.kdePackages.sddm;
+      theme = "sddm-astronaut-theme";
+      # Qt runtime the theme's QML needs (svg, multimedia for the animated
+      # background, the on-screen virtual keyboard).
+      extraPackages = with pkgs.kdePackages; [
+        qtsvg
+        qtmultimedia
+        qtvirtualkeyboard
+      ];
     };
 
     # polkit agent + secrets/keyring so GUI auth prompts and saved logins work.
@@ -105,6 +195,12 @@ in
     hardware.i2c.enable = true;
 
     environment.systemPackages = with pkgs; [
+      # SDDM "sddm-astronaut" theme (pixel_sakura layout, themed with our
+      # wallpaper + Catppuccin Mocha — see the `sddmAstronaut` let-binding).
+      # Installed into the system profile so SDDM finds it under
+      # .../share/sddm/themes/sddm-astronaut-theme.
+      sddmAstronaut
+
       brightnessctl
       ddcutil # external-monitor brightness (caelestia uses it)
       playerctl

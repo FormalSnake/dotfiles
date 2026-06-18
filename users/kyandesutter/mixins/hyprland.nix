@@ -203,6 +203,16 @@ in
       -- HDMI-A-1) and equibop to workspace 4 (communication, eDP-1).
       hl.exec_cmd("steam -silent")
       hl.exec_cmd("equibop --start-minimized")
+      -- The rest of the always-open set on this host: the browser, the two
+      -- messaging clients, and the music player. None take a "start minimized"
+      -- flag like steam/equibop, but each has a window_rule below pinning it to
+      -- its named workspace (helium→1 web, beeper & bluebubbles→4 communication,
+      -- spotify→8 media), so they open straight onto their own workspace instead
+      -- of piling onto whatever is focused at login.
+      hl.exec_cmd("helium")
+      hl.exec_cmd("beeper")
+      hl.exec_cmd("bluebubbles")
+      hl.exec_cmd("spotify")
       -- Alt-Tab window switcher (standalone Quickshell instance; config in
       -- users/kyandesutter/mixins/alttab.nix). Started here rather than via a
       -- systemd unit so it inherits Hyprland's Wayland env. It registers the
