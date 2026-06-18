@@ -437,6 +437,30 @@ in
     fi
   '';
 
+  # — Quickshell icon theme —
+  #
+  # caelestia (and the alttab switcher in alttab.nix) are Quickshell/Qt6 apps.
+  # Their icons come from Qt's icon theme, which Quickshell takes from the Qt
+  # *platform theme*. This session sets no Qt platform theme (QT_QPA_PLATFORMTHEME
+  # is unset), so Qt's icon theme falls back to a near-empty default and every
+  # unresolved icon renders as the magenta/black "missing texture" placeholder —
+  # all over caelestia and in alttab. (GTK apps are unaffected: they read
+  # gtk-icon-theme-name directly from gtk-3.0/settings.ini.)
+  #
+  # Papirus-Dark is already installed and named for GTK (the catppuccin module
+  # pulls it in and points gtk-icon-theme-name + dconf icon-theme at it when
+  # gtk.enable is on). Rather than introduce a full Qt platform theme (which would
+  # restyle every Qt app), point Quickshell straight at it with QS_ICON_THEME —
+  # Quickshell's own override env var. The scheme is pinned to mocha *dark*
+  # (caelestiaScheme), so QS_ICON_THEME not tracking light/dark doesn't matter.
+  #
+  # Placed in uwsm/env (sourced for every uwsm session and imported into the
+  # systemd user manager) so it reaches caelestia.service — a systemd user unit —
+  # as well as the Hyprland-spawned alttab instance.
+  xdg.configFile."uwsm/env".text = ''
+    export QS_ICON_THEME="Papirus-Dark"
+  '';
+
   # Clipboard manager: cliphist (history store), wl-clip-persist (keep the
   # selection alive after the source app exits). The picker UI is fuzzel,
   # configured via programs.fuzzel below. Nautilus is the GUI file manager, plus
