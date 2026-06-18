@@ -85,21 +85,6 @@
     lazydocker.enable = true;
     lazygit.enable = true;
     opencode.enable = true;
-    prismlauncher = {
-      enable = true;
-      # Bundle zulu17 (older MC) and zulu21 (MC 1.20.5+/1.21 require Java 21).
-      # Prism auto-selects the right JDK per instance. We skip the default
-      # jdk21/17/8 triple to avoid pulling the extra Java 8 JDK we don't need.
-      package =
-        let
-          prism = pkgs.prismlauncher.override { jdks = [ pkgs.zulu17 pkgs.zulu21 ]; };
-        in
-        # On the PRIME laptop, wrap so Minecraft (OpenGL — it can't grab the
-        # dGPU opportunistically the way Vulkan games can) renders on the RTX
-        # 5070. gpuOffloadWrap is provided by the nvidia mixin's overlay, so it
-        # only exists on Linux/g815; on darwin fall through to the plain package.
-        if pkgs ? gpuOffloadWrap then pkgs.gpuOffloadWrap prism else prism;
-    };
     ripgrep.enable = true;
     yazi.enable = true;
     zoxide.enable = true;
