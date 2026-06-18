@@ -20,7 +20,7 @@
       "audacity"
       "balenaetcher"
       "betterdisplay"
-      "bluebubbles"
+      "bluebubbles" # BlueBubbles Server (iMessage bridge) — macOS-only, this Mac is the host
       "claude"
       "clop"
       "docker-desktop"

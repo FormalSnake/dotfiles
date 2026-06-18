@@ -66,4 +66,21 @@ in
     "ghostty/themes/catppuccin-latte".source =
       "${config.catppuccin.sources.ghostty}/catppuccin-latte.conf";
   };
+
+  # On macOS the ghostty binary is a Homebrew cask, so nixpkgs has no ghostty
+  # package and an incoming SSH session — TERM=xterm-ghostty, sent from the Linux
+  # box — can't find the terminfo entry, so full-screen apps error with "unknown
+  # terminal type". Compile the captured source (./xterm-ghostty.terminfo, from
+  # `infocmp -x xterm-ghostty`) into ~/.terminfo using the *system* tic so the
+  # output matches Apple's ncurses readers. ~/.terminfo is searched
+  # unconditionally, so no env var is needed. This is the declarative stand-in
+  # for ghostty's `ssh-terminfo` shell-integration feature, disabled above
+  # because it hung on connect.
+  home.activation.ghosttyTerminfo = lib.mkIf isDarwin (
+    lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      if [ -x /usr/bin/tic ]; then
+        run /usr/bin/tic -x -o "$HOME/.terminfo" ${./xterm-ghostty.terminfo} || true
+      fi
+    ''
+  );
 }

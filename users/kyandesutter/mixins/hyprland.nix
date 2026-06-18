@@ -355,10 +355,11 @@ in
     hl.window_rule({ match = { class = "^([Hh]elium)$" }, workspace = "1" })                       -- web
     hl.window_rule({ match = { class = "^(com.mitchellh.ghostty)$" }, workspace = "2" })           -- terminal
     hl.window_rule({ match = { class = "^([Cc]ode|[Zz]ed|dev.zed.Zed)$" }, workspace = "3" })      -- development
-    hl.window_rule({ match = { class = "^([Ss]lack|WhatsApp|[Ee]quibop|discord|[Bb]eeper)$" }, workspace = "4" })  -- communication (incl. Discord/equibop/Beeper, internal panel)
+    hl.window_rule({ match = { class = "^([Ss]lack|WhatsApp|[Ee]quibop|discord|[Bb]eeper|[Bb]lue[Bb]ubbles)$" }, workspace = "4" })  -- communication (incl. Discord/equibop/Beeper/BlueBubbles, internal panel)
     -- Beeper (Electron) maps its main window as floating, so it never tiles. Force
     -- it back into the dwindle layout; it still lands on ws4 via the rule above.
     hl.window_rule({ match = { class = "^([Bb]eeper)$" }, float = false })                            -- beeper → tiled
+    hl.window_rule({ match = { class = "^([Bb]lue[Bb]ubbles)$" }, float = false })                    -- bluebubbles → tiled
     hl.window_rule({ match = { class = "^([Cc]laude)$" }, workspace = "7" })                       -- ai
     hl.window_rule({ match = { class = "^([Ss]potify)$" }, workspace = "8" })                      -- media
     hl.window_rule({ match = { class = "^([Ss]team|steam)$" }, workspace = "9" })                 -- gaming
