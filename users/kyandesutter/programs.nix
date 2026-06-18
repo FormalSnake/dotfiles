@@ -56,6 +56,12 @@
       terminal-notifier
       xcbeautify
       xcodegen
+    ]
+    ++ lib.optionals stdenv.isLinux [
+      # VNC client for the Mac's built-in Screen Sharing (reached over Tailscale)
+      # — for seeing/clicking GUI & permission dialogs on the remote work
+      # server. See docs/remote-server.md.
+      remmina
     ];
 
   programs = {

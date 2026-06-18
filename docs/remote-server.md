@@ -53,7 +53,19 @@ owner-only bits the flake cannot do. The owner runs every rebuild.
   1Password-held **public** key into the Mac's `~/.ssh/authorized_keys` (this
   replaces the raw `~/.ssh/id_ed25519` key from step 3).
 
+### 7. Screen Sharing on the Mac (remote desktop)
+- Enable the built-in host: System Settings → General → Sharing → **Screen
+  Sharing** = on (or **Remote Management** if you want the login window too).
+  No third-party app or account.
+- Nothing to install on the Mac side — this is built into macOS.
+
 ## Daily use
+
+### Remote desktop — click a dialog on the Mac
+- The laptop has **remmina** (VNC client). Connect to `vnc://macbook:5900` over
+  Tailscale (Tailscale already encrypts it — no SSH tunnel needed).
+- Use this when serve-sim / an SSH session hits a GUI or permission dialog on
+  the Mac that you can only dismiss by seeing the screen.
 
 ### Resilient shell
 - `mosh macbook` — survives suspend/roaming. Uses the `macbook` ssh entry for
