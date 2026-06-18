@@ -11,6 +11,8 @@
       ./mixins/login-items.nix
       ./mixins/auto-update.nix
       ./mixins/agenix.nix
+      ./mixins/tailscale.nix
+      ./mixins/remote-access.nix
       ./profiles
     ];
   };

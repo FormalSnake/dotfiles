@@ -18,6 +18,20 @@
         LocalForward = "8080 127.0.0.1:8080";
       };
 
+      # Remote work server over Tailscale (reachable anywhere). `mosh macbook`
+      # uses this entry for the resilient shell; a separate `ssh -fN macbook`
+      # holds the tunnels (mosh cannot forward ports). serve-sim needs BOTH
+      # 3200 (preview UI) and 3100 (MJPEG/WS stream) — see docs/remote-server.md.
+      "macbook" = {
+        HostName = "macbook"; # Tailscale MagicDNS name — confirm the tailnet machine name
+        User = "kyandesutter";
+        LocalForward = [
+          "3200 127.0.0.1:3200"
+          "3100 127.0.0.1:3100"
+          "8080 127.0.0.1:8080"
+        ];
+      };
+
       "superserver.local" = {
         HostName = "192.168.86.2";
         Port = 22;

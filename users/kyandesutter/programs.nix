@@ -6,7 +6,6 @@
     [
       just
       zulu21
-      _1password-cli
 
       # — migrated from homebrew formulae —
       assimp
@@ -49,6 +48,7 @@
     # macOS-only dev toolchain (Swift/Xcode/CocoaPods, Mac App Store CLI).
     # These packages are Darwin-only in nixpkgs, so guard them off on Linux.
     ++ lib.optionals stdenv.isDarwin [
+      _1password-cli
       cocoapods
       mas
       swiftformat

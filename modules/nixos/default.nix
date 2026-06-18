@@ -23,6 +23,9 @@
       ./mixins/gaming.nix
       ./mixins/asus.nix
       ./mixins/sober.nix
+      ./mixins/tailscale.nix
+      ./mixins/nordvpn.nix
+      ./mixins/onepassword.nix
       ./profiles
     ];
   };

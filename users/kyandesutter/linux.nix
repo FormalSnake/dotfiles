@@ -5,6 +5,7 @@
     ./mixins/hyprland.nix
     ./mixins/alttab.nix
     ./mixins/caelestia.nix
+    ./mixins/beeper.nix
     ./mixins/helium.nix
     ./mixins/spicetify.nix
     ./mixins/fetch.nix

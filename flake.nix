@@ -75,6 +75,11 @@
 
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
+    # NordVPN — laptop VPN exit only (the device mesh is Tailscale). No
+    # first-party nixpkgs module exists; this community flake provides the
+    # package + a NixOS module (services.nordvpn).
+    nordvpn-flake.url = "github:connerohnesorge/nordvpn-flake";
+
     # CachyOS kernel + scx schedulers. nyxpkgs-unstable tracks nixpkgs-unstable.
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
 
