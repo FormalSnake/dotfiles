@@ -243,13 +243,18 @@ in
         allow_tearing = true,
       },
       decoration = {
-        rounding = 10,
+        rounding = 13,
         blur = { enabled = true, size = 6, passes = 3 },
       },
       animations = { enabled = true },
       misc = {
         disable_hyprland_logo = true,
         disable_splash_rendering = true,
+        -- When an app opens a link, the browser requests focus via xdg-activation.
+        -- Hyprland ignores activation requests by default (anti-focus-steal), so the
+        -- link opens but the browser stays in the background. Honour the request so
+        -- the browser window is focused (and its workspace switched to) on open.
+        focus_on_activate = true,
         -- VRR is OFF. Games here run ~120fps; on the 240Hz internal panel that's a
         -- clean 2:1 cadence (smooth), but on the fixed 144Hz desk monitor (HDMI-A-1)
         -- 120 doesn't divide 144 — frames are held for 1 or 2 refreshes in an uneven
@@ -570,7 +575,7 @@ in
 
   # fuzzel is the menu used by the clipboard picker (clipboardPicker above).
   # Themed to match the rest of the desktop: Catppuccin Mocha palette with the
-  # Mauve accent, Geist UI font, and the same 10px rounding / mauve border as the
+  # Mauve accent, Geist UI font, and the same 13px rounding / mauve border as the
   # Hyprland window decorations. Colours are RRGGBBAA hex.
   programs.fuzzel = {
     enable = true;
@@ -590,7 +595,7 @@ in
         border = "cba6f7ff"; # mauve
       };
       border = {
-        radius = 10;
+        radius = 13;
         width = 2;
       };
     };
