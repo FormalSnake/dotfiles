@@ -36,6 +36,20 @@ in
         label.family = "Geist";
         mono.family = "GeistMono Nerd Font";
       };
+
+      # On-demand sleep. The session menu (SUPER+Space → power) has a fixed set
+      # of four buttons baked into the shell QML — logout/shutdown/hibernate/
+      # reboot — so a fifth "suspend" button isn't reachable from config. The
+      # hibernate slot ran `systemctl hibernate`, which does nothing here (no
+      # swap/resume device is configured), so repurpose it into a sleep button:
+      # `systemctl suspend` with a crescent-moon icon. caelestia's LogindManager
+      # locks the screen before sleep (general.idle.lockBeforeSleep, default on),
+      # so resume lands on the lock screen. The matching keybind is in
+      # hyprland.lua (SUPER+SHIFT+Escape).
+      session = {
+        commands.hibernate = [ "systemctl" "suspend" ];
+        icons.hibernate = "bedtime";
+      };
     };
   };
 

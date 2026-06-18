@@ -307,6 +307,11 @@ in
     -- displays, and holds a Wayland idle-inhibit lock so caelestia's idle daemon
     -- doesn't suspend mid-download. SUPER+SHIFT+N again to restore.
     hl.bind(mod .. " + SHIFT + N", hl.dsp.exec_cmd("night-mode toggle"))
+    -- Sleep: suspend on demand. caelestia locks the screen before sleep
+    -- (general.idle.lockBeforeSleep, default on), so resume lands on the lock
+    -- screen. Mirrors the session menu's repurposed "sleep" button (see the
+    -- session.commands.hibernate override in caelestia.nix).
+    hl.bind(mod .. " + SHIFT + Escape", hl.dsp.exec_cmd("systemctl suspend"))
 
     -- Vim-style focus (aerospace alt-hjkl → SUPER+hjkl).
     hl.bind(mod .. " + H", hl.dsp.focus({ direction = "l" }))
