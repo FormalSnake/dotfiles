@@ -1,3 +1,4 @@
+{ pkgs, lib, ... }:
 {
   programs.ssh = {
     enable = true;
@@ -23,7 +24,7 @@
       # holds the tunnels (mosh cannot forward ports). serve-sim needs BOTH
       # 3200 (preview UI) and 3100 (MJPEG/WS stream) — see docs/remote-server.md.
       "macbook" = {
-        HostName = "macbook"; # Tailscale MagicDNS name — confirm the tailnet machine name
+        HostName = "macbook-pro-2"; # Tailscale MagicDNS name of the Mac (confirmed via direct ssh)
         User = "kyandesutter";
         LocalForward = [
           "3200 127.0.0.1:3200"
@@ -54,10 +55,13 @@
         User = "kyandesutter";
       };
 
+      # UseKeychain is an Apple-SSH-only option; Linux OpenSSH rejects the
+      # whole config if it appears, so only emit it on Darwin.
       "github.com" = {
         AddKeysToAgent = "yes";
-        UseKeychain = "yes";
         IdentityFile = "~/.ssh/id_ed25519";
+      } // lib.optionalAttrs pkgs.stdenv.isDarwin {
+        UseKeychain = "yes";
       };
 
       "superintelligence" = {

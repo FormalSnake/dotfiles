@@ -23,7 +23,12 @@ in
       # Original file set this twice (`no-cursor` then `true`); preserve the
       # last-wins behaviour with a single value.
       shell-integration = "fish";
-      shell-integration-features = true;
+      # `true` enables every feature, including `ssh-terminfo`, which copies the
+      # xterm-ghostty terminfo to remotes by opening a side connection and running
+      # `tic`. On the Mac that step stalls and ssh appears to hang at
+      # "Setting up xterm-ghostty terminfo on macbook...". Keep the local features
+      # (cursor/sudo/title) and lightweight `ssh-env`, but drop `ssh-terminfo`.
+      shell-integration-features = "cursor,sudo,title,ssh-env,no-ssh-terminfo";
 
       background-opacity = 0.9;
       background-blur-radius = 32;

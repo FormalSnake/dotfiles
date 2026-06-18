@@ -58,6 +58,9 @@
       xcodegen
     ]
     ++ lib.optionals stdenv.isLinux [
+      # BlueBubbles desktop client (iMessage). Flutter app; Linux-only in
+      # nixpkgs — on darwin it's a homebrew cask (see systems/macbook/homebrew.nix).
+      bluebubbles
       # VNC client for the Mac's built-in Screen Sharing (reached over Tailscale)
       # — for seeing/clicking GUI & permission dialogs on the remote work
       # server. See docs/remote-server.md.

@@ -20,6 +20,7 @@
       "audacity"
       "balenaetcher"
       "betterdisplay"
+      "bluebubbles"
       "claude"
       "clop"
       "docker-desktop"
