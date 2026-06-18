@@ -25,5 +25,7 @@
     ];
   };
 
-  security.pam.services.sudo_local.touchIdAuth = true;
+  # TouchID sudo disabled — fall back to password for sudo (TouchID isn't usable
+  # over SSH/mosh on the remote work server anyway).
+  security.pam.services.sudo_local.touchIdAuth = false;
 }
