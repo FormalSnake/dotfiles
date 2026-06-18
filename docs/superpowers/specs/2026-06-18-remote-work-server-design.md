@@ -121,7 +121,11 @@ nordvpn-flake.url = "github:connerohnesorge/nordvpn-flake";
 
 > **Gotcha:** `_1password-cli` currently sits in the *shared* `users/kyandesutter/programs.nix` `home.packages`. On Linux the user-profile `op` would **shadow** the system setuid `op`, breaking the GUI↔CLI integration (biometric unlock). Fix: move `_1password-cli` into the `lib.optionals stdenv.isDarwin` block of `programs.nix` so the laptop gets `op` from `programs._1password` instead. Mac behaviour is unchanged.
 
-> **Optional — 1Password as the SSH agent (opt-in):** enable the app's SSH agent (Settings → Developer → *Use the SSH agent*, writes `~/.config/1Password/ssh/agent.sock`), set `IdentityAgent = "~/.config/1Password/ssh/agent.sock";` on the `macbook` ssh host, and put the 1Password-held public key into the Mac's `authorized_keys` instead of a raw private key on disk. Off by default unless requested.
+> **Optional — 1Password as the SSH agent (opt-in):** enable the app's SSH agent (Settings → Developer → *Use the SSH agent*, writes `~/.config/1Password/ssh/agent.sock`), set `IdentityAgent = "~/.config/1Password/ssh/agent.sock";` on the `macbook` ssh host, and put the 1Password-held public key into the Mac's `authorized_keys` instead of a raw private key on disk. **Decision (2026-06-18): not used** — owner won't always be near the Mac; a normal `~/.ssh` key is fine.
+
+**5c. Remote desktop (VNC) — `remmina` on the laptop.** For seeing/clicking GUI & permission dialogs on the Mac when serve-sim/SSH isn't enough. Decision: **built-in macOS Screen Sharing** (no third-party host app), client = `remmina` added to the laptop via a `lib.optionals stdenv.isLinux` block in `programs.nix`. Reached directly at `macbook:5900` over Tailscale (already encrypted — no SSH tunnel).
+
+> **Field finding (2026-06-18):** the Mac's Screen Sharing toggle reads "managed by an external party." Root cause: **Jump Desktop Connect** has switched macOS into Apple Remote Management mode (writes `com.apple.RemoteManagement`, runs `ARDAgent`, `screensharingd` on 5900). **No MDM and no configuration profile** — confirmed. Decision: **keep Jump, VNC through it** — don't reclaim native control; remmina connects to 5900 with the existing legacy VNC password. The Mac needs **no nix change** for this. Security: legacy VNC auth is weak (`allowInsecureDH`) — only over the Tailscale tunnel, never exposed to LAN/internet.
 
 ### Shared home
 

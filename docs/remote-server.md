@@ -53,17 +53,28 @@ owner-only bits the flake cannot do. The owner runs every rebuild.
   1Password-held **public** key into the Mac's `~/.ssh/authorized_keys` (this
   replaces the raw `~/.ssh/id_ed25519` key from step 3).
 
-### 7. Screen Sharing on the Mac (remote desktop)
-- Enable the built-in host: System Settings → General → Sharing → **Screen
-  Sharing** = on (or **Remote Management** if you want the login window too).
-  No third-party app or account.
-- Nothing to install on the Mac side — this is built into macOS.
+### 7. Screen Sharing on the Mac (remote desktop) — already on, via Jump Desktop Connect
+- Screen Sharing is **already enabled** on this Mac, but it is **managed by Jump
+  Desktop Connect** (Jump switches macOS into Apple Remote Management mode). That
+  is exactly why System Settings → Sharing shows the toggle as "managed by an
+  external party" — expected, not a problem, no MDM/profile involved.
+  `screensharingd` listens on **5900**.
+- remmina connects as a standard (legacy) VNC client. A legacy VNC password is
+  already set (`/Library/Preferences/com.apple.VNCSettings.txt`). If you don't
+  know it, reset it to one you choose (this does **not** disturb Jump):
+  ```sh
+  sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart \
+    -configure -clientopts -setvnclegacy -vnclegacy yes -setvncpw -vncpw 'YOUR_PASSWORD'
+  ```
+- **Security:** legacy VNC auth is weak (`allowInsecureDH`) — only ever reach
+  5900 over the encrypted Tailscale tunnel; never forward it to the LAN/internet.
 
 ## Daily use
 
 ### Remote desktop — click a dialog on the Mac
 - The laptop has **remmina** (VNC client). Connect to `vnc://macbook:5900` over
-  Tailscale (Tailscale already encrypts it — no SSH tunnel needed).
+  Tailscale (Tailscale already encrypts it — no SSH tunnel needed), and
+  authenticate with the legacy VNC password from setup step 7.
 - Use this when serve-sim / an SSH session hits a GUI or permission dialog on
   the Mac that you can only dismiss by seeing the screen.
 

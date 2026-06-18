@@ -32,7 +32,7 @@
 | `modules/nixos/mixins/nordvpn.nix` *(new)* | NordVPN daemon via the community flake module |
 | `modules/nixos/mixins/onepassword.nix` *(new)* | 1Password GUI + integrated CLI on the laptop |
 | `modules/nixos/default.nix` *(modify)* | Import the three new nixos mixins |
-| `users/kyandesutter/programs.nix` *(modify)* | Move `_1password-cli` to Darwin-only (avoid shadowing the laptop's setuid `op`) |
+| `users/kyandesutter/programs.nix` *(modify)* | Move `_1password-cli` to Darwin-only (avoid shadowing the laptop's setuid `op`); add `remmina` (VNC client) Linux-only for the Mac's Screen Sharing |
 | `users/kyandesutter/mixins/ssh.nix` *(modify)* | `macbook` host entry forwarding serve-sim (3200+3100) and 8080 |
 | `docs/remote-server.md` *(new)* | Owner runbook (manual steps + gotchas) |
 
