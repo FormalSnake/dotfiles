@@ -287,6 +287,40 @@ fonts, `power-profile-ac`, gaming/idle-inhibit wiring.
    consider a different role (e.g. a saturated `tertiary`) or a `saturate` filter
    if it reads poorly.
 
+## Post-implementation notes (discovered at runtime)
+
+- **Runtime state overrides declarative config.** Noctalia applies
+  `~/.local/state/noctalia/settings.toml` (GUI-managed) *over* the HM-written
+  `config.toml`. The old `source = "builtin"` was pinned there and a rebuild
+  couldn't change it. Fix: `noctalia msg color-scheme-set wallpaper m3-tonal-spot`
+  (or the GUI). Mode toggle is `noctalia msg theme-mode-toggle`.
+- **Hyprland is 0.55 Lua parser** → `hyprctl keyword` is rejected ("Use eval").
+  Runtime option-set is `hyprctl eval 'hl.config({...})'`. Our `hyprland-border`
+  template replicates the builtin `hyprland` template's full property set
+  (general borders + group + groupbar) via eval, because the builtin appends
+  `require("noctalia")` to the read-only HM `hyprland.lua` and doesn't re-apply
+  live.
+- **Qt enabled** (`builtin_ids += "qt"`): qt6ct/qt5ct installed,
+  `QT_QPA_PLATFORMTHEME=qt6ct`, qt{5,6}ct.conf select the Noctalia colour scheme
+  (Fusion style). Restyles all Qt apps at launch.
+- **btop** moved from static Catppuccin → dynamic (`builtin_ids += "btop"`,
+  `programs.btop.settings.color_theme = "noctalia"`).
+- **Live-recolour matrix.** Live (reload signal): Noctalia shell, ghostty
+  (SIGUSR2), neovim (file-watch), Equibop (CSS watch), Aura keyboard, Hyprland
+  borders (eval). Launch-time only (toolkit/app has no palette hot-reload): GTK
+  apps, Qt apps, Spotify (Ctrl+Shift+R or relaunch). This is inherent, not a
+  config bug. Acceptable because wallpaper changes are manual/infrequent.
+- **yazi enabled** (community template): writes a `noctalia` flavor; its apply.sh
+  auto-points `~/.config/yazi/theme.toml` at it. Removed from the Catppuccin
+  static list. Works on next yazi launch, no manual steps.
+- **steam enabled** (community template) — themes via the **Millennium** patcher,
+  which is now nix-managed (`programs.steam.package = millennium-steam`, built
+  from Millennium's `steam.nix` so the dGPU-offload `extraEnv` is preserved).
+  One-time runtime/GUI step remains: in Millennium install the Material-Theme
+  skin (ID `ipYjqODds05KMcvh7QJn`), pick the "Matugen" colour, restart Steam.
+- **Still available, not enabled:** community templates for `telegram`, `zathura`,
+  `obsidian`, etc. (not used on this host or deferred).
+
 ## Out of scope
 
 - Theming SDDM/Herdr dynamically (can't — pre-login / build-time).

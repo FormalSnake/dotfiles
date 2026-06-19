@@ -72,7 +72,13 @@
     man.generateCaches = false;
 
     bat.enable = true;
-    btop.enable = true;
+    btop = {
+      enable = true;
+      # Follow Noctalia's wallpaper-derived palette: its `btop` builtin template
+      # writes ~/.config/btop/themes/noctalia.theme (see mixins/noctalia.nix);
+      # point btop at it. Picks up colours on next launch (no live reload).
+      settings.color_theme = "noctalia";
+    };
     bun.enable = true;
     direnv = {
       enable = true;

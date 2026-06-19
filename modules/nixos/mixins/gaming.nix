@@ -1,6 +1,31 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, inputs, ... }:
 let
   cfg = config.kyan.gaming;
+
+  # — Millennium (patched build) —
+  # Millennium's `bun-deps` fixed-output derivation pins a hash that our `bun`
+  # doesn't reproduce (bun install isn't byte-reproducible across bun versions),
+  # and Millennium's cachix doesn't carry the path either — so a from-source build
+  # fails with a hash mismatch. Patch that one hash, in a copy of Millennium's nix
+  # dir, to the value our bun actually produces, then build the lib + steam from
+  # the copy. `${inputs.millennium}` already points at the packages/nix subdir
+  # (the input URL has ?dir=packages/nix), so steam.nix/millennium.nix sit at its
+  # root. NOTE: if a future nixpkgs bumps `bun`, this hash may need updating — the
+  # rebuild error prints the new `got:` value to paste here.
+  millenniumBunDepsHash = "sha256-KDzbqRN1aobT5wMJI+P03i5hMzWCZv51mxRSpbVm4KI=";
+  millenniumNix = pkgs.runCommand "millennium-nix-patched" { } ''
+    cp -r ${inputs.millennium} "$out"
+    chmod -R +w "$out"
+    ${pkgs.gnused}/bin/sed -i \
+      's|sha256-XMYpHMrcmLNQYyLkc3DngjsZ4DdyPr9on0v5lcDrRiY=|${millenniumBunDepsHash}|' \
+      "$out/millennium.nix"
+  '';
+  # Build the millennium lib against our nixpkgs (so our bun → our patched hash);
+  # its own flake inputs supply the luajit/millennium sources.
+  millenniumLib = pkgs.callPackage "${millenniumNix}/millennium.nix" {
+    inputs = inputs.millennium.inputs;
+    millennium-src = inputs.millennium.inputs.millennium-src;
+  };
 
   # PRIME render-offload env + the launcher-wrapping helper are defined once in
   # ../mixins/nvidia.nix and exposed via an overlay (pkgs.nvidiaOffloadEnv /
@@ -206,10 +231,21 @@ in
       protontricks.enable = true;
       # Proton-GE shows up in Steam's compatibility-tool dropdown.
       extraCompatPackages = [ pkgs.proton-ge-bin ];
-      # Desktop-mode client + every game it spawns default to the RTX 5070.
-      # The steam module merges its own extraEnv (compat-tool paths, …) on top
-      # of this, so nothing is clobbered.
-      package = pkgs.steam.override { extraEnv = pkgs.nvidiaOffloadEnv; };
+      # Millennium-patched Steam (Steam Homebrew) — enables the client themes the
+      # Noctalia "steam" community template targets (Material-Theme skin; see
+      # users/kyandesutter/mixins/noctalia.nix). Built from Millennium's own
+      # steam.nix rather than the flake's prebuilt `millennium-steam` so we keep
+      # the dGPU-offload extraEnv (the prebuilt package defaults extraEnv to {},
+      # which would drop RTX-5070 offload — desktop client + every game it spawns
+      # default to the dGPU via these vars). steam.nix merges Millennium's own libs
+      # /env/profile on top, and the steam module merges its compat-tool extraEnv
+      # on top of that, so nothing is clobbered.
+      # Built from the patched Millennium nix dir (see the let block) so the
+      # bun-deps hash matches and the dGPU-offload extraEnv is preserved.
+      package = pkgs.callPackage "${millenniumNix}/steam.nix" {
+        millennium = millenniumLib;
+        extraEnv = pkgs.nvidiaOffloadEnv;
+      };
     };
 
     programs.gamescope = {

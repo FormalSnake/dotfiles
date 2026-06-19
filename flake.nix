@@ -100,5 +100,17 @@
       url = "github:schembriaiden/helium-browser-nix-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # Millennium (Steam Homebrew) — patched Steam enabling client themes/plugins,
+    # required by the Noctalia "steam" community template. Official flake lives
+    # under packages/nix; exposes packages.<system>.{millennium,millennium-steam}
+    # and overlays.default. We build it via its steam.nix in gaming.nix so the
+    # dGPU-offload extraEnv is preserved.
+    #
+    # NOTE: do NOT make this follow our nixpkgs. Millennium's `millennium` package
+    # has a fixed-output bun-deps derivation whose hash was pinned against its own
+    # pinned nixpkgs's `bun`; overriding nixpkgs gives a different bun and the
+    # bun-deps hash mismatches (build fails). Let it use its pinned nixpkgs.
+    millennium.url = "github:SteamClientHomebrew/Millennium?dir=packages/nix";
   };
 }

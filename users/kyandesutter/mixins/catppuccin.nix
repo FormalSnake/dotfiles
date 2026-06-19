@@ -22,11 +22,12 @@
     # manual Catppuccin theme on macOS (see mixins/ghostty.nix). Neovim's
     # Catppuccin comes from the catppuccin/nvim plugin in mixins/neovim.nix, not
     # this module.
+    # btop and yazi are dynamic now (Noctalia btop builtin + yazi community
+    # templates — see programs.nix / noctalia.nix), so they're intentionally
+    # absent here. The rest have no Noctalia template, so they stay static Mocha.
     bat.enable = true;
-    btop.enable = true;
     fzf.enable = true;
     lazygit.enable = true;
-    yazi.enable = true;
     fish.enable = true;
     tmux.enable = true;
   };

@@ -88,7 +88,25 @@
           # Qt platform theme (QT_QPA_PLATFORMTHEME=qt6ct, set in hyprland.nix)
           # reads. Qt/GTK apps follow the palette at launch (no live recolour — the
           # toolkits don't hot-reload palettes).
-          builtin_ids = [ "gtk3" "gtk4" "qt" ];
+          builtin_ids = [ "gtk3" "gtk4" "qt" "btop" ];
+
+          # Community templates (downloaded from api.noctalia.dev, cached locally,
+          # rendered on each palette change):
+          #   yazi  → writes ~/.config/yazi/flavors/noctalia.yazi/flavor.toml and
+          #           its apply.sh auto-points ~/.config/yazi/theme.toml at it
+          #           ([flavor] dark/light = "noctalia"). yazi is removed from the
+          #           catppuccin static list (mixins/catppuccin.nix). Picks up on
+          #           next yazi launch.
+          #   steam → writes a Matugen colour file into the Millennium "Material-
+          #           Theme" skin (~/.steam/.../skins/Material-Theme/.../matugen.css).
+          #           Millennium itself is now nix-managed (programs.steam.package =
+          #           millennium-steam, see modules/nixos/mixins/gaming.nix). One-time
+          #           manual setup remains (runtime, GUI): in Millennium install the
+          #           Material-Theme skin (ID ipYjqODds05KMcvh7QJn), pick the
+          #           "Matugen" colour variant, restart Steam. Harmless no-op until
+          #           then.
+          enable_community_templates = true;
+          community_ids = [ "yazi" "steam" ];
 
           user = {
             # ASUS Aura keyboard. Output file doubles as the "current accent" cache
