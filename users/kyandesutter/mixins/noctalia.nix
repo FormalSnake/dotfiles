@@ -154,11 +154,18 @@
             # Absolute spicetify path: this hook runs inside noctalia's systemd
             # user service, whose PATH won't include the home profile bin. If the
             # UI doesn't visibly recolour, Ctrl+Shift+R inside Spotify forces it.
+            #
+            # The config dir is selected via the SPICETIFY_CONFIG env var, NOT a
+            # `-c <path>` flag: in spicetify-cli v2 `-c`/`--config` is a standalone,
+            # non-chainable flag that just prints the config path and exits, so
+            # `spicetify -c <path> apply` silently runs nothing (exit 0) and Spotify
+            # never gets re-patched. Setting SPICETIFY_CONFIG points apply at this
+            # config dir explicitly (the systemd service may not have XDG_CONFIG_HOME).
             spicetify = {
               enabled = true;
               input_path = "~/.config/noctalia/templates/spicetify.ini.tmpl";
               output_path = "~/.config/spicetify/Themes/Comfy/color.ini";
-              post_hook = "${pkgs.spicetify-cli}/bin/spicetify -c /home/kyandesutter/.config/spicetify/config-xpui.ini apply --no-restart || true";
+              post_hook = "SPICETIFY_CONFIG=/home/kyandesutter/.config/spicetify ${pkgs.spicetify-cli}/bin/spicetify apply --no-restart || true";
             };
 
             # Hyprland borders + group/groupbar colours. Noctalia doesn't touch the
