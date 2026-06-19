@@ -204,6 +204,13 @@ in
           colour="$(${pkgs.coreutils}/bin/cat "$seed" 2>/dev/null || echo ${auraColour})"
           ${pkgs.asusctl}/bin/asusctl aura effect static -c "$colour" || true
           ${pkgs.asusctl}/bin/asusctl battery limit 80 || true
+          # Kill the red breathing "slash" pulse the Aura zones run while the
+          # laptop is suspended. The power-state flags are all-or-nothing — any
+          # flag omitted is set false — so re-assert boot/awake/shutdown and drop
+          # --sleep for every zone. Not all zones exist on every chassis; `|| true`.
+          for zone in keyboard logo lightbar lid rear-glow; do
+            ${pkgs.asusctl}/bin/asusctl aura power "$zone" --boot --awake --shutdown || true
+          done
         '';
       };
 
