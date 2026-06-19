@@ -193,7 +193,16 @@ in
       -- its named workspace (helium→1 web, beeper & bluebubbles→4 communication,
       -- spotify→8 media), so they open straight onto their own workspace instead
       -- of piling onto whatever is focused at login.
-      hl.exec_cmd("helium")
+      --
+      -- Helium (Chromium) picks its notification backend ONCE at startup: it probes
+      -- the org.freedesktop.Notifications D-Bus name and, if nothing owns it yet,
+      -- falls back to Chrome's built-in message-center for the whole session and
+      -- never re-checks. noctalia (our notification daemon) is a systemd user
+      -- service coming up in parallel with this autostart, so launching helium
+      -- bare races it — intermittently you get built-in Chrome notifications. Wait
+      -- (≤10s) for noctalia to claim the name before exec'ing helium so it always
+      -- latches onto the daemon. busctl is from systemd → always on PATH here.
+      hl.exec_cmd("sh -c 'for i in $(seq 50); do busctl --user call org.freedesktop.DBus /org/freedesktop/DBus org.freedesktop.DBus NameHasOwner s org.freedesktop.Notifications 2>/dev/null | grep -q true && break; sleep 0.2; done; exec helium'")
       hl.exec_cmd("beeper")
       hl.exec_cmd("bluebubbles")
       hl.exec_cmd("spotify")
