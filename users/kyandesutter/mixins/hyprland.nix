@@ -109,6 +109,67 @@ let
       fi
     '';
   };
+  # — "Shit Mic" toggle (SUPER+M) —
+  # Flip the default input (and every running record stream) between the real
+  # mic and the distorted virtual source "shit_mic". The distortion itself is a
+  # PipeWire filter-chain in modules/nixos/mixins/audio.nix; this only points
+  # streams at it. The chain's own capture stream (node.name shit_mic.capture)
+  # is skipped when moving streams so flipping the default can never feed back.
+  shitMicToggle = pkgs.writeShellApplication {
+    name = "toggle-shit-mic";
+    runtimeInputs = with pkgs; [
+      pulseaudio # pactl
+      gawk
+      gnugrep
+      coreutils # cat/printf
+      libnotify # notify-send
+    ];
+    text = ''
+      virt="shit_mic"
+      state="''${XDG_RUNTIME_DIR:-/tmp}/shit-mic.real"
+
+      # Indices of every record stream EXCEPT the filter-chain's own capture
+      # (moving that one onto shit_mic would loop its output back into itself).
+      streams() {
+        pactl list source-outputs | awk '
+          function flush() { if (idx != "" && !skip) print idx }
+          /^Source Output #/             { flush(); idx = substr($3, 2); skip = 0 }
+          /node\.name = "shit_mic\.capture"/ { skip = 1 }
+          END                            { flush() }
+        '
+      }
+
+      # Set the default input + move existing app record streams onto $1.
+      retarget() {
+        target="$1"
+        [ -n "$target" ] || return 0
+        pactl set-default-source "$target" || true
+        for id in $(streams); do
+          pactl move-source-output "$id" "$target" 2>/dev/null || true
+        done
+      }
+
+      cur=$(pactl get-default-source)
+
+      if [ "$cur" = "$virt" ]; then
+        # OFF → restore the real mic we saved when turning it on. Fall back to
+        # the first real (non-virtual, non-monitor) source if the saved one is
+        # gone (e.g. mic unplugged since).
+        real=$(cat "$state" 2>/dev/null || true)
+        if [ -z "$real" ] || ! pactl list short sources | awk '{print $2}' | grep -qx "$real"; then
+          real=$(pactl list short sources \
+            | awk -v v="$virt" '$2 != v && $2 !~ /\.monitor$/ { print $2; exit }')
+        fi
+        retarget "$real"
+        notify-send -t 1500 "Microphone" "Shit mic OFF — back to normal"
+      else
+        # ON → remember the current real default, then switch to shit_mic.
+        printf '%s\n' "$cur" > "$state"
+        retarget "$virt"
+        notify-send -t 1500 "Microphone" "Shit mic ON 💩"
+      fi
+    '';
+  };
 in
 {
   # Hyprland is enabled at the system level (programs.hyprland in
@@ -348,6 +409,10 @@ in
     hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"), { repeating = true })
     hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"), { repeating = true })
     hl.bind("XF86AudioMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"))
+    -- Toggle the distorted "Shit Mic" virtual source (Jschlatt-style blown-out
+    -- mic). Points the default input + running record streams at the shit_mic
+    -- filter-chain (modules/nixos/mixins/audio.nix), or back to the real mic.
+    hl.bind(mod .. " + M", hl.dsp.exec_cmd("${shitMicToggle}/bin/toggle-shit-mic"))
     -- Brightness adjusts whichever monitor the cursor is on (internal panel via
     -- brightnessctl, external monitors via ddcutil/DDC-CI). See monitorBrightness.
     hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("${monitorBrightness}/bin/monitor-brightness up"), { repeating = true })
