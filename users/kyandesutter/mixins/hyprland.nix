@@ -1,21 +1,5 @@
 { pkgs, lib, ... }:
 let
-  # Clipboard-history picker: cliphist holds the history (populated by the
-  # wl-paste watchers in the autostart block below), fuzzel renders it as a
-  # dmenu, and the chosen entry is decoded back onto the regular clipboard.
-  # Bound to SUPER+ñ. `cliphist decode` restores the original bytes (incl.
-  # images) for the id fuzzel returns.
-  clipboardPicker = pkgs.writeShellApplication {
-    name = "clipboard-picker";
-    runtimeInputs = with pkgs; [ cliphist fuzzel wl-clipboard ];
-    text = ''
-      cliphist list \
-        | fuzzel --dmenu --prompt "clip > " \
-        | cliphist decode \
-        | wl-copy
-    '';
-  };
-
   # Cursor-aware brightness control. Adjusts whichever monitor the cursor is
   # currently over: the internal panel via the kernel backlight (brightnessctl),
   # external monitors via DDC/CI (ddcutil). External monitors are addressed by
@@ -192,12 +176,11 @@ in
     -- is needed for GUI auth prompts.
     hl.on("hyprland.start", function()
       hl.exec_cmd("systemctl --user start hyprpolkitagent")
-      -- Clipboard manager. Two cliphist watchers record history (text + images);
-      -- wl-clip-persist takes ownership of the regular clipboard so its contents
-      -- survive the source app closing (Wayland otherwise drops a selection when
-      -- the app that offered it exits). Browse the history with SUPER+ñ.
-      hl.exec_cmd("wl-paste --type text --watch cliphist store")
-      hl.exec_cmd("wl-paste --type image --watch cliphist store")
+      -- Clipboard: noctalia's native ClipboardService records history by polling
+      -- the Wayland selection itself (browse it with SUPER+ñ). wl-clip-persist
+      -- takes ownership of the regular clipboard so its contents survive the
+      -- source app closing (Wayland otherwise drops a selection when the app that
+      -- offered it exits), giving noctalia's poller a chance to capture it.
       hl.exec_cmd("wl-clip-persist --clipboard regular")
       -- Always-running apps on this host: launch minimized to the tray so they
       -- don't grab focus at login. Window rules send steam to workspace 9 (gaming,
@@ -300,9 +283,11 @@ in
     hl.bind(mod .. " + SHIFT + F", hl.dsp.window.fullscreen({ action = "toggle", mode = "fullscreen" }))
     hl.bind(mod .. " + V", hl.dsp.window.float({ action = "toggle" }))
     hl.bind(mod .. " + B", hl.dsp.exec_cmd("helium"))
-    -- Clipboard history picker (cliphist via fuzzel). ñ is a dedicated key on the
-    -- es layout; its XKB keysym is `ntilde`.
-    hl.bind(mod .. " + ntilde", hl.dsp.exec_cmd("${clipboardPicker}/bin/clipboard-picker"))
+    -- Clipboard history (noctalia's dedicated clipboard panel, over IPC). ñ is a
+    -- dedicated key on the es layout; its XKB keysym is `ntilde`.
+    hl.bind(mod .. " + ntilde", hl.dsp.exec_cmd("noctalia msg panel-toggle clipboard"))
+    -- Emoji picker (noctalia's launcher in /emo mode, over IPC).
+    hl.bind(mod .. " + period", hl.dsp.exec_cmd("noctalia msg panel-toggle launcher /emo"))
     -- Overnight quiet-download mode: Quiet fan profile + power-saver, blanks the
     -- displays, and holds a Wayland idle-inhibit lock so noctalia's idle service
     -- doesn't blank the screen mid-download. SUPER+SHIFT+N again to restore.
@@ -507,14 +492,13 @@ in
     export QS_ICON_THEME="Papirus-Dark"
   '';
 
-  # Clipboard manager: cliphist (history store), wl-clip-persist (keep the
-  # selection alive after the source app exits). The picker UI is fuzzel,
-  # configured via programs.fuzzel below. Nautilus is the GUI file manager, plus
+  # Clipboard: noctalia provides the history store and picker natively; we only
+  # need wl-clip-persist to keep the selection alive after the source app exits
+  # so noctalia's poller can capture it. Nautilus is the GUI file manager, plus
   # the GNOME companions that make it feel complete: file-roller (extract/create
   # archives from the right-click menu), sushi (Spacebar quick-preview), and
   # loupe (the GNOME image viewer).
   home.packages = with pkgs; [
-    cliphist
     wl-clip-persist
     hyprpolkitagent
     nautilus
@@ -647,31 +631,4 @@ in
     gtk4.extraConfig.gtk-application-prefer-dark-theme = 1;
   };
 
-  # fuzzel is the menu used by the clipboard picker (clipboardPicker above).
-  # Themed to match the rest of the desktop: Catppuccin Mocha palette with the
-  # Mauve accent, Geist UI font, and the same 13px rounding / mauve border as the
-  # Hyprland window decorations. Colours are RRGGBBAA hex.
-  programs.fuzzel = {
-    enable = true;
-    settings = {
-      main = {
-        font = "Geist:size=12";
-        lines = 12;
-        width = 50;
-      };
-      colors = {
-        background = "1e1e2eff"; # base
-        text = "cdd6f4ff"; # text
-        match = "cba6f7ff"; # mauve
-        selection = "585b70ff"; # surface2
-        selection-text = "cdd6f4ff";
-        selection-match = "cba6f7ff";
-        border = "cba6f7ff"; # mauve
-      };
-      border = {
-        radius = 13;
-        width = 2;
-      };
-    };
-  };
 }

@@ -31,6 +31,34 @@ in
         panel.transparency_mode = "solid";
       };
 
+      # Bar: caelestia-style full-width, edge-to-edge, solid. The real keys (per
+      # the BarConfig struct — example.toml's margin_h/margin_v are stale and
+      # silently ignored) are:
+      #   margin_ends → inset from each END of the bar along its main axis; 0 =
+      #                 spans the full screen width.
+      #   margin_edge → distance from the nearest screen edge; >0 floats the bar,
+      #                 0 = flush against the top.
+      # The bar itself stays a squared solid rectangle (top corners = 0); instead
+      # the *desktop* gets the rounded border:
+      #
+      #   radius_bottom_{left,right} < 0 → concave corners on the bar's inner
+      #   (bottom) edge. noctalia renders these as a concave spike that curves
+      #   outward into the desktop, so the content area below the bar reads as
+      #   having rounded top corners flowing out from under the bar — not the bar
+      #   being rounded. Range is -500..500; -20 ≈ a soft notch.
+      #
+      # A little more padding / widget spacing for breathing room. reserve_space
+      # stays true (default) so tiled windows don't underlap it.
+      bar.main = {
+        margin_ends = 0; # full width
+        margin_edge = 0; # flush to the top edge
+        radius = 0; # seeds all four corners; top stays squared
+        radius_bottom_left = -20; # concave → curves out into the desktop
+        radius_bottom_right = -20;
+        padding = 16;
+        widget_spacing = 8;
+      };
+
       # Catppuccin (dark) builtin theme — the static equivalent of caelestia's
       # `scheme set -n catppuccin -f mocha -m dark`, now fully declarative (no
       # activation script / CLI state to pin).
@@ -73,6 +101,12 @@ in
         resume_command = "noctalia:dpms-on";
         enabled = true;
       };
+
+      # Weather, with coordinates resolved automatically from IP geolocation
+      # ([location].auto_locate). Shown in the control center / dashboard. Unit
+      # stays celsius (noctalia default).
+      weather.enabled = true;
+      location.auto_locate = true;
     };
   };
 }
