@@ -26,18 +26,25 @@
       "macbook" = {
         HostName = "macbook-pro-2"; # Tailscale MagicDNS name of the Mac (confirmed via direct ssh)
         User = "kyandesutter";
+        # Mac-side connect target is `localhost` (not 127.0.0.1) on purpose:
+        # Vite/Astro dev servers bind only to IPv6 [::1], while workerd/bun bind
+        # IPv4. Targeting `localhost` makes sshd on the Mac try every address for
+        # the name, so the forward connects regardless of which stack the server
+        # chose — otherwise IPv6-only servers fail with `channel N: open failed`.
+        # The local listen side stays default (127.0.0.1) for localhost-only
+        # cookies/CORS in the browser.
         LocalForward = [
-          "3200 127.0.0.1:3200"
-          "3100 127.0.0.1:3100"
-          "8080 127.0.0.1:8080"
+          "3200 localhost:3200"
+          "3100 localhost:3100"
+          "8080 localhost:8080"
           # CanaryPulse dev servers — so the browser on the client can reach them
           # as localhost (auth/CORS/cookies are localhost-only in dev). The admin
           # SPA loads its API/scraper URLs as http://localhost:<port> in the
           # browser, so 3001 (API) is required alongside 4322 (admin) for login.
-          "4322 127.0.0.1:4322" # admin SPA
-          "3001 127.0.0.1:3001" # API (browser calls directly: auth + tRPC)
-          "3003 127.0.0.1:3003" # scraper (REST + WebSocket)
-          "4321 127.0.0.1:4321" # web (optional)
+          "4322 localhost:4322" # admin SPA
+          "3001 localhost:3001" # API (browser calls directly: auth + tRPC)
+          "3003 localhost:3003" # scraper (REST + WebSocket)
+          "4321 localhost:4321" # web (optional)
         ];
       };
 
