@@ -4,6 +4,7 @@
   # self.homeModules.kyandesutter-linux.
   imports = [
     ./mixins/hyprland.nix
+    ./mixins/easyeffects.nix
     ./mixins/alttab.nix
     ./mixins/noctalia.nix
     ./mixins/beeper.nix
