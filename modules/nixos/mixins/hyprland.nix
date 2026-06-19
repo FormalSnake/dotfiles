@@ -3,11 +3,11 @@ let
   cfg = config.kyan.desktop;
 
   # The SDDM greeter runs as the unprivileged `sddm` user before any user logs
-  # in, so it can't read caelestia's runtime wallpaper/scheme state. Instead we
-  # bake both into the theme statically, mirroring what caelestia is pinned to
-  # in ../../../users/kyandesutter/mixins/caelestia.nix:
+  # in, so it can't read the noctalia shell's wallpaper/theme. Instead we bake
+  # both into the theme statically, mirroring what noctalia is configured with in
+  # ../../../users/kyandesutter/mixins/noctalia.nix:
   #   • wallpaper → wallpapers/storm.jpg
-  #   • scheme    → Catppuccin Mocha
+  #   • theme     → Catppuccin (Mocha) dark
   # If either of those changes there, update them here too.
 
   # In-repo wallpaper, copied to the store as its own path. file:// so the
@@ -138,16 +138,16 @@ in
     # already there) so the trash backend (gvfsd-trash) loads and D-Bus-activates.
     environment.sessionVariables.GIO_EXTRA_MODULES = [ "${pkgs.gvfs}/lib/gio/modules" ];
 
-    # UPower: the D-Bus power daemon caelestia reads battery state from. Enable
-    # it explicitly — relying on D-Bus auto-activation made battery detection
-    # in the caelestia bar flaky.
+    # UPower: the D-Bus power daemon noctalia's battery service reads battery
+    # state from. Enable it explicitly — relying on D-Bus auto-activation made
+    # battery detection in the bar flaky.
     services.upower.enable = true;
 
-    # Fonts caelestia/Hyprland expect (Material Symbols, a Nerd Font, emoji).
+    # Fonts noctalia/Hyprland expect (Material Symbols, a Nerd Font, emoji).
     # System UI font is Geist; monospace is GeistMono patched with Nerd Font
-    # glyphs (terminal/caelestia mono + powerline icons). The rest are general
-    # coverage fonts so apps don't fall back to Geist (which carries no emoji,
-    # CJK, or serif glyphs) for anything outside basic Latin.
+    # glyphs (terminal mono + powerline icons). The rest are general coverage
+    # fonts so apps don't fall back to Geist (which carries no emoji, CJK, or
+    # serif glyphs) for anything outside basic Latin.
     fonts.packages = with pkgs; [
       material-symbols
       geist-font # "Geist" (sans) + "Geist Mono"
@@ -202,7 +202,7 @@ in
       sddmAstronaut
 
       brightnessctl
-      ddcutil # external-monitor brightness (caelestia uses it)
+      ddcutil # external-monitor brightness (used by the monitor-brightness keybind script; also noctalia's optional [brightness] enable_ddcutil backend)
       playerctl
       wl-clipboard
       grim

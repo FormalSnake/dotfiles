@@ -68,7 +68,7 @@ Dispatchers (`hl.dsp.*`) — pass the **result** to `hl.bind`, or to `hl.dispatc
 | `hl.dsp.window.resize()` / `({ x, y, relative })` | `resizewindow` / `resizeactive` | mouse form vs. fixed-step form |
 | `hl.dsp.workspace.toggle_special(name)` | `togglespecialworkspace` | |
 | `hl.dsp.submap(name)` | `submap` | |
-| `hl.dsp.global(string)` | `global` | dbus global shortcut (e.g. `caelestia:launcher`) |
+| `hl.dsp.global(string)` | `global` | dbus global shortcut (e.g. `alttab:next`) |
 
 ## Migration cheatsheet (hyprlang → Lua)
 

@@ -188,7 +188,7 @@ in
     hl.env("__GL_GSYNC_ALLOWED", "1")
 
     -- — Autostart (replaces exec-once) —
-    -- caelestia shell auto-starts via its systemd user service. A polkit agent
+    -- noctalia shell auto-starts via its systemd user service. A polkit agent
     -- is needed for GUI auth prompts.
     hl.on("hyprland.start", function()
       hl.exec_cmd("systemctl --user start hyprpolkitagent")
@@ -292,8 +292,8 @@ in
     })
 
     -- — Keybinds (mirror the macOS/aerospace muscle memory, SUPER as mod) —
-    -- App launcher (caelestia registers this Hyprland global shortcut).
-    hl.bind(mod .. " + Space", hl.dsp.global("caelestia:launcher"))
+    -- App launcher (noctalia panel toggled over IPC).
+    hl.bind(mod .. " + Space", hl.dsp.exec_cmd("noctalia msg panel-toggle launcher"))
 
     hl.bind(mod .. " + Return", hl.dsp.exec_cmd(terminal))
     hl.bind(mod .. " + Q", hl.dsp.window.close())
@@ -304,14 +304,12 @@ in
     -- es layout; its XKB keysym is `ntilde`.
     hl.bind(mod .. " + ntilde", hl.dsp.exec_cmd("${clipboardPicker}/bin/clipboard-picker"))
     -- Overnight quiet-download mode: Quiet fan profile + power-saver, blanks the
-    -- displays, and holds a Wayland idle-inhibit lock so caelestia's idle daemon
-    -- doesn't suspend mid-download. SUPER+SHIFT+N again to restore.
+    -- displays, and holds a Wayland idle-inhibit lock so noctalia's idle service
+    -- doesn't blank the screen mid-download. SUPER+SHIFT+N again to restore.
     hl.bind(mod .. " + SHIFT + N", hl.dsp.exec_cmd("night-mode toggle"))
-    -- Sleep: suspend on demand. caelestia locks the screen before sleep
-    -- (general.idle.lockBeforeSleep, default on), so resume lands on the lock
-    -- screen. Mirrors the session menu's repurposed "sleep" button (see the
-    -- session.commands.hibernate override in caelestia.nix).
-    hl.bind(mod .. " + SHIFT + Escape", hl.dsp.exec_cmd("systemctl suspend"))
+    -- Sleep: lock then suspend on demand. noctalia's `session lock-and-suspend`
+    -- locks the screen before suspending, so resume lands on the lock screen.
+    hl.bind(mod .. " + SHIFT + Escape", hl.dsp.exec_cmd("noctalia msg session lock-and-suspend"))
 
     -- Vim-style focus (aerospace alt-hjkl → SUPER+hjkl).
     hl.bind(mod .. " + H", hl.dsp.focus({ direction = "l" }))
@@ -343,11 +341,10 @@ in
     hl.bind("MOD5 + Tab", hl.dsp.global("alttab:next"))
     hl.bind("MOD5 + SHIFT + Tab", hl.dsp.global("alttab:prev"))
 
-    -- Screenshots (caelestia's integrated tool: saves to ~/Pictures, copies to
-    -- the clipboard and shows a notification). Print = whole screen; SUPER+SHIFT+S
-    -- = region picker with the screen frozen while you select (macOS Cmd+Shift+4).
-    hl.bind("Print", hl.dsp.exec_cmd("caelestia screenshot"))
-    hl.bind(mod .. " + SHIFT + S", hl.dsp.exec_cmd("caelestia screenshot -r -f"))
+    -- Screenshots (noctalia's integrated tool, over IPC). Print = whole screen;
+    -- SUPER+SHIFT+S = region picker (macOS Cmd+Shift+4).
+    hl.bind("Print", hl.dsp.exec_cmd("noctalia msg screenshot-fullscreen"))
+    hl.bind(mod .. " + SHIFT + S", hl.dsp.exec_cmd("noctalia msg screenshot-region"))
 
     -- Volume / brightness (repeat while held).
     hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"), { repeating = true })
@@ -488,24 +485,24 @@ in
 
   # — Quickshell icon theme —
   #
-  # caelestia (and the alttab switcher in alttab.nix) are Quickshell/Qt6 apps.
-  # Their icons come from Qt's icon theme, which Quickshell takes from the Qt
-  # *platform theme*. This session sets no Qt platform theme (QT_QPA_PLATFORMTHEME
-  # is unset), so Qt's icon theme falls back to a near-empty default and every
-  # unresolved icon renders as the magenta/black "missing texture" placeholder —
-  # all over caelestia and in alttab. (GTK apps are unaffected: they read
-  # gtk-icon-theme-name directly from gtk-3.0/settings.ini.)
+  # noctalia V5 is native C++/OpenGL ES and draws its own icons, so it ignores
+  # this. But the alttab switcher (alttab.nix) is still a Quickshell/Qt6 app: its
+  # icons come from Qt's icon theme, which Quickshell takes from the Qt *platform
+  # theme*. This session sets no Qt platform theme (QT_QPA_PLATFORMTHEME is
+  # unset), so Qt's icon theme falls back to a near-empty default and every
+  # unresolved icon renders as the magenta/black "missing texture" placeholder in
+  # alttab. (GTK apps are unaffected: they read gtk-icon-theme-name directly from
+  # gtk-3.0/settings.ini.)
   #
   # Papirus-Dark is already installed and named for GTK (the catppuccin module
   # pulls it in and points gtk-icon-theme-name + dconf icon-theme at it when
   # gtk.enable is on). Rather than introduce a full Qt platform theme (which would
   # restyle every Qt app), point Quickshell straight at it with QS_ICON_THEME —
-  # Quickshell's own override env var. The scheme is pinned to mocha *dark*
-  # (caelestiaScheme), so QS_ICON_THEME not tracking light/dark doesn't matter.
+  # Quickshell's own override env var. The theme is fixed dark (noctalia's
+  # Catppuccin dark), so QS_ICON_THEME not tracking light/dark doesn't matter.
   #
   # Placed in uwsm/env (sourced for every uwsm session and imported into the
-  # systemd user manager) so it reaches caelestia.service — a systemd user unit —
-  # as well as the Hyprland-spawned alttab instance.
+  # systemd user manager) so it reaches the Hyprland-spawned alttab instance.
   xdg.configFile."uwsm/env".text = ''
     export QS_ICON_THEME="Papirus-Dark"
   '';
@@ -525,6 +522,11 @@ in
     sushi
     loupe
 
+    # GTK theme noctalia's gtk template sets via gsettings/dconf (adw-gtk3-dark).
+    # Installed here so that theme name resolves; noctalia, not the gtk module,
+    # selects it (see the dark-mode block below).
+    adw-gtk3
+
     # GNOME/GTK apps that round out the desktop.
     papers # PDF / document viewer (default for application/pdf)
     gnome-text-editor # plain-text editor (default for text/plain)
@@ -539,14 +541,15 @@ in
     #     support; mpv handles everything, so this is the reliable GTK choice.
     #   • libreoffice-fresh: the only real office suite here (GNOME has none).
     #     The -fresh build renders through the gtk3 VCL backend, so it follows
-    #     the adw-gtk3-dark theme set below. Opens Word/Excel/PowerPoint + ODF.
+    #     the adw-gtk3-dark GTK theme (set by noctalia; see the dark-mode block
+    #     below). Opens Word/Excel/PowerPoint + ODF.
     celluloid
     libreoffice-fresh
   ];
 
   # Default apps by MIME. enable writes ~/.config/mimeapps.list.
   #   • Folders → Nautilus (xdg-open, file pickers, "open containing folder",
-  #     caelestia, etc. all launch it).
+  #     noctalia, etc. all launch it).
   #   • Images → Loupe, so double-clicking an image in Nautilus opens it.
   #   • PDFs → Papers; plain text → GNOME Text Editor.
   #   • Video → Celluloid.
@@ -620,28 +623,26 @@ in
 
   # Dark mode for GTK / X11 / browsers.
   #
-  # caelestia already sets the *Wayland* dark signal: the xdg-desktop-portal
-  # `org.freedesktop.appearance color-scheme` reports prefer-dark, and dconf
-  # `org/gnome/desktop/interface` has color-scheme=prefer-dark + gtk-theme=
-  # adw-gtk3-dark. That's enough for native-Wayland libadwaita/GTK4 apps.
+  # noctalia owns app theming now (see programs.noctalia.settings.theme.templates
+  # in ../mixins/noctalia.nix). Its gtk3/gtk4 templates write the Catppuccin
+  # palette to ~/.config/gtk-{3,4}.0/noctalia.css (imported via gtk.css) and their
+  # apply.sh post-hook drives the *runtime* dark signal — `gsettings set
+  # org.gnome.desktop.interface color-scheme prefer-dark` + `gtk-theme
+  # adw-gtk3-dark` (also written to dconf). xdg-desktop-portal reports that to
+  # native-Wayland libadwaita/GTK4 apps. So we no longer pin the theme *name*
+  # here — noctalia chooses it (currently adw-gtk3-dark), and pinning our own
+  # would drift if noctalia changes its choice.
   #
-  # But two classes of app don't read the portal/dconf and were staying light:
-  #   • X11 / XWayland GTK apps — they read XSettings or ~/.config/gtk-3.0/
-  #     settings.ini (neither existed here; no xsettingsd is running).
-  #   • Browsers running under XWayland — same story, they derive
-  #     prefers-color-scheme from the GTK theme.
-  # On top of that, `adw-gtk3-dark` was named in dconf but the theme package was
-  # never actually installed, so even dconf readers couldn't resolve it.
-  #
-  # The gtk module fixes both: it installs adw-gtk3 (so the theme resolves) and
-  # writes the gtk-3.0/gtk-4.0 settings.ini files with the dark theme and
-  # gtk-application-prefer-dark-theme — which is exactly what X11 apps read.
+  # We keep this module for the two things noctalia does NOT do:
+  #   • gtk.enable = true — the catppuccin module hooks on it to set the Papirus
+  #     icon theme (gtk-icon-theme-name + dconf icon-theme).
+  #   • gtk-application-prefer-dark-theme in settings.ini — the X11/XWayland
+  #     fallback (no xsettingsd here). noctalia's apply.sh only touches gtk.css +
+  #     gsettings/dconf, never settings.ini, so this remains our job.
+  # adw-gtk3 stays installed (home.packages below) so noctalia's adw-gtk3-dark
+  # resolves; gtk.css is left unmanaged here so noctalia owns it.
   gtk = {
     enable = true;
-    theme = {
-      name = "adw-gtk3-dark";
-      package = pkgs.adw-gtk3;
-    };
     gtk3.extraConfig.gtk-application-prefer-dark-theme = 1;
     gtk4.extraConfig.gtk-application-prefer-dark-theme = 1;
   };

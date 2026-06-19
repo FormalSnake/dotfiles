@@ -87,9 +87,11 @@
     # is only distributed as a Flatpak — not packaged in nixpkgs).
     nix-flatpak.url = "github:gmodena/nix-flatpak";
 
-    # caelestia Quickshell desktop shell — official flake (home-manager module).
-    caelestia-shell = {
-      url = "github:caelestia-dots/shell";
+    # noctalia V5 desktop shell — native C++/OpenGL ES, official flake (home-
+    # manager module under homeModules.default). Build from source following our
+    # nixpkgs (no cachix substituter).
+    noctalia = {
+      url = "github:noctalia-dev/noctalia";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

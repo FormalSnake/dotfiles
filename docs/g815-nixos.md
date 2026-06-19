@@ -13,9 +13,9 @@ G18 G815LP-S9034** (Intel Core Ultra 9 275HX "Arrow Lake-HX", RTX 5070 Laptop "B
   (`nvidia-offload` wrapper). dGPU auto-powers when the external monitor is plugged in.
 - **No supergfxd / no MUX switching** (would require a relog). "Game mode" is a runtime
   asusd profile toggle instead — no relog.
-- **Desktop:** Hyprland + **caelestia** shell (official flake `homeManagerModules.default`),
-  full-experience config. Keybinds mirror the macOS/aerospace muscle memory with **SUPER**
-  as primary mod; **SUPER+Space** = app launcher.
+- **Desktop:** Hyprland + **noctalia** V5 shell (native C++/OpenGL ES, official flake
+  `homeModules.default`), full-experience config. Keybinds mirror the macOS/aerospace muscle
+  memory with **SUPER** as primary mod; **SUPER+Space** = app launcher.
 - **Boot:** systemd-boot, auto-detects Windows. **No Secure Boot / no lanzaboote** (casual
   Fortnite doesn't require it; only tournaments do). Laptop ships with no OS → install
   Win11 into its own partition, then NixOS alongside.
@@ -50,7 +50,7 @@ verification is hardware-only (see the checklist above).
 ## Implementation tasks
 
 ### Phase 1 — Plumbing / skeleton
-- [ ] `flake.nix`: add inputs `nixos-hardware`, `chaotic` (nyxpkgs-unstable), `caelestia-shell`,
+- [ ] `flake.nix`: add inputs `nixos-hardware`, `chaotic` (nyxpkgs-unstable), `noctalia`,
       `helium`.
 - [ ] `modules/default.nix`: import `./nixos` alongside `./darwin`.
 - [ ] `modules/nixos/default.nix`: `flake.nixosModules.default` = shared + nixos mixins + profiles.
@@ -74,12 +74,12 @@ verification is hardware-only (see the checklist above).
 - [ ] `modules/nixos/mixins/nvidia.nix`: open driver, modesetting, prime offload, powerManagement,
       Wayland env vars.
 
-### Phase 3 — Desktop (Hyprland + caelestia)
+### Phase 3 — Desktop (Hyprland + noctalia)
 - [ ] `modules/nixos/mixins/hyprland.nix`: `programs.hyprland`, xdg portals, polkit, greetd/login.
 - [ ] `modules/nixos/mixins/audio.nix`: pipewire (alsa/pulse/jack) + rtkit.
 - [ ] `users/kyandesutter/mixins/hyprland.nix`: monitors (eDP-1 240Hz + external 1440p), keybinds
       (SUPER mirror of aerospace), window→workspace rules, animations/look, autostart.
-- [ ] `users/kyandesutter/mixins/caelestia.nix`: import caelestia HM module + `programs.caelestia`.
+- [ ] `users/kyandesutter/mixins/noctalia.nix`: import noctalia HM module + `programs.noctalia`.
 - [ ] `users/kyandesutter/mixins/helium.nix`: helium overlay + package, default browser, web ws.
 
 ### Phase 4 — Gaming + game-mode + ASUS

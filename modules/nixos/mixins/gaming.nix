@@ -8,11 +8,11 @@ let
   # launcher onto the dGPU so games use the RTX 5070 with no per-title config).
 
   # — Keep the screen awake while gaming with a controller —
-  # caelestia's idle daemon uses the Wayland ext-idle-notify protocol, which only
+  # noctalia's idle service uses the Wayland ext-idle-notify protocol, which only
   # resets on keyboard/mouse/touch activity from libinput — gamepad input never
-  # counts. So a controller-only session keeps counting down and hits the default
-  # timeouts (lock@3m, dpms@5m, suspend@10m). All of those idle monitors
-  # respectInhibitors, so holding a standard Wayland idle inhibitor (wlinhibit,
+  # counts. So a controller-only session keeps counting down and hits the
+  # configured idle action (screen-off@11m; see noctalia.nix). The idle monitor
+  # respects inhibitors, so holding a standard Wayland idle inhibitor (wlinhibit,
   # exactly as night-mode already does) fully suppresses them. Two complementary
   # holders cover the two cases:
   #   1. game-inhibit — driven by the gamemode start/end hooks below, so the
@@ -225,7 +225,7 @@ in
         desiredgov = "performance";
       };
       # Hold a Wayland idle inhibitor for the lifetime of every gamemode-aware
-      # title so caelestia never locks/suspends mid-game (see gameInhibit above).
+      # title so noctalia never blanks the screen mid-game (see gameInhibit above).
       settings.custom = {
         start = "${gameInhibit}/bin/game-inhibit on";
         end = "${gameInhibit}/bin/game-inhibit off";
@@ -234,7 +234,7 @@ in
 
     # Catch-all for non-gamemode controller use: a session daemon that suppresses
     # idle while a gamepad is actively used (see gamepadWatcher above). Bound to
-    # graphical-session.target like the caelestia shell, so it has the Wayland
+    # graphical-session.target like the noctalia shell, so it has the Wayland
     # session env wlinhibit needs and starts/stops with the desktop session.
     systemd.user.services.gamepad-idle-inhibit = {
       description = "Hold a Wayland idle inhibitor while a game controller is active";

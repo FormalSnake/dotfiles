@@ -20,9 +20,9 @@ let
   '';
 
   # Follow AC state with the power-profiles-daemon profile: Performance on AC,
-  # Balanced on battery. PPD is the backend the caelestia bar reads/writes
-  # (Quickshell UPower → net.hadess.PowerProfiles), so this is what makes the
-  # shell show "Performance" plugged in without manual toggling. Reads ADP0
+  # Balanced on battery. PPD is the backend the noctalia bar reads/writes
+  # (UPower → net.hadess.PowerProfiles), so this is what makes the shell show
+  # "Performance" plugged in without manual toggling. Reads ADP0
   # itself so a single udev rule on any power_supply change does the right thing.
   # `performance` can be unavailable when the daemon reports degradation, so we
   # fall back to balanced rather than fail.
@@ -78,12 +78,12 @@ let
   # to Quiet (gentlest fan curve) and PPD to power-saver (caps CPU boost → less
   # heat → fans stay down), turns the displays and Aura keyboard LEDs off, and —
   # crucially — holds a
-  # Wayland idle-inhibit lock for the duration so caelestia's idle daemon never
-  # fires its timeouts. Those default to lock@3m, dpms-off@5m and
-  # `systemctl suspend-then-hibernate`@10m, and all of them `respectInhibitors`;
-  # the 10-minute suspend is what would otherwise pause a Steam download
-  # overnight. We blank the screens ourselves (dpms off) since the inhibitor
-  # also suppresses caelestia's own auto screen-off — they wake on any input.
+  # Wayland idle-inhibit lock for the duration so noctalia's idle service never
+  # fires its action. We configure noctalia with screen-off@11m (see noctalia.nix)
+  # which `respectInhibitors`; the inhibitor suppresses it so the session stays
+  # fully awake for an overnight download. We blank the screens ourselves (dpms
+  # off) since the inhibitor also suppresses noctalia's own auto screen-off —
+  # they wake on any input.
   night-mode = pkgs.writeShellApplication {
     name = "night-mode";
     runtimeInputs = [
@@ -152,7 +152,7 @@ in
       # (supergfxd is intentionally omitted — MUX switching needs a relog.)
       services.asusd.enable = true;
 
-      # power-profiles-daemon: the profile backend the caelestia bar reads and
+      # power-profiles-daemon: the profile backend the noctalia bar reads and
       # writes. The bare Hyprland session doesn't pull it in (no desktop manager
       # does), so without it the bar is stuck showing a static "Balanced" it
       # can't change. Coexists with asusd, which keeps Aura/fan/charge-limit

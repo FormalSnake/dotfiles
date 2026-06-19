@@ -5,7 +5,7 @@
   imports = [
     ./mixins/hyprland.nix
     ./mixins/alttab.nix
-    ./mixins/caelestia.nix
+    ./mixins/noctalia.nix
     ./mixins/beeper.nix
     ./mixins/helium.nix
     ./mixins/spicetify.nix

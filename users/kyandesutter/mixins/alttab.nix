@@ -3,7 +3,8 @@
   # — Alt-Tab window switcher (Quickshell) —
   #
   # A classic hold-to-cycle window switcher for Hyprland, written as a tiny
-  # standalone Quickshell config (separate from the caelestia shell instance).
+  # standalone Quickshell config (noctalia, the desktop shell, is native C++ and
+  # not Quickshell-based, so this is the only Quickshell instance in the session).
   #
   # How it works:
   #   • The es layout remaps left Alt to AltGr (lv3:lalt_switch), which Hyprland
