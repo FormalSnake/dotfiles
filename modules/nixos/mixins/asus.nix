@@ -106,7 +106,7 @@ let
         asusctl profile set Quiet || true
         "$ppctl" set power-saver || true
         # Blank the Aura keyboard LEDs (static black) so they aren't glowing
-        # overnight. `off` repaints them the Catppuccin Mauve set at boot.
+        # overnight. `off` repaints them the current wallpaper-derived accent.
         asusctl aura effect static -c 000000 || true
         if ! is_on; then
           # Foreground tool that holds the idle inhibitor until killed; background
@@ -126,8 +126,12 @@ let
         hyprctl dispatch 'hl.dsp.dpms({ action = "enable" })' || true
         asusctl profile set Performance || true
         "$ppctl" set performance 2>/dev/null || "$ppctl" set balanced || true
-        # Repaint the Aura keyboard the Catppuccin Mauve set by the asus-aura unit.
-        asusctl aura effect static -c ${auraColour} || true
+        # Repaint the Aura keyboard. Restore the *current* wallpaper-derived accent
+        # that noctalia's `aura` template caches to ~/.cache/noctalia/aura-color
+        # (see users/kyandesutter/mixins/noctalia.nix), falling back to the
+        # Catppuccin Mauve seed if noctalia hasn't generated a palette yet.
+        aura_colour="$(cat "$HOME/.cache/noctalia/aura-color" 2>/dev/null || echo ${auraColour})"
+        asusctl aura effect static -c "$aura_colour" || true
         notify-send -a "night-mode" "Night mode OFF" "Restored Performance" || true
         echo "Night mode OFF"
       }
@@ -180,11 +184,14 @@ in
         };
       };
 
-      # After asusd is up: paint the keyboard Catppuccin Mauve and cap the
-      # battery charge at 80% for longevity. `|| true` so a CLI/permission
-      # hiccup never fails the boot.
+      # After asusd is up: seed the keyboard colour and cap the battery charge at
+      # 80% for longevity. The seed is the last wallpaper-derived accent noctalia
+      # cached to the user's ~/.cache/noctalia/aura-color (so the keyboard already
+      # shows the right colour before the graphical session starts); noctalia
+      # repaints it on login anyway. Falls back to the Catppuccin Mauve seed if no
+      # cache exists yet. `|| true` so a CLI/permission hiccup never fails the boot.
       systemd.services.asus-aura = {
-        description = "Aura keyboard Catppuccin Mauve + 80% charge limit";
+        description = "Aura keyboard accent seed + 80% charge limit";
         after = [ "asusd.service" ];
         requires = [ "asusd.service" ];
         wantedBy = [ "multi-user.target" ];
@@ -193,7 +200,9 @@ in
           RemainAfterExit = true;
         };
         script = ''
-          ${pkgs.asusctl}/bin/asusctl aura effect static -c ${auraColour} || true
+          seed=/home/kyandesutter/.cache/noctalia/aura-color
+          colour="$(${pkgs.coreutils}/bin/cat "$seed" 2>/dev/null || echo ${auraColour})"
+          ${pkgs.asusctl}/bin/asusctl aura effect static -c "$colour" || true
           ${pkgs.asusctl}/bin/asusctl battery limit 80 || true
         '';
       };

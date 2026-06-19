@@ -1,8 +1,4 @@
-{ inputs, ... }:
-let
-  # Wallpaper tracked in-repo so it resolves to an immutable store path.
-  wallpaper = ../wallpapers/storm.jpg;
-in
+{ inputs, pkgs, ... }:
 {
   # Official noctalia flake home-manager module. noctalia V5 is a native C++ /
   # OpenGL ES Wayland shell (the V4 line was Quickshell). The module installs the
@@ -59,35 +55,127 @@ in
         widget_spacing = 8;
       };
 
-      # Catppuccin (dark) builtin theme — the static equivalent of caelestia's
-      # `scheme set -n catppuccin -f mocha -m dark`, now fully declarative (no
-      # activation script / CLI state to pin).
+      # Dynamic, wallpaper-derived palette is now the single source of truth for
+      # the desktop's colours (replacing the static Catppuccin builtin). On every
+      # wallpaper pick or light/dark flip, Noctalia regenerates a Material Design 3
+      # palette from the image, re-renders all templates below, and runs their
+      # hooks. `wallpaper_scheme` selects the M3 generator (tonal-spot = balanced /
+      # legible; "vibrant" for punchier accents). Mode defaults to dark; the
+      # SUPER+SHIFT+T keybind (../mixins/hyprland.nix) toggles light/dark via
+      # `noctalia msg theme-mode-toggle`. See docs/superpowers/specs/
+      # 2026-06-19-noctalia-dynamic-theming-design.md.
       theme = {
         mode = "dark";
-        source = "builtin";
-        builtin = "Catppuccin";
+        source = "wallpaper";
+        wallpaper_scheme = "m3-tonal-spot";
 
-        # App theming: render the active palette into GTK 3/4 config and drive the
-        # system dark signal. The gtk3/gtk4 templates write
-        # ~/.config/gtk-{3,4}.0/noctalia.css (imported via gtk.css) and their
-        # apply.sh post-hook sets `org.gnome.desktop.interface color-scheme =
-        # prefer-dark` + `gtk-theme = adw-gtk3-dark` via gsettings/dconf at
-        # runtime. This is what makes native-Wayland/GTK and X11 apps follow dark
-        # mode (the role caelestia's portal signal used to fill). adw-gtk3 is
-        # installed by the gtk module in ../mixins/hyprland.nix, which sets the
-        # same adw-gtk3-dark / prefer-dark values declaratively — they agree.
+        # App theming. The builtin gtk3/gtk4 templates render the live palette into
+        # ~/.config/gtk-{3,4}.0/noctalia.css (imported via gtk.css) and drive the
+        # dconf/gsettings dark signal at runtime — this is what makes native GTK/Qt
+        # and X11 apps follow the palette, and is also what lets Helium follow it
+        # for free via its "Use GTK theme" appearance setting. adw-gtk3 is installed
+        # by the gtk module in ../mixins/hyprland.nix.
+        #
+        # The `user` templates push the same live palette into apps Noctalia can't
+        # theme natively. `.default` colour tokens track the active mode, so each
+        # output is rewritten on every mode flip / wallpaper change. Template
+        # sources are installed to ~/.config/noctalia/templates/ via xdg.configFile
+        # below. post_hook strings are themselves rendered through the engine
+        # (colour tokens interpolated) before running.
         templates = {
           enable_builtin_templates = true;
-          builtin_ids = [ "gtk3" "gtk4" ];
+          # gtk3/gtk4 theme GTK apps; qt writes qt5ct/qt6ct colour schemes that the
+          # Qt platform theme (QT_QPA_PLATFORMTHEME=qt6ct, set in hyprland.nix)
+          # reads. Qt/GTK apps follow the palette at launch (no live recolour — the
+          # toolkits don't hot-reload palettes).
+          builtin_ids = [ "gtk3" "gtk4" "qt" ];
+
+          user = {
+            # ASUS Aura keyboard. Output file doubles as the "current accent" cache
+            # that night-mode reads to restore today's colour (see asus.nix); the
+            # post_hook does the actual repaint. NOTE: in light mode `primary` can
+            # be pale — switch to a saturated role (e.g. tertiary) or add a
+            # `saturate` filter here if the keyboard reads washed out.
+            aura = {
+              enabled = true;
+              input_path = "~/.config/noctalia/templates/aura.tmpl";
+              output_path = "~/.cache/noctalia/aura-color";
+              post_hook = "asusctl aura effect static -c {{ colors.primary.default.hex_stripped }}";
+            };
+
+            # Ghostty: written into ghostty's themes dir; config references it with
+            # `theme = "Matugen"` (see ghostty.nix). SIGUSR2 live-reloads it
+            # (ghostty >= 1.2) without a restart.
+            ghostty = {
+              enabled = true;
+              input_path = "~/.config/noctalia/templates/ghostty.tmpl";
+              output_path = "~/.config/ghostty/themes/Matugen";
+              post_hook = "pkill -SIGUSR2 ghostty || true";
+            };
+
+            # Neovim: base16 lua module consumed by dynamic-base16.nvim
+            # (watch = true) — no hook needed, the plugin watches the file. See
+            # neovim.nix.
+            neovim = {
+              enabled = true;
+              input_path = "~/.config/noctalia/templates/neovim.lua.tmpl";
+              output_path = "~/.config/nvim/lua/noctalia_base16.lua";
+            };
+
+            # Equibop (Discord): Equicord hot-reloads the themes folder, so no hook.
+            # One-time: enable the theme in Equibop -> Settings -> Themes.
+            equibop = {
+              enabled = true;
+              input_path = "~/.config/noctalia/templates/equibop.css.tmpl";
+              output_path = "~/.config/equibop/themes/noctalia.theme.css";
+            };
+
+            # Spotify via spicetify. Writes the Comfy theme's color.ini, then
+            # re-applies it to the (Flatpak) Spotify — see mixins/spicetify.nix and
+            # the spec §5 for the one-time setup + the per-update maintenance tax.
+            # Absolute spicetify path: this hook runs inside noctalia's systemd
+            # user service, whose PATH won't include the home profile bin. If the
+            # UI doesn't visibly recolour, Ctrl+Shift+R inside Spotify forces it.
+            spicetify = {
+              enabled = true;
+              input_path = "~/.config/noctalia/templates/spicetify.ini.tmpl";
+              output_path = "~/.config/spicetify/Themes/Comfy/color.ini";
+              post_hook = "${pkgs.spicetify-cli}/bin/spicetify -c /home/kyandesutter/.config/spicetify/config-xpui.ini apply --no-restart || true";
+            };
+
+            # Hyprland borders + group/groupbar colours. Noctalia doesn't touch the
+            # compositor. This replicates the exact property set its built-in
+            # `hyprland` template applies (general.col.{active,inactive}_border,
+            # group.col.border_*, group.groupbar.col.*), but pushes it live with
+            # `hyprctl eval 'hl.config{…}'`. We hand-roll it because this is Hyprland
+            # 0.55+ Lua config (see docs/hyprland-lua.md): the built-in template's
+            # apply.sh appends `require("noctalia")` to ~/.config/hypr/hyprland.lua,
+            # but that's a read-only home-manager symlink here, and the built-in
+            # doesn't re-apply live. `hyprctl eval` does both — instant, no flicker —
+            # and Noctalia re-runs it on every session start / wallpaper / mode
+            # change. primary = active border; secondary = active group; error =
+            # locked; surface = inactive.
+            hyprland-border = {
+              enabled = true;
+              input_path = "~/.config/noctalia/templates/hypr-border.tmpl";
+              output_path = "~/.cache/noctalia/hypr-border";
+              post_hook = ''hyprctl eval 'hl.config({ general = { col = { active_border = "rgb({{ colors.primary.default.hex_stripped }})", inactive_border = "rgb({{ colors.surface.default.hex_stripped }})" } }, group = { col = { border_active = "rgb({{ colors.secondary.default.hex_stripped }})", border_inactive = "rgb({{ colors.surface.default.hex_stripped }})", border_locked_active = "rgb({{ colors.error.default.hex_stripped }})", border_locked_inactive = "rgb({{ colors.surface.default.hex_stripped }})" }, groupbar = { col = { active = "rgb({{ colors.secondary.default.hex_stripped }})", inactive = "rgb({{ colors.surface.default.hex_stripped }})", locked_active = "rgb({{ colors.error.default.hex_stripped }})", locked_inactive = "rgb({{ colors.surface.default.hex_stripped }})" } } } })' '';
+            };
+          };
         };
       };
 
-      # Wallpaper is declarative now (caelestia tracked it as CLI runtime state).
-      # crop = fill the screen, matching caelestia's behaviour.
+      # Wallpapers live in a *mutable* set under ~/Pictures/Wallpapers/{light,dark}
+      # (owner-managed, intentionally not tracked by the flake — see the design
+      # spec). No rotation: automation.enabled = false, so the palette only changes
+      # when you pick a wallpaper from Noctalia's picker or flip light/dark. Each
+      # mode pulls from its own folder. crop = fill the screen.
       wallpaper = {
         enabled = true;
         fill_mode = "crop";
-        default.path = "${wallpaper}";
+        directory_dark = "/home/kyandesutter/Pictures/Wallpapers/dark";
+        directory_light = "/home/kyandesutter/Pictures/Wallpapers/light";
+        automation.enabled = false;
       };
 
       # Auto screen-off on idle (DPMS), preserving caelestia's idle screen
@@ -108,5 +196,19 @@ in
       weather.enabled = true;
       location.auto_locate = true;
     };
+  };
+
+  # Template sources for the user templates declared above. Installed read-only
+  # into ~/.config/noctalia/templates/; Noctalia renders them into their
+  # output_path on every palette change. These are matugen-syntax templates
+  # (Noctalia's engine is matugen-compatible), mapping M3 colour roles into each
+  # app's format.
+  xdg.configFile = {
+    "noctalia/templates/aura.tmpl".source = ../noctalia-templates/aura.tmpl;
+    "noctalia/templates/ghostty.tmpl".source = ../noctalia-templates/ghostty.tmpl;
+    "noctalia/templates/neovim.lua.tmpl".source = ../noctalia-templates/neovim.lua.tmpl;
+    "noctalia/templates/equibop.css.tmpl".source = ../noctalia-templates/equibop.css.tmpl;
+    "noctalia/templates/spicetify.ini.tmpl".source = ../noctalia-templates/spicetify.ini.tmpl;
+    "noctalia/templates/hypr-border.tmpl".source = ../noctalia-templates/hypr-border.tmpl;
   };
 }

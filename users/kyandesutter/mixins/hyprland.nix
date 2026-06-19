@@ -288,6 +288,10 @@ in
     hl.bind(mod .. " + ntilde", hl.dsp.exec_cmd("noctalia msg panel-toggle clipboard"))
     -- Emoji picker (noctalia's launcher in /emo mode, over IPC).
     hl.bind(mod .. " + period", hl.dsp.exec_cmd("noctalia msg panel-toggle launcher /emo"))
+    -- Toggle light/dark mode. noctalia regenerates the wallpaper-derived palette
+    -- for the new mode and re-renders every app template (terminal, editor,
+    -- Discord, Aura keyboard, GTK/Qt). See mixins/noctalia.nix.
+    hl.bind(mod .. " + SHIFT + T", hl.dsp.exec_cmd("noctalia msg theme-mode-toggle"))
     -- Overnight quiet-download mode: Quiet fan profile + power-saver, blanks the
     -- displays, and holds a Wayland idle-inhibit lock so noctalia's idle service
     -- doesn't blank the screen mid-download. SUPER+SHIFT+N again to restore.
@@ -468,28 +472,46 @@ in
     fi
   '';
 
-  # — Quickshell icon theme —
+  # — Qt platform theme + Quickshell icon theme —
   #
-  # noctalia V5 is native C++/OpenGL ES and draws its own icons, so it ignores
-  # this. But the alttab switcher (alttab.nix) is still a Quickshell/Qt6 app: its
-  # icons come from Qt's icon theme, which Quickshell takes from the Qt *platform
-  # theme*. This session sets no Qt platform theme (QT_QPA_PLATFORMTHEME is
-  # unset), so Qt's icon theme falls back to a near-empty default and every
-  # unresolved icon renders as the magenta/black "missing texture" placeholder in
-  # alttab. (GTK apps are unaffected: they read gtk-icon-theme-name directly from
-  # gtk-3.0/settings.ini.)
+  # We now run a full Qt platform theme (qt6ct) so Qt apps follow Noctalia's
+  # wallpaper-derived palette: Noctalia's builtin `qt` template (see noctalia.nix)
+  # writes ~/.config/qt{5,6}ct/colors/noctalia.conf, and qt6ct.conf below points
+  # at it with a Fusion style (Fusion honours the custom palette). Qt apps pick up
+  # the colours at launch — no live recolour (Qt has no palette hot-reload).
   #
-  # Papirus-Dark is already installed and named for GTK (the catppuccin module
-  # pulls it in and points gtk-icon-theme-name + dconf icon-theme at it when
-  # gtk.enable is on). Rather than introduce a full Qt platform theme (which would
-  # restyle every Qt app), point Quickshell straight at it with QS_ICON_THEME —
-  # Quickshell's own override env var. The theme is fixed dark (noctalia's
-  # Catppuccin dark), so QS_ICON_THEME not tracking light/dark doesn't matter.
+  # QT_QPA_PLATFORMTHEME=qt6ct also fixes the alttab switcher (alttab.nix, a
+  # Quickshell/Qt6 app): Qt's icon theme now comes from qt6ct.conf (icon_theme =
+  # Papirus-Dark) instead of falling back to the empty default (which rendered
+  # every unresolved icon as the magenta/black "missing texture" placeholder).
+  # QS_ICON_THEME is kept as a belt-and-braces Quickshell-specific override.
   #
   # Placed in uwsm/env (sourced for every uwsm session and imported into the
-  # systemd user manager) so it reaches the Hyprland-spawned alttab instance.
+  # systemd user manager) so it reaches every Hyprland-spawned Qt app.
   xdg.configFile."uwsm/env".text = ''
     export QS_ICON_THEME="Papirus-Dark"
+    export QT_QPA_PLATFORMTHEME="qt6ct"
+  '';
+
+  # qt6ct / qt5ct config: select the Fusion style and Noctalia's generated colour
+  # scheme. The colors/noctalia.conf files are written at runtime by Noctalia's
+  # `qt` template; these .conf files just tell qt{5,6}ct to use them. Managed
+  # declaratively (read-only) — don't hand-edit via the qt6ct GUI.
+  xdg.configFile."qt6ct/qt6ct.conf".text = ''
+    [Appearance]
+    style=Fusion
+    custom_palette=true
+    color_scheme_path=/home/kyandesutter/.config/qt6ct/colors/noctalia.conf
+    icon_theme=Papirus-Dark
+    standard_dialogs=default
+  '';
+  xdg.configFile."qt5ct/qt5ct.conf".text = ''
+    [Appearance]
+    style=Fusion
+    custom_palette=true
+    color_scheme_path=/home/kyandesutter/.config/qt5ct/colors/noctalia.conf
+    icon_theme=Papirus-Dark
+    standard_dialogs=default
   '';
 
   # Clipboard: noctalia provides the history store and picker natively; we only
@@ -510,6 +532,12 @@ in
     # Installed here so that theme name resolves; noctalia, not the gtk module,
     # selects it (see the dark-mode block below).
     adw-gtk3
+
+    # Qt platform theme engines. QT_QPA_PLATFORMTHEME=qt6ct (uwsm/env above) points
+    # Qt6 apps at qt6ct; qt5ct themes Qt5 apps. Both read Noctalia's generated
+    # colour scheme via the qt{6,5}ct.conf written above.
+    kdePackages.qt6ct
+    libsForQt5.qt5ct
 
     # GNOME/GTK apps that round out the desktop.
     papers # PDF / document viewer (default for application/pdf)

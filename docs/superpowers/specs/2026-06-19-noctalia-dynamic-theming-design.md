@@ -158,6 +158,13 @@ catppuccin = {
 Apps that still want it reference `config.catppuccin.*` explicitly (no change to
 those references): SDDM, Herdr, Neovim fallback, jankyborders.
 
+**Implementation note (added during build):** `autoEnable = false` also strips
+Catppuccin from the terminal/CLI tools it was silently theming (`bat`, `btop`,
+`fzf`, `lazygit`, `yazi`, `fish`, `tmux`) — and Noctalia has no template for
+those. Since they have no dynamic path, they're re-enabled explicitly
+(`catppuccin.<tool>.enable = true`) so they keep their Mocha theme. This is the
+correct reading of "keep Catppuccin for apps that can't be dynamic."
+
 ### 3. `users/kyandesutter/mixins/ghostty.nix`
 - Drop the catppuccin latte/mocha light-dark theme pair.
 - Set `theme = "Matugen"` (loads the Noctalia-written
@@ -170,7 +177,44 @@ those references): SDDM, Herdr, Neovim fallback, jankyborders.
 - Keep `catppuccin/nvim` as the pre-palette fallback colorscheme (loads first;
   dynamic overrides once the file exists). Mirrors the matugen-themes fallback.
 
-### 5. `users/kyandesutter/mixins/spicetify.nix` (rewrite)
+### 5. `users/kyandesutter/mixins/spicetify.nix` — IMPLEMENTED (option b)
+
+**Status: implemented via a `--user` Flatpak Spotify + `spicetify-cli`.** Owner
+chose option (b). spicetify is a host-side file patcher: it patches files inside
+the Spotify app tree, so it needs a *writable* tree. Both `pkgs.spotify` (Nix
+store) and a system Flatpak (`/var/lib/flatpak`, root) are read-only; a `--user`
+Flatpak lives under `$HOME`, so its (still read-only OSTree) app tree can be
+`chmod`-ed writable without sudo. No `flatpak run` wrapping / `flatpak override`
+is needed (spicetify writes on the host side).
+
+What was implemented:
+- **flake.nix:** `spicetify-nix` input removed (change 8).
+- **spicetify.nix (rewritten):** imports `nix-flatpak.homeManagerModules.nix-flatpak`;
+  user install of `com.spotify.Client` + flathub remote; `home.packages =
+  [ pkgs.spicetify-cli ]`; a guarded `home.activation.spicetifyChmod` that
+  re-asserts writability of the app tree on each activation (no-ops until the app
+  exists).
+- **noctalia.nix:** `spicetify` user template → `Themes/Comfy/color.ini`, with
+  `post_hook = "${pkgs.spicetify-cli}/bin/spicetify -c <abs config> apply
+  --no-restart"` (absolute spicetify path because noctalia's systemd user-service
+  PATH excludes the home profile).
+- **noctalia-templates/spicetify.ini.tmpl:** M3→Comfy `color.ini` mapping,
+  `hex_stripped`, `[Comfy]` section.
+
+Manual first-run (owner, once, after rebuild — see Risks/owner steps): launch the
+Flatpak Spotify once to populate its app tree + prefs, `chmod` the tree writable,
+clone the **Comfy** theme into `~/.config/spicetify/Themes/`, `spicetify config`
+the Flatpak `spotify_path`/`prefs_path` + `current_theme/color_scheme = Comfy`,
+then `spicetify backup apply` with Spotify closed.
+
+**Known maintenance tax:** every Spotify update re-deploys the OSTree tree,
+wiping the chmod *and* the injection — re-run `chmod` (the activation handles this
+on next `home-manager switch`) and `spicetify backup apply` (manual, Spotify
+closed). Live recolor via `apply --no-restart` may need a `Ctrl+Shift+R` inside
+Spotify to visibly refresh. This fragility is the accepted cost of runtime
+recolor vs spicetify-nix's reliable-but-static build-time injection.
+
+#### (original plan — superseded by the above)
 - Remove `inputs.spicetify-nix` usage and the catppuccin theme.
 - Install Spotify via **`nix-flatpak`** (mutable install spicetify can patch) +
   `pkgs.spicetify-cli`.
@@ -183,6 +227,11 @@ those references): SDDM, Herdr, Neovim fallback, jankyborders.
   fall back to "Spotify stays static" (decided at implementation time).
 
 ### 6. `users/kyandesutter/mixins/hyprland.nix` (user)
+- **Hyprland window borders** follow the accent too (added on request). Noctalia
+  doesn't touch the compositor, so a `hyprland-border` user template's `post_hook`
+  pushes colours live via `hyprctl keyword general:col.{active,inactive}_border`
+  (instant, no reload). Runtime state, but re-applied on every session start /
+  wallpaper / mode change. (Borders were previously unset → Hyprland defaults.)
 - Add a light/dark **toggle keybind** → Noctalia mode-toggle IPC
   (**verify exact command**, e.g. `noctalia msg <dark-mode-toggle>`).
 - Helium: documented one-time Appearance → "Use GTK theme" (no nix change;

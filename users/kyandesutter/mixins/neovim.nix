@@ -70,6 +70,33 @@
         }
       '';
 
+      # Wallpaper-derived colours (Linux/Noctalia). Noctalia renders the live M3
+      # palette into ~/.config/nvim/lua/noctalia_base16.lua as a base00..base0F
+      # table (see the `neovim` user template in mixins/noctalia.nix);
+      # dynamic-base16.nvim maps it onto all Treesitter/LSP highlight groups and,
+      # with watch = true, hot-reloads when Noctalia rewrites the file (on every
+      # wallpaper change / light-dark flip). catppuccin (above) stays the base
+      # colourscheme and the fallback: the setup is pcall-guarded so a missing file
+      # (cold start before the first palette, or the macOS host where Noctalia
+      # doesn't run) never breaks startup — nvim simply stays on catppuccin until
+      # the file exists (restart nvim once after the first palette is generated).
+      dynamic-base16 = ''
+        return {
+          "GnRlLeclerc/dynamic-base16.nvim",
+          lazy = false,
+          priority = 999,
+          config = function()
+            pcall(function()
+              require("dynamic-base16").setup({
+                module = "noctalia_base16",
+                transparent = true,
+                watch = true,
+              })
+            end)
+          end,
+        }
+      '';
+
       # Follow the macOS appearance at runtime. Toggling vim.o.background makes
       # catppuccin (flavour = "auto") swap latte <-> the dark flavor. We also
       # re-run :colorscheme so the ColorScheme autocmd fires and the
