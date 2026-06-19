@@ -12,6 +12,21 @@
     ./mixins/fetch.nix
   ];
 
+  # NixOS rebuild shortcut (g815-only, so it lives here rather than the shared
+  # fish.nix — `nixos-rebuild` doesn't exist on the darwin host). Merges into the
+  # programs.fish.functions set defined in mixins/fish.nix.
+  #
+  # The flake is referenced by absolute path (~/.config/nix#g815), not `.#g815`,
+  # so `rebuild` works from any directory. `#g815` is literal: fish only treats
+  # `#` as a comment at the start of a word, and `~` still expands at word-start.
+  # Extra flags (e.g. --show-trace, boot) pass through via $argv.
+  programs.fish.functions.rebuild = {
+    description = "Rebuild NixOS from the flake (~/.config/nix#g815), runnable from any directory";
+    body = ''
+      sudo nixos-rebuild switch --flake ~/.config/nix#g815 $argv
+    '';
+  };
+
   # PrismLauncher (Minecraft) lives here rather than the shared programs.nix:
   # prismlauncher-11 segfaults in nixpkgs' wrap-qt6-apps-hook on aarch64-darwin
   # (upstream bug, exit 139) and it's a g815-only concern anyway (dGPU wrap).

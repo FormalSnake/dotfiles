@@ -404,7 +404,39 @@ in
     -- only actually happens when the game itself presents without vsync, so launch
     -- games with vsync OFF (in-game setting, or Vulkan IMMEDIATE / __GL_SYNC_TO_VBLANK=0).
     hl.window_rule({ match = { class = "^(steam_app_.*)$" }, immediate = true })                    -- games → allow tearing
-    hl.window_rule({ match = { title = "^(Picture-in-Picture)$" }, float = true })                 -- floating PiP
+    -- — Chromium/helium auxiliary popups: float, pin across every workspace, and
+    --   tuck into a corner. Mirrors the aerospace setup (float PiP + keep it on the
+    --   focused workspace); `pin` is Hyprland's "show on all workspaces". helium
+    --   gives these three windows distinct identities, captured live with
+    --   `hyprctl clients` + the openwindow event socket:
+    --     • Video PiP      → class "" (empty), title "Picture in picture"
+    --     • Built-in notif → class "" (empty), title "" (empty)
+    --     • Document PiP   → class "helium", maps floating, dynamic page title
+    --   Matching is on initialClass/initialTitle (creation-time) — which is why the
+    --   old `title:Picture-in-Picture` rule never fired: the real title is
+    --   "Picture in picture" (spaces, not hyphens) and the class is empty, not helium.
+    --
+    -- Video PiP → float, pin, bottom-right, capped to ~28% (it opens ~1240px wide).
+    -- Title is distinctive enough to match alone; the char-classes tolerate the
+    -- "Picture in picture" / "Picture-in-Picture" spellings and capitalisation.
+    hl.window_rule({ match = { title = "^([Pp]icture[ -][Ii]n[ -][Pp]icture)$" },
+      float = true, pin = true,
+      size = { "monitor_w*0.28", "monitor_h*0.28" },
+      move = { "monitor_w-window_w-16", "monitor_h-window_h-16" } })
+    -- Document PiP (and any other floating helium popup) → pin + sane size (Meet's
+    -- document PiP opens ~1240x1110 — the "massive" one) + bottom-right. Matched on
+    -- floating state, so normal *tiled* browser windows are untouched (only the
+    -- dynamic `pin` would ever reach a manually-floated window).
+    hl.window_rule({ match = { class = "^(helium)$", float = true },
+      pin = true,
+      size = { "monitor_w*0.28", "monitor_h*0.28" },
+      move = { "monitor_w-window_w-16", "monitor_h-window_h-16" } })
+    -- Chrome built-in notification → empty class AND empty title. Float (it tiles
+    -- otherwise — a calendar alert wrecking the layout), pin, top-right. The empty
+    -- title is what sets it apart from the video PiP above (also empty class).
+    hl.window_rule({ match = { class = "^$", title = "^$" },
+      float = true, pin = true,
+      move = { "monitor_w-window_w-16", "16" } })
   '';
 
   # — Multi-GPU primary selection (hybrid laptop) —
