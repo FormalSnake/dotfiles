@@ -30,6 +30,14 @@
           "3200 127.0.0.1:3200"
           "3100 127.0.0.1:3100"
           "8080 127.0.0.1:8080"
+          # CanaryPulse dev servers — so the browser on the client can reach them
+          # as localhost (auth/CORS/cookies are localhost-only in dev). The admin
+          # SPA loads its API/scraper URLs as http://localhost:<port> in the
+          # browser, so 3001 (API) is required alongside 4322 (admin) for login.
+          "4322 127.0.0.1:4322" # admin SPA
+          "3001 127.0.0.1:3001" # API (browser calls directly: auth + tRPC)
+          "3003 127.0.0.1:3003" # scraper (REST + WebSocket)
+          "4321 127.0.0.1:4321" # web (optional)
         ];
       };
 
