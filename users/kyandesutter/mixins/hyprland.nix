@@ -491,6 +491,9 @@ in
       -- HDMI-A-1) and equibop to workspace 4 (communication, eDP-1).
       hl.exec_cmd("steam -silent")
       hl.exec_cmd("equibop --start-minimized")
+      -- 1Password to the tray (--silent): keeps the desktop app running so the
+      -- integrated `op` CLI and browser unlock work from login without focus.
+      hl.exec_cmd("1password --silent")
       -- The rest of the always-open set on this host: the browser, the two
       -- messaging clients, and the music player. None take a "start minimized"
       -- flag like steam/equibop, but each has a window_rule below pinning it to

@@ -13,4 +13,13 @@
     enable = true;
     polkitPolicyOwners = [ "kyandesutter" ];
   };
+
+  # Trust Helium (a Chromium fork) for the browser-unlock native-messaging
+  # integration. 1Password only talks to browsers whose binary name is in its
+  # built-in allowlist or this file; Helium isn't recognized, so add it.
+  # The Nix wrapper execs .../opt/helium/helium, so the process name is "helium".
+  environment.etc."1password/custom_allowed_browsers" = {
+    text = "helium";
+    mode = "0755";
+  };
 }
