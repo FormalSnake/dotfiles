@@ -1,4 +1,34 @@
 { inputs, pkgs, ... }:
+let
+  # Repaint the Aura keyboard to the new accent, then re-assert the AC-appropriate
+  # backlight level. The second step is the fix for the LEDs lighting up after a
+  # session relog on battery: setting an Aura *effect* re-enables the backlight at
+  # its last level, and the battery-dim in modules/nixos/mixins/asus.nix is
+  # edge-triggered on power plug/unplug events only — it never fires on a relog —
+  # so without this the keyboard glows on battery until you unplug/replug. noctalia
+  # runs this post_hook on every palette change (session start, wallpaper pick,
+  # light/dark flip), so all of those now respect AC state. Runs inside noctalia's
+  # systemd *user* service (limited PATH), so tools are pinned by absolute path;
+  # brightness is driven through asusd (asusctl leds) since the user can't write the
+  # root-owned /sys LED node directly. high == max (3) mirrors the udev "on" rule.
+  auraRepaint = pkgs.writeShellApplication {
+    name = "aura-repaint";
+    runtimeInputs = [
+      pkgs.asusctl
+      pkgs.coreutils
+    ];
+    text = ''
+      colour="''${1:?usage: aura-repaint <hex>}"
+      asusctl aura effect static -c "$colour" || true
+      online=$(cat /sys/class/power_supply/ADP0/online 2>/dev/null || echo 1)
+      if [ "$online" = 1 ]; then
+        asusctl leds set high || true
+      else
+        asusctl leds set off || true
+      fi
+    '';
+  };
+in
 {
   # Official noctalia flake home-manager module. noctalia V5 is a native C++ /
   # OpenGL ES Wayland shell (the V4 line was Quickshell). The module installs the
@@ -118,7 +148,7 @@
               enabled = true;
               input_path = "~/.config/noctalia/templates/aura.tmpl";
               output_path = "~/.cache/noctalia/aura-color";
-              post_hook = "asusctl aura effect static -c {{ colors.primary.default.hex_stripped }}";
+              post_hook = "${auraRepaint}/bin/aura-repaint {{ colors.primary.default.hex_stripped }}";
             };
 
             # Ghostty: written into ghostty's themes dir; config references it with

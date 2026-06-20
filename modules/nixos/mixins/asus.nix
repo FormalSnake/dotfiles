@@ -16,6 +16,13 @@ let
     case "''${1:-}" in
       on)  echo "$max" > "$led/brightness" ;;
       off) echo 0      > "$led/brightness" ;;
+      # ac: read AC state and apply the right level. Used by the asus-aura boot
+      # service to re-assert the dim *after* it sets the Aura effect (which
+      # re-enables the backlight), since at boot there may be no power event to
+      # drive the on/off rules below.
+      ac)
+        online=$(cat /sys/class/power_supply/ADP0/online 2>/dev/null || echo 1)
+        if [ "$online" = 1 ]; then echo "$max" > "$led/brightness"; else echo 0 > "$led/brightness"; fi ;;
     esac
   '';
 
@@ -211,6 +218,10 @@ in
           for zone in keyboard logo lightbar lid rear-glow; do
             ${pkgs.asusctl}/bin/asusctl aura power "$zone" --boot --awake --shutdown || true
           done
+          # Setting the Aura effect above re-enables the backlight, so re-assert the
+          # AC-appropriate level last: dark on battery, full on AC. Mirrors the relog
+          # fix in users/kyandesutter/mixins/noctalia.nix (aura-repaint).
+          ${kbdDim} ac || true
         '';
       };
 
