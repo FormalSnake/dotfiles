@@ -603,6 +603,18 @@ in
         fi
       done
     fi
+
+    # VA-API hardware video decode GPU, chosen at session start by power source:
+    # nvidia on AC (decode on the dGPU), iHD (Intel iGPU) on battery so the dGPU can
+    # stay asleep instead of being woken by any app that plays video. Replaces the
+    # old static LIBVA_DRIVER_NAME=nvidia in modules/nixos/mixins/nvidia.nix. Picked
+    # once per session, so a relogin on unplug is what re-evaluates it; offloaded
+    # apps still force nvidia via pkgs.nvidiaOffloadEnv regardless of this default.
+    if [ "$(cat /sys/class/power_supply/ADP0/online 2>/dev/null || echo 1)" = 0 ]; then
+      export LIBVA_DRIVER_NAME=iHD
+    else
+      export LIBVA_DRIVER_NAME=nvidia
+    fi
   '';
 
   # Power automation (see powerTune in the let block): refresh rate, power profile

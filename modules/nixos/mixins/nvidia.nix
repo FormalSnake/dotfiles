@@ -51,10 +51,13 @@
   '';
 
   environment.sessionVariables = {
-    # NVIDIA + Wayland: hardware video decode through the dGPU.
-    LIBVA_DRIVER_NAME = "nvidia";
     # Electron/Chromium apps run native Wayland.
     NIXOS_OZONE_WL = "1";
+    # LIBVA_DRIVER_NAME is intentionally NOT set globally. It's chosen per session
+    # by power source in users/kyandesutter/mixins/hyprland.nix (uwsm/env-hyprland):
+    # nvidia on AC (dGPU decode), iHD on battery so the dGPU can stay asleep instead
+    # of being woken by any app that decodes video. Offloaded apps still get nvidia
+    # decode via nvidiaOffloadEnv below.
   };
 
   # PRIME render-offload plumbing for the gaming stack.
@@ -81,6 +84,10 @@
         __NV_PRIME_RENDER_OFFLOAD_PROVIDER = "NVIDIA-G0";
         __GLX_VENDOR_LIBRARY_NAME = "nvidia";
         __VK_LAYER_NV_optimus = "NVIDIA_only";
+        # An offloaded process drives the dGPU, so keep its VA-API decode there too.
+        # The session default is now iHD on battery (hyprland.nix uwsm/env-hyprland),
+        # so offloaded apps must set this explicitly to decode on the dGPU.
+        LIBVA_DRIVER_NAME = "nvidia";
       };
 
       gpuOffloadWrap =
