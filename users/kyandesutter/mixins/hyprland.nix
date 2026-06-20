@@ -201,6 +201,13 @@ let
               2) asusctl leds set med 2>/dev/null || true ;;
               *) asusctl leds set high 2>/dev/null || true ;;
             esac
+            # Genuine battery→AC transition (not the initial reconcile, where
+            # last_ac is empty): offer the dGPU relog. dock-relog self-guards on
+            # the session-gpu-mode marker + a 10s cancel window and ends in
+            # `uwsm stop` (or just returns if canceled / already dGPU-primary).
+            if [ "$last_ac" = battery ]; then
+              ${dockRelog}/bin/dock-relog || true
+            fi
           fi
           last_ac="$ac"
         fi
@@ -226,6 +233,191 @@ let
         "type='signal',member='Changed',path='/org/freedesktop/UPower'" \
         "type='signal',interface='org.freedesktop.DBus.Properties',path='/org/freedesktop/UPower/PowerProfiles'" \
         2>/dev/null)
+    '';
+  };
+
+  # — Window session snapshot / restore + AC-dock auto-relog —
+  #
+  # AQ_DRM_DEVICES (the dGPU-primary zero-copy path; see uwsm/env-hyprland below)
+  # is read once at aquamarine init, so switching the primary GPU needs a full
+  # relog. We want the dGPU primary whenever on AC (desk or travelling — games
+  # render on the dGPU and present to whatever panel is lit) and the iGPU primary
+  # on battery (so the dGPU can RTD3-sleep). powerTune's reconcile() already fires
+  # on the battery→AC edge, so it calls dock-relog there; env-hyprland re-derives
+  # the GPU from AC state on the new session; session-restore relaunches the
+  # windows the last snapshot recorded. Restore also runs on *manual* relogs, so
+  # the snapshot is taken continuously rather than only at relog time.
+
+  # Periodic, game-aware window snapshot. `session-snapshot loop` runs the watcher
+  # loop (started from hyprland.start); `session-snapshot` (no arg) writes one
+  # snapshot (also called by dock-relog right before tearing the session down).
+  # Each window records class/title/workspace/floating + its argv from /proc so
+  # restore can relaunch it. While a window is fullscreen (gaming) the tick is
+  # skipped entirely — the layout isn't changing, so steady-state game cost ≈ 0.
+  sessionSnapshot = pkgs.writeShellApplication {
+    name = "session-snapshot";
+    runtimeInputs = with pkgs; [ hyprland jq coreutils ];
+    text = ''
+      if [ "''${1:-}" = loop ]; then
+        while true; do
+          "$0" >/dev/null 2>&1 || true
+          sleep 20
+        done
+      fi
+
+      state_dir="''${XDG_STATE_HOME:-$HOME/.local/state}/hypr-session"
+      mkdir -p "$state_dir"
+      out="$state_dir/windows.json"
+      tmp="$out.tmp"
+      parts="$out.parts"
+
+      # Game-aware skip: don't poke the compositor while a window is fullscreen.
+      fs=$(hyprctl -j activewindow 2>/dev/null | jq -r '.fullscreen // 0') || fs=0
+      [ -n "$fs" ] || fs=0
+      if [ "$fs" != 0 ]; then exit 0; fi
+
+      clients=$(hyprctl -j clients 2>/dev/null) || exit 0
+      [ -n "$clients" ] || exit 0
+      addrs=$(jq -r '.[].address' <<<"$clients" 2>/dev/null) || exit 0
+
+      : > "$parts"
+      while IFS= read -r addr; do
+        [ -n "$addr" ] || continue
+        win=$(jq -c --arg a "$addr" 'first(.[] | select(.address==$a)) // empty' <<<"$clients") || continue
+        [ -n "$win" ] || continue
+
+        pid=$(jq -r '.pid // empty' <<<"$win")
+        case "$pid" in *[!0-9]*) pid="" ;; esac
+
+        cmd_json="[]"
+        if [ -n "$pid" ] && [ -r "/proc/$pid/cmdline" ]; then
+          cmd_json=$(tr '\0' '\n' < "/proc/$pid/cmdline" | jq -Rn '[inputs]' 2>/dev/null) || cmd_json="[]"
+          [ -n "$cmd_json" ] || cmd_json="[]"
+        fi
+
+        jq -c --argjson cmd "$cmd_json" \
+          '{class: .class, title: .title, workspace: .workspace.id, floating: .floating, cmd: $cmd}' \
+          <<<"$win" >> "$parts" || true
+      done <<<"$addrs"
+
+      if jq -s '.' "$parts" > "$tmp" 2>/dev/null; then
+        mv "$tmp" "$out"
+      fi
+      rm -f "$parts" "$tmp"
+    '';
+  };
+
+  # Relaunch the windows recorded in the last snapshot and place each on the
+  # workspace it was on. Runs on every hyprland.start (AC-triggered or manual
+  # relog). Skips the autostart set (hyprland.start owns those) and shell surfaces,
+  # and dedupes per class against what's already open, so it's idempotent — a
+  # restart-without-logout won't duplicate anything. Only workspace + floating
+  # state are restored (in-app state can't survive a relog).
+  sessionRestore = pkgs.writeShellApplication {
+    name = "session-restore";
+    runtimeInputs = with pkgs; [ hyprland jq coreutils ];
+    text = ''
+      state_file="''${XDG_STATE_HOME:-$HOME/.local/state}/hypr-session/windows.json"
+      [ -r "$state_file" ] || exit 0
+      snap=$(<"$state_file") || exit 0
+      [ -n "$snap" ] || exit 0
+
+      # Autostart owns these (hyprland.start), and shell surfaces aren't apps —
+      # never relaunch them, regardless of whether they're up yet at restore time.
+      skip_class() {
+        case "$1" in
+          [Hh]elium|[Bb]eeper|[Bb]lue[Bb]ubbles|[Ss]potify|[Ss]team|steam_app_*|[Ee]quibop) return 0 ;;
+          quickshell|[Nn]octalia*|*[Pp]olkit*|xdg-desktop-portal*) return 0 ;;
+          "") return 0 ;;
+        esac
+        return 1
+      }
+
+      open=$(hyprctl -j clients 2>/dev/null) || open='[]'
+      [ -n "$open" ] || open='[]'
+
+      classes=$(jq -r '[.[].class] | unique | .[]' <<<"$snap" 2>/dev/null) || exit 0
+      while IFS= read -r class; do
+        [ -n "$class" ] || continue
+        if skip_class "$class"; then continue; fi
+
+        entries=$(jq -c --arg c "$class" '[.[] | select(.class==$c)]' <<<"$snap") || continue
+        want=$(jq 'length' <<<"$entries") || want=0
+        have=$(jq --arg c "$class" '[.[] | select(.class==$c)] | length' <<<"$open") || have=0
+
+        i="$have"
+        while [ "$i" -lt "$want" ]; do
+          entry=$(jq -c --argjson i "$i" '.[$i]' <<<"$entries") || break
+          i=$((i + 1))
+
+          cmd=$(jq -r '.cmd | map(@sh) | join(" ")' <<<"$entry") || cmd=""
+          [ -n "$cmd" ] || continue
+
+          # Stale Nix store path (GC'd after a rebuild) → retry on PATH by basename.
+          bin=$(jq -r '.cmd[0] // ""' <<<"$entry") || bin=""
+          case "$bin" in
+            /*) if [ ! -x "$bin" ]; then
+                  base=$(basename "$bin")
+                  cmd=$(jq -r --arg b "$base" '([$b] + .cmd[1:]) | map(@sh) | join(" ")' <<<"$entry") || cmd=""
+                fi ;;
+          esac
+          [ -n "$cmd" ] || continue
+
+          ws=$(jq -r '.workspace // ""' <<<"$entry") || ws=""
+          floating=$(jq -r '.floating // false' <<<"$entry") || floating=false
+          if [ "$ws" -ge 1 ] 2>/dev/null; then
+            rule="workspace $ws silent"
+          else
+            rule="silent"
+          fi
+          if [ "$floating" = true ]; then rule="$rule; float"; fi
+
+          hyprctl dispatch exec "[$rule] $cmd" >/dev/null 2>&1 || true
+        done
+      done <<<"$classes"
+    '';
+  };
+
+  # Guarded relog, called by powerTune on a battery→AC transition. Self-guards on
+  # the session-gpu-mode marker (written by env-hyprland) so a session that already
+  # booted dGPU-primary is never relogged. Shows a notification with a 10s cancel
+  # window (Super+Shift+Backspace → `dock-relog cancel` drops the cancel flag); if
+  # not canceled it takes a fresh snapshot and `uwsm stop`s cleanly back to SDDM.
+  # On the next login env-hyprland re-derives the (now dGPU) GPU and session-restore
+  # relaunches the windows.
+  dockRelog = pkgs.writeShellApplication {
+    name = "dock-relog";
+    runtimeInputs = with pkgs; [ libnotify coreutils uwsm ];
+    text = ''
+      cancel="''${XDG_RUNTIME_DIR:-/tmp}/dock-relog.cancel"
+      marker="''${XDG_RUNTIME_DIR:-/tmp}/session-gpu-mode"
+
+      if [ "''${1:-}" = cancel ]; then
+        : > "$cancel"
+        notify-send -t 1500 "Docking" "Auto-relog canceled." || true
+        exit 0
+      fi
+
+      # Only relog when this session booted iGPU-primary; if already dGPU, nothing
+      # to do (e.g. plugged in at boot, or a battery→AC→battery→AC bounce).
+      mode=igpu
+      if [ -r "$marker" ]; then mode=$(cat "$marker"); fi
+      if [ "$mode" != igpu ]; then exit 0; fi
+
+      rm -f "$cancel"
+      notify-send -t 11000 "Docking" "On AC — relogging in 10s to enable the dGPU. Super+Shift+Backspace to cancel." || true
+
+      i=0
+      while [ "$i" -lt 10 ]; do
+        if [ -e "$cancel" ]; then rm -f "$cancel"; exit 0; fi
+        sleep 1
+        i=$((i + 1))
+      done
+      if [ -e "$cancel" ]; then rm -f "$cancel"; exit 0; fi
+
+      ${sessionSnapshot}/bin/session-snapshot || true
+      notify-send -t 2000 "Docking" "Relogging…" || true
+      uwsm stop
     '';
   };
 in
@@ -338,6 +530,16 @@ in
       -- the running args; the `[q]uickshell` bracket keeps the guard's own
       -- shell (whose argv carries this pattern) from matching itself.
       hl.exec_cmd("pgrep -f '[q]uickshell -c alttab' >/dev/null || ${pkgs.quickshell}/bin/qs -c alttab")
+      -- Window session restore + snapshotting (see the session/dock scripts in the
+      -- let block and the AC-keyed GPU choice in uwsm/env-hyprland below). Restore
+      -- relaunches the windows from the last snapshot onto their workspaces; it
+      -- skips the autostart set above and dedupes against what's already open, so a
+      -- restart-without-logout won't duplicate anything. The snapshot loop keeps the
+      -- state fresh (game-aware: it skips while a window is fullscreen) so *manual*
+      -- relogs restore too. The AC-plug relog itself is driven by powerTune (above),
+      -- not here. pgrep-guarded like the alttab launcher so re-fires can't stack it.
+      hl.exec_cmd("${sessionRestore}/bin/session-restore")
+      hl.exec_cmd("pgrep -f '[s]ession-snapshot loop' >/dev/null || ${sessionSnapshot}/bin/session-snapshot loop")
     end)
 
     -- — General options —
@@ -427,6 +629,9 @@ in
     -- Sleep: lock then suspend on demand. noctalia's `session lock-and-suspend`
     -- locks the screen before suspending, so resume lands on the lock screen.
     hl.bind(mod .. " + SHIFT + Escape", hl.dsp.exec_cmd("noctalia msg session lock-and-suspend"))
+    -- Cancel an in-progress AC-dock auto-relog (the 10s countdown after plugging in
+    -- AC). See dockRelog / powerTune in the let block.
+    hl.bind(mod .. " + SHIFT + BackSpace", hl.dsp.exec_cmd("${dockRelog}/bin/dock-relog cancel"))
 
     -- Vim-style focus (aerospace alt-hjkl → SUPER+hjkl).
     hl.bind(mod .. " + H", hl.dsp.focus({ direction = "l" }))
@@ -580,40 +785,53 @@ in
   #
   # Battery trade-off: a primary dGPU can't RTD3-sleep, which fights the
   # finegrained NVIDIA power management in modules/nixos/mixins/nvidia.nix. So
-  # only opt in when a display is actually lit on the dGPU (i.e. docked to the
-  # external monitor); undocked, leave AQ_DRM_DEVICES unset so the iGPU stays
-  # primary and the dGPU powers down as before. The choice is made ONCE at
-  # session start — uwsm sources env-${XDG_CURRENT_DESKTOP,,} (→ env-hyprland)
-  # as a POSIX shell script before launching Hyprland — so dock *before* logging
-  # in to get the zero-copy path; plugging the monitor in afterwards needs a relog.
+  # gate it on AC power — on AC the battery cost is moot and we want the dGPU
+  # primary for gaming whether docked at the desk OR travelling on the internal
+  # panel (games render on the dGPU and present to whatever panel is lit);
+  # on battery leave AQ_DRM_DEVICES unset so the iGPU stays primary and the dGPU
+  # powers down. The choice is made ONCE at session start — uwsm sources
+  # env-${XDG_CURRENT_DESKTOP,,} (→ env-hyprland) as a POSIX shell script before
+  # launching Hyprland — so applying a change needs a relog: powerTune's
+  # battery→AC edge calls dock-relog (guarded 10s countdown), which snapshots the
+  # windows and `uwsm stop`s; the new session then re-evaluates this on AC and
+  # session-restore relaunches the windows. env-hyprland also records the chosen
+  # mode in $XDG_RUNTIME_DIR/session-gpu-mode so dock-relog never relogs a session
+  # that already booted dGPU-primary.
   #
   # GPUs are resolved through the stable by-path PCI symlinks (DRM card numbers
   # can reorder across boots) back to the canonical /dev/dri/cardN nodes that
   # aquamarine enumerates and matches against.
   xdg.configFile."uwsm/env-hyprland".text = ''
+    # Resolve the two GPUs and read AC power ONCE; every per-session GPU/power
+    # decision below (primary render GPU, VA-API decode driver) keys off these so
+    # they can't disagree. ADP0 is the mains adapter; default to AC (1) when it
+    # can't be read. The whole file is re-evaluated on each (re)login, which is how
+    # an AC change takes effect — see the relog machinery in the let block.
     dgpu=$(readlink -f /dev/dri/by-path/pci-0000:02:00.0-card 2>/dev/null)
     igpu=$(readlink -f /dev/dri/by-path/pci-0000:00:02.0-card 2>/dev/null)
-    if [ -n "$dgpu" ] && [ -n "$igpu" ]; then
-      card=$(basename "$dgpu")
-      for status in /sys/class/drm/"$card"-*/status; do
-        [ -r "$status" ] || continue
-        if [ "$(cat "$status")" = connected ]; then
-          export AQ_DRM_DEVICES="$dgpu:$igpu"
-          break
-        fi
-      done
+    ac=$(cat /sys/class/power_supply/ADP0/online 2>/dev/null || echo 1)
+
+    # Primary render/allocator GPU: dGPU on AC (zero-copy gaming), iGPU on battery
+    # (so the dGPU can RTD3-sleep). Record the chosen mode for dock-relog's
+    # "already dGPU?" guard.
+    mode=igpu
+    if [ "$ac" = 1 ] && [ -n "$dgpu" ] && [ -n "$igpu" ]; then
+      export AQ_DRM_DEVICES="$dgpu:$igpu"
+      mode=dgpu
+    fi
+    if [ -n "''${XDG_RUNTIME_DIR:-}" ]; then
+      printf '%s\n' "$mode" > "$XDG_RUNTIME_DIR/session-gpu-mode" 2>/dev/null || true
     fi
 
-    # VA-API hardware video decode GPU, chosen at session start by power source:
-    # nvidia on AC (decode on the dGPU), iHD (Intel iGPU) on battery so the dGPU can
-    # stay asleep instead of being woken by any app that plays video. Replaces the
-    # old static LIBVA_DRIVER_NAME=nvidia in modules/nixos/mixins/nvidia.nix. Picked
-    # once per session, so a relogin on unplug is what re-evaluates it; offloaded
-    # apps still force nvidia via pkgs.nvidiaOffloadEnv regardless of this default.
-    if [ "$(cat /sys/class/power_supply/ADP0/online 2>/dev/null || echo 1)" = 0 ]; then
-      export LIBVA_DRIVER_NAME=iHD
-    else
+    # VA-API hardware video decode GPU: nvidia on AC (decode on the dGPU), iHD
+    # (Intel iGPU) on battery so the dGPU isn't woken by any app that plays video.
+    # Replaces the old static LIBVA_DRIVER_NAME=nvidia in modules/nixos/mixins/
+    # nvidia.nix; offloaded apps still force nvidia via pkgs.nvidiaOffloadEnv
+    # regardless of this default.
+    if [ "$ac" = 1 ]; then
       export LIBVA_DRIVER_NAME=nvidia
+    else
+      export LIBVA_DRIVER_NAME=iHD
     fi
   '';
 

@@ -109,23 +109,28 @@ for each window:
 
 Restores **workspace + floating state** only (per non-goals).
 
-### 4. `dock-watcher` — AC detection daemon
+### 4. AC detection — reuse the existing `power-tune` service
 
-Guarded background daemon started from `hyprland.start`. Blocks on
-`udevadm monitor --udev --subsystem-match=power_supply`; on each event re-reads AC
-online state with a ~15s debounce. On a **battery → AC** transition, and only if
-`$XDG_RUNTIME_DIR/session-gpu-mode` == `igpu` (don't relog a session that already
-booted dGPU-primary), it invokes `dock-relog`. Event-driven → idle cost is zero.
+**Implementation note (refinement):** the config already has a `power-tune`
+systemd user service that event-detects AC/battery (UPower `OnBattery` via
+`dbus-monitor` + `busctl`) and edge-triggers on transitions in `reconcile()`.
+Rather than add a second `dock-watcher` daemon watching the same signal, the
+relog is hooked into `power-tune`'s AC branch: on a genuine **battery → AC**
+transition (`last_ac == battery`, so not the initial reconcile), it calls
+`dock-relog`. The "only if `session-gpu-mode == igpu`" guard moved *into*
+`dock-relog` itself (see unit 5), keeping the trigger site a one-liner.
 
 ### 5. `dock-relog` — guarded relog trigger
 
-1. `notify-send` (noctalia): "Docking — relog in 10s to enable dGPU. Cancel with
+1. **Self-guard:** if `session-gpu-mode != igpu` (session already booted
+   dGPU-primary), exit immediately — nothing to do.
+2. `notify-send` (noctalia): "Docking — relog in 10s to enable dGPU. Cancel with
    Super+Shift+Backspace."
-2. Wait up to 10s, polling for a cancel flag file
+3. Wait up to 10s, polling for a cancel flag file
    (`$XDG_RUNTIME_DIR/dock-relog.cancel`).
-3. A new keybind **`SUPER+SHIFT+BackSpace`** → `dock-relog cancel` writes that
+4. A new keybind **`SUPER+SHIFT+BackSpace`** → `dock-relog cancel` writes that
    flag to abort.
-4. If not canceled: run a fresh `session-snapshot` (one-shot), then `uwsm stop`
+5. If not canceled: run a fresh `session-snapshot` (one-shot), then `uwsm stop`
    (clean uwsm teardown → SDDM).
 
 A subcommand layout (`dock-relog`, `dock-relog cancel`) keeps it one script.
