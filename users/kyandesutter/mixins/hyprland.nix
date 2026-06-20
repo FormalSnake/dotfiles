@@ -1,4 +1,4 @@
-{ pkgs, lib, ... }:
+{ pkgs, lib, config, ... }:
 let
   # Cursor-aware brightness control. Adjusts whichever monitor the cursor is
   # currently over: the internal panel via the kernel backlight (brightnessctl),
@@ -137,39 +137,46 @@ let
     '';
   };
 
-  # AC/battery-aware refresh rate + power profile (see systemd.user.services.power-tune).
+  # Power-source-aware refresh rate + keyboard aura + dGPU dock-relog (see
+  # systemd.user.services.power-tune).
   #
-  # The internal panel (eDP-1) is 2560x1600@240Hz; 240Hz costs meaningful battery,
-  # so drop it to 60Hz whenever the active power profile is power-saver and restore
-  # 240Hz otherwise. Separately the platform power profile (power-profiles-daemon —
-  # the same one Noctalia's "power saver" toggles) is set to power-saver on unplug
-  # and balanced on AC. Refresh follows the *profile*, not AC directly, so a manual
-  # power-saver toggle in Noctalia also drops to 60Hz.
+  # Subscribes to /run/power/state — published by the system reconciler in
+  # modules/nixos/mixins/asus.nix, the single authority on the power source
+  # (ac / powerbank / battery). A power bank reports as ADP0=online to UPower, so
+  # we deliberately do NOT use UPower's OnBattery here; the state file is what
+  # tells a ~50W power bank apart from the ~300W barrel.
   #
-  # Event-driven, no polling: dbus-monitor wakes us on UPower OnBattery (plug/unplug)
-  # and power-profiles-daemon ActiveProfile changes; the authoritative state is then
-  # re-read with busctl. The AC→profile switch is edge-triggered (only on transition)
-  # so a manual "performance" choice on AC isn't clobbered. Monitor mode is set via
-  # `hyprctl eval` (hl.monitor) — the Lua config parser rejects `hyprctl keyword`
-  # ("non-legacy parsers. Use eval.").
+  # This owns only the *session* side (the power profile itself is owned by the
+  # system reconciler):
+  #   - keyboard aura: delegated to aura-repaint (the shared single setter, see
+  #     noctalia.nix), passing the cached wallpaper accent. ac=static,
+  #     powerbank=breathe ("charging" vibe), battery=dark.
+  #   - refresh rate: eDP-1 is 2560x1600@240Hz; drop to 60Hz whenever the active
+  #     PPD profile is power-saver, restore 240Hz otherwise. Refresh follows the
+  #     *profile* (not the source) so a manual Noctalia power-saver toggle also
+  #     drops to 60Hz. Mode is set via `hyprctl eval` (the Lua parser rejects
+  #     `hyprctl keyword`).
+  #   - dGPU dock-relog: only on a transition *to* ac (barrel plugged) — never for
+  #     a power bank. dock-relog self-guards on the session-gpu-mode marker + a 10s
+  #     cancel window and ends in `uwsm stop` (or returns if canceled / already
+  #     dGPU-primary).
+  #
+  # Event-driven, no polling: two monitors feed one loop through a single process
+  # substitution (which keeps the loop in this shell so last_src/last_rate persist)
+  # — inotifywait on /run/power/state for source changes, dbus-monitor on PPD for
+  # profile changes (the refresh follow). The inner `wait` keeps the substitution
+  # alive while both backgrounded monitors run.
   powerTune = pkgs.writeShellApplication {
     name = "power-tune";
     runtimeInputs = with pkgs; [
       hyprland # hyprctl
       power-profiles-daemon # powerprofilesctl
-      asusctl # keyboard LED brightness (aura)
+      inotify-tools # inotifywait
       dbus # dbus-monitor
-      systemd # busctl
       coreutils
     ];
     text = ''
-      onbattery() {
-        case "$(busctl get-property org.freedesktop.UPower /org/freedesktop/UPower \
-                  org.freedesktop.UPower OnBattery 2>/dev/null)" in
-          *true) echo battery ;;
-          *)     echo ac ;;
-        esac
-      }
+      source_now() { cat /run/power/state 2>/dev/null || echo battery; }
 
       profile() {
         powerprofilesctl get 2>/dev/null
@@ -184,32 +191,20 @@ let
       }
 
       reconcile() {
-        ac="$(onbattery)"
-        if [ "$ac" != "$last_ac" ]; then
-          if [ "$ac" = battery ]; then
-            powerprofilesctl set power-saver 2>/dev/null || true
-            # Save the current keyboard LED level, then turn the aura off. The
-            # static colour set by Noctalia's aura template survives — only the
-            # brightness is dropped, so restoring it on AC brings the colour back.
-            cat "$kbd_led" 2>/dev/null > "$kbd_state" || true
-            asusctl leds set off 2>/dev/null || true
-          else
-            powerprofilesctl set balanced 2>/dev/null || true
-            case "$(cat "$kbd_state" 2>/dev/null || echo 3)" in
-              0) asusctl leds set off 2>/dev/null || true ;;
-              1) asusctl leds set low 2>/dev/null || true ;;
-              2) asusctl leds set med 2>/dev/null || true ;;
-              *) asusctl leds set high 2>/dev/null || true ;;
-            esac
-            # Genuine battery→AC transition (not the initial reconcile, where
-            # last_ac is empty): offer the dGPU relog. dock-relog self-guards on
-            # the session-gpu-mode marker + a 10s cancel window and ends in
-            # `uwsm stop` (or just returns if canceled / already dGPU-primary).
-            if [ "$last_ac" = battery ]; then
-              ${dockRelog}/bin/dock-relog || true
-            fi
+        src="$(source_now)"
+        if [ "$src" != "$last_src" ]; then
+          # Repaint the keyboard for the new source via the shared setter (in the
+          # home profile — user services have a limited PATH, so reference it
+          # absolutely), using the cached wallpaper accent (fall back to the seed).
+          colour="$(cat "$HOME/.cache/noctalia/aura-color" 2>/dev/null || echo b15bf5)"
+          ${config.home.profileDirectory}/bin/aura-repaint "$colour" || true
+          # Offer the dGPU relog only when arriving on real AC (barrel) from
+          # elsewhere — never on a power bank. Skips the initial reconcile, where
+          # last_src is empty.
+          if [ "$src" = ac ] && [ -n "$last_src" ]; then
+            ${dockRelog}/bin/dock-relog || true
           fi
-          last_ac="$ac"
+          last_src="$src"
         fi
         case "$(profile)" in
           power-saver) set_refresh 60 ;;
@@ -217,22 +212,20 @@ let
         esac
       }
 
-      kbd_led=/sys/class/leds/asus::kbd_backlight/brightness
-      kbd_state="''${XDG_RUNTIME_DIR:-/tmp}/power-tune-kbd"
-      last_ac=""
+      last_src=""
       last_rate=""
       reconcile
-      # Process substitution (not a pipe) keeps the loop in this shell so last_ac /
-      # last_rate persist across events instead of dying in a pipeline subshell.
       while read -r line; do
         case "$line" in
-          *PropertiesChanged*|*member=Changed*) reconcile ;;
+          *state*|*PropertiesChanged*|*member=Changed*) reconcile ;;
         esac
-      done < <(dbus-monitor --system \
-        "type='signal',interface='org.freedesktop.DBus.Properties',path='/org/freedesktop/UPower'" \
-        "type='signal',member='Changed',path='/org/freedesktop/UPower'" \
-        "type='signal',interface='org.freedesktop.DBus.Properties',path='/org/freedesktop/UPower/PowerProfiles'" \
-        2>/dev/null)
+      done < <( {
+        inotifywait -m -q -e close_write,moved_to,create /run/power 2>/dev/null &
+        dbus-monitor --system \
+          "type='signal',interface='org.freedesktop.DBus.Properties',path='/org/freedesktop/UPower/PowerProfiles'" \
+          2>/dev/null &
+        wait
+      } )
     '';
   };
 
@@ -802,20 +795,22 @@ in
   # can reorder across boots) back to the canonical /dev/dri/cardN nodes that
   # aquamarine enumerates and matches against.
   xdg.configFile."uwsm/env-hyprland".text = ''
-    # Resolve the two GPUs and read AC power ONCE; every per-session GPU/power
-    # decision below (primary render GPU, VA-API decode driver) keys off these so
-    # they can't disagree. ADP0 is the mains adapter; default to AC (1) when it
-    # can't be read. The whole file is re-evaluated on each (re)login, which is how
-    # an AC change takes effect — see the relog machinery in the let block.
+    # Resolve the two GPUs and classify the power source ONCE; every per-session
+    # GPU/power decision below (primary render GPU, VA-API decode driver) keys off
+    # these so they can't disagree. power-source (modules/nixos/mixins/asus.nix)
+    # returns ac / powerbank / battery — a power bank is deliberately NOT `ac`, so
+    # it gets the iGPU/battery path. Default to `ac` when it can't be read. The
+    # whole file is re-evaluated on each (re)login, which is how a power change
+    # takes effect — see the relog machinery in the let block.
     dgpu=$(readlink -f /dev/dri/by-path/pci-0000:02:00.0-card 2>/dev/null)
     igpu=$(readlink -f /dev/dri/by-path/pci-0000:00:02.0-card 2>/dev/null)
-    ac=$(cat /sys/class/power_supply/ADP0/online 2>/dev/null || echo 1)
+    ac=$(/run/current-system/sw/bin/power-source 2>/dev/null || echo ac)
 
     # Primary render/allocator GPU: dGPU on AC (zero-copy gaming), iGPU on battery
     # (so the dGPU can RTD3-sleep). Record the chosen mode for dock-relog's
     # "already dGPU?" guard.
     mode=igpu
-    if [ "$ac" = 1 ] && [ -n "$dgpu" ] && [ -n "$igpu" ]; then
+    if [ "$ac" = ac ] && [ -n "$dgpu" ] && [ -n "$igpu" ]; then
       export AQ_DRM_DEVICES="$dgpu:$igpu"
       mode=dgpu
     fi
@@ -828,7 +823,7 @@ in
     # Replaces the old static LIBVA_DRIVER_NAME=nvidia in modules/nixos/mixins/
     # nvidia.nix; offloaded apps still force nvidia via pkgs.nvidiaOffloadEnv
     # regardless of this default.
-    if [ "$ac" = 1 ]; then
+    if [ "$ac" = ac ]; then
       export LIBVA_DRIVER_NAME=nvidia
     else
       export LIBVA_DRIVER_NAME=iHD
@@ -841,7 +836,7 @@ in
   # (uwsm finalises it into the systemd user manager) — hyprctl needs it.
   systemd.user.services.power-tune = {
     Unit = {
-      Description = "Refresh rate + power profile + aura follow AC/battery";
+      Description = "Refresh rate + keyboard aura + dGPU relog follow the power source";
       After = [ "graphical-session.target" ];
       PartOf = [ "graphical-session.target" ];
     };

@@ -6,9 +6,38 @@ let
   # bump saturation (HSL 272/89/66) to read as the intended purple.
   auraColour = "b15bf5";
 
-  # Toggle the keyboard backlight brightness node directly (0..max). Driven by
-  # the udev rule below so dimming on battery works in the udev run context
-  # without depending on the asusd dbus service being up.
+  # Single source of truth for the power source. Prints exactly one of:
+  #   ac        — the barrel charger (up to ~300W): ADP0 online and no USB-C PD
+  #               source negotiated.
+  #   powerbank — a USB-C / Thunderbolt PD source is online (a ucsi-source-psy-*
+  #               entry). The EC reports a power bank as ADP0 online *too*, so the
+  #               only signal that tells a ~40-50W power bank apart from the barrel
+  #               is a lit UCSI source — the barrel never lights one. A power bank
+  #               can't sustain Performance, so it must be treated as battery
+  #               (low power) even though it charges.
+  #   battery   — nothing plugged.
+  # Both the system reconciler (below) and the user session (hyprland.nix) key
+  # every power decision off this one classifier.
+  powerSource = pkgs.writeShellApplication {
+    name = "power-source";
+    runtimeInputs = [ pkgs.coreutils ];
+    text = ''
+      for f in /sys/class/power_supply/ucsi-source-psy-*/online; do
+        [ -e "$f" ] || continue
+        if [ "$(cat "$f" 2>/dev/null)" = 1 ]; then echo powerbank; exit 0; fi
+      done
+      if [ "$(cat /sys/class/power_supply/ADP0/online 2>/dev/null || echo 1)" = 1 ]; then
+        echo ac
+      else
+        echo battery
+      fi
+    '';
+  };
+
+  # Toggle the keyboard backlight brightness node directly (0..max). Used at boot
+  # by the asus-aura service to seed an AC-appropriate level without depending on
+  # the asusd dbus service being up. (Live AC/battery keyboard following while a
+  # session is up is owned by the user session — see power-tune / aura-repaint.)
   kbdDim = pkgs.writeShellScript "asus-kbd-dim" ''
     led=/sys/class/leds/asus::kbd_backlight
     [ -e "$led/brightness" ] || exit 0
@@ -16,32 +45,48 @@ let
     case "''${1:-}" in
       on)  echo "$max" > "$led/brightness" ;;
       off) echo 0      > "$led/brightness" ;;
-      # ac: read AC state and apply the right level. Used by the asus-aura boot
-      # service to re-assert the dim *after* it sets the Aura effect (which
-      # re-enables the backlight), since at boot there may be no power event to
-      # drive the on/off rules below.
+      # ac: classify the source and apply the right level. Used by the asus-aura
+      # boot service to re-assert the level *after* it sets the Aura effect (which
+      # re-enables the backlight), since at boot there may be no power event yet.
       ac)
-        online=$(cat /sys/class/power_supply/ADP0/online 2>/dev/null || echo 1)
-        if [ "$online" = 1 ]; then echo "$max" > "$led/brightness"; else echo 0 > "$led/brightness"; fi ;;
+        if [ "$(${powerSource}/bin/power-source)" = ac ]; then echo "$max" > "$led/brightness"; else echo 0 > "$led/brightness"; fi ;;
     esac
   '';
 
-  # Follow AC state with the power-profiles-daemon profile: Performance on AC,
-  # Balanced on battery. PPD is the backend the noctalia bar reads/writes
-  # (UPower → net.hadess.PowerProfiles), so this is what makes the shell show
-  # "Performance" plugged in without manual toggling. Reads ADP0
-  # itself so a single udev rule on any power_supply change does the right thing.
+  # System power reconciler — the single automatic owner of the power profile,
+  # and the authority that publishes the current power source to the user session
+  # via /run/power/state. Triggered by udev on any ADP0 or ucsi-source-psy change
+  # (and at boot via the service's wantedBy PPD). PPD is the backend the noctalia
+  # bar reads/writes (UPower → net.hadess.PowerProfiles), so this is what makes the
+  # shell show the right profile without manual toggling.
+  #
+  # The 1.5s settle is essential: plugging a power bank lands ADP0=online *before*
+  # the USB-C PD contract negotiates, so an immediate read would misclassify it as
+  # `ac`. Waiting lets the UCSI source come up (the UCSI udev event also
+  # re-triggers this, so it always converges). Because the canonical state is only
+  # written post-settle, every downstream consumer can trust it without its own
+  # debounce.
+  #
   # `performance` can be unavailable when the daemon reports degradation, so we
   # fall back to balanced rather than fail.
-  powerProfileSync = pkgs.writeShellScript "power-profile-ac" ''
-    ppctl=${config.services.power-profiles-daemon.package}/bin/powerprofilesctl
-    online=$(cat /sys/class/power_supply/ADP0/online 2>/dev/null || echo 1)
-    if [ "$online" = "1" ]; then
-      "$ppctl" set performance 2>/dev/null || "$ppctl" set balanced || true
-    else
-      "$ppctl" set balanced || true
-    fi
-  '';
+  powerReconcile = pkgs.writeShellApplication {
+    name = "power-reconcile";
+    runtimeInputs = [
+      pkgs.coreutils
+      powerSource
+      config.services.power-profiles-daemon.package
+    ];
+    text = ''
+      sleep 1.5
+      src="$(power-source)"
+      printf '%s\n' "$src" > /run/power/state
+      if [ "$src" = ac ]; then
+        powerprofilesctl set performance 2>/dev/null || powerprofilesctl set balanced || true
+      else
+        powerprofilesctl set power-saver 2>/dev/null || powerprofilesctl set balanced || true
+      fi
+    '';
+  };
 
   # game-mode: a no-relog runtime toggle. Flips the asusd platform profile
   # (fans/power) between Performance and Balanced. Per-game CPU governor/niceness
@@ -170,24 +215,27 @@ in
       # duties; PPD owns the platform profile (the kernel asus-wmi interface).
       services.power-profiles-daemon.enable = true;
 
-      # Drive PPD from AC state: Performance on AC, Balanced on battery. Bound to
-      # PPD itself (wantedBy power-profiles-daemon), so it runs right after PPD
-      # comes up at boot, plus on every AC plug/unplug (udev rule below).
+      # Publish /run/power/state for the user session to subscribe to.
+      systemd.tmpfiles.rules = [ "d /run/power 0755 root root -" ];
+
+      # Drive PPD + publish the power source. Bound to PPD itself (wantedBy
+      # power-profiles-daemon), so it runs right after PPD comes up at boot, plus
+      # on every ADP0 / ucsi-source-psy change (udev rules below).
       #
       # NOTE: do NOT use `wantedBy = multi-user.target` here. nixpkgs orders PPD
       # `After=multi-user.target` (it belongs to graphical.target), so pinning a
       # unit that is `After=power-profiles-daemon.service` to multi-user.target
-      # closes an ordering loop (multi-user → power-profile-ac → PPD →
+      # closes an ordering loop (multi-user → power-reconcile → PPD →
       # multi-user). systemd can't break it and drops the whole transaction,
       # failing sysinit/basic/NetworkManager at switch/boot.
-      systemd.services.power-profile-ac = {
-        description = "Power profile follows AC (Performance on AC, Balanced on battery)";
+      systemd.services.power-reconcile = {
+        description = "Power profile + /run/power/state follow the power source (AC / power bank / battery)";
         after = [ "power-profiles-daemon.service" ];
         wants = [ "power-profiles-daemon.service" ];
         wantedBy = [ "power-profiles-daemon.service" ];
         serviceConfig = {
           Type = "oneshot";
-          ExecStart = powerProfileSync;
+          ExecStart = "${powerReconcile}/bin/power-reconcile";
         };
       };
 
@@ -225,12 +273,20 @@ in
         '';
       };
 
-      # Dim the keyboard LEDs on battery, restore to full on AC. The static
-      # Mauve effect set by asusd is preserved across brightness changes.
+      # power-source is the shared classifier; expose it on PATH so the user
+      # session (env-hyprland, power-tune) can call it via /run/current-system.
+      environment.systemPackages = [ powerSource ];
+
+      # Re-run the reconciler on any power-source change. We watch BOTH the ACPI
+      # mains adapter (ADP0 — barrel) and the USB-C PD sources (ucsi-source-psy-*
+      # — a power bank), since a power bank lands ADP0=online before its UCSI
+      # source negotiates; the second (UCSI) event is what lets the reconciler's
+      # post-settle read see the power bank for what it is. The keyboard LEDs are
+      # no longer driven from here — the user session owns live AC/battery
+      # following (power-tune / aura-repaint) so there is a single keyboard owner.
       services.udev.extraRules = ''
-        SUBSYSTEM=="power_supply", KERNEL=="ADP0", ATTR{online}=="0", RUN+="${kbdDim} off"
-        SUBSYSTEM=="power_supply", KERNEL=="ADP0", ATTR{online}=="1", RUN+="${kbdDim} on"
-        SUBSYSTEM=="power_supply", KERNEL=="ADP0", RUN+="${config.systemd.package}/bin/systemctl --no-block restart power-profile-ac.service"
+        SUBSYSTEM=="power_supply", KERNEL=="ADP0", RUN+="${config.systemd.package}/bin/systemctl --no-block restart power-reconcile.service"
+        SUBSYSTEM=="power_supply", KERNEL=="ucsi-source-psy-*", RUN+="${config.systemd.package}/bin/systemctl --no-block restart power-reconcile.service"
       '';
     })
 

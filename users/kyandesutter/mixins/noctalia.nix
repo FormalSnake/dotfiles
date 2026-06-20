@@ -1,16 +1,23 @@
 { inputs, pkgs, ... }:
 let
-  # Repaint the Aura keyboard to the new accent, then re-assert the AC-appropriate
-  # backlight level. The second step is the fix for the LEDs lighting up after a
-  # session relog on battery: setting an Aura *effect* re-enables the backlight at
-  # its last level, and the battery-dim in modules/nixos/mixins/asus.nix is
-  # edge-triggered on power plug/unplug events only — it never fires on a relog —
-  # so without this the keyboard glows on battery until you unplug/replug. noctalia
-  # runs this post_hook on every palette change (session start, wallpaper pick,
-  # light/dark flip), so all of those now respect AC state. Runs inside noctalia's
-  # systemd *user* service (limited PATH), so tools are pinned by absolute path;
-  # brightness is driven through asusd (asusctl leds) since the user can't write the
-  # root-owned /sys LED node directly. high == max (3) mirrors the udev "on" rule.
+  # The single keyboard-aura setter: paint the Aura keyboard to a given accent and
+  # apply the effect/brightness appropriate to the current power source. Shared by
+  # two triggers — noctalia runs it as a post_hook on every palette change (session
+  # start, wallpaper pick, light/dark flip, passing the new accent), and power-tune
+  # (hyprland.nix) calls it on every power-source change (passing the cached accent).
+  # Having one setter means the two triggers can't disagree.
+  #
+  # By power source (see modules/nixos/mixins/asus.nix `power-source`):
+  #   ac        — static themed colour, full brightness.
+  #   powerbank — slow breathe of the themed accent (a "charging" vibe) while still
+  #               being treated as battery for power; full brightness.
+  #   battery   — themed colour staged but brightness dropped to dark (so a later
+  #               AC/relog brings the colour back). This is also the fix for the
+  #               LEDs lighting up after a relog on battery: setting an Aura effect
+  #               re-enables the backlight, so we re-assert the dark level here.
+  # Runs inside noctalia's systemd *user* service (limited PATH), so power-source is
+  # pinned by absolute path; brightness is driven through asusd (asusctl leds) since
+  # the user can't write the root-owned /sys LED node directly.
   auraRepaint = pkgs.writeShellApplication {
     name = "aura-repaint";
     runtimeInputs = [
@@ -19,13 +26,20 @@ let
     ];
     text = ''
       colour="''${1:?usage: aura-repaint <hex>}"
-      asusctl aura effect static -c "$colour" || true
-      online=$(cat /sys/class/power_supply/ADP0/online 2>/dev/null || echo 1)
-      if [ "$online" = 1 ]; then
-        asusctl leds set high || true
-      else
-        asusctl leds set off || true
-      fi
+      case "$(/run/current-system/sw/bin/power-source 2>/dev/null || echo ac)" in
+        ac)
+          asusctl aura effect static -c "$colour" || true
+          asusctl leds set high || true
+          ;;
+        powerbank)
+          asusctl aura effect breathe --colour "$colour" --colour2 000000 --speed med || true
+          asusctl leds set high || true
+          ;;
+        *)
+          asusctl aura effect static -c "$colour" || true
+          asusctl leds set off || true
+          ;;
+      esac
     '';
   };
 in
@@ -35,6 +49,10 @@ in
   # `noctalia` shell + runs it as a user systemd service bound to the Wayland
   # systemd target (auto-starts once Hyprland/uwsm reaches that target).
   imports = [ inputs.noctalia.homeModules.default ];
+
+  # Expose aura-repaint on PATH so power-tune (hyprland.nix) can call it as the
+  # shared keyboard-aura setter (the noctalia post_hook below uses it by store path).
+  home.packages = [ auraRepaint ];
 
   programs.noctalia = {
     enable = true;
