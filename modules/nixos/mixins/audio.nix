@@ -2,8 +2,6 @@
   # PipeWire audio stack (replaces PulseAudio).
   security.rtkit.enable = true;
 
-  services.pulseaudio.enable = false;
-
   services.pipewire = {
     enable = true;
     alsa.enable = true;

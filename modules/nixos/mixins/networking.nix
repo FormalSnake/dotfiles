@@ -9,8 +9,9 @@
 
   networking.networkmanager = {
     enable = true;
-    # The MT7925 module (imported in systems/g815) recommends iwd as the wifi
-    # backend and disables powersave; it sets wifi.backend itself.
+    # The g815's Wi-Fi is an Intel BE200 (iwlwifi/iwlmld). Its latency/powersave
+    # tuning (power_save=0, power_scheme=1, NetworkManager wifi.powersave=false)
+    # is host-specific and handled in systems/g815/default.nix.
   };
 
   # Hostname is set per-host in systems/g815/default.nix.

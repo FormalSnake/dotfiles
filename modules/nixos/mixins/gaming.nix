@@ -2,6 +2,12 @@
 let
   cfg = config.kyan.gaming;
 
+  # Catppuccin Mocha "Mauve" — the accent painted on the Aura keyboard.
+  # Deepened from the on-screen value (cba6f7) to compensate for the LEDs: the
+  # pastel mauve renders too white on the keyboard, so we drop lightness and
+  # bump saturation (HSL 272/89/66) to read as the intended purple.
+  auraColour = "b15bf5";
+
   # — Millennium (patched build) —
   # Millennium's `bun-deps` fixed-output derivation pins a hash that our `bun`
   # doesn't reproduce (bun install isn't byte-reproducible across bun versions),
@@ -18,7 +24,7 @@ let
     chmod -R +w "$out"
     ${pkgs.gnused}/bin/sed -i \
       's|sha256-XMYpHMrcmLNQYyLkc3DngjsZ4DdyPr9on0v5lcDrRiY=|${millenniumBunDepsHash}|' \
-      "$out/millennium.nix"
+      "$out/millennium.nix" || { echo 'millennium hash patch: pattern not found — update millenniumBunDepsHash'; exit 1; }
   '';
   # Build the millennium lib against our nixpkgs (so our bun → our patched hash);
   # its own flake inputs supply the luajit/millennium sources.
@@ -238,6 +244,127 @@ let
         --add-flags "--disable-features=WebRtcAllowInputVolumeAdjustment"
     '';
   };
+
+  # game-mode: a no-relog runtime toggle. Flips the asusd platform profile
+  # (fans/power) between Performance and Balanced. Per-game CPU governor/niceness
+  # is handled separately by `gamemode` when a title launches. No GPU mode switch
+  # (that would need a relog) — games already run on the dGPU via
+  # `gamescope` / `nvidia-offload`.
+  game-mode = pkgs.writeShellApplication {
+    name = "game-mode";
+    runtimeInputs = [
+      pkgs.asusctl
+      pkgs.libnotify
+    ];
+    text = ''
+      action="''${1:-toggle}"
+
+      current() { asusctl profile get 2>/dev/null | grep -oiE 'Performance|Balanced|Quiet' | head -n1; }
+
+      on() {
+        asusctl profile set Performance
+        notify-send -a "game-mode" "Game mode ON" "asusd profile → Performance" || true
+        echo "Game mode ON (Performance)"
+      }
+      off() {
+        asusctl profile set Balanced
+        notify-send -a "game-mode" "Game mode OFF" "asusd profile → Balanced" || true
+        echo "Game mode OFF (Balanced)"
+      }
+
+      case "$action" in
+        on)     on ;;
+        off)    off ;;
+        status) echo "Current profile: $(current)" ;;
+        toggle)
+          if [ "$(current)" = "Performance" ]; then off; else on; fi ;;
+        *) echo "usage: game-mode [on|off|toggle|status]" >&2; exit 1 ;;
+      esac
+    '';
+  };
+
+  # night-mode: a quiet overnight-download mode. Sets the asusd platform profile
+  # to Quiet (gentlest fan curve) and PPD to power-saver (caps CPU boost → less
+  # heat → fans stay down), turns the displays and Aura keyboard LEDs off, and —
+  # crucially — holds a
+  # Wayland idle-inhibit lock for the duration so noctalia's idle service never
+  # fires its action. We configure noctalia with screen-off@11m (see noctalia.nix)
+  # which `respectInhibitors`; the inhibitor suppresses it so the session stays
+  # fully awake for an overnight download. We blank the screens ourselves (dpms
+  # off) since the inhibitor also suppresses noctalia's own auto screen-off —
+  # they wake on any input.
+  night-mode = pkgs.writeShellApplication {
+    name = "night-mode";
+    runtimeInputs = [
+      pkgs.asusctl
+      config.services.power-profiles-daemon.package # powerprofilesctl
+      pkgs.wlinhibit
+      pkgs.hyprland # hyprctl
+      pkgs.libnotify
+      pkgs.coreutils
+    ];
+    text = ''
+      action="''${1:-toggle}"
+      pidfile="''${XDG_RUNTIME_DIR:-/tmp}/night-mode-inhibit.pid"
+      ppctl=${config.services.power-profiles-daemon.package}/bin/powerprofilesctl
+
+      # ON iff a recorded wlinhibit process is still alive.
+      is_on() { [ -f "$pidfile" ] && kill -0 "$(cat "$pidfile" 2>/dev/null)" 2>/dev/null; }
+
+      on() {
+        asusctl profile set Quiet || true
+        "$ppctl" set power-saver || true
+        # Blank the Aura keyboard LEDs (static black) so they aren't glowing
+        # overnight. `off` repaints them the current wallpaper-derived accent.
+        asusctl aura effect static -c 000000 || true
+        if ! is_on; then
+          # Foreground tool that holds the idle inhibitor until killed; background
+          # it and remember the PID so `off` can release it.
+          wlinhibit >/dev/null 2>&1 &
+          echo "$!" > "$pidfile"
+        fi
+        notify-send -a "night-mode" "Night mode ON" \
+          "Quiet fans · idle suspend blocked · screens + RGB off" || true
+        hyprctl dispatch 'hl.dsp.dpms({ action = "disable" })' || true
+        echo "Night mode ON"
+      }
+
+      off() {
+        if is_on; then kill "$(cat "$pidfile")" 2>/dev/null || true; fi
+        rm -f "$pidfile"
+        hyprctl dispatch 'hl.dsp.dpms({ action = "enable" })' || true
+        # Restore the profile that matches the CURRENT power source, mirroring the
+        # system power reconciler (modules/nixos/mixins/power.nix): AC →
+        # Performance/performance, battery or power bank → Balanced/power-saver.
+        # night-mode runs as the user and can't trigger the root-owned
+        # power-reconcile.service, so we replicate its mapping here. The `|| echo ac`
+        # keeps the old always-Performance behaviour if the classifier is absent.
+        if [ "$(/run/current-system/sw/bin/power-source 2>/dev/null || echo ac)" = ac ]; then
+          asusctl profile set Performance || true
+          "$ppctl" set performance 2>/dev/null || "$ppctl" set balanced || true
+        else
+          asusctl profile set Balanced || true
+          "$ppctl" set power-saver 2>/dev/null || "$ppctl" set balanced || true
+        fi
+        # Repaint the Aura keyboard. Restore the *current* wallpaper-derived accent
+        # that noctalia's `aura` template caches to ~/.cache/noctalia/aura-color
+        # (see users/kyandesutter/mixins/noctalia.nix), falling back to the
+        # Catppuccin Mauve seed if noctalia hasn't generated a palette yet.
+        aura_colour="$(cat "$HOME/.cache/noctalia/aura-color" 2>/dev/null || echo ${auraColour})"
+        asusctl aura effect static -c "$aura_colour" || true
+        notify-send -a "night-mode" "Night mode OFF" "Restored power profile for the current source" || true
+        echo "Night mode OFF"
+      }
+
+      case "$action" in
+        on)     on ;;
+        off)    off ;;
+        status) if is_on; then echo "Night mode ON"; else echo "Night mode OFF"; fi ;;
+        toggle) if is_on; then off; else on; fi ;;
+        *) echo "usage: night-mode [on|off|toggle|status]" >&2; exit 1 ;;
+      esac
+    '';
+  };
 in
 {
   options.kyan.gaming.enable = lib.mkEnableOption "gaming stack (Steam, gamescope, gamemode, launchers)";
@@ -310,6 +437,10 @@ in
     };
 
     environment.systemPackages = with pkgs; [
+      # game-mode / night-mode need asusctl/asusd; the g815 host enables kyan.asus too.
+      game-mode
+      night-mode
+
       # Idle-inhibit helpers (also driven by the gamemode hooks / user service
       # above; exposed here for manual control and testing).
       gameInhibit

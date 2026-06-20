@@ -11,6 +11,9 @@
     # hits a path that no longer exists and exits 1, aborting the build under
     # set -e. Pre-create the (empty) dir so that obsolete find is a harmless
     # no-op. Remove once nixpkgs drops/guards the koffi cleanup upstream.
+    # Track nixpkgs' pi-coding-agent package (pkgs/by-name/pi/pi-coding-agent)
+    # and drop this overlay once its postInstall no longer references the koffi
+    # cleanup.
     (final: prev: {
       pi-coding-agent = prev.pi-coding-agent.overrideAttrs (old: {
         postInstall = builtins.replaceStrings

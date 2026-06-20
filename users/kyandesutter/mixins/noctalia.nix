@@ -1,4 +1,4 @@
-{ inputs, pkgs, ... }:
+{ config, inputs, pkgs, ... }:
 let
   # The single keyboard-aura setter: paint the Aura keyboard to a given accent and
   # apply the effect/brightness appropriate to the current power source. Shared by
@@ -213,7 +213,7 @@ in
               enabled = true;
               input_path = "~/.config/noctalia/templates/spicetify.ini.tmpl";
               output_path = "~/.config/spicetify/Themes/Comfy/color.ini";
-              post_hook = "SPICETIFY_CONFIG=/home/kyandesutter/.config/spicetify ${pkgs.spicetify-cli}/bin/spicetify apply --no-restart || true";
+              post_hook = "SPICETIFY_CONFIG=${config.home.homeDirectory}/.config/spicetify ${pkgs.spicetify-cli}/bin/spicetify apply --no-restart || true";
             };
 
             # Hyprland borders + group/groupbar colours. Noctalia doesn't touch the
@@ -234,6 +234,17 @@ in
               output_path = "~/.cache/noctalia/hypr-border";
               post_hook = ''hyprctl eval 'hl.config({ general = { col = { active_border = "rgb({{ colors.primary.default.hex_stripped }})", inactive_border = "rgb({{ colors.surface.default.hex_stripped }})" } }, group = { col = { border_active = "rgb({{ colors.secondary.default.hex_stripped }})", border_inactive = "rgb({{ colors.surface.default.hex_stripped }})", border_locked_active = "rgb({{ colors.error.default.hex_stripped }})", border_locked_inactive = "rgb({{ colors.surface.default.hex_stripped }})" }, groupbar = { col = { active = "rgb({{ colors.secondary.default.hex_stripped }})", inactive = "rgb({{ colors.surface.default.hex_stripped }})", locked_active = "rgb({{ colors.error.default.hex_stripped }})", locked_inactive = "rgb({{ colors.surface.default.hex_stripped }})" } } } })' '';
             };
+
+            # Alt-Tab switcher (Quickshell). Emits a tiny JSON file of the live
+            # palette that the alttab QML watches (Quickshell FileView) and parses
+            # at runtime — see mixins/alttab.nix. No post_hook: the QML reloads on
+            # file change. When this file is missing/unparseable (e.g. before the
+            # first palette render) the QML falls back to baked catppuccin values.
+            alttab = {
+              enabled = true;
+              input_path = "~/.config/noctalia/templates/alttab.json.tmpl";
+              output_path = "~/.cache/noctalia/alttab-colors.json";
+            };
           };
         };
       };
@@ -246,8 +257,8 @@ in
       wallpaper = {
         enabled = true;
         fill_mode = "crop";
-        directory_dark = "/home/kyandesutter/Pictures/Wallpapers/dark";
-        directory_light = "/home/kyandesutter/Pictures/Wallpapers/light";
+        directory_dark = "${config.home.homeDirectory}/Pictures/Wallpapers/dark";
+        directory_light = "${config.home.homeDirectory}/Pictures/Wallpapers/light";
         automation.enabled = false;
       };
 
@@ -283,5 +294,6 @@ in
     "noctalia/templates/equibop.css.tmpl".source = ../noctalia-templates/equibop.css.tmpl;
     "noctalia/templates/spicetify.ini.tmpl".source = ../noctalia-templates/spicetify.ini.tmpl;
     "noctalia/templates/hypr-border.tmpl".source = ../noctalia-templates/hypr-border.tmpl;
+    "noctalia/templates/alttab.json.tmpl".source = ../noctalia-templates/alttab.json.tmpl;
   };
 }

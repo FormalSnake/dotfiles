@@ -16,8 +16,6 @@
     # a driver that never loads, so it was removed; see the Wi-Fi block below.
   ];
 
-  nixpkgs.hostPlatform = "x86_64-linux";
-
   networking.hostName = "g815";
 
   # Intel Core Ultra 9 275HX (Arrow Lake-HX).
@@ -36,7 +34,26 @@
 
   # Set the Wi-Fi regulatory domain (was 00/world, which caps TX power and
   # available channels). Spain (Canary Islands).
-  boot.kernelParams = [ "cfg80211.ieee80211_regdom=ES" ];
+  boot.kernelParams = [
+    "cfg80211.ieee80211_regdom=ES"
+
+    # Internal eDP-1 panel (i915) goes "lit but black" after a long idle on
+    # this hybrid laptop. The BOE NE180QDM panel is scanned out by the iGPU
+    # while its backlight is driven by nvidia_wmi_ec_backlight (stays at 100% →
+    # "lit"). The actual failure is at modeset: the kernel logs
+    #   i915 0000:00:02.0: [drm] PHY A failed to request refclk
+    # on every attempt to bring the panel back — the eDP PHY can't get its
+    # reference clock, so no image, even though the connector reports
+    # connected/enabled/dpms On. No compositor (hyprctl) command recovers it;
+    # only a full GPU re-init (reboot / suspend-resume) does. The cause is i915
+    # display power management gating the PHY refclk over idle:
+    #   • enable_dc=0  — keep the display power wells up (don't enter DC5/DC6),
+    #                    which is what gates the refclk; primary fix.
+    #   • enable_psr=0 — disable Panel Self Refresh (same failure family).
+    # Cost is a little idle power on the iGPU; no other behavioural change.
+    "i915.enable_dc=0"
+    "i915.enable_psr=0"
+  ];
 
   # Belt-and-suspenders: keep NetworkManager from re-enabling Wi-Fi powersave.
   networking.networkmanager.wifi.powersave = false;

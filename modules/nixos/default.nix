@@ -22,8 +22,8 @@
       ./mixins/hyprland.nix
       ./mixins/gaming.nix
       ./mixins/asus.nix
+      ./mixins/power.nix
       ./mixins/sober.nix
-      ./mixins/tailscale.nix
       # Temporarily disabled: the NordVPN .deb (repo.nordvpn.com) is blocked by
       # this network's DNS content filter (Cisco Umbrella block page), so the
       # fetch fails at eval. Re-enable on an unfiltered network. See nordvpn.nix.

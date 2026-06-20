@@ -1,5 +1,13 @@
 { config, lib, ... }:
 {
+  # PRIME offload needs the iGPU bus ID; it's set per-host (systems/g815).
+  assertions = [
+    {
+      assertion = config.hardware.nvidia.prime.intelBusId != "";
+      message = "nvidia.nix: PRIME offload requires hardware.nvidia.prime.intelBusId set in the host config";
+    }
+  ];
+
   # Builds the NVIDIA kernel module against boot.kernelPackages (CachyOS).
   services.xserver.videoDrivers = [ "nvidia" ];
 

@@ -1,10 +1,10 @@
-{ inputs, ... }:
+{ config, inputs, ... }:
 {
   imports = [ inputs.agenix.darwinModules.default ];
 
   age = {
     # Master identity used to decrypt at activation time.
-    identityPaths = [ "/Users/kyandesutter/.config/age/keys.txt" ];
+    identityPaths = [ "${config.users.users.kyandesutter.home}/.config/age/keys.txt" ];
 
     secrets =
       let

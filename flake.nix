@@ -38,6 +38,8 @@
 
     mac-app-util.url = "github:hraban/mac-app-util";
 
+    # No `inputs.nixpkgs.follows`: nix-homebrew is a pure nix-darwin module with
+    # no nixpkgs input of its own to override, so pinning it would be a no-op.
     nix-homebrew = {
       url = "github:zhaofengli/nix-homebrew";
     };
@@ -77,14 +79,19 @@
 
     # NordVPN — laptop VPN exit only (the device mesh is Tailscale). No
     # first-party nixpkgs module exists; this community flake provides the
-    # package + a NixOS module (services.nordvpn).
+    # package + a NixOS module (services.nordvpn). No `inputs.nixpkgs.follows`:
+    # its package is built (with a vendored .deb FOD) against its own pinned
+    # nixpkgs, and it's dormant — leave it self-contained rather than risk a
+    # mismatch. Revisit if it's ever activated.
     nordvpn-flake.url = "github:connerohnesorge/nordvpn-flake";
 
     # CachyOS kernel + scx schedulers. nyxpkgs-unstable tracks nixpkgs-unstable.
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
 
     # Declarative Flatpak management (used for Sober, the Roblox client, which
-    # is only distributed as a Flatpak — not packaged in nixpkgs).
+    # is only distributed as a Flatpak — not packaged in nixpkgs). No
+    # `inputs.nixpkgs.follows`: it's a pure NixOS/home-manager module with no
+    # nixpkgs input of its own to override.
     nix-flatpak.url = "github:gmodena/nix-flatpak";
 
     # noctalia V5 desktop shell — native C++/OpenGL ES, official flake (home-

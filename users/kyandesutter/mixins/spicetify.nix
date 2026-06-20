@@ -1,8 +1,9 @@
-{ inputs, pkgs, lib, ... }:
+{ inputs, pkgs, lib, config, ... }:
 let
   # Absolute (no ~) — spicetify config and our chmod both need the real path, and
   # ~ does not expand inside config-xpui.ini values.
-  spotifyPath = "/home/kyandesutter/.local/share/flatpak/app/com.spotify.Client/x86_64/stable/active/files/extra/share/spotify";
+  # host is x86_64-only
+  spotifyPath = "${config.home.homeDirectory}/.local/share/flatpak/app/com.spotify.Client/x86_64/stable/active/files/extra/share/spotify";
 in
 {
   # Spotify is installed as a **user** Flatpak (not spicetify-nix, not pkgs.spotify)

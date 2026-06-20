@@ -5,7 +5,6 @@
   # vendor completions resolve.
   programs.fish.enable = true;
 
-  security.sudo.enable = true;
   security.sudo.wheelNeedsPassword = true;
 
   users.users.kyandesutter = {

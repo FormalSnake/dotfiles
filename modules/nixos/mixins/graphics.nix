@@ -4,6 +4,6 @@
     enable32Bit = true; # required for Steam / 32-bit Proton titles
   };
 
-  # Firmware for the MT7925 Wi-Fi/BT and other devices.
+  # Firmware for Intel BE200 (iwlwifi/iwlmld), NVIDIA Blackwell, and other devices.
   hardware.enableRedistributableFirmware = true;
 }

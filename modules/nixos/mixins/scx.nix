@@ -1,3 +1,4 @@
+{ lib, ... }:
 {
   # sched-ext userspace scheduler. scx_bpfland handles hybrid P/E-core CPUs
   # (the 275HX has 8 P + 16 E cores) well and is a big part of the "CachyOS feel".
@@ -5,6 +6,6 @@
   # the newest schedulers instead, set `package` to a git build on the hardware.
   services.scx = {
     enable = true;
-    scheduler = "scx_bpfland";
+    scheduler = lib.mkDefault "scx_bpfland";
   };
 }

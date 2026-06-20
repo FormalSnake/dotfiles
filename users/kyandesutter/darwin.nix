@@ -8,7 +8,6 @@
     # ./mixins/aerospace.nix
     ./mixins/karabiner.nix
     ./mixins/hammerspoon.nix
-    # ./mixins/jankyborders.nix
     ./mixins/linearmouse.nix
     ./mixins/lynk-browser.nix
   ];

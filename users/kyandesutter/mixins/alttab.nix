@@ -1,4 +1,24 @@
-{ pkgs, ... }:
+{ config, lib, pkgs, inputs, ... }:
+let
+  # Build-time FALLBACK palette. The alttab colours primarily follow noctalia's
+  # live matugen (wallpaper-derived) palette via a JSON file the QML watches at
+  # runtime (see below + mixins/noctalia.nix's `alttab` user template). When that
+  # file is missing or unparseable (e.g. before noctalia has rendered its first
+  # palette, or a malformed write) the QML falls back to these catppuccin values,
+  # baked here from the globally-active flavor — same source jankyborders uses.
+  # palette.json is `<flavor>.colors.<name>.hex` ("#rrggbb").
+  palette =
+    (lib.importJSON
+      "${inputs.catppuccin.packages.${pkgs.stdenv.hostPlatform.system}.palette}/palette.json")
+    .${config.catppuccin.flavor}.colors;
+
+  # Fallbacks mirror the previously-hardcoded mocha literals 1:1:
+  #   base #1e1e2e, mauve #cba6f7, surface2 #585b70, text #cdd6f4.
+  fbBase = palette.base.hex; # panel background
+  fbAccent = palette.mauve.hex; # panel border + selected-cell border
+  fbSelected = palette.surface2.hex; # selected-cell fill
+  fbText = palette.text.hex; # title text
+in
 {
   # — Alt-Tab window switcher (Quickshell) —
   #
@@ -48,6 +68,44 @@
       // tap); the commit then happens as soon as the list arrives.
       property bool pendingCommit: false
 
+      // — Dynamic theming —
+      // Colours follow noctalia's live matugen palette, written by noctalia into
+      // ~/.cache/noctalia/alttab-colors.json (the `alttab` user template — see
+      // mixins/noctalia.nix). The FileView below watches that file and parses it
+      // into these properties. They are INITIALISED to the catppuccin fallback
+      // (baked at build time from config.catppuccin.flavor, interpolated by Nix),
+      // so the switcher is themed even before noctalia renders its first palette
+      // or if the file is ever missing/malformed.
+      property string cBase: "${fbBase}"
+      property string cAccent: "${fbAccent}"
+      property string cSelected: "${fbSelected}"
+      property string cText: "${fbText}"
+
+      // Parse the runtime palette JSON, overriding each colour only when present
+      // and truthy. Any failure (file absent, unreadable, invalid JSON, missing
+      // keys) leaves the catppuccin fallbacks untouched.
+      function applyColors() {
+        var raw = colorsFile.text();
+        if (!raw || raw.length === 0) return;
+        var c;
+        try { c = JSON.parse(raw); } catch (e) { return; }
+        if (!c) return;
+        if (c.base) root.cBase = c.base;
+        if (c.accent) root.cAccent = c.accent;
+        if (c.selected) root.cSelected = c.selected;
+        if (c.text) root.cText = c.text;
+      }
+
+      FileView {
+        id: colorsFile
+        path: "${config.home.homeDirectory}/.cache/noctalia/alttab-colors.json"
+        watchChanges: true
+        onFileChanged: reload()
+        onLoaded: root.applyColors()
+        // onLoadFailed (missing file etc.) intentionally unhandled: the baked
+        // catppuccin fallbacks already in cBase/cAccent/cSelected/cText stand.
+      }
+
       // Resolve a Hyprland window address to its Wayland Toplevel handle, which
       // ScreencopyView uses as a capture source. `hyprctl clients` reports
       // addresses WITH a 0x prefix; Hyprland.toplevels reports them WITHOUT, so
@@ -73,7 +131,7 @@
       // Hyprland.toplevels stays empty until refreshToplevels() is called, and
       // it is the only source of the Wayland handles ScreencopyView needs. Prime
       // it at startup (and again per-open) so the window→handle map is populated.
-      Component.onCompleted: Hyprland.refreshToplevels()
+      Component.onCompleted: { Hyprland.refreshToplevels(); root.applyColors(); }
 
       function begin(dir) {
         if (root.open) { root.step(dir); return; }
@@ -249,8 +307,8 @@
               anchors.centerIn: parent
               visible: root.entries.length > 0 // hidden during the brief load
               radius: 10
-              color: "#1e1e2e"          // base
-              border.color: "#cba6f7"   // mauve
+              color: root.cBase         // base (matugen surface → catppuccin base)
+              border.color: root.cAccent // accent (matugen primary → catppuccin mauve)
               border.width: 2
               implicitWidth: Math.min(parent.width - 80, col.implicitWidth + 32)
               implicitHeight: col.implicitHeight + 32
@@ -285,8 +343,8 @@
                       Rectangle {
                         anchors.fill: parent
                         radius: 8
-                        color: cell.index === root.index ? "#585b70" : "#00000000" // surface2 / clear
-                        border.color: cell.index === root.index ? "#cba6f7" : "#00000000"
+                        color: cell.index === root.index ? root.cSelected : "#00000000" // selected fill / clear
+                        border.color: cell.index === root.index ? root.cAccent : "#00000000"
                         border.width: 2
                       }
 
@@ -321,7 +379,7 @@
                   width: previews.width
                   horizontalAlignment: Text.AlignHCenter
                   elide: Text.ElideRight
-                  color: "#cdd6f4"          // text
+                  color: root.cText         // text
                   font.family: "Geist"
                   font.pixelSize: 14
                   text: (root.entries.length > 0 && root.index < root.entries.length)

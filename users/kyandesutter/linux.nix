@@ -4,6 +4,9 @@
   # self.homeModules.kyandesutter-linux.
   imports = [
     ./mixins/hyprland.nix
+    ./mixins/qt.nix
+    ./mixins/desktop-apps.nix
+    ./mixins/autostart.nix
     ./mixins/easyeffects.nix
     ./mixins/alttab.nix
     ./mixins/noctalia.nix

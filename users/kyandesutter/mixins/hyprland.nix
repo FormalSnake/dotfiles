@@ -1,4 +1,4 @@
-{ pkgs, lib, config, ... }:
+{ pkgs, config, ... }:
 let
   # Cursor-aware brightness control. Adjusts whichever monitor the cursor is
   # currently over: the internal panel via the kernel backlight (brightnessctl),
@@ -480,39 +480,10 @@ in
     -- is needed for GUI auth prompts.
     hl.on("hyprland.start", function()
       hl.exec_cmd("systemctl --user start hyprpolkitagent")
-      -- Clipboard: noctalia's native ClipboardService records history by polling
-      -- the Wayland selection itself (browse it with SUPER+ñ). wl-clip-persist
-      -- takes ownership of the regular clipboard so its contents survive the
-      -- source app closing (Wayland otherwise drops a selection when the app that
-      -- offered it exits), giving noctalia's poller a chance to capture it.
-      hl.exec_cmd("wl-clip-persist --clipboard regular")
-      -- Always-running apps on this host: launch minimized to the tray so they
-      -- don't grab focus at login. Window rules send steam to workspace 9 (gaming,
-      -- HDMI-A-1) and equibop to workspace 4 (communication, eDP-1).
-      hl.exec_cmd("steam -silent")
-      hl.exec_cmd("equibop --start-minimized")
-      -- 1Password to the tray (--silent): keeps the desktop app running so the
-      -- integrated `op` CLI and browser unlock work from login without focus.
-      hl.exec_cmd("1password --silent")
-      -- The rest of the always-open set on this host: the browser, the two
-      -- messaging clients, and the music player. None take a "start minimized"
-      -- flag like steam/equibop, but each has a window_rule below pinning it to
-      -- its named workspace (helium→1 web, beeper & bluebubbles→4 communication,
-      -- spotify→8 media), so they open straight onto their own workspace instead
-      -- of piling onto whatever is focused at login.
-      --
-      -- Helium (Chromium) picks its notification backend ONCE at startup: it probes
-      -- the org.freedesktop.Notifications D-Bus name and, if nothing owns it yet,
-      -- falls back to Chrome's built-in message-center for the whole session and
-      -- never re-checks. noctalia (our notification daemon) is a systemd user
-      -- service coming up in parallel with this autostart, so launching helium
-      -- bare races it — intermittently you get built-in Chrome notifications. Wait
-      -- (≤10s) for noctalia to claim the name before exec'ing helium so it always
-      -- latches onto the daemon. busctl is from systemd → always on PATH here.
-      hl.exec_cmd("sh -c 'for i in $(seq 50); do busctl --user call org.freedesktop.DBus /org/freedesktop/DBus org.freedesktop.DBus NameHasOwner s org.freedesktop.Notifications 2>/dev/null | grep -q true && break; sleep 0.2; done; exec helium'")
-      hl.exec_cmd("beeper")
-      hl.exec_cmd("bluebubbles")
-      hl.exec_cmd("spotify")
+      -- Generic GUI login apps (steam, equibop, 1password, helium, beeper,
+      -- bluebubbles, spotify, wl-clip-persist) now live as systemd user services
+      -- bound to graphical-session.target in users/kyandesutter/mixins/autostart.nix.
+      -- Window rules below still pin each one to its named workspace.
       -- Alt-Tab window switcher (standalone Quickshell instance; config in
       -- users/kyandesutter/mixins/alttab.nix). Started here rather than via a
       -- systemd unit so it inherits Hyprland's Wayland env. It registers the
@@ -872,40 +843,19 @@ in
     export QT_QPA_PLATFORMTHEME="qt6ct"
   '';
 
-  # qt6ct / qt5ct config: select the Fusion style and Noctalia's generated colour
-  # scheme. The colors/noctalia.conf files are written at runtime by Noctalia's
-  # `qt` template; these .conf files just tell qt{5,6}ct to use them. Managed
-  # declaratively (read-only) — don't hand-edit via the qt6ct GUI.
-  xdg.configFile."qt6ct/qt6ct.conf".text = ''
-    [Appearance]
-    style=Fusion
-    custom_palette=true
-    color_scheme_path=/home/kyandesutter/.config/qt6ct/colors/noctalia.conf
-    icon_theme=Papirus-Dark
-    standard_dialogs=default
-  '';
-  xdg.configFile."qt5ct/qt5ct.conf".text = ''
-    [Appearance]
-    style=Fusion
-    custom_palette=true
-    color_scheme_path=/home/kyandesutter/.config/qt5ct/colors/noctalia.conf
-    icon_theme=Papirus-Dark
-    standard_dialogs=default
-  '';
+  # The qt6ct/qt5ct.conf colour-scheme selection moved to
+  # users/kyandesutter/mixins/qt.nix (the QT_QPA_PLATFORMTHEME env above stays
+  # here so it reaches every uwsm/Hyprland-spawned Qt app).
 
-  # Clipboard: noctalia provides the history store and picker natively; we only
-  # need wl-clip-persist to keep the selection alive after the source app exits
-  # so noctalia's poller can capture it. Nautilus is the GUI file manager, plus
-  # the GNOME companions that make it feel complete: file-roller (extract/create
-  # archives from the right-click menu), sushi (Spacebar quick-preview), and
-  # loupe (the GNOME image viewer).
+  # Compositor-essential session packages. The generic GNOME/desktop apps and
+  # their MIME defaults moved to users/kyandesutter/mixins/desktop-apps.nix.
+  #   • wl-clip-persist: keeps the regular Wayland selection alive after the
+  #     source app exits so noctalia's clipboard poller can capture it (launched
+  #     from autostart.nix).
+  #   • hyprpolkitagent: GUI polkit auth agent (started from hyprland.start).
   home.packages = with pkgs; [
     wl-clip-persist
     hyprpolkitagent
-    nautilus
-    file-roller
-    sushi
-    loupe
 
     # GTK theme noctalia's gtk template sets via gsettings/dconf (adw-gtk3-dark).
     # Installed here so that theme name resolves; noctalia, not the gtk module,
@@ -914,91 +864,10 @@ in
 
     # Qt platform theme engines. QT_QPA_PLATFORMTHEME=qt6ct (uwsm/env above) points
     # Qt6 apps at qt6ct; qt5ct themes Qt5 apps. Both read Noctalia's generated
-    # colour scheme via the qt{6,5}ct.conf written above.
+    # colour scheme via the qt{6,5}ct.conf written in mixins/qt.nix.
     kdePackages.qt6ct
     libsForQt5.qt5ct
-
-    # GNOME/GTK apps that round out the desktop.
-    papers # PDF / document viewer (default for application/pdf)
-    gnome-text-editor # plain-text editor (default for text/plain)
-    gnome-calendar
-    gnome-clocks
-    gnome-maps
-    snapshot # camera
-
-    # Media + office, so double-clicking these files in Nautilus opens something.
-    #   • celluloid: GTK4/libadwaita mpv frontend — plays every common video
-    #     format. GNOME Videos (totem) is the "native" app but has weak codec
-    #     support; mpv handles everything, so this is the reliable GTK choice.
-    #   • libreoffice-fresh: the only real office suite here (GNOME has none).
-    #     The -fresh build renders through the gtk3 VCL backend, so it follows
-    #     the adw-gtk3-dark GTK theme (set by noctalia; see the dark-mode block
-    #     below). Opens Word/Excel/PowerPoint + ODF.
-    celluloid
-    libreoffice-fresh
   ];
-
-  # Default apps by MIME. enable writes ~/.config/mimeapps.list.
-  #   • Folders → Nautilus (xdg-open, file pickers, "open containing folder",
-  #     noctalia, etc. all launch it).
-  #   • Images → Loupe, so double-clicking an image in Nautilus opens it.
-  #   • PDFs → Papers; plain text → GNOME Text Editor.
-  #   • Video → Celluloid.
-  #   • Office docs → the matching LibreOffice component (Writer/Calc/Impress).
-  xdg.mimeApps = {
-    enable = true;
-    defaultApplications =
-      {
-        "inode/directory" = [ "org.gnome.Nautilus.desktop" ];
-        "application/pdf" = [ "org.gnome.Papers.desktop" ];
-        "text/plain" = [ "org.gnome.TextEditor.desktop" ];
-      }
-      // lib.genAttrs [
-        "image/png"
-        "image/jpeg"
-        "image/gif"
-        "image/webp"
-        "image/bmp"
-        "image/tiff"
-        "image/x-icon"
-        "image/heif"
-        "image/avif"
-        "image/svg+xml"
-      ] (_: [ "org.gnome.Loupe.desktop" ])
-      // lib.genAttrs [
-        "video/mp4"
-        "video/x-matroska" # .mkv
-        "video/webm"
-        "video/quicktime" # .mov
-        "video/x-msvideo" # .avi
-        "video/mpeg"
-        "video/ogg"
-        "video/x-m4v"
-        "video/3gpp"
-        "video/x-flv"
-        "video/x-ms-wmv"
-      ] (_: [ "io.github.celluloid_player.Celluloid.desktop" ])
-      // lib.genAttrs [
-        # Word-processor documents (.doc/.docx/.odt/.rtf) → Writer.
-        "application/msword"
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        "application/vnd.oasis.opendocument.text"
-        "application/rtf"
-      ] (_: [ "writer.desktop" ])
-      // lib.genAttrs [
-        # Spreadsheets (.xls/.xlsx/.ods/.csv) → Calc.
-        "application/vnd.ms-excel"
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        "application/vnd.oasis.opendocument.spreadsheet"
-        "text/csv"
-      ] (_: [ "calc.desktop" ])
-      // lib.genAttrs [
-        # Presentations (.ppt/.pptx/.odp) → Impress.
-        "application/vnd.ms-powerpoint"
-        "application/vnd.openxmlformats-officedocument.presentationml.presentation"
-        "application/vnd.oasis.opendocument.presentation"
-      ] (_: [ "impress.desktop" ]);
-  };
 
   # Cursor theme — Bibata Modern Ice (https://www.opendesktop.org/p/1197198/).
   # Sets it for GTK, native Wayland (hyprcursor) and X11/XWayland (x11.enable

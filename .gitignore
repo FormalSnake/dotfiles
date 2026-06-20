@@ -2,3 +2,6 @@ result
 result-*
 .direnv/
 .DS_Store
+
+# matugen / build scratch artifacts
+*.tmp
