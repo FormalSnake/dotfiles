@@ -136,6 +136,98 @@ let
       esac
     '';
   };
+
+  # AC/battery-aware refresh rate + power profile (see systemd.user.services.power-tune).
+  #
+  # The internal panel (eDP-1) is 2560x1600@240Hz; 240Hz costs meaningful battery,
+  # so drop it to 60Hz whenever the active power profile is power-saver and restore
+  # 240Hz otherwise. Separately the platform power profile (power-profiles-daemon —
+  # the same one Noctalia's "power saver" toggles) is set to power-saver on unplug
+  # and balanced on AC. Refresh follows the *profile*, not AC directly, so a manual
+  # power-saver toggle in Noctalia also drops to 60Hz.
+  #
+  # Event-driven, no polling: dbus-monitor wakes us on UPower OnBattery (plug/unplug)
+  # and power-profiles-daemon ActiveProfile changes; the authoritative state is then
+  # re-read with busctl. The AC→profile switch is edge-triggered (only on transition)
+  # so a manual "performance" choice on AC isn't clobbered. Monitor mode is set via
+  # `hyprctl eval` (hl.monitor) — the Lua config parser rejects `hyprctl keyword`
+  # ("non-legacy parsers. Use eval.").
+  powerTune = pkgs.writeShellApplication {
+    name = "power-tune";
+    runtimeInputs = with pkgs; [
+      hyprland # hyprctl
+      power-profiles-daemon # powerprofilesctl
+      asusctl # keyboard LED brightness (aura)
+      dbus # dbus-monitor
+      systemd # busctl
+      coreutils
+    ];
+    text = ''
+      onbattery() {
+        case "$(busctl get-property org.freedesktop.UPower /org/freedesktop/UPower \
+                  org.freedesktop.UPower OnBattery 2>/dev/null)" in
+          *true) echo battery ;;
+          *)     echo ac ;;
+        esac
+      }
+
+      profile() {
+        powerprofilesctl get 2>/dev/null
+      }
+
+      set_refresh() {
+        if [ "$1" = "$last_rate" ]; then return 0; fi
+        hyprctl eval \
+          "hl.monitor({ output = \"eDP-1\", mode = \"2560x1600@$1\", position = \"2560x0\", scale = 1.25 })" \
+          >/dev/null 2>&1 || true
+        last_rate="$1"
+      }
+
+      reconcile() {
+        ac="$(onbattery)"
+        if [ "$ac" != "$last_ac" ]; then
+          if [ "$ac" = battery ]; then
+            powerprofilesctl set power-saver 2>/dev/null || true
+            # Save the current keyboard LED level, then turn the aura off. The
+            # static colour set by Noctalia's aura template survives — only the
+            # brightness is dropped, so restoring it on AC brings the colour back.
+            cat "$kbd_led" 2>/dev/null > "$kbd_state" || true
+            asusctl leds set off 2>/dev/null || true
+          else
+            powerprofilesctl set balanced 2>/dev/null || true
+            case "$(cat "$kbd_state" 2>/dev/null || echo 3)" in
+              0) asusctl leds set off 2>/dev/null || true ;;
+              1) asusctl leds set low 2>/dev/null || true ;;
+              2) asusctl leds set med 2>/dev/null || true ;;
+              *) asusctl leds set high 2>/dev/null || true ;;
+            esac
+          fi
+          last_ac="$ac"
+        fi
+        case "$(profile)" in
+          power-saver) set_refresh 60 ;;
+          *)           set_refresh 240 ;;
+        esac
+      }
+
+      kbd_led=/sys/class/leds/asus::kbd_backlight/brightness
+      kbd_state="''${XDG_RUNTIME_DIR:-/tmp}/power-tune-kbd"
+      last_ac=""
+      last_rate=""
+      reconcile
+      # Process substitution (not a pipe) keeps the loop in this shell so last_ac /
+      # last_rate persist across events instead of dying in a pipeline subshell.
+      while read -r line; do
+        case "$line" in
+          *PropertiesChanged*|*member=Changed*) reconcile ;;
+        esac
+      done < <(dbus-monitor --system \
+        "type='signal',interface='org.freedesktop.DBus.Properties',path='/org/freedesktop/UPower'" \
+        "type='signal',member='Changed',path='/org/freedesktop/UPower'" \
+        "type='signal',interface='org.freedesktop.DBus.Properties',path='/org/freedesktop/UPower/PowerProfiles'" \
+        2>/dev/null)
+    '';
+  };
 in
 {
   # Hyprland is enabled at the system level (programs.hyprland in
@@ -512,6 +604,24 @@ in
       done
     fi
   '';
+
+  # Power automation (see powerTune in the let block): refresh rate, power profile
+  # and keyboard aura all follow AC/battery. Bound to graphical-session.target so it
+  # starts and stops with the Hyprland session and inherits HYPRLAND_INSTANCE_SIGNATURE
+  # (uwsm finalises it into the systemd user manager) — hyprctl needs it.
+  systemd.user.services.power-tune = {
+    Unit = {
+      Description = "Refresh rate + power profile + aura follow AC/battery";
+      After = [ "graphical-session.target" ];
+      PartOf = [ "graphical-session.target" ];
+    };
+    Service = {
+      ExecStart = "${powerTune}/bin/power-tune";
+      Restart = "on-failure";
+      RestartSec = 3;
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
+  };
 
   # — Qt platform theme + Quickshell icon theme —
   #
