@@ -109,34 +109,6 @@ let
       fi
     '';
   };
-  # — "Shit Mic" toggle (SUPER+M) —
-  # Flip EasyEffects' global bypass on/off. The distortion is the "shit-mic"
-  # input preset (users/kyandesutter/mixins/easyeffects.nix), loaded when the
-  # EasyEffects daemon starts; EasyEffects already routes every app's mic
-  # through its virtual source (processAllInputs), so this single switch makes
-  # the crust apply everywhere — no device/stream juggling, no feedback loops.
-  #
-  #   bypass DISABLED → effects active → crusty mic
-  #   bypass ENABLED  → passthrough    → clean mic
-  #
-  # `easyeffects -b 3` reports the current state ("1" = bypassed/clean,
-  # "2" = active/shit); we toggle then read it back for an accurate notification.
-  shitMicToggle = pkgs.writeShellApplication {
-    name = "toggle-shit-mic";
-    runtimeInputs = with pkgs; [
-      easyeffects
-      libnotify # notify-send
-    ];
-    text = ''
-      easyeffects --bypass-toggle
-
-      case "$(easyeffects -b 3)" in
-        2*) notify-send -t 1500 "Microphone" "Shit mic ON 💩" ;;
-        *)  notify-send -t 1500 "Microphone" "Shit mic OFF — back to normal" ;;
-      esac
-    '';
-  };
-
   # Power-source-aware refresh rate + keyboard aura + dGPU dock-relog (see
   # systemd.user.services.power-tune).
   #
@@ -639,11 +611,6 @@ in
     hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"), { repeating = true })
     hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"), { repeating = true })
     hl.bind("XF86AudioMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"))
-    -- Toggle the distorted "Shit Mic" (Jschlatt-style blown-out mic) by
-    -- flipping EasyEffects' global bypass. The crust is the "shit-mic" input
-    -- preset (users/kyandesutter/mixins/easyeffects.nix); EasyEffects already
-    -- routes every app's mic through it, so this applies/clears it everywhere.
-    hl.bind(mod .. " + M", hl.dsp.exec_cmd("${shitMicToggle}/bin/toggle-shit-mic"))
     -- Brightness adjusts whichever monitor the cursor is on (internal panel via
     -- brightnessctl, external monitors via ddcutil/DDC-CI). See monitorBrightness.
     hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("${monitorBrightness}/bin/monitor-brightness up"), { repeating = true })
