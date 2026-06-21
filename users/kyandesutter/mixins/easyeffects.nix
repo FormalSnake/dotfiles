@@ -1,9 +1,45 @@
 { ... }:
+let
+  # — Voicing EQ for the Pebbles (the "general sound" improvement) —
+  #
+  # The upper half of Ziyad Nazem's community "Perfect EQ" curve, adapted for
+  # these speakers. The original 10-band curve is a consumer "smile":
+  #   32:+4 64:+2 125:+1 250:0 500:-1 1k:-2 2k:0 4k:+2 8k:+3 16k:+3
+  # The bass bells (32/64 Hz) are ZEROED here on purpose: filter#0's low-shelf
+  # already owns everything below 110 Hz, and the 2" drivers can't move 32 Hz —
+  # boosting it just adds excursion/distortion and eats the headroom. What's
+  # left is what actually improves *general* clarity on a bass-boosted tiny
+  # speaker: a gentle 500 Hz–1 kHz scoop to de-mud, plus a 4/8/16 kHz presence
+  # + air lift so vocals and detail cut through. All Bell, RLC (BT), Q≈1.5.
+  # Want the full smile back? Set band0/band1 gains to 4.0/2.0. Tune live in the
+  # EasyEffects window — changes save back to the bass-boost output preset.
+  mkBand = frequency: gain: {
+    inherit frequency gain;
+    type = "Bell";
+    mode = "RLC (BT)";
+    q = 1.5;
+    slope = "x1";
+    mute = false;
+    solo = false;
+  };
+  perfectEqBands = {
+    band0 = mkBand 32.0 0.0; # owned by the low-shelf — left flat
+    band1 = mkBand 64.0 0.0; # owned by the low-shelf — left flat
+    band2 = mkBand 125.0 1.0;
+    band3 = mkBand 250.0 0.0;
+    band4 = mkBand 500.0 (-1.0); # de-mud
+    band5 = mkBand 1000.0 (-2.0); # de-mud
+    band6 = mkBand 2000.0 0.0;
+    band7 = mkBand 4000.0 2.0; # presence
+    band8 = mkBand 8000.0 3.0; # detail
+    band9 = mkBand 16000.0 3.0; # air
+  };
+in
 {
   # EasyEffects runs as a user daemon (systemd graphical-session service) and
   # sits on the OUTPUT pipeline (apps → "Easy Effects Sink" → the real device).
-  # Its only job here is the bass boost for the HDMI speakers below, applied to
-  # the HDMI sink only via the per-device autoload profile.
+  # Its job here is to voice the HDMI speakers — bass boost + a clarity EQ —
+  # applied to the HDMI sink only via the per-device autoload profile.
   #
   # Preset format note (EasyEffects 8): the top-level block ("output" here)
   # selects the pipeline folder, `plugins_order` lists the active plugin
@@ -30,11 +66,14 @@
   #      headroom; turn the speaker up.
   #      The bass-vs-rest emphasis is the shelf `gain`; the overall level/headroom
   #      is `input-gain`. Want less bass but same loudness? Lower BOTH together.
-  #   2. bass_enhancer#0 — psychoacoustic harmonics for the sub-bass the tiny
-  #      drivers can't physically reproduce. Kept GENTLE on purpose: its
-  #      mechanism is literally added harmonic distortion, so a high `amount`
-  #      is what made it sound buzzy/overdriven. A small `amount` adds
-  #      perceived low end without the grit.
+  #   2. equalizer#0 — voicing EQ for general clarity (see `perfectEqBands`).
+  #
+  # NOTE: a Calf bass_enhancer used to sit between these two, synthesizing
+  # harmonics to fake sub-bass the 2" drivers can't move. Removed — on speakers
+  # that already reproduce real low end via the shelf, its added harmonic
+  # distortion read as midbass "warmth" that MASKED the genuine deep bass,
+  # making it feel shallower. The pure shelf sounds deeper. If you ever want it
+  # back, re-add "bass_enhancer#0" to plugins_order with a low `amount` (~3).
   #
   # Applied to HDMI ONLY (not the laptop's analog speakers) via a per-device
   # autoload profile written below — see the xdg.dataFile entry. Tune any of
@@ -47,7 +86,7 @@
         blocklist = [ ];
         plugins_order = [
           "filter#0"
-          "bass_enhancer#0"
+          "equalizer#0"
         ];
 
         # Low-shelf + preamp: -11 dB on everything (input-gain) for headroom,
@@ -71,21 +110,19 @@
           balance = 0.0;
         };
 
-        # Bass enhancer (Calf): synthesize harmonics of content below `scope`
-        # so the brain hears bass the drivers can't move. GENTLE — `amount` is
-        # low so it warms rather than buzzes. Raise `amount`/`harmonics` for
-        # more grit, lower for cleaner. floor disabled — works all the way down.
-        "bass_enhancer#0" = {
+        # Voicing EQ — final stage, shapes the already bass-boosted signal.
+        # See `perfectEqBands` above for the curve and rationale. split-channels
+        # off, so the single (mirrored) band set applies to both L and R; both
+        # `left`/`right` are written identically for a clean, explicit preset.
+        "equalizer#0" = {
           bypass = false;
           "input-gain" = 0.0;
           "output-gain" = 0.0;
-          amount = 3.0;
-          harmonics = 4.0;
-          scope = 120.0;
-          floor = 20.0;
-          "floor-active" = false;
-          blend = 0.0;
-          listen = false;
+          mode = "IIR";
+          "num-bands" = 10;
+          "split-channels" = false;
+          left = perfectEqBands;
+          right = perfectEqBands;
         };
       };
     };
