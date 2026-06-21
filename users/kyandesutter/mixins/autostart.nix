@@ -118,6 +118,41 @@
     };
   };
 
+  # KDE Connect tray indicator. Launching the indicator spawns kdeconnectd (the
+  # daemon), which bridges the paired iPhone: notification mirroring (via the
+  # freedesktop notification API → noctalia), shared clipboard, media control and
+  # find-my-phone. System-level programs.kdeconnect.enable (phone-integration.nix)
+  # provides the binary + firewall ports.
+  systemd.user.services.kdeconnect-indicator = {
+    Unit = {
+      Description = "KDE Connect (tray indicator + daemon)";
+      PartOf = [ "graphical-session.target" ];
+      After = [ "graphical-session.target" ];
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
+    Service = {
+      Type = "simple";
+      ExecStart = "kdeconnect-indicator";
+    };
+  };
+
+  # LocalSend receiver (AirDrop-style file/link sharing). Kept running so files
+  # can arrive without manually opening the app. It opens a window at launch;
+  # enable "launch minimized / minimize to tray" in-app to suppress that.
+  # System-level programs.localsend.enable provides the binary + firewall port.
+  systemd.user.services.localsend = {
+    Unit = {
+      Description = "LocalSend (file sharing receiver)";
+      PartOf = [ "graphical-session.target" ];
+      After = [ "graphical-session.target" ];
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
+    Service = {
+      Type = "simple";
+      ExecStart = "localsend";
+    };
+  };
+
   # Helium (Chromium browser). Window rule pins it to workspace 1 (web).
   #
   # Helium picks its notification backend ONCE at startup: it probes the

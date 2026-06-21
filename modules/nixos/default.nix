@@ -23,6 +23,7 @@
       ./mixins/gaming.nix
       ./mixins/asus.nix
       ./mixins/power.nix
+      ./mixins/phone-integration.nix
       ./mixins/sober.nix
       # Temporarily disabled: the NordVPN .deb (repo.nordvpn.com) is blocked by
       # this network's DNS content filter (Cisco Umbrella block page), so the
