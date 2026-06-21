@@ -501,6 +501,16 @@ in
         border_size = 2,
         layout = "dwindle",
         resize_on_border = true,
+        -- Static Catppuccin Mocha fallback for the borders (mauve active / surface2
+        -- inactive). Noctalia overrides these with the live wallpaper palette — both
+        -- instantly via `hyprctl eval` (mixins/noctalia.nix post_hook) and
+        -- persistently via the dofile below. Without a value here Hyprland's built-in
+        -- default active border is white, which is what borders revert to whenever a
+        -- `hyprctl reload`/startup re-evals this config before the palette is applied.
+        col = {
+          active_border = "rgb(cba6f7)",
+          inactive_border = "rgb(585b70)",
+        },
         -- Master switch for screen tearing. Does nothing on its own — a window must
         -- also carry the `immediate` rule (see the game rules below). Used here as a
         -- VRR-free fix for 120fps-into-144Hz judder on the desk monitor; see misc.vrr.
@@ -542,6 +552,17 @@ in
         force_zero_scaling = true,
       },
     })
+
+    -- — Border colours: persist the last wallpaper palette across reloads —
+    -- Noctalia renders the live wallpaper-derived border/group colours to
+    -- ~/.cache/noctalia/hypr-border on every palette change and also pushes them live
+    -- via `hyprctl eval` (mixins/noctalia.nix). That eval is runtime-only, so a
+    -- `hyprctl reload` (or the startup race before the first palette render) would
+    -- drop back to the static Catppuccin fallback in `general.col` above. Re-applying
+    -- the cache file here on every config eval keeps the wallpaper colours instead.
+    -- pcall: the file is absent before Noctalia's first render — fall through to the
+    -- fallback rather than erroring the whole config.
+    pcall(dofile, os.getenv("HOME") .. "/.cache/noctalia/hypr-border")
 
     -- — Keybinds (mirror the macOS/aerospace muscle memory, SUPER as mod) —
     -- App launcher (noctalia panel toggled over IPC).
