@@ -73,6 +73,15 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # CanaryCode — our own fast, minimal terminal coding agent (Bun/TypeScript).
+    # Ships a flake whose package is the prebuilt per-system release binary
+    # (autoPatchelf'd on Linux) plus a home-manager module (programs.canarycode).
+    # Cross-platform: the release covers all four darwin/linux systems.
+    canarycode = {
+      url = "github:CanaryCoders/CanaryCodeCli";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # — NixOS (g815 gaming laptop) inputs —
 
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";

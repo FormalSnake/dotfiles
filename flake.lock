@@ -40,6 +40,26 @@
         "type": "github"
       }
     },
+    "canarycode": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1782229790,
+        "narHash": "sha256-Un47Bv3LzeJtv1rHLkkmjqcAdytLb2nfMHolaqs9HYE=",
+        "owner": "CanaryCoders",
+        "repo": "CanaryCodeCli",
+        "rev": "3a830c0ecd1b4b014a8b1b7fd7653f086035292c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "CanaryCoders",
+        "repo": "CanaryCodeCli",
+        "type": "github"
+      }
+    },
     "catppuccin": {
       "inputs": {
         "nixpkgs": [
@@ -1008,6 +1028,7 @@
     "root": {
       "inputs": {
         "agenix": "agenix",
+        "canarycode": "canarycode",
         "catppuccin": "catppuccin",
         "chaotic": "chaotic",
         "determinate": "determinate",
