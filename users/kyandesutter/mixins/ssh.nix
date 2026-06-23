@@ -37,6 +37,7 @@
           "3200 localhost:3200"
           "3100 localhost:3100"
           "8080 localhost:8080"
+          "3000 localhost:3000" # generic dev server (Next.js/Vite default)
           # CanaryPulse dev servers — so the browser on the client can reach them
           # as localhost (auth/CORS/cookies are localhost-only in dev). The admin
           # SPA loads its API/scraper URLs as http://localhost:<port> in the

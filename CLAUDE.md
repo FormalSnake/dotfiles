@@ -4,11 +4,16 @@ Guidance for Claude Code (claude.ai/code) when working in this repository.
 
 ## ⚠️ Rebuild policy — READ FIRST
 
-**Only the owner (kyandesutter) runs rebuilds.** Never run `darwin-rebuild`,
-`nixos-rebuild`, `home-manager switch`, or any `just` build/switch/bootstrap
-recipe — not even build-only variants. When changes are ready: `git add` the
-new/changed files (the flake only sees git-tracked files), document what
-changed, then stop and let the owner rebuild.
+**Claude may run rebuilds.** `darwin-rebuild`, `nixos-rebuild`,
+`home-manager switch`, and the `just` build/switch/bootstrap recipes are
+allowed. Always `git add` new/changed files first — the flake only sees
+git-tracked files, so an unstaged file is invisible to the build.
+
+**Sudo caveat:** system rebuilds (`nixos-rebuild switch`, `darwin-rebuild
+switch`, most `just` recipes) need root and will prompt for a sudo password.
+That prompt can't be answered non-interactively, so the rebuild may hang or
+fail. If it does, stop and ask the owner to run that step (e.g. via `! <cmd>`)
+or to grant passwordless sudo — don't try to work around it.
 
 Safe, non-building checks you MAY run:
 - `nix-instantiate --parse <file>.nix` — syntax only.
@@ -17,6 +22,20 @@ Safe, non-building checks you MAY run:
   forces all module imports to resolve without building the system. (Avoid
   evaluating `home-manager.users.*` config paths: they trigger IFD, e.g.
   Noctalia's `config validate` and the Catppuccin palette import.)
+
+## Keep both machines in sync
+
+The two hosts must stay in sync: a change applied on one is expected to land on
+the other. When working from the **g815 (nixos laptop)**, the full flow is:
+
+1. Rebuild on g815 (`nixos-rebuild` / the `just` recipe).
+2. `git push`.
+3. `ssh macbook`, `cd ~/.config/nix`, `git pull`.
+4. Rebuild on the macbook (`darwin-rebuild` / the `just` recipe).
+
+Claude can drive all four steps. Watch for the sudo caveat above on the two
+rebuilds (steps 1 and 4) and the `ssh macbook` auth on step 3 — if either blocks
+on a password, hand that step to the owner and continue once it clears.
 
 ## Overview
 

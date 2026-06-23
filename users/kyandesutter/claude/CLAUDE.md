@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## AI Guidance
 
-* **NEVER REBUILD. Only the owner (kyandesutter) may run rebuilds.** Do not run `darwin-rebuild`, `nixos-rebuild`, `home-manager switch`, `just r`/`just b`/`just rebuild`/`just build`/`just bootstrap`, or any build/activation/switch command — not even build-only variants — in the nix config (`~/.config/nix`) or anywhere else. When nix changes are ready, `git add` the new/changed files (flakes only see git-tracked files), document what changed, then stop and let the owner rebuild manually.
+* **Rebuilds are allowed.** Claude may run `darwin-rebuild`, `nixos-rebuild`, `home-manager switch`, and the `just r`/`just b`/`just rebuild`/`just build`/`just bootstrap` recipes in the nix config (`~/.config/nix`). Always `git add` new/changed files first — flakes only see git-tracked files, so an unstaged file is invisible to the build. Caveat: system rebuilds need root and prompt for a sudo password that can't be answered non-interactively; if a rebuild blocks on sudo (or `ssh` auth), stop and hand that step to the owner (e.g. via `! <cmd>`) rather than working around it.
 * Ignore GEMINI.md and GEMINI-*.md files
 * To save main context space, for code searches, inspections, troubleshooting or analysis, use code-searcher subagent where appropriate - giving the subagent full context background for the task(s) you assign it.
 * After receiving tool results, carefully reflect on their quality and determine optimal next steps before proceeding. Use your thinking to plan and iterate based on this new information, and then take the best next action.

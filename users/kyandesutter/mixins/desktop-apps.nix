@@ -19,6 +19,7 @@
     gnome-clocks
     gnome-maps
     snapshot # camera
+    epiphany # web browser
 
     # Media + office, so double-clicking these files in Nautilus opens something.
     #   • celluloid: GTK4/libadwaita mpv frontend — plays every common video
