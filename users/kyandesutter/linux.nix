@@ -14,6 +14,7 @@
     ./mixins/helium.nix
     ./mixins/spicetify.nix
     ./mixins/fetch.nix
+    ./mixins/lumen.nix
   ];
 
   # NixOS rebuild shortcut (g815-only, so it lives here rather than the shared
