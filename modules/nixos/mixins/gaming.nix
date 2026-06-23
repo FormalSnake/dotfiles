@@ -18,12 +18,12 @@ let
   # (the input URL has ?dir=packages/nix), so steam.nix/millennium.nix sit at its
   # root. NOTE: if a future nixpkgs bumps `bun`, this hash may need updating — the
   # rebuild error prints the new `got:` value to paste here.
-  millenniumBunDepsHash = "sha256-KDzbqRN1aobT5wMJI+P03i5hMzWCZv51mxRSpbVm4KI=";
+  millenniumBunDepsHash = "sha256-07kSANQ5uLwsLX+wuS0Cq2YSeTqkSVnUBGqadP0Uj4Y=";
   millenniumNix = pkgs.runCommand "millennium-nix-patched" { } ''
     cp -r ${inputs.millennium} "$out"
     chmod -R +w "$out"
     ${pkgs.gnused}/bin/sed -i \
-      's|sha256-XMYpHMrcmLNQYyLkc3DngjsZ4DdyPr9on0v5lcDrRiY=|${millenniumBunDepsHash}|' \
+      's|sha256-eVk0KVSIMTGPC0DbdenO/ZCY/fiD1Q9RXj3yKqsHz0Y=|${millenniumBunDepsHash}|' \
       "$out/millennium.nix" || { echo 'millennium hash patch: pattern not found — update millenniumBunDepsHash'; exit 1; }
   '';
   # Build the millennium lib against our nixpkgs (so our bun → our patched hash);
