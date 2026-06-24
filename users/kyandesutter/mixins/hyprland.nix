@@ -774,6 +774,18 @@ in
     mode=igpu
     if [ "$ac" = ac ] && [ -n "$dgpu" ] && [ -n "$igpu" ]; then
       export AQ_DRM_DEVICES="$dgpu:$igpu"
+      # Cross-GPU scanout survives suspend. With the dGPU primary, the internal
+      # panel (eDP-1, on the iGPU) is fed by a cross-GPU copy: aquamarine renders
+      # on the dGPU, exports a dmabuf and imports it into the iGPU's EGL context
+      # to scan out. After an s2idle resume the dGPU re-exports that buffer with a
+      # tiling modifier the iGPU can no longer import — eglCreateImageKHR fails
+      # with EGL_BAD_MATCH, the eDP-1 page-flip never completes ("Cannot commit
+      # when a page-flip is awaiting") and the panel stays black until reboot; a
+      # relog or modeset doesn't clear it. Forcing a LINEAR intermediate buffer
+      # for the multi-GPU blit makes that import modifier-independent, so it
+      # survives resume. Only affects the eDP-1 copy — the game→dGPU→HDMI gaming
+      # path is same-GPU (no blit), so zero gaming cost.
+      export AQ_FORCE_LINEAR_BLIT=1
       mode=dgpu
     fi
     if [ -n "''${XDG_RUNTIME_DIR:-}" ]; then

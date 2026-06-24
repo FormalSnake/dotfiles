@@ -2,86 +2,11 @@
 let
   cfg = config.kyan.desktop;
 
-  # The SDDM greeter runs as the unprivileged `sddm` user before any user logs
-  # in, so it can't read the noctalia shell's wallpaper/theme. Instead we bake
-  # both into the theme statically, mirroring what noctalia is configured with in
-  # ../../../users/kyandesutter/mixins/noctalia.nix:
-  #   • wallpaper → wallpapers/storm.jpg
-  #   • theme     → Catppuccin (Mocha) dark
-  # If either of those changes there, update them here too.
-
-  # In-repo wallpaper, copied to the store as its own path. file:// so the
-  # theme's QML (Main.qml) loads it as an absolute local file rather than
-  # resolving it relative to the theme directory.
-  loginWallpaper = "file://${../../../users/kyandesutter/wallpapers/storm.jpg}";
-
-  # Catppuccin Mocha palette (subset used below). Mauve is the accent.
-  mocha = {
-    base = "#1e1e2e";
-    mantle = "#181825";
-    crust = "#11111b";
-    surface0 = "#313244";
-    surface1 = "#45475a";
-    text = "#cdd6f4";
-    subtext0 = "#a6adc8";
-    overlay0 = "#6c7086";
-    mauve = "#cba6f7";
-    red = "#f38ba8";
-  };
-
-  # sddm-astronaut, "pixel_sakura" layout, themed with the wallpaper + Mocha.
-  # `themeConfig` is written to pixel_sakura.conf.user and merged over the
-  # bundled pixel_sakura.conf, so unset keys keep their upstream defaults.
+  # sddm-astronaut with the "pixel_sakura" preset, used as-is with no overrides:
+  # the bundled pixel_sakura.conf (animated pixel_sakura.gif background + the
+  # theme's own colors) applies unchanged.
   sddmAstronaut = pkgs.sddm-astronaut.override {
     embeddedTheme = "pixel_sakura";
-    themeConfig = {
-      # Use our wallpaper instead of the bundled pixel_sakura.gif, cropped to
-      # fill the screen. PartialBlur softens the area behind the login form so
-      # the Mocha text stays legible over an arbitrary photo.
-      Background = loginWallpaper;
-      CropBackground = "true";
-      DimBackground = "0.0";
-      PartialBlur = "true";
-
-      # Mocha colors.
-      HeaderTextColor = mocha.text;
-      DateTextColor = mocha.subtext0;
-      TimeTextColor = mocha.text;
-
-      BackgroundColor = mocha.base;
-      FormBackgroundColor = mocha.mantle;
-      DimBackgroundColor = mocha.crust;
-
-      LoginFieldBackgroundColor = mocha.surface0;
-      PasswordFieldBackgroundColor = mocha.surface0;
-      LoginFieldTextColor = mocha.text;
-      PasswordFieldTextColor = mocha.text;
-      UserIconColor = mocha.subtext0;
-      PasswordIconColor = mocha.subtext0;
-
-      PlaceholderTextColor = mocha.overlay0;
-      WarningColor = mocha.red;
-
-      LoginButtonTextColor = mocha.base;
-      LoginButtonBackgroundColor = mocha.mauve;
-      SystemButtonsIconsColor = mocha.subtext0;
-      SessionButtonTextColor = mocha.subtext0;
-      VirtualKeyboardButtonTextColor = mocha.subtext0;
-
-      DropdownTextColor = mocha.text;
-      DropdownSelectedBackgroundColor = mocha.surface1;
-      DropdownBackgroundColor = mocha.surface0;
-
-      HighlightTextColor = mocha.text;
-      HighlightBackgroundColor = mocha.mauve;
-      HighlightBorderColor = "transparent";
-
-      HoverUserIconColor = mocha.mauve;
-      HoverPasswordIconColor = mocha.mauve;
-      HoverSystemButtonsIconsColor = mocha.mauve;
-      HoverSessionButtonTextColor = mocha.mauve;
-      HoverVirtualKeyboardButtonTextColor = mocha.mauve;
-    };
   };
 in
 {
