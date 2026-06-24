@@ -408,7 +408,8 @@ in
     -- monitor selector (e.g. Forza Horizon): they target the monitor at (0,0) and
     -- enumerate only its modes. With eDP-1 at the origin, Forza fullscreened onto the
     -- internal panel and locked to its 240Hz/2560x1600 instead of this 1440p144 panel.
-    hl.monitor({ output = "HDMI-A-1", mode = "2560x1440@144", position = "0x0", scale = 1.0 })
+    -- vrr = 1: FreeSync/adaptive-sync always on for this panel (overrides misc.vrr).
+    hl.monitor({ output = "HDMI-A-1", mode = "2560x1440@144", position = "0x0", scale = 1.0, vrr = 1 })
     -- Internal 18" WQXGA 240Hz panel, to the RIGHT of the desk monitor (same physical
     -- arrangement as before, just shifted so HDMI-A-1 owns the origin). HDMI-A-1 is
     -- 2560px wide at scale 1.0 → this sits at x = 2560. Adjust scale to taste (1.0–1.5).
@@ -512,8 +513,9 @@ in
           inactive_border = "rgb(585b70)",
         },
         -- Master switch for screen tearing. Does nothing on its own — a window must
-        -- also carry the `immediate` rule (see the game rules below). Used here as a
-        -- VRR-free fix for 120fps-into-144Hz judder on the desk monitor; see misc.vrr.
+        -- also carry the `immediate` rule (see the game rules below). Kept as an
+        -- optional low-latency fullscreen path; the desk monitor's judder is now
+        -- handled by per-monitor FreeSync (vrr = 1), see misc.vrr.
         allow_tearing = true,
       },
       decoration = {
@@ -529,15 +531,13 @@ in
         -- link opens but the browser stays in the background. Honour the request so
         -- the browser window is focused (and its workspace switched to) on open.
         focus_on_activate = true,
-        -- VRR is OFF. Games here run ~120fps; on the 240Hz internal panel that's a
-        -- clean 2:1 cadence (smooth), but on the fixed 144Hz desk monitor (HDMI-A-1)
-        -- 120 doesn't divide 144 — frames are held for 1 or 2 refreshes in an uneven
-        -- pattern, which reads as judder at the *same* fps. Rather than adaptive sync,
-        -- we fix it with screen tearing: allow_tearing (general, below) + an
-        -- `immediate` window rule per game lets fullscreen frames present the instant
-        -- they're ready instead of waiting for the 144Hz vblank, killing the judder at
-        -- the cost of a visible tear line. direct_scanout (render, below) additionally
-        -- hands a fullscreen game's buffer straight to the display plane.
+        -- Global VRR default is OFF; the desk monitor (HDMI-A-1) opts in to
+        -- FreeSync per-monitor via its `vrr = 1` above, and the internal eDP-1
+        -- panel stays off. (The old judder we blamed on a 120fps-into-144Hz
+        -- cadence mismatch turned out to be a GPU hybrid mismatch — now fixed —
+        -- so adaptive sync is the right cure rather than the screen-tearing
+        -- workaround.) allow_tearing / `immediate` / direct_scanout below remain
+        -- available as a low-latency fullscreen path.
         vrr = 0,
       },
       render = {
@@ -679,9 +679,10 @@ in
     hl.window_rule({ match = { class = "^(steam_app_2483190)$" }, fullscreen = true })              -- forza → always fullscreen
     -- Allow tearing for Steam games (any steam_app_<id> window). Pairs with
     -- general.allow_tearing to present frames immediately instead of on the 144Hz
-    -- vblank — the VRR-free cure for the 120/144 judder on the desk monitor. Tearing
-    -- only actually happens when the game itself presents without vsync, so launch
-    -- games with vsync OFF (in-game setting, or Vulkan IMMEDIATE / __GL_SYNC_TO_VBLANK=0).
+    -- vblank — an optional low-latency path now that the desk monitor uses FreeSync
+    -- (vrr = 1) for smooth presentation. Tearing only actually happens when the game
+    -- itself presents without vsync, so launch games with vsync OFF (in-game setting,
+    -- or Vulkan IMMEDIATE / __GL_SYNC_TO_VBLANK=0).
     hl.window_rule({ match = { class = "^(steam_app_.*)$" }, immediate = true })                    -- games → allow tearing
     -- — Chromium/helium auxiliary popups: float, pin across every workspace, and
     --   tuck into a corner. Mirrors the aerospace setup (float PiP + keep it on the

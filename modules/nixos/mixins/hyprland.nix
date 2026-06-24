@@ -8,6 +8,53 @@ let
   sddmAstronaut = pkgs.sddm-astronaut.override {
     embeddedTheme = "pixel_sakura";
   };
+
+  # weston.ini for the SDDM Wayland greeter compositor. Mirrors what the NixOS
+  # sddm module generates by default — keyboard from the xkb config, the module's
+  # libinput defaults — so behaviour is unchanged except that we hand weston a
+  # fixed config path while the wrapper below varies only the --drm-device.
+  sddmWestonIni = pkgs.writeText "sddm-weston.ini" ''
+    [keyboard]
+    keymap_layout=${config.services.xserver.xkb.layout}
+    keymap_model=${config.services.xserver.xkb.model}
+    keymap_options=${config.services.xserver.xkb.options}
+    keymap_variant=${config.services.xserver.xkb.variant}
+
+    [libinput]
+    enable-tap=true
+    left-handed=false
+  '';
+
+  # SDDM Wayland greeter compositor launcher.
+  #
+  # HDMI-A-1 (the desk monitor) is wired to the NVIDIA dGPU, whose DRM card is a
+  # different device from the Intel iGPU that drives the internal eDP-1 panel —
+  # and the iGPU (boot_vga) is the card weston picks by default. The iGPU cannot
+  # see the HDMI port, so to show the login screen on HDMI we must point weston
+  # at the card that actually owns the connected HDMI connector:
+  #
+  #   • HDMI connected -> run weston on that connector's card (the dGPU); the
+  #                       greeter appears on the desk monitor.
+  #   • HDMI absent    -> no --drm-device, weston falls back to boot_vga (the
+  #                       iGPU) and the greeter appears on the internal panel.
+  #
+  # cardN numbering isn't stable across boots, so we resolve the card fresh from
+  # the connected connector's sysfs path every time the greeter starts — which is
+  # every boot AND every logout, since SDDM respawns the greeter each time. That
+  # makes log-out/log-in behave exactly like a fresh boot.
+  sddmGreeterCompositor = pkgs.writeShellScript "sddm-greeter-compositor" ''
+    set -u
+    drmarg=""
+    for status in /sys/class/drm/card*-HDMI*/status; do
+      [ -e "$status" ] || continue
+      if [ "$(cat "$status")" = "connected" ]; then
+        conn=$(basename "$(dirname "$status")")   # e.g. card0-HDMI-A-1
+        drmarg="--drm-device=''${conn%%-*}"        # e.g. --drm-device=card0
+        break
+      fi
+    done
+    exec ${pkgs.weston}/bin/weston --shell=kiosk -c ${sddmWestonIni} $drmarg
+  '';
 in
 {
   options.kyan.desktop.enable = lib.mkEnableOption "Hyprland desktop (system side)";
@@ -31,6 +78,10 @@ in
     services.displayManager.sddm = {
       enable = true;
       wayland.enable = true;
+      # Pick the greeter compositor's GPU based on whether HDMI is connected, so
+      # the login screen lands on the desk monitor (dGPU) when docked and falls
+      # back to the internal panel (iGPU) otherwise. See `sddmGreeterCompositor`.
+      wayland.compositorCommand = toString sddmGreeterCompositor;
       package = pkgs.kdePackages.sddm;
       theme = "sddm-astronaut-theme";
       # Qt runtime the theme's QML needs (svg, multimedia for the animated
