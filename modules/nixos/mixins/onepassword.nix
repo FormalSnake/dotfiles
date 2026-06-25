@@ -14,6 +14,17 @@
     polkitPolicyOwners = [ "kyandesutter" ];
   };
 
+  # The NixOS module creates the `onepassword` / `onepassword-cli` groups (which
+  # own the setgid BrowserSupport helper and the `op` wrapper) but does NOT add
+  # anyone to them. Without `onepassword` membership the browser-integration
+  # helper can't verify the browser — so Helium isn't trusted and the unlocked
+  # session can't be held, making 1Password appear to lock itself at random.
+  # `onepassword-cli` is the matching membership for biometric `op` unlock.
+  users.users.kyandesutter.extraGroups = [
+    "onepassword"
+    "onepassword-cli"
+  ];
+
   # Trust Helium (a Chromium fork) for the browser-unlock native-messaging
   # integration. 1Password only talks to browsers whose binary name is in its
   # built-in allowlist or this file; Helium isn't recognized, so add it.
