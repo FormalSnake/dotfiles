@@ -82,3 +82,46 @@ Requires the i2c stack (already wired on g815: `hardware.i2c.enable`, user in th
 
 `noctalia msg <cmd>` requires the running user instance (the systemd user service
 bound to the graphical-session target).
+
+## Bar widgets & per-widget config
+
+The bar's `[bar.main]` `start` / `center` / `end` are arrays of **widget id
+strings**. Built-in ids: `launcher`, `wallpaper`, `workspaces`, `clock`, `media`,
+`tray`, `notifications`, `clipboard`, `network`, `bluetooth`, `volume`,
+`brightness`, `battery`, `control-center`, `session`, `settings`, `spacer`,
+`sysmon`, … Overriding a list replaces it wholesale — repeat the defaults you want
+to keep.
+
+Per-instance config lives in a top-level `[widget.<id>]` table. If `<id>` is a
+built-in name the `type` is implied (`[widget.clock]`); otherwise set `type`
+explicitly, which also lets you define **multiple instances of one type** under
+distinct ids:
+
+```toml
+[widget.gpu_temp]            # arbitrary id, referenced from bar start/center/end
+type = "sysmon"
+stat = "gpu_temp"
+display = "text"             # "text" | "gauge" (default gauge)
+```
+
+`sysmon` `stat` values: `cpu_usage`, `cpu_temp`, `gpu_temp`, `gpu_usage`,
+`gpu_vram`, `ram_used`, `ram_pct`, `swap_pct`, `disk_pct`, `net_rx`, `net_tx`.
+Sampling/poll intervals + alert thresholds are under `[system.monitor]` (on by
+default). GPU `usage`/`vram` read via NVML (`nvidia-smi`) → **wakes a PRIME-offload
+dGPU**; `gpu_temp` is lighter.
+
+## Hooks (`[hooks]`) — events & env vars
+
+Each key is a shell command (string) or list of commands, run on the event:
+`started`, `wallpaper_changed`, `colors_changed`, `theme_mode_changed`
+(`$NOCTALIA_THEME_MODE`), `session_locked`/`unlocked`, `logging_out`,
+`rebooting`/`shutting_down`, `wifi_enabled`/`disabled`,
+`bluetooth_enabled`/`disabled`, `battery_state_changed`
+(`$NOCTALIA_BATTERY_STATE`), `power_profile_changed` (`$NOCTALIA_POWER_PROFILE`),
+and `battery_under_threshold` (`$NOCTALIA_BATTERY_PERCENT`) — the last requires
+`battery_low_percent_threshold > 0`.
+
+Gotchas when set declaratively from Nix: the noctalia **user** service has a
+limited PATH, so pin binaries by store path (e.g. `${pkgs.libnotify}/bin/notify-send`);
+and escape the shell vars as `\${NOCTALIA_…}` so Nix doesn't try to interpolate
+them. Notifications surface through noctalia's own daemon.
