@@ -286,16 +286,23 @@ in
         automation.enabled = false;
       };
 
-      # Auto screen-off on idle (DPMS), preserving caelestia's idle screen
-      # blanking. The Wayland idle-inhibit locks held during games/downloads (see
-      # modules/nixos/mixins/{gaming,asus}.nix) suppress this. Lock-before-sleep
-      # is handled explicitly by the SUPER+SHIFT+Escape `session lock-and-suspend`
-      # keybind in ../mixins/hyprland.nix, so no idle auto-lock is enabled here.
+      # Idle screen-off (DPMS) is DISABLED — the laptop stays "caffeinated"; the
+      # displays never blank on idle. Off rather than just a long timeout for two
+      # reasons:
+      #   1. Always-on is the desired behaviour (manual blank still available via
+      #      night-mode / `session lock-and-suspend`, SUPER+SHIFT+N / +Escape).
+      #   2. It dodges the i915 "lit but black" internal-panel bug: eDP-1 fails its
+      #      wake modeset with `PHY A failed to request refclk` (see
+      #      systems/g815/default.nix), and that modeset only happens when the panel
+      #      comes back from a DPMS-off. Never blanking it on idle means it never
+      #      hits that failing wake path.
+      # The Wayland idle-inhibit locks held during games/downloads (see
+      # modules/nixos/mixins/{gaming,asus}.nix) are now belt-and-suspenders here.
       idle.behavior."screen-off" = {
         timeout = 660;
         command = "noctalia:dpms-off";
         resume_command = "noctalia:dpms-on";
-        enabled = true;
+        enabled = false;
       };
 
       # Weather, with coordinates resolved automatically from IP geolocation

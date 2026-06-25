@@ -299,8 +299,13 @@ in
     -- monitor selector (e.g. Forza Horizon): they target the monitor at (0,0) and
     -- enumerate only its modes. With eDP-1 at the origin, Forza fullscreened onto the
     -- internal panel and locked to its 240Hz/2560x1600 instead of this 1440p144 panel.
-    -- vrr = 1: FreeSync/adaptive-sync always on for this panel (overrides misc.vrr).
-    hl.monitor({ output = "HDMI-A-1", mode = "2560x1440@144", position = "0x0", scale = 1.0, vrr = 1 })
+    -- vrr = 2: FreeSync/adaptive-sync FULLSCREEN-ONLY for this panel (overrides
+    -- misc.vrr). Always-on (vrr = 1) made the panel flicker (its brightness tracks
+    -- the variable refresh during normal desktop use — scrolling, video, cursor).
+    -- vrr = 2 only engages adaptive sync while a fullscreen app (a game) is up, so
+    -- the desktop sits at a steady 144Hz (no flicker) while games still get the
+    -- judder cure. vrr = 0 would kill flicker entirely but bring the judder back.
+    hl.monitor({ output = "HDMI-A-1", mode = "2560x1440@144", position = "0x0", scale = 1.0, vrr = 2 })
     -- Internal 18" WQXGA 240Hz panel, to the RIGHT of the desk monitor (same physical
     -- arrangement as before, just shifted so HDMI-A-1 owns the origin). HDMI-A-1 is
     -- 2560px wide at scale 1.0 → this sits at x = 2560. Adjust scale to taste (1.0–1.5).
@@ -423,9 +428,10 @@ in
         -- the browser window is focused (and its workspace switched to) on open.
         focus_on_activate = true,
         -- Global VRR default is OFF; the desk monitor (HDMI-A-1) opts in to
-        -- FreeSync per-monitor via its `vrr = 1` above, and the internal eDP-1
-        -- panel stays off. (The old judder we blamed on a 120fps-into-144Hz
-        -- cadence mismatch turned out to be a GPU hybrid mismatch — now fixed —
+        -- FreeSync per-monitor via its `vrr = 2` (fullscreen-only) above, and the
+        -- internal eDP-1 panel stays off. (The old judder we blamed on a
+        -- 120fps-into-144Hz cadence mismatch turned out to be a GPU hybrid
+        -- mismatch — now fixed —
         -- so adaptive sync is the right cure rather than the screen-tearing
         -- workaround.) allow_tearing / `immediate` / direct_scanout below remain
         -- available as a low-latency fullscreen path.
