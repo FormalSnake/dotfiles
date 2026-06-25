@@ -100,8 +100,32 @@ in
         radius_bottom_left = -20; # concave → curves out into the desktop
         radius_bottom_right = -20;
         padding = 16;
-        widget_spacing = 8;
+        widget_spacing = 12;
+
+        # Widget layout. start/center/end are arrays of widget id strings;
+        # overriding a list replaces noctalia's default wholesale (see
+        # docs/noctalia-hm-internals.md → "Bar widgets"). Built-in ids imply
+        # their type; `spacer_2` is a *named* spacer instance, defined in the
+        # top-level `widget.spacer_2` table below.
+        start = [ "session" "launcher" "wallpaper" "workspaces" ];
+        center = [ "control-center" "media" "audio-visualizer" ];
+        end = [
+          "tray"
+          "spacer_2"
+          "notifications"
+          "clipboard"
+          "network"
+          "bluetooth"
+          "volume"
+          "brightness"
+          "battery"
+          "clock"
+        ];
       };
+
+      # Named spacer instance referenced from bar.main.end. A non-builtin id, so
+      # its type must be declared explicitly (defaults otherwise).
+      widget.spacer_2.type = "spacer";
 
       # Dynamic, wallpaper-derived palette is now the single source of truth for
       # the desktop's colours (replacing the static Catppuccin builtin). On every
