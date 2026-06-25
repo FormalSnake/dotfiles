@@ -433,6 +433,15 @@ in
       },
       render = {
         direct_scanout = 1,
+        -- Auto-HDR: the desktop and both monitors stay SDR/8-bit at all times;
+        -- when a fullscreen app requests an HDR swapchain (e.g. a game like
+        -- Forza via Proton with PROTON_ENABLE_HDR=1), Hyprland flips that output
+        -- to HDR for the duration and reverts on exit. 1 = generic BT.2020+PQ;
+        -- bump to 2 (hdredid, uses the panel's EDID primaries) if HDR colours/
+        -- brightness look off. If a game white-screens on launch, add
+        -- `prefer_hdr = 1` here. HDR over HDMI-A-1 needs the dGPU primary, i.e.
+        -- gaming on AC (see env-hyprland's AC GPU selection).
+        cm_auto_hdr = 1,
       },
       -- eDP-1 runs at fractional scale (1.25). XWayland can't do fractional
       -- scaling, so Hyprland upscales X11 surfaces → blurry/"weird" scaling and
