@@ -24,13 +24,15 @@
       # holds the tunnels (mosh cannot forward ports). serve-sim needs BOTH
       # 3200 (preview UI) and 3100 (MJPEG/WS stream) — see docs/remote-server.md.
       "macbook" = {
-        # Stable Tailscale IP, not the MagicDNS name (`macbook-pro-2`): when a
-        # second VPN (e.g. NordVPN) is connected it overwrites /etc/resolv.conf
-        # with its own resolvers, so MagicDNS can't resolve the name and `ssh
-        # macbook` fails at lookup. The 100.x IP is per-node stable and needs no
-        # DNS. (NordVPN coexistence also needs `lan-discovery` enabled so the
-        # direct LAN handshake isn't firewalled off.)
-        HostName = "100.75.60.102";
+        # Resolved via /etc/hosts (networking.hosts in modules/nixos/mixins/
+        # networking.nix), which pins this name to the macbook's stable Tailscale
+        # IP. Plain MagicDNS doesn't work here: the host forces Google DNS and
+        # NordVPN overwrites /etc/resolv.conf when connected — both bypass the
+        # tailnet resolver. /etc/hosts is consulted before DNS, so the name
+        # resolves regardless. (NordVPN coexistence also needs `lan-discovery`
+        # enabled so the direct LAN handshake isn't firewalled off — enforced by
+        # nordvpn-settings.service.)
+        HostName = "macbook-pro-2";
         User = "kyandesutter";
         # Mac-side connect target is `localhost` (not 127.0.0.1) on purpose:
         # Vite/Astro dev servers bind only to IPv6 [::1], while workerd/bun bind

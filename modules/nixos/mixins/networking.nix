@@ -21,6 +21,21 @@
 
   # Hostname is set per-host in systems/g815/default.nix.
 
+  # Reach the macbook over Tailscale by name on a DNS-hostile host. Tailscale
+  # Serve / MagicDNS names (e.g. the macbook's `*.ts.net` dev URLs on :8443)
+  # resolve only via the tailnet resolver 100.100.100.100 — but this host forces
+  # Google DNS (above) AND NordVPN overwrites /etc/resolv.conf when connected,
+  # so both bypass MagicDNS and the names won't resolve. Pin them to the
+  # macbook's stable Tailscale IP via /etc/hosts (nsswitch `files` is consulted
+  # before DNS, so it survives both). This is the single source of truth for the
+  # macbook's tailnet IP — ssh/mosh/curl/browser all resolve the name through it.
+  # One entry covers every Serve port/path since they share the hostname; the
+  # TLS cert stays valid because SNI/Host is still the `.ts.net` name.
+  networking.hosts."100.75.60.102" = [
+    "macbook-pro-2.tailb24294.ts.net"
+    "macbook-pro-2"
+  ];
+
   networking.firewall = {
     enable = true;
     # Steam/gamescope ports are opened by programs.steam.*.openFirewall (gaming.nix).
