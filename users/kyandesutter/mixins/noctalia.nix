@@ -101,29 +101,6 @@ in
         radius_bottom_right = -20;
         padding = 16;
         widget_spacing = 8;
-
-        # Right-side widgets. We override `end` to prepend a CPU/GPU system-monitor
-        # cluster (the `sysmon` instances defined in `widget` below); the rest is
-        # noctalia's default `end` set, repeated verbatim because overriding the
-        # list replaces it wholesale. `start`/`center` are left at their defaults.
-        end = [
-          "cpu_usage"
-          "cpu_temp"
-          "gpu_temp"
-          "gpu_usage"
-          "gpu_vram"
-          "media"
-          "tray"
-          "notifications"
-          "clipboard"
-          "network"
-          "bluetooth"
-          "volume"
-          "brightness"
-          "battery"
-          "control-center"
-          "session"
-        ];
       };
 
       # Dynamic, wallpaper-derived palette is now the single source of truth for
@@ -332,44 +309,6 @@ in
         kinds.brightness = true;
       };
 
-      # System-monitor widgets referenced by id from bar.main.end above. Each is a
-      # `sysmon` instance rendering one stat from [system.monitor] (which samples
-      # CPU/GPU/mem/etc. by default). display = "text" shows the value inline
-      # ("62°C", "45%") rather than a gauge.
-      #
-      # PRIME-offload caveat: gpu_usage and gpu_vram are read via NVML (nvidia-smi),
-      # which wakes the dGPU; with the default ~5s GPU poll this tends to keep the
-      # offload GPU awake and costs battery. gpu_temp is lighter (often hwmon
-      # sysfs). Raise system.monitor.gpu_poll_seconds or drop the usage/vram
-      # widgets if idle battery drain shows up.
-      widget = {
-        cpu_usage = {
-          type = "sysmon";
-          stat = "cpu_usage";
-          display = "text";
-        };
-        cpu_temp = {
-          type = "sysmon";
-          stat = "cpu_temp";
-          display = "text";
-        };
-        gpu_temp = {
-          type = "sysmon";
-          stat = "gpu_temp";
-          display = "text";
-        };
-        gpu_usage = {
-          type = "sysmon";
-          stat = "gpu_usage";
-          display = "text";
-        };
-        gpu_vram = {
-          type = "sysmon";
-          stat = "gpu_vram";
-          display = "text";
-        };
-      };
-
       # Event hooks: run a command on a shell event. Notifications surface through
       # noctalia's own notification daemon. notify-send is pinned by store path
       # because the noctalia *user* service runs with a limited PATH (same reason
@@ -387,7 +326,6 @@ in
         theme_mode_changed =
           "${pkgs.libnotify}/bin/notify-send 'Noctalia' \"Theme: $NOCTALIA_THEME_MODE\"";
         wallpaper_changed = "${pkgs.libnotify}/bin/notify-send 'Noctalia' 'Wallpaper changed'";
-        colors_changed = "${pkgs.libnotify}/bin/notify-send 'Noctalia' 'Palette updated'";
       };
     };
   };

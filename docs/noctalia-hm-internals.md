@@ -106,9 +106,27 @@ display = "text"             # "text" | "gauge" (default gauge)
 
 `sysmon` `stat` values: `cpu_usage`, `cpu_temp`, `gpu_temp`, `gpu_usage`,
 `gpu_vram`, `ram_used`, `ram_pct`, `swap_pct`, `disk_pct`, `net_rx`, `net_tx`.
+Other `[widget.<id>]` keys: `display` (`gauge`|`text`|`graph`), `show_label`
+(value text in gauge mode), `glyph` (icon override — each stat has a default icon
+like `cpu-usage`/`gpu-temperature`), `path` (for `disk_pct`), `interface` (net).
 Sampling/poll intervals + alert thresholds are under `[system.monitor]` (on by
-default). GPU `usage`/`vram` read via NVML (`nvidia-smi`) → **wakes a PRIME-offload
-dGPU**; `gpu_temp` is lighter.
+default).
+
+**NVIDIA GPU stats need NVML.** noctalia reads `gpu_temp`/`gpu_usage`/`gpu_vram`
+via NVML (`libnvidia-ml.so.1`), which it dlopens by soname (sysfs `gpu_busy_percent`
+/`mem_info_vram_*` are amdgpu-only). On NixOS that lib is in `/run/opengl-driver/lib`,
+off the loader path, so the service logs `NVML unavailable` and the widgets read
+`--`. Fix: give the noctalia user service `Environment = [
+"LD_LIBRARY_PATH=/run/opengl-driver/lib" ]` (that dir has only vendor impls, no
+glvnd dispatch libs, so it won't shadow noctalia's GL). PRIME-offload caveat: NVML
+polling keeps the dGPU awake (it's on anyway while the external monitor is docked).
+Diagnose via `~/.cache/noctalia/noctalia.log` (`[sysmon] detected GPU … source:`).
+
+**Compacting a cluster:** `bar.main.capsule_group = [{ id = "..."; members = [ … ];
+}]` wraps listed widgets in one pill **without** enabling bar-wide `capsule` mode.
+Other group keys: `fill`, `foreground`, `border`, `padding`, `radius`, `opacity`.
+Members must be contiguous in the `start`/`center`/`end` list for the pill to look
+right.
 
 ## Hooks (`[hooks]`) — events & env vars
 
