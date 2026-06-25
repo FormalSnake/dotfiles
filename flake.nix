@@ -90,9 +90,16 @@
     # first-party nixpkgs module exists; this community flake provides the
     # package + a NixOS module (services.nordvpn). No `inputs.nixpkgs.follows`:
     # its package is built (with a vendored .deb FOD) against its own pinned
-    # nixpkgs, and it's dormant — leave it self-contained rather than risk a
-    # mismatch. Revisit if it's ever activated.
-    nordvpn-flake.url = "github:connerohnesorge/nordvpn-flake";
+    # nixpkgs — leave it self-contained rather than risk a mismatch.
+    #
+    # The flake consumes the NordVPN .deb as `flake = false` inputs pinned to
+    # 4.2.0, which NordVPN has since removed from their repo (404). Override
+    # both arch debs to a version still hosted so the FOD resolves.
+    nordvpn-flake = {
+      url = "github:connerohnesorge/nordvpn-flake";
+      inputs.nordvpn-amd64-deb.url = "file+https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/n/nordvpn/nordvpn_5.1.0_amd64.deb";
+      inputs.nordvpn-arm64-deb.url = "file+https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/n/nordvpn/nordvpn_5.1.0_arm64.deb";
+    };
 
     # CachyOS kernel + scx schedulers. nyxpkgs-unstable tracks nixpkgs-unstable.
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";

@@ -24,28 +24,38 @@
       # holds the tunnels (mosh cannot forward ports). serve-sim needs BOTH
       # 3200 (preview UI) and 3100 (MJPEG/WS stream) — see docs/remote-server.md.
       "macbook" = {
-        HostName = "macbook-pro-2"; # Tailscale MagicDNS name of the Mac (confirmed via direct ssh)
+        # Stable Tailscale IP, not the MagicDNS name (`macbook-pro-2`): when a
+        # second VPN (e.g. NordVPN) is connected it overwrites /etc/resolv.conf
+        # with its own resolvers, so MagicDNS can't resolve the name and `ssh
+        # macbook` fails at lookup. The 100.x IP is per-node stable and needs no
+        # DNS. (NordVPN coexistence also needs `lan-discovery` enabled so the
+        # direct LAN handshake isn't firewalled off.)
+        HostName = "100.75.60.102";
         User = "kyandesutter";
         # Mac-side connect target is `localhost` (not 127.0.0.1) on purpose:
         # Vite/Astro dev servers bind only to IPv6 [::1], while workerd/bun bind
         # IPv4. Targeting `localhost` makes sshd on the Mac try every address for
         # the name, so the forward connects regardless of which stack the server
         # chose — otherwise IPv6-only servers fail with `channel N: open failed`.
-        # The local listen side stays default (127.0.0.1) for localhost-only
-        # cookies/CORS in the browser.
+        # The local listen side is pinned to 127.0.0.1 (not bare `localhost`):
+        # localhost resolves to both 127.0.0.1 and [::1], and when NordVPN is
+        # connected it disables IPv6 system-wide (leak protection), so the [::1]
+        # bind fails with "Cannot assign requested address" — 8 warnings per
+        # connect. Pinning IPv4 skips that bind and keeps the localhost-only
+        # (cookies/CORS) semantics the browser needs.
         LocalForward = [
-          "3200 localhost:3200"
-          "3100 localhost:3100"
-          "8080 localhost:8080"
-          "3000 localhost:3000" # generic dev server (Next.js/Vite default)
+          "127.0.0.1:3200 localhost:3200"
+          "127.0.0.1:3100 localhost:3100"
+          "127.0.0.1:8080 localhost:8080"
+          "127.0.0.1:3000 localhost:3000" # generic dev server (Next.js/Vite default)
           # CanaryPulse dev servers — so the browser on the client can reach them
           # as localhost (auth/CORS/cookies are localhost-only in dev). The admin
           # SPA loads its API/scraper URLs as http://localhost:<port> in the
           # browser, so 3001 (API) is required alongside 4322 (admin) for login.
-          "4322 localhost:4322" # admin SPA
-          "3001 localhost:3001" # API (browser calls directly: auth + tRPC)
-          "3003 localhost:3003" # scraper (REST + WebSocket)
-          "4321 localhost:4321" # web (optional)
+          "127.0.0.1:4322 localhost:4322" # admin SPA
+          "127.0.0.1:3001 localhost:3001" # API (browser calls directly: auth + tRPC)
+          "127.0.0.1:3003 localhost:3003" # scraper (REST + WebSocket)
+          "127.0.0.1:4321 localhost:4321" # web (optional)
         ];
       };
 

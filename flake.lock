@@ -982,25 +982,25 @@
     "nordvpn-amd64-deb": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-AfVDD/9ASErvgcG590/O+l7jeIeAv+PQkOvkRX8wC7I=",
+        "narHash": "sha256-Ty5PbtoAuUKzukDPCwL3DzO+6WE2XlDfTIPk+VT6lS4=",
         "type": "file",
-        "url": "https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/n/nordvpn/nordvpn_4.2.0_amd64.deb"
+        "url": "https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/n/nordvpn/nordvpn_5.1.0_amd64.deb"
       },
       "original": {
         "type": "file",
-        "url": "https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/n/nordvpn/nordvpn_4.2.0_amd64.deb"
+        "url": "https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/n/nordvpn/nordvpn_5.1.0_amd64.deb"
       }
     },
     "nordvpn-arm64-deb": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-YweSq0QV+rMNWvvWw6RN0XbsvGeZVIUlJo3z+l+f79w=",
+        "narHash": "sha256-WlDgjND0uOo+LRchVB3nG6OZBhRzTeaYt3SzImXjmqk=",
         "type": "file",
-        "url": "https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/n/nordvpn/nordvpn_4.2.0_arm64.deb"
+        "url": "https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/n/nordvpn/nordvpn_5.1.0_arm64.deb"
       },
       "original": {
         "type": "file",
-        "url": "https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/n/nordvpn/nordvpn_4.2.0_arm64.deb"
+        "url": "https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/n/nordvpn/nordvpn_5.1.0_arm64.deb"
       }
     },
     "nordvpn-flake": {

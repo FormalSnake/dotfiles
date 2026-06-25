@@ -30,6 +30,16 @@ in
   # Deliberately NO `Restart=`: closing one of these apps must not relaunch it
   # (matches the old exec-once semantics). Window rules in hyprland.nix still pin
   # each one to its named workspace.
+  #
+  # Every `[Unit]` below carries `X-SwitchMethod = "keep-old"`. home-manager
+  # switches user units with sd-switch, whose default action for a changed unit
+  # is stop-start — so each `nixos-rebuild switch` would kill and relaunch these
+  # login apps (and occasionally just leave them closed when the restart races
+  # graphical-session.target). Their `ExecStart` embeds `${pkgs.bash}`'s store
+  # path, so any nixpkgs bump rewrites the unit and re-triggers that churn.
+  # `keep-old` tells sd-switch to leave an already-running app untouched across a
+  # switch (the new definition applies at the next login) while still starting it
+  # if it isn't running. Rebuilds no longer disturb the running session.
 
   # Steam, launched minimized to the tray so it doesn't grab focus at login.
   # Window rule sends it to workspace 9 (gaming, HDMI-A-1).
@@ -38,6 +48,7 @@ in
       Description = "Steam (minimized to tray)";
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
+      "X-SwitchMethod" = "keep-old";
     };
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {
@@ -53,6 +64,7 @@ in
       Description = "Equibop (minimized to tray)";
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
+      "X-SwitchMethod" = "keep-old";
     };
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {
@@ -68,6 +80,7 @@ in
       Description = "1Password (tray)";
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
+      "X-SwitchMethod" = "keep-old";
     };
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {
@@ -82,6 +95,7 @@ in
       Description = "Beeper";
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
+      "X-SwitchMethod" = "keep-old";
     };
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {
@@ -96,6 +110,7 @@ in
       Description = "BlueBubbles";
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
+      "X-SwitchMethod" = "keep-old";
     };
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {
@@ -111,6 +126,7 @@ in
       Description = "Spotify";
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
+      "X-SwitchMethod" = "keep-old";
     };
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {
@@ -129,6 +145,7 @@ in
       Description = "wl-clip-persist (keep regular clipboard alive)";
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
+      "X-SwitchMethod" = "keep-old";
     };
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {
@@ -147,6 +164,7 @@ in
       Description = "KDE Connect (tray indicator + daemon)";
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
+      "X-SwitchMethod" = "keep-old";
     };
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {
@@ -165,6 +183,7 @@ in
       Description = "LocalSend (file sharing receiver)";
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
+      "X-SwitchMethod" = "keep-old";
     };
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {
@@ -192,6 +211,7 @@ in
       PartOf = [ "graphical-session.target" ];
       After = [ "noctalia.service" "graphical-session.target" ];
       Wants = [ "noctalia.service" ];
+      "X-SwitchMethod" = "keep-old";
     };
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {
