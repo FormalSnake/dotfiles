@@ -1,13 +1,31 @@
-{ ... }:
+{ pkgs, ... }:
+let
+  # — How these services find their executables —
+  #
+  # systemd resolves a *bare* `ExecStart` name against the manager process's own
+  # PATH, which PAM fixes when `systemd --user` first starts — long before the
+  # Hyprland session imports the rich session PATH into the user manager. That
+  # early PATH lacks /run/current-system/sw/bin and the per-user profile, so a
+  # bare `ExecStart=steam` (or even `sh`) fails at login with status=203/EXEC and
+  # the app silently never starts. (noctalia/easyeffects dodge this only because
+  # their units use absolute /nix/store paths.)
+  #
+  # Fix: launch each app through a login shell. `bash -lc` rebuilds the full
+  # session PATH (/run/current-system/sw/bin + the per-user profile), exactly the
+  # environment hl.exec_cmd gave these apps before. `exec` replaces the shell so
+  # the app stays the unit's main PID — tray behaviour and Type=simple are
+  # unchanged. This is the systemd-unit analogue of the old shell-launched
+  # exec-once, not a behaviour change.
+  loginExec = cmd: "${pkgs.bash}/bin/bash -lc 'exec ${cmd}'";
+in
 {
   # — DE-agnostic login items (generic GUI apps) —
   #
   # These were previously launched from Hyprland's hyprland.start via
   # hl.exec_cmd; they are generic GUI apps, not compositor-coupled, so they live
   # here as home-manager systemd user services bound to graphical-session.target
-  # (which uwsm starts/stops with the Hyprland session). The services inherit the
-  # imported graphical-session env — the same env noctalia's own user service runs
-  # in — so bare command names resolve exactly as they did under hl.exec_cmd.
+  # (which uwsm starts/stops with the Hyprland session). See loginExec above for
+  # how their executables are resolved.
   #
   # Deliberately NO `Restart=`: closing one of these apps must not relaunch it
   # (matches the old exec-once semantics). Window rules in hyprland.nix still pin
@@ -24,7 +42,7 @@
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {
       Type = "simple";
-      ExecStart = "steam -silent";
+      ExecStart = loginExec "steam -silent";
     };
   };
 
@@ -39,7 +57,7 @@
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {
       Type = "simple";
-      ExecStart = "equibop --start-minimized";
+      ExecStart = loginExec "equibop --start-minimized";
     };
   };
 
@@ -54,7 +72,7 @@
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {
       Type = "simple";
-      ExecStart = "1password --silent";
+      ExecStart = loginExec "1password --silent";
     };
   };
 
@@ -68,7 +86,7 @@
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {
       Type = "simple";
-      ExecStart = "beeper";
+      ExecStart = loginExec "beeper";
     };
   };
 
@@ -82,11 +100,12 @@
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {
       Type = "simple";
-      ExecStart = "bluebubbles";
+      ExecStart = loginExec "bluebubbles";
     };
   };
 
-  # Spotify music player. Window rule pins it to workspace 8 (media).
+  # Spotify music player (installed as the com.spotify.Client flatpak — there is
+  # no `spotify` binary on PATH). Window rule pins it to workspace 8 (media).
   systemd.user.services.spotify = {
     Unit = {
       Description = "Spotify";
@@ -96,7 +115,7 @@
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {
       Type = "simple";
-      ExecStart = "spotify";
+      ExecStart = loginExec "flatpak run com.spotify.Client";
     };
   };
 
@@ -114,7 +133,7 @@
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {
       Type = "simple";
-      ExecStart = "wl-clip-persist --clipboard regular";
+      ExecStart = loginExec "wl-clip-persist --clipboard regular";
     };
   };
 
@@ -132,14 +151,15 @@
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {
       Type = "simple";
-      ExecStart = "kdeconnect-indicator";
+      ExecStart = loginExec "kdeconnect-indicator";
     };
   };
 
   # LocalSend receiver (AirDrop-style file/link sharing). Kept running so files
   # can arrive without manually opening the app. It opens a window at launch;
   # enable "launch minimized / minimize to tray" in-app to suppress that.
-  # System-level programs.localsend.enable provides the binary + firewall port.
+  # System-level programs.localsend.enable provides the binary (`localsend_app`)
+  # + firewall port.
   systemd.user.services.localsend = {
     Unit = {
       Description = "LocalSend (file sharing receiver)";
@@ -149,7 +169,7 @@
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {
       Type = "simple";
-      ExecStart = "localsend";
+      ExecStart = loginExec "localsend_app";
     };
   };
 
@@ -176,8 +196,8 @@
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {
       Type = "simple";
-      ExecStartPre = "sh -c 'for i in $(seq 50); do busctl --user call org.freedesktop.DBus /org/freedesktop/DBus org.freedesktop.DBus NameHasOwner s org.freedesktop.Notifications 2>/dev/null | grep -q true && break; sleep 0.2; done'";
-      ExecStart = "helium";
+      ExecStartPre = "${pkgs.bash}/bin/bash -lc 'for i in $(seq 50); do busctl --user call org.freedesktop.DBus /org/freedesktop/DBus org.freedesktop.DBus NameHasOwner s org.freedesktop.Notifications 2>/dev/null | grep -q true && break; sleep 0.2; done'";
+      ExecStart = loginExec "helium";
     };
   };
 }
