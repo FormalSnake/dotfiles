@@ -53,6 +53,13 @@
     # Cost is a little idle power on the iGPU; no other behavioural change.
     "i915.enable_dc=0"
     "i915.enable_psr=0"
+
+    # Disable CPU speculative-execution mitigations for a CPU-bound performance
+    # win (~5-15% on some workloads; smaller on Arrow Lake-HX, which is newer
+    # silicon needing fewer of them). SECURITY TRADE-OFF: drops Spectre/Meltdown
+    # -class protections. Acceptable here — a single-user personal gaming laptop,
+    # not a shared/server host running untrusted code.
+    "mitigations=off"
   ];
 
   # Belt-and-suspenders: keep NetworkManager from re-enabling Wi-Fi powersave.
