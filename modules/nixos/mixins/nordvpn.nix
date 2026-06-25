@@ -39,6 +39,10 @@ in
       Type = "oneshot";
       RemainAfterExit = true;
       Group = "nordvpn";
+      # The nordvpn CLI calls os.UserHomeDir() (for its per-user config) and
+      # aborts with "cannot get user home dir" when $HOME is unset — which it is
+      # for a root oneshot. Give it one so every `nordvpn` call below works.
+      Environment = "HOME=/root";
     };
     script = ''
       # Wait for the daemon to accept CLI commands (it starts NonBlocking).
