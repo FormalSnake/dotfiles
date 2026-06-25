@@ -276,9 +276,38 @@ in
 
       # Weather, with coordinates resolved automatically from IP geolocation
       # ([location].auto_locate). Shown in the control center / dashboard. Unit
-      # stays celsius (noctalia default).
+      # stays celsius (noctalia default). [location] is also the single "where am
+      # I" source feeding the night light schedule below (sunset/sunrise).
       weather.enabled = true;
       location.auto_locate = true;
+
+      # Display brightness control. enable_ddcutil turns on the DDC/CI backend so
+      # the *external* monitor (HDMI-A-1, an ASUS PA278CGV) is driven over i2c by
+      # both Noctalia's brightness slider AND the XF86MonBrightness keybinds
+      # (which call `noctalia msg brightness-up/down current` — see hyprland.nix).
+      # The internal panel (eDP-1, nvidia_wmi_ec_backlight) auto-resolves to the
+      # backlight backend; no per-monitor override needed. The i2c stack (group,
+      # /dev/i2c-* access, ddcutil) is wired in modules/nixos/mixins/hyprland.nix.
+      brightness.enable_ddcutil = true;
+
+      # Night light (colour-temperature warm shift). It has no schedule of its
+      # own — it follows [location], so with auto_locate above it only kicks in
+      # between the region's real sunset and sunrise. force = false keeps it on
+      # that automatic schedule (force = true would pin it on regardless of time).
+      nightlight = {
+        enabled = true;
+        force = false;
+        temperature_day = 6500; # neutral during the day (no shift)
+        temperature_night = 4000; # warm after sunset
+      };
+
+      # OSD popups (volume/brightness/etc). bottom_center mirrors the macOS HUD
+      # placement. brightness is on by default; set explicitly so the keybind
+      # feedback is guaranteed visible.
+      osd = {
+        position = "bottom_center";
+        kinds.brightness = true;
+      };
     };
   };
 

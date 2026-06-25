@@ -178,7 +178,7 @@ in
       sddmAstronaut
 
       brightnessctl
-      ddcutil # external-monitor brightness (used by the monitor-brightness keybind script; also noctalia's optional [brightness] enable_ddcutil backend)
+      ddcutil # external-monitor brightness over DDC/CI — noctalia's [brightness] enable_ddcutil backend (drives the slider + the XF86MonBrightness keybinds)
       playerctl
       wl-clipboard
       grim

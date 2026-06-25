@@ -1,114 +1,5 @@
 { pkgs, config, ... }:
 let
-  # Cursor-aware brightness control. Adjusts whichever monitor the cursor is
-  # currently over: the internal panel via the kernel backlight (brightnessctl),
-  # external monitors via DDC/CI (ddcutil). External monitors are addressed by
-  # mapping the Hyprland connector name (e.g. HDMI-A-1) to its /dev/i2c-N bus,
-  # since ddcutil's own display numbering doesn't track Hyprland's.
-  monitorBrightness = pkgs.writeShellApplication {
-    name = "monitor-brightness";
-    runtimeInputs = with pkgs; [
-      hyprland # hyprctl
-      jq
-      gawk
-      coreutils # tr
-      util-linux # flock
-      brightnessctl
-      ddcutil
-    ];
-    text = ''
-      # usage: monitor-brightness up|down [stepPercent]
-      dir="''${1:?usage: monitor-brightness up|down [step]}"
-      step="''${2:-5}"
-      cache="''${XDG_RUNTIME_DIR:-/tmp}/ddc-bus.cache"
-
-      # Cursor position in global layout coords ("x, y" → "x y").
-      read -r cx cy < <(hyprctl cursorpos 2>/dev/null | tr -d ',') || true
-      if [ -z "''${cx:-}" ] || [ -z "''${cy:-}" ]; then exit 0; fi
-
-      # The monitor whose logical rectangle contains the cursor. width/height are
-      # physical pixels, so divide by scale to get the logical size that cursorpos
-      # is expressed in.
-      mon=$(hyprctl -j monitors | jq -c --argjson cx "$cx" --argjson cy "$cy" '
-        first(.[] | select(
-          $cx >= .x and $cx < (.x + (.width / .scale)) and
-          $cy >= .y and $cy < (.y + (.height / .scale))
-        )) // empty') || true
-      # Fallback: the focused monitor (used only when the cursor isn't inside
-      # any monitor rect; with follow_mouse=0 focus follows clicks, not hover).
-      if [ -z "$mon" ]; then
-        mon=$(hyprctl -j monitors | jq -c 'first(.[] | select(.focused)) // empty') || true
-      fi
-      if [ -z "$mon" ]; then exit 0; fi
-
-      name=$(jq -r '.name'          <<<"$mon")
-      model=$(jq -r '.model // ""'  <<<"$mon")
-      serial=$(jq -r '.serial // ""' <<<"$mon")
-
-      # Internal panel → kernel backlight.
-      case "$name" in
-        eDP-*|LVDS-*|DSI-*)
-          if [ "$dir" = up ]; then
-            brightnessctl set "$step%+" >/dev/null || true
-          else
-            brightnessctl set "$step%-" >/dev/null || true
-          fi
-          exit 0
-          ;;
-      esac
-
-      # External monitor → DDC/CI. Build a connector→bus table from `ddcutil
-      # detect` (slow, so cache it for the session), keyed by DRM connector with
-      # EDID serial then model as fallbacks.
-      build_cache() {
-        ddcutil detect --terse 2>/dev/null | awk '
-          function flush() {
-            if (bus != "") printf "%s|%s|%s|%s\n", drm, bus, model, serial
-            drm=""; bus=""; model=""; serial=""
-          }
-          /^Display/       { flush() }
-          /I2C bus:/       { b=$0; sub(/.*i2c-/, "", b); bus=b }
-          /DRM connector:/ { d=$NF; sub(/^card[0-9]+-/, "", d); drm=d }
-          /Model:/         { m=$0; sub(/^[^:]*:[ \t]*/, "", m); model=m }
-          /Serial number:/ { s=$0; sub(/^[^:]*:[ \t]*/, "", s); serial=s }
-          END              { flush() }
-        ' >"$cache" || true
-      }
-
-      lookup_bus() {
-        [ -s "$cache" ] || return 1
-        local b
-        b=$(awk -F'|' -v c="$name" '$1==c{print $2; exit}' "$cache")
-        if [ -n "$b" ]; then printf '%s\n' "$b"; return 0; fi
-        if [ -n "$serial" ]; then
-          b=$(awk -F'|' -v s="$serial" '$4==s{print $2; exit}' "$cache")
-          if [ -n "$b" ]; then printf '%s\n' "$b"; return 0; fi
-        fi
-        if [ -n "$model" ]; then
-          b=$(awk -F'|' -v m="$model" '$3==m{print $2; exit}' "$cache")
-          if [ -n "$b" ]; then printf '%s\n' "$b"; return 0; fi
-        fi
-        return 1
-      }
-
-      bus=$(lookup_bus) || true
-      if [ -z "$bus" ]; then build_cache; bus=$(lookup_bus) || true; fi
-      if [ -z "$bus" ]; then exit 0; fi
-
-      # Holding the key fires many events, but each DDC write takes ~100ms on the
-      # i2c bus. flock -n drops overlapping events so they don't pile up; the
-      # monitor visibly changing is the feedback.
-      lock="''${XDG_RUNTIME_DIR:-/tmp}/ddc-brightness.lock"
-      exec 9>"$lock"
-      flock -n 9 || exit 0
-
-      if [ "$dir" = up ]; then
-        ddcutil --bus="$bus" --noverify setvcp 10 + "$step" >/dev/null 2>&1 || true
-      else
-        ddcutil --bus="$bus" --noverify setvcp 10 - "$step" >/dev/null 2>&1 || true
-      fi
-    '';
-  };
   # Power-source-aware refresh rate + keyboard aura + dGPU dock-relog (see
   # systemd.user.services.power-tune).
   #
@@ -628,21 +519,31 @@ in
     hl.bind("Print", hl.dsp.exec_cmd("noctalia msg screenshot-fullscreen"))
     hl.bind(mod .. " + SHIFT + S", hl.dsp.exec_cmd("noctalia msg screenshot-region"))
 
-    -- Volume / brightness (repeat while held).
-    hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"), { repeating = true })
-    hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"), { repeating = true })
-    hl.bind("XF86AudioMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"))
-    -- Brightness adjusts whichever monitor the cursor is on (internal panel via
-    -- brightnessctl, external monitors via ddcutil/DDC-CI). See monitorBrightness.
-    hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("${monitorBrightness}/bin/monitor-brightness up"), { repeating = true })
-    hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("${monitorBrightness}/bin/monitor-brightness down"), { repeating = true })
+    -- Volume / brightness / media all route through noctalia (msg IPC) so they
+    -- share one OSD (bottom-center, see noctalia.nix) and stay in sync with the
+    -- shell, rather than poking wpctl/playerctl/ddcutil directly:
+    --   • volume / mic → speaker + mic, with the volume OSD.
+    --   • brightness   → whichever monitor the CURSOR is on (`current`), in clean
+    --     10% steps (a multiple of 5 → stays on a tidy grid, no read-snap needed).
+    --     The external monitor is driven over DDC/CI because noctalia.nix sets
+    --     [brightness] enable_ddcutil = true; the internal panel uses the backlight
+    --     backend. Same code path as noctalia's brightness slider.
+    --   • media        → the ACTIVE MPRIS player noctalia tracks (the one shown in
+    --     its media widget), so the keys follow Spotify, not a background YouTube
+    --     tab — `playerctl` picked the wrong player by default.
+    hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("noctalia msg volume-up"), { repeating = true })
+    hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("noctalia msg volume-down"), { repeating = true })
+    hl.bind("XF86AudioMute", hl.dsp.exec_cmd("noctalia msg volume-mute"))
+    hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd("noctalia msg mic-mute"))
+    hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("noctalia msg brightness-up current 10"), { repeating = true })
+    hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("noctalia msg brightness-down current 10"), { repeating = true })
 
-    -- Media playback (G815 dedicated keys) via the active MPRIS player.
-    hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"))
-    hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"))
-    hl.bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"))
-    hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"))
-    hl.bind("XF86AudioStop", hl.dsp.exec_cmd("playerctl stop"))
+    -- Media playback (G815 dedicated keys) via noctalia → the active MPRIS player.
+    hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("noctalia msg media toggle"))
+    hl.bind("XF86AudioPause", hl.dsp.exec_cmd("noctalia msg media toggle"))
+    hl.bind("XF86AudioNext", hl.dsp.exec_cmd("noctalia msg media next"))
+    hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("noctalia msg media previous"))
+    hl.bind("XF86AudioStop", hl.dsp.exec_cmd("noctalia msg media stop"))
 
     -- Mouse drag/resize (aerospace SUPER+LMB move, SUPER+RMB resize).
     hl.bind(mod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
