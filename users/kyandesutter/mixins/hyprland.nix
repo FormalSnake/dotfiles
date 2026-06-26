@@ -390,7 +390,10 @@ in
         -- 0 = focus only changes on click, never on hover (focus-follows-mouse off).
         follow_mouse = 0,
         sensitivity = 0,
-        touchpad = { natural_scroll = true },
+        -- clickfinger: a physical 2-finger press = RMB, 3-finger = MMB (replaces
+        -- libinput's bottom-corner click areas). 2-finger tap already right-clicks
+        -- via the default tap_to_click.
+        touchpad = { natural_scroll = true, clickfinger_behavior = true },
       },
       general = {
         gaps_in = 4,
@@ -469,6 +472,11 @@ in
     -- pcall: the file is absent before Noctalia's first render — fall through to the
     -- fallback rather than erroring the whole config.
     pcall(dofile, os.getenv("HOME") .. "/.cache/noctalia/hypr-border")
+
+    -- — Trackpad gestures (1:1 swipe) —
+    -- 3-finger horizontal = workspace switch; 3-finger up = toggle fullscreen.
+    hl.gesture({ fingers = 3, direction = "horizontal", action = "workspace" })
+    hl.gesture({ fingers = 3, direction = "up", action = "fullscreen" })
 
     -- — Keybinds (mirror the macOS/aerospace muscle memory, SUPER as mod) —
     -- App launcher (noctalia panel toggled over IPC).
