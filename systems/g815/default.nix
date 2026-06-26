@@ -101,6 +101,9 @@
   # Sober — Roblox client for Linux (Flatpak-only, managed declaratively).
   kyan.sober.enable = true;
 
+  # Vinegar — Roblox Studio client for Linux (Flatpak-only, managed declaratively).
+  kyan.vinegar.enable = true;
+
   home-manager.users.kyandesutter = {
     imports = [
       self.homeModules.kyandesutter

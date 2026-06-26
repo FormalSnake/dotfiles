@@ -25,6 +25,7 @@
       ./mixins/power.nix
       ./mixins/phone-integration.nix
       ./mixins/sober.nix
+      ./mixins/vinegar.nix
       ./mixins/nordvpn.nix
       ./mixins/onepassword.nix
       ./profiles
