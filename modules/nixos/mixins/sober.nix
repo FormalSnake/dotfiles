@@ -13,6 +13,13 @@ in
     services.flatpak = {
       enable = true;
 
+      # Sober tracks Roblox, which updates often — refresh installed Flatpaks on a
+      # daily timer so it stays current without manual `flatpak update` / rebuilds.
+      update.auto = {
+        enable = true;
+        onCalendar = "daily";
+      };
+
       remotes = lib.mkOptionDefault [
         {
           name = "flathub";
