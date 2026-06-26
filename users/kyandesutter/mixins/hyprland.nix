@@ -61,12 +61,13 @@ let
           # absolutely), using the cached wallpaper accent (fall back to the seed).
           colour="$(cat "$HOME/.cache/noctalia/aura-color" 2>/dev/null || echo b15bf5)"
           ${config.home.profileDirectory}/bin/aura-repaint "$colour" || true
-          # Offer the dGPU relog only when arriving on real AC (barrel) from
-          # elsewhere — never on a power bank. Skips the initial reconcile, where
-          # last_src is empty.
-          if [ "$src" = ac ] && [ -n "$last_src" ]; then
-            ${dockRelog}/bin/dock-relog || true
-          fi
+          # dGPU power now follows the source at the SYSTEM level (power-reconcile →
+          # dgpu-power, modules/nixos/mixins/power.nix): hard power-off on battery,
+          # back on for AC — live, no relog. The old battery→AC dock-relog (to make
+          # the desktop dGPU-primary without a reboot) is disabled: it relogs via
+          # `uwsm stop`, and logout black-screens on this machine. dGPU-primary on AC
+          # is still chosen at login by env-hyprland; mid-session AC just powers the
+          # dGPU back for offload. dock-relog itself is kept for the manual keybind.
           last_src="$src"
         fi
         case "$(profile)" in

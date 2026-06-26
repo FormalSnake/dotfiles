@@ -59,7 +59,15 @@ in
 
   config = lib.mkIf config.kyan.asus.enable {
     # asusd: fan curves, Aura keyboard LEDs, battery charge limit.
-    # (supergfxd is intentionally omitted — MUX switching needs a relog.)
+    #
+    # NOTE: supergfxd is intentionally NOT used for dGPU power management. RTD3 is
+    # broken on this Blackwell RTX 5070 + open-module 610 (NVIDIA
+    # open-gpu-kernel-modules #882) so the dGPU must be hard-powered-off to save
+    # power on battery — but supergfxd applies its Integrated switch only during a
+    # logout, and logout black-screens on this machine. Instead, power.nix's
+    # dgpu-power does the same hard power-off (unload nvidia → PCI remove →
+    # asus-nb-wmi dgpu_disable) *live*, with no logout/reboot, driven by the
+    # power-source reconciler. See modules/nixos/mixins/power.nix.
     services.asusd.enable = true;
 
     # After asusd is up: seed the keyboard colour and cap the battery charge at

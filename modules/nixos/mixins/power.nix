@@ -28,6 +28,77 @@ let
     '';
   };
 
+  # Hard dGPU power switch. RTD3/D3cold is broken on this Blackwell RTX 5070 +
+  # open-kernel-module 610 (NVIDIA open-gpu-kernel-modules #882): the dGPU never
+  # self-suspends, so it idles at D0 (~10W) on battery no matter how little uses
+  # it. The only way to actually reclaim that power is to power the chip OFF, which
+  # supergfxd's Integrated mode does — but only across a logout, and logout
+  # black-screens on this machine. So we do the same teardown LIVE here, no logout:
+  #   off: stop the nvidia clients (nvidia-powerd holds an NVML handle; Steam is
+  #        offload-wrapped onto the dGPU), unload the driver stack, remove the GPU
+  #        from PCI, then flip the ASUS WMI kill switch (asus-nb-wmi/dgpu_disable →
+  #        ACPI _PR3) to cut power. Safe because the desktop is iGPU-primary on
+  #        battery (hyprland.nix env-hyprland) so nothing on-screen uses the dGPU.
+  #   on:  un-flip the kill switch, rescan PCI, reload the driver, restart Steam.
+  # The modprobe -r is retried because a client may take a moment to release. If it
+  # never releases we bail and leave the dGPU on rather than wedge anything. Steam
+  # lives in the user session, so we reach its unit through the user's systemd via
+  # runuser; absent (e.g. pre-login at boot) it's a harmless no-op. modprobe is the
+  # NixOS-wrapped one (knows the module tree) via its absolute path.
+  dgpuPower = pkgs.writeShellApplication {
+    name = "dgpu-power";
+    runtimeInputs = [
+      pkgs.coreutils
+      pkgs.util-linux # runuser
+      config.systemd.package # systemctl
+    ];
+    text = ''
+      knob=/sys/devices/platform/asus-nb-wmi/dgpu_disable
+      dev=0000:02:00.0
+      user=kyandesutter
+      modprobe=/run/current-system/sw/bin/modprobe
+
+      # No ASUS dGPU kill switch on this host → nothing to do.
+      [ -e "$knob" ] || exit 0
+
+      uid="$(id -u "$user" 2>/dev/null || true)"
+      user_systemctl() {
+        [ -n "$uid" ] && [ -d "/run/user/$uid" ] || return 0
+        runuser -u "$user" -- env \
+          XDG_RUNTIME_DIR="/run/user/$uid" \
+          DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$uid/bus" \
+          systemctl --user "$@" 2>/dev/null || true
+      }
+
+      case "''${1:-}" in
+        off)
+          systemctl stop nvidia-powerd.service 2>/dev/null || true
+          user_systemctl stop steam.service
+          ok=
+          for _ in 1 2 3 4 5; do
+            if "$modprobe" -r nvidia_drm nvidia_uvm nvidia_modeset nvidia 2>/dev/null; then ok=1; break; fi
+            sleep 1
+          done
+          if [ -z "$ok" ]; then
+            echo "dgpu-power: nvidia still in use — leaving dGPU powered on" >&2
+            exit 1
+          fi
+          [ -e "/sys/bus/pci/devices/$dev/remove" ] && echo 1 > "/sys/bus/pci/devices/$dev/remove" || true
+          echo 1 > "$knob"
+          ;;
+        on)
+          echo 0 > "$knob"
+          echo 1 > /sys/bus/pci/rescan
+          sleep 1
+          "$modprobe" nvidia nvidia_modeset nvidia_uvm nvidia_drm 2>/dev/null || true
+          user_systemctl start steam.service
+          ;;
+        *)
+          echo "usage: dgpu-power off|on" >&2; exit 2 ;;
+      esac
+    '';
+  };
+
   # System power reconciler — the single automatic owner of the power profile,
   # and the authority that publishes the current power source to the user session
   # via /run/power/state. Triggered by udev on any ADP0 or ucsi-source-psy change
@@ -49,6 +120,7 @@ let
     runtimeInputs = [
       pkgs.coreutils
       powerSource
+      dgpuPower
       config.services.power-profiles-daemon.package
       config.systemd.package
     ];
@@ -58,16 +130,17 @@ let
       printf '%s\n' "$src" > /run/power/state
       if [ "$src" = ac ]; then
         powerprofilesctl set performance 2>/dev/null || powerprofilesctl set balanced || true
-        # Dynamic Boost: nvidia-powerd shifts power budget to the dGPU under load.
-        # It keeps a permanent NVML handle on the GPU, which structurally blocks
-        # RTD3 (the dGPU never reaches D3cold, ~10W wasted) — so it only belongs on
-        # AC, where the budget matters and battery drain is moot. On battery/power
-        # bank stop it so the idle dGPU can finally sleep. Mirrors the PowerMizer
-        # "max on AC, adaptive on battery" policy in nvidia.nix.
+        # Bring the dGPU back (reload driver + power on) for offload/gaming, then
+        # start nvidia-powerd (Dynamic Boost) — it needs the driver loaded, so it
+        # must follow dgpu-power on. RTD3 being broken, the dGPU just idles at D0
+        # while on AC, which is fine: battery drain is moot when plugged in.
+        dgpu-power on || true
         systemctl start nvidia-powerd.service 2>/dev/null || true
       else
         powerprofilesctl set power-saver 2>/dev/null || powerprofilesctl set balanced || true
-        systemctl stop nvidia-powerd.service 2>/dev/null || true
+        # Hard power-off the dGPU (see dgpu-power above): the only real battery win,
+        # since RTD3 can't suspend it. dgpu-power stops nvidia-powerd + Steam first.
+        dgpu-power off || true
       fi
     '';
   };
