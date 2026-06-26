@@ -37,8 +37,11 @@ let
   #   off: stop the nvidia clients (nvidia-powerd holds an NVML handle; Steam is
   #        offload-wrapped onto the dGPU), unload the driver stack, remove the GPU
   #        from PCI, then flip the ASUS WMI kill switch (asus-nb-wmi/dgpu_disable →
-  #        ACPI _PR3) to cut power. Safe because the desktop is iGPU-primary on
-  #        battery (hyprland.nix env-hyprland) so nothing on-screen uses the dGPU.
+  #        ACPI _PR3) to cut power. Safe once the desktop is iGPU-primary (the normal
+  #        battery case via hyprland.nix env-hyprland; for a session that booted
+  #        dGPU-primary on AC, the AC→battery dock-relog switches it to iGPU first).
+  #        Until that relog lands the compositor still pins the dGPU and `modprobe
+  #        -r` fails — power-reconcile's off_dgpu retries once after, see below.
   #   on:  un-flip the kill switch, rescan PCI, reload the driver, restart Steam.
   # The modprobe -r is retried because a client may take a moment to release. If it
   # never releases we bail and leave the dGPU on rather than wedge anything. Steam
@@ -99,6 +102,23 @@ let
     '';
   };
 
+  # One-shot "make the dGPU power match the current source" — re-reads the source
+  # itself so it's safe to fire later than the event that scheduled it (a re-plug in
+  # between flips the decision). Used by power-reconcile's post-relog retry (off_dgpu)
+  # to power the dGPU off once a dGPU-primary session has relogged to iGPU and let go
+  # of it. Does not re-schedule, so a still-pinned dGPU (canceled relog) just stays on.
+  dgpuReconcile = pkgs.writeShellApplication {
+    name = "dgpu-reconcile";
+    runtimeInputs = [ powerSource dgpuPower ];
+    text = ''
+      if [ "$(power-source)" = ac ]; then
+        dgpu-power on || true
+      else
+        dgpu-power off || true
+      fi
+    '';
+  };
+
   # System power reconciler — the single automatic owner of the power profile,
   # and the authority that publishes the current power source to the user session
   # via /run/power/state. Triggered by udev on any ADP0 or ucsi-source-psy change
@@ -125,6 +145,19 @@ let
       config.systemd.package
     ];
     text = ''
+      # Power the dGPU off, but tolerate the one case where it can't: a session that
+      # booted dGPU-primary (on AC) still holds the DRM node open, so `dgpu-power
+      # off`'s `modprobe -r` fails. That session is relogging to iGPU-primary right
+      # now (hyprland.nix dock-relog), and releases the dGPU when it tears down — so
+      # retry once ~25s out, past the 15s relog countdown + teardown. The retry
+      # re-reads the source, so a re-plug to AC in the meantime powers the dGPU back
+      # ON instead of off, and it does NOT re-schedule, so a canceled relog (session
+      # stays dGPU-primary) just leaves the dGPU on rather than looping.
+      off_dgpu() {
+        if dgpu-power off; then return 0; fi
+        systemd-run --quiet --on-active=25 -- ${dgpuReconcile}/bin/dgpu-reconcile || true
+      }
+
       sleep 1.5
       src="$(power-source)"
       printf '%s\n' "$src" > /run/power/state
@@ -149,13 +182,15 @@ let
           powerprofilesctl set balanced || true
           # Hard power-off the dGPU (see dgpu-power above): the only real battery win,
           # since RTD3 can't suspend it. dgpu-power stops nvidia-powerd + Steam first.
-          dgpu-power off || true
+          # off_dgpu retries once if a dGPU-primary session is mid-relog (see above).
+          off_dgpu
           ;;
         *)
           powerprofilesctl set power-saver 2>/dev/null || powerprofilesctl set balanced || true
           # Hard power-off the dGPU (see dgpu-power above): the only real battery win,
           # since RTD3 can't suspend it. dgpu-power stops nvidia-powerd + Steam first.
-          dgpu-power off || true
+          # off_dgpu retries once if a dGPU-primary session is mid-relog (see above).
+          off_dgpu
           ;;
       esac
     '';
