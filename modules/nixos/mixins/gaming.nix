@@ -404,6 +404,19 @@ in
       capSysNice = true; # lets gamescope set nice/rtprio
     };
 
+    # NTSync — kernel-level NT synchronization primitives (CONFIG_NTSYNC, mainlined
+    # in Linux 6.14; the CachyOS kernel ships it as a module). Wine/Proton 11+ open
+    # /dev/ntsync for semantically-correct, in-kernel sync that fsync only ever
+    # approximated (NtPulseEvent, wait-for-all) — the payoff is steadier frame
+    # times / fewer stutters in heavily multithreaded titles rather than big
+    # average-FPS gains over fsync. Valve already loads it by default in SteamOS.
+    # Load the module at boot, and grant the logged-in user access via logind's
+    # uaccess ACL (the misc device is otherwise root-only, so Proton can't open it).
+    boot.kernelModules = [ "ntsync" ];
+    services.udev.extraRules = ''
+      KERNEL=="ntsync", MODE="0660", TAG+="uaccess"
+    '';
+
     programs.gamemode = {
       enable = true;
       settings.general = {
