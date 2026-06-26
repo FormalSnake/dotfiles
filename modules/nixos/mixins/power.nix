@@ -50,6 +50,7 @@ let
       pkgs.coreutils
       powerSource
       config.services.power-profiles-daemon.package
+      config.systemd.package
     ];
     text = ''
       sleep 1.5
@@ -57,8 +58,16 @@ let
       printf '%s\n' "$src" > /run/power/state
       if [ "$src" = ac ]; then
         powerprofilesctl set performance 2>/dev/null || powerprofilesctl set balanced || true
+        # Dynamic Boost: nvidia-powerd shifts power budget to the dGPU under load.
+        # It keeps a permanent NVML handle on the GPU, which structurally blocks
+        # RTD3 (the dGPU never reaches D3cold, ~10W wasted) — so it only belongs on
+        # AC, where the budget matters and battery drain is moot. On battery/power
+        # bank stop it so the idle dGPU can finally sleep. Mirrors the PowerMizer
+        # "max on AC, adaptive on battery" policy in nvidia.nix.
+        systemctl start nvidia-powerd.service 2>/dev/null || true
       else
         powerprofilesctl set power-saver 2>/dev/null || powerprofilesctl set balanced || true
+        systemctl stop nvidia-powerd.service 2>/dev/null || true
       fi
     '';
   };

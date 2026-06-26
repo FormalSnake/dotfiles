@@ -712,6 +712,16 @@ in
       # path is same-GPU (no blit), so zero gaming cost.
       export AQ_FORCE_LINEAR_BLIT=1
       mode=dgpu
+    elif [ -n "$igpu" ]; then
+      # Battery: pin the compositor to the iGPU *only* — name just that one card so
+      # aquamarine never enumerates the dGPU. Leaving AQ_DRM_DEVICES unset is NOT
+      # enough: aquamarine then probes every card, and since the dGPU is card0 it
+      # gets opened anyway (Xwayland grabs /dev/dri/card0, and that single open
+      # handle pins the dGPU at D0 — RTD3 never arms and it never sleeps). With only
+      # the iGPU named, the dGPU's DRM node is never touched by the session, so it
+      # can RTD3-sleep. Offloaded apps (pkgs.nvidiaOffloadEnv) still open the dGPU
+      # directly on demand and present back through the iGPU.
+      export AQ_DRM_DEVICES="$igpu"
     fi
     if [ -n "''${XDG_RUNTIME_DIR:-}" ]; then
       printf '%s\n' "$mode" > "$XDG_RUNTIME_DIR/session-gpu-mode" 2>/dev/null || true
@@ -726,6 +736,17 @@ in
       export LIBVA_DRIVER_NAME=nvidia
     else
       export LIBVA_DRIVER_NAME=iHD
+      # Keep Chromium/Electron (and any other GL/Vulkan client) off the dGPU on
+      # battery. Pinning the compositor to the iGPU above is not enough: these apps
+      # run their own GPU process that enumerates EGL/Vulkan vendors independently
+      # and will open the nvidia render node (/dev/dri/renderD12x) — another handle
+      # that pins the dGPU at D0. Exposing only the iGPU's Mesa EGL + Intel Vulkan
+      # ICD makes them open the iGPU node instead, so the dGPU stays asleep.
+      # Offloaded apps re-expand the vendor list themselves (they set their own
+      # __GLX/__VK env), and on AC nothing is restricted so gaming is untouched.
+      export __EGL_VENDOR_LIBRARY_FILENAMES=/run/opengl-driver/share/glvnd/egl_vendor.d/50_mesa.json
+      export VK_DRIVER_FILES=/run/opengl-driver/share/vulkan/icd.d/intel_icd.x86_64.json
+      export VK_ICD_FILENAMES="$VK_DRIVER_FILES"
     fi
   '';
 
