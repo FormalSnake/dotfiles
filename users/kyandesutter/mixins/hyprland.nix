@@ -393,7 +393,9 @@ in
         -- clickfinger: a physical 2-finger press = RMB, 3-finger = MMB (replaces
         -- libinput's bottom-corner click areas). 2-finger tap already right-clicks
         -- via the default tap_to_click.
-        touchpad = { natural_scroll = true, clickfinger_behavior = true },
+        -- scroll_factor < 1 dampens scroll velocity, taming the over-sensitive,
+        -- long-coasting two-finger scroll.
+        touchpad = { natural_scroll = true, clickfinger_behavior = true, scroll_factor = 0.4 },
       },
       general = {
         gaps_in = 4,
