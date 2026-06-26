@@ -387,8 +387,10 @@ in
         -- (@ # ~ [ ] { } \ € …). Trade-off: left Alt no longer acts as a plain
         -- Alt modifier (SUPER is the primary mod here anyway).
         kb_options = "lv3:lalt_switch",
-        -- 0 = focus only changes on click, never on hover (focus-follows-mouse off).
-        follow_mouse = 0,
+        -- 2 = keyboard focus only changes on click (focus-follows-mouse off), but
+        -- the hovered window still receives pointer events — so you can scroll an
+        -- unfocused window under the cursor without it stealing keyboard focus.
+        follow_mouse = 2,
         sensitivity = 0,
         -- clickfinger: a physical 2-finger press = RMB, 3-finger = MMB (replaces
         -- libinput's bottom-corner click areas). 2-finger tap already right-clicks
