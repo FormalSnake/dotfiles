@@ -7,26 +7,13 @@ in
     lib.mkEnableOption "Sober (Roblox client for Linux, installed via Flatpak)";
 
   # Sober is only distributed as a Flatpak (org.vinegarhq.Sober on Flathub) —
-  # there is no nixpkgs package. nix-flatpak installs/updates it declaratively
-  # on each rebuild. The nix-flatpak NixOS module is imported in ../default.nix.
+  # there is no nixpkgs package. It rides on the declarative Flatpak base in
+  # ./flatpak.nix (enabled below), which nix-flatpak installs/updates on each
+  # rebuild.
   config = lib.mkIf cfg.enable {
+    kyan.flatpak.enable = true;
+
     services.flatpak = {
-      enable = true;
-
-      # Sober tracks Roblox, which updates often — refresh installed Flatpaks on a
-      # daily timer so it stays current without manual `flatpak update` / rebuilds.
-      update.auto = {
-        enable = true;
-        onCalendar = "daily";
-      };
-
-      remotes = lib.mkOptionDefault [
-        {
-          name = "flathub";
-          location = "https://flathub.org/repo/flathub.flatpakrepo";
-        }
-      ];
-
       packages = [ "org.vinegarhq.Sober" ];
 
       overrides."org.vinegarhq.Sober" = {

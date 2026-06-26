@@ -4,7 +4,7 @@
     imports = [
       # CachyOS kernel overlay + binary cache + git scx schedulers.
       inputs.chaotic.nixosModules.default
-      # Declarative Flatpak (Sober / Roblox) — see ./mixins/sober.nix.
+      # Declarative Flatpak (base service in ./mixins/flatpak.nix).
       inputs.nix-flatpak.nixosModules.nix-flatpak
       ../shared
       ./mixins/nix.nix
@@ -24,6 +24,7 @@
       ./mixins/asus.nix
       ./mixins/power.nix
       ./mixins/phone-integration.nix
+      ./mixins/flatpak.nix
       ./mixins/sober.nix
       ./mixins/vinegar.nix
       ./mixins/nordvpn.nix
