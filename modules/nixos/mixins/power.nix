@@ -128,20 +128,36 @@ let
       sleep 1.5
       src="$(power-source)"
       printf '%s\n' "$src" > /run/power/state
-      if [ "$src" = ac ]; then
-        powerprofilesctl set performance 2>/dev/null || powerprofilesctl set balanced || true
-        # Bring the dGPU back (reload driver + power on) for offload/gaming, then
-        # start nvidia-powerd (Dynamic Boost) — it needs the driver loaded, so it
-        # must follow dgpu-power on. RTD3 being broken, the dGPU just idles at D0
-        # while on AC, which is fine: battery drain is moot when plugged in.
-        dgpu-power on || true
-        systemctl start nvidia-powerd.service 2>/dev/null || true
-      else
-        powerprofilesctl set power-saver 2>/dev/null || powerprofilesctl set balanced || true
-        # Hard power-off the dGPU (see dgpu-power above): the only real battery win,
-        # since RTD3 can't suspend it. dgpu-power stops nvidia-powerd + Steam first.
-        dgpu-power off || true
-      fi
+      # Three-way profile policy keyed off the classifier:
+      #   ac        — performance + dGPU on (the barrel can sustain it).
+      #   powerbank — balanced, dGPU off. A ~40-50W PD source can't feed
+      #               Performance, but it IS charging, so power-saver is needlessly
+      #               conservative; balanced is the "working remotely off a power
+      #               bank" sweet spot.
+      #   battery   — power-saver, dGPU off. Nothing plugged: stretch the battery.
+      case "$src" in
+        ac)
+          powerprofilesctl set performance 2>/dev/null || powerprofilesctl set balanced || true
+          # Bring the dGPU back (reload driver + power on) for offload/gaming, then
+          # start nvidia-powerd (Dynamic Boost) — it needs the driver loaded, so it
+          # must follow dgpu-power on. RTD3 being broken, the dGPU just idles at D0
+          # while on AC, which is fine: battery drain is moot when plugged in.
+          dgpu-power on || true
+          systemctl start nvidia-powerd.service 2>/dev/null || true
+          ;;
+        powerbank)
+          powerprofilesctl set balanced || true
+          # Hard power-off the dGPU (see dgpu-power above): the only real battery win,
+          # since RTD3 can't suspend it. dgpu-power stops nvidia-powerd + Steam first.
+          dgpu-power off || true
+          ;;
+        *)
+          powerprofilesctl set power-saver 2>/dev/null || powerprofilesctl set balanced || true
+          # Hard power-off the dGPU (see dgpu-power above): the only real battery win,
+          # since RTD3 can't suspend it. dgpu-power stops nvidia-powerd + Steam first.
+          dgpu-power off || true
+          ;;
+      esac
     '';
   };
 in
