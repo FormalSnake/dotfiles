@@ -72,6 +72,46 @@
   zramSwap = {
     enable = true;
     memoryPercent = 50;
+    priority = 5; # used before the disk swapfile below (RAM-speed first)
+  };
+
+  # Real overflow tier. zram is *compressed RAM*, not extra capacity — once the
+  # 32 GB fills, zram can't help because its compressed pages live in that same
+  # RAM. With no disk swap the kernel then OOM-kills processes (it took out
+  # Noctalia during a BeamNG-with-traffic session). This 32 GB swapfile on the
+  # ext4 root gives genuine spill space so a transient spike pages cold anon
+  # memory to NVMe instead of reaping the desktop. Priority 1 (< zram's 5) so
+  # it's only touched once zram is exhausted — the slow tier, used last.
+  swapDevices = [
+    {
+      device = "/swapfile";
+      size = 32 * 1024; # MiB → 32 GiB
+      priority = 1;
+    }
+  ];
+
+  # earlyoom — userspace OOM guard. The kernel's own OOM-killer only fires at
+  # ~0 bytes free and picks purely by oom_score, which is how a BeamNG-with-
+  # traffic spike got Noctalia/Spotify reaped instead of the game. earlyoom acts
+  # earlier (at the free thresholds below) and SIGTERMs the biggest hog — almost
+  # always the game itself — so a memory blowout costs you the game, never the
+  # desktop session. The swapfile above is the capacity fix; this is the
+  # graceful-failure backstop for when even that fills.
+  services.earlyoom = {
+    enable = true;
+    freeMemThreshold = 10; # SIGTERM when free RAM drops under 10% …
+    freeSwapThreshold = 15; # … and free swap under 15% (disk-swap thrash is painful)
+    enableNotifications = true; # Noctalia toast when it kills something
+    extraArgs = [
+      # NEVER sacrifice the compositor or shell — losing these collapses the whole
+      # session. Matched against /proc/*/comm (truncated to 15 chars), so list the
+      # wrapped names too.
+      "--avoid"
+      "^(Hyprland|\\.Hyprland-wrapp|noctalia|quickshell|hyprpolkitagent|sshd|systemd)$"
+      # Prefer to reap the heavy gaming/Wine processes first.
+      "--prefer"
+      "^(BeamNG|wine|wineserver|gamescope)$"
+    ];
   };
 
   # Cap crash-dump storage. Games/compositor crashes (Proton, gamescope, …)
