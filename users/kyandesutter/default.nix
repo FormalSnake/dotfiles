@@ -19,6 +19,7 @@
     ./mixins/catppuccin.nix
     ./mixins/fastfetch.nix
     ./mixins/herdr.nix
+    ./mixins/godot.nix
   ];
 
   home = {
