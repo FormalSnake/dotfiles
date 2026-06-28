@@ -29,7 +29,9 @@ in
   #
   # Deliberately NO `Restart=`: closing one of these apps must not relaunch it
   # (matches the old exec-once semantics). Window rules in hyprland.nix still pin
-  # each one to its named workspace.
+  # each one to its named workspace. The one exception is 1Password (below), which
+  # carries `Restart = on-failure` because it's a credential daemon that must stay
+  # present — see its block for the rationale.
   #
   # Every `[Unit]` below carries `X-SwitchMethod = "keep-old"`. home-manager
   # switches user units with sd-switch, whose default action for a changed unit
@@ -75,6 +77,16 @@ in
 
   # 1Password to the tray (--silent): keeps the desktop app running so the
   # integrated `op` CLI and browser unlock work from login without focus.
+  #
+  # UNLIKE the other login apps, this one auto-restarts. 1Password's embedded
+  # Chromium occasionally exits abnormally mid-session (it tears its GPU process
+  # down with a SIGTRAP core-dump on SIGTERM, and has hit status=1 exits), and
+  # without a `Restart=` the tray daemon just vanished until the next login —
+  # taking `op` CLI and browser unlock with it. `on-failure` (not `always`) brings
+  # it back on a crash while still honouring an intentional quit from the tray
+  # (clean exit 0). It does NOT interfere with the dGPU/AC relog or a reboot:
+  # those stop the unit via graphical-session.target going down (a commanded stop),
+  # and `Restart=` never fires on a commanded stop.
   systemd.user.services."1password" = {
     Unit = {
       Description = "1Password (tray)";
@@ -86,6 +98,8 @@ in
     Service = {
       Type = "simple";
       ExecStart = loginExec "1password --silent";
+      Restart = "on-failure";
+      RestartSec = 2;
     };
   };
 
