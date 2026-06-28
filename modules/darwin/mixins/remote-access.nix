@@ -13,6 +13,16 @@
     KbdInteractiveAuthentication no
   '';
 
+  # Authorized keys for SSH into this Mac over Tailscale. nix-darwin delivers
+  # these via an AuthorizedKeysCommand (/etc/ssh/nix_authorized_keys.d/%u),
+  # which is *additive* to ~/.ssh/authorized_keys — the laptop's hand-installed
+  # key (docs/remote-server.md step 3) is untouched. Tailscale SSH can't be a
+  # macOS server, so mobile devices (iPhone/iPad) reach the Mac via native sshd
+  # with key auth; add each device's public key here.
+  users.users.kyandesutter.openssh.authorizedKeys.keys = [
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIcVJF2yg72gRq6NceAnchCIgIWfC2Xx2Va2vcq1GVOm personal_mac"
+  ];
+
   # Best-effort enable of Remote Login (sshd) on activation. postActivation.text
   # is type `lines`, so this concatenates with any other contributor. Under
   # macOS TCC the call may silently no-op; the runbook has the manual Settings
