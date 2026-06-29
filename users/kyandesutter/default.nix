@@ -10,6 +10,7 @@
     ./mixins/git.nix
     ./mixins/gh.nix
     ./mixins/ssh.nix
+    ./mixins/clipssh.nix
     ./mixins/claude-code.nix
     ./mixins/canarycode.nix
     ./mixins/pi.nix
