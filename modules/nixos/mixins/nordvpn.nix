@@ -63,6 +63,13 @@ in
       # subnet and the WireGuard handshake never completes.
       echo "$settings" | grep -qi 'LAN Discovery: enabled' \
         || ${nordvpn} set lan-discovery enable
+
+      # Auto-connect dials the fastest exit as soon as the daemon is up (once
+      # logged in), so NordVPN comes back after every boot like Tailscale does —
+      # without it the daemon runs but leaves the tunnel Disconnected until a
+      # manual `nordvpn connect`.
+      echo "$settings" | grep -qi 'Auto-connect: enabled' \
+        || ${nordvpn} set autoconnect enable
     '';
   };
 }
