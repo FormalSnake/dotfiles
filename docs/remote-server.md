@@ -93,10 +93,14 @@ owner-only bits the flake cannot do. The owner runs every rebuild.
 ## Gotchas
 - **NordVPN killswitch vs Tailscale:** if the laptop loses the Mac while NordVPN
   is connected, re-check the `100.64.0.0/10` allowlist (step 5).
-- **mosh stalls at "Connecting…":** the macOS application firewall is blocking
-  `mosh-server`. Allow it (System Settings → Network → Firewall → Options →
-  add `mosh-server`), or confirm the firewall is off. mosh UDP (60000–61000)
-  rides the Tailscale tunnel.
+- **mosh stalls / "Nothing received from server on UDP port 600xx":** the macOS
+  application firewall silently drops inbound UDP to the *unsigned* Nix
+  `mosh-server` (SSH still works because sshd is Apple-signed). This is now fixed
+  declaratively — `modules/darwin/mixins/remote-access.nix` runs `socketfilterfw
+  --add`/`--unblockapp` on `mosh-server` every activation. If it still stalls
+  after a `darwin-rebuild switch`, TCC may have no-op'd the call; allow it
+  manually (System Settings → Network → Firewall → Options → add `mosh-server`)
+  or turn the firewall off. mosh UDP (60000–61000) rides the Tailscale tunnel.
 - **serve-sim video blank:** only 3200 was forwarded — forward 3100 too. The
   stream server binds 0.0.0.0 with no auth, so never expose it off the tunnel.
 - **Tailscale SSH** is not supported as a macOS *server*, which is why the Mac
