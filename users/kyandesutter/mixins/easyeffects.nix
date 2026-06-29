@@ -81,6 +81,40 @@ in
   services.easyeffects = {
     enable = true;
 
+    # — Neutral + gentle bass for the laptop's BUILT-IN speakers (ALC294) —
+    #
+    # Separate from the HDMI `bass-boost` preset: the built-in drivers are voiced
+    # reasonably flat already, so this stays "as neutral as possible" — NO smile
+    # EQ, no presence/air lift, no mid scoop. Just one low-shelf to add the low end
+    # the small drivers roll off, with a matching preamp cut so the boosted bass
+    # lands at unity instead of clipping (same headroom trick as bass-boost, just
+    # gentler). Net: bass ≈ 0 dB, everything else ≈ -4 dB → clean, never clips, a
+    # touch quieter overall (raise the speaker volume to compensate). Want more
+    # bass? Raise `gain` and drop `input-gain` by the same amount. Bound to the
+    # analog sink only via the autoload profile below.
+    extraPresets.laptop-neutral = {
+      output = {
+        blocklist = [ ];
+        plugins_order = [ "filter#0" ];
+
+        "filter#0" = {
+          bypass = false;
+          "input-gain" = -4.0; # preamp cut for headroom — matches the +4 shelf
+          "output-gain" = 0.0;
+          type = "Low-shelf";
+          mode = "RLC (BT)";
+          "equal-mode" = "IIR";
+          slope = "x1";
+          decramp = "Off";
+          frequency = 120.0;
+          width = 4.0;
+          quality = 0.0;
+          gain = 4.0; # gentle low-end lift below ~120 Hz
+          balance = 0.0;
+        };
+      };
+    };
+
     extraPresets.bass-boost = {
       output = {
         blocklist = [ ];
@@ -147,5 +181,18 @@ in
       "device-description" = "GB206 High Definition Audio Controller Digital Stereo (HDMI)";
       "device-profile" = "hdmi-stereo";
       "preset-name" = "bass-boost";
+    };
+
+  # Per-device autoload for the BUILT-IN analog speakers → laptop-neutral preset.
+  # Values from `wpctl inspect` on the ALC294 analog sink:
+  #   node.name           -> "device"          (and the filename device part)
+  #   device.profile.name -> "device-profile"  (and the filename profile part)
+  #   node.description     -> "device-description"
+  xdg.dataFile."easyeffects/autoload/output/alsa_output.pci-0000_80_1f.3.analog-stereo:analog-stereo.json".text =
+    builtins.toJSON {
+      device = "alsa_output.pci-0000_80_1f.3.analog-stereo";
+      "device-description" = "800 Series Chipset Family Audio Context Engine (ACE) Analog Stereo";
+      "device-profile" = "analog-stereo";
+      "preset-name" = "laptop-neutral";
     };
 }

@@ -1,14 +1,17 @@
 { config, lib, pkgs, ... }:
 let
   # Single source of truth for the power source. Prints exactly one of:
-  #   ac        — the barrel charger (up to ~300W): ADP0 online and no USB-C PD
-  #               source negotiated.
-  #   powerbank — a USB-C / Thunderbolt PD source is online (a ucsi-source-psy-*
-  #               entry). The EC reports a power bank as ADP0 online *too*, so the
-  #               only signal that tells a ~40-50W power bank apart from the barrel
-  #               is a lit UCSI source — the barrel never lights one. A power bank
-  #               can't sustain Performance, so it must be treated as battery
-  #               (low power) even though it charges.
+  #   ac        — the barrel charger (up to ~300W), the only source that can
+  #               sustain Performance + the dGPU. ASUS charge_mode reports 1
+  #               (barrel) or 3 (barrel + USB-C both plugged).
+  #   powerbank — any USB-C PD source: a power bank OR a plain USB-C wall charger.
+  #               Two signals, because the EC surfaces them differently: a power
+  #               bank lights a ucsi-source-psy-* `online`, while a USB-C charger
+  #               often does NOT — it lights ADP0=online with every UCSI source
+  #               online=0, making it indistinguishable from the barrel by ADP0
+  #               alone. The reliable discriminator is the ASUS EC charge_mode
+  #               (asus-nb-wmi): 2 == USB-C PD. None of these can feed Performance,
+  #               so they all take the balanced / dGPU-off / no-relog path.
   #   battery   — nothing plugged.
   # Both the system reconciler (below) and the user session (hyprland.nix) key
   # every power decision off this one classifier.
@@ -16,14 +19,22 @@ let
     name = "power-source";
     runtimeInputs = [ pkgs.coreutils ];
     text = ''
+      # A power bank lights an online UCSI source; the barrel never does.
       for f in /sys/class/power_supply/ucsi-source-psy-*/online; do
         [ -e "$f" ] || continue
         if [ "$(cat "$f" 2>/dev/null)" = 1 ]; then echo powerbank; exit 0; fi
       done
-      if [ "$(cat /sys/class/power_supply/ADP0/online 2>/dev/null || echo 1)" = 1 ]; then
-        echo ac
+      # Nothing on ADP0 → running on battery.
+      if [ "$(cat /sys/class/power_supply/ADP0/online 2>/dev/null || echo 1)" != 1 ]; then
+        echo battery; exit 0
+      fi
+      # Charging via ADP0. The EC's charge_mode tells the source apart even when a
+      # USB-C charger leaves every UCSI source online=0: 2 == USB-C PD (treat like
+      # a power bank), 1/3/unknown == barrel (can sustain Performance) → ac.
+      if [ "$(cat /sys/devices/platform/asus-nb-wmi/charge_mode 2>/dev/null || echo 1)" = 2 ]; then
+        echo powerbank
       else
-        echo battery
+        echo ac
       fi
     '';
   };
@@ -223,6 +234,21 @@ in
       after = [ "power-profiles-daemon.service" ];
       wants = [ "power-profiles-daemon.service" ];
       wantedBy = [ "power-profiles-daemon.service" ];
+
+      # Robustness: each power event restarts this unit via `systemctl restart`
+      # (udev rules below), and a single plug/unplug fires TWO events (ADP0 +
+      # the UCSI source) — plus a human re-plugging a few times stacks more. Each
+      # restart SIGTERMs the in-flight instance (mid 1.5s-settle or mid
+      # `dgpu-power off`) and starts a fresh one. With systemd's default limiter
+      # (5 starts / 10s) that quickly trips `start-limit-hit`, after which systemd
+      # REFUSES to run the unit at all — freezing /run/power/state and leaving the
+      # dGPU stuck in whatever state it was in. These restarts are external
+      # triggers, not a crash loop, so the rate limiter is the wrong safety here:
+      # disable it. The reconciler re-reads the source after its settle, so the
+      # last event always wins and state converges; an interrupted run is harmless
+      # because the next one completes (dgpu-power is written to be re-runnable).
+      startLimitIntervalSec = 0;
+
       serviceConfig = {
         Type = "oneshot";
         ExecStart = "${powerReconcile}/bin/power-reconcile";
