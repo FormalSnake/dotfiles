@@ -338,13 +338,14 @@ in
     -- monitor selector (e.g. Forza Horizon): they target the monitor at (0,0) and
     -- enumerate only its modes. With eDP-1 at the origin, Forza fullscreened onto the
     -- internal panel and locked to its 240Hz/2560x1600 instead of this 1440p144 panel.
-    -- vrr = 2: FreeSync/adaptive-sync FULLSCREEN-ONLY for this panel (overrides
-    -- misc.vrr). Always-on (vrr = 1) made the panel flicker (its brightness tracks
-    -- the variable refresh during normal desktop use — scrolling, video, cursor).
-    -- vrr = 2 only engages adaptive sync while a fullscreen app (a game) is up, so
-    -- the desktop sits at a steady 144Hz (no flicker) while games still get the
-    -- judder cure. vrr = 0 would kill flicker entirely but bring the judder back.
-    hl.monitor({ output = "HDMI-A-1", mode = "2560x1440@144", position = "0x0", scale = 1.0, vrr = 2 })
+    -- vrr = 0: adaptive sync OFF — the panel stays locked at a steady 144Hz.
+    -- History: vrr = 1 (always-on) made the panel flicker on the desktop (its
+    -- brightness tracks the variable refresh during scrolling/video/cursor), and
+    -- vrr = 2 (fullscreen-only) cured that flicker but left games feeling laggy —
+    -- the refresh rate visibly chases the framerate (e.g. dropping to ~100Hz) and
+    -- the constant catch-up reads as judder/input lag. Locking to a fixed 144Hz
+    -- trades the variable-refresh judder-smoothing for consistent presentation.
+    hl.monitor({ output = "HDMI-A-1", mode = "2560x1440@144", position = "0x0", scale = 1.0, vrr = 0 })
     -- Internal 18" WQXGA 240Hz panel, to the RIGHT of the desk monitor (same physical
     -- arrangement as before, just shifted so HDMI-A-1 owns the origin). HDMI-A-1 is
     -- 2560px wide at scale 1.0 → this sits at x = 2560. Adjust scale to taste (1.0–1.5).
