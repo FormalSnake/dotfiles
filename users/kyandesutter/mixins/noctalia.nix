@@ -182,7 +182,7 @@ in
 
           user = {
             # ASUS Aura keyboard. Output file doubles as the "current accent" cache
-            # that night-mode reads to restore today's colour (see asus.nix); the
+            # that asus.nix's aura-repaint reads to restore today's colour; the
             # post_hook does the actual repaint. NOTE: in light mode `primary` can
             # be pale — switch to a saturated role (e.g. tertiary) or add a
             # `saturate` filter here if the keyboard reads washed out.
@@ -290,7 +290,7 @@ in
       # displays never blank on idle. Off rather than just a long timeout for two
       # reasons:
       #   1. Always-on is the desired behaviour (manual blank still available via
-      #      night-mode / `session lock-and-suspend`, SUPER+SHIFT+N / +Escape).
+      #      `session lock-and-suspend`, SUPER+SHIFT+Escape).
       #   2. It dodges the i915 "lit but black" internal-panel bug: eDP-1 fails its
       #      wake modeset with `PHY A failed to request refclk` (see
       #      systems/g815/default.nix), and that modeset only happens when the panel

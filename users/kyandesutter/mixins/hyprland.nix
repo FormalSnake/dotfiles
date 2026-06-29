@@ -541,10 +541,6 @@ in
     -- for the new mode and re-renders every app template (terminal, editor,
     -- Discord, Aura keyboard, GTK/Qt). See mixins/noctalia.nix.
     hl.bind(mod .. " + SHIFT + T", hl.dsp.exec_cmd("noctalia msg theme-mode-toggle"))
-    -- Overnight quiet-download mode: Quiet fan profile + power-saver, blanks the
-    -- displays, and holds a Wayland idle-inhibit lock so noctalia's idle service
-    -- doesn't blank the screen mid-download. SUPER+SHIFT+N again to restore.
-    hl.bind(mod .. " + SHIFT + N", hl.dsp.exec_cmd("night-mode toggle"))
     -- Sleep: lock then suspend on demand. noctalia's `session lock-and-suspend`
     -- locks the screen before suspending, so resume lands on the lock screen.
     hl.bind(mod .. " + SHIFT + Escape", hl.dsp.exec_cmd("noctalia msg session lock-and-suspend"))
@@ -633,19 +629,6 @@ in
     hl.window_rule({ match = { class = "^([Cc]laude)$" }, workspace = "7" })                       -- ai
     hl.window_rule({ match = { class = "^([Ss]potify)$" }, workspace = "8" })                      -- media
     hl.window_rule({ match = { class = "^([Ss]team|steam)$" }, workspace = "9" })                 -- gaming
-    -- Forza Horizon 6 (Steam app 2483190). Must run on XWayland — i.e. launch options
-    -- WITHOUT PROTON_ENABLE_WAYLAND (that mode hard-targets output 0 / the internal
-    -- panel and Hyprland can't relocate its fullscreen). On XWayland Hyprland controls
-    -- the window, so pinning it to ws9 (tied to HDMI-A-1) makes its in-game Fullscreen
-    -- land on the external desk monitor while eDP-1 stays active. Launch options:
-    --   PROTON_VKD3D_HEAP=1 VKD3D_CONFIG=enable_experimental_features,descriptor_heap %command%
-    hl.window_rule({ match = { class = "^(steam_app_2483190)$" }, workspace = "9" })                -- forza → gaming/HDMI
-    -- Force fullscreen on map. FH6 restores its last *floating* window geometry,
-    -- and a position saved under a previous monitor layout (HDMI-A-1 was at -2560,0)
-    -- lands the window off the left edge once HDMI-A-1 owns the 0,0 origin — visible
-    -- only as audio. Fullscreening on map snaps it to HDMI-A-1 (0,0..2560) regardless
-    -- of the remembered coordinate, so a stale position can never hide it again.
-    hl.window_rule({ match = { class = "^(steam_app_2483190)$" }, fullscreen = true })              -- forza → always fullscreen
     -- Allow tearing for Steam games (any steam_app_<id> window). Pairs with
     -- general.allow_tearing to present frames immediately instead of on the 144Hz
     -- vblank — an optional low-latency path now that the desk monitor uses FreeSync

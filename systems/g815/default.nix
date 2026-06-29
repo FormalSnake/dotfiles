@@ -73,23 +73,6 @@
     nvidiaBusId = "PCI:2:0:0";
   };
 
-  # External USB SSD holding the Steam library (ext4, label "Steam").
-  # Declared here so it mounts at boot instead of relying on the desktop
-  # session's udisks auto-mount — otherwise Steam starts before the disk is
-  # mounted and drops the library, forcing a manual re-add every boot.
-  # `nofail` keeps boot from hanging when the drive is unplugged; `x-systemd`
-  # options make it an automount that activates on first access and gives up
-  # if the device never shows.
-  fileSystems."/mnt/steam" = {
-    device = "/dev/disk/by-uuid/1f80aa17-b86f-4d9c-94e5-b1f7898c583f";
-    fsType = "ext4";
-    options = [
-      "nofail"
-      "x-systemd.automount"
-      "x-systemd.device-timeout=10s"
-    ];
-  };
-
   # Profiles (enable the desktop + gaming stacks for this host).
   kyan.profiles.desktop.enable = true;
   kyan.profiles.gaming.enable = true;

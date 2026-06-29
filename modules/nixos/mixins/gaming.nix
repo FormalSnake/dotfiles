@@ -2,12 +2,6 @@
 let
   cfg = config.kyan.gaming;
 
-  # Catppuccin Mocha "Mauve" — the accent painted on the Aura keyboard.
-  # Deepened from the on-screen value (cba6f7) to compensate for the LEDs: the
-  # pastel mauve renders too white on the keyboard, so we drop lightness and
-  # bump saturation (HSL 272/89/66) to read as the intended purple.
-  auraColour = "b15bf5";
-
   # — Millennium (patched build) —
   # Millennium's `bun-deps` fixed-output derivation pins a hash that our `bun`
   # doesn't reproduce (bun install isn't byte-reproducible across bun versions),
@@ -43,19 +37,18 @@ let
   # resets on keyboard/mouse/touch activity from libinput — gamepad input never
   # counts. So a controller-only session keeps counting down and hits the
   # configured idle action (screen-off@11m; see noctalia.nix). The idle monitor
-  # respects inhibitors, so holding a standard Wayland idle inhibitor (wlinhibit,
-  # exactly as night-mode already does) fully suppresses them. Two complementary
-  # holders cover the two cases:
+  # respects inhibitors, so holding a standard Wayland idle inhibitor (wlinhibit)
+  # fully suppresses them. Two complementary holders cover the two cases:
   #   1. game-inhibit — driven by the gamemode start/end hooks below, so the
   #      screen stays on for the whole lifetime of any gamemode-aware title
-  #      (Steam/Proton, Lutris, Heroic) regardless of input device — including
+  #      (Steam/Proton) regardless of input device — including
   #      input-free stretches like cutscenes or turn-based thinking.
   #   2. gamepad-idle-inhibit — a session daemon that watches evdev gamepads and
   #      holds the inhibitor while a controller is actively used, covering apps
   #      that never trigger gamemode (emulators, browser/cloud games, couch media).
 
-  # 1. wlinhibit holder toggled by the gamemode hooks. Mirrors night-mode's
-  #    pidfile pattern so `end` releases exactly the process `start` spawned.
+  # 1. wlinhibit holder toggled by the gamemode hooks. Uses a pidfile so `end`
+  #    releases exactly the process `start` spawned.
   gameInhibit = pkgs.writeShellApplication {
     name = "game-inhibit";
     runtimeInputs = [ pkgs.wlinhibit pkgs.coreutils ];
@@ -283,88 +276,6 @@ let
     '';
   };
 
-  # night-mode: a quiet overnight-download mode. Sets the asusd platform profile
-  # to Quiet (gentlest fan curve) and PPD to power-saver (caps CPU boost → less
-  # heat → fans stay down), turns the displays and Aura keyboard LEDs off, and —
-  # crucially — holds a
-  # Wayland idle-inhibit lock for the duration so noctalia's idle service never
-  # fires its action. We configure noctalia with screen-off@11m (see noctalia.nix)
-  # which `respectInhibitors`; the inhibitor suppresses it so the session stays
-  # fully awake for an overnight download. We blank the screens ourselves (dpms
-  # off) since the inhibitor also suppresses noctalia's own auto screen-off —
-  # they wake on any input.
-  night-mode = pkgs.writeShellApplication {
-    name = "night-mode";
-    runtimeInputs = [
-      pkgs.asusctl
-      config.services.power-profiles-daemon.package # powerprofilesctl
-      pkgs.wlinhibit
-      pkgs.hyprland # hyprctl
-      pkgs.libnotify
-      pkgs.coreutils
-    ];
-    text = ''
-      action="''${1:-toggle}"
-      pidfile="''${XDG_RUNTIME_DIR:-/tmp}/night-mode-inhibit.pid"
-      ppctl=${config.services.power-profiles-daemon.package}/bin/powerprofilesctl
-
-      # ON iff a recorded wlinhibit process is still alive.
-      is_on() { [ -f "$pidfile" ] && kill -0 "$(cat "$pidfile" 2>/dev/null)" 2>/dev/null; }
-
-      on() {
-        asusctl profile set Quiet || true
-        "$ppctl" set power-saver || true
-        # Blank the Aura keyboard LEDs (static black) so they aren't glowing
-        # overnight. `off` repaints them the current wallpaper-derived accent.
-        asusctl aura effect static -c 000000 || true
-        if ! is_on; then
-          # Foreground tool that holds the idle inhibitor until killed; background
-          # it and remember the PID so `off` can release it.
-          wlinhibit >/dev/null 2>&1 &
-          echo "$!" > "$pidfile"
-        fi
-        notify-send -a "night-mode" "Night mode ON" \
-          "Quiet fans · idle suspend blocked · screens + RGB off" || true
-        hyprctl dispatch 'hl.dsp.dpms({ action = "disable" })' || true
-        echo "Night mode ON"
-      }
-
-      off() {
-        if is_on; then kill "$(cat "$pidfile")" 2>/dev/null || true; fi
-        rm -f "$pidfile"
-        hyprctl dispatch 'hl.dsp.dpms({ action = "enable" })' || true
-        # Restore the profile that matches the CURRENT power source, mirroring the
-        # system power reconciler (modules/nixos/mixins/power.nix): AC →
-        # Performance/performance, battery or power bank → Balanced/power-saver.
-        # night-mode runs as the user and can't trigger the root-owned
-        # power-reconcile.service, so we replicate its mapping here. The `|| echo ac`
-        # keeps the old always-Performance behaviour if the classifier is absent.
-        if [ "$(/run/current-system/sw/bin/power-source 2>/dev/null || echo ac)" = ac ]; then
-          asusctl profile set Performance || true
-          "$ppctl" set performance 2>/dev/null || "$ppctl" set balanced || true
-        else
-          asusctl profile set Balanced || true
-          "$ppctl" set power-saver 2>/dev/null || "$ppctl" set balanced || true
-        fi
-        # Repaint the Aura keyboard. Restore the *current* wallpaper-derived accent
-        # that noctalia's `aura` template caches to ~/.cache/noctalia/aura-color
-        # (see users/kyandesutter/mixins/noctalia.nix), falling back to the
-        # Catppuccin Mauve seed if noctalia hasn't generated a palette yet.
-        aura_colour="$(cat "$HOME/.cache/noctalia/aura-color" 2>/dev/null || echo ${auraColour})"
-        asusctl aura effect static -c "$aura_colour" || true
-        notify-send -a "night-mode" "Night mode OFF" "Restored power profile for the current source" || true
-        echo "Night mode OFF"
-      }
-
-      case "$action" in
-        on)     on ;;
-        off)    off ;;
-        status) if is_on; then echo "Night mode ON"; else echo "Night mode OFF"; fi ;;
-        toggle) if is_on; then off; else on; fi ;;
-        *) echo "usage: night-mode [on|off|toggle|status]" >&2; exit 1 ;;
-      esac
-    '';
-  };
 in
 {
   options.kyan.gaming.enable = lib.mkEnableOption "gaming stack (Steam, gamescope, gamemode, launchers)";
@@ -404,19 +315,6 @@ in
       capSysNice = true; # lets gamescope set nice/rtprio
     };
 
-    # NTSync — kernel-level NT synchronization primitives (CONFIG_NTSYNC, mainlined
-    # in Linux 6.14; the CachyOS kernel ships it as a module). Wine/Proton 11+ open
-    # /dev/ntsync for semantically-correct, in-kernel sync that fsync only ever
-    # approximated (NtPulseEvent, wait-for-all) — the payoff is steadier frame
-    # times / fewer stutters in heavily multithreaded titles rather than big
-    # average-FPS gains over fsync. Valve already loads it by default in SteamOS.
-    # Load the module at boot, and grant the logged-in user access via logind's
-    # uaccess ACL (the misc device is otherwise root-only, so Proton can't open it).
-    boot.kernelModules = [ "ntsync" ];
-    services.udev.extraRules = ''
-      KERNEL=="ntsync", MODE="0660", TAG+="uaccess"
-    '';
-
     programs.gamemode = {
       enable = true;
       settings.general = {
@@ -450,9 +348,8 @@ in
     };
 
     environment.systemPackages = with pkgs; [
-      # game-mode / night-mode need asusctl/asusd; the g815 host enables kyan.asus too.
+      # game-mode needs asusctl/asusd; the g815 host enables kyan.asus too.
       game-mode
-      night-mode
 
       # Idle-inhibit helpers (also driven by the gamemode hooks / user service
       # above; exposed here for manual control and testing).
@@ -463,11 +360,6 @@ in
       mangohud
       vkbasalt
       protonup-qt # manage extra Proton-GE versions
-
-      # Launchers (Epic / GOG / non-Steam). Wrapped so games launched through
-      # them render on the dGPU (PRIME offload) — see ../mixins/nvidia.nix.
-      (gpuOffloadWrap lutris)
-      (gpuOffloadWrap heroic)
 
       # Comms / streaming.
       equibopNoAgc # Discord client (Vesktop fork); WebRTC mic-AGC flag baked in (see above)
