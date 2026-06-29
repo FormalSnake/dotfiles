@@ -54,6 +54,9 @@ let
   #        Until that relog lands the compositor still pins the dGPU and `modprobe
   #        -r` fails — power-reconcile's off_dgpu retries once after, see below.
   #   on:  un-flip the kill switch, rescan PCI, reload the driver, restart Steam.
+  #   on-quiet: same bring-up as `on` but WITHOUT launching Steam — used on USB-C,
+  #        where the dGPU must stay powered for the panel backlight (see below) but
+  #        we are not gaming.
   # The modprobe -r is retried because a client may take a moment to release. If it
   # never releases we bail and leave the dGPU on rather than wedge anything. Steam
   # lives in the user session, so we reach its unit through the user's systemd via
@@ -100,15 +103,18 @@ let
           [ -e "/sys/bus/pci/devices/$dev/remove" ] && echo 1 > "/sys/bus/pci/devices/$dev/remove" || true
           echo 1 > "$knob"
           ;;
-        on)
+        on|on-quiet)
           echo 0 > "$knob"
           echo 1 > /sys/bus/pci/rescan
           sleep 1
           "$modprobe" nvidia nvidia_modeset nvidia_uvm nvidia_drm 2>/dev/null || true
-          user_systemctl start steam.service
+          # `on` is the AC/gaming bring-up and also (re)starts Steam; `on-quiet`
+          # only powers the chip + driver (USB-C: keep the backlight alive without
+          # launching the gaming stack).
+          [ "''${1:-}" = on ] && user_systemctl start steam.service
           ;;
         *)
-          echo "usage: dgpu-power off|on" >&2; exit 2 ;;
+          echo "usage: dgpu-power off|on|on-quiet" >&2; exit 2 ;;
       esac
     '';
   };
@@ -173,12 +179,15 @@ let
       src="$(power-source)"
       printf '%s\n' "$src" > /run/power/state
       # Three-way profile policy keyed off the classifier:
-      #   ac        — performance + dGPU on (the barrel can sustain it).
-      #   powerbank — balanced, dGPU off. A ~40-50W PD source can't feed
-      #               Performance, but it IS charging, so power-saver is needlessly
-      #               conservative; balanced is the "working remotely off a power
-      #               bank" sweet spot.
-      #   battery   — power-saver, dGPU off. Nothing plugged: stretch the battery.
+      #   ac        — performance + dGPU on + Dynamic Boost (the barrel sustains it).
+      #   powerbank — balanced + dGPU ON, no Dynamic Boost. USB-C is plugged in, and
+      #               the panel backlight (nvidia_wmi_ec_backlight) is wired through
+      #               the dGPU's WMI, so the chip MUST stay powered or brightness
+      #               control dies (panel drops to a dim hardware default). So we keep
+      #               it up and just hold balanced instead of performance.
+      #   battery   — power-saver + dGPU OFF. Nothing plugged: stretch the battery,
+      #               accepting that the backlight (dGPU-wired) goes to its dim
+      #               default while unplugged.
       case "$src" in
         ac)
           powerprofilesctl set performance 2>/dev/null || powerprofilesctl set balanced || true
@@ -191,10 +200,12 @@ let
           ;;
         powerbank)
           powerprofilesctl set balanced || true
-          # Hard power-off the dGPU (see dgpu-power above): the only real battery win,
-          # since RTD3 can't suspend it. dgpu-power stops nvidia-powerd + Steam first.
-          # off_dgpu retries once if a dGPU-primary session is mid-relog (see above).
-          off_dgpu
+          # Keep the dGPU POWERED on USB-C — its WMI carries the panel backlight, so
+          # powering it off would kill brightness control. Drop Dynamic Boost to stay
+          # low-power, and `on-quiet` brings the chip back if we just arrived from the
+          # battery branch (which powers it off), without launching Steam.
+          systemctl stop nvidia-powerd.service 2>/dev/null || true
+          dgpu-power on-quiet || true
           ;;
         *)
           powerprofilesctl set power-saver 2>/dev/null || powerprofilesctl set balanced || true

@@ -426,7 +426,8 @@ in
         -- XKB level-3 selector so it types the es layout's AltGr glyphs
         -- (@ # ~ [ ] { } \ € …). Trade-off: left Alt no longer acts as a plain
         -- Alt modifier (SUPER is the primary mod here anyway).
-        kb_options = "lv3:lalt_switch",
+        -- caps:escape — Caps Lock acts as Escape (no Caps Lock function).
+        kb_options = "lv3:lalt_switch,caps:escape",
         -- 2 = keyboard focus only changes on click (focus-follows-mouse off), but
         -- the hovered window still receives pointer events — so you can scroll an
         -- unfocused window under the cursor without it stealing keyboard focus.
