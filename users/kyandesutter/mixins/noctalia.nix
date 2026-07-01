@@ -42,6 +42,32 @@ let
       esac
     '';
   };
+
+  # Per-wallpaper scheme override. Noctalia's colour source is a single global
+  # setting (wallpaper-derived matugen vs a hardcoded custom palette), so to make
+  # *some* wallpapers pin a fixed palette while everything else stays matugen, we
+  # flip the source at runtime on each wallpaper change. Noctalia fires the
+  # `wallpaper_changed` hook with the newly-picked image in $NOCTALIA_WALLPAPER_PATH
+  # (see noctalia-shell src/app/application_services.cpp); if that path contains
+  # "flexoki" (any case) we snap the whole shell to the hardcoded Flexoki palette
+  # below via `noctalia msg color-scheme-set custom Flexoki`, otherwise we return
+  # to the wallpaper-derived M3 palette (`color-scheme-set wallpaper m3-tonal-spot`,
+  # matching theme.wallpaper_scheme). This runs inside noctalia's systemd *user*
+  # service (limited PATH), so the noctalia binary is provided via runtimeInputs.
+  # `color-scheme-set` fires colors_changed (NOT wallpaper_changed), so no loop.
+  flexokiScheme = pkgs.writeShellApplication {
+    name = "flexoki-scheme";
+    runtimeInputs = [ config.programs.noctalia.package ];
+    text = ''
+      path="''${NOCTALIA_WALLPAPER_PATH:-}"
+      shopt -s nocasematch
+      if [[ "$path" == *flexoki* ]]; then
+        noctalia msg color-scheme-set custom Flexoki
+      else
+        noctalia msg color-scheme-set wallpaper m3-tonal-spot
+      fi
+    '';
+  };
 in
 {
   # Official noctalia flake home-manager module. noctalia V5 is a native C++ /
@@ -58,6 +84,112 @@ in
     enable = true;
     systemd.enable = true; # user service, PartOf the Wayland/graphical-session target
 
+    # Hardcoded Flexoki palette (kepano's "inky" scheme), rendered by the module to
+    # ~/.config/noctalia/palettes/Flexoki.json. This is NOT matugen — it's the real
+    # Flexoki hex values, activated only when a Flexoki-named wallpaper is picked
+    # (flexokiScheme runs `color-scheme-set custom Flexoki`; all other wallpapers
+    # stay wallpaper-derived). Both variants are defined so the SUPER+SHIFT+T
+    # light/dark toggle keeps working while Flexoki is active. Values are the
+    # canonical Flexoki palette (kepano/flexoki css/flexoki.css): dark uses the
+    # -400 accents on black (#100F0F) with base-200 text; light uses -600 accents
+    # on paper (#FFFCF0). The `terminal` blocks mirror Flexoki's own black-box
+    # terminal theme verbatim (incl. its purple-as-ANSI-blue mapping). Schema:
+    # noctalia-shell src/theme/cli.cpp + fixed_palette.h.
+    customPalettes.Flexoki = {
+      dark = {
+        mPrimary = "#4385BE"; # blue-400
+        mOnPrimary = "#100F0F";
+        mSecondary = "#3AA99F"; # cyan-400
+        mOnSecondary = "#100F0F";
+        mTertiary = "#DA702C"; # orange-400
+        mOnTertiary = "#100F0F";
+        mError = "#D14D41"; # red-400
+        mOnError = "#100F0F";
+        mSurface = "#100F0F"; # black
+        mOnSurface = "#CECDC3"; # base-200 (tx)
+        mSurfaceVariant = "#282726"; # base-900
+        mOnSurfaceVariant = "#878580"; # base-500 (tx-2)
+        mOutline = "#403E3C"; # base-800
+        mShadow = "#000000";
+        mHover = "#1C1B1A"; # base-950
+        mOnHover = "#CECDC3";
+        terminal = {
+          background = "#100F0F";
+          foreground = "#CECDC3";
+          cursor = "#CECDC3";
+          cursorText = "#100F0F";
+          selectionBg = "#403E3C";
+          selectionFg = "#FFFCF0";
+          normal = {
+            black = "#100F0F";
+            red = "#D14D41";
+            green = "#879A39";
+            yellow = "#D0A215";
+            blue = "#8B7EC8";
+            magenta = "#CE5D97";
+            cyan = "#3AA99F";
+            white = "#878580";
+          };
+          bright = {
+            black = "#100F0F";
+            red = "#AF3029";
+            green = "#66800B";
+            yellow = "#AD8301";
+            blue = "#5E409D";
+            magenta = "#A02F6F";
+            cyan = "#24837B";
+            white = "#6F6E69";
+          };
+        };
+      };
+      light = {
+        mPrimary = "#205EA6"; # blue-600
+        mOnPrimary = "#FFFCF0";
+        mSecondary = "#24837B"; # cyan-600
+        mOnSecondary = "#FFFCF0";
+        mTertiary = "#BC5215"; # orange-600
+        mOnTertiary = "#FFFCF0";
+        mError = "#AF3029"; # red-600
+        mOnError = "#FFFCF0";
+        mSurface = "#FFFCF0"; # paper
+        mOnSurface = "#100F0F"; # black (tx)
+        mSurfaceVariant = "#E6E4D9"; # base-100
+        mOnSurfaceVariant = "#6F6E69"; # base-600 (tx-2)
+        mOutline = "#DAD8CE"; # base-150
+        mShadow = "#000000";
+        mHover = "#F2F0E5"; # base-50
+        mOnHover = "#100F0F";
+        terminal = {
+          background = "#FFFCF0";
+          foreground = "#100F0F";
+          cursor = "#100F0F";
+          cursorText = "#FFFCF0";
+          selectionBg = "#CECDC3";
+          selectionFg = "#100F0F";
+          normal = {
+            black = "#100F0F";
+            red = "#AF3029";
+            green = "#66800B";
+            yellow = "#AD8301";
+            blue = "#5E409D";
+            magenta = "#A02F6F";
+            cyan = "#24837B";
+            white = "#6F6E69";
+          };
+          bright = {
+            black = "#100F0F";
+            red = "#D14D41";
+            green = "#879A39";
+            yellow = "#D0A215";
+            blue = "#8B7EC8";
+            magenta = "#CE5D97";
+            cyan = "#3AA99F";
+            white = "#878580";
+          };
+        };
+      };
+    };
+
     # Declarative config written to ~/.config/noctalia/config.toml (the module
     # converts this attrset to TOML and runs `noctalia config validate` on it at
     # build time, so unknown/invalid keys fail the build — keys below all come
@@ -73,6 +205,70 @@ in
         # Opaque panels — mirrors caelestia's appearance.transparency.enabled =
         # false. "solid" is also noctalia's default; set explicitly for clarity.
         panel.transparency_mode = "solid";
+
+        # Session/power menu buttons (the `session` bar widget; SUPER+SHIFT+Escape
+        # is bound to lock-and-suspend directly — see hyprland.nix). This list
+        # REPLACES noctalia's default action set wholesale (default is lock,
+        # logout, lock_and_suspend, reboot, shutdown), so it's the full menu in
+        # order; `shortcut` is the in-menu number key. Changes vs default:
+        #   • plain `lock` dropped — only lock-and-suspend is used here.
+        #   • a "Windows" command button: starts reboot-to-windows.service, which
+        #     sets a one-shot UEFI BootNext into Windows and reboots, leaving the
+        #     standing default (Limine → latest NixOS) untouched. (Limine, unlike
+        #     systemd-boot, has no LoaderEntryOneShot, hence the BootNext route.)
+        #   • a "BIOS" command button: `systemctl reboot --firmware-setup`, a
+        #     one-shot reboot straight into the UEFI firmware setup.
+        #     Both `command`s run from noctalia's user service (limited PATH), so
+        #     systemctl is pinned by absolute path; their password prompts are
+        #     waived by the polkit rules in modules/nixos/mixins/boot.nix.
+        #     `brand-windows`/`cpu` are bundled tabler glyphs. Windows + BIOS sit
+        #     just before shutdown at the end of the menu.
+        #
+        # GOTCHA (noctalia 5.0.0): for a command button the action MUST be
+        # `"command"`, NOT `"custom"`. The Settings GUI labels it "Custom" and the
+        # config schema accepts any string (it does NOT enum-check `action` — even a
+        # bogus value passes `noctalia config validate`), but the session-PANEL
+        # renderer only draws `action = "command"`; anything else it logs as
+        # `[session] session panel: skipping unknown action "<x>"` and the button
+        # silently vanishes. A `command` entry with an empty `command` is likewise
+        # skipped.
+        # action ∈ lock|logout|lock_and_suspend|suspend|reboot|shutdown|command;
+        # variant ∈ default|primary|secondary|outline|ghost|destructive.
+        session.actions = [
+          {
+            action = "lock_and_suspend";
+            shortcut = "1";
+          }
+          {
+            action = "logout";
+            shortcut = "2";
+          }
+          {
+            action = "reboot";
+            shortcut = "3";
+          }
+          {
+            action = "command";
+            label = "Windows";
+            glyph = "brand-windows";
+            command = "/run/current-system/sw/bin/systemctl start reboot-to-windows.service";
+            variant = "secondary";
+            shortcut = "4";
+          }
+          {
+            action = "command";
+            label = "BIOS";
+            glyph = "cpu";
+            command = "/run/current-system/sw/bin/systemctl reboot --firmware-setup";
+            variant = "secondary";
+            shortcut = "5";
+          }
+          {
+            action = "shutdown";
+            variant = "destructive";
+            shortcut = "6";
+          }
+        ];
       };
 
       # Bar: caelestia-style full-width, edge-to-edge, solid. The real keys (per
@@ -356,7 +552,10 @@ in
           "${pkgs.libnotify}/bin/notify-send 'Power' \"Profile: $NOCTALIA_POWER_PROFILE\"";
         theme_mode_changed =
           "${pkgs.libnotify}/bin/notify-send 'Noctalia' \"Theme: $NOCTALIA_THEME_MODE\"";
-        wallpaper_changed = "${pkgs.libnotify}/bin/notify-send 'Noctalia' 'Wallpaper changed'";
+        # flexoki-scheme flips the colour source per wallpaper (Flexoki-named
+        # wallpapers → hardcoded Flexoki palette, everything else → matugen); see
+        # the flexokiScheme note in the let block above.
+        wallpaper_changed = "${flexokiScheme}/bin/flexoki-scheme; ${pkgs.libnotify}/bin/notify-send 'Noctalia' 'Wallpaper changed'";
       };
     };
   };

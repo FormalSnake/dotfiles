@@ -1,16 +1,79 @@
 { pkgs, ... }:
+let
+  # One-shot "reboot into Windows" helper. Limine — unlike systemd-boot — does
+  # NOT implement systemd's Boot Loader Interface, so `systemctl reboot
+  # --boot-loader-entry=` (the old mechanism) can't drive a one-shot Windows
+  # boot. Instead we set a UEFI BootNext directly with efibootmgr: reuse the
+  # firmware's existing "Windows Boot Manager" entry if present, otherwise create
+  # a one-shot entry pointing at bootmgfw.efi on the ESP (Windows shares NixOS's
+  # ESP here). BootNext is honoured once by the firmware and then cleared, so the
+  # standing default (Limine → latest NixOS) is left untouched — same semantics
+  # as the old LoaderEntryOneShot flow, but bootloader-agnostic.
+  reboot-to-windows = pkgs.writeShellApplication {
+    name = "reboot-to-windows";
+    runtimeInputs = [
+      pkgs.efibootmgr
+      pkgs.gawk # awk
+      pkgs.util-linux # findmnt, lsblk
+      pkgs.coreutils
+      pkgs.systemd # systemctl
+    ];
+    text = ''
+      num=$(efibootmgr | awk '/Windows Boot Manager/ { n=$1; sub(/^Boot/,"",n); sub(/\*.*/,"",n); print n; exit }')
+      if [ -n "''${num:-}" ]; then
+        efibootmgr --bootnext "$num" >/dev/null
+      else
+        # No firmware entry yet — create a one-shot one pointing at the Windows
+        # bootloader on whatever partition /boot lives on.
+        src=$(findmnt -no SOURCE /boot)
+        bn=$(basename "$src")
+        part=$(cat "/sys/class/block/$bn/partition")
+        disk=$(lsblk -no PKNAME "$src" | head -1)
+        efibootmgr --create-next --disk "/dev/$disk" --part "$part" \
+          --loader '\EFI\Microsoft\Boot\bootmgfw.efi' --label 'Windows Boot Manager' >/dev/null
+      fi
+      systemctl reboot
+    '';
+  };
+in
 {
   boot = {
     loader = {
-      systemd-boot = {
+      limine = {
         enable = true;
-        configurationLimit = 3;
-        # Render the boot menu at the panel's highest available resolution so
-        # the text is crisp instead of a stretched low-res framebuffer.
-        consoleMode = "max";
+        # Parity with the old systemd-boot configurationLimit: keep the last few
+        # generations selectable in the menu (older ones stay on disk).
+        maxGenerations = 3;
+
+        # Theming: static Catppuccin Mocha. Limine renders pre-boot, so — like
+        # SDDM — it belongs to the theming model's *static fallback* tier, not the
+        # matugen/Noctalia runtime pipeline (which would mean a full rebuild on
+        # every wallpaper change). Colours are RRGGBB. Prepended to limine.conf.
+        extraConfig = ''
+          term_palette: 45475a;f38ba8;a6e3a1;f9e2af;89b4fa;f5c2e7;94e2d5;bac2de
+          term_palette_bright: 585b70;f38ba8;a6e3a1;f9e2af;89b4fa;f5c2e7;94e2d5;a6adc8
+          term_background: 1e1e2e
+          term_foreground: cdd6f4
+          term_background_bright: 313244
+          term_foreground_bright: cdd6f4
+          backdrop: 1e1e2e
+          interface_branding_colour: 89b4fa
+        '';
+
+        # Windows chainload. extraEntries is APPENDED after the auto-generated
+        # NixOS generation entries, giving the closest achievable order to
+        # "NixOS first, Windows after" (the module emits all generations as one
+        # contiguous block, so entries can't be wedged between current and older
+        # generations). Windows and NixOS share this ESP, so boot():/// — the
+        # disk Limine itself booted from — resolves without a cross-disk UUID.
+        extraEntries = ''
+          /Windows 11
+              comment: Chainload the Windows Boot Manager
+              protocol: efi
+              path: boot():///EFI/Microsoft/Boot/bootmgfw.efi
+        '';
       };
       efi.canTouchEfiVariables = true;
-      # systemd-boot auto-detects the Windows EFI entry for dual-boot.
       timeout = 4;
     };
 
@@ -118,4 +181,41 @@
   # produce large coredumps that are rarely useful here and otherwise grow
   # unbounded under /var/lib/systemd/coredump.
   systemd.coredump.settings.Coredump.MaxUse = "256M";
+
+  # One-click "boot into Windows" support. The Noctalia session button (see
+  # users/kyandesutter/mixins/noctalia.nix) starts this oneshot service, which
+  # runs the reboot-to-windows helper as root (setting the UEFI BootNext needs
+  # privilege). The service — not a setuid wrapper — keeps the privileged action
+  # declarative and lets a scoped polkit rule below waive the password prompt.
+  systemd.services.reboot-to-windows = {
+    description = "One-shot reboot into Windows via UEFI BootNext";
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "${reboot-to-windows}/bin/reboot-to-windows";
+    };
+  };
+
+  # Passwordless one-click for the two session buttons, scoped to the active
+  # local wheel session:
+  #   • "Windows" starts reboot-to-windows.service (systemd manage-units, which
+  #     defaults to a password prompt — waived only for that one unit).
+  #   • "BIOS" runs `systemctl reboot --firmware-setup`, which sets the
+  #     boot-to-firmware-UI EFI indication via logind (also auth_admin by
+  #     default). The plain Reboot action is already allowed for the active
+  #     local session, so only the firmware-setup indication needs a grant.
+  security.polkit.extraConfig = ''
+    polkit.addRule(function(action, subject) {
+      if (action.id == "org.freedesktop.systemd1.manage-units" &&
+          action.lookup("unit") == "reboot-to-windows.service" &&
+          subject.local && subject.active && subject.isInGroup("wheel")) {
+        return polkit.Result.YES;
+      }
+    });
+    polkit.addRule(function(action, subject) {
+      if (action.id == "org.freedesktop.login1.set-reboot-to-firmware-setup" &&
+          subject.local && subject.active && subject.isInGroup("wheel")) {
+        return polkit.Result.YES;
+      }
+    });
+  '';
 }

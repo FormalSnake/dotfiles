@@ -16,7 +16,9 @@ G18 G815LP-S9034** (Intel Core Ultra 9 275HX "Arrow Lake-HX", RTX 5070 Laptop "B
 - **Desktop:** Hyprland + **noctalia** V5 shell (native C++/OpenGL ES, official flake
   `homeModules.default`), full-experience config. Keybinds mirror the macOS/aerospace muscle
   memory with **SUPER** as primary mod; **SUPER+Space** = app launcher.
-- **Boot:** systemd-boot, auto-detects Windows. **No Secure Boot / no lanzaboote** (casual
+- **Boot:** Limine (Catppuccin-themed menu), Windows via a chainload entry; a Noctalia
+  "Windows" button does a one-shot UEFI BootNext and a "BIOS" button reboots to firmware
+  setup. **No Secure Boot / no lanzaboote** (casual
   Fortnite doesn't require it; only tournaments do). Laptop ships with no OS → install
   Win11 into its own partition, then NixOS alongside.
 - **Browser:** Helium via `github:schembriaiden/helium-browser-nix-flake` overlay → `web` ws.
@@ -68,7 +70,7 @@ verification is hardware-only (see the checklist above).
 - [ ] `systems/g815/hardware-configuration.nix`: placeholder template with TODO header.
 
 ### Phase 2 — Kernel + GPU
-- [ ] `modules/nixos/mixins/boot.nix`: systemd-boot, `linuxPackages_cachyos`, kernel params.
+- [ ] `modules/nixos/mixins/boot.nix`: Limine, `linuxPackages_cachyos`, kernel params.
 - [ ] `modules/nixos/mixins/scx.nix`: `services.scx` (`scx_bpfland`).
 - [ ] `modules/nixos/mixins/graphics.nix`: `hardware.graphics.enable + enable32Bit`.
 - [ ] `modules/nixos/mixins/nvidia.nix`: open driver, modesetting, prime offload, powerManagement,
@@ -113,8 +115,8 @@ verification is hardware-only (see the checklist above).
 
 Detailed expansion of the runbook above. Flake target is **`.#g815`**; repo is
 `github.com/FormalSnake/dotfiles`, lives at `~/.config/nix`. The laptop ships with **no OS**,
-so Windows is installed from scratch first, then NixOS alongside it (shared ESP, systemd-boot
-auto-detects Windows).
+so Windows is installed from scratch first, then NixOS alongside it (shared ESP; Limine
+chainloads the Windows Boot Manager).
 
 Three things in the repo are **placeholders** that only the real hardware can fill, and the
 flake is not fully correct until all three are done:
@@ -191,8 +193,8 @@ sudo nixos-install --flake /mnt/etc/nixos/nix-config#g815 \
   --option trusted-public-keys "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= nyx-cache.chaotic.cx:dJxTrgMC3V3cFfyIiBQDQorG6k1LsqurH/srpMSq7qk="
 ```
 
-Set the **root** password when prompted, reboot, pull the USB. systemd-boot should list **NixOS**
-and **Windows Boot Manager**.
+Set the **root** password when prompted, reboot, pull the USB. Limine should list **NixOS**
+and **Windows 11**.
 
 ### Phase 3 — First boot, on the hardware
 

@@ -1,5 +1,62 @@
-{ ... }:
+{ config, pkgs, ... }:
 let
+  # — Default-sink → preset sync (the reason EasyEffects' own autoload isn't enough) —
+  #
+  # EasyEffects 8 (the Qt6 rewrite) only autoloads a preset when a device's active
+  # output ROUTE changes (e.g. plugging headphones into the analog jack) — see
+  # pw_manager.cpp: `outputRouteChanged` triggers autoload, but `defaultSinkChanged`
+  # does NOT. Switching the default sink in Noctalia (HDMI ↔ speakers ↔ bluetooth)
+  # is a default-sink change, so EE never reacts and the wrong preset stays loaded.
+  #
+  # This service closes that gap: it tails `pw-metadata -n default -m`, which streams
+  # an update line on every `default.audio.sink` change (and replays the current value
+  # on connect, so the right preset is applied at startup too), maps the new sink's
+  # node.name to a preset, and runs `easyeffects -l <preset>`. The per-device autoload
+  # files below still cover the native route-change case (analog jack); this covers the
+  # default-sink case. The two can both fire and just load the same preset — harmless.
+  #
+  # Sink → preset map mirrors the identifiers in modules/nixos/mixins/audio.nix's
+  # output-priority rules. Runs in a user service with a limited PATH, so its tools
+  # come from runtimeInputs.
+  eePresetSync = pkgs.writeShellApplication {
+    name = "ee-preset-sync";
+    runtimeInputs = [
+      pkgs.pipewire # pw-metadata
+      config.services.easyeffects.package # easyeffects -l
+      pkgs.gnused
+      pkgs.coreutils
+    ];
+    text = ''
+      map_preset() {
+        case "$1" in
+          *pci-0000_02_00.1*) echo bass-boost ;;     # GB206 HDMI speakers
+          *pci-0000_80_1f.3*) echo laptop-neutral ;; # ALC294 built-in speakers
+          bluez_output.*)     echo flat ;;           # bluetooth (CMF Headphone Pro)
+          *)                  echo flat ;;           # anything else: pass-through, no EQ
+        esac
+      }
+
+      last=""
+      apply() {
+        preset="$1"
+        if [ "$preset" = "$last" ]; then return 0; fi
+        if easyeffects -l "$preset"; then last="$preset"; fi
+      }
+
+      # Let the EasyEffects daemon finish coming up before the first -l.
+      sleep 2
+
+      pw-metadata -n default -m 2>/dev/null | while IFS= read -r line; do
+        case "$line" in
+          *"key:'default.audio.sink'"*)
+            sink="$(printf '%s\n' "$line" | sed -nE 's/.*"name"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/p')"
+            [ -n "$sink" ] && apply "$(map_preset "$sink")"
+            ;;
+        esac
+      done
+    '';
+  };
+
   # — Voicing EQ for the Pebbles (the "general sound" improvement) —
   #
   # The upper half of Ziyad Nazem's community "Perfect EQ" curve, adapted for
@@ -80,6 +137,18 @@ in
   # this live in the EasyEffects window; changes save back to the output preset.
   services.easyeffects = {
     enable = true;
+
+    # — Flat / pass-through preset for devices that should get NO processing —
+    #
+    # Loaded by ee-preset-sync (above) whenever the default sink is the bluetooth
+    # headphones (CMF Headphone Pro) or any unmapped device. Empty plugins_order =
+    # an empty chain, so the signal passes through EasyEffects untouched.
+    extraPresets.flat = {
+      output = {
+        blocklist = [ ];
+        plugins_order = [ ];
+      };
+    };
 
     # — Neutral + gentle bass for the laptop's BUILT-IN speakers (ALC294) —
     #
@@ -163,36 +232,67 @@ in
   };
 
   # Per-device autoload profile: tie the bass-boost OUTPUT preset to the HDMI
-  # sink only. EasyEffects 8 looks for ~/.local/share/easyeffects/autoload/
-  # output/<device>:<profile>.json whenever the active output device/route
-  # changes; if it matches, it loads `preset-name`. With no profile for the
-  # laptop's analog sink, those speakers stay flat.
+  # sink. EasyEffects 8 looks for ~/.local/share/easyeffects/autoload/
+  # output/<device>:<route>.json whenever a device's active output ROUTE changes
+  # (not on default-sink changes — that's what ee-preset-sync above handles); if
+  # it matches, it loads `preset-name`.
   #
-  # Values come straight from `wpctl inspect` on the GB206 (NVIDIA) HDMI sink:
-  #   node.name              -> "device"           (and the filename device part)
-  #   device.profile.name    -> "device-profile"   (and the filename profile part)
-  #   node.description        -> "device-description"
-  # The filename is exactly "<device>:<profile>.json" (EasyEffects replaces any
-  # "/" with "_"; neither value has one here). If the HDMI node name ever
-  # changes (e.g. different PCI slot), regenerate from `wpctl inspect`.
-  xdg.dataFile."easyeffects/autoload/output/alsa_output.pci-0000_02_00.1.hdmi-stereo:hdmi-stereo.json".text =
+  # GOTCHA (EasyEffects 8): despite the JSON key being named "device-profile", v8
+  # matches on the active output ROUTE name, NOT the card profile name — see
+  # presets_autoload_manager.cpp (`device_route == json["device-profile"]`) and
+  # pw_manager.cpp (autoload is driven by `device.output_route_name`). The v7
+  # scheme used the card profile ("hdmi-stereo"); using that here silently never
+  # matches. Both the filename's route part AND the "device-profile" field must be
+  # the ROUTE name.
+  #
+  # Values:
+  #   node.name (sink)              -> "device"           (+ filename device part)
+  #   active output route name      -> "device-profile"   (+ filename route part)
+  #   node.description               -> "device-description" (informational only)
+  # Get the route name from:
+  #   pw-dump | jq '.[]|select(.info.props["device.name"]=="alsa_card.pci-0000_02_00.1")
+  #                 |.info.params.Route[]|select(.direction=="Output")|.name'
+  # (EasyEffects replaces any "/" with "_"; neither value has one here.) If the
+  # node name or route ever changes (different PCI slot / route), regenerate.
+  xdg.dataFile."easyeffects/autoload/output/alsa_output.pci-0000_02_00.1.hdmi-stereo:hdmi-output-0.json".text =
     builtins.toJSON {
       device = "alsa_output.pci-0000_02_00.1.hdmi-stereo";
       "device-description" = "GB206 High Definition Audio Controller Digital Stereo (HDMI)";
-      "device-profile" = "hdmi-stereo";
+      "device-profile" = "hdmi-output-0"; # active output ROUTE name (see GOTCHA above)
       "preset-name" = "bass-boost";
     };
 
   # Per-device autoload for the BUILT-IN analog speakers → laptop-neutral preset.
-  # Values from `wpctl inspect` on the ALC294 analog sink:
-  #   node.name           -> "device"          (and the filename device part)
-  #   device.profile.name -> "device-profile"  (and the filename profile part)
-  #   node.description     -> "device-description"
-  xdg.dataFile."easyeffects/autoload/output/alsa_output.pci-0000_80_1f.3.analog-stereo:analog-stereo.json".text =
+  # Same route-name rule as above; the analog card's active output route when the
+  # internal speakers are selected is "analog-output-speaker" (plugging the 3.5mm
+  # jack switches it to "analog-output-headphones" — add a file for that route if
+  # you ever want a headphone-jack preset).
+  xdg.dataFile."easyeffects/autoload/output/alsa_output.pci-0000_80_1f.3.analog-stereo:analog-output-speaker.json".text =
     builtins.toJSON {
       device = "alsa_output.pci-0000_80_1f.3.analog-stereo";
       "device-description" = "800 Series Chipset Family Audio Context Engine (ACE) Analog Stereo";
-      "device-profile" = "analog-stereo";
+      "device-profile" = "analog-output-speaker"; # active output ROUTE name
       "preset-name" = "laptop-neutral";
     };
+
+  # The default-sink → preset watcher. Lives exactly as long as the EasyEffects
+  # daemon (BindsTo + WantedBy easyeffects.service), starts after it, and restarts
+  # if pw-metadata or the daemon drops. See `eePresetSync` above for the why.
+  systemd.user.services.ee-preset-sync = {
+    Unit = {
+      Description = "Sync EasyEffects output preset to the default sink";
+      After = [
+        "pipewire.service"
+        "easyeffects.service"
+      ];
+      BindsTo = [ "easyeffects.service" ];
+      PartOf = [ "graphical-session.target" ];
+    };
+    Service = {
+      ExecStart = "${eePresetSync}/bin/ee-preset-sync";
+      Restart = "on-failure";
+      RestartSec = 2;
+    };
+    Install.WantedBy = [ "easyeffects.service" ];
+  };
 }
