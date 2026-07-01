@@ -58,6 +58,7 @@
           "127.0.0.1:3001 localhost:3001" # API (browser calls directly: auth + tRPC)
           "127.0.0.1:3003 localhost:3003" # scraper (REST + WebSocket)
           "127.0.0.1:4321 localhost:4321" # web (optional)
+          "127.0.0.1:4983 localhost:4983" # Drizzle Kit / Drizzle Studio
         ];
       };
 
