@@ -304,7 +304,7 @@ in
         # their type; `spacer_2` is a *named* spacer instance, defined in the
         # top-level `widget.spacer_2` table below.
         start = [ "session" "launcher" "wallpaper" "workspaces" ];
-        center = [ "control-center" "media" "audio-visualizer" ];
+        center = [ "control-center" "media" "audio_visualizer" ];
         end = [
           "tray"
           "spacer_2"

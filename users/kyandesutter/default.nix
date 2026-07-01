@@ -20,6 +20,7 @@
     ./mixins/catppuccin.nix
     ./mixins/fastfetch.nix
     ./mixins/herdr.nix
+    ./mixins/fast.nix
     ./mixins/godot.nix
   ];
 
