@@ -89,8 +89,9 @@ truth. Noctalia regenerates a palette on every wallpaper pick / light-dark flip 
 renders templates (`users/kyandesutter/noctalia-templates/`) into per-app files,
 running each app's reload hook. **Catppuccin is only a static fallback**
 (`autoEnable = false`) for consumers that genuinely can't be dynamic: SDDM
-(pre-login), Herdr (build-time theme name), Neovim's pre-palette colourscheme, and
-the alt-tab switcher's build-time fallback. When adding a themed surface, prefer a
+(pre-login), Neovim's pre-palette colourscheme, and the alt-tab switcher's
+build-time fallback. (Herdr instead uses its built-in `terminal` theme, so it
+follows ghostty's Noctalia colours dynamically and needs no fallback.) When adding a themed surface, prefer a
 Noctalia template + a Catppuccin fallback (see `mixins/alttab.nix` for the
 file-watch + fallback pattern).
 

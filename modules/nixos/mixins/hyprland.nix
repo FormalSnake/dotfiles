@@ -1,6 +1,20 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, inputs, ... }:
 let
   cfg = config.kyan.desktop;
+
+  # noctalia binary (same package the home-manager user service runs), used by
+  # the lock-before-sleep hook below.
+  noctalia = inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default;
+
+  # Lock the session before the machine suspends. Runs as kyandesutter and talks
+  # to the running noctalia over its IPC socket in the user's XDG_RUNTIME_DIR
+  # (resolved from the live uid, so nothing is hardcoded). `session lock` shows
+  # noctalia's PAM lock screen without suspending — the suspend itself is driven
+  # by systemd-suspend.service, ordered after this via sleep.target.
+  lockBeforeSleep = pkgs.writeShellScript "lock-before-sleep" ''
+    export XDG_RUNTIME_DIR="/run/user/$(${pkgs.coreutils}/bin/id -u)"
+    exec ${noctalia}/bin/noctalia msg session lock
+  '';
 
   # sddm-astronaut with the "pixel_sakura" preset, used as-is with no overrides:
   # the bundled pixel_sakura.conf (animated pixel_sakura.gif background + the
@@ -96,6 +110,24 @@ in
     # polkit agent + secrets/keyring so GUI auth prompts and saved logins work.
     security.polkit.enable = true;
     services.gnome.gnome-keyring.enable = true;
+
+    # Lock on suspend. logind's default HandleLidSwitch=suspend goes straight to
+    # s2idle with no lock, so closing the lid used to resume into an unlocked
+    # session. This oneshot raises noctalia's lock screen and is ordered Before
+    # sleep.target, so every suspend path — lid close, idle, and the
+    # SUPER+SHIFT+Escape keybind — resumes on the lock screen. (The keybind's
+    # `lock-and-suspend` still locks on its own too; this makes the lid path
+    # match.)
+    systemd.services.lock-before-sleep = {
+      description = "Lock the noctalia session before sleep";
+      before = [ "sleep.target" ];
+      wantedBy = [ "sleep.target" ];
+      serviceConfig = {
+        Type = "oneshot";
+        User = "kyandesutter";
+        ExecStart = toString lockBeforeSleep;
+      };
+    };
 
     # GNOME/GTK desktop plumbing the apps and file manager rely on:
     #   • gvfs:  Nautilus trash, removable-drive / network mounting, MTP.
