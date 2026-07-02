@@ -30,6 +30,29 @@
             "priority.driver" = 2000;
           };
         }
+
+        # AirPods Pro (bluetooth, MAC 14:14:7D:E7:8C:E3). They otherwise connect
+        # with `bluez5.profile = "off"`, so no sink/source node is ever created
+        # and they don't appear as an audio device. Pin the initial profile to
+        # A2DP (high-fidelity AAC playback) and auto-connect that profile so the
+        # sink always shows up. Trade-off: A2DP has no microphone — switch the
+        # card to `headset-head-unit` (via Noctalia/wpctl) when you need the mic.
+        {
+          matches = [ { "device.name" = "bluez_card.14_14_7D_E7_8C_E3"; } ];
+          actions.update-props = {
+            "device.profile" = "a2dp-sink";
+            "bluez5.auto-connect" = [ "a2dp_sink" ];
+          };
+        }
+
+        # …and make the AirPods a preferred default output when present.
+        {
+          matches = [ { "node.name" = "~bluez_output.14_14_7D_E7_8C_E3.*"; } ];
+          actions.update-props = {
+            "priority.session" = 2000;
+            "priority.driver" = 2000;
+          };
+        }
       ];
 
       # HDMI (GPU audio @ 02:00.1) above built-in analog speakers (@ 00:1f.3).
