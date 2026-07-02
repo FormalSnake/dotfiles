@@ -41,9 +41,6 @@ in
 
       mouse-hide-while-typing = true;
 
-      window-padding-x = 14;
-      window-padding-y = 14;
-      window-padding-balance = true;
       window-colorspace = "display-p3";
       confirm-close-surface = false;
       resize-overlay = "never";
