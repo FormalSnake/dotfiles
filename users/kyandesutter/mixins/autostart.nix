@@ -206,6 +206,26 @@ in
     };
   };
 
+  # librepods — AirPods daemon (hosts the app_server socket that librepods-ctl
+  # drives, see mixins/noctalia.nix `librepodsAnc`). DE-agnostic tray app, so it
+  # lives here like the other login items. Absolute store path (no loginExec
+  # needed); starts hidden to the tray. No Restart: quitting from the tray must
+  # not relaunch it. g815-only (imported via linux.nix); macOS handles AirPods
+  # natively. See docs/superpowers/specs/2026-07-02-librepods-noctalia-airpods-design.md.
+  systemd.user.services.librepods = {
+    Unit = {
+      Description = "librepods (AirPods daemon, hidden to tray)";
+      PartOf = [ "graphical-session.target" ];
+      After = [ "graphical-session.target" ];
+      "X-SwitchMethod" = "keep-old";
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
+    Service = {
+      Type = "simple";
+      ExecStart = "${pkgs.librepods}/bin/librepods --hide";
+    };
+  };
+
   # Helium (Chromium browser). Window rule pins it to workspace 1 (web).
   #
   # Helium picks its notification backend ONCE at startup: it probes the

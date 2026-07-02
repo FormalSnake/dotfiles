@@ -68,6 +68,65 @@ let
       fi
     '';
   };
+
+  # AirPods noise-control from the bar. librepods-ctl is write-only (v0.2.5 has
+  # no readback of any kind), so the current mode is tracked optimistically in a
+  # state file and becomes authoritative after the first action. Each change
+  # fires a synchronous-replace OSD so repeated toggles don't stack. Runs from
+  # noctalia's user service (limited PATH) → librepods-ctl/notify-send are
+  # provided via runtimeInputs. The librepods daemon that hosts the app_server
+  # socket is autostarted in mixins/autostart.nix. See docs/superpowers/specs/
+  # 2026-07-02-librepods-noctalia-airpods-design.md.
+  librepodsAnc = pkgs.writeShellApplication {
+    name = "librepods-anc";
+    runtimeInputs = [
+      pkgs.librepods
+      pkgs.libnotify
+      pkgs.coreutils
+    ];
+    text = ''
+      modes=(off anc transparency adaptive)
+      labels=(Off "Noise Cancellation" Transparency Adaptive)
+      state="''${XDG_RUNTIME_DIR:-/tmp}/librepods-anc.mode"
+
+      notify() {
+        notify-send -a AirPods -h string:x-canonical-private-synchronous:airpods "AirPods" "$1"
+      }
+
+      current() {
+        local i
+        i="$(cat "$state" 2>/dev/null || echo 0)"
+        case "$i" in 0|1|2|3) echo "$i" ;; *) echo 0 ;; esac
+      }
+
+      set_mode() {
+        local idx="$1"
+        if librepods-ctl "noise:''${modes[$idx]}" 2>/dev/null; then
+          echo "$idx" > "$state"
+          notify "Noise: ''${labels[$idx]}"
+        else
+          notify "librepods not running"
+          return 1
+        fi
+      }
+
+      cmd="''${1:-cycle}"
+      case "$cmd" in
+        cycle) set_mode "$(( ( $(current) + 1 ) % 4 ))" ;;
+        prev)  set_mode "$(( ( $(current) + 3 ) % 4 ))" ;;
+        set)
+          case "''${2:-}" in
+            off)          set_mode 0 ;;
+            anc)          set_mode 1 ;;
+            transparency) set_mode 2 ;;
+            adaptive)     set_mode 3 ;;
+            *) echo "usage: librepods-anc set <off|anc|transparency|adaptive>" >&2; exit 1 ;;
+          esac
+          ;;
+        *) echo "usage: librepods-anc <cycle|prev|set <mode>>" >&2; exit 1 ;;
+      esac
+    '';
+  };
 in
 {
   # Official noctalia flake home-manager module. noctalia V5 is a native C++ /
@@ -78,7 +137,11 @@ in
 
   # Expose aura-repaint on PATH so power-tune (hyprland.nix) can call it as the
   # shared keyboard-aura setter (the noctalia post_hook below uses it by store path).
-  home.packages = [ auraRepaint ];
+  home.packages = [
+    auraRepaint
+    librepodsAnc
+    pkgs.librepods
+  ];
 
   programs.noctalia = {
     enable = true;
@@ -312,6 +375,7 @@ in
           "clipboard"
           "network"
           "bluetooth"
+          "airpods"
           "volume"
           "brightness"
           "battery"
@@ -322,6 +386,22 @@ in
       # Named spacer instance referenced from bar.main.end. A non-builtin id, so
       # its type must be declared explicitly (defaults otherwise).
       widget.spacer_2.type = "spacer";
+
+      # AirPods noise-control button (see librepodsAnc in the let block above).
+      # custom_button is static (Noctalia V5 dropped the V4 dynamic textCommand),
+      # so mode feedback is the wrapper's OSD; battery lives only in librepods'
+      # own window (right-click → reopen). All commands are absolute store paths
+      # because the noctalia user service runs with a limited PATH.
+      widget.airpods = {
+        type = "custom_button";
+        glyph = "headphones";
+        tooltip = "AirPods noise — click cycle · scroll adjust · middle transparency · right open";
+        command = "${librepodsAnc}/bin/librepods-anc cycle";
+        scroll_up_command = "${librepodsAnc}/bin/librepods-anc cycle";
+        scroll_down_command = "${librepodsAnc}/bin/librepods-anc prev";
+        middle_command = "${librepodsAnc}/bin/librepods-anc set transparency";
+        right_command = "${pkgs.librepods}/bin/librepods-ctl reopen";
+      };
 
       # Dynamic, wallpaper-derived palette is now the single source of truth for
       # the desktop's colours (replacing the static Catppuccin builtin). On every

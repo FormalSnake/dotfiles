@@ -30,6 +30,12 @@
       # isolated profile would burn a device slot.
       shareProfile = true;
     }
+    {
+      # X/Twitter — reuse the Helium login; favicon auto-fetched at activation.
+      url = "https://x.com";
+      name = "Twitter";
+      shareProfile = true;
+    }
   ];
 
   # NixOS rebuild shortcut (g815-only, so it lives here rather than the shared
