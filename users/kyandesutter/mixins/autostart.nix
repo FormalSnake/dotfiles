@@ -206,12 +206,12 @@ in
     };
   };
 
-  # librepods — AirPods daemon (hosts the app_server socket that librepods-ctl
-  # drives, see mixins/noctalia.nix `librepodsAnc`). DE-agnostic tray app, so it
-  # lives here like the other login items. Absolute store path (no loginExec
-  # needed); starts hidden to the tray. No Restart: quitting from the tray must
-  # not relaunch it. g815-only (imported via linux.nix); macOS handles AirPods
-  # natively. See docs/superpowers/specs/2026-07-02-librepods-noctalia-airpods-design.md.
+  # librepods — AirPods tray app (package in mixins/airpods.nix). DE-agnostic
+  # tray app, so it lives here like the other login items. Absolute store path
+  # (no loginExec needed); starts hidden to the tray, and its icon is picked up
+  # by noctalia's `tray` widget. No Restart: quitting from the tray must not
+  # relaunch it. g815-only (imported via linux.nix); macOS handles AirPods
+  # natively.
   systemd.user.services.librepods = {
     Unit = {
       Description = "librepods (AirPods daemon, hidden to tray)";

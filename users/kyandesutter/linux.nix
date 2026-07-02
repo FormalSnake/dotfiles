@@ -7,6 +7,7 @@
     ./mixins/qt.nix
     ./mixins/desktop-apps.nix
     ./mixins/autostart.nix
+    ./mixins/airpods.nix
     ./mixins/easyeffects.nix
     ./mixins/alttab.nix
     ./mixins/noctalia.nix
