@@ -1,5 +1,18 @@
 { pkgs, ... }:
 let
+  # Fallout Limine theme (https://github.com/Neptune3013/fallout-limine-theme):
+  # vault-boy backdrop + retro PHXEGA8 bitmap font. Pinned via fetchFromGitHub so
+  # no binaries live in the repo. The upstream install script edits /boot
+  # imperatively — useless on NixOS, which regenerates limine.conf on every
+  # activation — so the theme is expressed through the module's style.* options
+  # instead (see the limine block below).
+  fallout-limine = pkgs.fetchFromGitHub {
+    owner = "Neptune3013";
+    repo = "fallout-limine-theme";
+    rev = "9a777b932de07dce60e58b2a1162b7d41ecfd2e9";
+    hash = "sha256-ZZb+x/dglrGEGljeDeHgr809qbFi9dc6ipfU53DIHwE=";
+  };
+
   # One-shot "reboot into Windows" helper. Limine — unlike systemd-boot — does
   # NOT implement systemd's Boot Loader Interface, so `systemctl reboot
   # --boot-loader-entry=` (the old mechanism) can't drive a one-shot Windows
@@ -45,20 +58,40 @@ in
         # generations selectable in the menu (older ones stay on disk).
         maxGenerations = 3;
 
-        # Theming: static Catppuccin Mocha. Limine renders pre-boot, so — like
-        # SDDM — it belongs to the theming model's *static fallback* tier, not the
-        # matugen/Noctalia runtime pipeline (which would mean a full rebuild on
-        # every wallpaper change). Colours are RRGGBB. Prepended to limine.conf.
+        # Theming: the Fallout theme (see fallout-limine in the let block above).
+        # Limine renders pre-boot, so — like SDDM — this is the theming model's
+        # *static fallback* tier, not the matugen/Noctalia runtime pipeline
+        # (which would mean a full rebuild on every wallpaper change).
+        #
+        # term_font / term_font_size have no dedicated module option, so the
+        # PHXEGA8 bitmap font goes via extraConfig + additionalFiles (copied to
+        # /boot/limine/, referenced as boot():/limine/…). Everything else maps
+        # onto the module's style.* options below. Colour values are taken
+        # verbatim from the theme's Limine.txt.
         extraConfig = ''
-          term_palette: 45475a;f38ba8;a6e3a1;f9e2af;89b4fa;f5c2e7;94e2d5;bac2de
-          term_palette_bright: 585b70;f38ba8;a6e3a1;f9e2af;89b4fa;f5c2e7;94e2d5;a6adc8
-          term_background: 1e1e2e
-          term_foreground: cdd6f4
-          term_background_bright: 313244
-          term_foreground_bright: cdd6f4
-          backdrop: 1e1e2e
-          interface_branding_colour: 89b4fa
+          term_font: boot():/limine/PHXEGA8.F14
+          term_font_size: 8x14
         '';
+        additionalFiles."PHXEGA8.F14" = "${fallout-limine}/Fallout_limine/PHXEGA8.F14";
+        style = {
+          # High-res (original GRUB) variant — sharper on the laptop panel than
+          # the compressed jpg the theme ships by default.
+          wallpapers = [ "${fallout-limine}/Fallout_limine/high-res-bg/background.png" ];
+          wallpaperStyle = "stretched";
+          interface = {
+            branding = ""; # drop Limine's "Limine x.y.z (…)" title
+            helpHidden = true; # hide the ARROWS/ENTER/S-Firmware key hints
+          };
+          graphicalTerminal = {
+            font.scale = "2x2";
+            margin = 0; # term_background covers the whole screen, uniform
+            foreground = "67d97a"; # boot-entry text (Pip-Boy green)
+            background = "9935453b"; # TTRRGGBB — 99 = ~40% opaque green tint
+            brightBackground = "ffffff";
+            palette = "000000;5c110c;074224;4d1c0d;00594d;f5c2e7;16de6d;989e9b";
+            brightPalette = "2f3030;ff0000;16de6d;f7cd34;0ddeaa;f5c2e7;16de6d;ffffff";
+          };
+        };
 
         # Windows chainload. extraEntries is APPENDED after the auto-generated
         # NixOS generation entries, giving the closest achievable order to

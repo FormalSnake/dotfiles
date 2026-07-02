@@ -16,7 +16,7 @@ G18 G815LP-S9034** (Intel Core Ultra 9 275HX "Arrow Lake-HX", RTX 5070 Laptop "B
 - **Desktop:** Hyprland + **noctalia** V5 shell (native C++/OpenGL ES, official flake
   `homeModules.default`), full-experience config. Keybinds mirror the macOS/aerospace muscle
   memory with **SUPER** as primary mod; **SUPER+Space** = app launcher.
-- **Boot:** Limine (Catppuccin-themed menu), Windows via a chainload entry; a Noctalia
+- **Boot:** Limine (Fallout-themed menu), Windows via a chainload entry; a Noctalia
   "Windows" button does a one-shot UEFI BootNext and a "BIOS" button reboots to firmware
   setup. **No Secure Boot / no lanzaboote** (casual
   Fortnite doesn't require it; only tournaments do). Laptop ships with no OS → install

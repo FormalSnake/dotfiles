@@ -16,6 +16,20 @@
     ./mixins/fetch.nix
     ./mixins/lumen.nix
     ./mixins/nordvpn.nix
+    ./mixins/webapps.nix
+  ];
+
+  # Standalone desktop web apps (see mixins/webapps.nix). Bare URL → auto
+  # name+favicon; attrs for overrides. Claude gets a hand-picked icon.
+  kyan.webapps.sites = [
+    {
+      url = "https://claude.ai";
+      name = "Claude";
+      icon = ./mixins/webapps-icons/claude.png;
+      # Reuse the Helium login — Claude enforces a hard device limit, so an
+      # isolated profile would burn a device slot.
+      shareProfile = true;
+    }
   ];
 
   # NixOS rebuild shortcut (g815-only, so it lives here rather than the shared
