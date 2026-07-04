@@ -55,11 +55,34 @@ let
   # matching theme.wallpaper_scheme). This runs inside noctalia's systemd *user*
   # service (limited PATH), so the noctalia binary is provided via runtimeInputs.
   # `color-scheme-set` fires colors_changed (NOT wallpaper_changed), so no loop.
+  #
+  # The palette is GLOBAL but wallpapers are per-monitor, so we gate on
+  # $NOCTALIA_WALLPAPER_CONNECTOR: only a wallpaper on a *currently connected*
+  # output may drive the palette. Noctalia keeps disconnected monitors in its
+  # config (e.g. a phantom HDMI-A-1 pinned to a flexoki-named wallpaper) and
+  # re-applies them on restart / session-restore / apply-to-all / hover-preview;
+  # those events carry a flexoki path and would otherwise re-pin Flexoki over
+  # eDP-1's matugen palette, leaving the shell stuck on Flexoki (observed
+  # 2026-07-04). Connectivity is checked via hyprctl (needs
+  # HYPRLAND_INSTANCE_SIGNATURE, present in the session env); if hyprctl can't be
+  # reached we fall through and process the event so the feature degrades safely.
   flexokiScheme = pkgs.writeShellApplication {
     name = "flexoki-scheme";
-    runtimeInputs = [ config.programs.noctalia.package ];
+    runtimeInputs = [
+      config.programs.noctalia.package
+      pkgs.hyprland
+    ];
     text = ''
       path="''${NOCTALIA_WALLPAPER_PATH:-}"
+      conn="''${NOCTALIA_WALLPAPER_CONNECTOR:-}"
+      if [[ -n "$conn" ]]; then
+        mons="$(hyprctl monitors 2>/dev/null || true)"
+        # Skip only when we actually got a monitor list and this output isn't in
+        # it (i.e. it's disconnected). Empty list = hyprctl unreachable → proceed.
+        if [[ -n "$mons" && "$mons" != *"Monitor $conn ("* ]]; then
+          exit 0
+        fi
+      fi
       shopt -s nocasematch
       if [[ "$path" == *flexoki* ]]; then
         noctalia msg color-scheme-set custom Flexoki
