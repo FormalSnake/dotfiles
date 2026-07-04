@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ config, inputs, ... }:
 {
   imports = [ inputs.agenix.nixosModules.default ];
 
@@ -13,7 +13,7 @@
     # Master identity used to decrypt at activation time. This is the same
     # `kyan` age key the MacBook uses (recipient age1fg5...k3hufv in
     # secrets/secrets.nix). Copied here out-of-band; NOT git-tracked.
-    identityPaths = [ "/home/kyandesutter/.config/age/keys.txt" ];
+    identityPaths = [ "${config.users.users.kyandesutter.home}/.config/age/keys.txt" ];
 
     secrets =
       let

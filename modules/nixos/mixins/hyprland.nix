@@ -7,13 +7,27 @@ let
   noctalia = inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default;
 
   # Lock the session before the machine suspends. Runs as kyandesutter and talks
-  # to the running noctalia over its IPC socket in the user's XDG_RUNTIME_DIR
-  # (resolved from the live uid, so nothing is hardcoded). `session lock` shows
-  # noctalia's PAM lock screen without suspending — the suspend itself is driven
-  # by systemd-suspend.service, ordered after this via sleep.target.
+  # to the running noctalia over its IPC socket in the user's XDG_RUNTIME_DIR.
+  # `session lock` shows noctalia's PAM lock screen without suspending — the
+  # suspend itself is driven by systemd-suspend.service, ordered after this via
+  # sleep.target.
+  #
+  # noctalia's IPC socket is namespaced by the Wayland display of the session
+  # that owns it ($XDG_RUNTIME_DIR/noctalia-<display>.sock), and `noctalia msg`
+  # discovers it through $WAYLAND_DISPLAY — with only XDG_RUNTIME_DIR set it
+  # reports "noctalia is not running" even though it is (verified 2026-07-03:
+  # 62/62 historical failures for exactly this reason). Derive the display from
+  # the socket that actually exists instead of hardcoding wayland-1. Always exit
+  # 0: a lock failure (no session, noctalia down) must never block the suspend.
   lockBeforeSleep = pkgs.writeShellScript "lock-before-sleep" ''
     export XDG_RUNTIME_DIR="/run/user/$(${pkgs.coreutils}/bin/id -u)"
-    exec ${noctalia}/bin/noctalia msg session lock
+    for sock in "$XDG_RUNTIME_DIR"/noctalia-wayland-*.sock; do
+      [ -e "$sock" ] || break   # no socket → no session to lock
+      name=''${sock##*/noctalia-}
+      export WAYLAND_DISPLAY=''${name%.sock}
+      ${pkgs.coreutils}/bin/timeout 10 ${noctalia}/bin/noctalia msg session lock && break
+    done
+    exit 0
   '';
 
   # sddm-astronaut with the "pixel_sakura" preset, used as-is with no overrides:
@@ -124,8 +138,11 @@ in
       wantedBy = [ "sleep.target" ];
       serviceConfig = {
         Type = "oneshot";
-        User = "kyandesutter";
+        User = config.users.users.kyandesutter.name;
         ExecStart = toString lockBeforeSleep;
+        # Belt-and-braces: the script already exits 0 and times out its IPC call,
+        # but suspend waits on this oneshot — cap it so sleep is never held up.
+        TimeoutStartSec = 15;
       };
     };
 

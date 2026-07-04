@@ -44,6 +44,8 @@
       url = "github:zhaofengli/nix-homebrew";
     };
 
+    # No `inputs.nixpkgs.follows`: the pinned FlakeHub release ships prebuilt
+    # binaries and declares no nixpkgs input of its own to override.
     determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/3";
 
     agenix = {

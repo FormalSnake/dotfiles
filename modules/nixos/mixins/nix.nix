@@ -4,12 +4,6 @@
   # This module adds the NixOS-only Nix daemon settings (the macbook uses
   # Determinate Nix, which owns those there).
 
-  # Heroic Games Launcher (gaming profile) pulls pnpm in at *build time* only
-  # (heroic-unwrapped's nativeBuildInputs); the updated nixpkgs flags
-  # pnpm-10.29.2 insecure. It is not in the runtime closure, so permit the
-  # build-time use. Bump/remove once heroic's nixpkgs node moves to a newer pnpm.
-  nixpkgs.config.permittedInsecurePackages = [ "pnpm-10.29.2" ];
-
   nix.settings = {
     experimental-features = [
       "nix-command"

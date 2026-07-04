@@ -238,31 +238,47 @@ let
     '';
   };
 
-  # game-mode: a no-relog runtime toggle. Flips the asusd platform profile
-  # (fans/power) between Performance and Balanced. Per-game CPU governor/niceness
-  # is handled separately by `gamemode` when a title launches. No GPU mode switch
-  # (that would need a relog) — games already run on the dGPU via
-  # `gamescope` / `nvidia-offload`.
+  # game-mode: a no-relog runtime toggle for the platform power profile.
+  # Per-game CPU governor/niceness is handled separately by `gamemode` when a
+  # title launches. No GPU mode switch (that would need a relog) — games already
+  # run on the dGPU via `gamescope` / `nvidia-offload`.
+  #
+  # Goes through PPD (powerprofilesctl), NOT asusctl: PPD is the single owner of
+  # the platform profile (see power.nix). Both daemons write the same asus-wmi
+  # sysfs node, so the old `asusctl profile set` silently fought power-reconcile
+  # — any plug/unplug event overwrote whatever game-mode had set. `off` restores
+  # the same source-keyed profile power-reconcile would pick (mirrors its
+  # policy), so the two owners now always agree. On AC `on` is effectively a
+  # no-op (the AC policy is already performance); the toggle earns its keep on
+  # battery/power-bank sessions.
   game-mode = pkgs.writeShellApplication {
     name = "game-mode";
     runtimeInputs = [
-      pkgs.asusctl
+      config.services.power-profiles-daemon.package
+      pkgs.coreutils
       pkgs.libnotify
     ];
     text = ''
       action="''${1:-toggle}"
 
-      current() { asusctl profile get 2>/dev/null | grep -oiE 'Performance|Balanced|Quiet' | head -n1; }
+      current() { powerprofilesctl get 2>/dev/null; }
 
       on() {
-        asusctl profile set Performance
-        notify-send -a "game-mode" "Game mode ON" "asusd profile → Performance" || true
-        echo "Game mode ON (Performance)"
+        powerprofilesctl set performance 2>/dev/null || powerprofilesctl set balanced || true
+        notify-send -a "game-mode" "Game mode ON" "power profile → performance" || true
+        echo "Game mode ON (performance)"
       }
       off() {
-        asusctl profile set Balanced
-        notify-send -a "game-mode" "Game mode OFF" "asusd profile → Balanced" || true
-        echo "Game mode OFF (Balanced)"
+        # Return to the profile the power source calls for (power-reconcile's
+        # policy: ac=performance, powerbank=balanced, battery=power-saver).
+        case "$(cat /run/power/state 2>/dev/null || echo ac)" in
+          ac)        p=performance ;;
+          powerbank) p=balanced ;;
+          *)         p=power-saver ;;
+        esac
+        powerprofilesctl set "$p" 2>/dev/null || powerprofilesctl set balanced || true
+        notify-send -a "game-mode" "Game mode OFF" "power profile → $p" || true
+        echo "Game mode OFF ($p)"
       }
 
       case "$action" in
@@ -270,7 +286,7 @@ let
         off)    off ;;
         status) echo "Current profile: $(current)" ;;
         toggle)
-          if [ "$(current)" = "Performance" ]; then off; else on; fi ;;
+          if [ "$(current)" = "performance" ]; then off; else on; fi ;;
         *) echo "usage: game-mode [on|off|toggle|status]" >&2; exit 1 ;;
       esac
     '';
@@ -348,7 +364,8 @@ in
     };
 
     environment.systemPackages = with pkgs; [
-      # game-mode needs asusctl/asusd; the g815 host enables kyan.asus too.
+      # game-mode drives the PPD profile; the g815 host enables kyan.asus, which
+      # brings up power-profiles-daemon (power.nix).
       game-mode
 
       # Idle-inhibit helpers (also driven by the gamemode hooks / user service

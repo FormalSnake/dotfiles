@@ -26,7 +26,12 @@
 
     powerManagement = {
       enable = true;
-      finegrained = true; # RTD3 — dGPU powers down when idle (laptop battery)
+      # RTD3 plumbing. NOTE: RTD3/D3cold does NOT actually work on this Blackwell
+      # RTX 5070 + open kernel module (open-gpu-kernel-modules #882) — the dGPU
+      # never self-suspends and idles at D0. Kept enabled so the udev/modeset
+      # hooks are in place if a driver update fixes it; the real battery win is
+      # the hard power-off in power.nix (dgpu-reconcile).
+      finegrained = true;
     };
 
     # Dynamic Boost — runs nvidia-powerd, which shifts power budget from the CPU
@@ -70,21 +75,21 @@
 
   # PRIME render-offload plumbing for the gaming stack.
   #
-  # In offload mode the iGPU drives the desktop and the dGPU is parked (RTD3)
-  # until a process opts in via these env vars — the same set `nvidia-offload`
-  # exports. There is no driver-level "this is a game → use the dGPU" detection;
-  # selection is per-process. But a child inherits its parent's environment, so
-  # carrying these vars on each game *launcher* (Steam, Prism, Lutris, Heroic,
-  # Sober) makes every game they spawn land on the RTX 5070 automatically, while
-  # the desktop and everything else stay on the iGPU and the dGPU still sleeps
-  # when idle. Trade-off: a launcher (and its dGPU) is awake while open.
+  # In offload mode the iGPU drives the desktop and the dGPU stays idle until a
+  # process opts in via these env vars — the same set `nvidia-offload` exports.
+  # There is no driver-level "this is a game → use the dGPU" detection; selection
+  # is per-process. But a child inherits its parent's environment, so carrying
+  # these vars on each game *launcher* (Steam, Prism, Sober) makes every game
+  # they spawn land on the RTX 5070 automatically, while the desktop and
+  # everything else stay on the iGPU. Trade-off: a launcher (and its dGPU) is
+  # awake while open.
   #
   # Exposed as an overlay so both NixOS modules and home-manager (useGlobalPkgs)
   # can reach them through `pkgs`:
   #   • pkgs.nvidiaOffloadEnv — the attrset, for env-style consumers
   #     (Steam's extraEnv / gamescopeSession.env, the Sober flatpak override).
   #   • pkgs.gpuOffloadWrap   — wraps a package's executables to always render on
-  #     the dGPU, for native launchers (Lutris, Heroic, Prism).
+  #     the dGPU, for native launchers (Prism, via users/kyandesutter/linux.nix).
   nixpkgs.overlays = [
     (final: _prev: {
       nvidiaOffloadEnv = {

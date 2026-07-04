@@ -30,6 +30,8 @@
     fzf.enable = true;
     lazygit.enable = true;
     fish.enable = true;
-    tmux.enable = true;
+    # tmux is intentionally absent: its config is a raw xdg.configFile symlink
+    # (mixins/tmux.nix), not programs.tmux — the catppuccin module hooks on
+    # programs.tmux.enable, so enabling it here was a silent no-op.
   };
 }

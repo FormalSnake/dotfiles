@@ -89,8 +89,10 @@ truth. Noctalia regenerates a palette on every wallpaper pick / light-dark flip 
 renders templates (`users/kyandesutter/noctalia-templates/`) into per-app files,
 running each app's reload hook. **Catppuccin is only a static fallback**
 (`autoEnable = false`) for consumers that genuinely can't be dynamic: SDDM
-(pre-login), Neovim's pre-palette colourscheme, and the alt-tab switcher's
-build-time fallback. (Herdr instead uses its built-in `terminal` theme, so it
+(pre-login), Neovim's pre-palette colourscheme, the alt-tab switcher's
+build-time fallback, Hyprland's pre-palette border colours (`general.col`),
+CLI tools with no Noctalia template (bat, fzf, lazygit, fish), and Ghostty on
+macOS (no Noctalia there). (Herdr instead uses its built-in `terminal` theme, so it
 follows ghostty's Noctalia colours dynamically and needs no fallback.) When adding a themed surface, prefer a
 Noctalia template + a Catppuccin fallback (see `mixins/alttab.nix` for the
 file-watch + fallback pattern).
@@ -100,11 +102,22 @@ file-watch + fallback pattern).
 Power management is centered on **Noctalia + Hyprland** and is load-bearing:
 - `modules/nixos/mixins/power.nix` — `power-source` classifier (AC / power bank /
   battery) + `power-reconcile` (the single automatic owner of the PPD profile,
-  publishes `/run/power/state`). udev-triggered on power events.
+  publishes `/run/power/state`; udev-triggered, restart-safe) +
+  `dgpu-reconcile.service`/`dgpu-power` (the ONLY thing allowed to load/unload
+  the nvidia modules — serialized via flock, holds a sleep inhibitor, only ever
+  `systemctl start`ed, never `restart`ed: interrupting or racing an nvidia
+  module transition deadlocks the kernel in D-state and breaks suspend until
+  reboot — observed 2026-07-03).
 - `users/kyandesutter/mixins/hyprland.nix` — `power-tune` reacts to source changes
-  (GPU choice on AC, AC-dock relog, keyboard aura via `aura-repaint`).
+  (GPU choice on AC, AC-dock relog with a 2-min anti-loop guard, keyboard aura
+  via `aura-repaint`).
 - `modules/nixos/mixins/asus.nix` — asusd, battery limit, Aura keyboard.
-- `night-mode`/`game-mode` (`gaming.nix`) — profile toggles.
+- `game-mode` (`gaming.nix`) — manual profile toggle; goes through PPD
+  (powerprofilesctl), never asusctl, so it can't fight `power-reconcile`.
+- `lock-before-sleep` (`modules/nixos/mixins/hyprland.nix`) — noctalia's IPC
+  socket is keyed by `WAYLAND_DISPLAY` (`noctalia-<display>.sock`); anything
+  calling `noctalia msg` outside the session must derive that env var from the
+  socket name or discovery fails with "noctalia is not running".
 
 When touching any of these, treat them as **reorganize-only unless explicitly
 asked to change behavior**. `power-source` MUST stay in `environment.systemPackages`

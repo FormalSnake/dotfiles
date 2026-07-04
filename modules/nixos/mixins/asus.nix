@@ -6,38 +6,15 @@ let
   # bump saturation (HSL 272/89/66) to read as the intended purple.
   auraColour = "b15bf5";
 
-  # Single source of truth for the power source. Prints exactly one of:
-  #   ac        — the barrel charger (up to ~300W): ADP0 online and no USB-C PD
-  #               source negotiated.
-  #   powerbank — a USB-C / Thunderbolt PD source is online (a ucsi-source-psy-*
-  #               entry). The EC reports a power bank as ADP0 online *too*, so the
-  #               only signal that tells a ~40-50W power bank apart from the barrel
-  #               is a lit UCSI source — the barrel never lights one. A power bank
-  #               can't sustain Performance, so it must be treated as battery
-  #               (low power) even though it charges.
-  #   battery   — nothing plugged.
-  # Both the system reconciler (below) and the user session (hyprland.nix) key
-  # every power decision off this one classifier.
-  powerSource = pkgs.writeShellApplication {
-    name = "power-source";
-    runtimeInputs = [ pkgs.coreutils ];
-    text = ''
-      for f in /sys/class/power_supply/ucsi-source-psy-*/online; do
-        [ -e "$f" ] || continue
-        if [ "$(cat "$f" 2>/dev/null)" = 1 ]; then echo powerbank; exit 0; fi
-      done
-      if [ "$(cat /sys/class/power_supply/ADP0/online 2>/dev/null || echo 1)" = 1 ]; then
-        echo ac
-      else
-        echo battery
-      fi
-    '';
-  };
-
   # Toggle the keyboard backlight brightness node directly (0..max). Used at boot
   # by the asus-aura service to seed an AC-appropriate level without depending on
   # the asusd dbus service being up. (Live AC/battery keyboard following while a
   # session is up is owned by the user session — see power-tune / aura-repaint.)
+  #
+  # The power-source classifier is the ONE defined in power.nix (published on
+  # PATH via /run/current-system) — this file used to carry its own older copy,
+  # which had drifted (no charge_mode check, so a USB-C PD charger classified as
+  # `ac`). One classifier, one answer.
   kbdDim = pkgs.writeShellScript "asus-kbd-dim" ''
     led=/sys/class/leds/asus::kbd_backlight
     [ -e "$led/brightness" ] || exit 0
@@ -49,7 +26,7 @@ let
       # boot service to re-assert the level *after* it sets the Aura effect (which
       # re-enables the backlight), since at boot there may be no power event yet.
       ac)
-        if [ "$(${powerSource}/bin/power-source)" = ac ]; then echo "$max" > "$led/brightness"; else echo 0 > "$led/brightness"; fi ;;
+        if [ "$(/run/current-system/sw/bin/power-source 2>/dev/null || echo ac)" = ac ]; then echo "$max" > "$led/brightness"; else echo 0 > "$led/brightness"; fi ;;
     esac
   '';
 in

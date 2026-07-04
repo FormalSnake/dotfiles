@@ -7,7 +7,7 @@ let
   # (hyprland.nix) calls it on every power-source change (passing the cached accent).
   # Having one setter means the two triggers can't disagree.
   #
-  # By power source (see modules/nixos/mixins/asus.nix `power-source`):
+  # By power source (see modules/nixos/mixins/power.nix `power-source`):
   #   ac        — static themed colour, full brightness.
   #   powerbank — slow breathe of the themed accent (a "charging" vibe) while still
   #               being treated as battery for power; full brightness.

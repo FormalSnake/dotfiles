@@ -1,4 +1,4 @@
-{ lib, ... }:
+{ config, lib, ... }:
 {
   # sched-ext userspace scheduler. scx_bpfland handles hybrid P/E-core CPUs
   # (the 275HX has 8 P + 16 E cores) well and is a big part of the "CachyOS feel".
@@ -13,4 +13,9 @@
     enable = true;
     scheduler = lib.mkDefault "scx_bpfland";
   };
+
+  # mkDefault means a host override can silently pick the known-bad scheduler;
+  # surface it at eval time instead of via a hot, leaking laptop.
+  warnings = lib.optional (config.services.scx.scheduler == "scx_lavd")
+    "scx_lavd busy-loops a core and leaks BPF map memory on Arrow Lake-HX (see modules/nixos/mixins/scx.nix) — use scx_bpfland.";
 }

@@ -4,7 +4,7 @@ let
   # systemd.user.services.power-tune).
   #
   # Subscribes to /run/power/state — published by the system reconciler in
-  # modules/nixos/mixins/asus.nix, the single authority on the power source
+  # modules/nixos/mixins/power.nix, the single authority on the power source
   # (ac / powerbank / battery). A power bank reports as ADP0=online to UPower, so
   # we deliberately do NOT use UPower's OnBattery here; the state file is what
   # tells a ~50W power bank apart from the ~300W barrel.
@@ -24,7 +24,8 @@ let
   #     primary). dock-relog compares the session-gpu-mode marker against the source,
   #     self-guards (no-op when they already agree), gives a 15s cancel window and
   #     ends in `uwsm stop`. The AC→iGPU direction is what lets the system finally
-  #     power the dGPU off — see dgpu-power's post-relog retry in power.nix.
+  #     power the dGPU off — dgpu-power's wait-for-free loop (power.nix) rides out
+  #     the session teardown before unloading.
   #
   # Event-driven, no polling: two monitors feed one loop through a single process
   # substitution (which keeps the loop in this shell so last_src/last_rate persist)
@@ -252,13 +253,17 @@ let
   # `uwsm stop`s cleanly back to SDDM. On the next login env-hyprland re-derives the
   # GPU from the source and session-restore relaunches the windows. The →iGPU
   # direction also releases the dGPU so the system can finally power it off (see
-  # dgpu-power's post-relog retry in power.nix).
+  # dgpu-power's wait-for-free loop in power.nix).
   dockRelog = pkgs.writeShellApplication {
     name = "dock-relog";
     runtimeInputs = with pkgs; [ libnotify coreutils uwsm ];
     text = ''
       cancel="''${XDG_RUNTIME_DIR:-/tmp}/dock-relog.cancel"
       marker="''${XDG_RUNTIME_DIR:-/tmp}/session-gpu-mode"
+      # Rate-limit stamp lives in the persistent state dir, NOT XDG_RUNTIME_DIR:
+      # the runtime dir is torn down with the last session, which is exactly when
+      # a relog loop would reset its own limiter.
+      stamp="''${XDG_STATE_HOME:-$HOME/.local/state}/hypr-session/relog.last"
 
       if [ "''${1:-}" = cancel ]; then
         : > "$cancel"
@@ -287,6 +292,19 @@ let
       # Already in the right mode → nothing to do.
       [ "$cur" = "$want" ] && exit 0
 
+      # Anti-loop guard: if an auto-relog already fired < 2 minutes ago, don't
+      # fire another. A session that crashes right back to SDDM (e.g. the dGPU
+      # is wedged/unavailable while AC wants dGPU-primary) would otherwise
+      # logout-loop forever — observed 2026-07-03 as back-to-back 2-second
+      # sessions. The user can still relog manually; the next real power event
+      # after the window retries automatically.
+      now=$(date +%s)
+      last=$(cat "$stamp" 2>/dev/null || echo 0)
+      if [ $((now - last)) -lt 120 ]; then
+        notify-send -t 5000 "GPU mode" "Auto-relog skipped (one ran <2 min ago). Log out manually to switch GPU mode." || true
+        exit 0
+      fi
+
       rm -f "$cancel"
       if [ "$want" = dgpu ]; then
         msg="On AC — relogging in 15s to make the dGPU primary."
@@ -310,6 +328,8 @@ let
       want_for "$src"
       [ "$cur" = "$want" ] && exit 0
 
+      mkdir -p "$(dirname "$stamp")"
+      date +%s > "$stamp"
       ${sessionSnapshot}/bin/session-snapshot || true
       notify-send -t 2000 "GPU mode" "Relogging…" || true
       uwsm stop
@@ -506,6 +526,22 @@ in
         force_zero_scaling = true,
       },
     })
+
+    -- — Animations: snappy, short, with a decisive (non-mushy) landing —
+    -- The default preset eases out with a long, near-zero-velocity tail over ~600–700ms,
+    -- which reads as sluggish and slightly disorienting. `snappy` front-loads the motion
+    -- (fast, responsive start) then lands with a real, non-flat end slope, so transitions
+    -- "arrive" instead of crawling to a stop. Durations are in ds (1 ds = 100ms).
+    -- Workspaces slide, so a switch visibly pushes in the direction you moved.
+    hl.curve("snappy", { ["type"] = "bezier", ["points"] = { { 0.15, 0.75 }, { 0.35, 0.9 } } })
+
+    hl.animation({ ["leaf"] = "windows",          ["enabled"] = true, ["bezier"] = "snappy", ["speed"] = 3 })
+    hl.animation({ ["leaf"] = "windowsOut",       ["enabled"] = true, ["bezier"] = "snappy", ["speed"] = 3, ["style"] = "popin 90%" })
+    hl.animation({ ["leaf"] = "layers",           ["enabled"] = true, ["bezier"] = "snappy", ["speed"] = 2.5 })
+    hl.animation({ ["leaf"] = "fade",             ["enabled"] = true, ["bezier"] = "snappy", ["speed"] = 2.5 })
+    hl.animation({ ["leaf"] = "border",           ["enabled"] = true, ["bezier"] = "snappy", ["speed"] = 5 })
+    hl.animation({ ["leaf"] = "workspaces",       ["enabled"] = true, ["bezier"] = "snappy", ["speed"] = 3, ["style"] = "slide" })
+    hl.animation({ ["leaf"] = "specialWorkspace", ["enabled"] = true, ["bezier"] = "snappy", ["speed"] = 3, ["style"] = "slidevert" })
 
     -- — Border colours: persist the last wallpaper palette across reloads —
     -- Noctalia renders the live wallpaper-derived border/group colours to
@@ -713,7 +749,7 @@ in
   xdg.configFile."uwsm/env-hyprland".text = ''
     # Resolve the two GPUs and classify the power source ONCE; every per-session
     # GPU/power decision below (primary render GPU, VA-API decode driver) keys off
-    # these so they can't disagree. power-source (modules/nixos/mixins/asus.nix)
+    # these so they can't disagree. power-source (modules/nixos/mixins/power.nix)
     # returns ac / powerbank / battery — a power bank is deliberately NOT `ac`, so
     # it gets the iGPU/battery path. Default to `ac` when it can't be read. The
     # whole file is re-evaluated on each (re)login, which is how a power change

@@ -46,37 +46,70 @@ let
   # supergfxd's Integrated mode does — but only across a logout, and logout
   # black-screens on this machine. So we do the same teardown LIVE here, no logout:
   #   off: stop the nvidia clients (nvidia-powerd holds an NVML handle; Steam is
-  #        offload-wrapped onto the dGPU), unload the driver stack, remove the GPU
-  #        from PCI, then flip the ASUS WMI kill switch (asus-nb-wmi/dgpu_disable →
-  #        ACPI _PR3) to cut power. Safe once the desktop is iGPU-primary (the normal
+  #        offload-wrapped onto the dGPU), wait for every handle on the device to
+  #        be released, unload the driver stack, remove the GPU from PCI, then
+  #        flip the ASUS WMI kill switch (asus-nb-wmi/dgpu_disable → ACPI _PR3)
+  #        to cut power. Safe once the desktop is iGPU-primary (the normal
   #        battery case via hyprland.nix env-hyprland; for a session that booted
-  #        dGPU-primary on AC, the AC→battery dock-relog switches it to iGPU first).
-  #        Until that relog lands the compositor still pins the dGPU and `modprobe
-  #        -r` fails — power-reconcile's off_dgpu retries once after, see below.
+  #        dGPU-primary on AC, the AC→battery dock-relog switches it to iGPU
+  #        first — the wait-for-free loop below covers that teardown window).
   #   on:  un-flip the kill switch, rescan PCI, reload the driver, restart Steam.
   #   on-quiet: same bring-up as `on` but WITHOUT launching Steam — used on USB-C,
   #        where the dGPU must stay powered for the panel backlight (see below) but
   #        we are not gaming.
-  # The modprobe -r is retried because a client may take a moment to release. If it
-  # never releases we bail and leave the dGPU on rather than wedge anything. Steam
-  # lives in the user session, so we reach its unit through the user's systemd via
-  # runuser; absent (e.g. pre-login at boot) it's a harmless no-op. modprobe is the
-  # NixOS-wrapped one (knows the module tree) via its absolute path.
+  #
+  # SAFETY (learned the hard way — 2026-07-03 journal): `modprobe -r nvidia` can
+  # DEADLOCK inside the kernel when a module load races the unload (e.g. an
+  # offload-wrapped app starting during a login storm modprobes nvidia_uvm while
+  # we tear the stack down). The stuck modprobe sits in uninterruptible D-state
+  # forever: it can't be killed, every later module op piles up behind the same
+  # mutex, and suspend fails from then on ("Device or resource busy" — a D-state
+  # task can't be frozen), which is exactly the lid-close-then-freeze symptom.
+  # Three guards address this:
+  #   1. flock — never run two dGPU transitions concurrently.
+  #   2. circuit breaker — if an earlier nvidia modprobe is still running, a
+  #      wedge is likely already in progress: do NOT pile on, leave the dGPU be.
+  #   3. wait-for-free — don't even start the unload until nothing holds a
+  #      /dev/nvidia* or dGPU DRM handle (a busy modprobe -r fails cleanly, but
+  #      minimising the load/unload overlap window is what avoids the deadlock).
+  # Steam lives in the user session, so we reach its unit through the user's
+  # systemd via runuser; absent (e.g. pre-login at boot) it's a harmless no-op.
+  # modprobe is the NixOS-wrapped one (knows the module tree) via absolute path.
   dgpuPower = pkgs.writeShellApplication {
     name = "dgpu-power";
     runtimeInputs = [
       pkgs.coreutils
-      pkgs.util-linux # runuser
+      pkgs.util-linux # runuser, flock
+      pkgs.psmisc # fuser
+      pkgs.procps # pgrep
       config.systemd.package # systemctl
     ];
     text = ''
       knob=/sys/devices/platform/asus-nb-wmi/dgpu_disable
       dev=0000:02:00.0
-      user=kyandesutter
+      user=${config.users.users.kyandesutter.name}
       modprobe=/run/current-system/sw/bin/modprobe
 
       # No ASUS dGPU kill switch on this host → nothing to do.
       [ -e "$knob" ] || exit 0
+
+      # Guard 1: serialize every dGPU transition (see SAFETY above). Non-blocking:
+      # if another transition is mid-flight, bail — the next power event (or the
+      # dgpu-reconcile converge loop) re-runs with the then-current source.
+      exec 9>/run/power/dgpu.lock
+      if ! flock -n 9; then
+        echo "dgpu-power: another dGPU transition is in progress — skipping" >&2
+        exit 0
+      fi
+
+      # Guard 2: circuit breaker. An nvidia modprobe still running means either a
+      # transition we somehow didn't serialize with, or — worse — a kernel-wedged
+      # unload in D-state that will never finish. Either way, touching the module
+      # stack now only makes it worse. Leave the dGPU in whatever state it is.
+      if pgrep -f 'modprobe.*nvidia' >/dev/null 2>&1; then
+        echo "dgpu-power: an earlier nvidia modprobe is still running (kernel wedge?) — leaving the dGPU alone" >&2
+        exit 0
+      fi
 
       uid="$(id -u "$user" 2>/dev/null || true)"
       user_systemctl() {
@@ -89,12 +122,32 @@ let
 
       case "''${1:-}" in
         off)
+          # Already off? (knob=1 and driver gone) — nothing to do.
+          if [ "$(cat "$knob")" = 1 ] && [ ! -e /sys/module/nvidia ]; then exit 0; fi
+
           systemctl stop nvidia-powerd.service 2>/dev/null || true
           user_systemctl stop steam.service
+
+          # Guard 3: wait (up to ~60s) for every handle on the dGPU to be
+          # released before unloading. Covers the dock-relog session teardown
+          # (which releases the dGPU when the compositor exits) that the old
+          # fixed 25s systemd-run retry used to guess at.
+          free=
+          for _ in $(seq 20); do
+            if ! fuser -s /dev/nvidia* "/dev/dri/by-path/pci-$dev-card" "/dev/dri/by-path/pci-$dev-render"* 2>/dev/null; then
+              free=1; break
+            fi
+            sleep 3
+          done
+          if [ -z "$free" ]; then
+            echo "dgpu-power: dGPU still in use after 60s — leaving it powered on" >&2
+            exit 1
+          fi
+
           ok=
-          for _ in 1 2 3 4 5; do
+          for _ in 1 2 3; do
             if "$modprobe" -r nvidia_drm nvidia_uvm nvidia_modeset nvidia 2>/dev/null; then ok=1; break; fi
-            sleep 1
+            sleep 2
           done
           if [ -z "$ok" ]; then
             echo "dgpu-power: nvidia still in use — leaving dGPU powered on" >&2
@@ -104,13 +157,18 @@ let
           echo 1 > "$knob"
           ;;
         on|on-quiet)
-          echo 0 > "$knob"
-          echo 1 > /sys/bus/pci/rescan
-          sleep 1
-          "$modprobe" nvidia nvidia_modeset nvidia_uvm nvidia_drm 2>/dev/null || true
+          # Only touch the PCI/module stack when actually off — a no-op `on`
+          # (already powered + driver loaded) must not rescan/reload anything.
+          if [ "$(cat "$knob")" != 0 ] || [ ! -e /sys/module/nvidia ]; then
+            echo 0 > "$knob"
+            echo 1 > /sys/bus/pci/rescan
+            sleep 1
+            "$modprobe" nvidia nvidia_modeset nvidia_uvm nvidia_drm 2>/dev/null || true
+          fi
           # `on` is the AC/gaming bring-up and also (re)starts Steam; `on-quiet`
           # only powers the chip + driver (USB-C: keep the backlight alive without
-          # launching the gaming stack).
+          # launching the gaming stack). steam.service's ExecCondition also gates
+          # it on AC, so this start is a no-op on any other source.
           [ "''${1:-}" = on ] && user_systemctl start steam.service
           ;;
         *)
@@ -119,20 +177,48 @@ let
     '';
   };
 
-  # One-shot "make the dGPU power match the current source" — re-reads the source
-  # itself so it's safe to fire later than the event that scheduled it (a re-plug in
-  # between flips the decision). Used by power-reconcile's post-relog retry (off_dgpu)
-  # to power the dGPU off once a dGPU-primary session has relogged to iGPU and let go
-  # of it. Does not re-schedule, so a still-pinned dGPU (canceled relog) just stays on.
+  # "Make the dGPU power (and its dependent services) match the current source."
+  # Runs as the payload of dgpu-reconcile.service (below) — NEVER inline in
+  # power-reconcile, whose udev-triggered restarts would SIGTERM a mid-flight
+  # module transition. Re-reads the source each pass and loops until the action
+  # taken still matches (a re-plug mid-transition changes the answer; systemd
+  # merges `start` jobs on an active unit, so without the loop that late event
+  # would be lost).
   dgpuReconcile = pkgs.writeShellApplication {
     name = "dgpu-reconcile";
-    runtimeInputs = [ powerSource dgpuPower ];
+    runtimeInputs = [ powerSource dgpuPower config.systemd.package ];
     text = ''
-      if [ "$(power-source)" = ac ]; then
-        dgpu-power on || true
-      else
-        dgpu-power off || true
-      fi
+      for _ in 1 2 3; do
+        src="$(power-source)"
+        case "$src" in
+          ac)
+            # Bring the dGPU back (reload driver + power on) for offload/gaming,
+            # then start nvidia-powerd (Dynamic Boost) — it needs the driver
+            # loaded, so it must follow dgpu-power on. RTD3 being broken, the
+            # dGPU just idles at D0 while on AC, which is fine: battery drain is
+            # moot when plugged in.
+            dgpu-power on || true
+            systemctl start nvidia-powerd.service 2>/dev/null || true
+            ;;
+          powerbank)
+            # Keep the dGPU POWERED on USB-C — its WMI carries the panel
+            # backlight, so powering it off would kill brightness control. Drop
+            # Dynamic Boost to stay low-power; `on-quiet` brings the chip back if
+            # we just arrived from the battery branch, without launching Steam.
+            systemctl stop nvidia-powerd.service 2>/dev/null || true
+            dgpu-power on-quiet || true
+            ;;
+          *)
+            # Hard power-off (see dgpu-power above): the only real battery win,
+            # since RTD3 can't suspend it. dgpu-power stops nvidia-powerd + Steam
+            # first and waits for the device to be free (relog teardown window).
+            systemctl stop nvidia-powerd.service 2>/dev/null || true
+            dgpu-power off || true
+            ;;
+        esac
+        # Source unchanged since we acted on it → converged.
+        [ "$(power-source)" = "$src" ] && break
+      done
     '';
   };
 
@@ -157,24 +243,10 @@ let
     runtimeInputs = [
       pkgs.coreutils
       powerSource
-      dgpuPower
       config.services.power-profiles-daemon.package
       config.systemd.package
     ];
     text = ''
-      # Power the dGPU off, but tolerate the one case where it can't: a session that
-      # booted dGPU-primary (on AC) still holds the DRM node open, so `dgpu-power
-      # off`'s `modprobe -r` fails. That session is relogging to iGPU-primary right
-      # now (hyprland.nix dock-relog), and releases the dGPU when it tears down — so
-      # retry once ~25s out, past the 15s relog countdown + teardown. The retry
-      # re-reads the source, so a re-plug to AC in the meantime powers the dGPU back
-      # ON instead of off, and it does NOT re-schedule, so a canceled relog (session
-      # stays dGPU-primary) just leaves the dGPU on rather than looping.
-      off_dgpu() {
-        if dgpu-power off; then return 0; fi
-        systemd-run --quiet --on-active=25 -- ${dgpuReconcile}/bin/dgpu-reconcile || true
-      }
-
       sleep 1.5
       src="$(power-source)"
       printf '%s\n' "$src" > /run/power/state
@@ -189,32 +261,16 @@ let
       #               accepting that the backlight (dGPU-wired) goes to its dim
       #               default while unplugged.
       case "$src" in
-        ac)
-          powerprofilesctl set performance 2>/dev/null || powerprofilesctl set balanced || true
-          # Bring the dGPU back (reload driver + power on) for offload/gaming, then
-          # start nvidia-powerd (Dynamic Boost) — it needs the driver loaded, so it
-          # must follow dgpu-power on. RTD3 being broken, the dGPU just idles at D0
-          # while on AC, which is fine: battery drain is moot when plugged in.
-          dgpu-power on || true
-          systemctl start nvidia-powerd.service 2>/dev/null || true
-          ;;
-        powerbank)
-          powerprofilesctl set balanced || true
-          # Keep the dGPU POWERED on USB-C — its WMI carries the panel backlight, so
-          # powering it off would kill brightness control. Drop Dynamic Boost to stay
-          # low-power, and `on-quiet` brings the chip back if we just arrived from the
-          # battery branch (which powers it off), without launching Steam.
-          systemctl stop nvidia-powerd.service 2>/dev/null || true
-          dgpu-power on-quiet || true
-          ;;
-        *)
-          powerprofilesctl set power-saver 2>/dev/null || powerprofilesctl set balanced || true
-          # Hard power-off the dGPU (see dgpu-power above): the only real battery win,
-          # since RTD3 can't suspend it. dgpu-power stops nvidia-powerd + Steam first.
-          # off_dgpu retries once if a dGPU-primary session is mid-relog (see above).
-          off_dgpu
-          ;;
+        ac)        powerprofilesctl set performance 2>/dev/null || powerprofilesctl set balanced || true ;;
+        powerbank) powerprofilesctl set balanced || true ;;
+        *)         powerprofilesctl set power-saver 2>/dev/null || powerprofilesctl set balanced || true ;;
       esac
+      # The dGPU side (power on/off, nvidia-powerd, Steam) lives in its own
+      # service so a udev-triggered restart of THIS unit can never SIGTERM a
+      # module load/unload mid-flight (interrupted nvidia module transitions are
+      # how the kernel wedges — see dgpu-power). `start` (not restart): a running
+      # transition is left alone; its converge loop picks up the new source.
+      systemctl start --no-block dgpu-reconcile.service || true
     '';
   };
 in
@@ -263,6 +319,33 @@ in
       serviceConfig = {
         Type = "oneshot";
         ExecStart = "${powerReconcile}/bin/power-reconcile";
+      };
+    };
+
+    # The dGPU transition worker (see dgpuReconcile / dgpu-power above). A
+    # separate unit from power-reconcile for two reasons:
+    #   • power-reconcile is `systemctl restart`ed by udev on every power event —
+    #     restarting SIGTERMs the in-flight run, which is fine for the fast
+    #     profile/state work but must NEVER interrupt an nvidia module
+    #     load/unload (that's the kernel-wedge path). This unit is only ever
+    #     `start`ed, and systemd merges a `start` on an active unit into the
+    #     running job — so a transition always runs to completion, and the
+    #     converge loop inside re-reads the source to catch events that arrived
+    #     mid-run.
+    #   • systemd-inhibit holds a sleep + lid-switch inhibitor for the duration,
+    #     so a lid close can't fire suspend into the middle of a module
+    #     transition (another wedge aggravator) — the suspend simply waits the
+    #     few seconds until the transition is done.
+    systemd.services.dgpu-reconcile = {
+      description = "dGPU power follows the power source (hard off on battery)";
+      # External `start`s, not a crash loop — same rationale as power-reconcile.
+      startLimitIntervalSec = 0;
+      serviceConfig = {
+        Type = "oneshot";
+        ExecStart = "${config.systemd.package}/bin/systemd-inhibit --what=sleep:handle-lid-switch --who=dgpu-reconcile --why='dGPU power transition in progress' --mode=block ${dgpuReconcile}/bin/dgpu-reconcile";
+        # Bounded, but generous enough for the worst case: wait-for-free (60s)
+        # + module unload + up to three converge passes.
+        TimeoutStartSec = 300;
       };
     };
 

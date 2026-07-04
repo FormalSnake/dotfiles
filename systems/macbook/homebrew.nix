@@ -3,7 +3,6 @@
     taps = [
       "barutsrb/tap"
       "jnsahaj/lumen"
-      "nikitabobko/tap"
       "pluk-inc/tap"
     ];
 
