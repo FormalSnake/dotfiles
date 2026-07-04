@@ -43,6 +43,13 @@
       name = "YouTube";
       shareProfile = true;
     }
+    {
+      # Jump Desktop — reuse the Helium login; favicon auto-fetched at
+      # activation. Connection auth-creds fragment stripped from the URL.
+      url = "https://app.jumpdesktop.com/jump";
+      name = "Jump Desktop";
+      shareProfile = true;
+    }
   ];
 
   # NixOS rebuild shortcut (g815-only, so it lives here rather than the shared

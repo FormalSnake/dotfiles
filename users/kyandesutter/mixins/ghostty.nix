@@ -36,8 +36,8 @@ in
       # (cursor/sudo/title) and lightweight `ssh-env`, but drop `ssh-terminfo`.
       shell-integration-features = "cursor,sudo,title,ssh-env,no-ssh-terminfo";
 
-      background-opacity = 0.9;
-      background-blur-radius = 32;
+      background-opacity = 1.0;
+      background-blur-radius = 0;
 
       mouse-hide-while-typing = true;
 

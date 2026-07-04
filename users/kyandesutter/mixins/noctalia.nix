@@ -51,7 +51,7 @@ let
   # (see noctalia-shell src/app/application_services.cpp); if that path contains
   # "flexoki" (any case) we snap the whole shell to the hardcoded Flexoki palette
   # below via `noctalia msg color-scheme-set custom Flexoki`, otherwise we return
-  # to the wallpaper-derived M3 palette (`color-scheme-set wallpaper m3-tonal-spot`,
+  # to the wallpaper-derived M3 palette (`color-scheme-set wallpaper muted`,
   # matching theme.wallpaper_scheme). This runs inside noctalia's systemd *user*
   # service (limited PATH), so the noctalia binary is provided via runtimeInputs.
   # `color-scheme-set` fires colors_changed (NOT wallpaper_changed), so no loop.
@@ -64,7 +64,7 @@ let
       if [[ "$path" == *flexoki* ]]; then
         noctalia msg color-scheme-set custom Flexoki
       else
-        noctalia msg color-scheme-set wallpaper m3-tonal-spot
+        noctalia msg color-scheme-set wallpaper muted
       fi
     '';
   };
@@ -206,6 +206,12 @@ in
         # false. "solid" is also noctalia's default; set explicitly for clarity.
         panel.transparency_mode = "solid";
 
+        # Global corner-radius multiplier for every Noctalia surface (control
+        # center, launcher, OSD, notifications, tooltips, the bar). 0.0 squares
+        # them all off for the flat/mono look; 1.0 is noctalia's default rounded
+        # radius. (Backed by Style::cornerRadiusScale / kCornerRadiusScaleRange.)
+        corner_radius_scale = 0.0;
+
         # Session/power menu buttons (the `session` bar widget; SUPER+SHIFT+Escape
         # is bound to lock-and-suspend directly — see hyprland.nix). This list
         # REPLACES noctalia's default action set wholesale (default is lock,
@@ -271,30 +277,28 @@ in
         ];
       };
 
-      # Bar: caelestia-style full-width, edge-to-edge, solid. The real keys (per
-      # the BarConfig struct — example.toml's margin_h/margin_v are stale and
-      # silently ignored) are:
+      # Bar: caelestia-style full-width, edge-to-edge, solid, pinned to the
+      # BOTTOM edge. The real keys (per the BarConfig struct — example.toml's
+      # margin_h/margin_v are stale and silently ignored) are:
+      #   position    → which screen edge the bar sits on (top|bottom|left|right).
       #   margin_ends → inset from each END of the bar along its main axis; 0 =
       #                 spans the full screen width.
       #   margin_edge → distance from the nearest screen edge; >0 floats the bar,
-      #                 0 = flush against the top.
-      # The bar itself stays a squared solid rectangle (top corners = 0); instead
-      # the *desktop* gets the rounded border:
-      #
-      #   radius_bottom_{left,right} < 0 → concave corners on the bar's inner
-      #   (bottom) edge. noctalia renders these as a concave spike that curves
-      #   outward into the desktop, so the content area below the bar reads as
-      #   having rounded top corners flowing out from under the bar — not the bar
-      #   being rounded. Range is -500..500; -20 ≈ a soft notch.
+      #                 0 = flush against that edge (here, the bottom).
+      # The bar is a plain squared solid rectangle — all four corners = 0. (It
+      # used to carry a concave -20 notch on its inner edge to fake a rounded
+      # desktop border; that's dropped for the flat/square look, so the content
+      # area meets the bar with a hard edge.)
       #
       # A little more padding / widget spacing for breathing room. reserve_space
       # stays true (default) so tiled windows don't underlap it.
       bar.main = {
+        position = "bottom"; # pin to the bottom edge (default is top)
         margin_ends = 0; # full width
-        margin_edge = 0; # flush to the top edge
-        radius = 0; # seeds all four corners; top stays squared
-        radius_bottom_left = -20; # concave → curves out into the desktop
-        radius_bottom_right = -20;
+        margin_edge = 0; # flush to the bottom edge
+        radius = 0; # all four corners squared
+        radius_top_left = 0; # no notch — hard edge into the desktop
+        radius_top_right = 0;
         padding = 16;
         widget_spacing = 12;
 
@@ -327,15 +331,20 @@ in
       # the desktop's colours (replacing the static Catppuccin builtin). On every
       # wallpaper pick or light/dark flip, Noctalia regenerates a Material Design 3
       # palette from the image, re-renders all templates below, and runs their
-      # hooks. `wallpaper_scheme` selects the M3 generator (tonal-spot = balanced /
-      # legible; "vibrant" for punchier accents). Mode defaults to dark; the
-      # SUPER+SHIFT+T keybind (../mixins/hyprland.nix) toggles light/dark via
+      # hooks. `wallpaper_scheme` selects the generator; "muted" keeps the palette
+      # low-saturation (the most minimal non-monochrome scheme noctalia ships)
+      # while still being wallpaper-derived. Valid values (noctalia rejects
+      # anything else and silently falls back to m3-content) are the M3 schemes
+      # m3-tonal-spot (balanced), m3-content, m3-monochrome (pure gray),
+      # m3-rainbow, m3-fruit-salad, plus the non-M3 muted, soft, vibrant,
+      # faithful, dysfunctional. Mode defaults to dark; the SUPER+SHIFT+T keybind
+      # (../mixins/hyprland.nix) toggles light/dark via
       # `noctalia msg theme-mode-toggle`. See docs/superpowers/specs/
       # 2026-06-19-noctalia-dynamic-theming-design.md.
       theme = {
         mode = "dark";
         source = "wallpaper";
-        wallpaper_scheme = "m3-tonal-spot";
+        wallpaper_scheme = "muted";
 
         # App theming. The builtin gtk3/gtk4 templates render the live palette into
         # ~/.config/gtk-{3,4}.0/noctalia.css (imported via gtk.css) and drive the

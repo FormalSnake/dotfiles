@@ -391,6 +391,15 @@ in
       hl.workspace_rule({ workspace = tostring(i), monitor = monitor, default = (i == 1 or i == 4) })
     end
 
+    -- Drop the window border on any workspace holding a single tiled window.
+    -- `w[tv1]` is a dynamic selector = "workspace with exactly 1 tiled visible
+    -- window"; on it we set no_border so a lone window sits flush with no frame.
+    -- As soon as a second tiled window appears the selector stops matching and
+    -- the global border_size (2) returns, giving the seams between tiled windows
+    -- — and between a top window and the bar. This is a separate, state-based
+    -- rule type from the per-number monitor bindings above, so the two coexist.
+    hl.workspace_rule({ workspace = "w[tv1]", no_border = true })
+
     -- — Variables —
     local mod = "SUPER"        -- primary modifier (the physical Cmd-position key)
     local terminal = "ghostty"
@@ -461,8 +470,8 @@ in
         touchpad = { natural_scroll = true, clickfinger_behavior = true, scroll_factor = 0.4 },
       },
       general = {
-        gaps_in = 4,
-        gaps_out = 8,
+        gaps_in = 0,
+        gaps_out = 0,
         border_size = 2,
         layout = "dwindle",
         resize_on_border = true,
@@ -483,8 +492,8 @@ in
         allow_tearing = true,
       },
       decoration = {
-        rounding = 13,
-        blur = { enabled = true, size = 6, passes = 3 },
+        rounding = 0,
+        blur = { enabled = false },
       },
       animations = { enabled = true },
       misc = {
