@@ -58,19 +58,23 @@ let
     '';
   };
 
-  # — Voicing EQ for the Pebbles (the "general sound" improvement) —
+  # — Voicing EQ for the Pebble X Plus (the "general sound" improvement) —
   #
-  # The upper half of Ziyad Nazem's community "Perfect EQ" curve, adapted for
-  # these speakers. The original 10-band curve is a consumer "smile":
-  #   32:+4 64:+2 125:+1 250:0 500:-1 1k:-2 2k:0 4k:+2 8k:+3 16k:+3
-  # The bass bells (32/64 Hz) are ZEROED here on purpose: filter#0's low-shelf
-  # already owns everything below 110 Hz, and the 2" drivers can't move 32 Hz —
-  # boosting it just adds excursion/distortion and eats the headroom. What's
-  # left is what actually improves *general* clarity on a bass-boosted tiny
-  # speaker: a gentle 500 Hz–1 kHz scoop to de-mud, plus a 4/8/16 kHz presence
-  # + air lift so vocals and detail cut through. All Bell, RLC (BT), Q≈1.5.
-  # Want the full smile back? Set band0/band1 gains to 4.0/2.0. Tune live in the
-  # EasyEffects window — changes save back to the bass-boost output preset.
+  # The Pebble X Plus is a 2.1 system: two 2" satellites + a dedicated 3.5"
+  # subwoofer (dual passive radiators) reaching ~45 Hz. Unlike the old 2" Pebble
+  # V3 it makes REAL low end, so the sub-bass is handled entirely by filter#0's
+  # low-shelf below — this EQ only shapes everything above it.
+  #
+  # Based on the upper half of Ziyad Nazem's community "Perfect EQ" smile, which
+  # also matches the near-mandatory "Music" V-shape reviewers recommend over the
+  # "dull/empty" flat tuning (lows + highs up, slight mid scoop). The low bells
+  # (32/64/125 Hz) are ZEROED on purpose: the shelf already owns everything below
+  # ~110 Hz, and lifting them here would just stack into the sub's boomy midbass.
+  # What's left is a gentle 500 Hz–1 kHz scoop to de-mud plus a 4/8/16 kHz
+  # presence + air lift. The satellites are already detailed/slightly bright, so
+  # the top lift is kept modest (≤ +2.5) to stay "not too sharp". All Bell,
+  # RLC (BT), Q≈1.5. Tune live in the EasyEffects window — changes save back to
+  # the bass-boost output preset.
   mkBand = frequency: gain: {
     inherit frequency gain;
     type = "Bell";
@@ -81,16 +85,16 @@ let
     solo = false;
   };
   perfectEqBands = {
-    band0 = mkBand 32.0 0.0; # owned by the low-shelf — left flat
+    band0 = mkBand 32.0 0.0; # below the sub's ~45 Hz floor — left flat
     band1 = mkBand 64.0 0.0; # owned by the low-shelf — left flat
-    band2 = mkBand 125.0 1.0;
+    band2 = mkBand 125.0 0.0; # midbass boom region — left flat
     band3 = mkBand 250.0 0.0;
-    band4 = mkBand 500.0 (-1.0); # de-mud
-    band5 = mkBand 1000.0 (-2.0); # de-mud
+    band4 = mkBand 500.0 (-1.0); # de-mud (scoop)
+    band5 = mkBand 1000.0 (-1.5); # de-mud (scoop)
     band6 = mkBand 2000.0 0.0;
-    band7 = mkBand 4000.0 2.0; # presence
-    band8 = mkBand 8000.0 3.0; # detail
-    band9 = mkBand 16000.0 3.0; # air
+    band7 = mkBand 4000.0 1.5; # presence
+    band8 = mkBand 8000.0 2.0; # detail
+    band9 = mkBand 16000.0 2.5; # air
   };
 
   # — Audiophile (Harman-neutral) correction for the AirPods Pro 2 —
@@ -142,34 +146,31 @@ in
   # instances, parameter keys are hyphenated, and enum-valued keys (type/mode)
   # take their string label exactly as shown in the GUI. Tune any of this live in
   # the EasyEffects window — changes save back to the output preset.
-  # — Bass boost for the Creative Pebble V3 on HDMI —
+  # — Bass boost for the Creative Pebble X Plus on HDMI —
   #
-  # The Pebbles are tiny 2" drivers with effectively no low end. EasyEffects
-  # already sits on the OUTPUT pipeline (apps → "Easy Effects Sink" → the real
-  # device), so an output preset is the natural place to fix this.
+  # The Pebble X Plus is a 2.1 system with a real 3.5" subwoofer (down to ~45 Hz),
+  # so — unlike the old 2" Pebble V3 — it does NOT need a huge fake-bass shelf to
+  # invent low end it can't produce. It just needs a tasteful lift aimed at the
+  # sub's deep range, kept clear of the ~100–160 Hz midbass where this system can
+  # get boomy. EasyEffects already sits on the OUTPUT pipeline (apps → "Easy
+  # Effects Sink" → the real device), so an output preset is the natural place to
+  # voice it.
   #
-  # eqMac-style: boost the bass but pull the WHOLE signal down by a matching
-  # amount (a "preamp" cut) so the boosted low end lands at unity instead of
-  # slamming past 0 dBFS and clipping. The result is quieter overall but with
-  # hard, clean bass — turn the speaker up to taste. Boosting without this
-  # headroom is exactly what produces the distorted "2013 bass boost" sound.
+  # Same eqMac-style headroom trick as before, just gentler: boost the sub band
+  # but pull the WHOLE signal down by a matching amount (a "preamp" cut) so the
+  # boosted low end lands at unity instead of clipping. Because we're reinforcing
+  # real bass rather than faking it, the cut is small (-5 dB, not the V3's -11).
   #
   # Two plugins, in order:
-  #   1. filter#0 as a Low-shelf: input-gain -11 dB knocks the whole signal down
-  #      for headroom (eqMac used ~-11 dB), then +10 dB below ~110 Hz brings the
-  #      bass back to roughly unity (so bass ≈ -1 dB, everything else ≈ -11 dB →
-  #      bass is way out front, nothing clips). Overall much quieter — that's the
-  #      headroom; turn the speaker up.
+  #   1. filter#0 as a Low-shelf: input-gain -5 dB knocks the whole signal down
+  #      for headroom, then +5 dB below ~75 Hz brings the sub band back to roughly
+  #      unity (so bass ≈ 0 dB, everything else ≈ -5 dB → the deep bass sits ~5 dB
+  #      out front, nothing clips). Aimed LOW (75 Hz) on purpose: it leans on the
+  #      sub's strength (45–90 Hz) and stays out of the boomy midbass.
   #      The bass-vs-rest emphasis is the shelf `gain`; the overall level/headroom
   #      is `input-gain`. Want less bass but same loudness? Lower BOTH together.
-  #   2. equalizer#0 — voicing EQ for general clarity (see `perfectEqBands`).
-  #
-  # NOTE: a Calf bass_enhancer used to sit between these two, synthesizing
-  # harmonics to fake sub-bass the 2" drivers can't move. Removed — on speakers
-  # that already reproduce real low end via the shelf, its added harmonic
-  # distortion read as midbass "warmth" that MASKED the genuine deep bass,
-  # making it feel shallower. The pure shelf sounds deeper. If you ever want it
-  # back, re-add "bass_enhancer#0" to plugins_order with a low `amount` (~3).
+  #      Boomy on some tracks? The sub has a physical level knob — use it.
+  #   2. equalizer#0 — voicing EQ (the V-shape; see `perfectEqBands`).
   #
   # Applied to HDMI ONLY (not the laptop's analog speakers) via a per-device
   # autoload profile written below — see the xdg.dataFile entry. Tune any of
@@ -231,24 +232,25 @@ in
           "equalizer#0"
         ];
 
-        # Low-shelf + preamp: -11 dB on everything (input-gain) for headroom,
-        # then +10 dB below 110 Hz. Bass nets ≈ -1 dB, the rest ≈ -11 dB, so the
-        # bass is ~10 dB hotter than the rest and nothing clips. RLC (BT) is a
-        # gentle, musical shelf; slope x1 keeps it broad rather than a sharp step.
-        # Too quiet? Raise the speaker volume. Too much bass? Lower `gain`.
+        # Low-shelf + preamp: -5 dB on everything (input-gain) for headroom, then
+        # +5 dB below ~75 Hz. The sub band nets ≈ 0 dB, the rest ≈ -5 dB, so the
+        # deep bass sits ~5 dB hotter than the rest and nothing clips. Aimed low
+        # (75 Hz) to lean on the sub (45–90 Hz) and dodge the boomy midbass. RLC
+        # (BT) is a gentle, musical shelf; slope x1 keeps it broad. Too much bass?
+        # Lower `gain`, or use the sub's physical level knob.
         "filter#0" = {
           bypass = false;
-          "input-gain" = -11.0;
+          "input-gain" = -5.0;
           "output-gain" = 0.0;
           type = "Low-shelf";
           mode = "RLC (BT)";
           "equal-mode" = "IIR";
           slope = "x1";
           decramp = "Off";
-          frequency = 110.0;
+          frequency = 75.0;
           width = 4.0;
           quality = 0.0;
-          gain = 10.0;
+          gain = 5.0;
           balance = 0.0;
         };
 
