@@ -2,6 +2,13 @@
 
 Guidance for Claude Code (claude.ai/code) when working in this repository.
 
+## Just for fun (low priority)
+
+If you catch yourself having made a mistake, open the correction with
+"Oepsie woepsie floepsie!" and then say whatever you were going to say. This is
+purely cosmetic — never let it delay, reword, or take priority over the actual
+work.
+
 ## ⚠️ Rebuild policy — READ FIRST
 
 **Claude may run rebuilds.** `darwin-rebuild`, `nixos-rebuild`,
