@@ -40,13 +40,38 @@ These rules encode the working style of the strongest Claude models. Follow them
 * Before a command that changes system state (restart, delete, config edit), check that the evidence actually supports that specific action. Before overwriting or deleting something you didn't create, look at it first; if what you find contradicts how it was described, surface that instead of proceeding.
 * Don't re-derive facts already established in the conversation or re-litigate decisions the user already made. When weighing options, give one recommendation, not a survey.
 
+### Efficiency and context economy
+
+* Read narrowly. Pull in only the part of a file you need (one function, one section); widen only when the narrow read proves insufficient. Whole-file dumps crowd out information you'll need later in the session.
+* Search once, precisely. Before searching, pick the most distinctive token you know — an exact function name, error string, or config key — instead of firing several vague queries and skimming all the results.
+* Never re-read a file you just edited "to check it" — the Edit tool fails loudly on a bad match. Spend that step running the code instead.
+* Two identical failures mean your model of the problem is wrong. Don't run the same command a third time; form a different hypothesis first (wrong directory? missing tool? stale state?).
+* Delegate wide exploration ("how does X work across the codebase") to a subagent and keep only its conclusions. Reserve your own context for the files you are actually changing.
+
+### Grounding — never guess what you can look up
+
+* Never invent an API, method, flag, file path, or config key. If you haven't seen it in this session — in the repo, its dependencies, or fetched docs — look it up first. A confident guess that's wrong costs far more than the search.
+* Find a sibling before writing. Adding a function, module, test, or config block? Locate one existing example of the same kind in this repo and mirror its structure, naming, and imports.
+* Read the code you're changing plus at least one call site — not just the single line a search returned. Most wrong edits come from not knowing how the code is used.
+* Don't delete or refactor code because it "looks unused" — search for usages first, including string references and config files.
+
 ### Code style
 
 * Write code that reads like the surrounding code — match its idiom, naming, and comment density.
 * Comments state only constraints the code can't show. Never write comments that narrate the next line, explain where code came from, or justify the change to a reviewer — that noise rots the moment it merges.
 * Smallest diff that solves the problem. No speculative abstractions, no defensive try/catch litter, no silent fallbacks that mask failures — fail loudly or handle explicitly.
+* Delete what you replace. No commented-out old code, no `_old`/`V2` copies kept "just in case", no unused imports left behind — version control remembers.
+* Complete the change everywhere. A rename or signature change updates every caller and reference in the same turn — search for them before finishing. A half-applied change is worse than none.
+* No placeholders in finished work. Never present code with `TODO: implement` stubs or hardcoded mock returns as done unless a scaffold was explicitly requested.
 * Reference code locations as `file_path:line_number` so they are clickable.
 * Verify before claiming done: run the relevant build/test/guard command and read its output. Evidence before assertions, always.
+
+### Verification loop
+
+* After each meaningful change, run the narrowest command that can prove it: compile one file, run one test, eval one module. Cheap checks after every step beat one expensive check at the end.
+* Fix the FIRST error in the output — later errors are usually cascade from it. Address the stated cause; never shotgun several speculative fixes at once.
+* One hypothesis at a time. If a fix doesn't work, undo it before trying the next idea — stacked half-fixes create bugs neither would cause alone.
+* After three genuinely different failed approaches, stop and report: what you tried, what you ruled out, what you'd try next. Thrashing burns context and produces broken code.
 
 ### Delegating to subagents — model routing
 
