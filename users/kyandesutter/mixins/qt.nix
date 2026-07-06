@@ -17,7 +17,7 @@
     style=Fusion
     custom_palette=true
     color_scheme_path=${config.home.homeDirectory}/.config/qt6ct/colors/noctalia.conf
-    icon_theme=Papirus-Dark
+    icon_theme=Colloid-Dark
     standard_dialogs=default
   '';
   xdg.configFile."qt5ct/qt5ct.conf".text = ''
@@ -25,7 +25,7 @@
     style=Fusion
     custom_palette=true
     color_scheme_path=${config.home.homeDirectory}/.config/qt5ct/colors/noctalia.conf
-    icon_theme=Papirus-Dark
+    icon_theme=Colloid-Dark
     standard_dialogs=default
   '';
 }

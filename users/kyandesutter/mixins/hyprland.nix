@@ -852,14 +852,14 @@ in
   #
   # QT_QPA_PLATFORMTHEME=qt6ct also fixes the alttab switcher (alttab.nix, a
   # Quickshell/Qt6 app): Qt's icon theme now comes from qt6ct.conf (icon_theme =
-  # Papirus-Dark) instead of falling back to the empty default (which rendered
+  # Colloid-Dark) instead of falling back to the empty default (which rendered
   # every unresolved icon as the magenta/black "missing texture" placeholder).
   # QS_ICON_THEME is kept as a belt-and-braces Quickshell-specific override.
   #
   # Placed in uwsm/env (sourced for every uwsm session and imported into the
   # systemd user manager) so it reaches every Hyprland-spawned Qt app.
   xdg.configFile."uwsm/env".text = ''
-    export QS_ICON_THEME="Papirus-Dark"
+    export QS_ICON_THEME="Colloid-Dark"
     export QT_QPA_PLATFORMTHEME="qt6ct"
   '';
 
@@ -882,6 +882,13 @@ in
     # selects it (see the dark-mode block below).
     adw-gtk3
 
+    # Icon themes. Colloid-Dark is the desktop-wide icon set (set via gtk.iconTheme
+    # below, plus qt{5,6}ct.conf + QS_ICON_THEME above for Qt/Quickshell). adwaita
+    # is kept as the complete freedesktop fallback so any icon Colloid lacks
+    # resolves to a real glyph instead of the broken-image placeholder.
+    colloid-icon-theme
+    adwaita-icon-theme
+
     # Qt platform theme engines. QT_QPA_PLATFORMTHEME=qt6ct (uwsm/env above) points
     # Qt6 apps at qt6ct; qt5ct themes Qt5 apps. Both read Noctalia's generated
     # colour scheme via the qt{6,5}ct.conf written in mixins/qt.nix.
@@ -889,12 +896,13 @@ in
     libsForQt5.qt5ct
   ];
 
-  # Cursor theme — Bibata Modern Ice (https://www.opendesktop.org/p/1197198/).
-  # Sets it for GTK, native Wayland (hyprcursor) and X11/XWayland (x11.enable
-  # exports XCURSOR_THEME/SIZE) so every app shows the same pretty cursor.
+  # Cursor theme — Bibata Modern Classic, the black variant
+  # (https://www.opendesktop.org/p/1197198/). Sets it for GTK, native Wayland
+  # (hyprcursor) and X11/XWayland (x11.enable exports XCURSOR_THEME/SIZE) so every
+  # app shows the same cursor.
   home.pointerCursor = {
     package = pkgs.bibata-cursors;
-    name = "Bibata-Modern-Ice";
+    name = "Bibata-Modern-Classic";
     size = 24;
     gtk.enable = true;
     x11.enable = true;
@@ -913,16 +921,24 @@ in
   # here — noctalia chooses it (currently adw-gtk3-dark), and pinning our own
   # would drift if noctalia changes its choice.
   #
-  # We keep this module for the two things noctalia does NOT do:
-  #   • gtk.enable = true — the catppuccin module hooks on it to set the Papirus
-  #     icon theme (gtk-icon-theme-name + dconf icon-theme).
+  # We keep this module for the things noctalia does NOT do:
+  #   • gtk.iconTheme — sets Colloid-Dark as the icon theme (gtk-icon-theme-name in
+  #     settings.ini + org.gnome.desktop.interface icon-theme in dconf). Noctalia
+  #     never touches the icon theme, so without this GTK falls back to hicolor and
+  #     renders every app/mime icon as the broken-image placeholder. (This used to
+  #     be the catppuccin module's job, but autoEnable = false disabled that hook.)
   #   • gtk-application-prefer-dark-theme in settings.ini — the X11/XWayland
   #     fallback (no xsettingsd here). noctalia's apply.sh only touches gtk.css +
   #     gsettings/dconf, never settings.ini, so this remains our job.
   # adw-gtk3 stays installed (home.packages below) so noctalia's adw-gtk3-dark
-  # resolves; gtk.css is left unmanaged here so noctalia owns it.
+  # resolves; gtk.css is left unmanaged here so noctalia owns it. We set the icon
+  # theme but NOT theme.name — leaving gtk-theme unpinned so noctalia owns it.
   gtk = {
     enable = true;
+    iconTheme = {
+      name = "Colloid-Dark";
+      package = pkgs.colloid-icon-theme;
+    };
     gtk3.extraConfig.gtk-application-prefer-dark-theme = 1;
     gtk4.extraConfig.gtk-application-prefer-dark-theme = 1;
   };
