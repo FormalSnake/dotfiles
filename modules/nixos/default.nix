@@ -27,7 +27,6 @@
       ./mixins/phone-integration.nix
       ./mixins/flatpak.nix
       ./mixins/sober.nix
-      ./mixins/mimick.nix
       ./mixins/nordvpn.nix
       ./mixins/onepassword.nix
       ./profiles

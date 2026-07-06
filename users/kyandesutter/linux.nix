@@ -50,6 +50,13 @@
       name = "Jump Desktop";
       shareProfile = true;
     }
+    {
+      # Immich (photos.kaiiserni.com) — replaces the Mimick Flatpak client.
+      # Shares the Helium login so the web app opens already authenticated.
+      url = "https://photos.kaiiserni.com";
+      name = "Photos";
+      shareProfile = true;
+    }
   ];
 
   # NixOS rebuild shortcut (g815-only, so it lives here rather than the shared

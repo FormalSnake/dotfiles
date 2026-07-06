@@ -145,9 +145,6 @@
   # Sober — Roblox client for Linux (Flatpak-only, managed declaratively).
   kyan.sober.enable = true;
 
-  # Mimick — Immich desktop client (Flatpak-only, managed declaratively).
-  kyan.mimick.enable = true;
-
   home-manager.users.kyandesutter = {
     imports = [
       self.homeModules.kyandesutter
