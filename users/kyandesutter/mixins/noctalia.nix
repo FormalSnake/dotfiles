@@ -322,6 +322,22 @@ in
         radius = 0; # all four corners squared
         radius_top_left = 0; # no notch — hard edge into the desktop
         radius_top_right = 0;
+
+        # Seamless edge overpaint to kill an occasional 1px wallpaper leak at
+        # the bar's inner (top) edge — a subpixel rounding gap where the
+        # background fill doesn't quite reach the topmost row. Noctalia has no
+        # per-side bar border: `border` (a ColorSpec) + `border_width` stroke a
+        # ring just inside ALL FOUR edges of the bar rect. So instead of a
+        # visible outline (which would frame the bar on every side), we set the
+        # border to the SAME colour the bar background uses — the dynamic M3
+        # `surface` role (Bar::applyBackgroundPalette fills the body with
+        # ColorRole::Surface) — so the ring is invisible everywhere yet still
+        # repaints the top edge in bar colour, covering the leak. `border_width`
+        # defaults to 0 (no border); 2 (not 1) reliably covers the leak even
+        # under fractional scaling. Range is 0–20. Tracks the wallpaper palette.
+        border = "surface";
+        border_width = 2;
+
         padding = 16;
         widget_spacing = 12;
 
