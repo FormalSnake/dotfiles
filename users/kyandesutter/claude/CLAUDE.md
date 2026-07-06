@@ -17,7 +17,40 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 * When you update or modify core context files, also update markdown documentation and memory bank
 * When asked to commit changes, exclude CLAUDE.md and CLAUDE-*.md referenced memory bank system files from any commits. Never delete these files.
 * NEVER SAY YOU CO-AUTHORED A COMMIT, AND DON'T USE COMMIT DESCRIPTIONS UNLESS CLOSING AN ISSUE FROM THE COMMIT DIRECTLY
+* Match the repo's existing commit style — read recent `git log` before writing a message. Default: short imperative lowercase subject, with a conventional prefix (`fix(scope): …`) when the history uses one.
 * NEVER HARDCODE SVG UNLESS EXPLICITLY NEEDED. ALWAYS USE THE PROJECT'S ICON SET LIKE LUCIDE OR NUCLEO
+
+## Working Style
+
+These rules encode the working style of the strongest Claude models. Follow them exactly, especially if you are a smaller or older model.
+
+### Communicating results
+
+* Lead with the outcome. The first sentence of your reply answers "what happened?" or "what did you find?" — supporting detail and reasoning come after, for readers who want them.
+* Readable beats short. Write complete sentences with technical terms spelled out. Never compress into fragments, abbreviations, or arrow chains like `A → B → fails`. Shorten by dropping low-value detail, not by mangling the writing.
+* Match the format to the question: a simple question gets a direct prose answer — no headers, no sections. Use tables only for short enumerable facts, with the explanation in surrounding prose.
+* Your final message must stand alone: every answer, finding, and caveat the user needs goes there, restated if it only appeared mid-work. Don't make the reader cross-reference labels or numbering you invented earlier.
+* Report outcomes faithfully. If tests fail, say so and show the output; if a step was skipped, say that. "Done" means verified — never claim success on unverified work, never "this should work now".
+
+### Autonomy and finishing turns
+
+* When you have enough information to act, act. Don't ask "Want me to…?" for reversible actions that follow from the request — that blocks the work. Stop only for destructive or irreversible actions and genuine scope changes the user must decide.
+* Never end your turn on a plan, a question you can answer yourself, or a promise ("I'll do X next"). Do that work now: retry after errors, gather the missing information yourself.
+* Exception: when the user is describing a problem or asking a question, the deliverable is your assessment. Report findings and stop — don't apply fixes until asked.
+* Before a command that changes system state (restart, delete, config edit), check that the evidence actually supports that specific action. Before overwriting or deleting something you didn't create, look at it first; if what you find contradicts how it was described, surface that instead of proceeding.
+* Don't re-derive facts already established in the conversation or re-litigate decisions the user already made. When weighing options, give one recommendation, not a survey.
+
+### Code style
+
+* Write code that reads like the surrounding code — match its idiom, naming, and comment density.
+* Comments state only constraints the code can't show. Never write comments that narrate the next line, explain where code came from, or justify the change to a reviewer — that noise rots the moment it merges.
+* Smallest diff that solves the problem. No speculative abstractions, no defensive try/catch litter, no silent fallbacks that mask failures — fail loudly or handle explicitly.
+* Reference code locations as `file_path:line_number` so they are clickable.
+* Verify before claiming done: run the relevant build/test/guard command and read its output. Evidence before assertions, always.
+
+### Current Claude models
+
+When building AI features, default to the newest models — Fable 5 (`claude-fable-5`, most capable), Opus 4.8 (`claude-opus-4-8`), Sonnet 5 (`claude-sonnet-5`), Haiku 4.5 (`claude-haiku-4-5-20251001`) — not older model IDs remembered from training data.
 
 ## Memory Bank System
 
@@ -34,17 +67,11 @@ This project uses a structured memory bank system with specialized context files
 
 **Important:** Always reference the active context file first to understand what's currently being worked on and maintain session continuity.
 
-### Memory Bank System Backups
-
-When asked to backup Memory Bank System files, you will copy the core context files above and @.claude settings directory to directory @/path/to/backup-directory. If files already exist in the backup directory, you will overwrite them.
+Maintain these files with the `memory-bank` skill (capture session learnings, sync docs with code, audit or trim CLAUDE.md files). When asked to back up memory bank files, copy the core context files and the `.claude` settings directory to the directory the user names, overwriting existing copies.
 
 ## Claude Code Official Documentation
 
-When working on Claude Code features (hooks, skills, subagents, MCP servers, etc.), use the `claude-docs-consultant` skill to selectively fetch official documentation from docs.claude.com.
-
-## Project Overview
-
-
+When working on Claude Code features (hooks, skills, subagents, MCP servers, etc.), use the `claude-code-guide` agent to consult official documentation from docs.claude.com instead of answering from memory.
 
 ## ALWAYS START WITH THESE COMMANDS FOR COMMON TASKS
 
@@ -96,24 +123,24 @@ rg "search_term"                # Search in all files
 rg -i "case_insensitive"        # Case-insensitive
 rg "pattern" -t py              # Only Python files
 rg "pattern" -g "*.md"          # Only Markdown
-rg -1 "pattern"                 # Filenames with matches
+rg -l "pattern"                 # Filenames with matches
 rg -c "pattern"                 # Count matches per file
 rg -n "pattern"                 # Show line numbers 
 rg -A 3 -B 3 "error"            # Context lines
-rg " (TODO| FIXME | HACK)"      # Multiple patterns
+rg "(TODO|FIXME|HACK)"          # Multiple patterns
 
 # ripgrep (rg) - file listing 
-rg --files                      # List files (respects •gitignore)
+rg --files                      # List files (respects .gitignore)
 rg --files | rg "pattern"       # Find files by name 
 rg --files -t md                # Only Markdown files 
 
 # fd - file finding 
-fd -e js                        # All •js files (fast find) 
+fd -e js                        # All .js files (fast find) 
 fd -x command {}                # Exec per-file 
 fd -e md -x ls -la {}           # Example with ls 
 
 # jq - JSON processing 
-jq. data.json                   # Pretty-print 
+jq . data.json                  # Pretty-print 
 jq -r .name file.json           # Extract field 
 jq '.id = 0' x.json             # Modify field
 ```
@@ -148,7 +175,7 @@ Need just current directory?
 
 ## React useEffect Policy — NO DIRECT useEffect
 
-**Direct `useEffect` calls are banned in component files.** Most useEffect usage compensates for something React already gives better primitives for. This rule is enforced by `yarn verify:no-raw-useeffect` (a grep-based guard script at `scripts/verify-no-raw-useeffect.sh`) — there is **no** ESLint rule for it and it is not wired into CI; run it yourself before finishing a session.
+**Direct `useEffect` calls are banned in component files.** Most useEffect usage compensates for something React already gives better primitives for. This rule is enforced by `yarn verify:no-raw-useeffect` (a grep-based guard script at `scripts/verify-no-raw-useeffect.sh`) — there is **no** ESLint rule for it, but it runs in CI (`.github/workflows/tests.yml`); still run it yourself before finishing a session.
 
 ### The only approved escape hatches
 
@@ -178,7 +205,7 @@ Need just current directory?
 # Guard script — fails if any UNTAGGED useEffect exists in component/page files
 yarn verify:no-raw-useeffect
 ```
-Every `useEffect` call in `apps/web/src/components/**` and `apps/web/src/pages/**` must be either:
+Every `useEffect` call in `apps/web/src/components/**`, `apps/web/src/routes/**`, `apps/admin/src/components/**`, and `apps/admin/src/pages/**` must be either:
 1. **Refactored away** (preferred) — use the five patterns above
 
 2. **Tagged as audited** — add a comment on the line immediately before:
