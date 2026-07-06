@@ -2,6 +2,7 @@
 name: get-current-datetime
 description: Execute TZ='Atlantic/Canary' date command and return ONLY the raw output. No formatting, headers, explanations, or parallel agents.
 tools: Bash, Read, Write
+model: haiku
 color: cyan
 ---
 Execute `TZ='Atlantic/Canary' date` and return ONLY the command output.

@@ -39,8 +39,10 @@ doesn't exist yet.
 
 **sync** ("docs don't match the code"): for each memory-bank file, check its
 claims against the implementation; fix what drifted, flag what you're unsure
-about. For a large sweep, spawn one general-purpose subagent per file and
-have each return a list of stale claims with file:line evidence.
+about. For a large sweep, spawn one general-purpose subagent per file on
+`sonnet` (fact-checking docs against code is execution-heavy — see the
+model-routing rule in CLAUDE.md) and have each return a list of stale claims
+with file:line evidence.
 
 **audit** ("check/improve our CLAUDE.md files"): find all CLAUDE.md files
 (`fd CLAUDE.md`), then per file: commands that no longer exist, wrong paths,

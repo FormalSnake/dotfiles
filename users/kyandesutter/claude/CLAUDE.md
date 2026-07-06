@@ -48,6 +48,16 @@ These rules encode the working style of the strongest Claude models. Follow them
 * Reference code locations as `file_path:line_number` so they are clickable.
 * Verify before claiming done: run the relevant build/test/guard command and read its output. Evidence before assertions, always.
 
+### Delegating to subagents — model routing
+
+When spawning a subagent (Task/Agent tool), pick its model by the shape of the task:
+
+* **Reasoning-heavy → `opus`** (Opus 4.8 / latest): architecture and planning, root-cause debugging, adversarial review and verification of findings, design trade-offs, synthesis across many sources.
+* **Coding/execution-heavy → `sonnet`** (Sonnet 5 / latest): well-specified implementation, refactors and mechanical edits, broad code searches, running tests, data gathering and summarization.
+* **Trivial single-command lookups → `haiku`**.
+* Use the model aliases (`opus`, `sonnet`, `haiku`), never pinned version IDs — aliases track the latest variant automatically. Omit the override (inherit the session model) only when a task genuinely mixes deep reasoning with heavy execution and can't be split.
+* The same rule applies to custom agent definitions in `~/.claude/agents/`: every agent file declares a `model:` in its frontmatter matching its task profile (e.g. code-searcher runs on `sonnet`, get-current-datetime on `haiku`). Set it when creating new agents.
+
 ### Current Claude models
 
 When building AI features, default to the newest models — Fable 5 (`claude-fable-5`, most capable), Opus 4.8 (`claude-opus-4-8`), Sonnet 5 (`claude-sonnet-5`), Haiku 4.5 (`claude-haiku-4-5-20251001`) — not older model IDs remembered from training data.

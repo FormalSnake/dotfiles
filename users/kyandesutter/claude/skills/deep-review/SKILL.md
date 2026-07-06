@@ -27,9 +27,10 @@ disabled — if any are still visible, prefer this skill over them.
 
 1. Scope the diff (`git diff main...` or the PR) and pick only the lenses
    that match what changed. Skip lenses with no matching surface.
-2. Spawn one general-purpose subagent per lens, in parallel. Each returns
-   findings as `file:line — severity (critical/major/minor) — one-sentence
-   defect — failure scenario`.
+2. Spawn one general-purpose subagent per lens, in parallel, on `opus`
+   (review and verification are reasoning-heavy — see the model-routing rule
+   in CLAUDE.md). Each returns findings as `file:line — severity
+   (critical/major/minor) — one-sentence defect — failure scenario`.
 3. Verify each finding against the actual code before reporting (drop
    anything you cannot reproduce from the source). Dedupe across lenses.
 4. Report findings ranked most-severe first. Do not apply fixes unless asked.
