@@ -98,6 +98,16 @@ in
     xdg.portal = {
       enable = true;
       extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+      # gnome-keyring's Secret portal is gated `UseIn=gnome`, so on this Hyprland
+      # session ($XDG_CURRENT_DESKTOP=Hyprland) xdg-desktop-portal never exposes
+      # org.freedesktop.portal.Secret — which sandboxed Flatpaks (Mimick) need to
+      # store credentials in the keyring. Pin it explicitly (an explicit backend
+      # choice overrides UseIn). `default` mirrors the prior implicit routing so
+      # screenshare (hyprland) and file pickers (gtk) are unaffected.
+      config.common = {
+        default = [ "hyprland" "gtk" ];
+        "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];
+      };
     };
 
     # SDDM (Qt6, Wayland) with the Keyitdev "sddm-astronaut" theme. SDDM lists the

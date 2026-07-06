@@ -11,6 +11,18 @@
       "*" = {
         AddKeysToAgent = "yes";
         ServerAliveInterval = 60;
+
+        # Route SSH auth through the 1Password agent instead of gnome-keyring's.
+        # IdentityAgent overrides SSH_AUTH_SOCK, so this takes over cleanly without
+        # disabling gnome-keyring (which still backs the Secret Service). The socket
+        # only exists once 1Password's SSH agent is enabled in-app (Settings →
+        # Developer → "Use the SSH agent"); until then ssh falls back to on-disk
+        # keys. The Darwin path is 1Password's sandboxed group-container socket and
+        # must stay quoted (it contains spaces).
+        IdentityAgent =
+          if pkgs.stdenv.isDarwin
+          then ''"~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"''
+          else "~/.1password/agent.sock";
       };
 
       "mac-codeserver" = {
