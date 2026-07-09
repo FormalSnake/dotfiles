@@ -153,8 +153,6 @@
       fish_add_path ~/.cargo/bin
       fish_add_path ~/.bun/bin
       fish_add_path ~/.local/bin
-      fish_add_path ~/Library/Android/sdk/emulator
-      fish_add_path ~/Library/Android/sdk/platform-tools
 
       # OrbStack shell integration
       if test -f ~/.orbstack/shell/init2.fish

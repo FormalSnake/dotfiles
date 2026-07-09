@@ -47,11 +47,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1782229790,
-        "narHash": "sha256-Un47Bv3LzeJtv1rHLkkmjqcAdytLb2nfMHolaqs9HYE=",
+        "lastModified": 1783421217,
+        "narHash": "sha256-Cla0o/FLbmmXyhxXKAbM4qTyBTYu8LSnYtKtiJFpgHI=",
         "owner": "CanaryCoders",
         "repo": "CanaryCodeCli",
-        "rev": "3a830c0ecd1b4b014a8b1b7fd7653f086035292c",
+        "rev": "f7de8188d3284150a04e97f8812be4488d7cdf34",
         "type": "github"
       },
       "original": {

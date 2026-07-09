@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ pkgs, ... }:
 {
   home.sessionVariables = {
     EDITOR = "nvim";
@@ -10,9 +10,8 @@
     # `portless --tailscale`). Honoured by yarn, bun, npm and direct portless.
     PORTLESS_TAILSCALE = "1";
 
+    # The JDK gradle (Android) and other JVM tooling run under. ANDROID_HOME and
+    # the SDK's PATH entries live in ./mixins/android.nix.
     JAVA_HOME = "${pkgs.zulu21.home}";
-  } // lib.optionalAttrs pkgs.stdenv.isDarwin {
-    # macOS-only: the SDK lives under the macOS Library path (wrong on Linux).
-    ANDROID_HOME = "${config.home.homeDirectory}/Library/Android/sdk";
   };
 }
