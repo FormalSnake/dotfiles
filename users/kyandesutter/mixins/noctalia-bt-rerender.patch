@@ -1,14 +1,14 @@
+diff --git a/src/shell/control_center/tabs/bluetooth_tab.cpp b/src/shell/control_center/tabs/bluetooth_tab.cpp
+index ec43fd9..98c1898 100644
 --- a/src/shell/control_center/tabs/bluetooth_tab.cpp
 +++ b/src/shell/control_center/tabs/bluetooth_tab.cpp
-@@ -582,7 +582,13 @@
+@@ -582,7 +582,11 @@ std::string BluetoothTab::listKey() const {
      key.push_back(':');
      key += std::to_string(static_cast<int>(d.batteryPercent));
      key.push_back(':');
 -    key += std::to_string(static_cast<int>(d.rssi));
-+    // RSSI is only shown for Available devices, and only as a coarse percent.
-+    // Fold that displayed value in (not raw dBm, and only when shown) so signal
-+    // flutter from a nearby device can't rebuild the whole list — which used to
-+    // tear down paired/connected rows that never display RSSI at all.
++    // Only the rendered signal percent (Available rows) belongs in the key; raw
++    // RSSI churn would otherwise rebuild the whole list, including connected rows.
 +    if (d.hasRssi && bucketFor(d) == DeviceBucket::Available) {
 +      key += std::to_string(signalPercentFromRssi(d.rssi));
 +    }
