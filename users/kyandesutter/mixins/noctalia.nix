@@ -107,6 +107,20 @@ in
     enable = true;
     systemd.enable = true; # user service, PartOf the Wayland/graphical-session target
 
+    # Local patch (drop when upstream lands it): the bluetooth control-center tab
+    # folded every device's raw RSSI into its list-diff key, so any nearby
+    # device's signal flutter tore down and rebuilt the ENTIRE device list —
+    # including the paired/connected rows (AirPods, mouse) that never even
+    # display RSSI. The panel became unusable while a scan was live: the
+    # "Connect" row you're aiming at kept getting recreated out from under the
+    # cursor. The patch keys only on the value that's actually shown (the coarse
+    # signal percent, and only for the Available bucket that renders it), so
+    # paired/connected rows stay put. The `mkDefault` in noctalia's homeModule
+    # lets this override the stock package (a full source rebuild).
+    package = inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs (old: {
+      patches = (old.patches or [ ]) ++ [ ./noctalia-bt-rerender.patch ];
+    });
+
     # Hardcoded Flexoki palette (kepano's "inky" scheme), rendered by the module to
     # ~/.config/noctalia/palettes/Flexoki.json. This is NOT matugen — it's the real
     # Flexoki hex values, activated only when a Flexoki-named wallpaper is picked
