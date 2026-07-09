@@ -15,6 +15,16 @@
     # which are audible as pops/crackle. A larger buffer absorbs the jitter.
     extraConfig.pipewire."92-min-quantum"."context.properties"."default.clock.min-quantum" = 1024;
 
+    # Never auto-switch Bluetooth headsets to the HFP/headset profile. This
+    # chassis's BT adapter can't hold an SCO voice link (kernel: "SCO packet for
+    # unknown connection handle"), so the AirPods mic only ever captures silence
+    # anyway. Left on, WirePlumber flips A2DP→headset whenever an app opens that
+    # dead mic, which swaps the high-quality stereo sink for a separate HFP sink
+    # whose volume collapses toward 0 — the media volume "randomly" dropping.
+    # Off: AirPods stay A2DP (full stereo, stable volume); calls use the laptop
+    # mic, which WirePlumber then picks as the default source on its own.
+    wireplumber.extraConfig."51-airpods-a2dp-only"."wireplumber.settings"."bluetooth.autoswitch-to-headset-profile" = false;
+
     # Device-specific output priorities (headphone MACs, this chassis's PCI
     # audio addresses) live in systems/g815/default.nix — they are hardware
     # facts, not portable audio-stack config.

@@ -159,12 +159,12 @@ in
   # Same eqMac-style headroom trick as before, just gentler: boost the sub band
   # but pull the WHOLE signal down by a matching amount (a "preamp" cut) so the
   # boosted low end lands at unity instead of clipping. Because we're reinforcing
-  # real bass rather than faking it, the cut is small (-5 dB, not the V3's -11).
+  # real bass rather than faking it, the cut is small (-7 dB, not the V3's -11).
   #
   # Two plugins, in order:
-  #   1. filter#0 as a Low-shelf: input-gain -5 dB knocks the whole signal down
-  #      for headroom, then +5 dB below ~75 Hz brings the sub band back to roughly
-  #      unity (so bass ≈ 0 dB, everything else ≈ -5 dB → the deep bass sits ~5 dB
+  #   1. filter#0 as a Low-shelf: input-gain -7 dB knocks the whole signal down
+  #      for headroom, then +7 dB below ~75 Hz brings the sub band back to roughly
+  #      unity (so bass ≈ 0 dB, everything else ≈ -7 dB → the deep bass sits ~7 dB
   #      out front, nothing clips). Aimed LOW (75 Hz) on purpose: it leans on the
   #      sub's strength (45–90 Hz) and stays out of the boomy midbass.
   #      The bass-vs-rest emphasis is the shelf `gain`; the overall level/headroom
@@ -232,15 +232,15 @@ in
           "equalizer#0"
         ];
 
-        # Low-shelf + preamp: -5 dB on everything (input-gain) for headroom, then
-        # +5 dB below ~75 Hz. The sub band nets ≈ 0 dB, the rest ≈ -5 dB, so the
-        # deep bass sits ~5 dB hotter than the rest and nothing clips. Aimed low
+        # Low-shelf + preamp: -7 dB on everything (input-gain) for headroom, then
+        # +7 dB below ~75 Hz. The sub band nets ≈ 0 dB, the rest ≈ -7 dB, so the
+        # deep bass sits ~7 dB hotter than the rest and nothing clips. Aimed low
         # (75 Hz) to lean on the sub (45–90 Hz) and dodge the boomy midbass. RLC
         # (BT) is a gentle, musical shelf; slope x1 keeps it broad. Too much bass?
         # Lower `gain`, or use the sub's physical level knob.
         "filter#0" = {
           bypass = false;
-          "input-gain" = -5.0;
+          "input-gain" = -7.0;
           "output-gain" = 0.0;
           type = "Low-shelf";
           mode = "RLC (BT)";
@@ -250,7 +250,7 @@ in
           frequency = 75.0;
           width = 4.0;
           quality = 0.0;
-          gain = 5.0;
+          gain = 7.0;
           balance = 0.0;
         };
 
