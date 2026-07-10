@@ -715,6 +715,11 @@ in
     hl.window_rule({ match = { class = "^$", title = "^$" },
       float = true, pin = true,
       move = { "monitor_w-window_w-16", "16" } })
+    -- GNOME spacebar quick-preview (Sushi / NautilusPreviewer): float + center it
+    -- so it pops up like macOS Quick Look instead of tiling into the layout. It
+    -- sizes itself to the previewed content, so no size rule — just float+center.
+    hl.window_rule({ match = { class = "^(org.gnome.NautilusPreviewer)$" },
+      float = true, center = true })
   '';
 
   # — Multi-GPU primary selection (hybrid laptop) —
