@@ -18,6 +18,7 @@
       ./mixins/scx.nix
       ./mixins/graphics.nix
       ./mixins/nvidia.nix
+      ./mixins/nvidia-resume-recovery.nix
       ./mixins/audio.nix
       ./mixins/bluetooth.nix
       ./mixins/hyprland.nix
