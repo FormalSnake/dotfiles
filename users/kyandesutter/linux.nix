@@ -7,6 +7,7 @@
     ./mixins/qt.nix
     ./mixins/desktop-apps.nix
     ./mixins/autostart.nix
+    ./mixins/macbook-mount.nix
     ./mixins/airpods.nix
     ./mixins/easyeffects.nix
     ./mixins/alttab.nix
