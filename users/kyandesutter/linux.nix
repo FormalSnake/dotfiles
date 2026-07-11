@@ -1,16 +1,15 @@
 { pkgs, ... }:
 {
-  # Linux/NixOS-only home mixins (Hyprland desktop). Wired on the g815 host via
+  # Linux/NixOS-only home mixins (niri desktop). Wired on the g815 host via
   # self.homeModules.kyandesutter-linux.
   imports = [
-    ./mixins/hyprland.nix
+    ./mixins/niri.nix
     ./mixins/qt.nix
     ./mixins/desktop-apps.nix
     ./mixins/autostart.nix
     ./mixins/macbook-mount.nix
     ./mixins/airpods.nix
     ./mixins/easyeffects.nix
-    ./mixins/alttab.nix
     ./mixins/noctalia.nix
     ./mixins/beeper.nix
     ./mixins/helium.nix
