@@ -4,7 +4,7 @@ let
   # apply the effect/brightness appropriate to the current power source. Shared by
   # two triggers — noctalia runs it as a post_hook on every palette change (session
   # start, wallpaper pick, light/dark flip, passing the new accent), and power-tune
-  # (hyprland.nix) calls it on every power-source change (passing the cached accent).
+  # (niri.nix) calls it on every power-source change (passing the cached accent).
   # Having one setter means the two triggers can't disagree.
   #
   # By power source (see modules/nixos/mixins/power.nix `power-source`):
@@ -63,23 +63,24 @@ let
   # re-applies them on restart / session-restore / apply-to-all / hover-preview;
   # those events carry a flexoki path and would otherwise re-pin Flexoki over
   # eDP-1's matugen palette, leaving the shell stuck on Flexoki (observed
-  # 2026-07-04). Connectivity is checked via hyprctl (needs
-  # HYPRLAND_INSTANCE_SIGNATURE, present in the session env); if hyprctl can't be
-  # reached we fall through and process the event so the feature degrades safely.
+  # 2026-07-04). Connectivity is checked via `niri msg --json outputs` (needs
+  # NIRI_SOCKET, present in the session env); if niri can't be reached we fall
+  # through and process the event so the feature degrades safely.
   flexokiScheme = pkgs.writeShellApplication {
     name = "flexoki-scheme";
     runtimeInputs = [
       config.programs.noctalia.package
-      pkgs.hyprland
+      pkgs.niri
+      pkgs.jq
     ];
     text = ''
       path="''${NOCTALIA_WALLPAPER_PATH:-}"
       conn="''${NOCTALIA_WALLPAPER_CONNECTOR:-}"
       if [[ -n "$conn" ]]; then
-        mons="$(hyprctl monitors 2>/dev/null || true)"
-        # Skip only when we actually got a monitor list and this output isn't in
-        # it (i.e. it's disconnected). Empty list = hyprctl unreachable → proceed.
-        if [[ -n "$mons" && "$mons" != *"Monitor $conn ("* ]]; then
+        outs="$(niri msg --json outputs 2>/dev/null || true)"
+        # Skip only when we actually got an output map and this connector isn't
+        # in it (i.e. it's disconnected). Empty = niri unreachable → proceed.
+        if [[ -n "$outs" ]] && ! jq -e --arg c "$conn" 'has($c)' <<<"$outs" >/dev/null 2>&1; then
           exit 0
         fi
       fi
@@ -96,10 +97,10 @@ in
   # Official noctalia flake home-manager module. noctalia V5 is a native C++ /
   # OpenGL ES Wayland shell (the V4 line was Quickshell). The module installs the
   # `noctalia` shell + runs it as a user systemd service bound to the Wayland
-  # systemd target (auto-starts once Hyprland/uwsm reaches that target).
+  # systemd target (auto-starts once niri reaches that target).
   imports = [ inputs.noctalia.homeModules.default ];
 
-  # Expose aura-repaint on PATH so power-tune (hyprland.nix) can call it as the
+  # Expose aura-repaint on PATH so power-tune (niri.nix) can call it as the
   # shared keyboard-aura setter (the noctalia post_hook below uses it by store path).
   home.packages = [ auraRepaint ];
 
@@ -250,7 +251,7 @@ in
         corner_radius_scale = 0.0;
 
         # Session/power menu buttons (the `session` bar widget; SUPER+SHIFT+Escape
-        # is bound to lock-and-suspend directly — see hyprland.nix). This list
+        # is bound to lock-and-suspend directly — see niri.nix). This list
         # REPLACES noctalia's default action set wholesale (default is lock,
         # logout, lock_and_suspend, reboot, shutdown), so it's the full menu in
         # order; `shortcut` is the in-menu number key. Changes vs default:
@@ -391,7 +392,7 @@ in
       # m3-tonal-spot (balanced), m3-content, m3-monochrome (pure gray),
       # m3-rainbow, m3-fruit-salad, plus the non-M3 muted, soft, vibrant,
       # faithful, dysfunctional. Mode defaults to dark; the SUPER+SHIFT+T keybind
-      # (../mixins/hyprland.nix) toggles light/dark via
+      # (../mixins/niri.nix) toggles light/dark via
       # `noctalia msg theme-mode-toggle`. See docs/superpowers/specs/
       # 2026-06-19-noctalia-dynamic-theming-design.md.
       theme = {
@@ -404,7 +405,7 @@ in
         # dconf/gsettings dark signal at runtime — this is what makes native GTK/Qt
         # and X11 apps follow the palette, and is also what lets Helium follow it
         # for free via its "Use GTK theme" appearance setting. adw-gtk3 is installed
-        # by the gtk module in ../mixins/hyprland.nix.
+        # by the gtk module in ../mixins/niri.nix.
         #
         # The `user` templates push the same live palette into apps Noctalia can't
         # theme natively. `.default` colour tokens track the active mode, so each
@@ -415,7 +416,7 @@ in
         templates = {
           enable_builtin_templates = true;
           # gtk3/gtk4 theme GTK apps; qt writes qt5ct/qt6ct colour schemes that the
-          # Qt platform theme (QT_QPA_PLATFORMTHEME=qt6ct, set in hyprland.nix)
+          # Qt platform theme (QT_QPA_PLATFORMTHEME=qt6ct, set in niri.nix)
           # reads. Qt/GTK apps follow the palette at launch (no live recolour — the
           # toolkits don't hot-reload palettes).
           builtin_ids = [ "gtk3" "gtk4" "qt" "btop" ];
@@ -498,34 +499,21 @@ in
               post_hook = "SPICETIFY_CONFIG=${config.home.homeDirectory}/.config/spicetify ${pkgs.spicetify-cli}/bin/spicetify apply --no-restart || true";
             };
 
-            # Hyprland borders + group/groupbar colours. Noctalia doesn't touch the
-            # compositor. This replicates the exact property set its built-in
-            # `hyprland` template applies (general.col.{active,inactive}_border,
-            # group.col.border_*, group.groupbar.col.*), but pushes it live with
-            # `hyprctl eval 'hl.config{…}'`. We hand-roll it because this is Hyprland
-            # 0.55+ Lua config (see docs/hyprland-lua.md): the built-in template's
-            # apply.sh appends `require("noctalia")` to ~/.config/hypr/hyprland.lua,
-            # but that's a read-only home-manager symlink here, and the built-in
-            # doesn't re-apply live. `hyprctl eval` does both — instant, no flicker —
-            # and Noctalia re-runs it on every session start / wallpaper / mode
-            # change. primary = active border; secondary = active group; error =
-            # locked; surface = inactive.
-            hyprland-border = {
+            # niri window borders. Noctalia doesn't touch the compositor; this
+            # renders the wallpaper palette into the layout fragment niri's
+            # config.kdl includes (include optional=true, placed LAST so it
+            # overrides the rendered defaults — see mixins/niri.nix), and the
+            # post_hook reloads niri's config so the colours apply instantly.
+            # One mechanism covers both the live push and persistence across
+            # reloads — unlike the old Hyprland pair of `hyprctl eval` + a
+            # dofile'd cache. mixins/niri.nix seeds a Catppuccin fallback copy
+            # for the first login before the first render here. primary =
+            # active border; error = urgent; surface = inactive.
+            niri-border = {
               enabled = true;
-              input_path = "~/.config/noctalia/templates/hypr-border.tmpl";
-              output_path = "~/.cache/noctalia/hypr-border";
-              post_hook = ''hyprctl eval 'hl.config({ general = { col = { active_border = "rgb({{ colors.primary.default.hex_stripped }})", inactive_border = "rgb({{ colors.surface.default.hex_stripped }})" } }, group = { col = { border_active = "rgb({{ colors.secondary.default.hex_stripped }})", border_inactive = "rgb({{ colors.surface.default.hex_stripped }})", border_locked_active = "rgb({{ colors.error.default.hex_stripped }})", border_locked_inactive = "rgb({{ colors.surface.default.hex_stripped }})" }, groupbar = { col = { active = "rgb({{ colors.secondary.default.hex_stripped }})", inactive = "rgb({{ colors.surface.default.hex_stripped }})", locked_active = "rgb({{ colors.error.default.hex_stripped }})", locked_inactive = "rgb({{ colors.surface.default.hex_stripped }})" } } } })' '';
-            };
-
-            # Alt-Tab switcher (Quickshell). Emits a tiny JSON file of the live
-            # palette that the alttab QML watches (Quickshell FileView) and parses
-            # at runtime — see mixins/alttab.nix. No post_hook: the QML reloads on
-            # file change. When this file is missing/unparseable (e.g. before the
-            # first palette render) the QML falls back to baked catppuccin values.
-            alttab = {
-              enabled = true;
-              input_path = "~/.config/noctalia/templates/alttab.json.tmpl";
-              output_path = "~/.cache/noctalia/alttab-colors.json";
+              input_path = "~/.config/noctalia/templates/niri-border.kdl.tmpl";
+              output_path = "~/.cache/noctalia/niri-border.kdl";
+              post_hook = "${pkgs.niri}/bin/niri msg action load-config-file || true";
             };
           };
         };
@@ -573,10 +561,10 @@ in
       # Display brightness control. enable_ddcutil turns on the DDC/CI backend so
       # the *external* monitor (HDMI-A-1, an ASUS PA278CGV) is driven over i2c by
       # both Noctalia's brightness slider AND the XF86MonBrightness keybinds
-      # (which call `noctalia msg brightness-up/down current` — see hyprland.nix).
+      # (which call `noctalia msg brightness-up/down current` — see niri.nix).
       # The internal panel (eDP-1, nvidia_wmi_ec_backlight) auto-resolves to the
       # backlight backend; no per-monitor override needed. The i2c stack (group,
-      # /dev/i2c-* access, ddcutil) is wired in modules/nixos/mixins/hyprland.nix.
+      # /dev/i2c-* access, ddcutil) is wired in modules/nixos/mixins/niri.nix.
       brightness.enable_ddcutil = true;
 
       # Night light (colour-temperature warm shift). It has no schedule of its
@@ -633,7 +621,6 @@ in
     "noctalia/templates/neovim.lua.tmpl".source = ../noctalia-templates/neovim.lua.tmpl;
     "noctalia/templates/equibop.css.tmpl".source = ../noctalia-templates/equibop.css.tmpl;
     "noctalia/templates/spicetify.ini.tmpl".source = ../noctalia-templates/spicetify.ini.tmpl;
-    "noctalia/templates/hypr-border.tmpl".source = ../noctalia-templates/hypr-border.tmpl;
-    "noctalia/templates/alttab.json.tmpl".source = ../noctalia-templates/alttab.json.tmpl;
+    "noctalia/templates/niri-border.kdl.tmpl".source = ../noctalia-templates/niri-border.kdl.tmpl;
   };
 }
