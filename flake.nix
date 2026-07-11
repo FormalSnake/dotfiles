@@ -120,6 +120,15 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # niri scrollable-tiling compositor. The flake is used ONLY for its typed
+    # home-manager settings module (programs.niri.settings → KDL, validated
+    # with `niri validate` at build time); the niri binary itself comes from
+    # nixpkgs (26.04) — niri-flake's own niri-stable lags behind.
+    niri = {
+      url = "github:sodiboo/niri-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Helium browser (Chromium fork) — exposes overlays.default -> pkgs.helium.
     helium = {
       url = "github:schembriaiden/helium-browser-nix-flake";
