@@ -1,6 +1,6 @@
 { pkgs, config, ... }:
 let
-  # Power-source-aware refresh rate + keyboard aura + dGPU dock-relog (see
+  # Power-source-aware refresh rate + keyboard aura + relog consent prompt (see
   # systemd.user.services.power-tune).
   #
   # Subscribes to /run/power/state — published by the system reconciler in
@@ -19,19 +19,21 @@ let
   #     *profile* (not the source) so a manual Noctalia power-saver toggle also
   #     drops to 60Hz. Mode is set via `hyprctl eval` (the Lua parser rejects
   #     `hyprctl keyword`).
-  #   - dGPU dock-relog: on any source change where the session's GPU mode no longer
-  #     matches the source (→ac wants dGPU-primary; →power bank / →battery want iGPU-
-  #     primary). dock-relog compares the session-gpu-mode marker against the source,
-  #     self-guards (no-op when they already agree), gives a 15s cancel window and
-  #     ends in `uwsm stop`. The AC→iGPU direction is what lets the system finally
-  #     power the dGPU off — dgpu-power's wait-for-free loop (power.nix) rides out
-  #     the session teardown before unloading.
+  #   - relog consent prompt: every event re-runs gpu-relog-prompt (below),
+  #     which decides whether a GPU-topology relog is worth OFFERING (persistent
+  #     notification, user confirms or dismisses — NEVER automatic).
+  #   - dGPU convergence kick: once at startup, `systemctl start
+  #     dgpu-reconcile.service` (polkit rule in power.nix) so a fresh login
+  #     finally powers off a dGPU a previous session was holding.
   #
-  # Event-driven, no polling: two monitors feed one loop through a single process
-  # substitution (which keeps the loop in this shell so last_src/last_rate persist)
-  # — inotifywait on /run/power/state for source changes, dbus-monitor on PPD for
-  # profile changes (the refresh follow). The inner `wait` keeps the substitution
-  # alive while both backgrounded monitors run.
+  # Event-driven, no polling: three monitors feed one loop through a single
+  # process substitution (which keeps the loop in this shell so last_src/
+  # last_rate persist) — inotifywait on /run/power/state for source changes,
+  # dbus-monitor on PPD for profile changes (the refresh follow), and udevadm
+  # on the drm subsystem for monitor hotplug on the dGPU (its connectors are
+  # invisible to a session that doesn't list it, so Hyprland IPC can't see
+  # them). The inner `wait` keeps the substitution alive while the backgrounded
+  # monitors run.
   powerTune = pkgs.writeShellApplication {
     name = "power-tune";
     runtimeInputs = with pkgs; [
@@ -64,58 +66,59 @@ let
           # absolutely), using the cached wallpaper accent (fall back to the seed).
           colour="$(cat "$HOME/.cache/noctalia/aura-color" 2>/dev/null || echo b15bf5)"
           ${config.home.profileDirectory}/bin/aura-repaint "$colour" || true
-          # Re-derive the per-session GPU env (AQ_DRM_DEVICES, the VA-API driver, the
-          # EGL/Vulkan ICD pins) when the source no longer matches the session's GPU
-          # mode. dGPU *power* is owned live by the system (power-reconcile →
-          # dgpu-power, modules/nixos/mixins/power.nix: off on battery/power bank, on
-          # for AC); this owns the session's *primary GPU*, which is frozen at login
-          # because AQ_DRM_DEVICES is read once at aquamarine init — so switching it
-          # needs a relog. dock-relog self-guards (instant no-op when the session is
-          # already in the right mode, e.g. at startup or on a power bounce) and gives
-          # a 15s cancel window. Backgrounded so this loop stays responsive; on a real
-          # mode change it ends in `uwsm stop`, which tears the session down anyway.
-          ${dockRelog}/bin/dock-relog &
           last_src="$src"
         fi
         case "$(profile)" in
           power-saver) set_refresh 60 ;;
           *)           set_refresh 240 ;;
         esac
+        # Consent popup (self-guarding: single instance, remembers dismissals,
+        # no-ops when the session already fits the situation). Backgrounded so
+        # this loop stays responsive; on a confirmed relog it ends in
+        # `uwsm stop`, which tears this unit down with the session.
+        ${gpuRelogPrompt}/bin/gpu-relog-prompt &
       }
+
+      # Converge dGPU power for THIS login: a popup-confirmed relog happens
+      # long after the battery event that wanted the dGPU off, so the fresh
+      # session kicks the (start-only, serialized) system reconciler once.
+      # Passwordless via a polkit rule scoped to exactly this unit+verb
+      # (modules/nixos/mixins/power.nix).
+      /run/current-system/sw/bin/systemctl start dgpu-reconcile.service 2>/dev/null || true
 
       last_src=""
       last_rate=""
       reconcile
       while read -r line; do
         case "$line" in
-          *state*|*PropertiesChanged*|*member=Changed*) reconcile ;;
+          *state*|*PropertiesChanged*|*member=Changed*|*drm*|*DRM*) reconcile ;;
         esac
       done < <( {
         inotifywait -m -q -e close_write,moved_to,create /run/power 2>/dev/null &
         dbus-monitor --system \
           "type='signal',interface='org.freedesktop.DBus.Properties',path='/org/freedesktop/UPower/PowerProfiles'" \
           2>/dev/null &
+        # Monitor hotplug on the dGPU (drm "change" uevents). udevadm via the
+        # system profile — user services have a limited PATH.
+        /run/current-system/sw/bin/udevadm monitor --udev --subsystem-match=drm 2>/dev/null &
         wait
       } )
     '';
   };
 
-  # — Window session snapshot / restore + AC-dock auto-relog —
+  # — Window session snapshot / restore —
   #
-  # AQ_DRM_DEVICES (the dGPU-primary zero-copy path; see uwsm/env-hyprland below)
-  # is read once at aquamarine init, so switching the primary GPU needs a full
-  # relog. We want the dGPU primary whenever on AC (desk or travelling — games
-  # render on the dGPU and present to whatever panel is lit) and the iGPU primary
-  # on battery / power bank (so the dGPU can be powered off). powerTune's reconcile()
-  # fires on every source change and calls dock-relog, which relogs in *either*
-  # direction when the session's GPU mode no longer matches the source; env-hyprland
-  # re-derives the GPU from the source on the new session; session-restore relaunches
-  # the windows the last snapshot recorded. Restore also runs on *manual* relogs, so
-  # the snapshot is taken continuously rather than only at relog time.
+  # AQ_DRM_DEVICES (see uwsm/env-hyprland below) is read once at aquamarine
+  # init, so changing the session's GPU set needs a full relog. Relogs are
+  # CONSENT-ONLY: gpu-relog-prompt (below) offers one when the situation
+  # warrants it; on confirm it snapshots and `uwsm stop`s, and session-restore
+  # relaunches the windows the last snapshot recorded on the next login.
+  # Restore also runs on *manual* relogs, so the snapshot is taken
+  # continuously rather than only at relog time.
 
   # Periodic, game-aware window snapshot. `session-snapshot loop` runs the watcher
   # loop (started from hyprland.start); `session-snapshot` (no arg) writes one
-  # snapshot (also called by dock-relog right before tearing the session down).
+  # snapshot (also called by gpu-relog-prompt right before tearing the session down).
   # Each window records class/title/workspace/floating + its argv from /proc so
   # restore can relaunch it. While a window is fullscreen (gaming) the tick is
   # skipped entirely — the layout isn't changing, so steady-state game cost ≈ 0.
@@ -243,93 +246,114 @@ let
     '';
   };
 
-  # Guarded relog, called by powerTune on any source change. Compares the session's
-  # GPU mode (the session-gpu-mode marker written by env-hyprland) against the mode
-  # the current source wants — dGPU-primary on AC, iGPU-primary on power bank /
-  # battery — and relogs only when they disagree (so a session already in the right
-  # mode, e.g. plugged in at boot or a source bounce, is a no-op). Shows a
-  # notification with a 15s cancel window (Super+Shift+Backspace → `dock-relog
-  # cancel` drops the cancel flag); if not canceled it takes a fresh snapshot and
-  # `uwsm stop`s cleanly back to SDDM. On the next login env-hyprland re-derives the
-  # GPU from the source and session-restore relaunches the windows. The →iGPU
-  # direction also releases the dGPU so the system can finally power it off (see
-  # dgpu-power's wait-for-free loop in power.nix).
-  dockRelog = pkgs.writeShellApplication {
-    name = "dock-relog";
-    runtimeInputs = with pkgs; [ libnotify coreutils uwsm ];
+  # Consent-gated relog prompt — the ONLY path to a GPU-topology relog. No
+  # countdown, no default action: a persistent notification with [Relog now]/
+  # [Not now] buttons (Noctalia's daemon supports actions via notify-send -A;
+  # Super+Shift+BackSpace is a belt-and-braces confirm for a daemon that
+  # doesn't). Exactly two situations qualify (spec 2026-07-11):
+  #   monitor — a monitor is connected on the powered dGPU but this session
+  #             booted without the dGPU (marker `igpu`), so it can't light it
+  #             up. (If aquamarine hot-adds the card by itself, hyprctl shows
+  #             the output and this never fires — self-adapting.)
+  #   battery — on battery with no external monitor, but the session still
+  #             holds the dGPU (marker `igpu+dgpu`), so it can't power off.
+  # A dismissal is remembered per-situation and never re-prompted until the
+  # situation changes (the `dismissed` file is cleared whenever evaluate()
+  # says `none`). Confirming re-checks the situation, snapshots the windows
+  # and `uwsm stop`s; session-restore relaunches them on the next login.
+  gpuRelogPrompt = pkgs.writeShellApplication {
+    name = "gpu-relog-prompt";
+    runtimeInputs = with pkgs; [ libnotify coreutils util-linux jq uwsm hyprland ];
     text = ''
-      cancel="''${XDG_RUNTIME_DIR:-/tmp}/dock-relog.cancel"
-      marker="''${XDG_RUNTIME_DIR:-/tmp}/session-gpu-mode"
-      # Rate-limit stamp lives in the persistent state dir, NOT XDG_RUNTIME_DIR:
-      # the runtime dir is torn down with the last session, which is exactly when
-      # a relog loop would reset its own limiter.
-      stamp="''${XDG_STATE_HOME:-$HOME/.local/state}/hypr-session/relog.last"
+      rt="''${XDG_RUNTIME_DIR:-/tmp}"
+      confirm="$rt/gpu-relog.confirm"
+      dismissed="$rt/gpu-relog.dismissed"
+      outfile="$rt/gpu-relog.action"
+      marker="$rt/session-gpu-mode"
 
-      if [ "''${1:-}" = cancel ]; then
-        : > "$cancel"
-        notify-send -t 1500 "GPU mode" "Auto-relog canceled." || true
-        exit 0
-      fi
+      # Keybind fallback: Super+Shift+BackSpace drops the confirm flag.
+      if [ "''${1:-}" = confirm ]; then : > "$confirm"; exit 0; fi
 
-      # Mode this session booted with (env-hyprland writes it); default iGPU.
-      cur=igpu
-      if [ -r "$marker" ]; then cur=$(cat "$marker"); fi
-
-      # Mode the current source wants — mirrors env-hyprland's choice. Read the
-      # published classifier (power-reconcile writes it); on anything unknown or
-      # missing, don't relog (act only on a confident reading).
-      want_for() {
-        case "$1" in
-          ac)                want=dgpu ;;
-          powerbank|battery) want=igpu ;;
-          *)                 want="$cur" ;;
-        esac
+      # Which relog (if any) does the current situation want?
+      evaluate() {
+        cur=igpu
+        [ -r "$marker" ] && cur=$(cat "$marker")
+        src=battery
+        [ -r /run/power/state ] && src=$(cat /run/power/state)
+        card="$(readlink -f /dev/dri/by-path/pci-0000:02:00.0-card 2>/dev/null || true)"
+        kern_conn=
+        if [ -n "$card" ]; then
+          for s in "/sys/class/drm/''${card##*/}"-*/status; do
+            [ -e "$s" ] || continue
+            if [ "$(cat "$s" 2>/dev/null)" = connected ]; then kern_conn=1; break; fi
+          done
+        fi
+        # Does the session already drive any external output?
+        sess_ext=
+        if hyprctl monitors -j 2>/dev/null | jq -e 'map(select(.name != "eDP-1")) | length > 0' >/dev/null 2>&1; then
+          sess_ext=1
+        fi
+        if [ "$cur" = igpu ] && [ -n "$kern_conn" ] && [ -z "$sess_ext" ]; then
+          echo monitor
+        elif [ "$cur" = "igpu+dgpu" ] && [ "$src" = battery ] && [ -z "$kern_conn" ]; then
+          echo battery
+        else
+          echo none
+        fi
       }
-      src=""
-      if [ -r /run/power/state ]; then src=$(cat /run/power/state); fi
-      want_for "$src"
 
-      # Already in the right mode → nothing to do.
-      [ "$cur" = "$want" ] && exit 0
-
-      # Anti-loop guard: if an auto-relog already fired < 2 minutes ago, don't
-      # fire another. A session that crashes right back to SDDM (e.g. the dGPU
-      # is wedged/unavailable while AC wants dGPU-primary) would otherwise
-      # logout-loop forever — observed 2026-07-03 as back-to-back 2-second
-      # sessions. The user can still relog manually; the next real power event
-      # after the window retries automatically.
-      now=$(date +%s)
-      last=$(cat "$stamp" 2>/dev/null || echo 0)
-      if [ $((now - last)) -lt 120 ]; then
-        notify-send -t 5000 "GPU mode" "Auto-relog skipped (one ran <2 min ago). Log out manually to switch GPU mode." || true
+      need=$(evaluate)
+      if [ "$need" = none ]; then
+        rm -f "$dismissed"
         exit 0
       fi
+      # Already dismissed for this exact situation → stay quiet.
+      [ "$(cat "$dismissed" 2>/dev/null || true)" = "$need" ] && exit 0
 
-      rm -f "$cancel"
-      if [ "$want" = dgpu ]; then
-        msg="On AC — relogging in 15s to make the dGPU primary."
-      else
-        msg="On battery — relogging in 15s to release the dGPU (iGPU primary)."
-      fi
-      notify-send -t 16000 "GPU mode" "$msg Super+Shift+Backspace to cancel." || true
+      # One prompt at a time.
+      exec 9>"$rt/gpu-relog.lock"
+      flock -n 9 || exit 0
 
-      i=0
-      while [ "$i" -lt 15 ]; do
-        if [ -e "$cancel" ]; then rm -f "$cancel"; exit 0; fi
-        sleep 1
-        i=$((i + 1))
+      case "$need" in
+        monitor)
+          title="External monitor detected"
+          body="This session can't drive the dGPU's outputs. Relog to enable the monitor?" ;;
+        *)
+          title="On battery"
+          body="This session holds the dGPU (~10W). Relog to power it off?" ;;
+      esac
+
+      rm -f "$confirm" "$outfile"
+      notify-send -t 0 -u critical \
+        -A relog="Relog now" -A dismiss="Not now" \
+        "$title" "$body (Super+Shift+BackSpace also confirms)" \
+        > "$outfile" 2>/dev/null &
+      np=$!
+
+      act=dismiss
+      while :; do
+        if [ -e "$confirm" ]; then act=relog; break; fi
+        if ! kill -0 "$np" 2>/dev/null; then
+          # Button clicked (stdout has the action) or notification closed.
+          act="$(cat "$outfile" 2>/dev/null || true)"
+          [ -n "$act" ] || act=dismiss
+          break
+        fi
+        if [ "$(evaluate)" != "$need" ]; then act=stale; break; fi
+        sleep 2
       done
-      if [ -e "$cancel" ]; then rm -f "$cancel"; exit 0; fi
+      kill "$np" 2>/dev/null || true
+      rm -f "$confirm" "$outfile"
 
-      # Re-check after the countdown: a source bounce back during the window can make
-      # the relog unnecessary again.
-      src=""
-      if [ -r /run/power/state ]; then src=$(cat /run/power/state); fi
-      want_for "$src"
-      [ "$cur" = "$want" ] && exit 0
+      case "$act" in
+        relog) ;;
+        stale) exit 0 ;;
+        *) printf '%s\n' "$need" > "$dismissed"; exit 0 ;;
+      esac
 
-      mkdir -p "$(dirname "$stamp")"
-      date +%s > "$stamp"
+      # Re-check right before acting — the situation may have evaporated
+      # between click and here.
+      [ "$(evaluate)" = "$need" ] || exit 0
       ${sessionSnapshot}/bin/session-snapshot || true
       notify-send -t 2000 "GPU mode" "Relogging…" || true
       uwsm stop
@@ -435,8 +459,8 @@ in
       -- the running args; the `[q]uickshell` bracket keeps the guard's own
       -- shell (whose argv carries this pattern) from matching itself.
       hl.exec_cmd("pgrep -f '[q]uickshell -c alttab' >/dev/null || ${pkgs.quickshell}/bin/qs -c alttab")
-      -- Window session restore + snapshotting (see the session/dock scripts in the
-      -- let block and the AC-keyed GPU choice in uwsm/env-hyprland below). Restore
+      -- Window session restore + snapshotting (see the session scripts in the
+      -- let block and the GPU selection in uwsm/env-hyprland below). Restore
       -- relaunches the windows from the last snapshot onto their workspaces; it
       -- skips the autostart set above and dedupes against what's already open, so a
       -- restart-without-logout won't duplicate anything. The snapshot loop keeps the
@@ -522,8 +546,8 @@ in
         -- to HDR for the duration and reverts on exit. 1 = generic BT.2020+PQ;
         -- bump to 2 (hdredid, uses the panel's EDID primaries) if HDR colours/
         -- brightness look off. If a game white-screens on launch, add
-        -- `prefer_hdr = 1` here. HDR over HDMI-A-1 needs the dGPU primary, i.e.
-        -- gaming on AC (see env-hyprland's AC GPU selection).
+        -- `prefer_hdr = 1` here. (Note: the session is iGPU-primary; HDMI-A-1
+        -- is driven as a secondary dGPU head — see uwsm/env-hyprland.)
         cm_auto_hdr = 1,
       },
       -- eDP-1 runs at fractional scale (1.25). XWayland can't do fractional
@@ -589,9 +613,9 @@ in
     -- Sleep: lock then suspend on demand. noctalia's `session lock-and-suspend`
     -- locks the screen before suspending, so resume lands on the lock screen.
     hl.bind(mod .. " + SHIFT + Escape", hl.dsp.exec_cmd("noctalia msg session lock-and-suspend"))
-    -- Cancel an in-progress GPU-mode auto-relog (the 15s countdown after a power
-    -- source change). See dockRelog / powerTune in the let block.
-    hl.bind(mod .. " + SHIFT + BackSpace", hl.dsp.exec_cmd("${dockRelog}/bin/dock-relog cancel"))
+    -- Confirm the pending GPU-relog prompt (fallback for a notification daemon
+    -- without action buttons). See gpuRelogPrompt / powerTune in the let block.
+    hl.bind(mod .. " + SHIFT + BackSpace", hl.dsp.exec_cmd("${gpuRelogPrompt}/bin/gpu-relog-prompt confirm"))
 
     -- Vim-style focus (aerospace alt-hjkl → SUPER+hjkl).
     hl.bind(mod .. " + H", hl.dsp.focus({ direction = "l" }))
@@ -722,112 +746,74 @@ in
       float = true, center = true })
   '';
 
-  # — Multi-GPU primary selection (hybrid laptop) —
+  # — Multi-GPU selection (hybrid laptop) —
   #
   # This G815 is a hybrid laptop: the Intel iGPU (PCI 0000:00:02.0) drives the
   # internal panel (eDP-1), while the NVIDIA dGPU (PCI 0000:02:00.0) drives the
-  # external ports — including HDMI-A-1, the 1440p144 desk monitor games run on.
+  # external ports — including HDMI-A-1, the 1440p144 desk monitor.
   #
-  # By default Hyprland's Aquamarine backend makes the *boot* GPU (the iGPU,
-  # which owns fb0) its primary render/allocator device. With both the game and
-  # its monitor on the dGPU, every frame then crosses PCIe twice — dGPU renders →
-  # copied to the iGPU to composite → copied back to the dGPU to scan out on
-  # HDMI-A-1. That starves the dGPU (it stalls on the copies, so it never
-  # saturates — "GPU isn't being fully used") and surfaces in games as periodic
-  # slow-motion every few seconds — the symptom the disk/alt-tab/VRR/tearing
-  # changes were all chasing without addressing the cross-GPU copy itself.
+  # The session is ALWAYS iGPU-primary. Gaming lives on Windows; on Linux the
+  # dGPU is nothing but a power-managed peripheral for the panel backlight
+  # (its WMI) and the HDMI port. AQ_DRM_DEVICES is a ':'-separated device
+  # list; the FIRST entry becomes the primary GPU (aquamarine
+  # src/backend/drm/DRM.cpp). When the dGPU is powered at login (we were
+  # charging) it is listed SECOND — a scanout-only head for the desk monitor,
+  # fed by an iGPU→dGPU blit (trivial for desktop work). When it's absent
+  # (battery boot) only the iGPU is listed, so nothing in the session ever
+  # touches the nvidia stack and the chip can be hard powered off.
   #
-  # AQ_DRM_DEVICES is a ':'-separated device list; the FIRST entry becomes the
-  # primary GPU (aquamarine src/backend/drm/DRM.cpp). Listing the dGPU first
-  # makes the gaming path zero-copy (game → dGPU → HDMI-A-1 directly); only the
-  # iGPU's internal panel then needs a cross-GPU copy.
+  # Keyed on device PRESENCE, not the power source — it cannot disagree with
+  # reality. The set is frozen at aquamarine init (uwsm sources
+  # env-${XDG_CURRENT_DESKTOP,,} → env-hyprland once, before launching
+  # Hyprland); the only situations that want a different set mid-session go
+  # through the consent popup (gpu-relog-prompt above), never an automatic
+  # relog. env-hyprland records the chosen set in
+  # $XDG_RUNTIME_DIR/session-gpu-mode (igpu | igpu+dgpu) for the prompt.
   #
-  # Battery trade-off: a primary dGPU can't RTD3-sleep, which fights the
-  # finegrained NVIDIA power management in modules/nixos/mixins/nvidia.nix. So
-  # gate it on AC power — on AC the battery cost is moot and we want the dGPU
-  # primary for gaming whether docked at the desk OR travelling on the internal
-  # panel (games render on the dGPU and present to whatever panel is lit);
-  # on battery leave AQ_DRM_DEVICES unset so the iGPU stays primary and the dGPU
-  # powers down. The choice is made ONCE at session start — uwsm sources
-  # env-${XDG_CURRENT_DESKTOP,,} (→ env-hyprland) as a POSIX shell script before
-  # launching Hyprland — so applying a change needs a relog: powerTune's reconcile()
-  # calls dock-relog on every source change (guarded 15s countdown), which snapshots
-  # the windows and `uwsm stop`s in either direction when the session's GPU mode no
-  # longer matches the source; the new session then re-evaluates this and
-  # session-restore relaunches the windows. env-hyprland records the chosen mode in
-  # $XDG_RUNTIME_DIR/session-gpu-mode, which dock-relog compares against the source
-  # so it only relogs when they actually disagree.
-  #
-  # GPUs are resolved through the stable by-path PCI symlinks (DRM card numbers
-  # can reorder across boots) back to the canonical /dev/dri/cardN nodes that
-  # aquamarine enumerates and matches against.
+  # GPUs are resolved through the stable by-path PCI symlinks (DRM card
+  # numbers can reorder across boots) back to the canonical /dev/dri/cardN
+  # nodes that aquamarine enumerates and matches against.
   xdg.configFile."uwsm/env-hyprland".text = ''
-    # Resolve the two GPUs and classify the power source ONCE; every per-session
-    # GPU/power decision below (primary render GPU, VA-API decode driver) keys off
-    # these so they can't disagree. power-source (modules/nixos/mixins/power.nix)
-    # returns ac / powerbank / battery — a power bank is deliberately NOT `ac`, so
-    # it gets the iGPU/battery path. Default to `ac` when it can't be read. The
-    # whole file is re-evaluated on each (re)login, which is how a power change
-    # takes effect — see the relog machinery in the let block.
+    # Resolve the two GPUs ONCE per login; uwsm sources this before launching
+    # Hyprland. iGPU primary always — see the comment in hyprland.nix.
     dgpu=$(readlink -f /dev/dri/by-path/pci-0000:02:00.0-card 2>/dev/null)
     igpu=$(readlink -f /dev/dri/by-path/pci-0000:00:02.0-card 2>/dev/null)
-    ac=$(/run/current-system/sw/bin/power-source 2>/dev/null || echo ac)
 
-    # Primary render/allocator GPU: dGPU on AC (zero-copy gaming), iGPU on battery
-    # (so the dGPU can be powered off). Record the chosen mode so dock-relog can tell
-    # whether this session already matches the current source.
     mode=igpu
-    if [ "$ac" = ac ] && [ -n "$dgpu" ] && [ -n "$igpu" ]; then
-      export AQ_DRM_DEVICES="$dgpu:$igpu"
-      # Cross-GPU scanout survives suspend. With the dGPU primary, the internal
-      # panel (eDP-1, on the iGPU) is fed by a cross-GPU copy: aquamarine renders
-      # on the dGPU, exports a dmabuf and imports it into the iGPU's EGL context
-      # to scan out. After an s2idle resume the dGPU re-exports that buffer with a
-      # tiling modifier the iGPU can no longer import — eglCreateImageKHR fails
-      # with EGL_BAD_MATCH, the eDP-1 page-flip never completes ("Cannot commit
-      # when a page-flip is awaiting") and the panel stays black until reboot; a
-      # relog or modeset doesn't clear it. Forcing a LINEAR intermediate buffer
-      # for the multi-GPU blit makes that import modifier-independent, so it
-      # survives resume. Only affects the eDP-1 copy — the game→dGPU→HDMI gaming
-      # path is same-GPU (no blit), so zero gaming cost.
+    if [ -n "$igpu" ] && [ -n "$dgpu" ]; then
+      export AQ_DRM_DEVICES="$igpu:$dgpu"
+      # Cross-GPU scanout must survive suspend: after s2idle the dGPU side can
+      # re-export buffers with a tiling modifier the peer can't import
+      # (EGL_BAD_MATCH → permanently stuck pageflip). A LINEAR intermediate
+      # buffer for the multi-GPU blit is modifier-independent, so the
+      # iGPU→dGPU HDMI copy keeps working across resume.
       export AQ_FORCE_LINEAR_BLIT=1
-      mode=dgpu
+      mode="igpu+dgpu"
     elif [ -n "$igpu" ]; then
-      # Battery: pin the compositor to the iGPU *only* — name just that one card so
-      # aquamarine never enumerates the dGPU. Leaving AQ_DRM_DEVICES unset is NOT
-      # enough: aquamarine then probes every card, and since the dGPU is card0 it
-      # gets opened anyway (Xwayland grabs /dev/dri/card0, and that single open
-      # handle pins the dGPU at D0 — RTD3 never arms and it never sleeps). With only
-      # the iGPU named, the dGPU's DRM node is never touched by the session, so it
-      # can RTD3-sleep. Offloaded apps (pkgs.nvidiaOffloadEnv) still open the dGPU
-      # directly on demand and present back through the iGPU.
+      # dGPU powered off (battery boot): name ONLY the iGPU. Leaving
+      # AQ_DRM_DEVICES unset is NOT enough if the card reappears — aquamarine
+      # would probe every card and Xwayland would grab the nvidia node,
+      # pinning it at D0. With only the iGPU named, the session never touches
+      # the nvidia stack; gpu-relog-prompt offers a relog if a monitor shows
+      # up wanting it.
       export AQ_DRM_DEVICES="$igpu"
     fi
     if [ -n "''${XDG_RUNTIME_DIR:-}" ]; then
       printf '%s\n' "$mode" > "$XDG_RUNTIME_DIR/session-gpu-mode" 2>/dev/null || true
     fi
 
-    # VA-API hardware video decode GPU: nvidia on AC (decode on the dGPU), iHD
-    # (Intel iGPU) on battery so the dGPU isn't woken by any app that plays video.
-    # Replaces the old static LIBVA_DRIVER_NAME=nvidia in modules/nixos/mixins/
-    # nvidia.nix; offloaded apps still force nvidia via pkgs.nvidiaOffloadEnv
-    # regardless of this default.
-    if [ "$ac" = ac ]; then
-      export LIBVA_DRIVER_NAME=nvidia
-    else
-      export LIBVA_DRIVER_NAME=iHD
-      # Keep Chromium/Electron (and any other GL/Vulkan client) off the dGPU on
-      # battery. Pinning the compositor to the iGPU above is not enough: these apps
-      # run their own GPU process that enumerates EGL/Vulkan vendors independently
-      # and will open the nvidia render node (/dev/dri/renderD12x) — another handle
-      # that pins the dGPU at D0. Exposing only the iGPU's Mesa EGL + Intel Vulkan
-      # ICD makes them open the iGPU node instead, so the dGPU stays asleep.
-      # Offloaded apps re-expand the vendor list themselves (they set their own
-      # __GLX/__VK env), and on AC nothing is restricted so gaming is untouched.
-      export __EGL_VENDOR_LIBRARY_FILENAMES=/run/opengl-driver/share/glvnd/egl_vendor.d/50_mesa.json
-      export VK_DRIVER_FILES=/run/opengl-driver/share/vulkan/icd.d/intel_icd.x86_64.json
-      export VK_ICD_FILENAMES="$VK_DRIVER_FILES"
-    fi
+    # VA-API video decode on the iGPU, always — no app should wake the dGPU
+    # for video. Offloaded apps (pkgs.nvidiaOffloadEnv) still force nvidia
+    # themselves when explicitly asked.
+    export LIBVA_DRIVER_NAME=iHD
+    # Keep Chromium/Electron (and any other GL/Vulkan client) off the dGPU:
+    # their GPU processes enumerate EGL/Vulkan vendors independently and would
+    # otherwise open the nvidia render node, pinning it at D0. Mesa-only EGL +
+    # Intel-only Vulkan ICD makes them use the iGPU; offloaded apps re-expand
+    # the vendor list themselves (they set their own __GLX/__VK env).
+    export __EGL_VENDOR_LIBRARY_FILENAMES=/run/opengl-driver/share/glvnd/egl_vendor.d/50_mesa.json
+    export VK_DRIVER_FILES=/run/opengl-driver/share/vulkan/icd.d/intel_icd.x86_64.json
+    export VK_ICD_FILENAMES="$VK_DRIVER_FILES"
   '';
 
   # Power automation (see powerTune in the let block): refresh rate, power profile
@@ -836,7 +822,7 @@ in
   # (uwsm finalises it into the systemd user manager) — hyprctl needs it.
   systemd.user.services.power-tune = {
     Unit = {
-      Description = "Refresh rate + keyboard aura + dGPU relog follow the power source";
+      Description = "Refresh rate + keyboard aura + relog consent prompt follow the power source";
       After = [ "graphical-session.target" ];
       PartOf = [ "graphical-session.target" ];
     };
