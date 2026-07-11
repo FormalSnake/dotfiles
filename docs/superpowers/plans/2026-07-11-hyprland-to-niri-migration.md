@@ -28,7 +28,7 @@
 **Interfaces:**
 - Produces: `inputs.niri.homeModules.niri` (consumed by Task 3).
 
-- [ ] **Step 1: Add the input** after the `noctalia` input block:
+- [x] **Step 1: Add the input** after the `noctalia` input block:
 
 ```nix
     # niri scrollable-tiling compositor. The flake is used ONLY for its typed
@@ -41,13 +41,13 @@
     };
 ```
 
-- [ ] **Step 2: Lock and verify**
+- [x] **Step 2: Lock and verify**
 
 Run: `git add flake.nix && nix flake lock && git add flake.lock`
 Then: `nix eval '.#nixosConfigurations.g815.config.system.stateVersion'`
 Expected: prints the stateVersion, no errors.
 
-- [ ] **Step 3: Commit** — `git commit -m "feat(niri): add sodiboo/niri-flake input"`
+- [x] **Step 3: Commit** — `git commit -m "feat(niri): add sodiboo/niri-flake input"`
 
 ---
 
@@ -61,7 +61,7 @@ Expected: prints the stateVersion, no errors.
 **Interfaces:**
 - Produces: `config.programs.niri.package` (nixpkgs module; consumed by nvidia-resume-recovery), `kyan.desktop.enable` unchanged.
 
-- [ ] **Step 1: Create `modules/nixos/mixins/niri.nix`** — copy `modules/nixos/mixins/hyprland.nix` verbatim, then apply exactly these changes (everything else — `lockBeforeSleep`, `sddmAstronaut`, `sddmWestonIni`, `sddmGreeterCompositor`, SDDM block, polkit/keyring, lock-before-sleep unit, gvfs/tumbler/dconf, GIO_EXTRA_MODULES, upower, fonts, udev backlight rule, i2c, systemPackages — carries over unchanged):
+- [x] **Step 1: Create `modules/nixos/mixins/niri.nix`** — copy `modules/nixos/mixins/hyprland.nix` verbatim, then apply exactly these changes (everything else — `lockBeforeSleep`, `sddmAstronaut`, `sddmWestonIni`, `sddmGreeterCompositor`, SDDM block, polkit/keyring, lock-before-sleep unit, gvfs/tumbler/dconf, GIO_EXTRA_MODULES, upower, fonts, udev backlight rule, i2c, systemPackages — carries over unchanged):
 
 Replace the option description (line 88):
 ```nix
@@ -101,16 +101,16 @@ Replace the `xdg.portal` block (lines 97-111) with:
 
 Update the SDDM comment (lines 113-115): the session file is now `niri.desktop` (Exec=niri-session), installed by `programs.niri` into the same wayland-sessions dir. No code change.
 
-- [ ] **Step 2: Point the module tree at it** — in `modules/nixos/default.nix` replace `./mixins/hyprland.nix` with `./mixins/niri.nix`; in `modules/nixos/profiles/desktop.nix` update the enable-option description to "niri desktop profile" and the comment to reference `../mixins/niri.nix`. Delete `modules/nixos/mixins/hyprland.nix` (`git rm`).
+- [x] **Step 2: Point the module tree at it** — in `modules/nixos/default.nix` replace `./mixins/hyprland.nix` with `./mixins/niri.nix`; in `modules/nixos/profiles/desktop.nix` update the enable-option description to "niri desktop profile" and the comment to reference `../mixins/niri.nix`. Delete `modules/nixos/mixins/hyprland.nix` (`git rm`).
 
-- [ ] **Step 3: earlyoom** — in `modules/nixos/mixins/boot.nix:206` replace the avoid regex:
+- [x] **Step 3: earlyoom** — in `modules/nixos/mixins/boot.nix:206` replace the avoid regex:
 
 ```nix
       "^(niri|noctalia|polkit-kde-aut|sshd|systemd)$"
 ```
 (`Hyprland`/`.Hyprland-wrapp` → `niri`; `hyprpolkitagent` → `polkit-kde-aut` — comm names truncate at 15 chars, the agent binary is `polkit-kde-authentication-agent-1`; `quickshell` dropped — the alttab Quickshell instance is deleted in Task 3.)
 
-- [ ] **Step 4: nvidia-resume-recovery** — in `modules/nixos/mixins/nvidia-resume-recovery.nix`:
+- [x] **Step 4: nvidia-resume-recovery** — in `modules/nixos/mixins/nvidia-resume-recovery.nix`:
   - `runtimeInputs`: replace `config.programs.hyprland.package` with `config.programs.niri.package`.
   - Replace the instance check + `alive()` (lines 37-44) with:
 
@@ -132,7 +132,7 @@ Update the SDDM comment (lines 113-115): the session file is now `niri.desktop` 
 ```
   - Update the two comments and the unit description that say "Hyprland" to say "niri" (the driver bug and probe logic are unchanged).
 
-- [ ] **Step 5: Verify + commit**
+- [x] **Step 5: Verify + commit**
 
 Run: `git add -A && nix eval '.#nixosConfigurations.g815.config.system.stateVersion'`
 Expected: prints stateVersion. Then `git diff --stat HEAD -- modules/nixos/mixins/power.nix` → empty.
@@ -152,7 +152,7 @@ Commit: `git commit -m "feat(niri): system-side niri session replacing hyprland"
 - Consumes: `inputs.niri.homeModules.niri` (Task 1), `/run/power/state` + `dgpu-reconcile.service` polkit rule (power.nix, unchanged), `aura-repaint` on the home profile (noctalia.nix).
 - Produces: `gpu-relog-prompt` binary path (bound in binds), `~/.cache/power-tune/edp-refresh.kdl` + `~/.cache/noctalia/niri-border.kdl` fragment contract (Task 4's template renders the latter), `power-tune` systemd unit.
 
-- [ ] **Step 0 (decision gate): inspect niri-flake's raw-KDL composition.** Before writing the file, read the module source to see how `finalConfig` is derived (guard against infinite recursion when appending raw KDL):
+- [x] **Step 0 (decision gate): inspect niri-flake's raw-KDL composition.** Before writing the file, read the module source to see how `finalConfig` is derived (guard against infinite recursion when appending raw KDL):
 
 ```bash
 nix flake metadata github:sodiboo/niri-flake --json | jq -r .path   # or: nix eval --impure --raw --expr '(builtins.getFlake (toString ./.)).inputs.niri.outPath'
@@ -197,7 +197,7 @@ where in both cases:
   '';
 ```
 
-- [ ] **Step 1: Create `users/kyandesutter/mixins/niri.nix`** with the full content below. Port the explanatory comments from `hyprland.nix` where the concern survives (power-tune header, monitor layout rationale, workspace split, qt6ct block, PiP notes) — trimmed of Hyprland-specific mechanics. Structure:
+- [x] **Step 1: Create `users/kyandesutter/mixins/niri.nix`** with the full content below. Port the explanatory comments from `hyprland.nix` where the concern survives (power-tune header, monitor layout rationale, workspace split, qt6ct block, PiP notes) — trimmed of Hyprland-specific mechanics. Structure:
 
 ```nix
 { pkgs, config, lib, inputs, ... }:
@@ -594,19 +594,19 @@ EOF'
 
 Verify the polkit agent path first: `ls "$(nix build --no-link --print-out-paths nixpkgs#kdePackages.polkit-kde-agent-1 2>/dev/null || nix eval --raw --impure --expr '(builtins.getFlake (toString ./.)).inputs.nixpkgs.legacyPackages.x86_64-linux.kdePackages.polkit-kde-agent-1.outPath')/libexec/"` — adjust `ExecStart` if the binary name differs.
 
-- [ ] **Step 2: Rewire linux.nix** — in `users/kyandesutter/linux.nix`: replace `./mixins/hyprland.nix` with `./mixins/niri.nix`, delete the `./mixins/alttab.nix` line, update the header comment ("Hyprland desktop" → "niri desktop"). `git rm users/kyandesutter/mixins/hyprland.nix users/kyandesutter/mixins/alttab.nix`.
+- [x] **Step 2: Rewire linux.nix** — in `users/kyandesutter/linux.nix`: replace `./mixins/hyprland.nix` with `./mixins/niri.nix`, delete the `./mixins/alttab.nix` line, update the header comment ("Hyprland desktop" → "niri desktop"). `git rm users/kyandesutter/mixins/hyprland.nix users/kyandesutter/mixins/alttab.nix`.
 
-- [ ] **Step 3: Eval** — `git add -A && nix eval '.#nixosConfigurations.g815.config.system.stateVersion'`
+- [x] **Step 3: Eval** — `git add -A && nix eval '.#nixosConfigurations.g815.config.system.stateVersion'`
 Expected: passes (home config not yet forced; the real proof is the Task 6 build).
 
-- [ ] **Step 4: Build the home config early** (this is where `niri validate` runs — catch schema errors NOW, not in Task 6):
+- [x] **Step 4: Build the home config early** (this is where `niri validate` runs — catch schema errors NOW, not in Task 6):
 
 ```bash
 nixos-rebuild build --flake .#g815 2>&1 | tail -20
 ```
 Expected: build succeeds. If it fails on a settings option name, fix against the schema reference in the plan header / niri-flake docs.md; if it fails with infinite recursion, switch to Option B from Step 0. If Option B is in use, additionally validate the final file from the build result manually with `niri validate -c`.
 
-- [ ] **Step 5: Commit** — `git commit -m "feat(niri): user-side niri config replacing hyprland + alttab"`
+- [x] **Step 5: Commit** — `git commit -m "feat(niri): user-side niri config replacing hyprland + alttab"`
 
 ---
 
@@ -621,7 +621,7 @@ Expected: build succeeds. If it fails on a settings option name, fix against the
 - Consumes: the `~/.cache/noctalia/niri-border.kdl` include contract from Task 3.
 - Produces: rendered `niri-border.kdl` + `niri msg action load-config-file` post_hook.
 
-- [ ] **Step 1: Create `users/kyandesutter/noctalia-templates/niri-border.kdl.tmpl`:**
+- [x] **Step 1: Create `users/kyandesutter/noctalia-templates/niri-border.kdl.tmpl`:**
 
 ```
 // Generated by Noctalia on every palette change (wallpaper pick / light-dark
@@ -644,7 +644,7 @@ layout {
 }
 ```
 
-- [ ] **Step 2: Update `users/kyandesutter/mixins/noctalia.nix`:**
+- [x] **Step 2: Update `users/kyandesutter/mixins/noctalia.nix`:**
   - `flexokiScheme` (lines 69-93): `runtimeInputs = [ config.programs.noctalia.package pkgs.niri pkgs.jq ];` and replace the hyprctl connectivity check with:
 
 ```bash
@@ -673,7 +673,7 @@ layout {
   - In the `xdg.configFile` sources block (630-638): drop the `hypr-border.tmpl` and `alttab.json.tmpl` lines, add `"noctalia/templates/niri-border.kdl.tmpl".source = ../noctalia-templates/niri-border.kdl.tmpl;`.
   - `git rm users/kyandesutter/noctalia-templates/hypr-border.tmpl users/kyandesutter/noctalia-templates/alttab.json.tmpl`
 
-- [ ] **Step 3: Verify + commit**
+- [x] **Step 3: Verify + commit**
 
 ```bash
 git add -A && nixos-rebuild build --flake .#g815 2>&1 | tail -5
@@ -689,26 +689,26 @@ Commit: `git commit -m "feat(niri): retarget noctalia theming from hyprctl to ni
 - Delete: `docs/hyprland-lua.md`
 - Modify: `CLAUDE.md` (power section + theming + autostart + overview), `README.md` (g815 description), comment-only touch-ups in `modules/nixos/mixins/nvidia.nix:70,101`, `users/kyandesutter/mixins/qt.nix:9`, `users/kyandesutter/mixins/helium.nix:40`, `users/kyandesutter/mixins/autostart.nix:24-28`, `users/kyandesutter/mixins/desktop-apps.nix:3,31`, `users/kyandesutter/mixins/webapps.nix:51`, `modules/nixos/mixins/locale.nix:16-17`, `modules/nixos/mixins/phone-integration.nix:25`
 
-- [ ] **Step 1: `git rm docs/hyprland-lua.md`** (Hyprland Lua API doc — obsolete).
+- [x] **Step 1: `git rm docs/hyprland-lua.md`** (Hyprland Lua API doc — obsolete).
 
-- [ ] **Step 2: CLAUDE.md** — update the g815 overview line ("Hyprland + Noctalia" → "niri + Noctalia"), the theming section (hypr-border → niri-border fragment; "Hyprland's pre-palette border colours (`general.col`)" → "niri's pre-palette border colours (seeded `niri-border.kdl` fragment)"; drop "the alt-tab switcher's build-time fallback"), the **Power management** section: replace the `hyprland.nix` bullet with the niri model — `power-tune` (aura, refresh via the `edp-refresh.kdl` fragment + config reload, dgpu-reconcile kick), `gpu-relog-prompt` (battery-only: niri hot-adds the dGPU but holds its fd, so the consent prompt remains the only release path), no `env-hyprland`/marker (iGPU-primary is niri's default), fragments mechanism (`include optional=true` + `niri msg action load-config-file`). Update the Autostart section ("Hyprland-coupled startup" list is gone — polkit agent and power-tune are plain user services now; alttab/session-restore/snapshot deleted). Keep the DO-NOT-BREAK framing verbatim.
+- [x] **Step 2: CLAUDE.md** — update the g815 overview line ("Hyprland + Noctalia" → "niri + Noctalia"), the theming section (hypr-border → niri-border fragment; "Hyprland's pre-palette border colours (`general.col`)" → "niri's pre-palette border colours (seeded `niri-border.kdl` fragment)"; drop "the alt-tab switcher's build-time fallback"), the **Power management** section: replace the `hyprland.nix` bullet with the niri model — `power-tune` (aura, refresh via the `edp-refresh.kdl` fragment + config reload, dgpu-reconcile kick), `gpu-relog-prompt` (battery-only: niri hot-adds the dGPU but holds its fd, so the consent prompt remains the only release path), no `env-hyprland`/marker (iGPU-primary is niri's default), fragments mechanism (`include optional=true` + `niri msg action load-config-file`). Update the Autostart section ("Hyprland-coupled startup" list is gone — polkit agent and power-tune are plain user services now; alttab/session-restore/snapshot deleted). Keep the DO-NOT-BREAK framing verbatim.
 
-- [ ] **Step 3: README.md + comment sweep** — mechanical "Hyprland" → "niri" / "uwsm/env-hyprland" → "programs.niri.settings.environment (mixins/niri.nix)" comment updates at the exact locations listed above. No functional changes; verify with `git diff` that only comments/docs changed in those files.
+- [x] **Step 3: README.md + comment sweep** — mechanical "Hyprland" → "niri" / "uwsm/env-hyprland" → "programs.niri.settings.environment (mixins/niri.nix)" comment updates at the exact locations listed above. No functional changes; verify with `git diff` that only comments/docs changed in those files.
 
-- [ ] **Step 4: Commit** — `git add -A && git commit -m "docs: update power/theming docs for the niri migration"`
+- [x] **Step 4: Commit** — `git add -A && git commit -m "docs: update power/theming docs for the niri migration"`
 
 ---
 
 ### Task 6: Full verification + handoff
 
-- [ ] **Step 1: Final greps** — all must return nothing:
+- [x] **Step 1: Final greps** — all must return nothing:
 
 ```bash
 rg -il "hyprland|hyprctl|uwsm|AQ_DRM|hyprpolkitagent|session-gpu-mode" --glob '!docs/**' --glob '!users/kyandesutter/claude/**' .
 rg -l "alttab|session-snapshot|session-restore" --glob '!docs/**' --glob '!users/kyandesutter/claude/**' .
 ```
 
-- [ ] **Step 2: Both hosts eval, g815 builds**
+- [x] **Step 2: Both hosts eval, g815 builds**
 
 ```bash
 nix eval '.#nixosConfigurations.g815.config.system.stateVersion'
@@ -717,8 +717,8 @@ nixos-rebuild build --flake .#g815
 git diff --stat HEAD -- modules/nixos/mixins/power.nix   # must be empty
 ```
 
-- [ ] **Step 3: Hand the switch to the owner** — `sudo nixos-rebuild switch` needs a password; ask the owner to run `! just r` (or `! sudo nixos-rebuild switch --flake ~/.config/nix#g815`), then **log out and pick the "niri" session in SDDM**.
+- [x] **Step 3: Hand the switch to the owner** — `sudo nixos-rebuild switch` needs a password; ask the owner to run `! just r` (or `! sudo nixos-rebuild switch --flake ~/.config/nix#g815`), then **log out and pick the "niri" session in SDDM**.
 
 - [ ] **Step 4: First-login checklist** (owner-assisted, from the spec): Noctalia bar/wallpaper; workspaces pinned per output; autostart apps land on 1/4/8/9; native Alt+Tab; Print / Mod+Shift+S screenshots; volume/brightness keys; Steam launches (X11 via xwayland-satellite — check `journalctl --user-unit=niri -b | grep -i x11`); `niri msg --json outputs` sane; PPD profile flip changes eDP refresh (check `niri msg outputs` after `powerprofilesctl set power-saver`); wallpaper change recolours borders; on AC → nvidia loads → HDMI lights up live; unplug on battery → relog notification appears.
 
-- [ ] **Step 5: Memory bank** — update the `nix-power-and-theming` auto-memory (env-hyprland/marker gone, battery-only relog, fragment mechanism) and mark the migration done in the spec status line.
+- [x] **Step 5: Memory bank** — update the `nix-power-and-theming` auto-memory (env-hyprland/marker gone, battery-only relog, fragment mechanism) and mark the migration done in the spec status line.

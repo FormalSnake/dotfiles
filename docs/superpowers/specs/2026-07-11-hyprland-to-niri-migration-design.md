@@ -1,7 +1,7 @@
 # Hyprland → niri migration (g815) — design
 
 Date: 2026-07-11
-Status: approved design, pre-implementation
+Status: implemented 2026-07-11 (switch + first-login checklist pending on owner)
 Supersedes the compositor-specific parts of
 `2026-07-11-g815-power-gpu-redesign-design.md` (the power/GPU *model* from that
 spec is unchanged; only its Hyprland glue is replaced).
