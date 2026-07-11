@@ -85,34 +85,32 @@ let
   '';
 in
 {
-  options.kyan.desktop.enable = lib.mkEnableOption "Hyprland desktop (system side)";
+  options.kyan.desktop.enable = lib.mkEnableOption "niri desktop (system side)";
 
   config = lib.mkIf cfg.enable {
-    programs.hyprland = {
-      enable = true;
-      withUWSM = true; # session managed by uwsm (clean env / systemd target)
-      xwayland.enable = true;
-    };
+    # niri session (nixpkgs module): installs the package, registers the
+    # Wayland session for SDDM, wires portals (gnome for screencast + gtk
+    # fallback) and gnome-keyring. niri is systemd-native (niri-session →
+    # niri.service, BindsTo graphical-session.target) — no uwsm.
+    programs.niri.enable = true;
 
-    # xdg portals: hyprland portal + gtk fallback (file pickers, screenshare).
+    # xdg portals: niri routes screencast through xdg-desktop-portal-gnome and
+    # the rest through gtk (programs.niri wires the packages; this pins the
+    # routing). gnome-keyring's Secret portal is gated `UseIn=gnome`, and
+    # $XDG_CURRENT_DESKTOP=niri bypasses it — keep the explicit pin so
+    # sandboxed Flatpaks can reach the keyring.
     xdg.portal = {
       enable = true;
       extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
-      # gnome-keyring's Secret portal is gated `UseIn=gnome`, so on this Hyprland
-      # session ($XDG_CURRENT_DESKTOP=Hyprland) xdg-desktop-portal never exposes
-      # org.freedesktop.portal.Secret — which sandboxed Flatpaks (e.g. Sober) need to
-      # store credentials in the keyring. Pin it explicitly (an explicit backend
-      # choice overrides UseIn). `default` mirrors the prior implicit routing so
-      # screenshare (hyprland) and file pickers (gtk) are unaffected.
       config.common = {
-        default = [ "hyprland" "gtk" ];
+        default = [ "gnome" "gtk" ];
         "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];
       };
     };
 
-    # SDDM (Qt6, Wayland) with the Keyitdev "sddm-astronaut" theme. SDDM lists the
-    # Hyprland uwsm session from /run/current-system/sw/share/wayland-sessions, so
-    # logging in launches the same hyprland-uwsm.desktop session greetd used to.
+    # SDDM (Qt6, Wayland) with the Keyitdev "sddm-astronaut" theme. SDDM lists
+    # the niri session (niri.desktop, Exec=niri-session — installed by
+    # programs.niri) from /run/current-system/sw/share/wayland-sessions.
     services.displayManager.sddm = {
       enable = true;
       wayland.enable = true;
@@ -178,7 +176,7 @@ in
     # battery detection in the bar flaky.
     services.upower.enable = true;
 
-    # Fonts noctalia/Hyprland expect (Material Symbols, a Nerd Font, emoji).
+    # Fonts noctalia/niri expect (Material Symbols, a Nerd Font, emoji).
     # System UI font is Geist; monospace is GeistMono patched with Nerd Font
     # glyphs (terminal mono + powerline icons). The rest are general coverage
     # fonts so apps don't fall back to Geist (which carries no emoji, CJK, or
@@ -236,10 +234,16 @@ in
       # .../share/sddm/themes/sddm-astronaut-theme.
       sddmAstronaut
 
+      # X11 apps (Steam & co): niri ≥25.08 spawns xwayland-satellite on demand
+      # and exports DISPLAY by itself — the binary just has to be on PATH.
+      xwayland-satellite
+
       brightnessctl
       ddcutil # external-monitor brightness over DDC/CI — noctalia's [brightness] enable_ddcutil backend (drives the slider + the XF86MonBrightness keybinds)
       playerctl
       wl-clipboard
+      # grim/slurp stay: our screenshot keybinds are niri-native now, but
+      # Noctalia's control-center screenshot tooling may still shell out to them.
       grim
       slurp
       ffmpegthumbnailer # video thumbnails for tumbler/Nautilus

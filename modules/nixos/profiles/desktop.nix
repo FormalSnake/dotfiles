@@ -3,11 +3,11 @@ let
   cfg = config.kyan.profiles.desktop;
 in
 {
-  options.kyan.profiles.desktop.enable = lib.mkEnableOption "Hyprland desktop profile";
+  options.kyan.profiles.desktop.enable = lib.mkEnableOption "niri desktop profile";
 
   config = lib.mkIf cfg.enable {
-    # The Hyprland session, portals and login manager are wired in
-    # ../mixins/hyprland.nix; this flag gates them on per-host.
+    # The niri session, portals and login manager are wired in
+    # ../mixins/niri.nix; this flag gates them on per-host.
     kyan.desktop.enable = true;
   };
 }

@@ -4,7 +4,7 @@ let
 
   # Blackwell (RTX 5070) + nvidia-drm has an s2idle-resume regression: on wake,
   # the display pipeline's atomic pageflip stalls forever ("Pageflip timed
-  # out"), so an external monitor comes up detected-but-dark and the Hyprland
+  # out"), so an external monitor comes up detected-but-dark and the niri
   # session — blocked waiting on that flip — stops servicing input and IPC (which
   # also makes freshly hot-plugged USB look dead: nothing is processing it).
   # Present on driver 610.43.02, unfixed upstream as of 2026-07, and it hits KWin
@@ -14,8 +14,8 @@ let
   #
   # There's nothing in the kernel log to key off and the compositor's error
   # string is unreliable, so detection is a liveness probe instead: a wedged
-  # Hyprland blocks its event loop on the stalled flip and stops answering
-  # `hyprctl`. If the compositor is unresponsive for a sustained window after
+  # compositor blocks its event loop on the stalled flip and stops answering
+  # `niri msg`. If the compositor is unresponsive for a sustained window after
   # resume, restart the display-manager — a fresh greeter/compositor re-modesets
   # the dGPU, which is the one confirmed recovery short of the full power-cycle
   # it otherwise takes.
@@ -23,10 +23,9 @@ let
     name = "nvidia-resume-recovery";
     runtimeInputs = [
       pkgs.coreutils
-      pkgs.findutils # find
       pkgs.util-linux # runuser
       config.systemd.package # systemctl
-      config.programs.hyprland.package # hyprctl
+      config.programs.niri.package # niri msg
     ];
     text = ''
       user=${config.users.users.kyandesutter.name}
@@ -34,13 +33,20 @@ let
       [ -n "$uid" ] && [ -d "/run/user/$uid" ] || exit 0
       runtime="/run/user/$uid"
 
-      # No live Hyprland instance (e.g. resumed to the greeter, or the session
+      # No live niri instance (e.g. resumed to the greeter, or the session
       # already gone) → nothing here to recover, and don't restart-loop the DM.
-      [ -n "$(find "$runtime/hypr" -mindepth 1 -maxdepth 1 -type d 2>/dev/null)" ] || exit 0
+      # niri msg needs NIRI_SOCKET ($XDG_RUNTIME_DIR/niri.<display>.sock) —
+      # discover it from the socket that actually exists, the same way
+      # lock-before-sleep discovers noctalia's.
+      sock=""
+      for s in "$runtime"/niri.*.sock; do
+        [ -e "$s" ] && sock="$s" && break
+      done
+      [ -n "$sock" ] || exit 0
 
       alive() {
-        runuser -u "$user" -- env XDG_RUNTIME_DIR="$runtime" \
-          timeout 5 hyprctl version >/dev/null 2>&1
+        runuser -u "$user" -- env XDG_RUNTIME_DIR="$runtime" NIRI_SOCKET="$sock" \
+          timeout 5 niri msg version >/dev/null 2>&1
       }
 
       # Let the session thaw before the first probe.
@@ -54,7 +60,7 @@ let
         sleep 4
       done
 
-      echo "nvidia-resume-recovery: Hyprland unresponsive after resume — restarting display-manager to recover the display" >&2
+      echo "nvidia-resume-recovery: niri unresponsive after resume — restarting display-manager to recover the display" >&2
       systemctl restart display-manager.service
     '';
   };
@@ -64,7 +70,7 @@ in
     # Runs on resume (ordered after the sleep services, pulled in by them), never
     # blocking the suspend path itself. See the comment on `resumeRecovery`.
     systemd.services.nvidia-resume-recovery = {
-      description = "Recover Hyprland if nvidia-drm pageflip stalls after resume (Blackwell s2idle bug)";
+      description = "Recover niri if nvidia-drm pageflip stalls after resume (Blackwell s2idle bug)";
       after = [
         "systemd-suspend.service"
         "systemd-hibernate.service"

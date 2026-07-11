@@ -203,7 +203,7 @@ in
       # session. Matched against /proc/*/comm (truncated to 15 chars), so list the
       # wrapped names too.
       "--avoid"
-      "^(Hyprland|\\.Hyprland-wrapp|noctalia|quickshell|hyprpolkitagent|sshd|systemd)$"
+      "^(niri|noctalia|polkit-kde-aut|sshd|systemd)$"
       # Prefer to reap the heavy gaming/Wine processes first.
       "--prefer"
       "^(BeamNG|wine|wineserver|gamescope)$"

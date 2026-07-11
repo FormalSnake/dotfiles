@@ -21,7 +21,7 @@
       ./mixins/nvidia-resume-recovery.nix
       ./mixins/audio.nix
       ./mixins/bluetooth.nix
-      ./mixins/hyprland.nix
+      ./mixins/niri.nix
       ./mixins/gaming.nix
       ./mixins/asus.nix
       ./mixins/power.nix
