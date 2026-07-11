@@ -27,6 +27,14 @@ let
   # untouched — it is already patched upstream. Linux Widevine is L3 → up to 720p
   # on Netflix (the platform cap).
   helium = pkgs.helium.overrideAttrs (old: {
+    # Helium's "Use GTK" appearance option dlopens libgtk at runtime (the binary
+    # carries the loader strings libgtk-4.so.1 then libgtk-3.so.0). The upstream
+    # build ships no GTK, so the dlopen fails and the toggle silently falls back
+    # to the Classic theme. runtimeDependencies (not buildInputs — GTK is
+    # dlopen'd, not DT_NEEDED, so autoPatchelfHook won't add it otherwise) puts
+    # libgtk-3.so.0 on the rpath. GTK3 not 4: Chromium defaults to the GTK3
+    # backend (GTK4 is opt-in behind --gtk-version=4 and still incomplete).
+    runtimeDependencies = (old.runtimeDependencies or [ ]) ++ [ pkgs.gtk3 ];
     postInstall = (old.postInstall or "") + ''
       ln -s ${cdmDir} $out/opt/helium/WidevineCdm
     '';

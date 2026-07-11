@@ -6,16 +6,26 @@
 // post_hook in mixins/noctalia.nix reloads niri's config so the colours apply
 // instantly, and mixins/niri.nix seeds a Catppuccin fallback copy of this
 // file for the first login before Noctalia's first render.
-// primary = active border; error = urgent; surface = inactive.
+// primary = active border; error = urgent; outline = inactive (surface was
+// invisible against the wallpaper once gaps opened the layout up — outline is
+// M3's mid-tone made for exactly this).
 layout {
-    gaps 0
+    gaps 8
+    // The wallpaper layer lives in the overview backdrop (layer-rules in
+    // mixins/niri.nix); the workspace background must be transparent for it
+    // to show through on the normal desktop, not just in the overview.
+    background-color "transparent"
     focus-ring {
         off
     }
     border {
+        // niri-flake renders `border { off }` in the main layout block even
+        // when the typed settings declare no layout; a merged section only
+        // re-enables it with an explicit `on`.
+        on
         width 2
         active-color "#{{ colors.primary.default.hex_stripped }}"
-        inactive-color "#{{ colors.surface.default.hex_stripped }}"
+        inactive-color "#{{ colors.outline.default.hex_stripped }}"
         urgent-color "#{{ colors.error.default.hex_stripped }}"
     }
 }

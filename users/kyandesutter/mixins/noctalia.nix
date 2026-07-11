@@ -381,6 +381,12 @@ in
       # its type must be declared explicitly (defaults otherwise).
       widget.spacer_2.type = "spacer";
 
+      # niri declares all nine named workspaces eagerly (mixins/niri.nix), so
+      # without this the bar shows nine pills at all times — on Hyprland the
+      # workspaces were created on demand and the bar only showed occupied
+      # ones. Hide the empty pills to get that behaviour back.
+      widget.workspaces.hide_when_empty = true;
+
       # Dynamic, wallpaper-derived palette is now the single source of truth for
       # the desktop's colours (replacing the static Catppuccin builtin). On every
       # wallpaper pick or light/dark flip, Noctalia regenerates a Material Design 3

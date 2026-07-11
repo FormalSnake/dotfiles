@@ -375,10 +375,17 @@ in
         { matches = [ { namespace = "^noctalia-backdrop"; } ]; place-within-backdrop = true; }
       ];
 
-      # layout {} is deliberately ABSENT: the Noctalia border fragment owns it
-      # (gaps 0, 2px borders in the live wallpaper colours — rendered from
+      # The Noctalia border fragment owns the *palette* side of layout {}
+      # (gaps 8, 2px borders in the live wallpaper colours — rendered from
       # noctalia-templates/niri-border.kdl.tmpl, seeded with the Catppuccin
-      # fallback below).
+      # fallback below). Structural layout knobs that never change with the
+      # palette live here in the typed settings instead.
+      #
+      # Windows open at half the working area instead of their own requested
+      # width (Spotify/Electron remember a full-bleed size and would swallow
+      # the side gaps); Mod+F (maximize-column) gives full width with margins,
+      # Mod+R cycles the presets.
+      layout.default-column-width.proportion = 0.5;
 
       environment = {
         # Qt platform theme (qt6ct) so Qt apps follow Noctalia's palette (see
@@ -461,11 +468,13 @@ in
       '';
       borderSeed = pkgs.writeText "niri-border-seed.kdl" ''
         layout {
-            gaps 0
+            gaps 8
+            background-color "transparent"
             focus-ring {
                 off
             }
             border {
+                on
                 width 2
                 active-color "#cba6f7"
                 inactive-color "#585b70"
