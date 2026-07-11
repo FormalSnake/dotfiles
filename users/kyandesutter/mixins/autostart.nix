@@ -44,16 +44,10 @@ in
   # if it isn't running. Rebuilds no longer disturb the running session.
 
   # Steam, launched minimized to the tray so it doesn't grab focus at login.
-  # Window rule sends it to workspace 9 (gaming, HDMI-A-1).
-  #
-  # AC-only (ExecCondition): Steam is offload-wrapped onto the dGPU, so an
-  # autostart on battery wakes the dGPU at the exact moment dgpu-reconcile is
-  # powering it off — a module load racing a module unload is the kernel-wedge
-  # path (see dgpu-power in modules/nixos/mixins/power.nix). The gaming stack
-  # needs the barrel charger anyway; dgpu-power's `on` branch starts this unit
-  # when AC returns. ExecCondition ≠ failure: on battery the unit is simply
-  # skipped. A missing state file (first login racing power-reconcile) counts
-  # as AC, matching the classifier's default.
+  # Window rule sends it to workspace 9 (gaming, HDMI-A-1). Runs on the iGPU
+  # like every other app (the client is no longer offload-wrapped — gaming
+  # lives on Windows; see programs.steam in modules/nixos/mixins/gaming.nix),
+  # so it's safe to autostart on any power source and never touches the dGPU.
   systemd.user.services.steam = {
     Unit = {
       Description = "Steam (minimized to tray)";
@@ -64,7 +58,6 @@ in
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {
       Type = "simple";
-      ExecCondition = "${pkgs.bash}/bin/bash -c '[ \"$(cat /run/power/state 2>/dev/null || echo ac)\" = ac ]'";
       ExecStart = loginExec "steam -silent";
     };
   };

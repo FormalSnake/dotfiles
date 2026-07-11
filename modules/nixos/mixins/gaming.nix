@@ -311,18 +311,16 @@ in
       extraCompatPackages = [ pkgs.proton-ge-bin ];
       # Millennium-patched Steam (Steam Homebrew) — enables the client themes the
       # Noctalia "steam" community template targets (Material-Theme skin; see
-      # users/kyandesutter/mixins/noctalia.nix). Built from Millennium's own
-      # steam.nix rather than the flake's prebuilt `millennium-steam` so we keep
-      # the dGPU-offload extraEnv (the prebuilt package defaults extraEnv to {},
-      # which would drop RTX-5070 offload — desktop client + every game it spawns
-      # default to the dGPU via these vars). steam.nix merges Millennium's own libs
-      # /env/profile on top, and the steam module merges its compat-tool extraEnv
-      # on top of that, so nothing is clobbered.
-      # Built from the patched Millennium nix dir (see the let block) so the
-      # bun-deps hash matches and the dGPU-offload extraEnv is preserved.
+      # users/kyandesutter/mixins/noctalia.nix). Built from the patched
+      # Millennium nix dir (see the let block) so the bun-deps hash matches.
+      # extraEnv is empty ON PURPOSE: the client runs on the iGPU (gaming lives
+      # on Windows), so autostarting Steam never wakes or holds the dGPU — a
+      # battery autostart racing a dgpu-power unload was the kernel-wedge path.
+      # A game that really wants the dGPU is launched via `nvidia-offload` or
+      # the gamescope session (both still offload-wrapped).
       package = pkgs.callPackage "${millenniumNix}/steam.nix" {
         millennium = millenniumLib;
-        extraEnv = pkgs.nvidiaOffloadEnv;
+        extraEnv = { };
       };
     };
 
