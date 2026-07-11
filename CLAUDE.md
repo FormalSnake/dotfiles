@@ -106,6 +106,13 @@ file-watch + fallback pattern).
 
 ## Power management — DO NOT BREAK
 
+GPU model (since 2026-07-11, spec in `docs/superpowers/specs/`): the session is
+**always iGPU-primary** — gaming lives on Windows; the dGPU is only a
+power-managed peripheral for the panel backlight (its WMI) and the HDMI port.
+dGPU power: ON while charging (AC or USB-C), OFF on battery unless a monitor is
+connected on it or the session still holds it. **Relogs are consent-only**:
+`gpu-relog-prompt` shows a persistent button notification (never automatic).
+
 Power management is centered on **Noctalia + Hyprland** and is load-bearing:
 - `modules/nixos/mixins/power.nix` — `power-source` classifier (AC / power bank /
   battery) + `power-reconcile` (the single automatic owner of the PPD profile,
@@ -114,10 +121,18 @@ Power management is centered on **Noctalia + Hyprland** and is load-bearing:
   the nvidia modules — serialized via flock, holds a sleep inhibitor, only ever
   `systemctl start`ed, never `restart`ed: interrupting or racing an nvidia
   module transition deadlocks the kernel in D-state and breaks suspend until
-  reboot — observed 2026-07-03).
-- `users/kyandesutter/mixins/hyprland.nix` — `power-tune` reacts to source changes
-  (GPU choice on AC, AC-dock relog with a 2-min anti-loop guard, keyboard aura
-  via `aura-repaint`).
+  reboot — observed 2026-07-03; a held device is always left powered, never
+  force-released) + `power-resume-reconcile` (re-runs power-reconcile at wake
+  so a charger change during sleep is acted on) + a polkit rule letting the
+  session `systemctl start dgpu-reconcile.service` (login convergence kick).
+- `users/kyandesutter/mixins/hyprland.nix` — `power-tune` (keyboard aura via
+  `aura-repaint`, refresh-follows-profile, spawns `gpu-relog-prompt` on power/
+  drm events, kicks dgpu-reconcile once per login) + `gpu-relog-prompt` (the
+  ONLY relog path: persistent [Relog now]/[Not now] notification for exactly
+  two situations — session can't see a connected dGPU monitor, or battery
+  session still holds the dGPU) + `env-hyprland` (iGPU primary always; dGPU
+  listed as secondary head only when powered at login; marker
+  `$XDG_RUNTIME_DIR/session-gpu-mode` = `igpu` | `igpu+dgpu`).
 - `modules/nixos/mixins/asus.nix` — asusd, battery limit, Aura keyboard.
 - `game-mode` (`gaming.nix`) — manual profile toggle; goes through PPD
   (powerprofilesctl), never asusctl, so it can't fight `power-reconcile`.
