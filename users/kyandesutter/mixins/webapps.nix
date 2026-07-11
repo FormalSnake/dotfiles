@@ -48,7 +48,7 @@ let
       width = s.width or 1200;
       height = s.height or 800;
       # Accepted for interface stability across engines. Under Chromium --app on
-      # a tiling WM (Hyprland) the window already has no title bar, so borderless
+      # a tiling WM (niri) the window already has no title bar, so borderless
       # is the WM's concern; dark theming follows the site/system.
       darkMode = s.darkMode or true;
       borderless = s.borderless or true;

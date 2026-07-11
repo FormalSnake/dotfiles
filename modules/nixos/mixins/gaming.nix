@@ -226,7 +226,7 @@ let
   # is to launch with `--disable-features=WebRtcAllowInputVolumeAdjustment`.
   # The NixOS equibop wrapper just execs electron and ignores the usual
   # `equibop-flags.conf`, so the flag is injected at the package level here —
-  # this way it applies regardless of launch path (Hyprland autostart, the
+  # this way it applies regardless of launch path (autostart, the
   # `Exec=equibop` .desktop entry, or a terminal).
   equibopNoAgc = pkgs.symlinkJoin {
     name = "equibop-no-agc";

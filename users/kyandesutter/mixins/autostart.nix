@@ -4,7 +4,7 @@ let
   #
   # systemd resolves a *bare* `ExecStart` name against the manager process's own
   # PATH, which PAM fixes when `systemd --user` first starts — long before the
-  # Hyprland session imports the rich session PATH into the user manager. That
+  # niri session imports the rich session PATH into the user manager. That
   # early PATH lacks /run/current-system/sw/bin and the per-user profile, so a
   # bare `ExecStart=steam` (or even `sh`) fails at login with status=203/EXEC and
   # the app silently never starts. (noctalia/easyeffects dodge this only because
@@ -21,14 +21,13 @@ in
 {
   # — DE-agnostic login items (generic GUI apps) —
   #
-  # These were previously launched from Hyprland's hyprland.start via
-  # hl.exec_cmd; they are generic GUI apps, not compositor-coupled, so they live
-  # here as home-manager systemd user services bound to graphical-session.target
-  # (which uwsm starts/stops with the Hyprland session). See loginExec above for
-  # how their executables are resolved.
+  # Generic GUI apps, not compositor-coupled, so they live here as home-manager
+  # systemd user services bound to graphical-session.target (which niri.service
+  # BindsTo, so they start and stop with the niri session). See loginExec above
+  # for how their executables are resolved.
   #
   # Deliberately NO `Restart=`: closing one of these apps must not relaunch it
-  # (matches the old exec-once semantics). Window rules in hyprland.nix still pin
+  # (login items, not daemons). Window rules in niri.nix still pin
   # each one to its named workspace. The one exception is 1Password (below), which
   # carries `Restart = on-failure` because it's a credential daemon that must stay
   # present — see its block for the rationale.

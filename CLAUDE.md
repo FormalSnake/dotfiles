@@ -48,8 +48,8 @@ on a password, hand that step to the owner and continue once it clears.
 
 Declarative config for two machines via one flake (flake-parts):
 - **`macbook`** — `aarch64-darwin`, nix-darwin + home-manager. Primary dev host.
-- **`g815`** — `x86_64-linux`, NixOS + home-manager. ASUS ROG laptop; Hyprland +
-  Noctalia desktop, gaming + NVIDIA PRIME offload.
+- **`g815`** — `x86_64-linux`, NixOS + home-manager. ASUS ROG laptop; niri +
+  Noctalia desktop, NVIDIA dGPU as a power-managed peripheral.
 
 Secrets are agenix-encrypted (`secrets/`). The two hosts are wired in
 `systems/default.nix` (`darwinConfigurations.macbook`, `nixosConfigurations.g815`).
@@ -63,7 +63,7 @@ modules/
   shared/              cross-platform system modules (nix settings, home-manager
                        glue, tailscale) — imported by BOTH platforms
   darwin/  nixos/      per-platform module trees, each with:
-    mixins/            one concern per file (audio, bluetooth, hyprland, …)
+    mixins/            one concern per file (audio, bluetooth, niri, …)
     profiles/          compose mixins into roles (desktop, gaming)
 systems/<host>/        per-host config (hardware, host-specific options)
 users/kyandesutter/
@@ -94,26 +94,34 @@ Conventions:
 Colours are **wallpaper-derived (matugen/M3) via Noctalia**, the single source of
 truth. Noctalia regenerates a palette on every wallpaper pick / light-dark flip and
 renders templates (`users/kyandesutter/noctalia-templates/`) into per-app files,
-running each app's reload hook. **Catppuccin is only a static fallback**
-(`autoEnable = false`) for consumers that genuinely can't be dynamic: SDDM
-(pre-login), Neovim's pre-palette colourscheme, the alt-tab switcher's
-build-time fallback, Hyprland's pre-palette border colours (`general.col`),
-CLI tools with no Noctalia template (bat, fzf, lazygit, fish), and Ghostty on
-macOS (no Noctalia there). (Herdr instead uses its built-in `terminal` theme, so it
-follows ghostty's Noctalia colours dynamically and needs no fallback.) When adding a themed surface, prefer a
-Noctalia template + a Catppuccin fallback (see `mixins/alttab.nix` for the
-file-watch + fallback pattern).
+running each app's reload hook. niri's window borders are themed through the
+`niri-border` template: it renders `~/.cache/noctalia/niri-border.kdl` (the
+`layout {}` fragment niri's config `include`s last, so it wins) and its
+post_hook runs `niri msg action load-config-file`. **Catppuccin is only a
+static fallback** (`autoEnable = false`) for consumers that genuinely can't be
+dynamic: SDDM (pre-login), Neovim's pre-palette colourscheme, niri's
+pre-palette border colours (the seeded `niri-border.kdl` copy in
+`mixins/niri.nix`), CLI tools with no Noctalia template (bat, fzf, lazygit,
+fish), and Ghostty on macOS (no Noctalia there). (Herdr instead uses its
+built-in `terminal` theme, so it follows ghostty's Noctalia colours dynamically
+and needs no fallback.) When adding a themed surface, prefer a Noctalia
+template + a Catppuccin fallback (see the `niri-border` template in
+`mixins/noctalia.nix` for the render + seeded-fallback pattern).
 
 ## Power management — DO NOT BREAK
 
 GPU model (since 2026-07-11, spec in `docs/superpowers/specs/`): the session is
-**always iGPU-primary** — gaming lives on Windows; the dGPU is only a
-power-managed peripheral for the panel backlight (its WMI) and the HDMI port.
-dGPU power: ON while charging (AC or USB-C), OFF on battery unless a monitor is
-connected on it or the session still holds it. **Relogs are consent-only**:
-`gpu-relog-prompt` shows a persistent button notification (never automatic).
+**always iGPU-primary** — niri renders on the iGPU by default; gaming lives on
+Windows; the dGPU is only a power-managed peripheral for the panel backlight
+(its WMI) and the HDMI port. niri **hot-adds** the dGPU's DRM device at runtime
+(monitor on the powered dGPU lights up with no relog), but it also holds an fd
+on every GPU it has seen and has no release IPC — so on battery a held dGPU
+stays powered until logout. dGPU power: ON while charging (AC or USB-C), OFF on
+battery unless a monitor is connected on it or the session still holds it.
+**Relogs are consent-only**: `gpu-relog-prompt` shows a persistent button
+notification (never automatic).
 
-Power management is centered on **Noctalia + Hyprland** and is load-bearing:
+Power management is centered on **Noctalia + niri** and is load-bearing:
 - `modules/nixos/mixins/power.nix` — `power-source` classifier (AC / power bank /
   battery) + `power-reconcile` (the single automatic owner of the PPD profile,
   publishes `/run/power/state`; udev-triggered, restart-safe) +
@@ -125,18 +133,21 @@ Power management is centered on **Noctalia + Hyprland** and is load-bearing:
   force-released) + `power-resume-reconcile` (re-runs power-reconcile at wake
   so a charger change during sleep is acted on) + a polkit rule letting the
   session `systemctl start dgpu-reconcile.service` (login convergence kick).
-- `users/kyandesutter/mixins/hyprland.nix` — `power-tune` (keyboard aura via
-  `aura-repaint`, refresh-follows-profile, spawns `gpu-relog-prompt` on power/
-  drm events, kicks dgpu-reconcile once per login) + `gpu-relog-prompt` (the
-  ONLY relog path: persistent [Relog now]/[Not now] notification for exactly
-  two situations — session can't see a connected dGPU monitor, or battery
-  session still holds the dGPU) + `env-hyprland` (iGPU primary always; dGPU
-  listed as secondary head only when powered at login; marker
-  `$XDG_RUNTIME_DIR/session-gpu-mode` = `igpu` | `igpu+dgpu`).
+- `users/kyandesutter/mixins/niri.nix` — `power-tune` (keyboard aura via
+  `aura-repaint`, refresh-follows-profile via the `edp-refresh.kdl` fragment +
+  `niri msg action load-config-file` — niri has no runtime per-output IPC —
+  spawns `gpu-relog-prompt` on power/drm events, kicks dgpu-reconcile once per
+  login) + `gpu-relog-prompt` (the ONLY relog path: persistent [Relog now]/
+  [Not now] notification for exactly one situation now — on battery with the
+  dGPU device present (= held by niri) and no monitor on it; relog =
+  `niri msg action quit --skip-confirmation`). There is no env-hyprland
+  equivalent: iGPU-primary is niri's default and the dGPU is hot-added, so no
+  login-time GPU set, no `session-gpu-mode` marker, no session snapshot/
+  restore (autostart.nix relaunches the login apps).
 - `modules/nixos/mixins/asus.nix` — asusd, battery limit, Aura keyboard.
 - `game-mode` (`gaming.nix`) — manual profile toggle; goes through PPD
   (powerprofilesctl), never asusctl, so it can't fight `power-reconcile`.
-- `lock-before-sleep` (`modules/nixos/mixins/hyprland.nix`) — noctalia's IPC
+- `lock-before-sleep` (`modules/nixos/mixins/niri.nix`) — noctalia's IPC
   socket is keyed by `WAYLAND_DISPLAY` (`noctalia-<display>.sock`); anything
   calling `noctalia msg` outside the session must derive that env var from the
   socket name or discovery fails with "noctalia is not running".
@@ -149,9 +160,11 @@ asked to change behavior**. `power-source` MUST stay in `environment.systemPacka
 
 DE-agnostic login apps (Steam, Helium, Equibop, Spotify, …) are home-manager
 `systemd.user.services` bound to `graphical-session.target` in
-`users/kyandesutter/mixins/autostart.nix`. Only genuinely Hyprland-coupled startup
-(alttab Quickshell, session-restore/snapshot, polkit) stays in `hyprland.nix`'s
-`hyprland.start` block.
+`users/kyandesutter/mixins/autostart.nix` (niri.service BindsTo that target, so
+they follow the session). Nothing is compositor-hook-launched anymore: the
+polkit agent and power-tune are plain user services in `mixins/niri.nix`; the
+alttab Quickshell switcher and session-restore/snapshot were deleted with the
+niri migration (niri's native `recent-windows` MRU switcher replaces alttab).
 
 ## Tooling
 

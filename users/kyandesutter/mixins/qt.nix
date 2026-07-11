@@ -6,7 +6,7 @@
   # declaratively (read-only) — don't hand-edit via the qt6ct GUI.
   #
   # The Qt platform theme itself (QT_QPA_PLATFORMTHEME=qt6ct) is exported from
-  # uwsm/env in hyprland.nix so it reaches every Hyprland-spawned Qt app; this
+  # programs.niri.settings.environment in niri.nix so it reaches every niri-spawned Qt app; this
   # file only owns the qt{5,6}ct.conf colour/style selection. Noctalia's builtin
   # `qt` template (see noctalia.nix) writes ~/.config/qt{5,6}ct/colors/noctalia.conf,
   # and the qt6ct.conf below points at it with a Fusion style (Fusion honours the

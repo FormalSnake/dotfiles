@@ -3,7 +3,7 @@
 Declarative configuration for two machines from one flake:
 
 - **`macbook`** — `aarch64-darwin`, nix-darwin + home-manager (primary dev host)
-- **`g815`** — `x86_64-linux`, NixOS + home-manager (ASUS ROG laptop: Hyprland +
+- **`g815`** — `x86_64-linux`, NixOS + home-manager (ASUS ROG laptop: niri +
   Noctalia desktop, gaming, NVIDIA PRIME offload)
 
 Inspired by [getchoo/borealis](https://github.com/getchoo/borealis).
@@ -15,7 +15,7 @@ Inspired by [getchoo/borealis](https://github.com/getchoo/borealis).
 - `modules/` — reusable module sets
   - `modules/shared/` — cross-platform (nix settings, home-manager glue, tailscale)
   - `modules/darwin/` — macOS (homebrew, system defaults, dock, login items)
-  - `modules/nixos/` — NixOS (boot, graphics/nvidia, hyprland, gaming, power, asus, …)
+  - `modules/nixos/` — NixOS (boot, graphics/nvidia, niri, gaming, power, asus, …)
   - each platform has `mixins/` (one concern per file) and `profiles/` (compose mixins)
 - `systems/` — per-host config (`macbook/`, `g815/`)
 - `users/` — per-user home-manager config (`kyandesutter/`)

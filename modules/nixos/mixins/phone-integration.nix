@@ -22,7 +22,7 @@
 # iPhone to NetworkManager as a normal interface — no extra config here).
 #
 # Gated on the desktop profile (no-op on a headless NixOS host), mirroring the
-# import-unconditionally / gate-internally pattern of ./hyprland.nix.
+# import-unconditionally / gate-internally pattern of ./niri.nix.
 lib.mkIf config.kyan.desktop.enable {
   programs.kdeconnect.enable = true; # opens TCP+UDP 1714–1764
   programs.localsend.enable = true; # opens TCP+UDP 53317

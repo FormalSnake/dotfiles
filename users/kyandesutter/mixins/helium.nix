@@ -37,7 +37,7 @@ in
   # the system level in modules/nixos/mixins/nix.nix, so pkgs.helium resolves.
   #
   # No GPU wrapper needed: LIBVA_DRIVER_NAME is chosen per session by power source
-  # (users/kyandesutter/mixins/hyprland.nix uwsm/env-hyprland), so on battery Helium
+  # (programs.niri.settings.environment in users/kyandesutter/mixins/niri.nix), so on battery Helium
   # decodes video on the iGPU and leaves the dGPU asleep; on AC it uses nvidia.
   home.packages = [ helium ];
 
