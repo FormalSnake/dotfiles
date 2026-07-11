@@ -242,8 +242,8 @@ in
       ddcutil # external-monitor brightness over DDC/CI — noctalia's [brightness] enable_ddcutil backend (drives the slider + the XF86MonBrightness keybinds)
       playerctl
       wl-clipboard
-      # grim/slurp stay: our screenshot keybinds are niri-native now, but
-      # Noctalia's control-center screenshot tooling may still shell out to them.
+      # grim/slurp: Noctalia's screenshot tool (bound on Print / Mod+Shift+S in
+      # users/kyandesutter/mixins/niri.nix) shells out to them.
       grim
       slurp
       ffmpegthumbnailer # video thumbnails for tumbler/Nautilus

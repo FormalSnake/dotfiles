@@ -307,11 +307,13 @@ in
         "Mod+Minus".action.set-column-width = "-10%";
         "Mod+Plus".action.set-column-width = "+10%";
 
-        # Screenshots: niri's built-in UI replaces the Noctalia tool. Print =
-        # whole screen (file + clipboard); Mod+Shift+S = interactive region
-        # picker (macOS Cmd+Shift+4).
-        "Print".action.screenshot-screen = [ ];
-        "Mod+Shift+S".action.screenshot = [ ];
+        # Screenshots via noctalia (owner rule: when the shell has the feature,
+        # prefer it over the compositor's built-in — it's WM-agnostic, so the
+        # binds survive compositor changes). niri's own screenshot UI remains
+        # available via `niri msg action screenshot` if ever wanted. Print =
+        # whole screen; Mod+Shift+S = region picker (macOS Cmd+Shift+4).
+        "Print".action.spawn = [ noctaliaBin "msg" "screenshot-fullscreen" ];
+        "Mod+Shift+S".action.spawn = [ noctaliaBin "msg" "screenshot-region" ];
 
         # Volume / brightness / media all route through noctalia (msg IPC) so
         # they share one OSD and stay in sync with the shell:

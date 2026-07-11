@@ -13,8 +13,13 @@ session, as a **clean cut** — Hyprland is removed in the same change (NixOS
 generations are the rollback path). Target the **latest niri release, 26.04**
 (nixpkgs `pkgs.niri`), not niri-flake's older `niri-stable` (25.08).
 
-Guiding rule (owner decision): **where niri natively implements something we
-built a workaround for, adopt the native feature and delete the workaround.**
+Guiding rule (owner decision, refined post-implementation): feature priority is
+**Noctalia > compositor-native > custom workaround** — a Noctalia feature is
+WM-agnostic and survives compositor changes, so it beats a niri built-in; a
+niri built-in beats anything we hand-rolled. (Amendment 2026-07-11: screenshots
+therefore stay on Noctalia's tool, not niri's built-in UI — the "screenshots
+now native" line below is superseded. Alt-Tab stays niri-native: the old
+switcher was custom Quickshell, and Noctalia has no window switcher.)
 
 ## Owner decisions
 
