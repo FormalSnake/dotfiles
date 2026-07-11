@@ -27,18 +27,18 @@ in
   # not Quickshell-based, so this is the only Quickshell instance in the session).
   #
   # How it works:
-  #   • The es layout remaps left Alt to AltGr (lv3:lalt_switch), which Hyprland
-  #     sees as the MOD5 modifier. Two Hyprland binds (in hyprland.lua) fire the
-  #     `alttab:next` / `alttab:prev` global shortcuts on the FIRST press of
-  #     MOD5+Tab / MOD5+SHIFT+Tab.
+  #   • Hyprland binds (in hyprland.lua) fire the `alttab:next` / `alttab:prev`
+  #     global shortcuts on the FIRST press of Alt+Tab / Alt+SHIFT+Tab. They are
+  #     bound on both plain left Alt (ALT modifier) and the es layout's AltGr
+  #     (MOD5), so either key opens the switcher.
   #   • On that trigger this Quickshell instance fetches the window list
   #     (`hyprctl clients -j`, sorted by focusHistoryID → most-recently-used),
   #     pops an overlay layer-surface and takes EXCLUSIVE keyboard focus. From
   #     then on Quickshell itself handles every Tab / Shift+Tab (cycle), Escape
-  #     (cancel), Enter (commit) and — crucially — the RELEASE of AltGr, which
-  #     commits the selection (`hyprctl dispatch focuswindow address:…`). Because
-  #     the surface grabs the keyboard while AltGr is physically held, Wayland
-  #     delivers the release event to it.
+  #     (cancel), Enter (commit) and — crucially — the RELEASE of Alt or AltGr,
+  #     which commits the selection (`hyprctl dispatch focuswindow address:…`).
+  #     Because the surface grabs the keyboard while the modifier is physically
+  #     held, Wayland delivers the release event to it.
   #   • Each entry shows a live window preview via ScreencopyView, falling back
   #     to the app icon when no frame is available (e.g. windows on another,
   #     unrendered workspace).

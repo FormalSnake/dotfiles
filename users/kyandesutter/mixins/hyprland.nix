@@ -638,12 +638,15 @@ in
 
     hl.bind(mod .. " + Tab", hl.dsp.focus({ workspace = "previous" }))
 
-    -- Alt-Tab window switcher (Quickshell; config in alttab.nix). The es layout
-    -- remaps left Alt to AltGr (lv3:lalt_switch above), which Hyprland sees as the
-    -- MOD5 modifier. Hold MOD5 (left Alt) + Tab to open and cycle most-recently-
-    -- used windows; release MOD5 to focus the selection. SHIFT reverses. Hyprland
-    -- only fires the first press — once open, the Quickshell overlay grabs the
-    -- keyboard and handles further Tab / SHIFT+Tab / release itself.
+    -- Alt-Tab window switcher (Quickshell; config in alttab.nix). Bound on both
+    -- plain left Alt (ALT modifier) and the es layout's AltGr (MOD5), so either
+    -- key opens it. Hold Alt/AltGr + Tab to open and cycle most-recently-used
+    -- windows; release the held modifier to focus the selection. SHIFT reverses.
+    -- Hyprland only fires the first press — once open, the Quickshell overlay
+    -- grabs the keyboard and handles further Tab / SHIFT+Tab / release itself
+    -- (its Keys.onReleased commits on either Alt or AltGr).
+    hl.bind("ALT + Tab", hl.dsp.global("alttab:next"))
+    hl.bind("ALT + SHIFT + Tab", hl.dsp.global("alttab:prev"))
     hl.bind("MOD5 + Tab", hl.dsp.global("alttab:next"))
     hl.bind("MOD5 + SHIFT + Tab", hl.dsp.global("alttab:prev"))
 
