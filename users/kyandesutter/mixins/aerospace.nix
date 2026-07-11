@@ -44,7 +44,7 @@ in
       key-mapping.preset = "qwerty";
 
       mode.main.binding = {
-        # Vim-style focus (matches hyprland SUPER+hjkl)
+        # Vim-style focus (matches the g815 niri SUPER+hjkl)
         alt-h = "focus left";
         alt-j = "focus down";
         alt-k = "focus up";
@@ -55,13 +55,13 @@ in
         alt-shift-f = "fullscreen";
         alt-v = "layout floating tiling";
 
-        # Vim-style move (matches hyprland SUPER+SHIFT+hjkl)
+        # Vim-style move (matches the g815 niri SUPER+SHIFT+hjkl)
         alt-shift-h = "move left";
         alt-shift-j = "move down";
         alt-shift-k = "move up";
         alt-shift-l = "move right";
 
-        # Resize (matches hyprland SUPER+SHIFT+=/-)
+        # Resize (matches the g815 niri column-width binds)
         alt-shift-equal = "resize smart +50";
         alt-shift-minus = "resize smart -50";
 

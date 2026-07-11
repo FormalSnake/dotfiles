@@ -44,7 +44,7 @@
     #   i915 0000:00:02.0: [drm] PHY A failed to request refclk
     # on every attempt to bring the panel back — the eDP PHY can't get its
     # reference clock, so no image, even though the connector reports
-    # connected/enabled/dpms On. No compositor (hyprctl) command recovers it;
+    # connected/enabled/dpms On. No compositor IPC command recovers it (tested via hyprctl at the time);
     # only a full GPU re-init (reboot / suspend-resume) does. The cause is i915
     # display power management gating the PHY refclk over idle:
     #   • enable_dc=0  — keep the display power wells up (don't enter DC5/DC6),

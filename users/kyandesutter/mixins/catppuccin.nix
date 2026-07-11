@@ -8,8 +8,9 @@
   # docs/superpowers/specs/2026-06-19-noctalia-dynamic-theming-design.md). It now
   # only feeds the consumers that explicitly reference `config.catppuccin.*` and
   # genuinely can't be dynamic: SDDM (pre-login), Herdr (build-time theme name),
-  # the Neovim pre-palette fallback colourscheme, and the alt-tab switcher's
-  # build-time fallback (mixins/alttab.nix).
+  # and the Neovim pre-palette fallback colourscheme. (niri's pre-palette border
+  # fallback is a seeded copy of the Noctalia fragment — see mixins/niri.nix —
+  # with Mocha values baked in, not a `config.catppuccin.*` consumer.)
   catppuccin = {
     enable = true;
     autoEnable = false;

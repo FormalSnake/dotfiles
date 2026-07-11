@@ -13,7 +13,7 @@ let
   #               (asus-nb-wmi): 2 == USB-C PD. None of these can feed Performance,
   #               so they all take the balanced / dGPU-off / no-relog path.
   #   battery   — nothing plugged.
-  # Both the system reconciler (below) and the user session (hyprland.nix) key
+  # Both the system reconciler (below) and the user session (niri.nix) key
   # every power decision off this one classifier.
   powerSource = pkgs.writeShellApplication {
     name = "power-source";
@@ -48,7 +48,7 @@ let
   #        switch (asus-nb-wmi/dgpu_disable → ACPI _PR3) to cut power. If the
   #        device stays held (a charging-booted session lists it as a secondary
   #        head), give up QUIETLY — the consent popup (gpu-relog-prompt,
-  #        users/kyandesutter/mixins/hyprland.nix) is the only path that frees
+  #        users/kyandesutter/mixins/niri.nix) is the only path that frees
   #        it, and the next dgpu-reconcile run (login kick / power event /
   #        resume) retries.
   #   on:  un-flip the kill switch, rescan PCI, reload the driver.
@@ -261,7 +261,7 @@ in
 {
   config = lib.mkIf config.kyan.asus.enable {
     # power-profiles-daemon: the profile backend the noctalia bar reads and
-    # writes. The bare Hyprland session doesn't pull it in (no desktop manager
+    # writes. The bare niri session doesn't pull it in (no desktop manager
     # does), so without it the bar is stuck showing a static "Balanced" it
     # can't change. Coexists with asusd, which keeps Aura/fan/charge-limit
     # duties; PPD owns the platform profile (the kernel asus-wmi interface).
@@ -377,7 +377,7 @@ in
     };
 
     # power-source is the shared classifier; expose it on PATH so the user
-    # session (env-hyprland, power-tune) can call it via /run/current-system.
+    # session (power-tune) can call it via /run/current-system.
     environment.systemPackages = [ powerSource ];
 
     # Re-run the reconciler on any power-source change. We watch BOTH the ACPI
