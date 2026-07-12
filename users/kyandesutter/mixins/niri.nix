@@ -2,6 +2,19 @@
 let
   noctaliaBin = "${config.programs.noctalia.package}/bin/noctalia";
 
+  # Workspace pill labels: role → Nerd Font glyph + short name, mirroring the
+  # macOS aerospace workspace names (see mixins/aerospace.nix). niri-flake orders
+  # workspaces by attr *key* (kept "1"–"9" below); the workspace `name` is what
+  # the Mod+N binds and the window-rules target and what Noctalia renders on each
+  # pill (widget.workspaces.display = "name", max_label_chars in noctalia.nix).
+  # Glyph and name are joined by an EM SPACE (\u2003), not an ASCII space —
+  # Noctalia collapses ASCII/nbsp whitespace in the label but preserves it.
+  # Written as JSON \u escapes so the private-use glyphs survive editing; glyphs
+  # verified present in GeistMono Nerd Font 3.4.0.
+  wsName = builtins.fromJSON ''
+    {"1": "\uf0ac\u2003web", "2": "\uf120\u2003term", "3": "\uf121\u2003dev", "4": "\uf086\u2003chat", "5": "\uf0b1\u2003prod", "6": "\uf02f\u2003print", "7": "\udb81\udea9\u2003ai", "8": "\uf001\u2003media", "9": "\uf11b\u2003game"}
+  '';
+
   # Power-source-aware refresh rate + keyboard aura + relog consent prompt (see
   # systemd.user.services.power-tune).
   #
@@ -261,8 +274,11 @@ in
       # rest on the desk monitor (HDMI-A-1). When HDMI-A-1 is absent niri moves
       # its workspaces to eDP-1 and back on reconnect.
       workspaces = lib.listToAttrs (map (i: {
-        name = toString i;
-        value.open-on-output = if i == 4 || i == 8 then "eDP-1" else "HDMI-A-1";
+        name = toString i;                            # attr key → sort/position 1–9
+        value = {
+          name = wsName.${toString i};                # workspace name → pill label + ref
+          open-on-output = if i == 4 || i == 8 then "eDP-1" else "HDMI-A-1";
+        };
       }) (lib.range 1 9));
 
       # — Keybinds (mirror the macOS/aerospace muscle memory, SUPER as mod) —
@@ -335,25 +351,26 @@ in
         "XF86AudioPrev".action.spawn = [ noctaliaBin "msg" "media" "previous" ];
         "XF86AudioStop".action.spawn = [ noctaliaBin "msg" "media" "stop" ];
       } // (lib.listToAttrs (lib.concatMap (i: [
-        # Workspaces by NAME ("1"–"9", declared above) — a string arg targets
-        # the named workspace, an int would target the per-output index.
-        { name = "Mod+${toString i}"; value.action.focus-workspace = toString i; }
-        { name = "Mod+Shift+${toString i}"; value.action.move-column-to-workspace = toString i; }
+        # Workspaces by NAME (the glyphs in wsName, declared above) — a string
+        # arg targets the named workspace, an int would target the per-output
+        # index. Mod+N still maps to the workspace keyed N (order preserved).
+        { name = "Mod+${toString i}"; value.action.focus-workspace = wsName.${toString i}; }
+        { name = "Mod+Shift+${toString i}"; value.action.move-column-to-workspace = wsName.${toString i}; }
       ]) (lib.range 1 9)));
 
       # — Window → workspace rules (Linux app classes; niri matches app-id).
       # No terminal rule: ghostty opens on the active workspace.
       window-rules = [
-        { matches = [ { app-id = "^([Hh]elium)$"; } ]; open-on-workspace = "1"; } # web
-        { matches = [ { app-id = "^([Cc]ode|[Zz]ed|dev.zed.Zed)$"; } ]; open-on-workspace = "3"; } # development
-        { matches = [ { app-id = "^([Ss]lack|WhatsApp|[Ee]quibop|discord|[Bb]eeper|[Bb]lue[Bb]ubbles)$"; } ]; open-on-workspace = "4"; } # communication
+        { matches = [ { app-id = "^([Hh]elium)$"; } ]; open-on-workspace = wsName."1"; } # web
+        { matches = [ { app-id = "^([Cc]ode|[Zz]ed|dev.zed.Zed)$"; } ]; open-on-workspace = wsName."3"; } # development
+        { matches = [ { app-id = "^([Ss]lack|WhatsApp|[Ee]quibop|discord|[Bb]eeper|[Bb]lue[Bb]ubbles)$"; } ]; open-on-workspace = wsName."4"; } # communication
         # Beeper/BlueBubbles (Electron) map their main window floating, so they
         # never tile. Force them back into the layout.
         { matches = [ { app-id = "^([Bb]eeper)$"; } ]; open-floating = false; }
         { matches = [ { app-id = "^([Bb]lue[Bb]ubbles)$"; } ]; open-floating = false; }
-        { matches = [ { app-id = "^([Cc]laude)$"; } ]; open-on-workspace = "7"; } # ai
-        { matches = [ { app-id = "^([Ss]potify)$"; } ]; open-on-workspace = "8"; } # media
-        { matches = [ { app-id = "^([Ss]team|steam)$"; } ]; open-on-workspace = "9"; } # gaming
+        { matches = [ { app-id = "^([Cc]laude)$"; } ]; open-on-workspace = wsName."7"; } # ai
+        { matches = [ { app-id = "^([Ss]potify)$"; } ]; open-on-workspace = wsName."8"; } # media
+        { matches = [ { app-id = "^([Ss]team|steam)$"; } ]; open-on-workspace = wsName."9"; } # gaming
         # Chromium/helium auxiliary popups float instead of wrecking the layout
         # (niri has no cross-workspace pin — accepted loss vs Hyprland's `pin`).
         # Video PiP: class is empty, title "Picture in picture" (spaces) — the

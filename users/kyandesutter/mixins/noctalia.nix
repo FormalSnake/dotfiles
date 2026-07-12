@@ -387,6 +387,17 @@ in
       # ones. Hide the empty pills to get that behaviour back.
       widget.workspaces.hide_when_empty = true;
 
+      # Label pills with the niri workspace *name* ("1"–"9") rather than the
+      # per-output positional index (Noctalia's "id" default). Since named "4"
+      # and "8" are pinned to eDP-1, HDMI-A-1's remaining pills would otherwise
+      # read 1–7, and Mod+7 (which targets the *named* "7") would land on the
+      # pill drawn at position 6.
+      widget.workspaces.display = "name";
+
+      # The names are "<glyph> <short label>" (see wsName in mixins/niri.nix), so
+      # lift Noctalia's default 1-char cap or the pills truncate to just the glyph.
+      widget.workspaces.max_label_chars = 10;
+
       # Dynamic, wallpaper-derived palette is now the single source of truth for
       # the desktop's colours (replacing the static Catppuccin builtin). On every
       # wallpaper pick or light/dark flip, Noctalia regenerates a Material Design 3
