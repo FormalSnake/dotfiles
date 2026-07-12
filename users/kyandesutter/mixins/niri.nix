@@ -601,6 +601,14 @@ in
   #   • gtk-application-prefer-dark-theme in settings.ini — the X11/XWayland
   #     fallback (no xsettingsd here). noctalia's apply.sh only touches
   #     gtk.css + gsettings/dconf, never settings.ini.
+  #   • gtk{3,4}.extraCss — own gtk.css declaratively so it holds ONLY the
+  #     noctalia import. Noctalia writes noctalia.css but never gtk.css, so an
+  #     unmanaged gtk.css silently accumulates cruft: stale @define-color blocks
+  #     from old theming tools end up ABOVE the import, and GTK requires @import
+  #     before any other rule — so it drops the import, noctalia.css never loads,
+  #     and GTK3 apps (Helium via "Use GTK") render un-themed adw-gtk3-dark.
+  #     Managing the file keeps the import valid and first. (GTK4/libadwaita read
+  #     the accent from the portal, so they were unaffected either way.)
   gtk = {
     enable = true;
     iconTheme = {
@@ -609,5 +617,7 @@ in
     };
     gtk3.extraConfig.gtk-application-prefer-dark-theme = 1;
     gtk4.extraConfig.gtk-application-prefer-dark-theme = 1;
+    gtk3.extraCss = ''@import url("noctalia.css");'';
+    gtk4.extraCss = ''@import url("noctalia.css");'';
   };
 }
