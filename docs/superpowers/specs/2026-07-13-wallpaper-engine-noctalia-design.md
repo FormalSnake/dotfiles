@@ -58,38 +58,50 @@ scene's own `preview.*` from
 matugen-samples that still, so the **theming pipeline is unchanged**. Any
 wallpaper without the `we-` prefix behaves exactly as today.
 
-A small helper `we-add <workshopid>` copies a scene's `preview.*` into the
-wallpapers directory with the correct `we-<id>` name (quality-of-life; the same
-result can be achieved by hand).
+Three helper commands (scripts on `PATH`, usable from fish or any shell):
+
+- `we-list [search]` — list installed scenes (`id  type  title`), optionally
+  filtered by title substring. This is how you find an id.
+- `we-set <id> [fps]` — apply a scene to **every connected output** in one
+  command: it ensures the still is in the picker set, optionally writes the
+  engine fps, then points each niri output at it via `noctalia msg
+  wallpaper-set`.
+- `we-add <id> [light|dark]` — copy a scene's preview into the picker set
+  without applying it (for populating the light set, etc.).
 
 ### 3. Selection hook
 
 Append one call to Noctalia's existing `wallpaper_changed` hook (alongside
-`flexokiScheme`). It parses `$NOCTALIA_WALLPAPER_PATH`:
+`flexokiScheme`). It parses `$NOCTALIA_WALLPAPER_PATH` **per output**:
 
-- basename matches `we-<id>.*` → write `id=<id>` and
-  `connector=$NOCTALIA_WALLPAPER_CONNECTOR` to `~/.cache/wallpaper-engine/state`.
-- anything else → clear that state file.
+- basename matches `we-<id>.*` → write `<id>` to
+  `~/.cache/wallpaper-engine/outputs/$NOCTALIA_WALLPAPER_CONNECTOR`.
+- anything else → remove that output's file.
 
-Writing the state file is the only action; the reconciler (below) reacts to it.
+Per-output state (not a single global file) is what makes multi-monitor work:
+each connector can independently hold an animated scene or a plain wallpaper.
 
 ### 4. Reconciler daemon
 
 A `systemd.user.service` bound to `graphical-session.target` (same pattern as
-`users/kyandesutter/mixins/autostart.nix`). It `inotifywait`-watches two inputs:
+`users/kyandesutter/mixins/autostart.nix`). It `inotifywait -r`-watches two
+inputs:
 
-- `~/.cache/wallpaper-engine/state` — the current selection.
+- `~/.cache/wallpaper-engine/` — the per-output selection dir plus the optional
+  `fps` file (default 60; 30 looks choppy on the 240 Hz panel, and we only ever
+  run on AC so the extra cost is acceptable).
 - `/run/power/state` — published by `power-reconcile`; one lowercase word,
   `ac` / `powerbank` / `battery`.
 
 It enforces a single rule on every change:
 
-> **the engine runs iff a scene is selected AND `/run/power/state` != `battery`.**
+> **one engine spans every output with a scene selected, iff not on battery.**
 
-On each event it reconciles to that desired state: launch
-`linux-wallpaperengine` on the selected connector, or kill the running instance.
-Single-instance — it tracks the child PID and kills the previous engine before
-relaunching on a selection change.
+On each event it rebuilds the launch command from all
+`outputs/<connector>` files (`--screen-root C --bg ID` per output) plus the fps,
+compares a stable signature against the running one, and restarts the single
+engine only when the desired set actually changed (so hover-preview bursts and
+no-op events don't thrash the GL engine).
 
 This is a **new, independent reader** of `/run/power/state` — purely additive,
 touching none of the load-bearing power services in

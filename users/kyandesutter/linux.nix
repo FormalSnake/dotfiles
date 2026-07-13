@@ -11,6 +11,7 @@
     ./mixins/airpods.nix
     ./mixins/easyeffects.nix
     ./mixins/noctalia.nix
+    ./mixins/wallpaper-engine.nix
     ./mixins/beeper.nix
     ./mixins/helium.nix
     ./mixins/spicetify.nix

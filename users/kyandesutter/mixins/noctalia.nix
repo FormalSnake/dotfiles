@@ -621,8 +621,9 @@ in
           "${pkgs.libnotify}/bin/notify-send 'Noctalia' \"Theme: $NOCTALIA_THEME_MODE\"";
         # flexoki-scheme flips the colour source per wallpaper (Flexoki-named
         # wallpapers → hardcoded Flexoki palette, everything else → matugen); see
-        # the flexokiScheme note in the let block above.
-        wallpaper_changed = "${flexokiScheme}/bin/flexoki-scheme; ${pkgs.libnotify}/bin/notify-send 'Noctalia' 'Wallpaper changed'";
+        # the flexokiScheme note in the let block above. wallpaper-engine-select
+        # publishes the picked scene for the WE reconciler (mixins/wallpaper-engine.nix).
+        wallpaper_changed = "${flexokiScheme}/bin/flexoki-scheme; ${config.kyan.wallpaperEngine.selectCommand}; ${pkgs.libnotify}/bin/notify-send 'Noctalia' 'Wallpaper changed'";
       };
     };
   };

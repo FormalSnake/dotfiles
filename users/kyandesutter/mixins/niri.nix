@@ -383,6 +383,10 @@ in
         { matches = [ { app-id = "^(org.gnome.NautilusPreviewer)$"; } ]; open-floating = true; }
         # Noctalia's own settings window.
         { matches = [ { app-id = "^dev\\.noctalia\\.Noctalia$"; } ]; open-floating = true; }
+        # Ever-so-slight transparency on every window (empty matches = match all,
+        # applied last so it wins). niri has no blur (unimplemented as of 26.04),
+        # so this is opacity only — semitransparent clients compound it further.
+        { opacity = 0.96; }
       ];
 
       # Noctalia's wallpaper/backdrop layers render inside the overview
