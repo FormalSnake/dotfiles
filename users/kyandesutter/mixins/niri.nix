@@ -216,6 +216,57 @@ let
       niri msg action quit --skip-confirmation
     '';
   };
+
+  # Render-GPU selection (see systemd.user.services.niri-render-device).
+  #
+  # niri renders everything on ONE primary GPU (chosen once at startup, no
+  # runtime switch) and copies to secondary GPUs for scanout. The desk monitor
+  # (HDMI-A-1) is wired to the dGPU, so the iGPU-primary default renders every
+  # HDMI frame on the iGPU and copies it iGPU→dGPU — while the iGPU also drives
+  # the 240Hz internal panel, so it saturates and both outputs judder. When a
+  # monitor is connected on the dGPU we instead make the dGPU niri's render
+  # device: the RTX renders everything and copies the cheap direction for eDP.
+  # Off-dock we stay iGPU-primary so the power model can still power the dGPU
+  # down (a dGPU-primary session would hold it on forever, even on battery).
+  #
+  # render-drm-device is NOT re-read on `load-config-file` (niri reads it once at
+  # startup), so this runs as a oneshot BEFORE niri.service and writes the
+  # debug{} fragment niri include's. It points niri at the dGPU ONLY when the
+  # render node actually exists (nvidia loaded) AND a connector reports
+  # `connected` — never at a missing device, which would break login. Docking
+  # mid-session needs a manual relog to take effect (niri has no runtime
+  # render-GPU switch); login-while-docked converges automatically.
+  renderDeviceSelect = pkgs.writeShellApplication {
+    name = "niri-render-device-select";
+    runtimeInputs = with pkgs; [ coreutils ];
+    text = ''
+      frag_dir="''${XDG_CACHE_HOME:-$HOME/.cache}/niri"
+      frag="$frag_dir/render-device.kdl"
+      mkdir -p "$frag_dir"
+
+      # Stable dGPU nodes (survive renderD/card number reshuffles). The render
+      # node exists only while the nvidia modules are loaded. Same 02:00.0
+      # address the rest of the power machinery uses (power.nix, gpu-relog-prompt).
+      render="/dev/dri/by-path/pci-0000:02:00.0-render"
+      card="$(readlink -f /dev/dri/by-path/pci-0000:02:00.0-card 2>/dev/null || true)"
+
+      connected=
+      if [ -e "$render" ] && [ -n "$card" ]; then
+        for s in "/sys/class/drm/''${card##*/}"-*/status; do
+          [ -e "$s" ] || continue
+          if [ "$(cat "$s" 2>/dev/null)" = connected ]; then connected=1; break; fi
+        done
+      fi
+
+      if [ -n "$connected" ]; then
+        printf 'debug {\n    render-drm-device "%s"\n}\n' "$render" > "$frag.tmp"
+      else
+        # Empty fragment → niri keeps its iGPU-primary default.
+        : > "$frag.tmp"
+      fi
+      mv "$frag.tmp" "$frag"
+    '';
+  };
 in
 {
   # niri is enabled at the system level (programs.niri in
@@ -453,6 +504,10 @@ in
         // optional=true: a missing fragment logs a warning instead of failing.
         include optional=true "~/.cache/power-tune/edp-refresh.kdl"
         include optional=true "~/.cache/noctalia/niri-border.kdl"
+        // Render GPU: dGPU (debug{render-drm-device}) when docked, empty for
+        // the iGPU default. Rewritten before every niri start by
+        // niri-render-device.service (mixins/niri.nix).
+        include optional=true "~/.cache/niri/render-device.kdl"
 
         // Native MRU Alt-Tab switcher (replaces the old Quickshell alttab).
         // Hold Alt: Tab cycles forward, Shift+Tab back; release commits,
@@ -523,6 +578,12 @@ in
         run mkdir -p "$HOME/.cache/noctalia"
         run cp --no-preserve=mode ${borderSeed} "$HOME/.cache/noctalia/niri-border.kdl"
       fi
+      # Empty render-device fragment → safe iGPU default until
+      # niri-render-device.service rewrites it before the first niri start.
+      if [ ! -e "$HOME/.cache/niri/render-device.kdl" ]; then
+        run mkdir -p "$HOME/.cache/niri"
+        run touch "$HOME/.cache/niri/render-device.kdl"
+      fi
     '';
 
   # Power automation (see powerTune in the let block): refresh rate, keyboard
@@ -542,6 +603,21 @@ in
       RestartSec = 3;
     };
     Install.WantedBy = [ "graphical-session.target" ];
+  };
+
+  # Pick niri's render GPU before niri starts (see renderDeviceSelect in the let
+  # block). Oneshot ordered Before niri.service and pulled in by it, so niri
+  # reads a render-device fragment that already matches the live dock state.
+  systemd.user.services.niri-render-device = {
+    Unit = {
+      Description = "Select niri's render GPU (dGPU when docked, else iGPU)";
+      Before = [ "niri.service" ];
+    };
+    Service = {
+      Type = "oneshot";
+      ExecStart = "${renderDeviceSelect}/bin/niri-render-device-select";
+    };
+    Install.WantedBy = [ "niri.service" ];
   };
 
   # GUI polkit auth agent (generic Qt agent; replaces hyprpolkitagent, which
