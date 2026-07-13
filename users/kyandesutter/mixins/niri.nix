@@ -383,10 +383,6 @@ in
         { matches = [ { app-id = "^(org.gnome.NautilusPreviewer)$"; } ]; open-floating = true; }
         # Noctalia's own settings window.
         { matches = [ { app-id = "^dev\\.noctalia\\.Noctalia$"; } ]; open-floating = true; }
-        # Ever-so-slight transparency on every window (empty matches = match all,
-        # applied last so it wins). niri has no blur (unimplemented as of 26.04),
-        # so this is opacity only — semitransparent clients compound it further.
-        { opacity = 0.96; }
       ];
 
       # Noctalia's wallpaper/backdrop layers render inside the overview
@@ -468,6 +464,20 @@ in
                 Alt+Tab       { next-window; }
                 Alt+Shift+Tab { previous-window; }
                 Alt+grave     { next-window filter="app-id"; }
+            }
+        }
+
+        // Ever-so-slight transparency + backdrop blur on every window. No match
+        // clause = matches all; it's the last window-rule so its opacity wins.
+        // background-effect/blur landed in niri 26.04 and the pinned niri-flake
+        // input has no typed option for it yet, so it's raw KDL here (same
+        // reason as recent-windows/include above). blur only shows through a
+        // semitransparent window, which the opacity provides; `blur true` uses
+        // niri's default radius (no per-rule radius knob is exposed).
+        window-rule {
+            opacity 0.96
+            background-effect {
+                blur true
             }
         }
       '';

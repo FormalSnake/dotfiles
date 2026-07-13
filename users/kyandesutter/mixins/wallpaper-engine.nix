@@ -239,7 +239,10 @@ in
         Description = "Wallpaper Engine reconciler (animated wallpaper, power-aware)";
         PartOf = [ "graphical-session.target" ];
         After = [ "graphical-session.target" ];
-        X-SwitchMethod = "keep-old";
+        # No keep-old: on a rebuild that changes the reconciler, let it restart —
+        # it re-reads outputs/ on startup and relaunches the current scene, so a
+        # logic change takes effect immediately instead of needing a manual
+        # `systemctl --user restart`.
       };
       Install.WantedBy = [ "graphical-session.target" ];
       Service = {
