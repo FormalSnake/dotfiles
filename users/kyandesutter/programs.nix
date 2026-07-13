@@ -66,6 +66,8 @@
       # — for seeing/clicking GUI & permission dialogs on the remote work
       # server. See docs/remote-server.md.
       remmina
+      # TUI for managing bluetooth (bluez) — Linux-only.
+      bluetui
     ];
 
   programs = {

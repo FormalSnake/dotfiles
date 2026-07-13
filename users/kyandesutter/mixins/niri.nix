@@ -398,11 +398,12 @@ in
       # fallback below). Structural layout knobs that never change with the
       # palette live here in the typed settings instead.
       #
-      # Windows open at half the working area instead of their own requested
-      # width (Spotify/Electron remember a full-bleed size and would swallow
-      # the side gaps); Mod+F (maximize-column) gives full width with margins,
-      # Mod+R cycles the presets.
-      layout.default-column-width.proportion = 0.5;
+      # Empty {} means each window picks its own initial width. This is NOT the
+      # same as deleting the line: with no default-column-width at all, niri
+      # falls back to its built-in `proportion 0.5` (half the output), so the
+      # empty node is load-bearing. Mod+F (maximize-column) gives full width with
+      # margins, Mod+R cycles the presets.
+      layout.default-column-width = { };
 
       environment = {
         # Qt platform theme (qt6ct) so Qt apps follow Noctalia's palette (see
