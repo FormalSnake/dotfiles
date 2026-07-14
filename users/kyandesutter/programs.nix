@@ -53,7 +53,6 @@
       mas
       swiftformat
       swiftlint
-      terminal-notifier
       xcbeautify
       xcodegen
     ]

@@ -22,12 +22,12 @@ in
       enable-normalization-flatten-containers = true;
       enable-normalization-opposite-orientation-for-nested-containers = true;
 
-      # Keep floating Helium PiP and the Wispr Flow pill on the focused workspace
+      # Keep the floating Helium PiP on the focused workspace
       exec-on-workspace-change = [
         "/bin/bash"
         "-c"
         ''
-          for bundle in net.imput.helium com.electron.wispr-flow; do
+          for bundle in net.imput.helium; do
             ${aerospaceBin} list-windows --monitor all --app-bundle-id "$bundle" --format '%{window-id} %{window-layout}' | awk '$2 == "floating" { print $1 }' | xargs -I{} ${aerospaceBin} move-node-to-workspace --window-id {} "$AEROSPACE_FOCUSED_WORKSPACE"
           done
         ''
@@ -111,25 +111,17 @@ in
         (workspaceFor "com.tinyspeck.slackmacgui" "communication")
         (workspaceFor "net.whatsapp.WhatsApp" "communication")
         { "if".app-id = "com.apple.MobileSMS"; run = [ "move-node-to-workspace communication" ]; }
-        (workspaceFor "notion.id" "productivity")
         (workspaceFor "com.cron.electron" "productivity")
-        (workspaceFor "com.figma.Desktop" "productivity")
         (workspaceFor "co.ambercreative.nucleo" "productivity")
         (workspaceFor "es.canarycoders.canarybrowser" "productivity")
-        (workspaceFor "com.bambulab.bambu-studio" "print")
         (workspaceFor "com.google.Chrome" "development")
         (workspaceFor "com.google.chrome.for.testing" "development")
-        (workspaceFor "com.anthropic.Claude" "ai")
-        (workspaceFor "com.anthropic.claudefordesktop" "ai")
         (workspaceFor "ai.perplexity.comet" "ai")
         (workspaceFor "com.apple.Music" "media")
         (workspaceFor "com.apple.TV" "media")
         (workspaceFor "sh.cider.genten.mac" "media")
-        (workspaceFor "com.spotify.client" "media")
-        (workspaceFor "com.valvesoftware.steam" "gaming")
         (workspaceFor "dev.vencord.vesktop" "gaming")
         (workspaceFor "com.hnc.Discord" "gaming")
-        (workspaceFor "org.equicord.equibop" "gaming")
         (workspaceFor "com.nordvpn.macos" "productivity")
         (workspaceFor "com.apple.Notes" "productivity")
         (workspaceFor "com.apple.iCal" "productivity")
@@ -150,13 +142,8 @@ in
           };
           run = [ "layout floating" ];
         }
-        # Wispr Flow pill: always float, kept on the focused workspace by exec-on-workspace-change
-        { "if".app-id = "com.electron.wispr-flow"; run = [ "layout floating" ]; }
         (workspaceFor "net.imput.helium" "web")
-        (workspaceFor "md.obsidian" "productivity")
-        (workspaceFor "com.automattic.beeper.desktop" "communication")
         (workspaceFor "com.electron.dockerdesktop" "development")
-        (workspaceFor "com.github.Electron" "development")
       ];
 
       workspace-to-monitor-force-assignment = {

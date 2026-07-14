@@ -21,7 +21,6 @@
     ./mixins/fastfetch.nix
     ./mixins/herdr.nix
     ./mixins/fast.nix
-    ./mixins/godot.nix
   ];
 
   home = {

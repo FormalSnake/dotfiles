@@ -23,8 +23,8 @@
         style = "window";
         showsClicks = true;
       };
-      # Stage Manager — replaces aerospace tiling on this dev-host setup.
-      "com.apple.WindowManager".GloballyEnabled = true;
+      # Stage Manager — disabled; using plain macOS window management.
+      "com.apple.WindowManager".GloballyEnabled = false;
     };
 
     dock = {

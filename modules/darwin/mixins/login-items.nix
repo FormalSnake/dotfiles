@@ -10,13 +10,11 @@ let
   # bombarding you with windows on login.
   apps = [
     # aerospace is launched via programs.aerospace.launchd (currently disabled — see users/kyandesutter/mixins/aerospace.nix)
-    { id = "linearmouse";   path = "/Applications/LinearMouse.app"; }
     { id = "nordvpn";       path = "/Applications/NordVPN.app"; }
     { id = "raycast-beta";  path = "/Applications/Raycast Beta.app"; }
     { id = "aldente";       path = "/Applications/AlDente.app"; }
     { id = "orbstack";      path = "/Applications/OrbStack.app"; }
     { id = "betterdisplay"; path = "/Applications/BetterDisplay.app"; }
-    { id = "mos";           path = "/Applications/Mos.app"; }
   ];
 
   mkLoginAgent = { id, path }:

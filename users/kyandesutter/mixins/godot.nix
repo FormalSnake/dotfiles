@@ -3,9 +3,10 @@
   # Godot 4 with C#/.NET support.
   #
   # `godot-mono` is the Mono/.NET editor build (binary on PATH: `godot4-mono`,
-  # also `godot4.6-mono`). It is available on both x86_64-linux and
-  # aarch64-darwin, so this mixin is cross-platform and imported from the base
-  # home module — both hosts stay in sync.
+  # also `godot4.6-mono`). Godot is only used on the g815, and there is no
+  # aarch64-darwin binary cache for `godot-mono` (the macbook would compile the
+  # whole editor from source), so this mixin is Linux-only — imported from
+  # linux.nix, not the cross-platform base.
   #
   # `dotnet-sdk_8` is the SDK Godot's C# project template targets (net8.0); it's
   # required to build the C# assemblies the editor compiles. Bump alongside

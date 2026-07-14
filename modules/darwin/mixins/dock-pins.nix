@@ -12,13 +12,8 @@ let
     "/Applications/Helium.app"
     "/Applications/Ghostty.app"
     "/Applications/OrbStack.app"
-    "/Applications/Obsidian.app"
-    "/Applications/Claude.app"
     "/System/Applications/Calendar.app"
-    "/Applications/Equibop.app"
-    "/Applications/Beeper Desktop.app"
     "/System/Applications/Messages.app"
-    "/Applications/Spotify.app"
   ];
 
   # HM / nix-installed apps — resolved dynamically against the current HM

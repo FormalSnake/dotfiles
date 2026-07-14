@@ -19,6 +19,7 @@
     ./mixins/lumen.nix
     ./mixins/nordvpn.nix
     ./mixins/webapps.nix
+    ./mixins/godot.nix
   ];
 
   # Standalone desktop web apps (see mixins/webapps.nix). Bare URL → auto
