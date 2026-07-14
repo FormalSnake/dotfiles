@@ -1,31 +1,6 @@
-{ config, lib, pkgs, inputs, ... }:
+{ config, lib, pkgs, ... }:
 let
   cfg = config.kyan.gaming;
-
-  # — Millennium (patched build) —
-  # Millennium's `bun-deps` fixed-output derivation pins a hash that our `bun`
-  # doesn't reproduce (bun install isn't byte-reproducible across bun versions),
-  # and Millennium's cachix doesn't carry the path either — so a from-source build
-  # fails with a hash mismatch. Patch that one hash, in a copy of Millennium's nix
-  # dir, to the value our bun actually produces, then build the lib + steam from
-  # the copy. `${inputs.millennium}` already points at the packages/nix subdir
-  # (the input URL has ?dir=packages/nix), so steam.nix/millennium.nix sit at its
-  # root. NOTE: if a future nixpkgs bumps `bun`, this hash may need updating — the
-  # rebuild error prints the new `got:` value to paste here.
-  millenniumBunDepsHash = "sha256-BEupNhAlkAELGGLj6/SVUjj101hBm4JzJH9N5i1qM6A=";
-  millenniumNix = pkgs.runCommand "millennium-nix-patched" { } ''
-    cp -r ${inputs.millennium} "$out"
-    chmod -R +w "$out"
-    ${pkgs.gnused}/bin/sed -i \
-      's|sha256-BEupNhAlkAELGGLj6/SVUjj101hBm4JzJH9N5i1qM6A=|${millenniumBunDepsHash}|' \
-      "$out/millennium.nix" || { echo 'millennium hash patch: pattern not found — update millenniumBunDepsHash'; exit 1; }
-  '';
-  # Build the millennium lib against our nixpkgs (so our bun → our patched hash);
-  # its own flake inputs supply the luajit/millennium sources.
-  millenniumLib = pkgs.callPackage "${millenniumNix}/millennium.nix" {
-    inputs = inputs.millennium.inputs;
-    millennium-src = inputs.millennium.inputs.millennium-src;
-  };
 
   # PRIME render-offload env + the launcher-wrapping helper are defined once in
   # ../mixins/nvidia.nix and exposed via an overlay (pkgs.nvidiaOffloadEnv /
@@ -309,19 +284,6 @@ in
       protontricks.enable = true;
       # Proton-GE shows up in Steam's compatibility-tool dropdown.
       extraCompatPackages = [ pkgs.proton-ge-bin ];
-      # Millennium-patched Steam (Steam Homebrew) — enables the client themes the
-      # Noctalia "steam" community template targets (Material-Theme skin; see
-      # users/kyandesutter/mixins/noctalia.nix). Built from the patched
-      # Millennium nix dir (see the let block) so the bun-deps hash matches.
-      # extraEnv is empty ON PURPOSE: the client runs on the iGPU (gaming lives
-      # on Windows), so autostarting Steam never wakes or holds the dGPU — a
-      # battery autostart racing a dgpu-power unload was the kernel-wedge path.
-      # A game that really wants the dGPU is launched via `nvidia-offload` or
-      # the gamescope session (both still offload-wrapped).
-      package = pkgs.callPackage "${millenniumNix}/steam.nix" {
-        millennium = millenniumLib;
-        extraEnv = { };
-      };
     };
 
     programs.gamescope = {

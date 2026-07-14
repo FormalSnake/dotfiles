@@ -440,16 +440,8 @@ in
           #           ([flavor] dark/light = "noctalia"). yazi is removed from the
           #           catppuccin static list (mixins/catppuccin.nix). Picks up on
           #           next yazi launch.
-          #   steam → writes a Matugen colour file into the Millennium "Material-
-          #           Theme" skin (~/.steam/.../skins/Material-Theme/.../matugen.css).
-          #           Millennium itself is now nix-managed (programs.steam.package =
-          #           millennium-steam, see modules/nixos/mixins/gaming.nix). One-time
-          #           manual setup remains (runtime, GUI): in Millennium install the
-          #           Material-Theme skin (ID ipYjqODds05KMcvh7QJn), pick the
-          #           "Matugen" colour variant, restart Steam. Harmless no-op until
-          #           then.
           enable_community_templates = true;
-          community_ids = [ "yazi" "steam" ];
+          community_ids = [ "yazi" ];
 
           user = {
             # ASUS Aura keyboard. Output file doubles as the "current accent" cache
