@@ -1,17 +1,20 @@
 diff --git a/src/shell/control_center/tabs/bluetooth_tab.cpp b/src/shell/control_center/tabs/bluetooth_tab.cpp
-index ec43fd9..98c1898 100644
 --- a/src/shell/control_center/tabs/bluetooth_tab.cpp
 +++ b/src/shell/control_center/tabs/bluetooth_tab.cpp
-@@ -582,7 +582,11 @@ std::string BluetoothTab::listKey() const {
-     key.push_back(':');
-     key += std::to_string(static_cast<int>(d.batteryPercent));
-     key.push_back(':');
--    key += std::to_string(static_cast<int>(d.rssi));
-+    // Only the rendered signal percent (Available rows) belongs in the key; raw
-+    // RSSI churn would otherwise rebuild the whole list, including connected rows.
-+    if (d.hasRssi && bucketFor(d) == DeviceBucket::Available) {
-+      key += std::to_string(signalPercentFromRssi(d.rssi));
-+    }
-     key.push_back('\n');
-   }
-   return key;
+@@ -672,8 +672,14 @@ void BluetoothTab::rebuildDeviceList(Renderer& renderer) {
+               if (m_service == nullptr) {
+                 return;
+               }
+-              m_service->stopDiscovery();
+-              m_service->startDiscovery();
++              // Discovery consumes power and reveals nearby devices. Make it an
++              // explicit toggle rather than leaving a manual scan running until
++              // the Bluetooth tab is closed.
++              if (m_service->state().discovering) {
++                m_service->stopDiscovery();
++              } else {
++                m_service->startDiscovery();
++              }
+             },
+         })
+     );

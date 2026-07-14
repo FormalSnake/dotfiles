@@ -155,7 +155,10 @@ in
     };
 
     # GNOME/GTK desktop plumbing the apps and file manager rely on:
-    #   • gvfs:  Nautilus trash, removable-drive / network mounting, MTP.
+    #   • gvfs + wsdd: Nautilus trash, removable-drive / network mounting, MTP,
+    #     and Windows-network discovery. gvfsd-network starts `wsdd` on its first
+    #     activation; without it, Files waits for the failed automount and logs
+    #     "Failed to spawn the wsdd daemon".
     #   • tumbler (+ ffmpegthumbnailer): thumbnails, including video, in Nautilus.
     #   • dconf: the settings backend every GTK/GNOME app reads and writes.
     services.gvfs.enable = true;
@@ -247,6 +250,7 @@ in
       grim
       slurp
       ffmpegthumbnailer # video thumbnails for tumbler/Nautilus
+      wsdd # GVFS's Windows-network discovery helper; prevents first-launch delay in Nautilus
     ];
   };
 }
