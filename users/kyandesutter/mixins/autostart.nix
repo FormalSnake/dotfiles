@@ -47,6 +47,9 @@ in
   # like every other app (the client is no longer offload-wrapped — gaming
   # lives on Windows; see programs.steam in modules/nixos/mixins/gaming.nix),
   # so it's safe to autostart on any power source and never touches the dGPU.
+  # Steam's Chromium UI repeatedly fails to create a drawable under niri/Xwayland
+  # (black but still interactive window). Software-render its UI only; this does
+  # not affect the renderer used by games or Proton.
   systemd.user.services.steam = {
     Unit = {
       Description = "Steam (minimized to tray)";
@@ -57,7 +60,7 @@ in
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {
       Type = "simple";
-      ExecStart = loginExec "steam -silent";
+      ExecStart = loginExec "steam -silent -cef-disable-gpu";
     };
   };
 
