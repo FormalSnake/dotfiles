@@ -7,6 +7,16 @@ let
   # OpenRGB owns it on AC (this service), aura-repaint owns it otherwise. asusd
   # keeps owning brightness, fans, battery limit and suspend flags throughout.
   # Start/stop is driven by power-tune (niri.nix) on AC/battery transitions.
+  # OpenRGB with a G815LP laptop-keyboard entry patched in: upstream matches ASUS
+  # laptops by DMI board name and has no "G815LP" row, so it early-returns and the
+  # device falls back to a 84-key layout (no numpad, no lightbar). The patch adds
+  # a G815LP device reusing the G733QR zones (keyboard w/ numpad + lid + lightbar);
+  # ASUS N-KEY LED indices are consistent across models. Pending upstream as a
+  # device request. overrideAttrs so the system's own OpenRGB is untouched.
+  openrgb = pkgs.openrgb.overrideAttrs (old: {
+    patches = (old.patches or [ ]) ++ [ ./g815lp-openrgb.patch ];
+  });
+
   pythonEnv = pkgs.python3.withPackages (ps: [
     ps.openrgb-python
     ps.pillow
@@ -19,7 +29,7 @@ let
   ambient = pkgs.writeShellApplication {
     name = "aura-ambient";
     runtimeInputs = [
-      pkgs.openrgb
+      openrgb
       pythonEnv
       pkgs.grim
       pkgs.niri
@@ -39,7 +49,7 @@ in
   config = lib.mkIf config.kyan.auraAmbient.enable {
     home.packages = [
       ambient
-      pkgs.openrgb # CLI for probing devices (`openrgb -l`)
+      openrgb # patched CLI for probing devices (`openrgb -l`)
     ];
 
     # No [Install] / WantedBy: power-tune (niri.nix) is the only thing that starts

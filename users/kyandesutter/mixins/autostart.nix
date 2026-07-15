@@ -211,6 +211,26 @@ in
     };
   };
 
+  # UxPlay AirPlay screen-mirroring receiver. Kept running so an iPhone can start
+  # mirroring at any time (it opens no window until a phone connects). `-p` pins
+  # its ports to the fixed legacy set that the firewall opens — bare `uxplay`
+  # picks random ports the firewall drops, so the phone connects but the stream
+  # never establishes. System-level package + avahi publishing + firewall ports
+  # live in ../../../modules/nixos/mixins/airplay.nix.
+  systemd.user.services.uxplay = {
+    Unit = {
+      Description = "UxPlay (AirPlay mirroring receiver)";
+      PartOf = [ "graphical-session.target" ];
+      After = [ "graphical-session.target" ];
+      "X-SwitchMethod" = "keep-old";
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
+    Service = {
+      Type = "simple";
+      ExecStart = loginExec "uxplay -p";
+    };
+  };
+
   # librepods — AirPods tray app (package in mixins/airpods.nix). DE-agnostic
   # tray app, so it lives here like the other login items. Absolute store path
   # (no loginExec needed); starts hidden to the tray, and its icon is picked up

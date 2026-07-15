@@ -1,0 +1,37 @@
+--- a/Controllers/AsusAuraCoreController/AsusAuraCoreLaptopController/AsusAuraCoreLaptopDevices.cpp	2026-07-15 11:53:00.514394458 +0100
++++ b/Controllers/AsusAuraCoreController/AsusAuraCoreLaptopController/AsusAuraCoreLaptopDevices.cpp	2026-07-15 11:53:18.920390403 +0100
+@@ -940,6 +940,26 @@
+     }
+ };
+ 
++/*-------------------------------------------------------------*\
++|  ASUS ROG Strix G18 (G815LP)                                  |
++|                                                               |
++|  Reuses the G733QR zones (Keyboard w/ numpad, Lid, Lightbar,  |
++|  Keystone): ASUS N-KEY per-LED indices are consistent across  |
++|  these laptops, so the shared indices map onto the G815LP.    |
++\*-------------------------------------------------------------*/
++static const aura_core_laptop_device g815lp_device =
++{
++    "G815LP",
++    {
++        &g733qr_keyboard_zone,
++        &g733qr_lid_zone,
++        &g733qr_lightbar_zone,
++        &g733qr_keystone_zone,
++        nullptr,
++        nullptr
++    }
++};
++
+ /*-------------------------------------------------------------------------*\
+ |  DEVICE MASTER LIST                                                       |
+ \*-------------------------------------------------------------------------*/
+@@ -954,6 +974,7 @@
+     &g713rw_device,
+     &g733qr_device,
+     &g814jv_device,
++    &g815lp_device,
+ };
+ 
+ const unsigned int AURA_CORE_LAPTOP_DEVICE_COUNT = (sizeof(aura_core_laptop_device_list_data) / sizeof(aura_core_laptop_device_list_data[ 0 ]));

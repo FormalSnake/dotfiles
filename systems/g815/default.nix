@@ -145,6 +145,10 @@
   # Sober — Roblox client for Linux (Flatpak-only, managed declaratively).
   kyan.sober.enable = true;
 
+  # AirPlay screen-mirroring receiver (UxPlay). Run `uxplay -p` to show an
+  # iPhone's screen in a window; share that window in meetings.
+  kyan.airplay.enable = true;
+
   home-manager.users.kyandesutter = {
     imports = [
       self.homeModules.kyandesutter

@@ -26,6 +26,7 @@
       ./mixins/asus.nix
       ./mixins/power.nix
       ./mixins/phone-integration.nix
+      ./mixins/airplay.nix
       ./mixins/flatpak.nix
       ./mixins/sober.nix
       ./mixins/nordvpn.nix
