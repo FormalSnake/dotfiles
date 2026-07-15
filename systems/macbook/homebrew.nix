@@ -12,6 +12,14 @@
       "terminal-notifier" # nixpkgs 26.11 crashes in the Darwin linker (SIGTRAP)
       "watchman" # nixpkgs build pulls folly, which fails to compile on darwin
       "wireguard-tools"
+      {
+        # Obsidian LiveSync backend. Binds 127.0.0.1:5984 (CouchDB default);
+        # exposed to the tailnet via `tailscale serve` only. Config/init:
+        # scripts/couchdb-livesync-init.sh (one-time).
+        name = "couchdb";
+        start_service = true;
+        restart_service = "changed";
+      }
     ];
 
     casks = [
@@ -38,6 +46,7 @@
       "google-chrome"
       "jump-desktop-connect"
       "markdown-preview"  # pluk-inc/tap
+      "obsidian"
       "syncthing-app"
     ];
 
