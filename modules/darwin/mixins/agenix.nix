@@ -25,6 +25,7 @@
         npm-registry-token = mkSecret "npm-registry-token";
         wstunnel-path-prefix = mkSecret "wstunnel-path-prefix";
         wstunnel-endpoint    = mkSecret "wstunnel-endpoint";
+        couchdb-admin        = mkSecret "couchdb-admin";
       };
   };
 }
