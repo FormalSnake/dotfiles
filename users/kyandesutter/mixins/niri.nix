@@ -129,8 +129,12 @@ let
     '';
   };
 
-  # Battery-only consent relog prompt — the ONLY path that frees the dGPU for
-  # power-off. niri hot-adds the dGPU's DRM device at runtime (a monitor on the
+  # Consent relog prompt — the ONLY relog path, for three situations: a
+  # mid-session dock (relog to render on the dGPU for full refresh), a
+  # mid-session undock (relog back to the iGPU), and battery drain from a held
+  # dGPU (relog to free it for power-off). All three need a session restart:
+  # niri reads render-drm-device once at startup, and it hot-adds the dGPU's
+  # DRM device at runtime (a monitor on the
   # powered dGPU just works — the old `monitor` relog branch is gone with
   # Hyprland), but niri also opens a renderer fd on every GPU it sees and has
   # no release IPC. So once the dGPU has appeared in this session,
@@ -158,6 +162,20 @@ let
       # exists while the nvidia modules are loaded) + no monitor connected on
       # any of its connectors → a relog would let dgpu-reconcile power it off.
       evaluate() {
+        # Render-GPU mismatch (perf/power): the ideal render device for the live
+        # dock state no longer matches what niri booted with (stamped by
+        # niri-render-device-select). niri reads render-drm-device once at
+        # startup, so a switch needs a relog. render-dgpu = docked, want the
+        # dGPU; render-igpu = undocked, want the iGPU (and the dGPU powered off).
+        ideal="$(${renderDeviceIdeal}/bin/niri-render-device-ideal)"
+        booted="$(cat "''${XDG_CACHE_HOME:-$HOME/.cache}/niri/render-device.booted" 2>/dev/null || printf '%s' "$ideal")"
+        if [ "$ideal" != "$booted" ]; then
+          if [ -n "$ideal" ]; then echo render-dgpu; else echo render-igpu; fi
+          return
+        fi
+
+        # Battery drain: on battery, the dGPU present (niri holds it) and no
+        # monitor on it → a relog lets dgpu-reconcile power it off.
         src=battery
         [ -r /run/power/state ] && src=$(cat /run/power/state)
         card="$(readlink -f /dev/dri/by-path/pci-0000:02:00.0-card 2>/dev/null || true)"
@@ -174,17 +192,23 @@ let
         rm -f "$dismissed"
         exit 0
       fi
-      # Already dismissed for this situation → stay quiet.
-      [ -e "$dismissed" ] && exit 0
+      # Already dismissed for THIS situation (reason-keyed, so dismissing the
+      # dock offer doesn't also silence a later battery offer) → stay quiet.
+      [ -e "$dismissed" ] && [ "$(cat "$dismissed" 2>/dev/null)" = "$need" ] && exit 0
 
       # One prompt at a time.
       exec 9>"$rt/gpu-relog.lock"
       flock -n 9 || exit 0
 
       rm -f "$confirm" "$outfile"
+      case "$need" in
+        render-dgpu) title="Docked";     body="Relog to render on the dGPU for full refresh rate? (Super+Shift+BackSpace also confirms)" ;;
+        render-igpu) title="Undocked";   body="Relog to drop to the iGPU and power the dGPU down? (Super+Shift+BackSpace also confirms)" ;;
+        *)           title="On battery"; body="This session holds the dGPU (~10W). Relog to power it off? (Super+Shift+BackSpace also confirms)" ;;
+      esac
       notify-send -t 0 -u critical \
         -A relog="Relog now" -A dismiss="Not now" \
-        "On battery" "This session holds the dGPU (~10W). Relog to power it off? (Super+Shift+BackSpace also confirms)" \
+        "$title" "$body" \
         > "$outfile" 2>/dev/null &
       np=$!
 
@@ -206,7 +230,7 @@ let
       case "$act" in
         relog) ;;
         stale) exit 0 ;;
-        *) : > "$dismissed"; exit 0 ;;
+        *) printf '%s' "$need" > "$dismissed"; exit 0 ;;
       esac
 
       # Re-check right before acting — the situation may have evaporated
@@ -214,6 +238,26 @@ let
       [ "$(evaluate)" = "$need" ] || exit 0
       notify-send -t 2000 "GPU mode" "Relogging…" || true
       niri msg action quit --skip-confirmation
+    '';
+  };
+
+  # The ideal render GPU for the LIVE dock state: the dGPU's render node when it
+  # exists (nvidia loaded) AND a connector on the dGPU reads `connected`, else
+  # empty (iGPU-primary default). Shared by the login oneshot (which stamps it as
+  # what niri booted with) and gpu-relog-prompt (which compares the live value
+  # against that stamp to detect a mid-session dock/undock) so the two never
+  # disagree and fire a spurious relog offer.
+  renderDeviceIdeal = pkgs.writeShellApplication {
+    name = "niri-render-device-ideal";
+    runtimeInputs = with pkgs; [ coreutils ];
+    text = ''
+      render="/dev/dri/by-path/pci-0000:02:00.0-render"
+      card="$(readlink -f /dev/dri/by-path/pci-0000:02:00.0-card 2>/dev/null || true)"
+      [ -e "$render" ] && [ -n "$card" ] || exit 0
+      for s in "/sys/class/drm/''${card##*/}"-*/status; do
+        [ -e "$s" ] || continue
+        if [ "$(cat "$s" 2>/dev/null)" = connected ]; then printf '%s' "$render"; exit 0; fi
+      done
     '';
   };
 
@@ -233,38 +277,34 @@ let
   # startup), so this runs as a oneshot BEFORE niri.service and writes the
   # debug{} fragment niri include's. It points niri at the dGPU ONLY when the
   # render node actually exists (nvidia loaded) AND a connector reports
-  # `connected` — never at a missing device, which would break login. Docking
-  # mid-session needs a manual relog to take effect (niri has no runtime
-  # render-GPU switch); login-while-docked converges automatically.
+  # `connected` — never at a missing device, which would break login. It also
+  # stamps render-device.booted with the chosen node: niri has no runtime
+  # render-GPU switch, so a mid-session dock/undock is surfaced as a relog offer
+  # by gpu-relog-prompt (which compares the live ideal against that stamp).
+  # login-while-docked still converges automatically.
   renderDeviceSelect = pkgs.writeShellApplication {
     name = "niri-render-device-select";
     runtimeInputs = with pkgs; [ coreutils ];
     text = ''
       frag_dir="''${XDG_CACHE_HOME:-$HOME/.cache}/niri"
       frag="$frag_dir/render-device.kdl"
+      booted="$frag_dir/render-device.booted"
       mkdir -p "$frag_dir"
 
-      # Stable dGPU nodes (survive renderD/card number reshuffles). The render
-      # node exists only while the nvidia modules are loaded. Same 02:00.0
-      # address the rest of the power machinery uses (power.nix, gpu-relog-prompt).
-      render="/dev/dri/by-path/pci-0000:02:00.0-render"
-      card="$(readlink -f /dev/dri/by-path/pci-0000:02:00.0-card 2>/dev/null || true)"
+      ideal="$(${renderDeviceIdeal}/bin/niri-render-device-ideal)"
 
-      connected=
-      if [ -e "$render" ] && [ -n "$card" ]; then
-        for s in "/sys/class/drm/''${card##*/}"-*/status; do
-          [ -e "$s" ] || continue
-          if [ "$(cat "$s" 2>/dev/null)" = connected ]; then connected=1; break; fi
-        done
-      fi
-
-      if [ -n "$connected" ]; then
-        printf 'debug {\n    render-drm-device "%s"\n}\n' "$render" > "$frag.tmp"
+      if [ -n "$ideal" ]; then
+        printf 'debug {\n    render-drm-device "%s"\n}\n' "$ideal" > "$frag.tmp"
       else
         # Empty fragment → niri keeps its iGPU-primary default.
         : > "$frag.tmp"
       fi
       mv "$frag.tmp" "$frag"
+
+      # Stamp what niri boots with THIS session; gpu-relog-prompt compares the
+      # live ideal against it to detect a mid-session dock/undock.
+      printf '%s' "$ideal" > "$booted.tmp"
+      mv "$booted.tmp" "$booted"
     '';
   };
 in

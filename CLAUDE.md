@@ -138,12 +138,18 @@ Power management is centered on **Noctalia + niri** and is load-bearing:
   `niri msg action load-config-file` — niri has no runtime per-output IPC —
   spawns `gpu-relog-prompt` on power/drm events, kicks dgpu-reconcile once per
   login) + `gpu-relog-prompt` (the ONLY relog path: persistent [Relog now]/
-  [Not now] notification for exactly one situation now — on battery with the
-  dGPU device present (= held by niri) and no monitor on it; relog =
-  `niri msg action quit --skip-confirmation`). There is no env-hyprland
-  equivalent: iGPU-primary is niri's default and the dGPU is hot-added, so no
-  login-time GPU set, no `session-gpu-mode` marker, no session snapshot/
-  restore (autostart.nix relaunches the login apps).
+  [Not now] notification for three situations, each needing a session restart
+  because niri reads `render-drm-device` once at startup — a mid-session dock
+  (relog to render on the dGPU), a mid-session undock (relog back to the iGPU),
+  and battery drain from a held dGPU with no monitor on it (relog to power it
+  off); relog = `niri msg action quit --skip-confirmation`). The render-GPU
+  switch is driven by `niri-render-device-select` (oneshot before niri.service):
+  it writes the `render-device.kdl` debug fragment AND stamps
+  `render-device.booted`; gpu-relog-prompt compares the live ideal
+  (`niri-render-device-ideal`) against that stamp to detect a dock/undock. There
+  is no env-hyprland equivalent: iGPU-primary is niri's default and the dGPU is
+  hot-added, so no login-time GPU set, no `session-gpu-mode` marker, no session
+  snapshot/restore (autostart.nix relaunches the login apps).
 - `modules/nixos/mixins/asus.nix` — asusd, battery limit, Aura keyboard.
 - `game-mode` (`gaming.nix`) — manual profile toggle; goes through PPD
   (powerprofilesctl), never asusctl, so it can't fight `power-reconcile`.
