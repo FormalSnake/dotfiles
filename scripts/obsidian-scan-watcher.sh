@@ -58,14 +58,22 @@ A photo of handwritten notebook page(s) is at: $rel
    'YYYY-MM-DD topic.md'). If genuinely unsure, create it in Inbox/.
 4. End the appended/new section with an embed of the original page: ![[$rel]]
 5. NEVER delete, rewrite, or reorder existing content — append only. No YAML
-   frontmatter. Keep the markdown plain and calm."
+   frontmatter. Keep the markdown plain and calm.
+6. Your very last output line MUST be exactly 'FILED: <vault-relative note
+   path>' on success, or 'IMAGE-UNREADABLE' if the file is not a readable
+   notebook photo (then write nothing at all)."
 
-  if (cd "$VAULT" && claude -p "$prompt" \
-        --model sonnet --max-turns 30 \
-        --allowedTools "Read,Glob,Grep,Write,Edit") >> "$LOG" 2>&1; then
+  out="$SCANS/.agent-out.$$"
+  (cd "$VAULT" && claude -p "$prompt" \
+      --model sonnet --max-turns 30 \
+      --allowedTools "Read,Glob,Grep,Write,Edit") > "$out" 2>&1
+  rc=$?
+  cat "$out" >> "$LOG"
+  if [ $rc -eq 0 ] && grep -q '^FILED:' "$out"; then
     echo "$(date -Iseconds) OK $base -> $rel" >> "$LOG"
   else
     mv "$VAULT/$rel" "$SCANS/failed/$base"
-    echo "$(date -Iseconds) FAILED(agent) $base" >> "$LOG"
+    echo "$(date -Iseconds) FAILED(agent rc=$rc) $base" >> "$LOG"
   fi
+  rm -f "$out"
 done
