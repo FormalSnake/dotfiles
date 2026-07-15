@@ -50,6 +50,31 @@ let
   # device by itself; this loop only needs the event to re-run the prompt).
   # The inner `wait` keeps the substitution alive while the backgrounded
   # monitors run.
+  # Keyboard colour when the power source changes. The shared setter aura-repaint
+  # (home profile — user services have a limited PATH, so reference it absolutely)
+  # paints the cached wallpaper accent (falls back to the seed). With ambient
+  # enabled, AC instead hands the keyboard COLOUR to the OpenRGB screen-sampler
+  # (aura-ambient.service) — asusd still owns brightness — and any other source
+  # stops the sampler and restores the accent, so asusd and OpenRGB never write at
+  # once. systemctl by absolute path (limited PATH), matching the dgpu kick below.
+  auraOnSourceChange =
+    if config.kyan.auraAmbient.enable then ''
+      if [ "$src" = ac ]; then
+        /run/current-system/sw/bin/systemctl --user start aura-ambient.service 2>/dev/null || true
+      else
+        /run/current-system/sw/bin/systemctl --user stop aura-ambient.service 2>/dev/null || true
+      fi
+      # Always run the setter: with ambient up (AC) it only manages brightness and
+      # leaves the colour to the sampler; with it down (battery/power bank) it
+      # paints the accent. systemctl start/stop block until the state settles, so
+      # aura-repaint sees the right ambient state.
+      colour="$(cat "$HOME/.cache/noctalia/aura-color" 2>/dev/null || echo b15bf5)"
+      ${config.home.profileDirectory}/bin/aura-repaint "$colour" || true
+    '' else ''
+      colour="$(cat "$HOME/.cache/noctalia/aura-color" 2>/dev/null || echo b15bf5)"
+      ${config.home.profileDirectory}/bin/aura-repaint "$colour" || true
+    '';
+
   powerTune = pkgs.writeShellApplication {
     name = "power-tune";
     runtimeInputs = with pkgs; [
@@ -84,11 +109,7 @@ let
       reconcile() {
         src="$(source_now)"
         if [ "$src" != "$last_src" ]; then
-          # Repaint the keyboard for the new source via the shared setter (in the
-          # home profile — user services have a limited PATH, so reference it
-          # absolutely), using the cached wallpaper accent (fall back to the seed).
-          colour="$(cat "$HOME/.cache/noctalia/aura-color" 2>/dev/null || echo b15bf5)"
-          ${config.home.profileDirectory}/bin/aura-repaint "$colour" || true
+          ${auraOnSourceChange}
           last_src="$src"
         fi
         case "$(profile)" in

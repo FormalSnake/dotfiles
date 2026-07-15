@@ -47,6 +47,18 @@ in
     # power-source reconciler. See modules/nixos/mixins/power.nix.
     services.asusd.enable = true;
 
+    # Let the user session drive the keyboard's per-key LEDs via OpenRGB — the
+    # aura-ambient screen-sampler (home mixin) needs hidraw access without root
+    # and without a system-wide OpenRGB server. asusd still owns the keyboard by
+    # default; OpenRGB only takes over on AC. The N-KEY control interface is
+    # 0b05:19b6. GROUP+MODE grants access deterministically on any udev trigger —
+    # unlike OpenRGB's uaccess rules, which need logind to re-process the device
+    # (it's bound at boot before the rules, so a mid-session rebuild never ACLs it,
+    # and a background user service can't wait on that timing anyway).
+    services.udev.extraRules = ''
+      SUBSYSTEM=="hidraw", ATTRS{idVendor}=="0b05", ATTRS{idProduct}=="19b6", MODE="0660", GROUP="users"
+    '';
+
     # After asusd is up: seed the keyboard colour and cap the battery charge at
     # 80% for longevity. The seed is the last wallpaper-derived accent noctalia
     # cached to the user's ~/.cache/noctalia/aura-color (so the keyboard already
