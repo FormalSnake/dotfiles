@@ -4,7 +4,6 @@
   # self.homeModules.kyandesutter-linux.
   imports = [
     ./mixins/niri.nix
-    ./mixins/aura-ambient.nix
     ./mixins/qt.nix
     ./mixins/desktop-apps.nix
     ./mixins/autostart.nix
@@ -22,9 +21,6 @@
     ./mixins/webapps.nix
     ./mixins/godot.nix
   ];
-
-  # Screen-reactive per-key keyboard lighting (OpenRGB ambient, AC only).
-  kyan.auraAmbient.enable = true;
 
   # Standalone desktop web apps (see mixins/webapps.nix). Bare URL → auto
   # name+favicon; attrs for overrides. Claude gets a hand-picked icon.

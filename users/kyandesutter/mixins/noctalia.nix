@@ -28,16 +28,7 @@ let
       colour="''${1:?usage: aura-repaint <hex>}"
       case "$(/run/current-system/sw/bin/power-source 2>/dev/null || echo ac)" in
         ac)
-          # On AC the ambient sampler runs (power-tune starts it there), so it —
-          # not asusd — owns the keyboard COLOUR via OpenRGB Direct. When ambient
-          # is enabled, painting an asusd effect here would knock the device out
-          # of Direct and kill the ambient, so we manage brightness only. Powerbank
-          # and battery below still paint the accent: ambient is stopped there.
-          ${
-            if config.kyan.auraAmbient.enable
-            then "# colour owned by the ambient sampler; brightness only"
-            else ''asusctl aura effect static -c "$colour" || true''
-          }
+          asusctl aura effect static -c "$colour" || true
           asusctl leds set high || true
           ;;
         powerbank)
