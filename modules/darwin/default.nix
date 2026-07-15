@@ -12,6 +12,7 @@
       ./mixins/auto-update.nix
       ./mixins/agenix.nix
       ./mixins/remote-access.nix
+      ./mixins/obsidian-scan-watcher.nix
       ./profiles
     ];
   };
