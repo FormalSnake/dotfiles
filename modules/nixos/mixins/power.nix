@@ -181,22 +181,16 @@ let
             dgpu-power on || true
             ;;
           *)
-            # Battery: keep the dGPU powered while any of its connectors has a
-            # monitor attached (kernel connector status; when the dGPU is
-            # already off, the card node is gone and this loop finds nothing).
-            card="$(readlink -f /dev/dri/by-path/pci-0000:02:00.0-card 2>/dev/null || true)"
-            connected=
-            if [ -n "$card" ]; then
-              for s in "/sys/class/drm/''${card##*/}"-*/status; do
-                [ -e "$s" ] || continue
-                if [ "$(cat "$s" 2>/dev/null)" = connected ]; then connected=1; break; fi
-              done
-            fi
-            if [ -n "$connected" ]; then
-              echo "dgpu-reconcile: external monitor connected on the dGPU — leaving it powered" >&2
-            else
-              dgpu-power off || true
-            fi
+            # Battery: leave the dGPU powered. Auto-unloading it here
+            # (dgpu-power off -> modprobe -r nvidia) deadlocks the kernel in
+            # uninterruptible D-state when the unload races the display stack
+            # coming up at boot — hit on three straight boots 2026-07-16, wedging
+            # every boot until a hard reboot and killing the dGPU-wired HDMI
+            # output. The chip stays at D0 (~10W) unplugged; a safe battery-off
+            # path (done once, ordered Before=display-manager, before anything
+            # can hold the device) is not wired up yet. dgpu-power on is a no-op
+            # when it is already powered, so this just guarantees it stays up.
+            dgpu-power on || true
             ;;
         esac
         # Source unchanged since we acted on it → converged.
