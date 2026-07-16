@@ -175,8 +175,12 @@ let
         fi
 
         # Battery drain: on battery, the dGPU present (niri holds it) and no
-        # monitor on it → a relog lets dgpu-reconcile power it off.
-        src=battery
+        # monitor on it → a relog lets dgpu-reconcile power it off. Default to
+        # `unknown`, NOT `battery`: at login this runs before power-reconcile
+        # has written /run/power/state (a ~2s window), so a `battery` default
+        # would fire a spurious "On battery" relog offer on a charger boot.
+        # Only positively-confirmed battery reaches the prompt below.
+        src=unknown
         [ -r /run/power/state ] && src=$(cat /run/power/state)
         card="$(readlink -f /dev/dri/by-path/pci-0000:02:00.0-card 2>/dev/null || true)"
         if [ "$src" != battery ] || [ -z "$card" ]; then echo none; return; fi
