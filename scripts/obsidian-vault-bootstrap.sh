@@ -152,6 +152,13 @@ user `admin`, password in `/run/agenix/couchdb-admin` on either computer.
 Database: `notes`. End-to-end encryption is ON — the passphrase lives in your
 head/password manager, not on the server.
 
+The macbook keeps its own `~/Notes` current **headlessly** via a launchd
+daemon (`scripts/obsidian-livesync-daemon.sh`, the self-hosted-livesync CLI), so
+the scan/note pipelines see synced edits even when Obsidian isn't open there. It
+doesn't need — and shouldn't run alongside — Obsidian.app as a second sync device
+on the mac. If a note shows a conflict, resolve it with the CLI (`ls` flags it
+with `*`, `resolve <path> <rev>` keeps one).
+
 ## Adding a new device
 1. Install **Tailscale** (App Store / package) and sign into the tailnet.
 2. Install **Obsidian**; create/open an empty vault named `Notes`.
