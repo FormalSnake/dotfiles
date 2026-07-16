@@ -463,6 +463,7 @@ in
         # never tile. Force them back into the layout.
         { matches = [ { app-id = "^([Bb]eeper)$"; } ]; open-floating = false; }
         { matches = [ { app-id = "^([Bb]lue[Bb]ubbles)$"; } ]; open-floating = false; }
+        { matches = [ { app-id = "^([Oo]bsidian)$"; } ]; open-on-workspace = wsName."5"; } # productivity
         { matches = [ { app-id = "^([Cc]laude)$"; } ]; open-on-workspace = wsName."7"; } # ai
         { matches = [ { app-id = "^([Ss]potify)$"; } ]; open-on-workspace = wsName."8"; } # media
         { matches = [ { app-id = "^([Ss]team|steam)$"; } ]; open-on-workspace = wsName."9"; } # gaming

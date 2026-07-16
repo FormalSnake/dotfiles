@@ -60,13 +60,20 @@ let
   # forever: it can't be killed, every later module op piles up behind the same
   # mutex, and suspend fails from then on ("Device or resource busy" — a D-state
   # task can't be frozen), which is exactly the lid-close-then-freeze symptom.
-  # Three guards address this:
+  # Five guards address this:
   #   1. flock — never run two dGPU transitions concurrently.
   #   2. circuit breaker — if an earlier nvidia modprobe is still running, a
   #      wedge is likely already in progress: do NOT pile on, leave the dGPU be.
-  #   3. wait-for-free — don't even start the unload until nothing holds a
+  #   3. udev settle + initstate — udev inserts nvidia_drm/nvidia_modeset via
+  #      built-in kmod (no modprobe process, so guard 2 can't see it; observed
+  #      taking 3s+ at boot). Flush the udev queue, then require every loaded
+  #      nvidia module to be fully initialized (`live`) before unloading —
+  #      unloading against an in-flight load IS the deadlock.
+  #   4. wait-for-free — don't even start the unload until nothing holds a
   #      /dev/nvidia* or dGPU DRM handle (a busy modprobe -r fails cleanly, but
   #      minimising the load/unload overlap window is what avoids the deadlock).
+  #   5. fail SAFE — every bail-out leaves the dGPU fully powered with the whole
+  #      stack loaded; never a half-off state, never a blind retry into a wedge.
   # modprobe is the NixOS-wrapped one (knows the module tree) via absolute path.
   dgpuPower = pkgs.writeShellApplication {
     name = "dgpu-power";
@@ -75,6 +82,7 @@ let
       pkgs.util-linux # flock
       pkgs.psmisc # fuser
       pkgs.procps # pgrep
+      config.systemd.package # udevadm settle
     ];
     text = ''
       knob=/sys/devices/platform/asus-nb-wmi/dgpu_disable
@@ -97,7 +105,9 @@ let
       # transition we somehow didn't serialize with, or — worse — a kernel-wedged
       # unload in D-state that will never finish. Either way, touching the module
       # stack now only makes it worse. Leave the dGPU in whatever state it is.
-      if pgrep -f 'modprobe.*nvidia' >/dev/null 2>&1; then
+      # Also matches nvidia-modprobe, the setuid helper the nvidia EGL userspace
+      # runs on GL init (the load half of the 2026-07-16 boot wedge).
+      if pgrep -f 'modprobe.*nvidia|nvidia-modprobe' >/dev/null 2>&1; then
         echo "dgpu-power: an earlier nvidia modprobe is still running (kernel wedge?) — leaving the dGPU alone" >&2
         exit 0
       fi
@@ -107,7 +117,23 @@ let
           # Already off? (knob=1 and driver gone) — nothing to do.
           if [ "$(cat "$knob")" = 1 ] && [ ! -e /sys/module/nvidia ]; then exit 0; fi
 
-          # Guard 3: wait (up to ~60s) for every handle on the dGPU to be
+          # Guard 3: no unload while a load may be in flight. udev's kmod
+          # builtin loads nvidia_drm invisibly to guard 2, so first drain the
+          # udev queue (strict: a busy queue means bail), then require every
+          # nvidia module that exists to be past init (`live`, not `coming`).
+          if ! udevadm settle --timeout=15; then
+            echo "dgpu-power: udev queue still busy — leaving the dGPU alone" >&2
+            exit 0
+          fi
+          for m in /sys/module/nvidia*; do
+            [ -e "$m/initstate" ] || continue
+            if [ "$(cat "$m/initstate" 2>/dev/null)" != live ]; then
+              echo "dgpu-power: ''${m##*/} still initializing — leaving the dGPU alone" >&2
+              exit 0
+            fi
+          done
+
+          # Guard 4: wait (up to ~60s) for every handle on the dGPU to be
           # released before unloading — covers a just-confirmed relog whose
           # session teardown is still releasing the device. A session that
           # keeps holding it (user dismissed the popup) is respected: give up
@@ -124,12 +150,24 @@ let
             exit 0
           fi
 
+          # The EC backlight module ties the panel backlight to the dGPU's WMI
+          # path; drop it first so nothing can issue a backlight call into a
+          # GPU mid-teardown. Refcount-independent of nvidia.ko (verified
+          # holders/refcnt=0 live), so a refusal here is unexpected → bail.
+          if ! "$modprobe" -r nvidia_wmi_ec_backlight 2>/dev/null; then
+            echo "dgpu-power: nvidia_wmi_ec_backlight held — leaving dGPU powered" >&2
+            exit 0
+          fi
+
           ok=
           for _ in 1 2 3; do
             if "$modprobe" -r nvidia_drm nvidia_uvm nvidia_modeset nvidia 2>/dev/null; then ok=1; break; fi
             sleep 2
           done
           if [ -z "$ok" ]; then
+            # Guard 5: fail SAFE — restore the backlight module so the give-up
+            # state is fully powered with the whole stack loaded.
+            "$modprobe" nvidia_wmi_ec_backlight 2>/dev/null || true
             echo "dgpu-power: nvidia still in use — leaving dGPU powered on" >&2
             exit 0
           fi
@@ -143,7 +181,10 @@ let
             echo 0 > "$knob"
             echo 1 > /sys/bus/pci/rescan
             sleep 1
-            "$modprobe" nvidia nvidia_modeset nvidia_uvm nvidia_drm 2>/dev/null || true
+            # nvidia_wmi_ec_backlight last: the off path unloaded it, and
+            # re-registering /sys/class/backlight/nvidia_0 is what brings
+            # brightness control back on re-plug.
+            "$modprobe" nvidia nvidia_modeset nvidia_uvm nvidia_drm nvidia_wmi_ec_backlight 2>/dev/null || true
           fi
           ;;
         *)
@@ -170,10 +211,26 @@ let
   #       device (charging-booted, dGPU listed as secondary head) is left
   #       alone by dgpu-power's wait-for-free; the consent popup is the only
   #       release path.
+  #
+  # The battery off is decided ONCE, EARLY: the unit below is ordered
+  # Before=display-manager.service, so the boot-time unload runs while nothing
+  # can hold — or, worse, concurrently LOAD — the nvidia stack. Kicking it at
+  # graphical.target time raced SDDM's greeter (nvidia-drm registered 90ms
+  # before the greeter starts its nvidia EGL init) and deadlocked the kernel on
+  # three straight boots, 2026-07-16. Later runs (power events, resume, login
+  # kick) still take the off path, but by then a live session holds the device
+  # and wait-for-free gives up quietly — the consent relog stays the release path.
   dgpuReconcile = pkgs.writeShellApplication {
     name = "dgpu-reconcile";
-    runtimeInputs = [ pkgs.coreutils powerSource dgpuPower ];
+    runtimeInputs = [ pkgs.coreutils powerSource dgpuPower config.systemd.package ];
     text = ''
+      # At boot this runs before the display manager, possibly while udev
+      # coldplug is still registering power_supply/WMI devices — settle first
+      # so power-source classifies from real state, not a UCSI source or
+      # charge_mode that hasn't appeared yet. Lenient (|| true): on a timeout
+      # the classifier's defaults err toward `ac` → powered on → safe, and
+      # dgpu-power's own strict settle still gates the unload.
+      udevadm settle --timeout=15 || true
       for _ in 1 2 3; do
         src="$(power-source)"
         case "$src" in
@@ -181,16 +238,22 @@ let
             dgpu-power on || true
             ;;
           *)
-            # Battery: leave the dGPU powered. Auto-unloading it here
-            # (dgpu-power off -> modprobe -r nvidia) deadlocks the kernel in
-            # uninterruptible D-state when the unload races the display stack
-            # coming up at boot — hit on three straight boots 2026-07-16, wedging
-            # every boot until a hard reboot and killing the dGPU-wired HDMI
-            # output. The chip stays at D0 (~10W) unplugged; a safe battery-off
-            # path (done once, ordered Before=display-manager, before anything
-            # can hold the device) is not wired up yet. dgpu-power on is a no-op
-            # when it is already powered, so this just guarantees it stays up.
-            dgpu-power on || true
+            # Battery: keep the dGPU powered while any of its connectors has a
+            # monitor attached (kernel connector status; when the dGPU is
+            # already off, the card node is gone and this loop finds nothing).
+            card="$(readlink -f /dev/dri/by-path/pci-0000:02:00.0-card 2>/dev/null || true)"
+            connected=
+            if [ -n "$card" ]; then
+              for s in "/sys/class/drm/''${card##*/}"-*/status; do
+                [ -e "$s" ] || continue
+                if [ "$(cat "$s" 2>/dev/null)" = connected ]; then connected=1; break; fi
+              done
+            fi
+            if [ -n "$connected" ]; then
+              echo "dgpu-reconcile: external monitor connected on the dGPU — leaving it powered" >&2
+            else
+              dgpu-power off || true
+            fi
             ;;
         esac
         # Source unchanged since we acted on it → converged.
@@ -359,6 +422,19 @@ in
     #     few seconds until the transition is done.
     systemd.services.dgpu-reconcile = {
       description = "dGPU power follows the power source (hard off on battery)";
+      # Boot: make the dGPU decision ONCE, EARLY — before the display stack
+      # exists. nvidia.ko loads at sysinit (modules-load via nvidia_uvm) and
+      # nvidia_drm via udev coldplug; SDDM's greeter starts nvidia EGL within
+      # ~100ms of nvidia-drm registering, so a battery unload first kicked at
+      # graphical.target time (power-reconcile via PPD) raced it and wedged the
+      # kernel. Ordered here, the unload runs before any userspace can hold or
+      # load nvidia; on a charging boot it's a pure no-op. Later `start`s (power
+      # events, resume, login kick) are unaffected — ordering only shapes the
+      # boot transaction. No ordering cycle: this unit is only After=basic.target
+      # (default deps) and never orders against PPD/multi-user.target, so the
+      # loop documented on power-reconcile stays open.
+      before = [ "display-manager.service" ];
+      wantedBy = [ "display-manager.service" ];
       # External `start`s, not a crash loop — same rationale as power-reconcile.
       startLimitIntervalSec = 0;
       serviceConfig = {
