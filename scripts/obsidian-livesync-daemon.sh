@@ -27,6 +27,9 @@ miss() { echo "$(date -Iseconds) $1 — daemon idle"; sleep 30; exit 0; }
 if [ ! -f "$SETTINGS" ]; then
   mkdir -p "$STATE/.livesync"
   PW=$(cat "$PW_FILE"); PASS=$(cat "$PASS_FILE")
+  # The customChunkSize/usePluginSyncV2/handleFilenameCaseSensitive tweaks must
+  # match the remote's stored values or the CLI refuses to sync (config mismatch).
+
   ( umask 177; cat > "$SETTINGS" <<EOF
 {
   "couchDB_URI": "http://127.0.0.1:5984",
@@ -36,7 +39,10 @@ if [ ! -f "$SETTINGS" ]; then
   "encrypt": true,
   "passphrase": "$PASS",
   "liveSync": true,
-  "isConfigured": true
+  "isConfigured": true,
+  "customChunkSize": 60,
+  "usePluginSyncV2": true,
+  "handleFilenameCaseSensitive": false
 }
 EOF
   )
