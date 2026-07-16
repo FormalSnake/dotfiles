@@ -14,10 +14,17 @@ LOG="$VAULT/_inbox/note-watcher.log"
 SENTINEL='<!-- watcher log below (do not edit) -->'
 [ -d "$VAULT/_inbox" ] || exit 0
 
-# mkdir-based lock (no flock on macOS); a queued tick retries later.
+# mkdir-based lock (no flock on macOS), with stale-lock recovery: an interrupted
+# run (kickstart -k, crash) can leave the dir behind, so reclaim it if the pid
+# that held it is gone. Traps also release it on a normal SIGTERM/SIGINT.
 LOCK="$VAULT/_inbox/.note-watcher.lock"
-if ! mkdir "$LOCK" 2>/dev/null; then exit 0; fi
-trap 'rmdir "$LOCK"' EXIT
+if ! mkdir "$LOCK" 2>/dev/null; then
+  oldpid=$(cat "$LOCK/pid" 2>/dev/null)
+  if [ -n "$oldpid" ] && kill -0 "$oldpid" 2>/dev/null; then exit 0; fi
+  rm -rf "$LOCK"; mkdir "$LOCK" 2>/dev/null || exit 0
+fi
+echo $$ > "$LOCK/pid"
+trap 'rm -rf "$LOCK"' EXIT INT TERM
 
 # Seed the skeleton on first run so the file appears (and syncs) with no manual step.
 if [ ! -f "$FILE" ]; then
@@ -59,16 +66,15 @@ $body
    sign-off, output exactly 'PENDING' and change no files (they are still drafting).
 2. Otherwise read Home.md, then search existing notes (Projects/, Startup/, Meetings/, Ideas/,
    Inbox/) to resolve project names and the owner's shorthand.
-3. File it: APPEND to the best-matching existing note under a new heading '## Note $(date +%Y-%m-%d)',
-   or create a new note in the best-fitting folder — create the project note (e.g. Projects/<Name>.md)
-   when it's a new project. Group mixed content sensibly: bug/error reports under a bugs section,
-   feature ideas under features. If genuinely unsure, create a new topic-named note in Inbox/.
-   When you CREATE a new note, do NOT start it with a '# Title' H1 that repeats the filename —
-   Obsidian renders the filename as the note title, so an H1 would show it twice. Begin the note at
-   its first '## ' section (e.g. '## Bugs').
+3. File it: prefer an existing note when one fits. APPEND to it, placing each item under the existing
+   '## ' section it best belongs to; only add a new section when none fits. If no note fits, create
+   one in the best-fitting folder (a new project → Projects/<Name>.md), grouping related items under
+   their own '## ' sections. If genuinely unsure, create a new topic-named note in Inbox/. When you
+   CREATE a new note, do NOT start it with a '# Title' H1 that repeats the filename — Obsidian renders
+   the filename as the note title, so an H1 would show it twice. Begin at the first '## ' section.
 4. NEVER touch Inbox/index.md — that is the inbox file itself, not a filing destination.
-5. NEVER delete, rewrite, or reorder existing content — append only. No YAML frontmatter. Keep the
-   markdown plain and calm.
+5. NEVER delete, overwrite, or reorder existing content — you only ADD (at the end of a note, or
+   under the fitting existing heading). No YAML frontmatter. Keep the markdown plain and calm.
 6. Your very last output line MUST be exactly 'FILED: <vault-relative note path>' on success, or
    'PENDING' if there was no done signal."
 
