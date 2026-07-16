@@ -69,10 +69,20 @@ Welcome back. Everything has a place — and Inbox is a fine place.
 
 > 📷 Photograph a notebook page into `_inbox/scans/` (or use the *Scan to
 > Notes* shortcut) and it becomes a note on its own.
+>
+> ✍️ Or just type into [[Inbox/index|📥 index]] — end a note however you like
+> ("done", "dat was het", "file this") and it gets filed for you.
 EOF
 
 put Inbox/README.md <<'EOF'
 Unsorted things live here guilt-free. Move them out when they've earned a home — or don't.
+EOF
+
+put Inbox/index.md <<'EOF'
+# Inbox
+
+<!-- watcher log below (do not edit) -->
+## Log
 EOF
 
 put Projects/README.md <<'EOF'
@@ -131,6 +141,16 @@ headless Claude with this vault as context. It appends to the matching
 project/meeting/idea note (under a `## Scanned <date>` heading) or creates a
 new note; unsure → `Inbox/`. Failures land in `_inbox/scans/failed/` with a
 line in `_inbox/scans/watcher.log`. It never edits or deletes existing prose.
+
+## How the text inbox files things
+Type freeform into `Inbox/index.md` (the area above the log sentinel) from any
+device. A second macbook watcher (launchd, `scripts/obsidian-note-watcher.sh`)
+polls every 5 minutes and, when your text ends with a natural "done" signal
+("done", "dat was het", "file this", …), runs headless Claude to file it into
+the right note — creating the project note if it's new, grouping bugs and
+feature ideas. On success it clears the freeform and prepends a dated copy under
+`## Log`; no signal yet leaves it alone. Nothing below the sentinel is yours to
+edit. Log/debug in `_inbox/note-watcher.log`.
 EOF
 
 echo "full bootstrap done: $VAULT"

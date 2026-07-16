@@ -13,6 +13,7 @@
       ./mixins/agenix.nix
       ./mixins/remote-access.nix
       ./mixins/obsidian-scan-watcher.nix
+      ./mixins/obsidian-note-watcher.nix
       ./profiles
     ];
   };
