@@ -50,9 +50,13 @@ The owner types raw free-text captures into Inbox/index.md. Here is the current 
 $body
 ---
 
-1. First decide whether this text ends with a natural 'I'm done / file this' signal (phrased
-   however the owner likes — 'done', 'that's it', 'dat was het', 'file this', etc.). If it does
-   NOT, output exactly 'PENDING' and change no files — they are still drafting.
+1. DONE-SIGNAL CHECK — look ONLY at the last non-empty line of the text above. If it is a short
+   closing / sign-off phrase, in English or Dutch, the note is DONE — go to step 2. Phrases that
+   count include: done, that's it, that's all, that's the end, file it, file this, send, save it,
+   dat is het, dat was het, klaar, af, stuur maar, opslaan. Judge ONLY whether such a sign-off is
+   present as the final line — do NOT assess whether the note's content itself feels complete (a
+   half-broken error dump followed by 'dat is het' is DONE). Only if the last line is clearly NOT a
+   sign-off, output exactly 'PENDING' and change no files (they are still drafting).
 2. Otherwise read Home.md, then search existing notes (Projects/, Startup/, Meetings/, Ideas/,
    Inbox/) to resolve project names and the owner's shorthand.
 3. File it: APPEND to the best-matching existing note under a new heading '## Note $(date +%Y-%m-%d)',
