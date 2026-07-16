@@ -51,6 +51,10 @@ Declarative config for two machines via one flake (flake-parts):
 - **`g815`** — `x86_64-linux`, NixOS + home-manager. ASUS ROG laptop; niri +
   Noctalia desktop, NVIDIA dGPU as a power-managed peripheral.
 
+The macbook is the real development host; the g815 is used as a thin client that
+reaches the mac over SSH/MOSH and remote desktop to work remotely, rather than
+building locally.
+
 Secrets are agenix-encrypted (`secrets/`). The two hosts are wired in
 `systems/default.nix` (`darwinConfigurations.macbook`, `nixosConfigurations.g815`).
 
