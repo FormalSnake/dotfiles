@@ -63,6 +63,9 @@ $body
    or create a new note in the best-fitting folder — create the project note (e.g. Projects/<Name>.md)
    when it's a new project. Group mixed content sensibly: bug/error reports under a bugs section,
    feature ideas under features. If genuinely unsure, create a new topic-named note in Inbox/.
+   When you CREATE a new note, do NOT start it with a '# Title' H1 that repeats the filename —
+   Obsidian renders the filename as the note title, so an H1 would show it twice. Begin the note at
+   its first '## ' section (e.g. '## Bugs').
 4. NEVER touch Inbox/index.md — that is the inbox file itself, not a filing destination.
 5. NEVER delete, rewrite, or reorder existing content — append only. No YAML frontmatter. Keep the
    markdown plain and calm.
