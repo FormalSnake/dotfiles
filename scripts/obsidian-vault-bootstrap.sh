@@ -8,8 +8,14 @@ MODE="${1:?usage: obsidian-vault-bootstrap.sh <full|client> [vault-path]}"
 VAULT="${2:-$HOME/Notes}"
 [ "$MODE" = full ] || [ "$MODE" = client ] || { echo "mode must be full|client" >&2; exit 1; }
 
+# Linux is the only host where Noctalia repaints Obsidian from the wallpaper
+# palette (via a rendered snippet at .obsidian/snippets/noctalia.css); every
+# other host (macbook, mobile) rides Minimal's built-in Flexoki preset. .obsidian
+# is device-local (LiveSync hidden-file sync is off), so the two never collide.
+LINUX=false; [ "$(uname -s)" = Linux ] && LINUX=true
+
 mkdir -p "$VAULT"/{Inbox,Projects,Startup,Meetings,Ideas,Archive,Attachments,_inbox/scans/failed} \
-         "$VAULT"/.obsidian/{plugins/obsidian-livesync,themes/Minimal}
+         "$VAULT"/.obsidian/{plugins/obsidian-livesync,plugins/obsidian-minimal-settings,themes/Minimal,snippets}
 
 # --- .obsidian settings (only if absent — Obsidian owns these after first run) ---
 put() { # put <path> <<EOF...  (write only if missing)
@@ -28,14 +34,38 @@ put .obsidian/app.json <<'EOF'
 }
 EOF
 
-put .obsidian/appearance.json <<'EOF'
+# Minimal everywhere; follow the OS light/dark (mac → Flexoki light/dark, Linux →
+# Noctalia's SUPER+SHIFT+T toggle drives the desktop color-scheme signal). On
+# Linux, enable the Noctalia snippet so the wallpaper palette overrides Minimal.
+if $LINUX; then
+  put .obsidian/appearance.json <<'EOF'
 {
-  "cssTheme": "Minimal"
+  "cssTheme": "Minimal",
+  "theme": "system",
+  "enabledCssSnippets": ["noctalia"]
 }
 EOF
+else
+  put .obsidian/appearance.json <<'EOF'
+{
+  "cssTheme": "Minimal",
+  "theme": "system"
+}
+EOF
+fi
 
 put .obsidian/community-plugins.json <<'EOF'
-["obsidian-livesync"]
+["obsidian-livesync", "obsidian-minimal-settings"]
+EOF
+
+# Minimal Theme Settings: pin both color schemes to Flexoki (the theme's built-in
+# preset). Noctalia's snippet overrides these on Linux; on every other host this
+# is the whole color story. Field names + values are the plugin's own settings.
+put .obsidian/plugins/obsidian-minimal-settings/data.json <<'EOF'
+{
+  "lightScheme": "minimal-flexoki-light",
+  "darkScheme": "minimal-flexoki-dark"
+}
 EOF
 
 # --- LiveSync plugin (latest release assets) + Minimal theme ---
@@ -48,9 +78,20 @@ LS=https://github.com/vrtmrz/obsidian-livesync/releases/latest/download
 fetch "$LS/main.js"       .obsidian/plugins/obsidian-livesync/main.js
 fetch "$LS/manifest.json" .obsidian/plugins/obsidian-livesync/manifest.json
 fetch "$LS/styles.css"    .obsidian/plugins/obsidian-livesync/styles.css
+MTS=https://github.com/kepano/obsidian-minimal-settings/releases/latest/download
+fetch "$MTS/main.js"       .obsidian/plugins/obsidian-minimal-settings/main.js
+fetch "$MTS/manifest.json" .obsidian/plugins/obsidian-minimal-settings/manifest.json
+fetch "$MTS/styles.css"    .obsidian/plugins/obsidian-minimal-settings/styles.css
 MIN=https://raw.githubusercontent.com/kepano/obsidian-minimal/master
 fetch "$MIN/manifest.json" .obsidian/themes/Minimal/manifest.json
 fetch "$MIN/theme.css"     .obsidian/themes/Minimal/theme.css
+
+# Linux only: seed an empty enabled snippet so Obsidian has it toggled on and
+# ready before Noctalia's first render fills it (Noctalia owns the contents
+# thereafter, hot-reloaded on write).
+$LINUX && put .obsidian/snippets/noctalia.css <<'EOF'
+/* Rendered by Noctalia on every palette change — do not edit. */
+EOF
 
 [ "$MODE" = client ] && { echo "client bootstrap done: $VAULT"; exit 0; }
 

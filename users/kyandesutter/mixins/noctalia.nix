@@ -503,6 +503,19 @@ in
               post_hook = "SPICETIFY_CONFIG=${config.home.homeDirectory}/.config/spicetify ${pkgs.spicetify-cli}/bin/spicetify apply --no-restart || true";
             };
 
+            # Obsidian (Minimal theme). Rendered into the vault's snippet dir;
+            # Obsidian watches ~/Notes/.obsidian/snippets and hot-reloads on write,
+            # so no post_hook. The snippet overrides Minimal's swatches + Obsidian's
+            # core colour roles with the wallpaper palette (see the template header).
+            # macOS rides Minimal's built-in Flexoki preset instead — no Noctalia
+            # there — so this template is Linux-only (noctalia.nix is g815-only).
+            # bootstrap seeds an empty enabled snippet before the first render.
+            obsidian = {
+              enabled = true;
+              input_path = "~/.config/noctalia/templates/obsidian.css.tmpl";
+              output_path = "~/Notes/.obsidian/snippets/noctalia.css";
+            };
+
             # niri window borders. Noctalia doesn't touch the compositor; this
             # renders the wallpaper palette into the layout fragment niri's
             # config.kdl includes (include optional=true, placed LAST so it
@@ -627,5 +640,6 @@ in
     "noctalia/templates/equibop.css.tmpl".source = ../noctalia-templates/equibop.css.tmpl;
     "noctalia/templates/spicetify.ini.tmpl".source = ../noctalia-templates/spicetify.ini.tmpl;
     "noctalia/templates/niri-border.kdl.tmpl".source = ../noctalia-templates/niri-border.kdl.tmpl;
+    "noctalia/templates/obsidian.css.tmpl".source = ../noctalia-templates/obsidian.css.tmpl;
   };
 }
