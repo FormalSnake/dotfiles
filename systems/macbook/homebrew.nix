@@ -46,7 +46,6 @@
       "google-chrome"
       "jump-desktop-connect"
       "markdown-preview"  # pluk-inc/tap
-      "obsidian"
       "syncthing-app"
     ];
 
