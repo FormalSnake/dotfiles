@@ -47,6 +47,10 @@
       "jump-desktop-connect"
       "markdown-preview"  # pluk-inc/tap
       "syncthing-app"
+
+      # — tiling WM (mirrors the g815 niri setup) —
+      "omniwm"             # barutsrb/tap — niri-style scrolling tiler
+      "karabiner-elements" # remaps Right Command → the OmniWM "Super" chord (Ctrl+Opt+Cmd)
     ];
 
     # Mac App Store auto-install disabled — `mas install` is broken at the OS level (https://github.com/orgs/Homebrew/discussions/6550); apps remain installed manually.

@@ -9,5 +9,6 @@
     ./mixins/android.nix
     ./mixins/hammerspoon.nix
     ./mixins/lynk-browser.nix
+    ./mixins/omniwm.nix
   ];
 }

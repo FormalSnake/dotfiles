@@ -1,0 +1,351 @@
+# OmniWM — mirrors the g815 niri setup.
+#
+# "Super" here is Right Command, which Karabiner remaps to Ctrl+Opt+Cmd (see
+# karabiner.json). Shift is deliberately left OUT of that chord so it can still
+# discriminate the niri move-bindings (Super+Shift+hjkl). OmniWM's own native
+# Hyper trigger is NOT used — it always injects Shift, which would collapse
+# focus and move onto the same chord.
+#
+# Only the tables/keys that differ from OmniWM's defaults are written; the
+# loader fills everything else in (SettingsTOMLCodec recovers missing keys).
+# Hotkeys are overrides merged onto the defaults by id, so unlisted actions
+# keep their stock bindings.
+
+[general]
+defaultLayoutType = "niri"
+
+[focus]
+# niri keeps keyboard focus on click only.
+followsMouse = false
+
+[gaps]
+size = 8.0
+
+[gaps.outer]
+left = 8.0
+right = 8.0
+top = 8.0
+bottom = 8.0
+
+[niri]
+# Half-width columns, matching niri's default-column-width proportion 0.5.
+defaultColumnWidth = 0.5
+
+[borders]
+enabled = true
+width = 2.0
+
+[borders.color]
+# Catppuccin Mocha mauve (#cba6f7) — the same static border colour the g815
+# niri config falls back to before Noctalia themes it.
+red = 0.796
+green = 0.651
+blue = 0.969
+alpha = 1.0
+
+[quakeTerminal]
+# Ghostty drop-down on Super+Return (niri binds Super+Return to a terminal).
+enabled = true
+
+# ── Workspaces ───────────────────────────────────────────────────────────────
+# Numeric names drive the Super+N binds; displayName is the role label shown in
+# the bar. Roles match the g815 niri / aerospace workspace layout.
+
+[[workspaces]]
+id = "33f7ff54-2da6-43f2-9dd5-a5033a494bf2"
+name = "1"
+displayName = "web"
+layoutType = "niri"
+monitorAssignment = { type = "main" }
+
+[[workspaces]]
+id = "4c0debb5-5c39-43aa-a1d0-238097b392f8"
+name = "2"
+displayName = "term"
+layoutType = "niri"
+monitorAssignment = { type = "main" }
+
+[[workspaces]]
+id = "11fbec75-ea92-44ac-8421-72e0409ee18d"
+name = "3"
+displayName = "dev"
+layoutType = "niri"
+monitorAssignment = { type = "main" }
+
+[[workspaces]]
+id = "2f68c9c2-fb73-4874-afd6-9f7fe46c8a30"
+name = "4"
+displayName = "chat"
+layoutType = "niri"
+monitorAssignment = { type = "main" }
+
+[[workspaces]]
+id = "966224d0-5aaa-47ce-a7b0-449ead8ed966"
+name = "5"
+displayName = "prod"
+layoutType = "niri"
+monitorAssignment = { type = "main" }
+
+[[workspaces]]
+id = "1401a97d-5acb-4a61-bb9f-ccd04c96ce17"
+name = "6"
+displayName = "print"
+layoutType = "niri"
+monitorAssignment = { type = "main" }
+
+[[workspaces]]
+id = "7cf81898-015b-4622-8146-6978bb050530"
+name = "7"
+displayName = "ai"
+layoutType = "niri"
+monitorAssignment = { type = "main" }
+
+[[workspaces]]
+id = "f79a0dbb-ecb8-4fa5-9360-6dc74e576201"
+name = "8"
+displayName = "media"
+layoutType = "niri"
+monitorAssignment = { type = "main" }
+
+[[workspaces]]
+id = "76d9b668-50be-44d2-addd-0c1a67244047"
+name = "9"
+displayName = "game"
+layoutType = "niri"
+monitorAssignment = { type = "main" }
+
+# ── Hotkeys (Super = Ctrl+Opt+Cmd) ───────────────────────────────────────────
+# Focus (niri Super+hjkl)
+[[hotkeys]]
+id = "focus.left"
+binding = "Control+Option+Command+H"
+[[hotkeys]]
+id = "focus.down"
+binding = "Control+Option+Command+J"
+[[hotkeys]]
+id = "focus.up"
+binding = "Control+Option+Command+K"
+[[hotkeys]]
+id = "focus.right"
+binding = "Control+Option+Command+L"
+
+# Move (niri Super+Shift+hjkl)
+[[hotkeys]]
+id = "move.left"
+binding = "Control+Option+Command+Shift+H"
+[[hotkeys]]
+id = "move.down"
+binding = "Control+Option+Command+Shift+J"
+[[hotkeys]]
+id = "move.up"
+binding = "Control+Option+Command+Shift+K"
+[[hotkeys]]
+id = "move.right"
+binding = "Control+Option+Command+Shift+L"
+
+# Switch workspace (niri Super+1..9)
+[[hotkeys]]
+id = "switchWorkspace.1"
+binding = "Control+Option+Command+1"
+[[hotkeys]]
+id = "switchWorkspace.2"
+binding = "Control+Option+Command+2"
+[[hotkeys]]
+id = "switchWorkspace.3"
+binding = "Control+Option+Command+3"
+[[hotkeys]]
+id = "switchWorkspace.4"
+binding = "Control+Option+Command+4"
+[[hotkeys]]
+id = "switchWorkspace.5"
+binding = "Control+Option+Command+5"
+[[hotkeys]]
+id = "switchWorkspace.6"
+binding = "Control+Option+Command+6"
+[[hotkeys]]
+id = "switchWorkspace.7"
+binding = "Control+Option+Command+7"
+[[hotkeys]]
+id = "switchWorkspace.8"
+binding = "Control+Option+Command+8"
+[[hotkeys]]
+id = "switchWorkspace.9"
+binding = "Control+Option+Command+9"
+
+# Send window to workspace (niri Super+Shift+1..9)
+[[hotkeys]]
+id = "moveToWorkspace.1"
+binding = "Control+Option+Command+Shift+1"
+[[hotkeys]]
+id = "moveToWorkspace.2"
+binding = "Control+Option+Command+Shift+2"
+[[hotkeys]]
+id = "moveToWorkspace.3"
+binding = "Control+Option+Command+Shift+3"
+[[hotkeys]]
+id = "moveToWorkspace.4"
+binding = "Control+Option+Command+Shift+4"
+[[hotkeys]]
+id = "moveToWorkspace.5"
+binding = "Control+Option+Command+Shift+5"
+[[hotkeys]]
+id = "moveToWorkspace.6"
+binding = "Control+Option+Command+Shift+6"
+[[hotkeys]]
+id = "moveToWorkspace.7"
+binding = "Control+Option+Command+Shift+7"
+[[hotkeys]]
+id = "moveToWorkspace.8"
+binding = "Control+Option+Command+Shift+8"
+[[hotkeys]]
+id = "moveToWorkspace.9"
+binding = "Control+Option+Command+Shift+9"
+
+# Workspace back-and-forth (niri Super+Tab)
+[[hotkeys]]
+id = "workspaceBackAndForth"
+binding = "Control+Option+Command+Tab"
+
+# Column width / fullscreen / overview / float
+[[hotkeys]]
+id = "toggleColumnFullWidth"          # niri Super+F (maximize column)
+binding = "Control+Option+Command+F"
+[[hotkeys]]
+id = "toggleFullscreen"               # niri Super+Shift+F
+binding = "Control+Option+Command+Shift+F"
+[[hotkeys]]
+id = "toggleOverview"                 # niri Super+O
+binding = "Control+Option+Command+O"
+[[hotkeys]]
+id = "toggleFocusedWindowFloating"    # niri Super+V
+binding = "Control+Option+Command+V"
+[[hotkeys]]
+id = "cycleColumnWidthForward"        # niri Super+R (cycle preset widths)
+binding = "Control+Option+Command+R"
+[[hotkeys]]
+id = "cycleColumnWidthBackward"
+binding = "Control+Option+Command+Shift+R"
+[[hotkeys]]
+id = "setColumnWidth.decrease10Percent"   # niri Super+Minus
+binding = "Control+Option+Command+Minus"
+[[hotkeys]]
+id = "setColumnWidth.increase10Percent"   # niri Super+Plus
+binding = "Control+Option+Command+Equal"
+
+# Command palette (niri Super+Space launcher) + quake terminal (niri Super+Return)
+[[hotkeys]]
+id = "openCommandPalette"
+binding = "Control+Option+Command+Space"
+[[hotkeys]]
+id = "toggleQuakeTerminal"
+binding = "Control+Option+Command+Return"
+
+# Drop the stock bare-Option binds that would fire while typing Option-glyphs.
+[[hotkeys]]
+id = "focusPrevious"
+binding = "Unassigned"
+[[hotkeys]]
+id = "toggleColumnTabbed"
+binding = "Unassigned"
+[[hotkeys]]
+id = "toggleWorkspaceLayout"
+binding = "Unassigned"
+[[hotkeys]]
+id = "balanceSizes"
+binding = "Unassigned"
+[[hotkeys]]
+id = "raiseAllFloatingWindows"
+binding = "Unassigned"
+[[hotkeys]]
+id = "setWindowHeight.decrease10Percent"
+binding = "Unassigned"
+[[hotkeys]]
+id = "setWindowHeight.increase10Percent"
+binding = "Unassigned"
+
+# ── App rules (bundle IDs from the mac's aerospace mapping) ───────────────────
+[[appRules]]
+bundleId = "com.brave.Browser"
+assignToWorkspace = "1"
+[[appRules]]
+bundleId = "com.formalsnake.lynk"
+assignToWorkspace = "1"
+[[appRules]]
+bundleId = "net.imput.helium"
+assignToWorkspace = "1"
+[[appRules]]
+bundleId = "com.mitchellh.ghostty"
+assignToWorkspace = "2"
+[[appRules]]
+bundleId = "dev.warp.Warp-stable"
+assignToWorkspace = "2"
+[[appRules]]
+bundleId = "dev.zed.Zed"
+assignToWorkspace = "3"
+[[appRules]]
+bundleId = "com.google.Chrome"
+assignToWorkspace = "3"
+[[appRules]]
+bundleId = "com.google.chrome.for.testing"
+assignToWorkspace = "3"
+[[appRules]]
+bundleId = "com.electron.dockerdesktop"
+assignToWorkspace = "3"
+[[appRules]]
+bundleId = "com.tinyspeck.slackmacgui"
+assignToWorkspace = "4"
+[[appRules]]
+bundleId = "net.whatsapp.WhatsApp"
+assignToWorkspace = "4"
+[[appRules]]
+bundleId = "com.apple.MobileSMS"
+assignToWorkspace = "4"
+[[appRules]]
+bundleId = "com.cron.electron"
+assignToWorkspace = "5"
+[[appRules]]
+bundleId = "co.ambercreative.nucleo"
+assignToWorkspace = "5"
+[[appRules]]
+bundleId = "es.canarycoders.canarybrowser"
+assignToWorkspace = "5"
+[[appRules]]
+bundleId = "com.nordvpn.macos"
+assignToWorkspace = "5"
+[[appRules]]
+bundleId = "com.apple.Notes"
+assignToWorkspace = "5"
+[[appRules]]
+bundleId = "com.apple.iCal"
+assignToWorkspace = "5"
+[[appRules]]
+bundleId = "ai.perplexity.comet"
+assignToWorkspace = "7"
+[[appRules]]
+bundleId = "com.apple.Music"
+assignToWorkspace = "8"
+[[appRules]]
+bundleId = "com.apple.TV"
+assignToWorkspace = "8"
+[[appRules]]
+bundleId = "sh.cider.genten.mac"
+assignToWorkspace = "8"
+[[appRules]]
+bundleId = "dev.vencord.vesktop"
+assignToWorkspace = "9"
+[[appRules]]
+bundleId = "com.hnc.Discord"
+assignToWorkspace = "9"
+
+# Always-float rules (niri open-floating window rules)
+[[appRules]]
+bundleId = "com.apple.Stickies"
+layout = "float"
+[[appRules]]
+bundleId = "net.imput.helium"
+titleRegex = "Picture.?in.?Picture|Scherm-in-scherm"
+layout = "float"
+[[appRules]]
+bundleId = "app.zen-browser.zen"
+titleRegex = "Picture-in-Picture"
+layout = "float"

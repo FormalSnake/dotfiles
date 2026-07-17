@@ -1,0 +1,35 @@
+{
+  "global": {
+    "show_in_menu_bar": false
+  },
+  "profiles": [
+    {
+      "name": "Default",
+      "selected": true,
+      "complex_modifications": {
+        "rules": [
+          {
+            "description": "Right Command → OmniWM Super (Ctrl+Opt+Cmd)",
+            "manipulators": [
+              {
+                "type": "basic",
+                "from": {
+                  "key_code": "right_command",
+                  "modifiers": { "optional": ["any"] }
+                },
+                "to": [
+                  {
+                    "key_code": "left_command",
+                    "modifiers": ["left_control", "left_option"]
+                  }
+                ],
+                "to_if_alone": [{ "key_code": "right_command" }]
+              }
+            ]
+          }
+        ]
+      },
+      "virtual_hid_keyboard": { "keyboard_type_v2": "ansi" }
+    }
+  ]
+}
