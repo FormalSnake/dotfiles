@@ -10,5 +10,6 @@
     ./mixins/hammerspoon.nix
     ./mixins/lynk-browser.nix
     ./mixins/omniwm.nix
+    ./mixins/sketchybar.nix
   ];
 }

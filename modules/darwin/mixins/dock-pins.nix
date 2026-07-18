@@ -1,13 +1,9 @@
-{ config, ... }:
-let
-  # HM-managed GUI apps land in this trampoline dir (symlinks into the nix
-  # store). Use this prefix for any dock pin whose .app comes from
-  # home-manager so the path tracks the active home generation.
-  hmApps = "${config.users.users.kyandesutter.home}/Applications/Home Manager Apps";
-
-  # Brew casks, system apps, and manual /Applications installs — paths are
-  # stable so we hardcode them.
-  brewApps = [
+{ ... }:
+{
+  # Brew casks, system apps, and manual /Applications installs — paths are stable
+  # so we hardcode them. (PrismLauncher was dropped: it has no aarch64-darwin
+  # build — see the note in users/kyandesutter/linux.nix — so its pin was dead.)
+  system.defaults.dock.persistent-apps = [
     "/Applications/LaunchOS.app"
     "/Applications/Helium.app"
     "/Applications/Ghostty.app"
@@ -15,13 +11,4 @@ let
     "/System/Applications/Calendar.app"
     "/System/Applications/Messages.app"
   ];
-
-  # HM / nix-installed apps — resolved dynamically against the current HM
-  # generation.
-  nixApps = [
-    "${hmApps}/PrismLauncher.app"
-  ];
-in
-{
-  system.defaults.dock.persistent-apps = brewApps ++ nixApps;
 }

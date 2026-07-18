@@ -13,10 +13,20 @@
 
 [general]
 defaultLayoutType = "niri"
+# Turn on the omniwmctl IPC socket (~/Library/Caches/com.barut.OmniWM/ipc.sock).
+# Off by default; sketchybar drives its workspace pills off `omniwmctl query
+# workspaces` / `omniwmctl watch active-workspace`, so this is load-bearing for
+# the bar (users/kyandesutter/mixins/sketchybar.nix).
+ipcEnabled = true
 
 [focus]
 # niri keeps keyboard focus on click only.
 followsMouse = false
+
+# OmniWM's own workspace bar is disabled — sketchybar replaces it (mounted on the
+# top edge, notch-aware, mirroring the g815 noctalia bar). See mixins/sketchybar.nix.
+[workspaceBar]
+enabled = false
 
 [gaps]
 size = 8.0

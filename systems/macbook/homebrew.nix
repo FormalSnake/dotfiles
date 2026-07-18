@@ -2,6 +2,7 @@
   homebrew = {
     taps = [
       "barutsrb/tap"
+      "felixkratz/formulae" # sketchybar
       "jnsahaj/lumen"
       "pluk-inc/tap"
     ];
@@ -9,6 +10,7 @@
     # CLI tools that genuinely need brew (no Nix equivalent on darwin or version-pinned).
     # Everything else moved to nix/home-manager — see users/kyandesutter/programs.nix.
     brews = [
+      "sketchybar" # felixkratz/formulae — nixpkgs' build crashes the cctools linker; drives the OmniWM bar (users/kyandesutter/mixins/sketchybar.nix)
       "terminal-notifier" # nixpkgs 26.11 crashes in the Darwin linker (SIGTRAP)
       "watchman" # nixpkgs build pulls folly, which fails to compile on darwin
       "wireguard-tools"

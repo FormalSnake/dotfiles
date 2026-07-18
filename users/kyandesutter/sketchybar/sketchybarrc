@@ -1,0 +1,239 @@
+#!/usr/bin/env lua
+--
+-- sketchybar (SbarLua) — top bar for the OmniWM macbook session, mirroring the
+-- g815 noctalia bar. OmniWM's own workspace bar is off ([workspaceBar] enabled =
+-- false in omniwm/settings.toml) and the macOS menu bar is auto-hidden
+-- (_HIHideMenuBar), so this owns the top edge.
+--
+-- The physical notch is left empty on purpose: Alcove renders now-playing there,
+-- so — unlike noctalia — there is no media/visualiser widget. notch_width splits
+-- any center items around the notch (we keep center empty).
+--
+-- Workspaces are driven live off OmniWM's IPC: the omniwm-sketchybar-watch
+-- launchd agent runs `omniwmctl watch … --exec sketchybar --trigger
+-- omniwm_update`, and the hidden `space_manager` item redraws every pill from a
+-- single `omniwmctl query workspaces` on that event.
+--
+-- The sketchybar.so module is found via LUA_CPATH and `lua` via PATH, both set on
+-- the launchd agent in users/kyandesutter/mixins/sketchybar.nix. `hotload(true)`
+-- live-reloads on edit (the config is an out-of-store symlink to the git source).
+
+local sbar = require("sketchybar")
+
+local OMNIWMCTL = "/Applications/OmniWM.app/Contents/MacOS/omniwmctl"
+local FONT_ICON = "GeistMono Nerd Font" -- nerd glyphs (same font niri's ws pills use)
+local FONT_TEXT = "GeistMono Nerd Font" -- labels in the same font, per request
+
+-- Catppuccin Mocha — the macOS static palette (mauve matches the omniwm border).
+local col = {
+  bar      = 0xf0181825,
+  crust    = 0xff11111b,
+  text     = 0xffcdd6f4,
+  subtext  = 0xffa6adc8,
+  surface0 = 0xff313244,
+  overlay  = 0xff6c7086,
+  mauve    = 0xffcba6f7,
+  blue     = 0xff89b4fa,
+  green    = 0xffa6e3a1,
+  yellow   = 0xfff9e2af,
+  red      = 0xfff38ba8,
+  lavender = 0xffb4befe,
+}
+
+local ic = {
+  launcher = "\u{f009}",
+  clock    = "\u{f017}",
+  bolt     = "\u{f0e7}",
+  bat      = { full = "\u{f240}", tq = "\u{f241}", half = "\u{f242}", q = "\u{f243}", empty = "\u{f244}" },
+  vol      = { off = "\u{f026}", low = "\u{f027}", high = "\u{f028}" },
+  wifi     = "\u{f1eb}",
+}
+
+-- Workspace pills 1-9, glyph + short label mirroring niri's wsName.
+local WS = {
+  { glyph = "\u{f0ac}",  name = "web" },
+  { glyph = "\u{f120}",  name = "term" },
+  { glyph = "\u{f121}",  name = "dev" },
+  { glyph = "\u{f086}",  name = "chat" },
+  { glyph = "\u{f0b1}",  name = "prod" },
+  { glyph = "\u{f02f}",  name = "print" },
+  { glyph = "\u{f06a9}", name = "ai" },
+  { glyph = "\u{f001}",  name = "media" },
+  { glyph = "\u{f11b}",  name = "game" },
+}
+
+-- number \t isCurrent \t total-window-count, one row per workspace.
+local WS_CMD = OMNIWMCTL .. " query workspaces --format json"
+  .. " | jq -r '.result.payload.workspaces[] | [.number, .isCurrent, .counts.total] | @tsv'"
+
+sbar.begin_config()
+
+-- ── bar ──────────────────────────────────────────────────────────────────────
+sbar.bar({
+  position = "top",
+  height = 32,
+  color = col.bar,
+  notch_width = 200,
+  padding_left = 8,
+  padding_right = 8,
+  corner_radius = 0,
+  y_offset = 0,
+  sticky = true,
+  shadow = false,
+  font_smoothing = true,
+})
+
+-- ── defaults ─────────────────────────────────────────────────────────────────
+sbar.default({
+  updates = "when_shown",
+  icon = { font = FONT_ICON .. ":Bold:14.0", color = col.text, padding_left = 6, padding_right = 4 },
+  label = { font = FONT_TEXT .. ":Semibold:13.0", color = col.text, padding_left = 2, padding_right = 6 },
+  background = { corner_radius = 6, height = 24 },
+  padding_left = 4,
+  padding_right = 4,
+})
+
+sbar.add("event", "omniwm_update")
+
+-- ── left: OmniWM launcher (command palette) ──────────────────────────────────
+sbar.add("item", "omniwm", {
+  position = "left",
+  icon = { string = ic.launcher, font = FONT_ICON .. ":Bold:15.0", color = col.mauve },
+  label = { drawing = false },
+  click_script = OMNIWMCTL .. " command open-command-palette",
+})
+
+-- ── left: workspace pills ────────────────────────────────────────────────────
+local spaces = {}
+for i, w in ipairs(WS) do
+  spaces[i] = sbar.add("item", "space." .. i, {
+    position = "left",
+    icon = { string = w.glyph, font = FONT_ICON .. ":Bold:13.0" },
+    label = { string = w.name, color = col.subtext },
+    background = { color = col.surface0, drawing = false },
+    click_script = OMNIWMCTL .. " command switch-workspace " .. i,
+  })
+end
+
+-- updates="on" is load-bearing: the default is "when_shown", and a drawing=false
+-- item counts as "not shown", so without this its omniwm_update callback never
+-- fires and the pills never repaint.
+local manager = sbar.add("item", "space_manager", { drawing = false, updates = "on" })
+
+-- ── left: focused app ────────────────────────────────────────────────────────
+local front = sbar.add("item", "front_app", {
+  position = "left",
+  icon = { drawing = false },
+  label = { color = col.lavender, font = FONT_TEXT .. ":Bold:13.0" },
+  padding_left = 10,
+})
+
+-- ── right: rightmost added first (clock ▸ battery ▸ volume ▸ wifi) ────────────
+local clock = sbar.add("item", "clock", {
+  position = "right",
+  icon = { string = ic.clock, color = col.blue },
+  update_freq = 15,
+})
+
+local battery = sbar.add("item", "battery", { position = "right", update_freq = 120 })
+
+local volume = sbar.add("item", "volume", { position = "right", label = { drawing = false } })
+
+local wifi = sbar.add("item", "wifi", { position = "right", label = { drawing = false } })
+
+-- ── update logic ─────────────────────────────────────────────────────────────
+local function update_clock()
+  clock:set({ label = os.date("%a %d %b  %H:%M") })
+end
+
+local function update_battery()
+  sbar.exec("pmset -g batt", function(info)
+    if type(info) ~= "string" then return end
+    local charge = tonumber(info:match("(%d+)%%"))
+    if not charge then return end
+    local charging = info:find("AC Power") ~= nil
+    local icon, color
+    if charging then icon, color = ic.bolt, col.green
+    elseif charge <= 15 then icon, color = ic.bat.empty, col.red
+    elseif charge <= 35 then icon, color = ic.bat.q, col.yellow
+    elseif charge <= 60 then icon, color = ic.bat.half, col.text
+    elseif charge <= 85 then icon, color = ic.bat.tq, col.text
+    else icon, color = ic.bat.full, col.green end
+    battery:set({ icon = { string = icon, color = color }, label = { string = charge .. "%" } })
+  end)
+end
+
+local function set_volume(vol)
+  vol = tonumber(vol)
+  if not vol then return end
+  local icon, color
+  if vol == 0 then icon, color = ic.vol.off, col.overlay
+  elseif vol < 50 then icon, color = ic.vol.low, col.text
+  else icon, color = ic.vol.high, col.text end
+  volume:set({ icon = { string = icon, color = color } })
+end
+
+local function update_volume()
+  sbar.exec("osascript -e 'output volume of (get volume settings)'", set_volume)
+end
+
+local function update_wifi()
+  sbar.exec("ipconfig getifaddr en0", function(out)
+    local up = type(out) == "string" and out:match("%d+%.%d+")
+    wifi:set({ icon = { string = ic.wifi, color = up and col.text or col.red } })
+  end)
+end
+
+local function redraw_spaces()
+  sbar.exec(WS_CMD, function(out)
+    if type(out) ~= "string" then return end
+    for num, current, total in out:gmatch("(%d+)\t(%a+)\t(%d+)") do
+      local sp = spaces[tonumber(num)]
+      if sp then
+        if current == "true" then
+          sp:set({
+            background = { drawing = true, color = col.mauve },
+            icon = { color = col.crust },
+            label = { color = col.crust, drawing = true },
+          })
+        elseif tonumber(total) > 0 then
+          sp:set({
+            background = { drawing = false },
+            icon = { color = col.text },
+            label = { color = col.subtext, drawing = true },
+          })
+        else
+          -- empty & not current: glyph only, dimmed. Set drawing=false on the
+          -- whole item instead to hide empty pills (noctalia's hide_when_empty).
+          sp:set({
+            background = { drawing = false },
+            icon = { color = col.overlay },
+            label = { drawing = false },
+          })
+        end
+      end
+    end
+  end)
+end
+
+-- ── subscriptions ────────────────────────────────────────────────────────────
+clock:subscribe({ "routine", "forced" }, update_clock)
+battery:subscribe({ "routine", "forced", "power_source_change", "system_woke" }, update_battery)
+volume:subscribe("volume_change", function(env) set_volume(env.INFO) end)
+volume:subscribe({ "forced", "system_woke" }, update_volume)
+wifi:subscribe({ "wifi_change", "forced", "system_woke" }, update_wifi)
+front:subscribe("front_app_switched", function(env)
+  front:set({ label = { string = env.INFO or "" } })
+end)
+manager:subscribe({ "omniwm_update", "forced", "system_woke" }, redraw_spaces)
+
+-- first paint (independent of whether "forced" fires on load)
+update_clock()
+update_battery()
+update_volume()
+update_wifi()
+redraw_spaces()
+
+sbar.hotload(true)
+sbar.end_config()
+sbar.event_loop()
