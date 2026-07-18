@@ -13,6 +13,7 @@
     ./mixins/clipssh.nix
     ./mixins/claude-code.nix
     ./mixins/canarycode.nix
+    ./mixins/canary.nix
     ./mixins/pi.nix
     ./mixins/ghostty.nix
     ./mixins/tmux.nix
