@@ -28,7 +28,7 @@ local FONT_TEXT = "GeistMono Nerd Font" -- labels in the same font, per request
 -- matching the omniwm/niri active-border accent (Flexoki's UI palette has no
 -- purple, so the old Catppuccin mauve maps to blue, not violet).
 local col = {
-  bar      = 0xf01c1b1a, -- base-950, translucent
+  bar      = 0xff1c1b1a, -- base-950, opaque
   crust    = 0xff100f0f, -- black
   text     = 0xffcecdc3, -- base-200 (fg)
   subtext  = 0xff9f9d96, -- base-400
