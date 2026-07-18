@@ -29,6 +29,8 @@ followsMouse = false
 enabled = false
 
 [gaps]
+# Gaps are off unless explicitly enabled (like [borders]); size alone does nothing.
+enabled = true
 size = 8.0
 
 [gaps.outer]
@@ -46,11 +48,11 @@ enabled = true
 width = 2.0
 
 [borders.color]
-# Catppuccin Mocha mauve (#cba6f7) — the same static border colour the g815
-# niri config falls back to before Noctalia themes it.
-red = 0.796
-green = 0.651
-blue = 0.969
+# Flexoki blue (#4385be) — the same static border accent the g815 niri config
+# falls back to before Noctalia themes it.
+red = 0.263
+green = 0.522
+blue = 0.745
 alpha = 1.0
 
 [quakeTerminal]
@@ -153,62 +155,64 @@ binding = "Control+Option+Command+Shift+K"
 id = "move.right"
 binding = "Control+Option+Command+Shift+L"
 
-# Switch workspace (niri Super+1..9)
+# Switch workspace (niri Super+1..9). OmniWM's switchWorkspace.<n> hotkey id is a
+# 0-BASED workspaceIndex (verified: .1 lands on the 2nd workspace), NOT the 1-based
+# `switch-workspace <n>` CLI number. So key "1" → index 0 (web), key "9" → index 8.
 [[hotkeys]]
-id = "switchWorkspace.1"
+id = "switchWorkspace.0"
 binding = "Control+Option+Command+1"
 [[hotkeys]]
-id = "switchWorkspace.2"
+id = "switchWorkspace.1"
 binding = "Control+Option+Command+2"
 [[hotkeys]]
-id = "switchWorkspace.3"
+id = "switchWorkspace.2"
 binding = "Control+Option+Command+3"
 [[hotkeys]]
-id = "switchWorkspace.4"
+id = "switchWorkspace.3"
 binding = "Control+Option+Command+4"
 [[hotkeys]]
-id = "switchWorkspace.5"
+id = "switchWorkspace.4"
 binding = "Control+Option+Command+5"
 [[hotkeys]]
-id = "switchWorkspace.6"
+id = "switchWorkspace.5"
 binding = "Control+Option+Command+6"
 [[hotkeys]]
-id = "switchWorkspace.7"
+id = "switchWorkspace.6"
 binding = "Control+Option+Command+7"
 [[hotkeys]]
-id = "switchWorkspace.8"
+id = "switchWorkspace.7"
 binding = "Control+Option+Command+8"
 [[hotkeys]]
-id = "switchWorkspace.9"
+id = "switchWorkspace.8"
 binding = "Control+Option+Command+9"
 
-# Send window to workspace (niri Super+Shift+1..9)
+# Send window to workspace (niri Super+Shift+1..9). Same 0-based index as above.
 [[hotkeys]]
-id = "moveToWorkspace.1"
+id = "moveToWorkspace.0"
 binding = "Control+Option+Command+Shift+1"
 [[hotkeys]]
-id = "moveToWorkspace.2"
+id = "moveToWorkspace.1"
 binding = "Control+Option+Command+Shift+2"
 [[hotkeys]]
-id = "moveToWorkspace.3"
+id = "moveToWorkspace.2"
 binding = "Control+Option+Command+Shift+3"
 [[hotkeys]]
-id = "moveToWorkspace.4"
+id = "moveToWorkspace.3"
 binding = "Control+Option+Command+Shift+4"
 [[hotkeys]]
-id = "moveToWorkspace.5"
+id = "moveToWorkspace.4"
 binding = "Control+Option+Command+Shift+5"
 [[hotkeys]]
-id = "moveToWorkspace.6"
+id = "moveToWorkspace.5"
 binding = "Control+Option+Command+Shift+6"
 [[hotkeys]]
-id = "moveToWorkspace.7"
+id = "moveToWorkspace.6"
 binding = "Control+Option+Command+Shift+7"
 [[hotkeys]]
-id = "moveToWorkspace.8"
+id = "moveToWorkspace.7"
 binding = "Control+Option+Command+Shift+8"
 [[hotkeys]]
-id = "moveToWorkspace.9"
+id = "moveToWorkspace.8"
 binding = "Control+Option+Command+Shift+9"
 
 # Workspace back-and-forth (niri Super+Tab)

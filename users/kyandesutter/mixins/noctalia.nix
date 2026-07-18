@@ -125,8 +125,9 @@ in
     # light/dark toggle keeps working while Flexoki is active. Values are the
     # canonical Flexoki palette (kepano/flexoki css/flexoki.css): dark uses the
     # -400 accents on black (#100F0F) with base-200 text; light uses -600 accents
-    # on paper (#FFFCF0). The `terminal` blocks mirror Flexoki's own black-box
-    # terminal theme verbatim (incl. its purple-as-ANSI-blue mapping). Schema:
+    # on paper (#FFFCF0). The `terminal` blocks use Flexoki's Ghostty/iTerm2 ANSI
+    # mapping (real blue #4385BE/#205EA6 for ANSI blue), matching the macbook's
+    # built-in Flexoki terminal so both machines are consistent. Schema:
     # noctalia-shell src/theme/cli.cpp + fixed_palette.h.
     customPalettes.Flexoki = {
       dark = {
@@ -158,7 +159,7 @@ in
             red = "#D14D41";
             green = "#879A39";
             yellow = "#D0A215";
-            blue = "#8B7EC8";
+            blue = "#4385BE";
             magenta = "#CE5D97";
             cyan = "#3AA99F";
             white = "#878580";
@@ -168,7 +169,7 @@ in
             red = "#AF3029";
             green = "#66800B";
             yellow = "#AD8301";
-            blue = "#5E409D";
+            blue = "#205EA6";
             magenta = "#A02F6F";
             cyan = "#24837B";
             white = "#6F6E69";
@@ -204,7 +205,7 @@ in
             red = "#AF3029";
             green = "#66800B";
             yellow = "#AD8301";
-            blue = "#5E409D";
+            blue = "#205EA6";
             magenta = "#A02F6F";
             cyan = "#24837B";
             white = "#6F6E69";
@@ -214,7 +215,7 @@ in
             red = "#D14D41";
             green = "#879A39";
             yellow = "#D0A215";
-            blue = "#8B7EC8";
+            blue = "#4385BE";
             magenta = "#CE5D97";
             cyan = "#3AA99F";
             white = "#878580";
@@ -394,7 +395,7 @@ in
       widget.workspaces.max_label_chars = 10;
 
       # Dynamic, wallpaper-derived palette is now the single source of truth for
-      # the desktop's colours (replacing the static Catppuccin builtin). On every
+      # the desktop's colours (the static theme it replaced is long gone). On every
       # wallpaper pick or light/dark flip, Noctalia regenerates a Material Design 3
       # palette from the image, re-renders all templates below, and runs their
       # hooks. `wallpaper_scheme` selects the generator; "muted" keeps the palette
@@ -437,9 +438,9 @@ in
           # rendered on each palette change):
           #   yazi  → writes ~/.config/yazi/flavors/noctalia.yazi/flavor.toml and
           #           its apply.sh auto-points ~/.config/yazi/theme.toml at it
-          #           ([flavor] dark/light = "noctalia"). yazi is removed from the
-          #           catppuccin static list (mixins/catppuccin.nix). Picks up on
-          #           next yazi launch.
+          #           ([flavor] dark/light = "noctalia"). yazi has no static
+          #           Flexoki fallback (mixins/flexoki) — it's dynamic-only. Picks
+          #           up on next yazi launch.
           enable_community_templates = true;
           community_ids = [ "yazi" ];
 
@@ -523,7 +524,7 @@ in
             # post_hook reloads niri's config so the colours apply instantly.
             # One mechanism covers both the live push and persistence across
             # reloads — unlike the old Hyprland pair of `hyprctl eval` + a
-            # dofile'd cache. mixins/niri.nix seeds a Catppuccin fallback copy
+            # dofile'd cache. mixins/niri.nix seeds a Flexoki fallback copy
             # for the first login before the first render here. primary =
             # active border; error = urgent; surface = inactive.
             niri-border = {

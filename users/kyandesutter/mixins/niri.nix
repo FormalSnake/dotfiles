@@ -490,7 +490,7 @@ in
 
       # The Noctalia border fragment owns the *palette* side of layout {}
       # (gaps 8, 2px borders in the live wallpaper colours — rendered from
-      # noctalia-templates/niri-border.kdl.tmpl, seeded with the Catppuccin
+      # noctalia-templates/niri-border.kdl.tmpl, seeded with the Flexoki
       # fallback below). Structural layout knobs that never change with the
       # palette live here in the typed settings instead.
       #
@@ -584,9 +584,9 @@ in
   };
 
   # Seed the runtime fragments so first login (before Noctalia's first render /
-  # power-tune's first flip) has sane defaults: 240Hz, and the same static
-  # Catppuccin Mocha border fallback the Hyprland config carried (mauve active
-  # / surface2 inactive). Copied (not symlinked) only-if-absent: both files are
+  # power-tune's first flip) has sane defaults: 240Hz, and a static Flexoki
+  # border fallback (blue active / base-700 inactive). Copied (not symlinked)
+  # only-if-absent: both files are
   # runtime-owned after this — power-tune rewrites the first, Noctalia
   # re-renders the second.
   home.activation.seedNiriFragments =
@@ -608,8 +608,8 @@ in
             border {
                 on
                 width 2
-                active-color "#cba6f7"
-                inactive-color "#585b70"
+                active-color "#4385be"
+                inactive-color "#575653"
             }
         }
       '';
