@@ -10,7 +10,7 @@
     ./mixins/macbook-mount.nix
     ./mixins/airpods.nix
     ./mixins/easyeffects.nix
-    ./mixins/noctalia.nix
+    ./mixins/dms.nix
     ./mixins/wallpaper-engine.nix
     ./mixins/beeper.nix
     ./mixins/helium.nix

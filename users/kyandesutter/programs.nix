@@ -71,10 +71,10 @@
     bat.enable = true;
     btop = {
       enable = true;
-      # Follow Noctalia's wallpaper-derived palette: its `btop` builtin template
-      # writes ~/.config/btop/themes/noctalia.theme (see mixins/noctalia.nix);
-      # point btop at it. Picks up colours on next launch (no live reload).
-      settings.color_theme = "noctalia";
+      # Follow DMS's wallpaper-derived palette via a matugen user template that
+      # writes ~/.config/btop/themes/dank.theme; point btop at it. Picks up
+      # colours on next launch (no live reload).
+      settings.color_theme = "dank";
     };
     bun.enable = true;
     direnv = {

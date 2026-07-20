@@ -107,11 +107,12 @@
     # nixpkgs input of its own to override.
     nix-flatpak.url = "github:gmodena/nix-flatpak";
 
-    # noctalia V5 desktop shell — native C++/OpenGL ES, official flake (home-
-    # manager module under homeModules.default). Build from source following our
-    # nixpkgs (no cachix substituter).
-    noctalia = {
-      url = "github:noctalia-dev/noctalia";
+    # Dank Material Shell (DMS) desktop shell — Quickshell/QML, official flake
+    # (home-manager module under homeModules.dank-material-shell). Pinned to the
+    # `stable` branch rather than main. Build from source following our nixpkgs
+    # (no cachix substituter).
+    dank-material-shell = {
+      url = "github:AvengeMedia/DankMaterialShell/stable";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
