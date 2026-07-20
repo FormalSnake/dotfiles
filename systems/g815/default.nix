@@ -70,7 +70,7 @@
   # audio mixin. WirePlumber always switches the default sink to the
   # highest-priority *available* node, and auto-falls back when it disappears.
   # Order: CMF Headphone Pro / AirPods > HDMI > built-in speakers. A manual pick
-  # (Noctalia / `wpctl set-default` / pavucontrol) is stored as a "configured
+  # (DMS / `wpctl set-default` / pavucontrol) is stored as a "configured
   # default" and overrides this until you change it again.
   services.pipewire.wireplumber.extraConfig."51-output-priorities" = {
     # CMF Headphone Pro (bluetooth, MAC 2C:BE:EE:65:A0:21) — highest priority.
@@ -88,7 +88,7 @@
       # and they don't appear as an audio device. Pin the initial profile to
       # A2DP (high-fidelity AAC playback) and auto-connect that profile so the
       # sink always shows up. Trade-off: A2DP has no microphone — switch the
-      # card to `headset-head-unit` (via Noctalia/wpctl) when you need the mic.
+      # card to `headset-head-unit` (via DMS/wpctl) when you need the mic.
       {
         matches = [ { "device.name" = "bluez_card.14_14_7D_E7_8C_E3"; } ];
         actions.update-props = {

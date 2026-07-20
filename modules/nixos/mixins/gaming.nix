@@ -8,12 +8,16 @@ let
   # launcher onto the dGPU so games use the RTX 5070 with no per-title config).
 
   # — Keep the screen awake while gaming with a controller —
-  # noctalia's idle service uses the Wayland ext-idle-notify protocol, which only
+  # DMS's idle service uses the Wayland ext-idle-notify protocol, which only
   # resets on keyboard/mouse/touch activity from libinput — gamepad input never
-  # counts. So a controller-only session keeps counting down and hits the
-  # configured idle action (screen-off@11m; see noctalia.nix). The idle monitor
-  # respects inhibitors, so holding a standard Wayland idle inhibitor (wlinhibit)
-  # fully suppresses them. Two complementary holders cover the two cases:
+  # counts. Moot in practice: idle blanking is disabled outright (see the
+  # idleSettingsSeed in users/kyandesutter/mixins/dms.nix — still the eDP-1
+  # wake-modeset workaround), so these inhibitors are belt-and-braces rather
+  # than load-bearing. DMS's idle service also honors the
+  # org.freedesktop.ScreenSaver D-Bus inhibit interface alongside the Wayland
+  # idle-inhibit protocol wlinhibit holds below, so both keep working unchanged
+  # if idle blanking is ever turned back on. Two complementary holders cover
+  # the two cases:
   #   1. game-inhibit — driven by the gamemode start/end hooks below, so the
   #      screen stays on for the whole lifetime of any gamemode-aware title
   #      (Steam/Proton) regardless of input device — including
@@ -299,7 +303,8 @@ in
         desiredgov = "performance";
       };
       # Hold a Wayland idle inhibitor for the lifetime of every gamemode-aware
-      # title so noctalia never blanks the screen mid-game (see gameInhibit above).
+      # title (belt-and-braces — idle blanking is disabled outright; see
+      # gameInhibit above).
       settings.custom = {
         start = "${gameInhibit}/bin/game-inhibit on";
         end = "${gameInhibit}/bin/game-inhibit off";
@@ -308,7 +313,7 @@ in
 
     # Catch-all for non-gamemode controller use: a session daemon that suppresses
     # idle while a gamepad is actively used (see gamepadWatcher above). Bound to
-    # graphical-session.target like the noctalia shell, so it has the Wayland
+    # graphical-session.target like the DMS shell, so it has the Wayland
     # session env wlinhibit needs and starts/stops with the desktop session.
     systemd.user.services.gamepad-idle-inhibit = {
       description = "Hold a Wayland idle inhibitor while a game controller is active";

@@ -154,11 +154,11 @@ in
     };
   };
 
-  # Clipboard: noctalia's native ClipboardService records history by polling the
+  # Clipboard: the shell's clipboard manager records history by polling the
   # Wayland selection itself (browse it with SUPER+ñ). wl-clip-persist takes
   # ownership of the regular clipboard so its contents survive the source app
   # closing (Wayland otherwise drops a selection when the app that offered it
-  # exits), giving noctalia's poller a chance to capture it.
+  # exits), giving the clipboard manager a chance to capture it.
   systemd.user.services.wl-clip-persist = {
     Unit = {
       Description = "wl-clip-persist (keep regular clipboard alive)";
@@ -237,20 +237,20 @@ in
   # Helium picks its notification backend ONCE at startup: it probes the
   # org.freedesktop.Notifications D-Bus name and, if nothing owns it yet, falls
   # back to Chrome's built-in message-center for the whole session and never
-  # re-checks. noctalia (our notification daemon) is a systemd user service
+  # re-checks. DMS (our notification daemon) is a systemd user service
   # coming up in parallel, so launching helium bare races it — intermittently you
   # get built-in Chrome notifications. The ExecStartPre below waits (≤10s) for
-  # noctalia to claim the name before helium starts so it always latches onto the
+  # DMS to claim the name before helium starts so it always latches onto the
   # daemon. busctl is from systemd → always on PATH here.
   #
-  # noctalia.service is ordered before this (After/Wants) as a hint, but the
+  # dms.service is ordered before this (After/Wants) as a hint, but the
   # ExecStartPre busctl wait is the real guard (it polls until the name is owned).
   systemd.user.services.helium = {
     Unit = {
-      Description = "Helium (Chromium) — waits for noctalia's notification daemon";
+      Description = "Helium (Chromium) — waits for DMS's notification daemon";
       PartOf = [ "graphical-session.target" ];
-      After = [ "noctalia.service" "graphical-session.target" ];
-      Wants = [ "noctalia.service" ];
+      After = [ "dms.service" "graphical-session.target" ];
+      Wants = [ "dms.service" ];
       "X-SwitchMethod" = "keep-old";
     };
     Install.WantedBy = [ "graphical-session.target" ];

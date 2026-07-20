@@ -60,7 +60,7 @@ in
 
         # Theming: the Fallout theme (see fallout-limine in the let block above).
         # Limine renders pre-boot, so — like SDDM — this is the theming model's
-        # *static fallback* tier, not the matugen/Noctalia runtime pipeline
+        # *static fallback* tier, not the matugen/DMS runtime pipeline
         # (which would mean a full rebuild on every wallpaper change).
         #
         # term_font / term_font_size have no dedicated module option, so the
@@ -197,13 +197,18 @@ in
     enable = true;
     freeMemThreshold = 10; # SIGTERM when free RAM drops under 10% …
     freeSwapThreshold = 15; # … and free swap under 15% (disk-swap thrash is painful)
-    enableNotifications = true; # Noctalia toast when it kills something
+    enableNotifications = true; # DMS toast when it kills something
     extraArgs = [
       # NEVER sacrifice the compositor or shell — losing these collapses the whole
       # session. Matched against /proc/*/comm (truncated to 15 chars), so list the
-      # wrapped names too.
+      # wrapped names too — nixpkgs' wrapProgram/wrapQtAppsHook hide the real
+      # binary as `.<name>-wrapped` and install the wrapper at the original
+      # name, so DMS's actual running comms are `.dms-wrapped` (dms.service's
+      # `dms run --session`) and `.quickshell-wra` (its quickshell renderer,
+      # `.quickshell-wrapped` truncated) — verified via strace, not the
+      # `dms`/`quickshell` names the wrapper scripts are installed under.
       "--avoid"
-      "^(niri|noctalia|polkit-kde-aut|sshd|systemd)$"
+      "^(niri|\\.dms-wrapped|\\.quickshell-wra|polkit-kde-aut|sshd|systemd)$"
       # Prefer to reap the heavy gaming/Wine processes first.
       "--prefer"
       "^(BeamNG|wine|wineserver|gamescope)$"
@@ -215,11 +220,12 @@ in
   # unbounded under /var/lib/systemd/coredump.
   systemd.coredump.settings.Coredump.MaxUse = "256M";
 
-  # One-click "boot into Windows" support. The Noctalia session button (see
-  # users/kyandesutter/mixins/noctalia.nix) starts this oneshot service, which
-  # runs the reboot-to-windows helper as root (setting the UEFI BootNext needs
-  # privilege). The service — not a setuid wrapper — keeps the privileged action
-  # declarative and lets a scoped polkit rule below waive the password prompt.
+  # One-click "boot into Windows" support. DMS's powermenu / launcher desktop
+  # entry (the parity replacement for noctalia's old session button) starts
+  # this oneshot service, which runs the reboot-to-windows helper as root
+  # (setting the UEFI BootNext needs privilege). The service — not a setuid
+  # wrapper — keeps the privileged action declarative and lets a scoped
+  # polkit rule below waive the password prompt.
   systemd.services.reboot-to-windows = {
     description = "One-shot reboot into Windows via UEFI BootNext";
     serviceConfig = {

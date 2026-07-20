@@ -10,8 +10,8 @@ in
   # so spicetify-cli can patch it at runtime for wallpaper-derived dynamic colours.
   # Both pkgs.spotify (Nix store) and a system Flatpak (/var/lib/flatpak) are
   # read-only; a --user Flatpak lives under $HOME so we can chmod its (still
-  # read-only OSTree) app tree writable without sudo. Noctalia's `spicetify` user
-  # template (mixins/noctalia.nix) regenerates Themes/Comfy/color.ini and its
+  # read-only OSTree) app tree writable without sudo. DMS's `spicetify` user
+  # template (mixins/dms.nix) regenerates Themes/Comfy/color.ini and its
   # post_hook re-applies it. See docs/superpowers/specs/
   # 2026-06-19-noctalia-dynamic-theming-design.md §5 for the full rationale and the
   # known maintenance tax (every Spotify update wipes the injection → re-run

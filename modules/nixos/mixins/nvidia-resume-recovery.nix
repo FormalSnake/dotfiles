@@ -36,8 +36,8 @@ let
       # No live niri instance (e.g. resumed to the greeter, or the session
       # already gone) → nothing here to recover, and don't restart-loop the DM.
       # niri msg needs NIRI_SOCKET ($XDG_RUNTIME_DIR/niri.<display>.sock) —
-      # discover it from the socket that actually exists, the same way
-      # lock-before-sleep discovers noctalia's.
+      # discover it from the socket that actually exists (niri, unlike DMS,
+      # has no fixed well-known socket path to just connect to).
       sock=""
       for s in "$runtime"/niri.*.sock; do
         [ -e "$s" ] && sock="$s" && break

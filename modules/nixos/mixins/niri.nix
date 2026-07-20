@@ -128,13 +128,13 @@ in
 
     # Lock on suspend. logind's default HandleLidSwitch=suspend goes straight to
     # s2idle with no lock, so closing the lid used to resume into an unlocked
-    # session. This oneshot raises noctalia's lock screen and is ordered Before
+    # session. This oneshot raises DMS's lock screen and is ordered Before
     # sleep.target, so every suspend path — lid close, idle, and the
     # SUPER+SHIFT+Escape keybind — resumes on the lock screen. (The keybind's
     # `lock-and-suspend` still locks on its own too; this makes the lid path
     # match.)
     systemd.services.lock-before-sleep = {
-      description = "Lock the noctalia session before sleep";
+      description = "Lock the DMS session before sleep";
       before = [ "sleep.target" ];
       wantedBy = [ "sleep.target" ];
       serviceConfig = {
@@ -167,12 +167,12 @@ in
     # already there) so the trash backend (gvfsd-trash) loads and D-Bus-activates.
     environment.sessionVariables.GIO_EXTRA_MODULES = [ "${pkgs.gvfs}/lib/gio/modules" ];
 
-    # UPower: the D-Bus power daemon noctalia's battery service reads battery
+    # UPower: the D-Bus power daemon DMS's battery widget reads battery
     # state from. Enable it explicitly — relying on D-Bus auto-activation made
     # battery detection in the bar flaky.
     services.upower.enable = true;
 
-    # Fonts noctalia/niri expect (Material Symbols, a Nerd Font, emoji).
+    # Fonts DMS/niri expect (Material Symbols, a Nerd Font, emoji).
     # System UI font is Geist; monospace is GeistMono patched with Nerd Font
     # glyphs (terminal mono + powerline icons). The rest are general coverage
     # fonts so apps don't fall back to Geist (which carries no emoji, CJK, or
@@ -236,11 +236,12 @@ in
       xwayland-satellite
 
       brightnessctl
-      ddcutil # external-monitor brightness over DDC/CI — noctalia's [brightness] enable_ddcutil backend (drives the slider + the XF86MonBrightness keybinds)
+      ddcutil # external-monitor brightness over DDC/CI — DMS's brightness backend (drives the slider + the XF86MonBrightness keybinds)
       playerctl
       wl-clipboard
-      # grim/slurp: Noctalia's screenshot tool (bound on Print / Mod+Shift+S in
-      # users/kyandesutter/mixins/niri.nix) shells out to them.
+      # grim/slurp: kept installed for DMS's screenshot subcommand (bound on
+      # Print / Mod+Shift+S in users/kyandesutter/mixins/niri.nix), which
+      # likely shells out to them for the actual capture.
       grim
       slurp
       ffmpegthumbnailer # video thumbnails for tumbler/Nautilus

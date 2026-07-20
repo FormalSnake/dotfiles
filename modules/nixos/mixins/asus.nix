@@ -47,11 +47,12 @@ in
     services.asusd.enable = true;
 
     # After asusd is up: seed the keyboard colour and cap the battery charge at
-    # 80% for longevity. The seed is the last wallpaper-derived accent noctalia
-    # cached to the user's ~/.cache/noctalia/aura-color (so the keyboard already
-    # shows the right colour before the graphical session starts); noctalia
-    # repaints it on login anyway. Falls back to the Flexoki purple seed if no
-    # cache exists yet. `|| true` so a CLI/permission hiccup never fails the boot.
+    # 80% for longevity. The seed is the last wallpaper-derived accent DMS's
+    # matugen aura template cached to the user's ~/.cache/dank/aura-color (so
+    # the keyboard already shows the right colour before the graphical session
+    # starts); DMS repaints it on login anyway. Falls back to the Flexoki
+    # purple seed if no cache exists yet. `|| true` so a CLI/permission hiccup
+    # never fails the boot.
     systemd.services.asus-aura = {
       description = "Aura keyboard accent seed + 80% charge limit";
       after = [ "asusd.service" ];
@@ -62,7 +63,7 @@ in
         RemainAfterExit = true;
       };
       script = ''
-        seed="${config.users.users.kyandesutter.home}/.cache/noctalia/aura-color"
+        seed="${config.users.users.kyandesutter.home}/.cache/dank/aura-color"
         colour="$(${pkgs.coreutils}/bin/cat "$seed" 2>/dev/null || echo ${auraColour})"
         ${pkgs.asusctl}/bin/asusctl aura effect static -c "$colour" || true
         ${pkgs.asusctl}/bin/asusctl battery limit 80 || true
@@ -75,7 +76,7 @@ in
         done
         # Setting the Aura effect above re-enables the backlight, so re-assert the
         # AC-appropriate level last: dark on battery, full on AC. Mirrors the relog
-        # fix in users/kyandesutter/mixins/noctalia.nix (aura-repaint).
+        # fix in users/kyandesutter/mixins/dms.nix (aura-repaint).
         ${kbdDim} ac || true
       '';
     };

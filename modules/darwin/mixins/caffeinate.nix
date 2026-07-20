@@ -1,6 +1,6 @@
 {
   # Keep the laptop permanently caffeinated — never idle-sleep (the macOS parallel
-  # to the g815 staying "caffeinated", see the Noctalia idle notes on that host).
+  # to the g815 staying "caffeinated", see the DMS idle notes on that host).
   # `caffeinate -i` holds an idle-sleep assertion on any power source; `-s` adds
   # the system-sleep assertion on AC. Display sleep is left alone. The process
   # blocks for as long as it runs, so it holds the assertion for the whole login;

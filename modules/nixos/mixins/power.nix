@@ -265,7 +265,7 @@ let
   # System power reconciler — the single automatic owner of the power profile,
   # and the authority that publishes the current power source to the user session
   # via /run/power/state. Triggered by udev on any ADP0 or ucsi-source-psy change
-  # (and at boot via the service's wantedBy PPD). PPD is the backend the noctalia
+  # (and at boot via the service's wantedBy PPD). PPD is the backend the DMS
   # bar reads/writes (UPower → net.hadess.PowerProfiles), so this is what makes the
   # shell show the right profile without manual toggling.
   #
@@ -317,7 +317,7 @@ let
 in
 {
   config = lib.mkIf config.kyan.asus.enable {
-    # power-profiles-daemon: the profile backend the noctalia bar reads and
+    # power-profiles-daemon: the profile backend the DMS bar reads and
     # writes. The bare niri session doesn't pull it in (no desktop manager
     # does), so without it the bar is stuck showing a static "Balanced" it
     # can't change. Coexists with asusd, which keeps Aura/fan/charge-limit
