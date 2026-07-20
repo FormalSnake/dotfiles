@@ -11,7 +11,7 @@ let
   # DMS's idle service uses the Wayland ext-idle-notify protocol, which only
   # resets on keyboard/mouse/touch activity from libinput — gamepad input never
   # counts. Moot in practice: idle blanking is disabled outright (see the
-  # idleSettingsSeed in users/kyandesutter/mixins/dms.nix — still the eDP-1
+  # settingsSeed in users/kyandesutter/mixins/dms.nix — still the eDP-1
   # wake-modeset workaround), so these inhibitors are belt-and-braces rather
   # than load-bearing. DMS's idle service also honors the
   # org.freedesktop.ScreenSaver D-Bus inhibit interface alongside the Wayland
