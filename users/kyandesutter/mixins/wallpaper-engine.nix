@@ -5,9 +5,12 @@
 # 2026-07-13-wallpaper-engine-noctalia-design.md.
 #
 # Noctalia stays the single source of truth: a WE scene appears in its picker as
-# a *still* named `we-<workshopid>.<ext>` (its own preview.*), so Noctalia
+# a *still* named `we-<workshopid>.png` — a full-resolution frame rendered from
+# the scene (see weStill; falls back to the scene's own preview.*), so Noctalia
 # renders and matugen-samples that still exactly as any other wallpaper — the
-# theme pipeline is untouched. On every wallpaper pick the noctalia
+# theme pipeline is untouched. The rendered still matters because niri shows it
+# (not the live engine) in the backdrop between workspaces, where the raw
+# ~192px preview would upscale to a blurry smear. On every wallpaper pick the noctalia
 # `wallpaper_changed` hook appends `wallpaper-engine-select` (exposed below via
 # kyan.wallpaperEngine.selectCommand), which records the picked scene *per
 # output* under ~/.cache/wallpaper-engine/outputs/<connector>. A user-service
@@ -84,7 +87,11 @@ let
           conn="$(basename "$f")"
           id="$(cat "$f" 2>/dev/null || true)"
           [[ -n "$id" ]] || continue
-          ARGS+=(--screen-root "$conn" --bg "$id")
+          # --scaling is POSITIONAL: it binds to the *preceding* --screen-root, so
+          # it must sit right after each --bg — a single trailing --scaling would
+          # only reach the last output and the rest would fall back to the default
+          # (fit) mode, letterboxing scenes whose aspect differs from the panel.
+          ARGS+=(--screen-root "$conn" --bg "$id" --scaling fill)
           SIG+="$conn=$id;"
         done
       }
@@ -99,7 +106,7 @@ let
           if [[ "$desired" != "$running_sig" ]]; then
             stop
             # --silent: a desktop background must not blast scene audio.
-            linux-wallpaperengine "''${ARGS[@]}" --scaling fill --silent --fps "$fps" &
+            linux-wallpaperengine "''${ARGS[@]}" --silent --fps "$fps" &
             engine_pid=$!
             running_sig="$desired"
           fi
@@ -117,6 +124,78 @@ let
         while read -r -t 0.4 _; do :; done
         reconcile
       done < <(inotifywait -q -m -r -e close_write,create,moved_to,delete "$base" /run/power)
+    '';
+  };
+
+  # Render a full-resolution still for a scene and drop it in the picker set as
+  # we-<id>.png, replacing any stale we-<id>.* first. WE ships only a tiny
+  # preview.* thumbnail (often a 192px square), and Noctalia shows that still in
+  # niri's backdrop (place-within-backdrop) between workspaces — upscaling a
+  # 192px thumbnail to the panel is the blurry, smeared "stretch" you see there,
+  # while the live engine (bottom layer) can't be placed in the backdrop. So we
+  # render the scene once at full res via linux-wallpaperengine's --screenshot
+  # (its pywal path): --window mode renders OFF-SCREEN (no visible toplevel in
+  # niri) but never self-exits, so we poll for the file, then kill it. The
+  # rendered frame doubles as the matugen sample, so colours now come from the
+  # actual scene rather than the thumbnail. Falls back to the raw preview if the
+  # render yields nothing.
+  weStill = pkgs.writeShellApplication {
+    name = "we-still";
+    runtimeInputs = [ pkgs.linux-wallpaperengine pkgs.coreutils ];
+    text = ''
+      id="''${1:-}"
+      destdir="''${2:-}"
+      geom="''${3:-2560x1600}"
+      if [[ -z "$id" || -z "$destdir" ]]; then
+        echo "usage: we-still <workshop-id> <destdir> [WxH]" >&2
+        exit 1
+      fi
+      scene="${workshop}/$id"
+      mkdir -p "$destdir"
+
+      shopt -s nullglob nocaseglob
+      old=("$destdir"/we-"$id".*)
+      (( ''${#old[@]} )) && rm -f "''${old[@]}"
+
+      dest="$destdir/we-$id.png"
+      tmp="$destdir/.we-$id.tmp.png"
+      rm -f "$tmp"
+      echo "rendering still for $id ($geom)…" >&2
+      linux-wallpaperengine --window "0x0x$geom" --bg "$id" --scaling fill \
+        --silent --screenshot "$tmp" --screenshot-delay 30 >/dev/null 2>&1 &
+      pid=$!
+      ok=""
+      # Scene load + shader compile take a couple of seconds; poll up to ~20s for
+      # the screenshot to appear and stop growing, then stop the engine.
+      for _ in $(seq 1 40); do
+        sleep 0.5
+        if [[ -s "$tmp" ]]; then
+          s1="$(stat -c%s "$tmp")"; sleep 0.5; s2="$(stat -c%s "$tmp")"
+          if [[ "$s1" == "$s2" ]]; then ok=1; break; fi
+        fi
+        kill -0 "$pid" 2>/dev/null || break
+      done
+      kill "$pid" 2>/dev/null || true
+      wait "$pid" 2>/dev/null || true
+
+      if [[ -n "$ok" ]]; then
+        mv -f "$tmp" "$dest"
+        printf '%s' "$dest"
+        exit 0
+      fi
+      rm -f "$tmp"
+
+      # Fallback: the raw low-res preview is better than no wallpaper at all.
+      previews=("$scene"/preview.*)
+      if (( ''${#previews[@]} )); then
+        fb="$destdir/we-$id.''${previews[0]##*.}"
+        cp -f "''${previews[0]}" "$fb"
+        echo "render failed; used raw preview for $id" >&2
+        printf '%s' "$fb"
+        exit 0
+      fi
+      echo "no still could be produced for $id" >&2
+      exit 1
     '';
   };
 
@@ -144,7 +223,7 @@ let
   # sets the engine fps, then points every niri output at it via noctalia.
   weSet = pkgs.writeShellApplication {
     name = "we-set";
-    runtimeInputs = [ noctalia pkgs.niri pkgs.jq pkgs.coreutils ];
+    runtimeInputs = [ noctalia pkgs.niri pkgs.jq pkgs.coreutils weStill ];
     text = ''
       id="''${1:-}"
       fps="''${2:-}"
@@ -157,15 +236,7 @@ let
         echo "scene $id not found under $scene (try: we-list)" >&2
         exit 1
       fi
-      shopt -s nullglob nocaseglob
-      previews=("$scene"/preview.*)
-      if [[ ''${#previews[@]} -eq 0 ]]; then
-        echo "no preview.* in $scene" >&2
-        exit 1
-      fi
-      dest="$HOME/Pictures/Wallpapers/dark/we-$id.''${previews[0]##*.}"
-      mkdir -p "$(dirname "$dest")"
-      cp -f "''${previews[0]}" "$dest"
+      dest="$(we-still "$id" "$HOME/Pictures/Wallpapers/dark")"
 
       if [[ -n "$fps" ]]; then
         mkdir -p "$HOME/.cache/${cacheDir}"
@@ -187,7 +258,7 @@ let
   # Add a scene's preview to the picker without applying it (choose light/dark).
   weAdd = pkgs.writeShellApplication {
     name = "we-add";
-    runtimeInputs = [ pkgs.coreutils ];
+    runtimeInputs = [ pkgs.coreutils weStill ];
     text = ''
       id="''${1:-}"
       variant="''${2:-dark}"
@@ -200,15 +271,7 @@ let
         echo "scene $id not found under $scene" >&2
         exit 1
       fi
-      shopt -s nullglob nocaseglob
-      previews=("$scene"/preview.*)
-      if [[ ''${#previews[@]} -eq 0 ]]; then
-        echo "no preview.* in $scene" >&2
-        exit 1
-      fi
-      dest="$HOME/Pictures/Wallpapers/$variant/we-$id.''${previews[0]##*.}"
-      mkdir -p "$(dirname "$dest")"
-      cp -f "''${previews[0]}" "$dest"
+      dest="$(we-still "$id" "$HOME/Pictures/Wallpapers/$variant")"
       echo "added $dest"
     '';
   };
@@ -229,6 +292,7 @@ in
     home.packages = [
       pkgs.linux-wallpaperengine
       wallpaperEngineSelect
+      weStill
       weList
       weSet
       weAdd

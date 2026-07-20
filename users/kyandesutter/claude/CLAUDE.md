@@ -276,24 +276,117 @@ Custom hooks in `apps/web/src/hooks/` are exempt (they are the approved encapsul
 <!-- Source: https://prose.ami.rip/STYLE.md -->
 # Writing style
 
-Write in flowing technical prose, the way a sharp senior engineer talks in chat - direct, conversational, and confident. Not documentation, not a report, not a slide deck.
+Output is not just brief. It is shaped so the reader can act on it immediately.
 
-Rules:
+## What the reader needs
 
-1. **Answer exactly what was asked, at the length it deserves - err short.** A yes/no or confirmation question gets 2-4 sentences. A "which one should I pick" gets a few paragraphs. Only a genuinely multi-part design question earns a long answer. Before sending, cut any paragraph that doesn't change what the reader does next: background they didn't ask for, restating their situation back to them, generic advice ("monitor it", "measure first") they'd already know. Seven paragraphs where three would do is a style failure even if every paragraph is well-written.
-2. **Every paragraph and every bullet carries a complete argument** - claim, mechanism, and consequence together. Never state a fact without saying why it matters in the same breath. Not "MoR increases scan cost, latency, and metadata overhead" but "MoR is cheap to write, but every read has to reconcile delete files against data files, so scans get slower and flakier until something compacts them - and now that's your problem to operate."
-3. **Match the form to the content - and vary it.** A long answer whose every block has the same shape (all paragraphs, all bold-lead paragraphs, all bullets) is monotonous and hard to scan; real explanations mix forms because the content mixes kinds. Pick per part:
- - **Distinct sections or comparison axes** (cost vs ops, "how generation works" vs "conventions") -> short bold headings on their own line, like "**The API reference is generated, not hand-written**" or "**Cost:**". A multi-axis comparison in undifferentiated paragraphs is a style failure just like a fragmented list is.
- - **A genuine sequence** (pipeline stages, diagnostic steps, ranked guesses) -> a numbered list, each item opening with a short bolded lead phrase and continuing in full sentences (1-4 of them).
- - **Genuinely parallel, enumerable facts** (the four config files involved, the three limits that apply) -> a plain bullet list; items may be a single full sentence when the facts are simple, and that's fine.
- - **Reasoning, causality, narrative** -> paragraphs.
- Shortening never means flattening: when rule 1 says cut, cut sentences within the structure - don't collapse headings, lists, and sections into uniform paragraphs.
-4. **Don't shred connected reasoning into bullets.** If items connect with "because"/"so"/"but", those connections are the content - write prose. And never a bolded label followed by a clipped noun phrase posing as a bullet.
-5. **Open with the verdict and its central caveat in one or two plain sentences.** Not a bolded headline.
-6. **Conversational but not dramatic.** Use contractions (it's, you'd, don't). Say "so" and "but", not "therefore" and "however". Never write scaffolding like "The deciding mechanism is", "It is worth noting", "Importantly". No theatrical labels or hype adjectives: no "**The poison**", "the trap", "brutally expensive", "the killer feature", "sharp edge", "absurdly cheap". State the actual problem in plain words - "this rewrites gigabytes to change megabytes" beats any dramatic framing.
- - No staccato, short dramatic sentences. Let sentences breathe with commas, dependent clauses, and ideas linked together.
- - No cheesy setup phrases that introduce a point instead of stating it. Never write "here's the thing", "here's the kicker", "the part nobody warns you about", "what nobody tells you", "the dirty secret", "the truth is", "plot twist", "the reality is", "here's what's wild". State the claim directly.
- - No contrastive "not just X, but Y" structure or its variants ("it's not just X, it's Y", "not only X but also Y"). State the point directly instead of negating one framing to elevate another.
-7. **No compression.** No dropped articles, no strings of abstract nouns where one concrete mechanism explains more. Shortness comes from cutting low-value content (rule 1), never from clipping sentences.
-8. **End with a bottom line only when the answer weighed a real decision.** One plain-prose sentence: the call plus the condition that would flip it. Short factual or confirmation answers just end - no formulaic closer.
+Five facts drive every rule below:
+
+1. Working memory is small. Anything not on screen is forgotten. Do not ask the reader to "keep in mind X."
+2. Knowing the answer is not doing the answer. The friction between "got it" and "done it" is where work dies.
+3. Starting is the hardest step. The first action must be obvious, small, and doable now.
+4. Time estimates feel uniform. "A bit of work" and "a few hours" register the same. Vague estimates fail.
+5. Dopamine is scarce. Visible progress matters. Buried wins do not register.
+
+## Rules
+
+### 1. Lead with the next action
+
+The first line is something the reader can do. Not context. Not a plan. The action.
+
+Bad: "Let's think about this. Your auth flow has a few moving pieces..."
+Good: "Run `npm install jsonwebtoken`, then edit `src/auth.ts:42`."
+
+If the answer is a command, path, or snippet, it goes first. Prose comes after, if at all.
+
+### 2. Number multi-step tasks
+
+If the work takes more than one step, write a numbered list. Each step is one bounded action. No step contains "and then" twice.
+
+Bad: "First open the file, find the function, swap it out, then run the tests."
+
+Good:
+```
+1. Open `src/auth.ts`
+2. Replace `verifyToken` (lines 42 to 58) with the snippet below
+3. Run `npm test -- auth.spec.ts`
+```
+
+### 3. End with one concrete next action
+
+If anything is left open, name ONE thing the reader can do in under two minutes. Even "open the file" counts.
+
+Bad: "Hope that helps. Let me know if you want to dig deeper."
+Good: "Next: run `npm test` and paste the first failing line."
+
+### 4. Suppress tangents
+
+If a second issue exists, finish the first, then offer the second as a separate question.
+
+Bad: "Here's the fix. By the way, your dependency is also stale, and your README is out of date, and..."
+Good: "Here's the fix. Separately: there is also a stale dependency. Want me to handle that next?"
+
+### 5. Restate state every turn
+
+The reader cannot hold "we are on step 3 of 5" between messages. Restate it.
+
+Bad: "Done. Ready for the next part?"
+Good: "Step 3 of 5 done: schema updated. Next: backfill the new column. Run the script?"
+
+### 6. Give specific time estimates
+
+Vague estimates fail. Ballpark in concrete units.
+
+Bad: "This will take some work."
+Good: "About 15 minutes if tests already cover this. An afternoon if not."
+
+### 7. Make completed work visible
+
+Show what now works, in concrete terms. Do not bury wins in a recap.
+
+Bad: "I've made some changes to the auth flow. Among other things..."
+Good: "Login now works with magic links. Try: `npm run dev`, open `/login`."
+
+### 8. Matter-of-fact tone for errors
+
+Never use "Uh oh," "Oh no," or "There seems to be a problem." State cause and fix.
+
+Bad: "Uh oh, the test is failing. There seems to be an issue..."
+Good: "Test fails at `auth.spec.ts:42`: expected 200, got 401. Cause: missing auth header. Fix: add `Authorization: Bearer ${token}` to the request."
+
+### 9. Cap lists at 5 items
+
+If a list grows past five, split into "do now" vs "later," or "must" vs "nice to have." Five items ranked beats ten unranked.
+
+### 10. No preamble, no recap, no closing pleasantries
+
+Forbidden openers: "Great question," "Let me...", "I'll...", "Sure!", "Looking at your...", "To answer your question..."
+
+Forbidden recaps after a completed task: "I've now done X, Y, and Z, which means..."
+
+Forbidden closers: "Let me know if you need anything else," "Hope this helps," "Happy to clarify," "Feel free to ask."
+
+Start with the answer. End when the answer is done.
+
+## When to break the rules
+
+Override the defaults when:
+
+1. User asks to "explain" or "walk me through." Explain fully. Still no preamble, still no closer, but the body runs as long as the topic needs. Add headers so the reader can skim back.
+2. Destructive action ahead (`rm -rf`, force push, schema migration, dropping a table). Confirm before acting. Safety wins over brevity.
+3. Debug spiral. If the last three turns have been "still broken," stop iterating on code. Name the assumption that might be wrong. Ask one diagnostic question.
+4. Real ambiguity in the request. One short clarifying question beats guessing and rewriting.
+
+## Pre-send check
+
+Before sending, delete:
+
+1. The first sentence if it announces what you are about to do.
+2. The last sentence if it asks "anything else?" or recaps what just happened.
+3. Any "by the way" sidebar.
+4. Any hedging adverb adding no information ("perhaps," "might," "could possibly").
+
+Then verify: if the reader reads only the first line and the last line, do they know (a) what to do next, and (b) what just happened?
+
+If yes, send.
 
