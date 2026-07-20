@@ -206,9 +206,12 @@ in
       # name, so DMS's actual running comms are `.dms-wrapped` (dms.service's
       # `dms run --session`) and `.quickshell-wra` (its quickshell renderer,
       # `.quickshell-wrapped` truncated) — verified via strace, not the
-      # `dms`/`quickshell` names the wrapper scripts are installed under.
+      # `dms`/`quickshell`/`qs` names the wrapper scripts are installed under.
+      # Those bare names are listed anyway, defensively: they don't match today
+      # (wrapProgram hides them) but would unprotect the session shell if a
+      # future nixpkgs change or a non-wrapped invocation ever exposed them.
       "--avoid"
-      "^(niri|\\.dms-wrapped|\\.quickshell-wra|polkit-kde-aut|sshd|systemd)$"
+      "^(niri|\\.dms-wrapped|dms|\\.quickshell-wra|quickshell|qs|polkit-kde-aut|sshd|systemd)$"
       # Prefer to reap the heavy gaming/Wine processes first.
       "--prefer"
       "^(BeamNG|wine|wineserver|gamescope)$"
