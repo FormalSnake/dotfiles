@@ -93,7 +93,18 @@
     lazygit.enable = true;
     opencode.enable = true;
     ripgrep.enable = true;
-    yazi.enable = true;
+    yazi = {
+      enable = true;
+      # Follow DMS's wallpaper-derived palette via a matugen user template that
+      # writes ~/.config/yazi/flavors/dank.yazi/flavor.toml; point yazi's
+      # top-level theme.toml at it for both modes (the flavor itself is
+      # re-rendered on every light/dark flip, so one name covers both). Picks
+      # up colours on next launch (no live reload).
+      theme.flavor = {
+        dark = "dank";
+        light = "dank";
+      };
+    };
     zoxide.enable = true;
   };
 }

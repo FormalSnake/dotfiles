@@ -1,4 +1,4 @@
-{ lib, pkgs, inputs, ... }:
+{ config, lib, pkgs, inputs, ... }:
 let
   # The single keyboard-aura setter: paint the Aura keyboard to a given accent and
   # apply the effect/brightness appropriate to the current power source. Shared by
@@ -83,6 +83,124 @@ in
     enable = true;
     systemd.enable = true; # user service, PartOf the Wayland/graphical-session target
     enableDynamicTheming = true; # pulls in the deps DMS's own theming needs
+  };
+
+  # App theming beyond DMS's builtin templates (gtk3/gtk4, qt5ct/qt6ct, ghostty,
+  # …, all unconditionally detected + rendered by DMS itself — see
+  # AvengeMedia/DankMaterialShell core/internal/matugen/matugen.go
+  # templateRegistry). These `user` templates push the same live wallpaper
+  # palette into apps DMS can't theme natively. Sources are installed to
+  # ~/.config/matugen/templates/ below; `.default` colour tokens track the
+  # active mode, so each output is rewritten on every mode flip / wallpaper
+  # change DMS runs matugen for. post_hook strings are themselves rendered
+  # through the engine (colour tokens interpolated) before running.
+  xdg.configFile = {
+    "matugen/templates/aura.tmpl".source = ../matugen-templates/aura.tmpl;
+    "matugen/templates/ghostty.tmpl".source = ../matugen-templates/ghostty.tmpl;
+    "matugen/templates/neovim.lua.tmpl".source = ../matugen-templates/neovim.lua.tmpl;
+    "matugen/templates/equibop.css.tmpl".source = ../matugen-templates/equibop.css.tmpl;
+    "matugen/templates/spicetify.ini.tmpl".source = ../matugen-templates/spicetify.ini.tmpl;
+    "matugen/templates/obsidian.css.tmpl".source = ../matugen-templates/obsidian.css.tmpl;
+    "matugen/templates/niri-border.kdl.tmpl".source = ../matugen-templates/niri-border.kdl.tmpl;
+    "matugen/templates/btop.theme.tmpl".source = ../matugen-templates/btop.theme.tmpl;
+    "matugen/templates/yazi-flavor.toml.tmpl".source = ../matugen-templates/yazi-flavor.toml.tmpl;
+
+    # DMS reads ~/.config/matugen/config.toml on every re-theme and splices its
+    # [config] and [templates] sections verbatim into the matugen invocation it
+    # runs itself (buildMergedConfig in matugen.go) — so this is matugen's own
+    # TOML syntax, not a DMS-specific format. A bare `[templates]` header is
+    # required before the first `[templates.*]` subtable: DMS's merge locates
+    # the literal substring "[templates]", which "[templates.aura]" alone does
+    # not contain. `~` in input_path/output_path is expanded by matugen itself.
+    "matugen/config.toml".text = ''
+      [config]
+
+      [templates]
+
+      # ASUS Aura keyboard. Output file doubles as the "current accent" cache
+      # that power-tune (niri.nix) reads to restore today's colour on a
+      # power-source change; the post_hook does the actual repaint.
+      [templates.aura]
+      input_path = "~/.config/matugen/templates/aura.tmpl"
+      output_path = "~/.cache/dank/aura-color"
+      post_hook = "${auraRepaint}/bin/aura-repaint {{colors.primary.default.hex_stripped}}"
+
+      # Ghostty: written into ghostty's themes dir; config references it with
+      # `theme = "Matugen"` (see mixins/ghostty.nix). SIGUSR2 live-reloads it
+      # (ghostty >= 1.2) without a restart. DMS's own builtin ghostty template
+      # writes a separate `themes/dankcolors` file we don't reference, so the
+      # two don't conflict.
+      [templates.ghostty]
+      input_path = "~/.config/matugen/templates/ghostty.tmpl"
+      output_path = "~/.config/ghostty/themes/Matugen"
+      post_hook = "pkill -SIGUSR2 ghostty || true"
+
+      # Neovim: base16 lua module consumed by dynamic-base16.nvim (watch =
+      # true) — no hook needed, the plugin watches the file. See neovim.nix.
+      [templates.neovim]
+      input_path = "~/.config/matugen/templates/neovim.lua.tmpl"
+      output_path = "~/.config/nvim/lua/dank_base16.lua"
+
+      # Equibop (Discord): Equicord hot-reloads the themes folder, so no hook.
+      # One-time: enable the theme in Equibop -> Settings -> Themes.
+      [templates.equibop]
+      input_path = "~/.config/matugen/templates/equibop.css.tmpl"
+      output_path = "~/.config/equibop/themes/dank.theme.css"
+
+      # Spotify via spicetify. Writes the Comfy theme's color.ini, then
+      # re-applies it to the (Flatpak) Spotify — see mixins/spicetify.nix.
+      # Absolute spicetify path: this hook runs inside DMS's systemd user
+      # service, whose PATH won't include the home profile bin. If the UI
+      # doesn't visibly recolour, Ctrl+Shift+R inside Spotify forces it.
+      #
+      # The config dir is selected via the SPICETIFY_CONFIG env var, NOT a
+      # `-c <path>` flag: in spicetify-cli v2 `-c`/`--config` is a standalone,
+      # non-chainable flag that just prints the config path and exits, so
+      # `spicetify -c <path> apply` silently runs nothing (exit 0) and Spotify
+      # never gets re-patched. Setting SPICETIFY_CONFIG points apply at this
+      # config dir explicitly (the systemd service may not have XDG_CONFIG_HOME).
+      [templates.spicetify]
+      input_path = "~/.config/matugen/templates/spicetify.ini.tmpl"
+      output_path = "~/.config/spicetify/Themes/Comfy/color.ini"
+      post_hook = "SPICETIFY_CONFIG=${config.home.homeDirectory}/.config/spicetify ${pkgs.spicetify-cli}/bin/spicetify apply --no-restart || true"
+
+      # Obsidian (Minimal theme). Rendered into the vault's snippet dir;
+      # Obsidian watches ~/Notes/.obsidian/snippets and hot-reloads on write,
+      # so no post_hook. macOS rides Minimal's built-in Flexoki preset instead
+      # — no DMS there — so this template is Linux-only (dms.nix is
+      # g815-only). scripts/obsidian-vault-bootstrap.sh seeds an empty enabled
+      # snippet before the first render.
+      [templates.obsidian]
+      input_path = "~/.config/matugen/templates/obsidian.css.tmpl"
+      output_path = "~/Notes/.obsidian/snippets/dank.css"
+
+      # niri window borders. DMS doesn't touch the compositor; this renders the
+      # wallpaper palette into the layout fragment niri's config.kdl includes
+      # (include optional=true, placed LAST so it overrides the rendered
+      # defaults — see mixins/niri.nix), and the post_hook reloads niri's
+      # config so the colours apply instantly. mixins/niri.nix seeds a Flexoki
+      # fallback copy for the first login before the first render here.
+      # primary = active border; error = urgent; outline = inactive.
+      [templates.niri-border]
+      input_path = "~/.config/matugen/templates/niri-border.kdl.tmpl"
+      output_path = "~/.cache/dank/niri-border.kdl"
+      post_hook = "${pkgs.niri}/bin/niri msg action load-config-file || true"
+
+      # btop. DMS has no builtin btop template; programs.btop.settings.color_theme
+      # in programs.nix points at this output. Picks up colours on next launch
+      # (no live reload).
+      [templates.btop]
+      input_path = "~/.config/matugen/templates/btop.theme.tmpl"
+      output_path = "~/.config/btop/themes/dank.theme"
+
+      # yazi. DMS has no builtin yazi template; programs.yazi.theme in
+      # programs.nix points ~/.config/yazi/theme.toml's [flavor] dark/light at
+      # "dank", so this one output covers both modes. Picks up colours on next
+      # yazi launch (no live reload).
+      [templates.yazi]
+      input_path = "~/.config/matugen/templates/yazi-flavor.toml.tmpl"
+      output_path = "~/.config/yazi/flavors/dank.yazi/flavor.toml"
+    '';
   };
 
   # settings.json is DMS's own runtime-mutable config (rewritten by the Settings

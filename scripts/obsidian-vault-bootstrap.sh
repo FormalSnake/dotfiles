@@ -8,10 +8,11 @@ MODE="${1:?usage: obsidian-vault-bootstrap.sh <full|client> [vault-path]}"
 VAULT="${2:-$HOME/Notes}"
 [ "$MODE" = full ] || [ "$MODE" = client ] || { echo "mode must be full|client" >&2; exit 1; }
 
-# Linux is the only host where Noctalia repaints Obsidian from the wallpaper
-# palette (via a rendered snippet at .obsidian/snippets/noctalia.css); every
-# other host (macbook, mobile) rides Minimal's built-in Flexoki preset. .obsidian
-# is device-local (LiveSync hidden-file sync is off), so the two never collide.
+# Linux is the only host where DMS (via a matugen user template) repaints
+# Obsidian from the wallpaper palette (a rendered snippet at
+# .obsidian/snippets/dank.css); every other host (macbook, mobile) rides
+# Minimal's built-in Flexoki preset. .obsidian is device-local (LiveSync
+# hidden-file sync is off), so the two never collide.
 LINUX=false; [ "$(uname -s)" = Linux ] && LINUX=true
 
 mkdir -p "$VAULT"/{Inbox,Projects,Startup,Meetings,Ideas,Archive,Attachments,_inbox/scans/failed} \
@@ -35,14 +36,14 @@ put .obsidian/app.json <<'EOF'
 EOF
 
 # Minimal everywhere; follow the OS light/dark (mac → Flexoki light/dark, Linux →
-# Noctalia's SUPER+SHIFT+T toggle drives the desktop color-scheme signal). On
-# Linux, enable the Noctalia snippet so the wallpaper palette overrides Minimal.
+# the SUPER+SHIFT+T toggle drives the desktop color-scheme signal). On Linux,
+# enable the dank snippet so the wallpaper palette overrides Minimal.
 if $LINUX; then
   put .obsidian/appearance.json <<'EOF'
 {
   "cssTheme": "Minimal",
   "theme": "system",
-  "enabledCssSnippets": ["noctalia"]
+  "enabledCssSnippets": ["dank"]
 }
 EOF
 else
@@ -59,7 +60,7 @@ put .obsidian/community-plugins.json <<'EOF'
 EOF
 
 # Minimal Theme Settings: pin both color schemes to Flexoki (the theme's built-in
-# preset). Noctalia's snippet overrides these on Linux; on every other host this
+# preset). The dank snippet overrides these on Linux; on every other host this
 # is the whole color story. Field names + values are the plugin's own settings.
 put .obsidian/plugins/obsidian-minimal-settings/data.json <<'EOF'
 {
@@ -87,10 +88,10 @@ fetch "$MIN/manifest.json" .obsidian/themes/Minimal/manifest.json
 fetch "$MIN/theme.css"     .obsidian/themes/Minimal/theme.css
 
 # Linux only: seed an empty enabled snippet so Obsidian has it toggled on and
-# ready before Noctalia's first render fills it (Noctalia owns the contents
-# thereafter, hot-reloaded on write).
-$LINUX && put .obsidian/snippets/noctalia.css <<'EOF'
-/* Rendered by Noctalia on every palette change — do not edit. */
+# ready before DMS's first render fills it (DMS owns the contents thereafter,
+# hot-reloaded on write).
+$LINUX && put .obsidian/snippets/dank.css <<'EOF'
+/* Rendered by DMS (matugen) on every palette change — do not edit. */
 EOF
 
 [ "$MODE" = client ] && { echo "client bootstrap done: $VAULT"; exit 0; }

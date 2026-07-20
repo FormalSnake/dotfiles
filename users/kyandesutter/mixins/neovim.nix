@@ -84,14 +84,14 @@ in
         }
       '';
 
-      # Wallpaper-derived colours (Linux/Noctalia). Noctalia renders the live M3
-      # palette into ~/.config/nvim/lua/noctalia_base16.lua as a base00..base0F
-      # table (see the `neovim` user template in mixins/noctalia.nix);
+      # Wallpaper-derived colours (Linux/DMS). matugen renders the live M3
+      # palette into ~/.config/nvim/lua/dank_base16.lua as a base00..base0F
+      # table (see the `neovim` user template in mixins/dms.nix);
       # dynamic-base16.nvim maps it onto all Treesitter/LSP highlight groups and,
-      # with watch = true, hot-reloads when Noctalia rewrites the file (on every
+      # with watch = true, hot-reloads when DMS rewrites the file (on every
       # wallpaper change / light-dark flip). flexoki (above) stays the base
       # colourscheme and the fallback: the setup is pcall-guarded so a missing file
-      # (cold start before the first palette, or the macOS host where Noctalia
+      # (cold start before the first palette, or the macOS host where DMS
       # doesn't run) never breaks startup — nvim simply stays on flexoki until
       # the file exists (restart nvim once after the first palette is generated).
       dynamic-base16 = ''
@@ -102,7 +102,7 @@ in
           config = function()
             pcall(function()
               require("dynamic-base16").setup({
-                module = "noctalia_base16",
+                module = "dank_base16",
                 transparent = true,
                 watch = true,
               })
