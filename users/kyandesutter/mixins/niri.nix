@@ -332,13 +332,21 @@ in
           options = "caps:escape";
         };
         touchpad = {
-          # clickfinger: a physical 2-finger press = RMB, 3-finger = MMB
-          # (replaces libinput's bottom-corner click areas). scroll-factor < 1
-          # dampens the over-sensitive, long-coasting two-finger scroll.
+          # macOS-like feel. clickfinger: a physical 2-finger press = RMB,
+          # 3-finger = MMB (replaces libinput's bottom-corner click areas).
+          # dwt disables the pad while typing so a resting palm/thumb can't
+          # fire a tap or drag mid-keystroke (macOS does the same). adaptive
+          # accel with a small positive speed gives the nonlinear,
+          # slightly-quicker pointer macOS uses. scroll-factor stays under 1 to
+          # tame libinput's over-sensitive two-finger scroll while landing
+          # closer to macOS's pace so it neither undershoots nor coasts past.
           tap = true;
+          dwt = true;
           natural-scroll = true;
           click-method = "clickfinger";
-          scroll-factor = 0.4;
+          accel-profile = "adaptive";
+          accel-speed = 0.2;
+          scroll-factor = 0.5;
         };
         # focus-follows-mouse stays off (niri default) — keyboard focus only
         # changes on click, matching the old follow_mouse=2 behaviour; niri
