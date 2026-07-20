@@ -27,6 +27,7 @@
     casks = [
       # — previously-declared casks —
       "alcove"
+      "balenaetcher"
       "betterdisplay"
       "bluebubbles" # BlueBubbles Server (iMessage bridge) — macOS-only, this Mac is the host
       "clop"
