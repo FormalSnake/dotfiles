@@ -66,6 +66,15 @@ let
       stop() {
         if [[ -n "$engine_pid" ]] && kill -0 "$engine_pid" 2>/dev/null; then
           kill "$engine_pid" 2>/dev/null || true
+          # linux-wallpaperengine intermittently hangs on SIGTERM during GL
+          # teardown (prints "Stopping" then never exits). A bare `wait` here
+          # would block this single-threaded loop forever, so every later
+          # wallpaper change goes unreconciled. Give it up to 2s, then SIGKILL.
+          for _ in $(seq 1 20); do
+            kill -0 "$engine_pid" 2>/dev/null || break
+            sleep 0.1
+          done
+          kill -9 "$engine_pid" 2>/dev/null || true
           wait "$engine_pid" 2>/dev/null || true
         fi
         engine_pid=""

@@ -74,7 +74,7 @@
   programs.fish.functions.rebuild = {
     description = "Rebuild NixOS from the flake (~/.config/nix#g815), runnable from any directory";
     body = ''
-      sudo nixos-rebuild switch --flake ~/.config/nix#g815 $argv
+      sudo nixos-rebuild switch --flake ~/.config/nix#g815 --impure $argv
     '';
   };
 
