@@ -51,7 +51,7 @@ let
   # (see noctalia-shell src/app/application_services.cpp); if that path contains
   # "flexoki" (any case) we snap the whole shell to the hardcoded Flexoki palette
   # below via `noctalia msg color-scheme-set custom Flexoki`, otherwise we return
-  # to the wallpaper-derived M3 palette (`color-scheme-set wallpaper muted`,
+  # to the wallpaper-derived M3 palette (`color-scheme-set wallpaper m3-content`,
   # matching theme.wallpaper_scheme). This runs inside noctalia's systemd *user*
   # service (limited PATH), so the noctalia binary is provided via runtimeInputs.
   # `color-scheme-set` fires colors_changed (NOT wallpaper_changed), so no loop.
@@ -88,7 +88,7 @@ let
       if [[ "$path" == *flexoki* ]]; then
         noctalia msg color-scheme-set custom Flexoki
       else
-        noctalia msg color-scheme-set wallpaper muted
+        noctalia msg color-scheme-set wallpaper m3-content
       fi
     '';
   };
@@ -398,9 +398,10 @@ in
       # the desktop's colours (the static theme it replaced is long gone). On every
       # wallpaper pick or light/dark flip, Noctalia regenerates a Material Design 3
       # palette from the image, re-renders all templates below, and runs their
-      # hooks. `wallpaper_scheme` selects the generator; "muted" keeps the palette
-      # low-saturation (the most minimal non-monochrome scheme noctalia ships)
-      # while still being wallpaper-derived. Valid values (noctalia rejects
+      # hooks. `wallpaper_scheme` selects the generator; "m3-content" is the real
+      # Material SchemeContent, which stays faithful to the wallpaper's dominant
+      # colour rather than its most-saturated accent, so a small vivid neon strip
+      # no longer hijacks the whole palette. Valid values (noctalia rejects
       # anything else and silently falls back to m3-content) are the M3 schemes
       # m3-tonal-spot (balanced), m3-content, m3-monochrome (pure gray),
       # m3-rainbow, m3-fruit-salad, plus the non-M3 muted, soft, vibrant,
@@ -411,7 +412,7 @@ in
       theme = {
         mode = "dark";
         source = "wallpaper";
-        wallpaper_scheme = "muted";
+        wallpaper_scheme = "m3-content";
 
         # App theming. The builtin gtk3/gtk4 templates render the live palette into
         # ~/.config/gtk-{3,4}.0/noctalia.css (imported via gtk.css) and drive the
