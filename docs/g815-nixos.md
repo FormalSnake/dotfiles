@@ -1,5 +1,9 @@
 # NixOS gaming host `g815` — setup plan
 
+> **Historical (2026-06):** this is the original bootstrap plan. The live config
+> has since moved Hyprland → niri, Noctalia → Dank Material Shell (2026-07-20),
+> and gaming → Windows. Current architecture lives in `CLAUDE.md`.
+
 Adds a second host to this flake-parts config: a NixOS gaming/coding laptop, **without
 touching the existing `macbook` (nix-darwin) host**. The laptop is an **Asus ROG Strix
 G18 G815LP-S9034** (Intel Core Ultra 9 275HX "Arrow Lake-HX", RTX 5070 Laptop "Blackwell",

@@ -1,5 +1,9 @@
 # Noctalia home-manager module — internals & IPC reference
 
+> **Superseded (2026-07-20):** Noctalia was replaced by Dank Material Shell
+> (`users/kyandesutter/mixins/dms.nix`); the `noctalia` flake input is gone.
+> Kept as a reference for the old module's behavior only.
+
 Notes on how the upstream `noctalia` flake input's home-manager module
 (`programs.noctalia`) actually behaves on disk, plus the runtime IPC surface.
 Captured so we don't have to re-read the input source every time. The module
