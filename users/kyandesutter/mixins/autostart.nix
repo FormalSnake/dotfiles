@@ -173,25 +173,6 @@ in
     };
   };
 
-  # KDE Connect tray indicator. Launching the indicator spawns kdeconnectd (the
-  # daemon), which bridges the paired iPhone: notification mirroring (via the
-  # freedesktop notification API → noctalia), shared clipboard, media control and
-  # find-my-phone. System-level programs.kdeconnect.enable (phone-integration.nix)
-  # provides the binary + firewall ports.
-  systemd.user.services.kdeconnect-indicator = {
-    Unit = {
-      Description = "KDE Connect (tray indicator + daemon)";
-      PartOf = [ "graphical-session.target" ];
-      After = [ "graphical-session.target" ];
-      "X-SwitchMethod" = "keep-old";
-    };
-    Install.WantedBy = [ "graphical-session.target" ];
-    Service = {
-      Type = "simple";
-      ExecStart = loginExec "kdeconnect-indicator";
-    };
-  };
-
   # LocalSend receiver (AirDrop-style file/link sharing). Kept running so files
   # can arrive without manually opening the app. It opens a window at launch;
   # enable "launch minimized / minimize to tray" in-app to suppress that.
