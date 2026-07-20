@@ -4,7 +4,7 @@ Declarative configuration for two machines from one flake:
 
 - **`macbook`** — `aarch64-darwin`, nix-darwin + home-manager (primary dev host)
 - **`g815`** — `x86_64-linux`, NixOS + home-manager (ASUS ROG laptop: niri +
-  Noctalia desktop, gaming, NVIDIA PRIME offload)
+  DMS desktop, gaming, NVIDIA PRIME offload)
 
 Inspired by [getchoo/borealis](https://github.com/getchoo/borealis).
 
@@ -21,7 +21,7 @@ Inspired by [getchoo/borealis](https://github.com/getchoo/borealis).
 - `users/` — per-user home-manager config (`kyandesutter/`)
 - `secrets/` — agenix-encrypted secrets
 
-See [`CLAUDE.md`](./CLAUDE.md) for repo conventions, the Noctalia/matugen theming
+See [`CLAUDE.md`](./CLAUDE.md) for repo conventions, the DMS/matugen theming
 model, and the power-management architecture.
 
 ## ⚠️ Rebuild policy

@@ -5,7 +5,7 @@ let
   # EasyEffects 8 (the Qt6 rewrite) only autoloads a preset when a device's active
   # output ROUTE changes (e.g. plugging headphones into the analog jack) — see
   # pw_manager.cpp: `outputRouteChanged` triggers autoload, but `defaultSinkChanged`
-  # does NOT. Switching the default sink in Noctalia (HDMI ↔ speakers ↔ bluetooth)
+  # does NOT. Switching the default sink in DMS (HDMI ↔ speakers ↔ bluetooth)
   # is a default-sink change, so EE never reacts and the wrong preset stays loaded.
   #
   # This service closes that gap: it tails `pw-metadata -n default -m`, which streams

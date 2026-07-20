@@ -1,64 +1,78 @@
 { config, lib, pkgs, ... }:
-# Animated Wallpaper Engine scenes on the g815 niri/Noctalia desktop, without
+# Animated Wallpaper Engine scenes on the g815 niri/DMS desktop, without
 # disturbing the wallpaper-derived matugen theming and without fighting the
 # load-bearing power management. Design: docs/superpowers/specs/
-# 2026-07-13-wallpaper-engine-noctalia-design.md.
+# 2026-07-13-wallpaper-engine-noctalia-design.md (written for Noctalia; the
+# selection hook and wallpaper-apply call below were rewired onto DMS/matugen
+# when Noctalia was replaced — see the notes on each below).
 #
-# Noctalia stays the single source of truth: a WE scene appears in its picker as
-# a *still* named `we-<workshopid>.png` — a full-resolution frame rendered from
-# the scene (see weStill; falls back to the scene's own preview.*), so Noctalia
-# renders and matugen-samples that still exactly as any other wallpaper — the
-# theme pipeline is untouched. The rendered still matters because niri shows it
-# (not the live engine) in the backdrop between workspaces, where the raw
-# ~192px preview would upscale to a blurry smear. On every wallpaper pick the noctalia
-# `wallpaper_changed` hook appends `wallpaper-engine-select` (exposed below via
-# kyan.wallpaperEngine.selectCommand), which records the picked scene *per
-# output* under ~/.cache/wallpaper-engine/outputs/<connector>. A user-service
-# reconciler subscribes to that directory AND to /run/power/state (published by
-# power-reconcile, see modules/nixos/mixins/power.nix) and enforces one rule:
-# a single engine spans every output that has a scene selected, and only while
-# we're not on battery. This mixin only *reads* /run/power/state — it touches
-# none of the load-bearing power services.
+# DMS + matugen stay the single source of truth: a WE scene appears in the
+# picker as a *still* named `we-<workshopid>.png` — a full-resolution frame
+# rendered from the scene (see weStill; falls back to the scene's own
+# preview.*), so DMS renders and matugen-samples that still exactly as any
+# other wallpaper — the theme pipeline is untouched. The rendered still
+# matters because niri shows it (not the live engine) in the backdrop between
+# workspaces, where the raw ~192px preview would upscale to a blurry smear.
+# On every re-theme matugen runs the `[templates.wallpaper-path]` template
+# (dms.nix), whose post_hook feeds matugen's `{{image}}` straight to
+# `wallpaper-engine-select` (exposed below via kyan.wallpaperEngine.selectCommand),
+# which records/clears the picked scene id in a single selection file. A
+# user-service reconciler subscribes to that file AND to /run/power/state
+# (published by power-reconcile, see modules/nixos/mixins/power.nix) and
+# enforces one rule: the engine spans every output niri currently reports,
+# iff a scene is selected and we're not on battery. This mixin only *reads*
+# /run/power/state — it touches none of the load-bearing power services.
+#
+# Per-output tracking is gone (this used to be keyed by Noctalia's
+# $NOCTALIA_WALLPAPER_CONNECTOR): matugen's post_hook only fires for DMS's
+# single theming "target monitor" wallpaper (SessionData.qml
+# setMonitorWallpaper/matugenTargetMonitor, verified against
+# AvengeMedia/DankMaterialShell@main), so there's no per-connector signal left
+# to key off. This isn't a real capability loss in practice — weSet below
+# already applied one scene identically to every connected output — so the
+# reconciler now just mirrors that: one global selection, spanned across
+# whatever outputs niri reports live at reconcile time.
 #
 # Steam workshop path for Wallpaper Engine (appid 431960).
 let
   cacheDir = "wallpaper-engine";
   workshop = "$HOME/.steam/steam/steamapps/workshop/content/431960";
-  noctalia = config.programs.noctalia.package;
+  dms = config.programs.dank-material-shell.package;
 
-  # Runs inside noctalia's systemd *user* service (limited PATH); self-contained
-  # shell needing only coreutils. Records/clears the picked scene for one output.
+  # Invoked as the post_hook of the [templates.wallpaper-path] matugen
+  # template (dms.nix), which passes the newly themed image path as $1 —
+  # matugen's `{{image}}`, interpolated straight into the post_hook command
+  # the same way the aura template feeds aura-repaint its colour arg. Runs
+  # inside DMS's systemd *user* service (limited PATH); self-contained shell
+  # needing only coreutils. Records/clears the picked scene id.
   wallpaperEngineSelect = pkgs.writeShellApplication {
     name = "wallpaper-engine-select";
     text = ''
-      outdir="''${XDG_CACHE_HOME:-$HOME/.cache}/${cacheDir}/outputs"
-      mkdir -p "$outdir"
-      path="''${NOCTALIA_WALLPAPER_PATH:-}"
-      conn="''${NOCTALIA_WALLPAPER_CONNECTOR:-}"
-      # Without a connector we can't target an engine output; nothing to do.
-      [[ -n "$conn" ]] || exit 0
+      path="''${1:?usage: wallpaper-engine-select <image-path>}"
+      selfile="''${XDG_CACHE_HOME:-$HOME/.cache}/${cacheDir}/selected"
+      mkdir -p "$(dirname "$selfile")"
       base="$(basename "$path")"
       if [[ "$base" =~ ^we-([0-9]+)\. ]]; then
-        printf '%s' "''${BASH_REMATCH[1]}" > "$outdir/$conn"
+        printf '%s' "''${BASH_REMATCH[1]}" > "$selfile"
       else
-        rm -f "$outdir/$conn"
+        rm -f "$selfile"
       fi
     '';
   };
 
-  # Long-lived reconciler. Watches the per-output selection dir and
-  # /run/power/state via inotify and converges a single spanning engine to the
-  # desired state. Runs in the main shell (process substitution, not a pipeline)
-  # so the tracked engine PID persists across events.
+  # Long-lived reconciler. Watches the selection file and /run/power/state via
+  # inotify and converges a single spanning engine to the desired state. Runs
+  # in the main shell (process substitution, not a pipeline) so the tracked
+  # engine PID persists across events.
   wallpaperEngineReconcile = pkgs.writeShellApplication {
     name = "wallpaper-engine-reconcile";
-    runtimeInputs = [ pkgs.linux-wallpaperengine pkgs.inotify-tools pkgs.coreutils ];
+    runtimeInputs = [ pkgs.linux-wallpaperengine pkgs.inotify-tools pkgs.niri pkgs.jq pkgs.coreutils ];
     text = ''
       base="''${XDG_CACHE_HOME:-$HOME/.cache}/${cacheDir}"
-      outdir="$base/outputs"
+      selfile="$base/selected"
       fpsfile="$base/fps"
       powerstate="/run/power/state"
-      mkdir -p "$outdir"
+      mkdir -p "$base"
 
       engine_pid=""
       running_sig=""
@@ -82,20 +96,16 @@ let
       }
 
       # Builds the launch args (global ARGS) and a stable signature (global SIG)
-      # from every output that has a scene selected, sorted by connector.
+      # spanning every output niri currently reports live, all pointed at the
+      # one selected scene (no per-connector distinction — see the file header).
       build() {
         ARGS=()
         SIG=""
-        shopt -s nullglob
-        local raw=("$outdir"/*) files=() f conn id
-        if (( ''${#raw[@]} )); then
-          mapfile -t files < <(printf '%s\n' "''${raw[@]}" | sort)
-        fi
-        for f in "''${files[@]}"; do
-          [[ -f "$f" ]] || continue
-          conn="$(basename "$f")"
-          id="$(cat "$f" 2>/dev/null || true)"
-          [[ -n "$id" ]] || continue
+        local id="" conns=() conn=""
+        [[ -r "$selfile" ]] && id="$(cat "$selfile" 2>/dev/null || true)"
+        [[ -n "$id" ]] || return 0
+        mapfile -t conns < <(niri msg --json outputs | jq -r 'keys[]' | sort)
+        for conn in "''${conns[@]}"; do
           # --scaling is POSITIONAL: it binds to the *preceding* --screen-root, so
           # it must sit right after each --bg — a single trailing --scaling would
           # only reach the last output and the rest would fall back to the default
@@ -128,8 +138,9 @@ let
 
       reconcile
       while read -r _; do
-        # Coalesce bursts (noctalia re-fires wallpaper_changed on hover-preview)
-        # so we don't restart the GL engine on every event.
+        # Coalesce bursts (matugen can re-fire in quick succession, e.g. a
+        # light/dark flip right after a wallpaper pick) so we don't restart
+        # the GL engine on every event.
         while read -r -t 0.4 _; do :; done
         reconcile
       done < <(inotifywait -q -m -r -e close_write,create,moved_to,delete "$base" /run/power)
@@ -138,7 +149,7 @@ let
 
   # Render a full-resolution still for a scene and drop it in the picker set as
   # we-<id>.png, replacing any stale we-<id>.* first. WE ships only a tiny
-  # preview.* thumbnail (often a 192px square), and Noctalia shows that still in
+  # preview.* thumbnail (often a 192px square), and DMS shows that still in
   # niri's backdrop (place-within-backdrop) between workspaces — upscaling a
   # 192px thumbnail to the panel is the blurry, smeared "stretch" you see there,
   # while the live engine (bottom layer) can't be placed in the backdrop. So we
@@ -229,10 +240,15 @@ let
 
   # Apply a scene to EVERY connected output in one command: `we-set <id> [fps]`.
   # Ensures the still is in the picker set (so theming samples it), optionally
-  # sets the engine fps, then points every niri output at it via noctalia.
+  # sets the engine fps, then sets it as THE wallpaper via DMS's global
+  # `wallpaper set` IPC target (docs/IPC.md). DMS's per-monitor `setFor` only
+  # takes effect once per-monitor mode is enabled in Settings — off by
+  # default here — so the plain global setter is what actually reaches every
+  # output (and is what triggers the matugen re-theme that feeds the
+  # reconciler; see the file header).
   weSet = pkgs.writeShellApplication {
     name = "we-set";
-    runtimeInputs = [ noctalia pkgs.niri pkgs.jq pkgs.coreutils weStill ];
+    runtimeInputs = [ dms pkgs.coreutils weStill ];
     text = ''
       id="''${1:-}"
       fps="''${2:-}"
@@ -252,15 +268,8 @@ let
         printf '%s' "$fps" > "$HOME/.cache/${cacheDir}/fps"
       fi
 
-      mapfile -t conns < <(niri msg --json outputs | jq -r 'keys[]')
-      if [[ ''${#conns[@]} -eq 0 ]]; then
-        echo "no outputs reported by niri" >&2
-        exit 1
-      fi
-      for c in "''${conns[@]}"; do
-        noctalia msg wallpaper-set "$c" "$dest"
-      done
-      echo "applied $id to: ''${conns[*]}"
+      dms ipc call wallpaper set "$dest"
+      echo "applied $id"
     '';
   };
 
@@ -286,15 +295,16 @@ let
   };
 in
 {
-  # Exposed as a store-path command so noctalia.nix can append it to the
-  # `wallpaper_changed` hook (that hook runs in a limited-PATH service, so it
-  # references consumers by absolute store path — see flexokiScheme there).
+  # Exposed as a store-path command so dms.nix can wire it into the
+  # [templates.wallpaper-path] matugen post_hook (that hook runs in a
+  # limited-PATH service, so it references consumers by absolute store path —
+  # see auraRepaint there).
   options.kyan.wallpaperEngine.selectCommand = lib.mkOption {
     type = lib.types.str;
     internal = true;
     readOnly = true;
     default = "${wallpaperEngineSelect}/bin/wallpaper-engine-select";
-    description = "Command the noctalia wallpaper_changed hook runs to publish the selected Wallpaper Engine scene.";
+    description = "Command the matugen wallpaper-path post_hook runs (with the new image path as $1) to publish the selected Wallpaper Engine scene.";
   };
 
   config = {
@@ -313,9 +323,9 @@ in
         PartOf = [ "graphical-session.target" ];
         After = [ "graphical-session.target" ];
         # No keep-old: on a rebuild that changes the reconciler, let it restart —
-        # it re-reads outputs/ on startup and relaunches the current scene, so a
-        # logic change takes effect immediately instead of needing a manual
-        # `systemctl --user restart`.
+        # it re-reads the selection file on startup and relaunches the current
+        # scene, so a logic change takes effect immediately instead of needing
+        # a manual `systemctl --user restart`.
       };
       Install.WantedBy = [ "graphical-session.target" ];
       Service = {

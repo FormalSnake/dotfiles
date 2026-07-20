@@ -109,7 +109,7 @@ lib.mkMerge [
     # bat: Flexoki tmThemes generated from the palette. macOS follows the system
     # appearance (`auto:system` reads AppleInterfaceStyle live per-invocation);
     # on Linux that mode is unsupported and silently falls back to bat's builtin
-    # dark theme, so pin the dark theme by name (Noctalia has no bat template —
+    # dark theme, so pin the dark theme by name (DMS has no bat template —
     # this is the static fallback that replaces catppuccin mocha here).
     programs.bat = {
       themes = {
@@ -150,7 +150,7 @@ lib.mkMerge [
 
   # On macOS fzf and lazygit are left un-themed so they inherit ghostty's Flexoki
   # ANSI palette and switch with the system appearance. On Linux the terminal is
-  # Noctalia/Matugen-driven, so pin them to a static Flexoki dark palette — the
+  # DMS/matugen-driven, so pin them to a static Flexoki dark palette — the
   # fallback slot catppuccin used to fill.
   (lib.mkIf (!isDarwin) {
     programs.fzf.colors = {

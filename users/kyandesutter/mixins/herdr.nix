@@ -17,7 +17,7 @@
 
     # Use herdr's built-in "terminal" theme: it inherits the host terminal's
     # ANSI/OSC colours rather than shipping a static palette. On the g815 that
-    # means herdr follows ghostty's Noctalia-derived (matugen) colours
+    # means herdr follows ghostty's DMS-derived (matugen) colours
     # dynamically, so it needs no static Flexoki fallback of its own.
     [theme]
     name = "terminal"

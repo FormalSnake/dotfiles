@@ -27,7 +27,7 @@
     #     support; mpv handles everything, so this is the reliable GTK choice.
     #   • libreoffice-fresh: the only real office suite here (GNOME has none).
     #     The -fresh build renders through the gtk3 VCL backend, so it follows
-    #     the adw-gtk3-dark GTK theme (set by noctalia; see the dark-mode block
+    #     the adw-gtk3-dark GTK theme (set by DMS; see the dark-mode block
     #     in niri.nix). Opens Word/Excel/PowerPoint + ODF.
     celluloid
     libreoffice-fresh
@@ -35,7 +35,7 @@
 
   # Default apps by MIME. enable writes ~/.config/mimeapps.list.
   #   • Folders → Nautilus (xdg-open, file pickers, "open containing folder",
-  #     noctalia, etc. all launch it).
+  #     DMS, etc. all launch it).
   #   • Images → Loupe, so double-clicking an image in Nautilus opens it.
   #   • PDFs → Papers; plain text → GNOME Text Editor.
   #   • Video → Celluloid.

@@ -45,18 +45,23 @@ let
   };
 
   # Seed for ~/.config/DankMaterialShell/settings.json (activation block below):
-  # disables every idle monitor DMS's IdleService.qml drives — screen-off, lock,
-  # and suspend, on both AC and battery. Same reason noctalia's idle was
-  # force-disabled: the internal panel (eDP-1) fails its wake modeset with
-  # `PHY A failed to request refclk` (see systems/g815/default.nix), and that
-  # modeset only happens coming back from a DPMS-off, so never blanking on idle
-  # dodges it. Manual lock/suspend (SUPER+SHIFT+Escape) is unaffected.
+  #
+  #   - idle timeouts: disables every idle monitor DMS's IdleService.qml
+  #     drives — screen-off, lock, and suspend, on both AC and battery. Same
+  #     reason noctalia's idle was force-disabled: the internal panel (eDP-1)
+  #     fails its wake modeset with `PHY A failed to request refclk` (see
+  #     systems/g815/default.nix), and that modeset only happens coming back
+  #     from a DPMS-off, so never blanking on idle dodges it. Manual
+  #     lock/suspend (SUPER+SHIFT+Escape) is unaffected.
+  #   - battery/profile notifications: DMS supports both natively (low-battery
+  #     toast + a power-profile-change OSD) but ships them off by default;
+  #     flip them on here for parity with noctalia's old always-on hooks.
   #
   # Key names verified against upstream quickshell/Common/settings/SettingsSpec.js
-  # (AvengeMedia/DankMaterialShell@74896fb): DMS already defaults every one of
-  # these to 0 (= disabled), but they're pinned explicitly here rather than
-  # relying on that staying true across DMS updates.
-  idleSettingsSeed = pkgs.writeText "dms-settings-idle-seed.json" (
+  # (AvengeMedia/DankMaterialShell@74896fb): idle timeouts already default to 0
+  # (= disabled), but they're pinned explicitly here rather than relying on
+  # that staying true across DMS updates.
+  settingsSeed = pkgs.writeText "dms-settings-seed.json" (
     builtins.toJSON {
       acMonitorTimeout = 0;
       acLockTimeout = 0;
@@ -64,6 +69,8 @@ let
       batteryMonitorTimeout = 0;
       batteryLockTimeout = 0;
       batterySuspendTimeout = 0;
+      batteryNotifyLow = true;
+      osdPowerProfileEnabled = true;
     }
   );
 in
@@ -104,6 +111,7 @@ in
     "matugen/templates/niri-border.kdl.tmpl".source = ../matugen-templates/niri-border.kdl.tmpl;
     "matugen/templates/btop.theme.tmpl".source = ../matugen-templates/btop.theme.tmpl;
     "matugen/templates/yazi-flavor.toml.tmpl".source = ../matugen-templates/yazi-flavor.toml.tmpl;
+    "matugen/templates/wallpaper-path.tmpl".source = ../matugen-templates/wallpaper-path.tmpl;
 
     # DMS reads ~/.config/matugen/config.toml on every re-theme and splices its
     # [config] and [templates] sections verbatim into the matugen invocation it
@@ -200,17 +208,63 @@ in
       [templates.yazi]
       input_path = "~/.config/matugen/templates/yazi-flavor.toml.tmpl"
       output_path = "~/.config/yazi/flavors/dank.yazi/flavor.toml"
+
+      # Wallpaper Engine reconciler hook (mixins/wallpaper-engine.nix). matugen
+      # exposes the source image path as {{image}} on every re-theme; this
+      # renders it to a cache file (any future consumer can `cat` it, same
+      # doubles-as-cache pattern as templates.aura above) and the post_hook
+      # feeds that same path straight to wallpaper-engine-select, which
+      # records/clears the picked WE scene for the reconciler's already-
+      # running inotify watch to pick up. Parity replacement for noctalia's
+      # old wallpaper_changed hook — see that mixin for why the per-output
+      # tracking it used to do doesn't carry over (matugen only fires for
+      # DMS's single theming "target monitor" image, no per-output signal).
+      [templates.wallpaper-path]
+      input_path = "~/.config/matugen/templates/wallpaper-path.tmpl"
+      output_path = "~/.cache/dank/wallpaper-path"
+      post_hook = "${config.kyan.wallpaperEngine.selectCommand} {{image}}"
     '';
   };
 
   # settings.json is DMS's own runtime-mutable config (rewritten by the Settings
   # UI and by DMS itself on every save), so home-manager must not own the whole
-  # file — seed it once, only if absent, so idle stays disabled from the very
-  # first session rather than however long it takes to open Settings manually.
-  home.activation.dmsIdleSeed = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+  # file — seed it once, only if absent, so idle stays disabled and battery/
+  # profile notifications are on from the very first session rather than
+  # however long it takes to open Settings manually.
+  home.activation.dmsSettingsSeed = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     if [ ! -e "$HOME/.config/DankMaterialShell/settings.json" ]; then
       run mkdir -p "$HOME/.config/DankMaterialShell"
-      run cp --no-preserve=mode ${idleSettingsSeed} "$HOME/.config/DankMaterialShell/settings.json"
+      run cp --no-preserve=mode ${settingsSeed} "$HOME/.config/DankMaterialShell/settings.json"
     fi
   '';
+
+  # Fallback for the two power-menu actions DMS's own powermenu can't host:
+  # its action set is a fixed enum (SettingsData.powerMenuActions — reboot/
+  # logout/poweroff/lock/suspend/restart/hibernate/switchuser, see
+  # PowerMenuModal.qml upstream), with no custom-command entry, so "Reboot to
+  # Windows" and "UEFI Firmware Setup" can't be wired in declaratively there.
+  # These show up in DMS's spotlight launcher instead (it indexes
+  # ~/.local/share/applications like any XDG app launcher). The polkit rules
+  # waiving the password for both (modules/nixos/mixins/boot.nix) are scoped
+  # to the active local wheel session generally, not to any particular
+  # caller, so launching from here needs no extra grant.
+  xdg.desktopEntries = {
+    reboot-to-windows = {
+      name = "Reboot to Windows";
+      exec = "/run/current-system/sw/bin/systemctl start reboot-to-windows.service";
+      icon = "system-reboot";
+      terminal = false;
+      categories = [ "System" ];
+    };
+    uefi-firmware-setup = {
+      name = "UEFI Firmware Setup";
+      exec = "/run/current-system/sw/bin/systemctl reboot --firmware-setup";
+      # Colloid-Dark only ships org.gnome.Firmware as a *symbolic* icon (no
+      # matching non-symbolic entry), so use the icon theme's regular
+      # preferences-system glyph instead of risking a blank icon.
+      icon = "preferences-system";
+      terminal = false;
+      categories = [ "System" ];
+    };
+  };
 }

@@ -11,9 +11,9 @@ in
     # the real package.
     #
     # Theming differs per platform (see the `theme` line below). On Linux the
-    # colours are wallpaper-derived: Noctalia renders the live palette into
+    # colours are wallpaper-derived: DMS renders the live matugen palette into
     # ~/.config/ghostty/themes/Matugen and SIGUSR2-reloads ghostty (see the
-    # `ghostty` user template in mixins/noctalia.nix). On macOS (no Noctalia) we
+    # `ghostty` user template in mixins/dms.nix). On macOS (no DMS) we
     # follow the system appearance with Ghostty's built-in Flexoki themes — no
     # theme files to install, they ship with the app.
     package = if isDarwin then null else pkgs.ghostty;
@@ -53,12 +53,12 @@ in
         "shift+enter=text:\\x1b\\r"
       ] ++ lib.optionals isDarwin [ "global:cmd+shift+space=toggle_quick_terminal" ];
 
-      # Linux: the single dynamic "Matugen" theme Noctalia writes (it rewrites the
+      # Linux: the single dynamic "Matugen" theme DMS writes (it rewrites the
       # file on every light/dark flip, so one name covers both modes). macOS:
       # follow the system appearance with Ghostty's built-in Flexoki themes
       # (light ↔ dark). The names carry a space, which Ghostty's `light:…,dark:…`
       # theme syntax handles (it only splits on the comma).
-      # NOTE (Linux cold start): the Matugen file only exists once Noctalia has
+      # NOTE (Linux cold start): the Matugen file only exists once DMS has
       # generated a wallpaper palette — populate ~/Pictures/Wallpapers/{light,dark}
       # or ghostty starts themeless until the first palette is generated.
       theme =
