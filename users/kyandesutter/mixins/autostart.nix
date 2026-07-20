@@ -7,7 +7,7 @@ let
   # niri session imports the rich session PATH into the user manager. That
   # early PATH lacks /run/current-system/sw/bin and the per-user profile, so a
   # bare `ExecStart=steam` (or even `sh`) fails at login with status=203/EXEC and
-  # the app silently never starts. (noctalia/easyeffects dodge this only because
+  # the app silently never starts. (dms/easyeffects dodge this only because
   # their units use absolute /nix/store paths.)
   #
   # Fix: launch each app through a login shell. `bash -lc` rebuilds the full
@@ -215,7 +215,7 @@ in
   # librepods — AirPods tray app (package in mixins/airpods.nix). DE-agnostic
   # tray app, so it lives here like the other login items. Absolute store path
   # (no loginExec needed); starts hidden to the tray, and its icon is picked up
-  # by noctalia's `tray` widget. No Restart: quitting from the tray must not
+  # by DMS's `tray` widget. No Restart: quitting from the tray must not
   # relaunch it. g815-only (imported via linux.nix); macOS handles AirPods
   # natively.
   systemd.user.services.librepods = {
