@@ -1,14 +1,15 @@
 { pkgs, config, lib, inputs, options, ... }:
 let
-  noctaliaBin = "${config.programs.noctalia.package}/bin/noctalia";
+  dmsBin = "${config.programs.dank-material-shell.package}/bin/dms";
 
   # Workspace pill labels: role → Nerd Font glyph + short name, mirroring the
   # macOS aerospace workspace names (see mixins/aerospace.nix). niri-flake orders
   # workspaces by attr *key* (kept "1"–"9" below); the workspace `name` is what
-  # the Mod+N binds and the window-rules target and what Noctalia renders on each
-  # pill (widget.workspaces.display = "name", max_label_chars in noctalia.nix).
+  # the Mod+N binds and the window-rules target and what DMS's DankBar
+  # workspace widget renders on each pill.
   # Glyph and name are joined by an EM SPACE (\u2003), not an ASCII space —
-  # Noctalia collapses ASCII/nbsp whitespace in the label but preserves it.
+  # DMS's bar widget collapses ASCII/nbsp whitespace in the label but
+  # preserves it.
   # Written as JSON \u escapes so the private-use glyphs survive editing; glyphs
   # verified present in GeistMono Nerd Font 3.4.0.
   wsName = builtins.fromJSON ''
@@ -27,11 +28,11 @@ let
   # This owns only the *session* side (the power profile itself is owned by the
   # system reconciler):
   #   - keyboard aura: delegated to aura-repaint (the shared single setter, see
-  #     noctalia.nix), passing the cached wallpaper accent. ac=static,
+  #     dms.nix), passing the cached wallpaper accent. ac=static,
   #     powerbank=breathe ("charging" vibe), battery=dark.
   #   - refresh rate: eDP-1 is 2560x1600@240Hz; drop to 60Hz whenever the active
   #     PPD profile is power-saver, restore 240Hz otherwise. Refresh follows the
-  #     *profile* (not the source) so a manual Noctalia power-saver toggle also
+  #     *profile* (not the source) so a manual DMS power-saver toggle also
   #     drops to 60Hz. niri has no runtime per-output IPC, so the mode is set by
   #     rewriting the eDP-1 KDL fragment (include'd from config.kdl) and asking
   #     niri to reload — see set_refresh below.
@@ -87,7 +88,7 @@ let
           # Repaint the keyboard for the new source via the shared setter (in the
           # home profile — user services have a limited PATH, so reference it
           # absolutely), using the cached wallpaper accent (fall back to the seed).
-          colour="$(cat "$HOME/.cache/noctalia/aura-color" 2>/dev/null || echo b15bf5)"
+          colour="$(cat "$HOME/.cache/dank/aura-color" 2>/dev/null || echo b15bf5)"
           ${config.home.profileDirectory}/bin/aura-repaint "$colour" || true
           last_src="$src"
         fi
@@ -141,7 +142,7 @@ let
   # `modprobe -r nvidia*` stays blocked until the session ends — and on battery
   # that idle dGPU is a large drain. Hence: OFFER (never force) a relog. No
   # countdown, no default action: a persistent notification with [Relog now]/
-  # [Not now] buttons (Noctalia's daemon supports actions via notify-send -A;
+  # [Not now] buttons (DMS's daemon supports actions via notify-send -A;
   # Super+Shift+BackSpace is a belt-and-braces confirm for a daemon that
   # doesn't). A dismissal is remembered and never re-prompted until the
   # situation clears (the `dismissed` file is dropped whenever evaluate()
@@ -386,20 +387,23 @@ in
 
       # — Keybinds (mirror the macOS/aerospace muscle memory, SUPER as mod) —
       binds = {
-        # App launcher / clipboard / emoji / theme / lock via noctalia IPC
-        # (absolute path — niri spawns argv directly, no shell).
-        "Mod+Space".action.spawn = [ noctaliaBin "msg" "panel-toggle" "launcher" ];
+        # App launcher / clipboard / theme / lock via DMS IPC (absolute path —
+        # niri spawns argv directly, no shell). No emoji-picker bind: DMS has
+        # no equivalent IPC target (accepted loss vs the old launcher /emo).
+        "Mod+Space".action.spawn = [ dmsBin "ipc" "call" "spotlight" "toggle" ];
         "Mod+Return".action.spawn = "ghostty";
         "Mod+Q".action.close-window = [ ];
         "Mod+Shift+F".action.fullscreen-window = [ ];
         "Mod+V".action.toggle-window-floating = [ ];
         "Mod+B".action.spawn = "helium";
         # ñ is a dedicated key on the es layout; its XKB keysym is `ntilde`.
-        "Mod+ntilde".action.spawn = [ noctaliaBin "msg" "panel-toggle" "clipboard" ];
-        "Mod+Period".action.spawn = [ noctaliaBin "msg" "panel-toggle" "launcher" "/emo" ];
-        "Mod+Shift+T".action.spawn = [ noctaliaBin "msg" "theme-mode-toggle" ];
-        # Sleep: lock then suspend on demand, so resume lands on the lock screen.
-        "Mod+Shift+Escape".action.spawn = [ noctaliaBin "msg" "session" "lock-and-suspend" ];
+        "Mod+ntilde".action.spawn = [ dmsBin "ipc" "call" "clipboard" "toggle" ];
+        "Mod+Shift+T".action.spawn = [ dmsBin "ipc" "call" "theme" "toggle" ];
+        # Sleep: lock then suspend on demand, so resume lands on the lock
+        # screen. DMS's lock IPC only locks (no combined lock+suspend verb),
+        # so this composes the two through a shell (niri spawns argv
+        # directly, with no shell of its own).
+        "Mod+Shift+Escape".action.spawn = [ "sh" "-c" "${dmsBin} ipc call lock lock && systemctl suspend" ];
         # Confirm the pending GPU-relog prompt (fallback for a notification
         # daemon without action buttons). See gpuRelogPrompt above.
         "Mod+Shift+BackSpace".action.spawn = [ "${gpuRelogPrompt}/bin/gpu-relog-prompt" "confirm" ];
@@ -426,33 +430,34 @@ in
         "Mod+Minus".action.set-column-width = "-10%";
         "Mod+Plus".action.set-column-width = "+10%";
 
-        # Screenshots via noctalia (owner rule: when the shell has the feature,
+        # Screenshots via DMS (owner rule: when the shell has the feature,
         # prefer it over the compositor's built-in — it's WM-agnostic, so the
         # binds survive compositor changes). niri's own screenshot UI remains
-        # available via `niri msg action screenshot` if ever wanted. Print =
-        # whole screen; Mod+Shift+S = region picker (macOS Cmd+Shift+4).
-        "Print".action.spawn = [ noctaliaBin "msg" "screenshot-fullscreen" ];
-        "Mod+Shift+S".action.spawn = [ noctaliaBin "msg" "screenshot-region" ];
+        # available via `niri msg action screenshot` if ever wanted. `dms
+        # screenshot` is a top-level subcommand, not `ipc call`. Print = whole
+        # screen; Mod+Shift+S = region picker (macOS Cmd+Shift+4 — the bare
+        # `dms screenshot` invocation defaults to the region selector).
+        "Print".action.spawn = [ dmsBin "screenshot" "full" ];
+        "Mod+Shift+S".action.spawn = [ dmsBin "screenshot" ];
 
-        # Volume / brightness / media all route through noctalia (msg IPC) so
+        # Volume / brightness / media all route through DMS (ipc call) so
         # they share one OSD and stay in sync with the shell:
         #   • volume / mic → speaker + mic, with the volume OSD.
-        #   • brightness   → whichever monitor the CURSOR is on (`current`), in
-        #     clean 10% steps; external monitor over DDC/CI (noctalia.nix sets
-        #     [brightness] enable_ddcutil), internal via the backlight backend.
-        #   • media        → the ACTIVE MPRIS player noctalia tracks, so the
-        #     keys follow Spotify, not a background YouTube tab.
-        "XF86AudioRaiseVolume" = { allow-when-locked = true; action.spawn = [ noctaliaBin "msg" "volume-up" ]; };
-        "XF86AudioLowerVolume" = { allow-when-locked = true; action.spawn = [ noctaliaBin "msg" "volume-down" ]; };
-        "XF86AudioMute".action.spawn = [ noctaliaBin "msg" "volume-mute" ];
-        "XF86AudioMicMute".action.spawn = [ noctaliaBin "msg" "mic-mute" ];
-        "XF86MonBrightnessUp" = { allow-when-locked = true; action.spawn = [ noctaliaBin "msg" "brightness-up" "current" "10" ]; };
-        "XF86MonBrightnessDown" = { allow-when-locked = true; action.spawn = [ noctaliaBin "msg" "brightness-down" "current" "10" ]; };
-        "XF86AudioPlay".action.spawn = [ noctaliaBin "msg" "media" "toggle" ];
-        "XF86AudioPause".action.spawn = [ noctaliaBin "msg" "media" "toggle" ];
-        "XF86AudioNext".action.spawn = [ noctaliaBin "msg" "media" "next" ];
-        "XF86AudioPrev".action.spawn = [ noctaliaBin "msg" "media" "previous" ];
-        "XF86AudioStop".action.spawn = [ noctaliaBin "msg" "media" "stop" ];
+        #   • brightness   → the default backlight device (empty selector),
+        #     in clean 5% steps.
+        #   • media        → the ACTIVE MPRIS player DMS tracks, so the keys
+        #     follow Spotify, not a background YouTube tab.
+        "XF86AudioRaiseVolume" = { allow-when-locked = true; action.spawn = [ dmsBin "ipc" "call" "audio" "increment" "3" ]; };
+        "XF86AudioLowerVolume" = { allow-when-locked = true; action.spawn = [ dmsBin "ipc" "call" "audio" "decrement" "3" ]; };
+        "XF86AudioMute".action.spawn = [ dmsBin "ipc" "call" "audio" "mute" ];
+        "XF86AudioMicMute".action.spawn = [ dmsBin "ipc" "call" "audio" "micmute" ];
+        "XF86MonBrightnessUp" = { allow-when-locked = true; action.spawn = [ dmsBin "ipc" "call" "brightness" "increment" "5" "" ]; };
+        "XF86MonBrightnessDown" = { allow-when-locked = true; action.spawn = [ dmsBin "ipc" "call" "brightness" "decrement" "5" "" ]; };
+        "XF86AudioPlay".action.spawn = [ dmsBin "ipc" "call" "mpris" "playPause" ];
+        "XF86AudioPause".action.spawn = [ dmsBin "ipc" "call" "mpris" "playPause" ];
+        "XF86AudioNext".action.spawn = [ dmsBin "ipc" "call" "mpris" "next" ];
+        "XF86AudioPrev".action.spawn = [ dmsBin "ipc" "call" "mpris" "previous" ];
+        "XF86AudioStop".action.spawn = [ dmsBin "ipc" "call" "mpris" "stop" ];
       } // (lib.listToAttrs (lib.concatMap (i: [
         # Workspaces by NAME (the glyphs in wsName, declared above) — a string
         # arg targets the named workspace, an int would target the per-output
@@ -485,22 +490,23 @@ in
         # GNOME spacebar quick-preview (Sushi / NautilusPreviewer) → float like
         # macOS Quick Look instead of tiling into the layout.
         { matches = [ { app-id = "^(org.gnome.NautilusPreviewer)$"; } ]; open-floating = true; }
-        # Noctalia's own settings window.
-        { matches = [ { app-id = "^dev\\.noctalia\\.Noctalia$"; } ]; open-floating = true; }
       ];
 
-      # Noctalia's wallpaper/backdrop layers render inside the overview
-      # backdrop (wallpaper stays visible behind the zoomed-out workspaces).
-      layer-rules = [
-        { matches = [ { namespace = "^noctalia-wallpaper"; } ]; place-within-backdrop = true; }
-        { matches = [ { namespace = "^noctalia-backdrop"; } ]; place-within-backdrop = true; }
-      ];
+      # No layer-rules: DMS's settings pane and its plain wallpaper background
+      # (WallpaperBackground.qml) are layer-shell surfaces within the single
+      # quickshell process with no dedicated namespace to match — unlike the
+      # old shell's dedicated settings-window app-id and its distinctly
+      # namespaced wallpaper/backdrop layers. The only distinctly namespaced
+      # wallpaper layer DMS exposes is the opt-in compositor-blur background
+      # ("dms:blurwallpaper", off by default), which isn't what renders here
+      # — so the old "keep the wallpaper visible behind the zoomed-out
+      # overview" rule has no safe equivalent. Accepted loss.
 
-      # The Noctalia border fragment owns the *palette* side of layout {}
-      # (gaps 8, 2px borders in the live wallpaper colours — rendered from
-      # noctalia-templates/niri-border.kdl.tmpl, seeded with the Flexoki
-      # fallback below). Structural layout knobs that never change with the
-      # palette live here in the typed settings instead.
+      # The DMS border fragment owns the *palette* side of layout {}
+      # (gaps 8, 2px borders in the live wallpaper colours — rendered by
+      # matugen from matugen-templates/niri-border.kdl.tmpl (see dms.nix),
+      # seeded with the Flexoki fallback below). Structural layout knobs that
+      # never change with the palette live here in the typed settings instead.
       #
       # Empty {} means each window picks its own initial width. This is NOT the
       # same as deleting the line: with no default-column-width at all, niri
@@ -510,8 +516,8 @@ in
       layout.default-column-width = { };
 
       environment = {
-        # Qt platform theme (qt6ct) so Qt apps follow Noctalia's palette (see
-        # the qt6ct notes in mixins/qt.nix); QS_ICON_THEME is the Quickshell-
+        # Qt platform theme (qt6ct) so Qt apps follow DMS's palette (see the
+        # qt6ct notes in mixins/qt.nix); QS_ICON_THEME is the Quickshell-
         # specific icon override kept for Qt tooling.
         QS_ICON_THEME = "Colloid-Dark";
         QT_QPA_PLATFORMTHEME = "qt6ct";
@@ -552,11 +558,12 @@ in
 
         // Runtime-mutable fragments (the niri equivalent of `hyprctl eval`):
         // power-tune owns the eDP-1 output block (240↔60Hz refresh flip);
-        // Noctalia owns the layout block (wallpaper-derived border colours,
-        // re-rendered on every palette change, config reloaded via post_hook).
+        // DMS's matugen niri-border template owns the layout block
+        // (wallpaper-derived border colours, re-rendered on every palette
+        // change, config reloaded via post_hook).
         // optional=true: a missing fragment logs a warning instead of failing.
         include optional=true "~/.cache/power-tune/edp-refresh.kdl"
-        include optional=true "~/.cache/noctalia/niri-border.kdl"
+        include optional=true "~/.cache/dank/niri-border.kdl"
         // Render GPU: dGPU (debug{render-drm-device}) when docked, empty for
         // the iGPU default. Rewritten before every niri start by
         // niri-render-device.service (mixins/niri.nix).
@@ -591,12 +598,12 @@ in
       '';
   };
 
-  # Seed the runtime fragments so first login (before Noctalia's first render /
+  # Seed the runtime fragments so first login (before matugen's first render /
   # power-tune's first flip) has sane defaults: 240Hz, and a static Flexoki
   # border fallback (blue active / base-700 inactive). Copied (not symlinked)
   # only-if-absent: both files are
-  # runtime-owned after this — power-tune rewrites the first, Noctalia
-  # re-renders the second.
+  # runtime-owned after this — power-tune rewrites the first, DMS's matugen
+  # niri-border template re-renders the second.
   home.activation.seedNiriFragments =
     let
       refreshSeed = pkgs.writeText "edp-refresh-seed.kdl" ''
@@ -627,9 +634,9 @@ in
         run mkdir -p "$HOME/.cache/power-tune"
         run cp --no-preserve=mode ${refreshSeed} "$HOME/.cache/power-tune/edp-refresh.kdl"
       fi
-      if [ ! -e "$HOME/.cache/noctalia/niri-border.kdl" ]; then
-        run mkdir -p "$HOME/.cache/noctalia"
-        run cp --no-preserve=mode ${borderSeed} "$HOME/.cache/noctalia/niri-border.kdl"
+      if [ ! -e "$HOME/.cache/dank/niri-border.kdl" ]; then
+        run mkdir -p "$HOME/.cache/dank"
+        run cp --no-preserve=mode ${borderSeed} "$HOME/.cache/dank/niri-border.kdl"
       fi
       # Empty render-device fragment → safe iGPU default until
       # niri-render-device.service rewrites it before the first niri start.
@@ -692,13 +699,13 @@ in
   # Compositor-essential session packages. The generic GNOME/desktop apps and
   # their MIME defaults live in users/kyandesutter/mixins/desktop-apps.nix.
   #   • wl-clip-persist: keeps the regular Wayland selection alive after the
-  #     source app exits so noctalia's clipboard poller can capture it (launched
+  #     source app exits so DMS's clipboard poller can capture it (launched
   #     from autostart.nix).
   home.packages = with pkgs; [
     wl-clip-persist
 
-    # GTK theme noctalia's gtk template sets via gsettings/dconf (adw-gtk3-dark).
-    # Installed here so that theme name resolves; noctalia, not the gtk module,
+    # GTK theme DMS's gtk template sets via gsettings/dconf (adw-gtk3-dark).
+    # Installed here so that theme name resolves; DMS, not the gtk module,
     # selects it (see the dark-mode block below).
     adw-gtk3
 
@@ -710,7 +717,7 @@ in
     adwaita-icon-theme
 
     # Qt platform theme engines. QT_QPA_PLATFORMTHEME=qt6ct (environment above)
-    # points Qt6 apps at qt6ct; qt5ct themes Qt5 apps. Both read Noctalia's
+    # points Qt6 apps at qt6ct; qt5ct themes Qt5 apps. Both read DMS's
     # generated colour scheme via the qt{6,5}ct.conf written in mixins/qt.nix.
     kdePackages.qt6ct
     libsForQt5.qt5ct
@@ -729,30 +736,31 @@ in
 
   # Dark mode for GTK / X11 / browsers.
   #
-  # noctalia owns app theming (see programs.noctalia.settings.theme.templates
-  # in ../mixins/noctalia.nix). Its gtk3/gtk4 templates write the palette to
-  # ~/.config/gtk-{3,4}.0/noctalia.css (imported via gtk.css) and their
-  # apply.sh post-hook drives the *runtime* dark signal — `gsettings set
-  # org.gnome.desktop.interface color-scheme prefer-dark` + `gtk-theme
-  # adw-gtk3-dark` (also written to dconf). xdg-desktop-portal reports that to
-  # native-Wayland libadwaita/GTK4 apps. So we don't pin the theme *name*
-  # here — noctalia chooses it, and pinning our own would drift.
+  # DMS owns app theming (see the matugen config.toml + templates in dms.nix,
+  # plus DMS's own builtin gtk template). The builtin gtk3/gtk4 templates
+  # write the palette to ~/.config/gtk-{3,4}.0/dank-colors.css (imported via
+  # gtk.css), and DMS drives the *runtime* dark signal on every re-theme —
+  # `gsettings set org.gnome.desktop.interface color-scheme prefer-dark` +
+  # `gtk-theme adw-gtk3-dark` (also written to dconf). xdg-desktop-portal
+  # reports that to native-Wayland libadwaita/GTK4 apps. So we don't pin the
+  # theme *name* here — DMS chooses it, and pinning our own would drift.
   #
-  # We keep this module for the things noctalia does NOT do:
-  #   • gtk.iconTheme — sets Colloid-Dark as the icon theme. Noctalia never
+  # We keep this module for the things DMS does NOT do:
+  #   • gtk.iconTheme — sets Colloid-Dark as the icon theme. DMS never
   #     touches the icon theme; without this GTK falls back to hicolor and
   #     renders every app/mime icon as the broken-image placeholder.
   #   • gtk-application-prefer-dark-theme in settings.ini — the X11/XWayland
-  #     fallback (no xsettingsd here). noctalia's apply.sh only touches
+  #     fallback (no xsettingsd here). DMS's gtk theming only touches
   #     gtk.css + gsettings/dconf, never settings.ini.
   #   • gtk{3,4}.extraCss — own gtk.css declaratively so it holds ONLY the
-  #     noctalia import. Noctalia writes noctalia.css but never gtk.css, so an
-  #     unmanaged gtk.css silently accumulates cruft: stale @define-color blocks
-  #     from old theming tools end up ABOVE the import, and GTK requires @import
-  #     before any other rule — so it drops the import, noctalia.css never loads,
-  #     and GTK3 apps (Helium via "Use GTK") render un-themed adw-gtk3-dark.
-  #     Managing the file keeps the import valid and first. (GTK4/libadwaita read
-  #     the accent from the portal, so they were unaffected either way.)
+  #     dank-colors import. DMS writes dank-colors.css but never gtk.css, so
+  #     an unmanaged gtk.css silently accumulates cruft: stale @define-color
+  #     blocks from old theming tools end up ABOVE the import, and GTK
+  #     requires @import before any other rule — so it drops the import,
+  #     dank-colors.css never loads, and GTK3 apps (Helium via "Use GTK")
+  #     render un-themed adw-gtk3-dark. Managing the file keeps the import
+  #     valid and first. (GTK4/libadwaita read the accent from the portal, so
+  #     they were unaffected either way.)
   gtk = {
     enable = true;
     iconTheme = {
@@ -761,7 +769,7 @@ in
     };
     gtk3.extraConfig.gtk-application-prefer-dark-theme = 1;
     gtk4.extraConfig.gtk-application-prefer-dark-theme = 1;
-    gtk3.extraCss = ''@import url("noctalia.css");'';
-    gtk4.extraCss = ''@import url("noctalia.css");'';
+    gtk3.extraCss = ''@import url("dank-colors.css");'';
+    gtk4.extraCss = ''@import url("dank-colors.css");'';
   };
 }
