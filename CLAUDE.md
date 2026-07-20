@@ -28,7 +28,7 @@ Safe, non-building checks you MAY run:
   `nix eval '.#darwinConfigurations.macbook.config.system.stateVersion'` —
   forces all module imports to resolve without building the system. (Avoid
   evaluating `home-manager.users.*` config paths: they trigger IFD, e.g.
-  Noctalia's `config validate` and the Catppuccin palette import.)
+  Noctalia's `config validate`.)
 
 ## Keep both machines in sync
 
@@ -101,16 +101,21 @@ renders templates (`users/kyandesutter/noctalia-templates/`) into per-app files,
 running each app's reload hook. niri's window borders are themed through the
 `niri-border` template: it renders `~/.cache/noctalia/niri-border.kdl` (the
 `layout {}` fragment niri's config `include`s last, so it wins) and its
-post_hook runs `niri msg action load-config-file`. **Catppuccin is only a
-static fallback** (`autoEnable = false`) for consumers that genuinely can't be
-dynamic: SDDM (pre-login), Neovim's pre-palette colourscheme, niri's
-pre-palette border colours (the seeded `niri-border.kdl` copy in
-`mixins/niri.nix`), CLI tools with no Noctalia template (bat, fzf, lazygit,
-fish), and Ghostty on macOS (no Noctalia there). (Herdr instead uses its
-built-in `terminal` theme, so it follows ghostty's Noctalia colours dynamically
-and needs no fallback.) When adding a themed surface, prefer a Noctalia
-template + a Catppuccin fallback (see the `niri-border` template in
-`mixins/noctalia.nix` for the render + seeded-fallback pattern).
+post_hook runs `niri msg action load-config-file`. **Flexoki is only a static
+fallback** for consumers that genuinely can't be dynamic: Neovim's pre-palette
+colourscheme, niri's pre-palette border colours (the seeded `niri-border.kdl`
+copy in `mixins/niri.nix`), and CLI tools with no Noctalia template (bat, fzf,
+lazygit, fish). The Flexoki palette is pure Nix data in
+`users/kyandesutter/mixins/flexoki/palette.nix` (base tones + accents + ready
+`light`/`dark` terminal views), and `mixins/flexoki/` themes the CLI tools from
+it — static Flexoki dark on Linux, appearance-following light/dark on macOS
+(where Flexoki is the *primary* scheme, not a fallback: Ghostty uses its built-in
+Flexoki Light/Dark, bat uses `auto:system`, fish re-selects by appearance). SDDM
+is independent (the `sddm-astronaut` pixel_sakura preset's own colours); Herdr
+uses its built-in `terminal` theme, so it follows ghostty dynamically. When
+adding a themed surface, prefer a Noctalia template + a Flexoki fallback derived
+from `palette.nix` (see the `niri-border` template in `mixins/noctalia.nix` for
+the render + seeded-fallback pattern).
 
 ## Power management — DO NOT BREAK
 

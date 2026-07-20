@@ -24,20 +24,21 @@ local OMNIWMCTL = "/Applications/OmniWM.app/Contents/MacOS/omniwmctl"
 local FONT_ICON = "GeistMono Nerd Font" -- nerd glyphs (same font niri's ws pills use)
 local FONT_TEXT = "GeistMono Nerd Font" -- labels in the same font, per request
 
--- Catppuccin Mocha — the macOS static palette (mauve matches the omniwm border).
+-- Flexoki Dark — the macOS static menu-bar palette. `accent` is Flexoki blue,
+-- matching the omniwm/niri active-border accent (Flexoki's UI palette has no
+-- purple, so the old Catppuccin mauve maps to blue, not violet).
 local col = {
-  bar      = 0xf0181825,
-  crust    = 0xff11111b,
-  text     = 0xffcdd6f4,
-  subtext  = 0xffa6adc8,
-  surface0 = 0xff313244,
-  overlay  = 0xff6c7086,
-  mauve    = 0xffcba6f7,
-  blue     = 0xff89b4fa,
-  green    = 0xffa6e3a1,
-  yellow   = 0xfff9e2af,
-  red      = 0xfff38ba8,
-  lavender = 0xffb4befe,
+  bar      = 0xff1c1b1a, -- base-950, opaque
+  crust    = 0xff100f0f, -- black
+  text     = 0xffcecdc3, -- base-200 (fg)
+  subtext  = 0xff9f9d96, -- base-400
+  surface0 = 0xff403e3c, -- base-800
+  overlay  = 0xff6f6e69, -- base-600
+  accent   = 0xff4385be, -- blue-400 (primary accent)
+  accent2  = 0xff66a0c8, -- blue-300 (soft label accent)
+  green    = 0xff879a39,
+  yellow   = 0xffd0a215,
+  red      = 0xffd14d41,
 }
 
 local ic = {
@@ -71,7 +72,8 @@ sbar.begin_config()
 -- ── bar ──────────────────────────────────────────────────────────────────────
 sbar.bar({
   position = "top",
-  height = 32,
+  height = 37, -- match the notched menu-bar height
+
   color = col.bar,
   notch_width = 200,
   padding_left = 8,
@@ -79,6 +81,9 @@ sbar.bar({
   corner_radius = 0,
   y_offset = 0,
   sticky = true,
+  -- Draw above the auto-hidden macOS menu bar: without this, hovering the top
+  -- edge reveals the menu bar over the bar and swallows clicks on the pills.
+  topmost = true,
   shadow = false,
   font_smoothing = true,
 })
@@ -88,9 +93,9 @@ sbar.default({
   updates = "when_shown",
   icon = { font = FONT_ICON .. ":Bold:14.0", color = col.text, padding_left = 6, padding_right = 4 },
   label = { font = FONT_TEXT .. ":Semibold:13.0", color = col.text, padding_left = 2, padding_right = 6 },
-  background = { corner_radius = 6, height = 24 },
-  padding_left = 4,
-  padding_right = 4,
+  background = { corner_radius = 6, height = 26 },
+  padding_left = 2,
+  padding_right = 2,
 })
 
 sbar.add("event", "omniwm_update")
@@ -98,7 +103,7 @@ sbar.add("event", "omniwm_update")
 -- ── left: OmniWM launcher (command palette) ──────────────────────────────────
 sbar.add("item", "omniwm", {
   position = "left",
-  icon = { string = ic.launcher, font = FONT_ICON .. ":Bold:15.0", color = col.mauve },
+  icon = { string = ic.launcher, font = FONT_ICON .. ":Bold:15.0", color = col.accent },
   label = { drawing = false },
   click_script = OMNIWMCTL .. " command open-command-palette",
 })
@@ -124,14 +129,14 @@ local manager = sbar.add("item", "space_manager", { drawing = false, updates = "
 local front = sbar.add("item", "front_app", {
   position = "left",
   icon = { drawing = false },
-  label = { color = col.lavender, font = FONT_TEXT .. ":Bold:13.0" },
+  label = { color = col.accent2, font = FONT_TEXT .. ":Bold:13.0" },
   padding_left = 10,
 })
 
 -- ── right: rightmost added first (clock ▸ battery ▸ volume ▸ wifi) ────────────
 local clock = sbar.add("item", "clock", {
   position = "right",
-  icon = { string = ic.clock, color = col.blue },
+  icon = { string = ic.clock, color = col.accent },
   update_freq = 15,
 })
 
@@ -192,24 +197,21 @@ local function redraw_spaces()
       if sp then
         if current == "true" then
           sp:set({
-            background = { drawing = true, color = col.mauve },
+            drawing = true,
+            background = { drawing = true, color = col.accent },
             icon = { color = col.crust },
             label = { color = col.crust, drawing = true },
           })
         elseif tonumber(total) > 0 then
           sp:set({
+            drawing = true,
             background = { drawing = false },
             icon = { color = col.text },
             label = { color = col.subtext, drawing = true },
           })
         else
-          -- empty & not current: glyph only, dimmed. Set drawing=false on the
-          -- whole item instead to hide empty pills (noctalia's hide_when_empty).
-          sp:set({
-            background = { drawing = false },
-            icon = { color = col.overlay },
-            label = { drawing = false },
-          })
+          -- empty & not current: hide the pill entirely (noctalia's hide_when_empty)
+          sp:set({ drawing = false })
         end
       end
     end

@@ -231,8 +231,9 @@ in
     hardware.i2c.enable = true;
 
     environment.systemPackages = with pkgs; [
-      # SDDM "sddm-astronaut" theme (pixel_sakura layout, themed with our
-      # wallpaper + Catppuccin Mocha — see the `sddmAstronaut` let-binding).
+      # SDDM "sddm-astronaut" theme, used as-is with its bundled pixel_sakura
+      # preset (animated background + the preset's own colours — see the
+      # `sddmAstronaut` let-binding; it's independent of the app theming).
       # Installed into the system profile so SDDM finds it under
       # .../share/sddm/themes/sddm-astronaut-theme.
       sddmAstronaut

@@ -1,10 +1,9 @@
 { config, lib, pkgs, ... }:
 let
-  # Catppuccin Mocha "Mauve" — the accent painted on the Aura keyboard.
-  # Deepened from the on-screen value (cba6f7) to compensate for the LEDs: the
-  # pastel mauve renders too white on the keyboard, so we drop lightness and
-  # bump saturation (HSL 272/89/66) to read as the intended purple.
-  auraColour = "b15bf5";
+  # Flexoki blue — the accent painted on the Aura keyboard. Uses the deeper,
+  # more saturated blue-600 stop (#205EA6 vs the on-screen blue-400 #4385BE) so
+  # it reads as blue on the washed-out keyboard LEDs rather than white.
+  auraColour = "205ea6";
 
   # Toggle the keyboard backlight brightness node directly (0..max). Used at boot
   # by the asus-aura service to seed an AC-appropriate level without depending on
@@ -51,7 +50,7 @@ in
     # 80% for longevity. The seed is the last wallpaper-derived accent noctalia
     # cached to the user's ~/.cache/noctalia/aura-color (so the keyboard already
     # shows the right colour before the graphical session starts); noctalia
-    # repaints it on login anyway. Falls back to the Catppuccin Mauve seed if no
+    # repaints it on login anyway. Falls back to the Flexoki purple seed if no
     # cache exists yet. `|| true` so a CLI/permission hiccup never fails the boot.
     systemd.services.asus-aura = {
       description = "Aura keyboard accent seed + 80% charge limit";

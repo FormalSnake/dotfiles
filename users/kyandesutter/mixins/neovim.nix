@@ -1,4 +1,20 @@
-{ config, inputs, pkgs, ... }:
+{ inputs, pkgs, ... }:
+let
+  # kepano/flexoki-neovim (the only actively-maintained Flexoki colorscheme, by
+  # Flexoki's author). Not in nixpkgs and unknown to lazyvim-nix's plugin data,
+  # so package it here and hand lazy.nvim a `dir =` store path — fully pinned, no
+  # runtime git clone. `variant = "auto"` tracks vim.o.background.
+  flexokiNvim = pkgs.vimUtils.buildVimPlugin {
+    pname = "flexoki-neovim";
+    version = "0-unstable-2025-08-26";
+    src = pkgs.fetchFromGitHub {
+      owner = "kepano";
+      repo = "flexoki-neovim";
+      rev = "c3e2251e813d29d885a7cbbe9808a7af234d845d";
+      hash = "sha256-TlBP99MBAT/H0Uut1MF8SnIDoeetcdHLKrWal2oO2Ug=";
+    };
+  };
+in
 {
   imports = [ inputs.lazyvim.homeManagerModules.default ];
 
@@ -49,23 +65,21 @@
       colorscheme = ''
         return {
           {
-            "catppuccin/nvim",
-            name = "catppuccin",
+            dir = "${flexokiNvim}",
+            name = "flexoki",
             lazy = false,
             priority = 1000,
-            opts = {
-              -- flavour = "auto" follows vim.o.background; the dark variant is
-              -- driven by catppuccin.flavor (see mixins/catppuccin.nix), the
-              -- light variant is pinned to latte. Defaults to dark; reach light
-              -- with `:set background=light`.
-              flavour = "auto",
-              background = { light = "latte", dark = "${config.catppuccin.flavor}" },
-              transparent_background = true,
-            },
+            config = function()
+              -- variant = "auto" follows vim.o.background (auto-dark-mode toggles
+              -- it below). Defaults to dark; reach light with `:set background=light`.
+              -- Transparency isn't a plugin option here; the ColorScheme autocmd
+              -- backstop at the bottom of this file paints the backgrounds none.
+              require("flexoki").setup({ variant = "auto" })
+            end,
           },
           {
             "LazyVim/LazyVim",
-            opts = { colorscheme = "catppuccin" },
+            opts = { colorscheme = "flexoki" },
           },
         }
       '';
@@ -75,10 +89,10 @@
       # table (see the `neovim` user template in mixins/noctalia.nix);
       # dynamic-base16.nvim maps it onto all Treesitter/LSP highlight groups and,
       # with watch = true, hot-reloads when Noctalia rewrites the file (on every
-      # wallpaper change / light-dark flip). catppuccin (above) stays the base
+      # wallpaper change / light-dark flip). flexoki (above) stays the base
       # colourscheme and the fallback: the setup is pcall-guarded so a missing file
       # (cold start before the first palette, or the macOS host where Noctalia
-      # doesn't run) never breaks startup — nvim simply stays on catppuccin until
+      # doesn't run) never breaks startup — nvim simply stays on flexoki until
       # the file exists (restart nvim once after the first palette is generated).
       dynamic-base16 = ''
         return {
@@ -98,24 +112,24 @@
       '';
 
       # Follow the macOS appearance at runtime. Toggling vim.o.background makes
-      # catppuccin (flavour = "auto") swap latte <-> the dark flavor. We also
-      # re-run :colorscheme so the ColorScheme autocmd fires and the
-      # transparency backstop below re-applies on every flip.
+      # flexoki (variant = "auto") swap light <-> dark. We also re-run
+      # :colorscheme so the ColorScheme autocmd fires and the transparency
+      # backstop below re-applies on every flip.
       auto-dark-mode = ''
         return {
           "f-person/auto-dark-mode.nvim",
           lazy = false,
           priority = 999,
-          dependencies = { "catppuccin/nvim" },
+          dependencies = { "flexoki" },
           opts = {
             update_interval = 1000,
             set_dark_mode = function()
               vim.o.background = "dark"
-              vim.cmd.colorscheme("catppuccin")
+              vim.cmd.colorscheme("flexoki")
             end,
             set_light_mode = function()
               vim.o.background = "light"
-              vim.cmd.colorscheme("catppuccin")
+              vim.cmd.colorscheme("flexoki")
             end,
           },
         }
@@ -207,8 +221,8 @@
       '';
     };
 
-    # Backstop transparency for UI elements catppuccin's transparent_background
-    # doesn't cover (floats, telescope, notify, etc.).
+    # Backstop transparency for all UI backgrounds (flexoki has no transparent
+    # option): floats, telescope, notify, neo-tree, etc.
     config.autocmds = ''
       local groups = {
         "Normal", "NormalNC", "NormalFloat", "FloatBorder",

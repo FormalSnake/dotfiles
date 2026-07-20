@@ -18,7 +18,7 @@
     ./mixins/ghostty.nix
     ./mixins/tmux.nix
     ./mixins/neovim.nix
-    ./mixins/catppuccin.nix
+    ./mixins/flexoki
     ./mixins/fastfetch.nix
     ./mixins/herdr.nix
     ./mixins/fast.nix
