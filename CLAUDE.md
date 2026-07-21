@@ -67,7 +67,7 @@ modules/
                        glue, tailscale) — imported by BOTH platforms
   darwin/  nixos/      per-platform module trees, each with:
     mixins/            one concern per file (audio, bluetooth, niri, …)
-    profiles/          compose mixins into roles (desktop, gaming)
+    profiles/          compose mixins into roles (desktop)
 systems/<host>/        per-host config (hardware, host-specific options)
 users/kyandesutter/
   default.nix          cross-platform home base + imports
@@ -112,8 +112,10 @@ blanking must stay disabled there (eDP-1 wake-modeset bug). **Flexoki is only a
 static fallback** for consumers that genuinely can't be dynamic: Neovim's
 pre-palette colourscheme, niri's pre-palette border colours (the seeded
 `niri-border.kdl` copy in `mixins/niri.nix`), and CLI tools with no matugen
-template (bat, fzf, lazygit, fish). Per-wallpaper Flexoki *pinning* (the old
-`flexoki-scheme` hook) was dropped in the DMS migration. The Flexoki palette is
+template (bat, fzf, lazygit, fish). Per-wallpaper Flexoki *pinning* lives on as
+`flexoki-pin.service` (`mixins/dms.nix`): it watches DMS's session.json and
+pins/unpins the Flexoki custom theme while a flexoki-named wallpaper is active
+(same substring match as the old Noctalia `flexoki-scheme` hook). The Flexoki palette is
 pure Nix data in
 `users/kyandesutter/mixins/flexoki/palette.nix` (base tones + accents + ready
 `light`/`dark` terminal views), and `mixins/flexoki/` themes the CLI tools from
@@ -169,8 +171,6 @@ Power management is centered on **DMS + niri** and is load-bearing:
   hot-added, so no login-time GPU set, no `session-gpu-mode` marker, no session
   snapshot/restore (autostart.nix relaunches the login apps).
 - `modules/nixos/mixins/asus.nix` — asusd, battery limit, Aura keyboard.
-- `game-mode` (`gaming.nix`) — manual profile toggle; goes through PPD
-  (powerprofilesctl), never asusctl, so it can't fight `power-reconcile`.
 - `lock-before-sleep` (`modules/nixos/mixins/niri.nix`) — locks via
   `dms ipc call lock lock` before sleep.target; DMS's IPC socket lives in the
   user's `XDG_RUNTIME_DIR` (not display-keyed). The unit must never fail
