@@ -1,5 +1,9 @@
-{ config, lib, pkgs, inputs, ... }:
+{ config, lib, pkgs, inputs, osConfig ? { }, ... }:
 let
+  # Whether this host has the NVIDIA dGPU stack (g815 yes, Intel-only hosts
+  # no) — gates the GPU bar widget, which reads via nvidia-smi.
+  hasNvidia = (osConfig.kyan or { }).nvidia.enable or false;
+
   # The single keyboard-aura setter: paint the Aura keyboard to a given accent and
   # apply the effect/brightness appropriate to the current power source. Shared by
   # two triggers — the matugen aura template runs it as a post_hook on every
@@ -128,7 +132,9 @@ let
           showOnLastDisplay = true;
           leftWidgets = [ "launcherButton" "workspaceSwitcher" "focusedWindow" ];
           centerWidgets = [ "music" "clock" "weather" ];
-          rightWidgets = [ "systemTray" "cpuUsage" "nvidiaGpuMonitor" "memUsage" "claudeCodeUsage" "githubNotifier" "notificationButton" "battery" "controlCenterButton" ];
+          rightWidgets = [ "systemTray" "cpuUsage" ]
+            ++ lib.optional hasNvidia "nvidiaGpuMonitor"
+            ++ [ "memUsage" "claudeCodeUsage" "githubNotifier" "notificationButton" "battery" "controlCenterButton" ];
           spacing = 4;
           innerPadding = 4;
           bottomGap = 0;
@@ -372,7 +378,7 @@ in
       # shows data when the dGPU is powered (blank on battery, by design). The
       # dgpuStatus D0/D3cold power-state widget was dropped by preference — this
       # usage widget is the only GPU pill on the bar.
-      nvidiaGpuMonitor.enable = true;
+      nvidiaGpuMonitor.enable = hasNvidia;
       # Emoji & Unicode launcher — bound to Mod+Period in mixins/niri.nix via
       # `spotlight toggleQuery :e` (:e is the plugin's default trigger).
       emojiLauncher.enable = true;
@@ -597,7 +603,7 @@ in
     tmp="$(mktemp "$pf.XXXXXX")"
     ${pkgs.jq}/bin/jq '
       reduce (
-        "nvidiaGpuMonitor", "emojiLauncher",
+        ${lib.optionalString hasNvidia ''"nvidiaGpuMonitor",''} "emojiLauncher",
         "calculator", "nixPackageRunner", "githubNotifier",
         "claudeCodeUsage", "dankActions"
       ) as $id
