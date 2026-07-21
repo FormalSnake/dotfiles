@@ -6,16 +6,20 @@
 # duplicates and never fights a widget the user has since moved.
 #
 # Removals ARE unconditional — these ids are stripped from every bar on every
-# switch: clipboard by preference, and discordVoice/displayManager/dgpuStatus
-# because their plugins are disabled (a stale id would render as an empty/broken
-# widget once the plugin source is gone).
+# switch: clipboard by preference, and discordVoice/displayManager/dgpuStatus/
+# gameControllerBattery/asusControlCenter because their plugins are disabled (a
+# stale id would render as an empty/broken widget once the source is gone).
 #
-# Placement of the kept widgets (matching settingsSeed.rightWidgets in dms.nix):
-#   githubNotifier        after  systemTray
-#   nvidiaGpuMonitor      after  cpuUsage
-#   claudeCodeUsage       after  nvidiaGpuMonitor
-#   gameControllerBattery after  memUsage
-#   asusControlCenter     before battery
+# Placement of the kept plugin widgets (matching settingsSeed.rightWidgets):
+#   nvidiaGpuMonitor      after  cpuUsage          (insert-if-absent)
+#   claudeCodeUsage       after  memUsage          (repositioned)
+#   githubNotifier        before notificationButton (repositioned)
+#
+# githubNotifier and claudeCodeUsage are *repositioned* — stripped first, then
+# re-inserted — so a copy already on the live bar at the old spot actually
+# moves rather than being left in place (insert-if-absent can't relocate an
+# existing widget). Their anchors (memUsage, notificationButton) are core
+# seeded widgets, so they're always present.
 def allWidgets: (.leftWidgets // []) + (.centerWidgets // []) + (.rightWidgets // []);
 
 def without($drop): map(select(IN($drop[]) | not));
@@ -30,20 +34,15 @@ def insertBefore($arr; $anchor; $new):
   | if $i == null or ($new | length) == 0 then $arr
     else $arr[0:$i] + $new + $arr[$i:] end;
 
-(["discordVoice", "displayManager", "dgpuStatus", "clipboard"]) as $remove
+(["discordVoice", "displayManager", "dgpuStatus", "gameControllerBattery", "asusControlCenter", "clipboard"]) as $remove
+| (["githubNotifier", "claudeCodeUsage"]) as $reposition
 | .barConfigs |= map(
-    .leftWidgets   = ((.leftWidgets   // []) | without($remove))
-  | .centerWidgets = ((.centerWidgets // []) | without($remove))
-  | .rightWidgets  = ((.rightWidgets  // []) | without($remove))
+    .leftWidgets   = ((.leftWidgets   // []) | without($remove) | without($reposition))
+  | .centerWidgets = ((.centerWidgets // []) | without($remove) | without($reposition))
+  | .rightWidgets  = ((.rightWidgets  // []) | without($remove) | without($reposition))
   | (allWidgets) as $have
-  | (["githubNotifier"] - $have) as $github
   | (["nvidiaGpuMonitor"] - $have) as $gpu
-  | (["claudeCodeUsage"] - $have) as $claude
-  | (["gameControllerBattery"] - $have) as $controller
-  | (["asusControlCenter"] - $have) as $asus
-  | .rightWidgets = insertAfter(.rightWidgets; "systemTray"; $github)
   | .rightWidgets = insertAfter(.rightWidgets; "cpuUsage"; $gpu)
-  | .rightWidgets = insertAfter(.rightWidgets; "nvidiaGpuMonitor"; $claude)
-  | .rightWidgets = insertAfter(.rightWidgets; "memUsage"; $controller)
-  | .rightWidgets = insertBefore(.rightWidgets; "battery"; $asus)
+  | .rightWidgets = insertAfter(.rightWidgets; "memUsage"; ["claudeCodeUsage"])
+  | .rightWidgets = insertBefore(.rightWidgets; "notificationButton"; ["githubNotifier"])
 )

@@ -128,7 +128,7 @@ let
           showOnLastDisplay = true;
           leftWidgets = [ "launcherButton" "workspaceSwitcher" "focusedWindow" ];
           centerWidgets = [ "music" "clock" "weather" ];
-          rightWidgets = [ "systemTray" "githubNotifier" "cpuUsage" "nvidiaGpuMonitor" "claudeCodeUsage" "memUsage" "gameControllerBattery" "notificationButton" "asusControlCenter" "battery" "controlCenterButton" ];
+          rightWidgets = [ "systemTray" "cpuUsage" "nvidiaGpuMonitor" "memUsage" "claudeCodeUsage" "githubNotifier" "notificationButton" "battery" "controlCenterButton" ];
           spacing = 4;
           innerPadding = 4;
           bottomGap = 0;
@@ -368,11 +368,6 @@ in
     # `enabled: true` by the activation block below). All four are dankbar/
     # launcher surfaces, not daemons.
     plugins = {
-      # ASUS power-profile + GPU-mode control from the DankBar. NOTE: its
-      # GPU-Mode buttons need supergfxctl, which this host intentionally does
-      # NOT run (see modules/nixos/mixins/asus.nix and the dGPU power model in
-      # CLAUDE.md) — only the asusctl-backed power-profile control functions.
-      asusControlCenter.enable = true;
       # NVIDIA usage / VRAM / temperature. Reads via nvidia-smi, so it only
       # shows data when the dGPU is powered (blank on battery, by design). The
       # dgpuStatus D0/D3cold power-state widget was dropped by preference — this
@@ -400,10 +395,6 @@ in
       # claudeCodeUsage: token usage / rate limits / daily charts for the Claude
       # Code subscription. Parses ~/.claude logs with jq (added to home.packages).
       claudeCodeUsage.enable = true;
-      # gameControllerBattery: battery level of connected controllers, via upower
-      # (present). Seeded with hideWhenNoControllersConnected so the pill only
-      # appears when a controller is present (dmsPluginSettingsSeed below).
-      gameControllerBattery.enable = true;
 
       # Scriptable custom bar buttons (Avenge Media, first-party) — the
       # replacement for noctalia's old custom "Windows" power-menu button, which
@@ -606,16 +597,11 @@ in
     tmp="$(mktemp "$pf.XXXXXX")"
     ${pkgs.jq}/bin/jq '
       reduce (
-        "asusControlCenter", "nvidiaGpuMonitor", "emojiLauncher",
+        "nvidiaGpuMonitor", "emojiLauncher",
         "calculator", "nixPackageRunner", "githubNotifier",
-        "claudeCodeUsage", "gameControllerBattery", "dankActions"
+        "claudeCodeUsage", "dankActions"
       ) as $id
         (.; if has($id) then . else .[$id] = { enabled: true } end)
-      # gameControllerBattery: hide the pill unless a controller is connected
-      # (only added when the key is absent, so a later manual toggle wins).
-      | if (.gameControllerBattery | type) == "object"
-           and (.gameControllerBattery | has("hideWhenNoControllersConnected") | not)
-        then .gameControllerBattery.hideWhenNoControllersConnected = true else . end
     ' "$pf" > "$tmp"
     if ${pkgs.jq}/bin/jq -e --slurpfile a "$tmp" '. == $a[0]' "$pf" >/dev/null; then
       rm -f "$tmp"
