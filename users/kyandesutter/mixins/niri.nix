@@ -349,12 +349,22 @@ let
 
       ideal="$(${renderDeviceIdeal}/bin/niri-render-device-ideal)"
 
-      if [ -n "$ideal" ]; then
-        printf 'debug {\n    render-drm-device "%s"\n}\n' "$ideal" > "$frag.tmp"
-      else
-        # Empty fragment → niri keeps its iGPU-primary default.
-        : > "$frag.tmp"
-      fi
+      # This fragment is the single owner of niri's debug{} block — niri rejects
+      # a second one — so both debug options live here. force-pipewire-invalid-
+      # modifier is ALWAYS set: niri renders on the iGPU but screencast consumers
+      # (Discord, Chrome) import on the dGPU, and the cross-GPU DMA-BUF modifier
+      # handshake fails ("wrong modifier choice type") and tears the cast down
+      # instantly; advertising only the implicit modifier forces the importable
+      # SHM path. render-drm-device is added ONLY when a dGPU monitor exists (so
+      # the iGPU-primary power model is preserved off-dock).
+      {
+        printf 'debug {\n'
+        if [ -n "$ideal" ]; then
+          printf '    render-drm-device "%s"\n' "$ideal"
+        fi
+        printf '    force-pipewire-invalid-modifier\n'
+        printf '}\n'
+      } > "$frag.tmp"
       mv "$frag.tmp" "$frag"
 
       # Stamp what niri boots with THIS session; gpu-relog-prompt compares the
