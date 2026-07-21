@@ -27,8 +27,7 @@ Safe, non-building checks you MAY run:
 - `nix eval '.#nixosConfigurations.g815.config.system.stateVersion'` and
   `nix eval '.#darwinConfigurations.macbook.config.system.stateVersion'` —
   forces all module imports to resolve without building the system. (Avoid
-  evaluating `home-manager.users.*` config paths: they trigger IFD, e.g.
-  Noctalia's `config validate`.)
+  evaluating `home-manager.users.*` config paths: they can trigger IFD.)
 
 ## Keep both machines in sync
 
@@ -49,7 +48,7 @@ on a password, hand that step to the owner and continue once it clears.
 Declarative config for two machines via one flake (flake-parts):
 - **`macbook`** — `aarch64-darwin`, nix-darwin + home-manager. Primary dev host.
 - **`g815`** — `x86_64-linux`, NixOS + home-manager. ASUS ROG laptop; niri +
-  Noctalia desktop, NVIDIA dGPU as a power-managed peripheral.
+  Dank Material Shell (DMS) desktop, NVIDIA dGPU as a power-managed peripheral.
 
 The macbook is the real development host; the g815 is used as a thin client that
 reaches the mac over SSH/MOSH and remote desktop to work remotely, rather than
@@ -74,7 +73,7 @@ users/kyandesutter/
   default.nix          cross-platform home base + imports
   darwin.nix linux.nix platform-specific home mixin wiring
   mixins/              per-program home-manager config (one concern per file)
-  noctalia-templates/  matugen-syntax templates Noctalia renders at runtime
+  matugen-templates/   matugen-syntax templates DMS renders at runtime
   claude/              VENDORED Claude config (skills/commands/agents) — data,
                        not nix; ignore when analyzing the config itself
 secrets/               agenix .age files + secrets.nix
@@ -95,17 +94,27 @@ Conventions:
 
 ## Theming model (g815 desktop)
 
-Colours are **wallpaper-derived (matugen/M3) via Noctalia**, the single source of
-truth. Noctalia regenerates a palette on every wallpaper pick / light-dark flip and
-renders templates (`users/kyandesutter/noctalia-templates/`) into per-app files,
-running each app's reload hook. niri's window borders are themed through the
-`niri-border` template: it renders `~/.cache/noctalia/niri-border.kdl` (the
-`layout {}` fragment niri's config `include`s last, so it wins) and its
-post_hook runs `niri msg action load-config-file`. **Flexoki is only a static
-fallback** for consumers that genuinely can't be dynamic: Neovim's pre-palette
-colourscheme, niri's pre-palette border colours (the seeded `niri-border.kdl`
-copy in `mixins/niri.nix`), and CLI tools with no Noctalia template (bat, fzf,
-lazygit, fish). The Flexoki palette is pure Nix data in
+Colours are **wallpaper-derived (matugen/M3) via DMS** (Dank Material Shell,
+since 2026-07-20; it replaced Noctalia), the single source of truth. DMS runs
+matugen on every wallpaper pick / light-dark flip: its built-in templates theme
+GTK (`~/.config/gtk-{3,4}.0/dank-colors.css`, imported via gtk.css) and Qt
+(`~/.config/qt{5,6}ct/colors/matugen.conf`), and it merges our user templates
+(`users/kyandesutter/matugen-templates/`, registered via the generated
+`~/.config/matugen/config.toml` in `mixins/dms.nix`: aura, ghostty, neovim,
+equibop, spicetify, obsidian, niri-border, btop, yazi, wallpaper-path) into the
+same matugen run, executing each template's post_hook. niri's window borders are
+themed through the `niri-border` template: it renders
+`~/.cache/dank/niri-border.kdl` (the `layout {}` fragment niri's config
+`include`s last, so it wins) and its post_hook runs
+`niri msg action load-config-file`. DMS's `settings.json` is runtime-mutable
+(NOT home-manager-managed): `mixins/dms.nix` seeds it once if absent — idle
+blanking must stay disabled there (eDP-1 wake-modeset bug). **Flexoki is only a
+static fallback** for consumers that genuinely can't be dynamic: Neovim's
+pre-palette colourscheme, niri's pre-palette border colours (the seeded
+`niri-border.kdl` copy in `mixins/niri.nix`), and CLI tools with no matugen
+template (bat, fzf, lazygit, fish). Per-wallpaper Flexoki *pinning* (the old
+`flexoki-scheme` hook) was dropped in the DMS migration. The Flexoki palette is
+pure Nix data in
 `users/kyandesutter/mixins/flexoki/palette.nix` (base tones + accents + ready
 `light`/`dark` terminal views), and `mixins/flexoki/` themes the CLI tools from
 it — static Flexoki dark on Linux, appearance-following light/dark on macOS
@@ -113,9 +122,9 @@ it — static Flexoki dark on Linux, appearance-following light/dark on macOS
 Flexoki Light/Dark, bat uses `auto:system`, fish re-selects by appearance). SDDM
 is independent (the `sddm-astronaut` pixel_sakura preset's own colours); Herdr
 uses its built-in `terminal` theme, so it follows ghostty dynamically. When
-adding a themed surface, prefer a Noctalia template + a Flexoki fallback derived
-from `palette.nix` (see the `niri-border` template in `mixins/noctalia.nix` for
-the render + seeded-fallback pattern).
+adding a themed surface, prefer a matugen user template + a Flexoki fallback
+derived from `palette.nix` (see the `niri-border` template in `mixins/dms.nix`
+for the render + seeded-fallback pattern).
 
 ## Power management — DO NOT BREAK
 
@@ -130,7 +139,7 @@ battery unless a monitor is connected on it or the session still holds it.
 **Relogs are consent-only**: `gpu-relog-prompt` shows a persistent button
 notification (never automatic).
 
-Power management is centered on **Noctalia + niri** and is load-bearing:
+Power management is centered on **DMS + niri** and is load-bearing:
 - `modules/nixos/mixins/power.nix` — `power-source` classifier (AC / power bank /
   battery) + `power-reconcile` (the single automatic owner of the PPD profile,
   publishes `/run/power/state`; udev-triggered, restart-safe) +
@@ -162,10 +171,10 @@ Power management is centered on **Noctalia + niri** and is load-bearing:
 - `modules/nixos/mixins/asus.nix` — asusd, battery limit, Aura keyboard.
 - `game-mode` (`gaming.nix`) — manual profile toggle; goes through PPD
   (powerprofilesctl), never asusctl, so it can't fight `power-reconcile`.
-- `lock-before-sleep` (`modules/nixos/mixins/niri.nix`) — noctalia's IPC
-  socket is keyed by `WAYLAND_DISPLAY` (`noctalia-<display>.sock`); anything
-  calling `noctalia msg` outside the session must derive that env var from the
-  socket name or discovery fails with "noctalia is not running".
+- `lock-before-sleep` (`modules/nixos/mixins/niri.nix`) — locks via
+  `dms ipc call lock lock` before sleep.target; DMS's IPC socket lives in the
+  user's `XDG_RUNTIME_DIR` (not display-keyed). The unit must never fail
+  (exit-0 always) so a dead shell can't block suspend.
 
 When touching any of these, treat them as **reorganize-only unless explicitly
 asked to change behavior**. `power-source` MUST stay in `environment.systemPackages`
