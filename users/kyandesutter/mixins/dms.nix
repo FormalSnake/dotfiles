@@ -128,7 +128,7 @@ let
           showOnLastDisplay = true;
           leftWidgets = [ "launcherButton" "workspaceSwitcher" "focusedWindow" ];
           centerWidgets = [ "music" "clock" "weather" ];
-          rightWidgets = [ "systemTray" "clipboard" "cpuUsage" "memUsage" "notificationButton" "battery" "controlCenterButton" ];
+          rightWidgets = [ "systemTray" "clipboard" "cpuUsage" "nvidiaGpuMonitor" "dgpuStatus" "memUsage" "notificationButton" "asusControlCenter" "battery" "controlCenterButton" ];
           spacing = 4;
           innerPadding = 4;
           bottomGap = 0;
@@ -339,7 +339,14 @@ in
   # desktop shell. The module installs the `dms-shell` package + runs it as a user
   # systemd service bound to the Wayland systemd target (auto-starts once niri
   # reaches that target).
-  imports = [ inputs.dank-material-shell.homeModules.dank-material-shell ];
+  imports = [
+    inputs.dank-material-shell.homeModules.dank-material-shell
+    # Registers every community plugin as
+    # `programs.dank-material-shell.plugins.<id>` (all disabled by default); the
+    # ones enabled below get their fetchgit'd source symlinked into
+    # ~/.config/DankMaterialShell/plugins/<id>.
+    inputs.dms-plugin-registry.homeModules.default
+  ];
 
   # Expose aura-repaint on PATH so power-tune (niri.nix) can call it as the
   # shared keyboard-aura setter (the matugen aura template's post_hook also uses
@@ -351,6 +358,30 @@ in
     systemd.enable = true; # user service, PartOf the Wayland/graphical-session target
     enableDynamicTheming = true; # pulls in the deps DMS's own theming needs
     package = dmsPackage; # local patch: IPC `settings set` → SettingsData.set (see dmsPackage above)
+
+    # Community plugins from inputs.dms-plugin-registry (imported above). Only
+    # `.enable` is set here — no `.settings`, which deliberately keeps
+    # managePluginSettings off so plugin_settings.json stays runtime-mutable
+    # (the plugins persist their own config there, and it's seeded with
+    # `enabled: true` by the activation block below). All four are dankbar/
+    # launcher surfaces, not daemons.
+    plugins = {
+      # ASUS power-profile + GPU-mode control from the DankBar. NOTE: its
+      # GPU-Mode buttons need supergfxctl, which this host intentionally does
+      # NOT run (see modules/nixos/mixins/asus.nix and the dGPU power model in
+      # CLAUDE.md) — only the asusctl-backed power-profile control functions.
+      asusControlCenter.enable = true;
+      # dGPU power-state (D0 / D3cold) indicator — designed for exactly this
+      # iGPU-primary / dGPU-as-peripheral setup, and works while the dGPU is
+      # powered down (unlike the nvidia-smi widgets).
+      dgpuStatus.enable = true;
+      # NVIDIA usage / VRAM / temperature. Reads via nvidia-smi, so it only
+      # shows data when the dGPU is powered (blank on battery, by design).
+      nvidiaGpuMonitor.enable = true;
+      # Emoji & Unicode launcher — bound to Mod+Period in mixins/niri.nix via
+      # `spotlight toggleQuery :e` (:e is the plugin's default trigger).
+      emojiLauncher.enable = true;
+    };
   };
 
   # App theming beyond DMS's builtin templates (gtk3/gtk4, qt5ct/qt6ct, ghostty,
@@ -498,23 +529,54 @@ in
   #   - absent: seed it wholesale from settingsSeed above, so idle stays
   #     disabled and battery/profile notifications are on from the very first
   #     session rather than however long it takes to open Settings manually.
-  #   - present but missing the customThemeFile key: back-fill just that key,
-  #     nothing else. Covers a re-install (or any future settingsSeed key
-  #     added after a host's first boot) landing on a settings.json that
-  #     already exists — without this, flexoki-pin (below) flips
-  #     currentThemeName to "custom" with no customThemeFile set, so DMS has
-  #     no palette to load. Never touches an existing key, even if it's set
-  #     to "" — that could be a deliberate user clear.
+  #   - present: back-fill two things, both idempotently. The customThemeFile
+  #     key when absent (covers a re-install landing on a settings.json that
+  #     already exists — without it flexoki-pin flips currentThemeName to
+  #     "custom" with no palette to load; never touches an existing key, even
+  #     "", which could be a deliberate user clear). And the plugin bar widgets
+  #     (dms-bar-plugins.jq), spliced into the live bar the same way the seed
+  #     places them — each id added only when missing from the whole bar, so a
+  #     widget the user later moves or removes isn't duplicated on the next
+  #     switch. The file is only rewritten when that pass actually changes it.
   home.activation.dmsSettingsSeed = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     settings="$HOME/.config/DankMaterialShell/settings.json"
     if [ ! -e "$settings" ]; then
       run mkdir -p "$HOME/.config/DankMaterialShell"
       run cp --no-preserve=mode ${settingsSeed} "$settings"
-    elif [ "$(${pkgs.jq}/bin/jq 'has("customThemeFile") | not' "$settings")" = "true" ]; then
+    else
       tmp="$(mktemp "$settings.XXXXXX")"
-      ${pkgs.jq}/bin/jq '. + {customThemeFile: "${customThemeFile}"}' "$settings" > "$tmp"
-      chmod --reference="$settings" "$tmp"
-      run mv "$tmp" "$settings"
+      ${pkgs.jq}/bin/jq 'if has("customThemeFile") then . else . + {customThemeFile: "${customThemeFile}"} end' "$settings" \
+        | ${pkgs.jq}/bin/jq -f ${./dms-bar-plugins.jq} > "$tmp"
+      if ${pkgs.jq}/bin/jq -e --slurpfile a "$tmp" '. == $a[0]' "$settings" >/dev/null; then
+        rm -f "$tmp"
+      else
+        chmod --reference="$settings" "$tmp"
+        run mv "$tmp" "$settings"
+      fi
+    fi
+  '';
+
+  # plugin_settings.json holds each plugin's enabled flag plus its own
+  # runtime-written config. The registry HM module only manages this file when a
+  # plugin declares `.settings` (we deliberately don't — see plugins above), so
+  # DMS owns it; we just seed `enabled: true` for the plugins wired in above so
+  # they load on the first session with no manual Settings → Plugins toggle.
+  # Only a missing top-level id is added — an existing entry (even
+  # {enabled:false}) is left as a deliberate user choice. Rewritten only when
+  # the seed actually adds something.
+  home.activation.dmsPluginSettingsSeed = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    pf="$HOME/.config/DankMaterialShell/plugin_settings.json"
+    run mkdir -p "$HOME/.config/DankMaterialShell"
+    [ -e "$pf" ] || echo '{}' > "$pf"
+    tmp="$(mktemp "$pf.XXXXXX")"
+    ${pkgs.jq}/bin/jq '
+      reduce ("asusControlCenter", "dgpuStatus", "nvidiaGpuMonitor", "emojiLauncher") as $id
+        (.; if has($id) then . else .[$id] = { enabled: true } end)
+    ' "$pf" > "$tmp"
+    if ${pkgs.jq}/bin/jq -e --slurpfile a "$tmp" '. == $a[0]' "$pf" >/dev/null; then
+      rm -f "$tmp"
+    else
+      run mv "$tmp" "$pf"
     fi
   '';
 

@@ -116,6 +116,16 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # DMS plugin registry — a flake that packages every community plugin
+    # (built daily) and ships a home-manager module exposing them as
+    # `programs.dank-material-shell.plugins.<id>.enable`. We enable a handful in
+    # mixins/dms.nix; each is a `fetchgit` + copy-into-$out derivation, so only
+    # the enabled ones are ever realised.
+    dms-plugin-registry = {
+      url = "github:AvengeMedia/dms-plugin-registry";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # DankCalendar (dcal) — the calendar daemon behind DMS's native "dankcal"
     # backend (unifies Local/Google/Microsoft/CalDAV/iCloud accounts, stores
     # OAuth tokens in the keyring). Its home-manager module installs `dcal` and

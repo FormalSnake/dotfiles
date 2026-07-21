@@ -240,6 +240,26 @@
         "url": "https://install.determinate.systems/determinate-nixd/tag/v3.21.8/x86_64-linux"
       }
     },
+    "dms-plugin-registry": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1784640562,
+        "narHash": "sha256-4jRRUaWOMZYFVnwk6VvSMX5ZsOGOCVbH8hKQ/+uDJwo=",
+        "owner": "AvengeMedia",
+        "repo": "dms-plugin-registry",
+        "rev": "8dac3abdc5598f8d30cbbf37238be661f2c8eb9b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "AvengeMedia",
+        "repo": "dms-plugin-registry",
+        "type": "github"
+      }
+    },
     "fetch": {
       "inputs": {
         "nixpkgs": [
@@ -1106,6 +1126,7 @@
         "dank-material-shell": "dank-material-shell",
         "dankcalendar": "dankcalendar",
         "determinate": "determinate",
+        "dms-plugin-registry": "dms-plugin-registry",
         "fetch": "fetch",
         "flake-parts": "flake-parts_2",
         "helium": "helium",
