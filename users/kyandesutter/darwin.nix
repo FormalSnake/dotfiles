@@ -20,7 +20,7 @@
   programs.fish.functions.rebuild = {
     description = "Rebuild nix-darwin from the flake via `just r`, runnable from any directory";
     body = ''
-      just -f ~/.config/nix/justfile r --impure $argv
+      just -f ~/.config/nix/justfile r $argv
     '';
   };
 }

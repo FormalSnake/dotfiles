@@ -64,18 +64,20 @@
     }
   ];
 
-  # NixOS rebuild shortcut (g815-only, so it lives here rather than the shared
+  # NixOS rebuild shortcut (linux-only, so it lives here rather than the shared
   # fish.nix — `nixos-rebuild` doesn't exist on the darwin host). Merges into the
   # programs.fish.functions set defined in mixins/fish.nix.
   #
-  # The flake is referenced by absolute path (~/.config/nix#g815), not `.#g815`,
-  # so `rebuild` works from any directory. `#g815` is literal: fish only treats
-  # `#` as a comment at the start of a word, and `~` still expands at word-start.
-  # Extra flags (e.g. --show-trace, boot) pass through via $argv.
+  # The flake is referenced by absolute path (~/.config/nix#<host>), not `.#…`,
+  # so `rebuild` works from any directory. The host attr comes from the live
+  # hostname so this mixin serves every NixOS host, not just g815. `#` is
+  # literal: fish only treats it as a comment at the start of a word, and `~`
+  # still expands at word-start. Extra flags (e.g. --show-trace) pass through
+  # via $argv.
   programs.fish.functions.rebuild = {
-    description = "Rebuild NixOS from the flake (~/.config/nix#g815), runnable from any directory";
+    description = "Rebuild NixOS from the flake (~/.config/nix#<hostname>), runnable from any directory";
     body = ''
-      sudo nixos-rebuild switch --flake ~/.config/nix#g815 --impure $argv
+      sudo nixos-rebuild switch --flake ~/.config/nix#"$(hostname)" $argv
     '';
   };
 
