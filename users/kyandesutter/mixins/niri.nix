@@ -266,6 +266,57 @@ let
     '';
   };
 
+  # Focused-output-aware brightness keys.
+  #
+  # DMS's own `brightness increment/decrement` with an empty device selector
+  # resolves to its "preferred device" (DisplayService.qml getPreferredDevice:
+  # a per-screen pin if set, else getDefaultDevice), and getDefaultDevice picks
+  # the internal backlight whenever the internal panel is active AT ALL
+  # (Quickshell.screens.some(/^(eDP|LVDS|DSI)/i)) — not whichever output is
+  # currently focused. On a docked laptop that means the brightness keys
+  # always hit the internal panel, even while focused on the desk monitor. So
+  # this script picks the device itself, keyed off niri's *focused* output:
+  # internal-panel regex match (or niri unreachable) → empty selector (DMS's
+  # own internal-panel default), otherwise the first `ddc:` device from
+  # `brightness list`.
+  #
+  # DDC ids are discovered fresh on every keypress rather than hardcoded or
+  # pinned once: they're `ddc:i2c-<N>`, and the i2c bus number a monitor lands
+  # on shifts across boots/replugs (udev enumeration order, not a stable
+  # identity). DMS does support a per-screen device pin
+  # (SettingsData.brightnessDevicePins), but that only helps if the pinned id
+  # stays valid — it would need re-pinning by hand through Settings whenever
+  # the bus number rotates, which defeats the point of a keybind.
+  brightnessKey = pkgs.writeShellApplication {
+    name = "brightness-key";
+    # dms on PATH rather than interpolating dmsBin directly: the dms-shell
+    # store path embeds a literal "=" (its +date=... version suffix), which
+    # shellcheck's parser misreads as a `word=value` assignment prefix
+    # (SC2276) when that path is the leading token of a command.
+    runtimeInputs = [
+      config.programs.dank-material-shell.package # dms
+      pkgs.niri # niri msg
+      pkgs.jq
+      pkgs.gnugrep
+      pkgs.coreutils
+    ];
+    text = ''
+      dir="''${1:?usage: brightness-key up|down}"
+      case "$dir" in
+        up) verb=increment ;;
+        down) verb=decrement ;;
+        *) echo "usage: brightness-key up|down" >&2; exit 1 ;;
+      esac
+
+      focused="$(niri msg --json focused-output 2>/dev/null | jq -r '.name // empty')"
+      device=""
+      if [ -n "$focused" ] && ! printf '%s' "$focused" | grep -qiE '^(eDP|LVDS|DSI)'; then
+        device="$(dms ipc call brightness list 2>/dev/null | grep -oE 'ddc:[^[:space:]]+' | head -n1 || true)"
+      fi
+      dms ipc call brightness "$verb" 5 "$device"
+    '';
+  };
+
   # Render-GPU selection (see systemd.user.services.niri-render-device).
   #
   # niri renders everything on ONE primary GPU (chosen once at startup, no
@@ -443,16 +494,17 @@ in
         # Volume / brightness / media all route through DMS (ipc call) so
         # they share one OSD and stay in sync with the shell:
         #   • volume / mic → speaker + mic, with the volume OSD.
-        #   • brightness   → the default backlight device (empty selector),
-        #     in clean 5% steps.
+        #   • brightness   → brightness-key (see the let block) resolves the
+        #     device from niri's focused output instead of DMS's own
+        #     internal-panel-first default, in clean 5% steps.
         #   • media        → the ACTIVE MPRIS player DMS tracks, so the keys
         #     follow Spotify, not a background YouTube tab.
         "XF86AudioRaiseVolume" = { allow-when-locked = true; action.spawn = [ dmsBin "ipc" "call" "audio" "increment" "3" ]; };
         "XF86AudioLowerVolume" = { allow-when-locked = true; action.spawn = [ dmsBin "ipc" "call" "audio" "decrement" "3" ]; };
         "XF86AudioMute".action.spawn = [ dmsBin "ipc" "call" "audio" "mute" ];
         "XF86AudioMicMute".action.spawn = [ dmsBin "ipc" "call" "audio" "micmute" ];
-        "XF86MonBrightnessUp" = { allow-when-locked = true; action.spawn = [ dmsBin "ipc" "call" "brightness" "increment" "5" "" ]; };
-        "XF86MonBrightnessDown" = { allow-when-locked = true; action.spawn = [ dmsBin "ipc" "call" "brightness" "decrement" "5" "" ]; };
+        "XF86MonBrightnessUp" = { allow-when-locked = true; action.spawn = [ "${brightnessKey}/bin/brightness-key" "up" ]; };
+        "XF86MonBrightnessDown" = { allow-when-locked = true; action.spawn = [ "${brightnessKey}/bin/brightness-key" "down" ]; };
         "XF86AudioPlay".action.spawn = [ dmsBin "ipc" "call" "mpris" "playPause" ];
         "XF86AudioPause".action.spawn = [ dmsBin "ipc" "call" "mpris" "playPause" ];
         "XF86AudioNext".action.spawn = [ dmsBin "ipc" "call" "mpris" "next" ];
