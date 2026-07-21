@@ -1,0 +1,10 @@
+{
+  "name": "herdr-plugin-marketplace-worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bunx wrangler dev",
+    "deploy": "bunx wrangler deploy",
+    "test": "bun test"
+  }
+}

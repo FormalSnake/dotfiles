@@ -1,0 +1,15 @@
+name = "herdr-plugin-marketplace"
+main = "src/index.ts"
+compatibility_date = "2026-06-21"
+workers_dev = false
+
+[[r2_buckets]]
+binding = "PLUGIN_MARKETPLACE_BUCKET"
+bucket_name = "herdr-plugin-marketplace"
+
+[[kv_namespaces]]
+binding = "PLUGIN_MARKETPLACE_BLACKLIST"
+id = "6504b3b84171492db56e805f6aad1686"
+
+[triggers]
+crons = ["*/30 * * * *"]

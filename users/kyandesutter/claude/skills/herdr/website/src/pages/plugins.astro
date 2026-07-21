@@ -1,0 +1,629 @@
+---
+import MarketingLayout from '../components/MarketingLayout.astro';
+import fixture from '../data/plugins-fixture.json';
+
+const snapshotUrl = 'https://assets.herdr.dev/plugins/index.json';
+
+// Seed the page server-side from the public R2 snapshot so `bun run dev` and
+// the production build both render real data immediately. If the live fetch
+// fails, dev falls back to a local fixture for offline design; production seeds
+// empty and lets the client fetch fill it (never fake data).
+let liveData = null;
+try {
+  const res = await fetch(snapshotUrl);
+  if (res.ok) liveData = await res.json();
+} catch {
+  // ignore: handled by the fallbacks below
+}
+const initialData = liveData ?? (import.meta.env.DEV ? fixture : null);
+const initialIsFixture = !liveData && import.meta.env.DEV;
+const apiUrl = import.meta.env.DEV ? null : snapshotUrl;
+---
+
+<MarketingLayout
+  title="Herdr plugins: community plugin marketplace"
+  description="Discover community Herdr plugins published on GitHub. An automatic index of public repositories tagged with the herdr-plugin topic."
+  canonicalPath="/plugins/"
+>
+  <main class="plugins-page">
+    <section class="section plugins-hero">
+      <p class="section-kicker"># marketplace</p>
+      <h2>Plugins built on Herdr.</h2>
+      <p class="plugins-lede">
+        Community plugins published on GitHub. Install any of them with
+        <code>herdr plugin install</code>, or publish your own and get listed.
+      </p>
+      <p class="plugins-trust">
+        <span class="status-dot dot-idle"></span>
+        Listings are discovered automatically from the GitHub topic
+        <code>herdr-plugin</code>. They are not reviewed by Herdr, so install at
+        your own discretion. <a href="/docs/plugins/#trust-and-security">Trust guidance</a>.
+      </p>
+    </section>
+
+    <section class="section plugins-controls">
+      <div class="plugins-search-wrap">
+        <span class="plugins-search-icon" aria-hidden="true">/</span>
+        <input
+          id="plugins-search"
+          type="search"
+          class="plugins-search"
+          placeholder="search plugins, owners, languages…"
+          autocomplete="off"
+          spellcheck="false"
+          aria-label="Search plugins"
+        />
+      </div>
+      <label class="plugins-sort-wrap">
+        <span class="plugins-sort-label">sort</span>
+        <select id="plugins-sort" class="plugins-sort" aria-label="Sort plugins">
+          <option value="popular">Popular</option>
+          <option value="recent">Recently updated</option>
+          <option value="newest">Newest</option>
+          <option value="name">Name</option>
+        </select>
+      </label>
+      <p id="plugins-meta" class="plugins-meta" aria-live="polite"></p>
+    </section>
+
+    <section class="section plugins-results">
+      <div id="plugins-grid" class="plugins-grid" role="list"></div>
+      <div id="plugins-status" class="plugins-status">Loading plugins…</div>
+      <button id="plugins-more" class="button button-secondary plugins-more" hidden></button>
+    </section>
+
+    <section class="section plugins-publish">
+      <div class="plugins-publish-card">
+        <p class="section-kicker"># publish</p>
+        <h3>Want your plugin listed?</h3>
+        <p>
+          Add the GitHub topic <code>herdr-plugin</code> to a public repository
+          with a <code>herdr-plugin.toml</code> manifest. The index picks it up
+          on the next refresh. No submission, no review queue.
+        </p>
+        <div class="plugins-publish-actions">
+          <a class="button button-primary" href="/docs/marketplace/">How publishing works</a>
+          <a class="button button-secondary" href="/docs/plugins/">Author a plugin</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script define:vars={{ initialData, initialIsFixture, apiUrl }}>
+    const grid = document.getElementById("plugins-grid");
+    const statusEl = document.getElementById("plugins-status");
+    const searchInput = document.getElementById("plugins-search");
+    const sortSelect = document.getElementById("plugins-sort");
+    const metaEl = document.getElementById("plugins-meta");
+    const moreButton = document.getElementById("plugins-more");
+
+    // 24 fills complete rows in both the 3-column and 2-column grid layouts.
+    const SHOW_LIMIT = 24;
+    let showAll = false;
+
+    const LANG_COLORS = {
+      TypeScript: "#3178c6",
+      JavaScript: "#f1e05a",
+      Rust: "#dea584",
+      Python: "#3572A5",
+      Go: "#00ADD8",
+      Lua: "#000080",
+      Shell: "#89e051",
+      "C++": "#f34b7d",
+      Ruby: "#701516",
+    };
+
+    let plugins = [];
+    let usingFallback = false;
+
+    function timeAgo(iso) {
+      if (!iso) return null;
+      const then = new Date(iso).getTime();
+      if (Number.isNaN(then)) return null;
+      const secs = Math.max(0, Math.round((Date.now() - then) / 1000));
+      const units = [
+        ["y", 31536000],
+        ["mo", 2592000],
+        ["w", 604800],
+        ["d", 86400],
+        ["h", 3600],
+        ["m", 60],
+      ];
+      for (const [label, size] of units) {
+        const v = Math.floor(secs / size);
+        if (v >= 1) return v + label + " ago";
+      }
+      return "just now";
+    }
+
+    function isGithubUrl(url) {
+      return typeof url === "string" && /^https:\/\/github\.com\/[^/]+\/[^/]+/.test(url);
+    }
+
+    function el(tag, className, text) {
+      const node = document.createElement(tag);
+      if (className) node.className = className;
+      if (text != null) node.textContent = text;
+      return node;
+    }
+
+    function buildCard(p) {
+      const url = isGithubUrl(p.url) ? p.url : null;
+      const card = el(url ? "a" : "div", "plugin-card");
+      card.setAttribute("role", "listitem");
+      if (url) {
+        card.href = url;
+        card.target = "_blank";
+        card.rel = "noopener noreferrer";
+      }
+
+      const head = el("div", "plugin-card-head");
+      const title = el("div", "plugin-title");
+      title.appendChild(el("span", "plugin-owner", (p.owner || "?") + "/"));
+      title.appendChild(el("span", "plugin-name", p.name || "unknown"));
+      head.appendChild(title);
+      head.appendChild(el("span", "plugin-go", "↗"));
+      card.appendChild(head);
+
+      const desc = el(
+        "p",
+        "plugin-desc" + (p.description ? "" : " is-empty"),
+        p.description || "No description provided.",
+      );
+      card.appendChild(desc);
+
+      const meta = el("div", "plugin-meta-row");
+
+      const stars = el("span", "plugin-stat");
+      stars.appendChild(el("span", "plugin-star", "★"));
+      stars.appendChild(el("span", null, String(p.stars ?? 0)));
+      meta.appendChild(stars);
+
+      if (p.language) {
+        const lang = el("span", "plugin-stat");
+        const dot = el("span", "plugin-lang-dot");
+        dot.style.background = LANG_COLORS[p.language] || "var(--muted)";
+        lang.appendChild(dot);
+        lang.appendChild(el("span", null, p.language));
+        meta.appendChild(lang);
+      }
+
+      const updated = timeAgo(p.pushedAt);
+      if (updated) meta.appendChild(el("span", "plugin-stat plugin-updated", "updated " + updated));
+
+      card.appendChild(meta);
+      return card;
+    }
+
+    function matches(p, q) {
+      if (!q) return true;
+      const hay = [p.fullName, p.owner, p.name, p.description, p.language, ...(p.topics || [])]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return q.split(/\s+/).every((term) => hay.includes(term));
+    }
+
+    function sortPlugins(list, mode) {
+      const by = [...list];
+      const t = (v) => new Date(v || 0).getTime() || 0;
+      if (mode === "recent") by.sort((a, b) => t(b.pushedAt) - t(a.pushedAt));
+      else if (mode === "newest") by.sort((a, b) => t(b.createdAt) - t(a.createdAt));
+      else if (mode === "name") by.sort((a, b) => (a.fullName || "").localeCompare(b.fullName || ""));
+      else
+        by.sort(
+          (a, b) => (b.stars ?? 0) - (a.stars ?? 0) || t(b.pushedAt) - t(a.pushedAt),
+        );
+      return by;
+    }
+
+    function render() {
+      const q = searchInput.value.trim().toLowerCase();
+      const visible = sortPlugins(plugins.filter((p) => matches(p, q)), sortSelect.value);
+      const shown = showAll ? visible : visible.slice(0, SHOW_LIMIT);
+
+      grid.replaceChildren();
+      for (const p of shown) grid.appendChild(buildCard(p));
+
+      const hiddenCount = visible.length - shown.length;
+      moreButton.hidden = hiddenCount === 0;
+      if (hiddenCount > 0) {
+        moreButton.textContent = "show " + hiddenCount + " more";
+      }
+
+      if (visible.length === 0) {
+        statusEl.textContent = q
+          ? "No plugins match your search."
+          : "No plugins are listed yet.";
+        statusEl.hidden = false;
+      } else {
+        statusEl.hidden = true;
+      }
+    }
+
+    function setMeta(generatedAt) {
+      const parts = [];
+      parts.push(plugins.length + (plugins.length === 1 ? " plugin" : " plugins"));
+      const ago = timeAgo(generatedAt);
+      if (ago) parts.push("updated " + ago);
+      if (usingFallback) parts.push("preview data");
+      metaEl.textContent = parts.join(" · ");
+    }
+
+    function apply(data) {
+      plugins = Array.isArray(data && data.plugins) ? data.plugins : [];
+      setMeta(data && data.generatedAt);
+      render();
+    }
+
+    function showError() {
+      plugins = [];
+      metaEl.textContent = "";
+      grid.replaceChildren();
+      moreButton.hidden = true;
+      statusEl.textContent =
+        "The plugin marketplace is warming up. Check back in a few minutes.";
+      statusEl.hidden = false;
+    }
+
+    async function load() {
+      // Render the server-seeded data immediately (live in prod and dev; fixture
+      // only as a dev offline fallback).
+      if (initialData) {
+        usingFallback = initialIsFixture;
+        apply(initialData);
+      }
+      // Refresh from the same-origin function in production for the freshest snapshot.
+      if (apiUrl) {
+        try {
+          const res = await fetch(apiUrl, { headers: { accept: "application/json" } });
+          if (!res.ok) throw new Error("status " + res.status);
+          usingFallback = false;
+          apply(await res.json());
+        } catch (err) {
+          if (!initialData) showError();
+        }
+      } else if (!initialData) {
+        showError();
+      }
+    }
+
+    searchInput.addEventListener("input", render);
+    sortSelect.addEventListener("change", render);
+    moreButton.addEventListener("click", () => {
+      showAll = true;
+      render();
+    });
+    load();
+  </script>
+
+  <style is:global>
+    .plugins-page {
+      padding-bottom: 5rem;
+    }
+
+    /* Reuse .section only for max-width centering, not its 5rem padding + top divider. */
+    .plugins-page .section {
+      padding-block: 0;
+      border-top: none;
+    }
+
+    .plugins-page .plugins-hero {
+      padding-top: 3rem;
+    }
+
+    .plugins-hero h2 {
+      margin: 0;
+      color: var(--ink);
+      font-family: var(--mono);
+      font-weight: 400;
+      letter-spacing: -0.04em;
+      line-height: 1.05;
+      font-size: clamp(2rem, 4vw, 3rem);
+    }
+
+    .plugins-lede {
+      max-width: 640px;
+      margin: 1.1rem 0 0;
+      color: var(--ink-soft);
+      font-size: clamp(1rem, 1.6vw, 1.15rem);
+      line-height: 1.6;
+    }
+
+    .plugins-lede code,
+    .plugins-trust code,
+    .plugins-publish-card code {
+      font-family: var(--mono);
+      font-size: 0.85em;
+      background: var(--bg-elevated);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      padding: 0.1em 0.35em;
+      white-space: nowrap;
+    }
+
+    .plugins-trust {
+      max-width: 640px;
+      margin: 1.1rem 0 0;
+      color: var(--muted);
+      font-size: 0.85rem;
+      line-height: 1.55;
+    }
+
+    .plugins-trust .status-dot {
+      display: inline-block;
+      margin-right: 0.4rem;
+      vertical-align: middle;
+    }
+
+    .plugins-trust a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    /* Controls */
+    .plugins-page .plugins-controls {
+      position: relative;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 2.5rem;
+      padding-bottom: 1.75rem;
+    }
+
+    /* Divider bound to the content box (padding box), so it aligns with the
+       search row and the cards instead of bleeding past them. */
+    .plugins-controls::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .plugins-search-wrap {
+      position: relative;
+      flex: 1 1 18rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .plugins-search-icon {
+      position: absolute;
+      left: 0.7rem;
+      color: var(--muted-2);
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      pointer-events: none;
+    }
+
+    .plugins-search {
+      width: 100%;
+      padding: 0.6rem 0.8rem 0.6rem 1.7rem;
+      background: var(--bg-elevated);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      color: var(--ink);
+      font-family: var(--mono);
+      font-size: 0.85rem;
+    }
+
+    .plugins-search:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .plugins-sort-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .plugins-sort-label {
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      text-transform: lowercase;
+      letter-spacing: 0.06em;
+    }
+
+    .plugins-sort {
+      padding: 0.55rem 0.7rem;
+      background: var(--bg-elevated);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      color: var(--ink);
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      cursor: pointer;
+    }
+
+    .plugins-sort:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .plugins-meta {
+      margin: 0;
+      margin-left: auto;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+    }
+
+    /* Grid */
+    .plugins-results {
+      margin-top: 2rem;
+    }
+
+    .plugins-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+      gap: 0.85rem;
+    }
+
+    .plugin-card {
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+      padding: 1.25rem;
+      background: var(--bg-elevated);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      transition: border-color 0.12s ease, transform 0.12s ease;
+      min-height: 8.5rem;
+    }
+
+    a.plugin-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .plugin-card-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .plugin-title {
+      font-family: var(--mono);
+      font-size: 0.95rem;
+      line-height: 1.3;
+      word-break: break-word;
+    }
+
+    .plugin-owner {
+      color: var(--muted);
+    }
+
+    .plugin-name {
+      color: var(--ink);
+      font-weight: 600;
+    }
+
+    .plugin-go {
+      color: var(--muted-2);
+      font-family: var(--mono);
+      flex: 0 0 auto;
+      transition: color 0.12s ease;
+    }
+
+    a.plugin-card:hover .plugin-go {
+      color: var(--accent);
+    }
+
+    .plugin-desc {
+      margin: 0;
+      color: var(--ink-soft);
+      font-size: 0.88rem;
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .plugin-desc.is-empty {
+      color: var(--muted-2);
+      font-style: italic;
+    }
+
+    .plugin-meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.9rem;
+      margin-top: auto;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 0.78rem;
+    }
+
+    .plugin-stat {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .plugin-star {
+      color: var(--yellow, #d4a72c);
+    }
+
+    .plugin-lang-dot {
+      width: 0.6rem;
+      height: 0.6rem;
+      border-radius: 50%;
+      flex: 0 0 auto;
+    }
+
+    .plugin-updated {
+      margin-left: auto;
+      color: var(--muted-2);
+    }
+
+    .plugins-status {
+      padding: 3rem 1rem;
+      text-align: center;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 0.85rem;
+    }
+
+    .plugins-more {
+      display: flex;
+      margin: 2rem auto 0;
+      cursor: pointer;
+    }
+
+    .plugins-more[hidden] {
+      display: none;
+    }
+
+    /* Publish */
+    .plugins-publish {
+      margin-top: 3.5rem;
+    }
+
+    .plugins-publish-card {
+      padding: 2rem;
+      background: var(--bg-elevated);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+    }
+
+    .plugins-publish-card h3 {
+      margin: 0.25rem 0 0;
+      color: var(--ink);
+      font-family: var(--mono);
+      font-weight: 400;
+      font-size: 1.4rem;
+      letter-spacing: -0.02em;
+    }
+
+    .plugins-publish-card p {
+      max-width: 620px;
+      margin: 0.8rem 0 0;
+      color: var(--ink-soft);
+      line-height: 1.6;
+    }
+
+    .plugins-publish-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-top: 1.5rem;
+    }
+
+    @media (max-width: 38rem) {
+      .plugins-meta {
+        margin-left: 0;
+        width: 100%;
+      }
+    }
+  </style>
+</MarketingLayout>

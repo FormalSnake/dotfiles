@@ -116,6 +116,16 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # DankCalendar (dcal) — the calendar daemon behind DMS's native "dankcal"
+    # backend (unifies Local/Google/Microsoft/CalDAV/iCloud accounts, stores
+    # OAuth tokens in the keyring). Its home-manager module installs `dcal` and
+    # runs `dcal run --session --hidden`; DMS's calendarBackend defaults to
+    # "auto" and picks up the running daemon over IPC. See mixins/dankcal.nix.
+    dankcalendar = {
+      url = "github:AvengeMedia/dankcalendar";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # niri scrollable-tiling compositor. The flake is used ONLY for its typed
     # home-manager settings module (programs.niri.settings → KDL, validated
     # with `niri validate` at build time); the niri binary itself comes from
