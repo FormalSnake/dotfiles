@@ -12,7 +12,7 @@
   # ordered ahead of it), so trust is declarative and self-healing.
   system.activationScripts.preActivation.text =
     lib.mkIf (config.homebrew.taps != [ ]) ''
-      sudo --user=${lib.escapeShellArg config.homebrew.user} ${config.homebrew.prefix}/bin/brew trust --taps ${
+      sudo --set-home --user=${lib.escapeShellArg config.homebrew.user} ${config.homebrew.prefix}/bin/brew trust --taps ${
         lib.escapeShellArgs (map (t: if lib.isString t then t else t.name) config.homebrew.taps)
       } || true
     '';
