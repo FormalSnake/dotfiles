@@ -439,14 +439,22 @@ in
       # — Keybinds (mirror the macOS/aerospace muscle memory, SUPER as mod) —
       binds = {
         # App launcher / clipboard / theme / lock via DMS IPC (absolute path —
-        # niri spawns argv directly, no shell). No emoji-picker bind: DMS has
-        # no equivalent IPC target (accepted loss vs the old launcher /emo).
+        # niri spawns argv directly, no shell).
         "Mod+Space".action.spawn = [ dmsBin "ipc" "call" "spotlight" "toggle" ];
         "Mod+Return".action.spawn = "ghostty";
         "Mod+Q".action.close-window = [ ];
         "Mod+Shift+F".action.fullscreen-window = [ ];
         "Mod+V".action.toggle-window-floating = [ ];
         "Mod+B".action.spawn = "helium";
+        # Emoji picker: DMS's spotlight search has no emoji surface (modes are
+        # all/apps/files/plugins only), and its bundled "Emoji Cycler" example
+        # plugin is a disabled-by-default DankBar widget with a 120-emoji
+        # popout — not a launcher, and needs manual per-machine install into
+        # ~/.config/DankMaterialShell/plugins. smile is a standalone GTK
+        # emoji picker (on PATH via home.packages below); it copies the pick
+        # to the clipboard, which DMS's clipboard manager then captures like
+        # any other copy.
+        "Mod+Period".action.spawn = "smile";
         # ñ is a dedicated key on the es layout; its XKB keysym is `ntilde`.
         "Mod+ntilde".action.spawn = [ dmsBin "ipc" "call" "clipboard" "toggle" ];
         "Mod+Shift+T".action.spawn = [ dmsBin "ipc" "call" "theme" "toggle" ];
@@ -542,6 +550,9 @@ in
         # GNOME spacebar quick-preview (Sushi / NautilusPreviewer) → float like
         # macOS Quick Look instead of tiling into the layout.
         { matches = [ { app-id = "^(org.gnome.NautilusPreviewer)$"; } ]; open-floating = true; }
+        # smile emoji picker (Mod+Period above) → float as a small popup
+        # instead of tiling into the layout.
+        { matches = [ { app-id = "^(it.mijorus.smile)$"; } ]; open-floating = true; }
       ];
 
       # No layer-rules: DMS's settings pane and its plain wallpaper background
@@ -755,6 +766,10 @@ in
   #     from autostart.nix).
   home.packages = with pkgs; [
     wl-clip-persist
+
+    # GTK emoji picker for Mod+Period (see binds above) — DMS has no emoji
+    # surface of its own.
+    smile
 
     # GTK theme DMS's gtk template sets via gsettings/dconf (adw-gtk3-dark).
     # Installed here so that theme name resolves; DMS, not the gtk module,
