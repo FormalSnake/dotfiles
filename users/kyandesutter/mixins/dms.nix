@@ -61,6 +61,41 @@ let
   #     Colors → Custom pick sets currentThemeName to "custom". Does NOT touch
   #     currentThemeName itself — DMS's own wallpaper-derived default stands
   #     until something (flexoki-pin, or the user) opts in.
+  #   - currentThemeName "dynamic": SPEC's own default is "purple" (a fixed
+  #     registry theme, not wallpaper-derived) — without this a fresh install
+  #     shows purple until someone opens Settings and picks a theme. "dynamic"
+  #     is Theme.qml's own sentinel for "wallpaper-derived" (`readonly property
+  #     string dynamic: "dynamic"`), so this just makes the real default match
+  #     the wallpaper-derived theming this whole file exists to drive.
+  #   - cornerRadius 0 + barConfigs[0].squareCorners true: fully squared UI,
+  #     matching the old Noctalia config (corner_radius_scale 0.0, bar radius
+  #     0). cornerRadius is the single global radius Theme.qml applies to
+  #     popups/notifications/dock/widgets; the bar has its own separate
+  #     squareCorners flag, hence seeding the whole default barConfigs entry
+  #     (SPEC.barConfigs.def) with just that one field flipped — DMS's loader
+  #     doesn't deep-merge array values, so a partial object would drop the
+  #     rest of the bar's config to `undefined`. niriLayoutRadiusOverride is
+  #     left at its SPEC default (-1, off) — niri's own window-corner radius
+  #     is out of scope here and already matches (see mixins/niri.nix).
+  #   - showWorkspaceName + showOccupiedWorkspacesOnly: renders niri's named
+  #     workspaces (wsName in mixins/niri.nix) on the bar's pills instead of
+  #     bare indices, and hides empty ones — the closest match to Noctalia's
+  #     old hide_when_empty=true + name-label behaviour. There's no per-widget
+  #     "max name length" key upstream (WorkspaceSwitcher.qml renders the full
+  #     name on a horizontal bar; it only truncates to the first character in
+  #     vertical-bar orientation), so none is seeded.
+  #   - no wallpaper-folder key: verified there isn't one. DMS has no
+  #     directory-scanning wallpaper gallery — SettingsSpec.js/SessionSpec.js
+  #     have no wallpaperFolder/wallpaperDirectory key at all. The Settings
+  #     wallpaper picker (SettingsWallpaperPicker.qml) is a generic
+  #     FileBrowserModal that opens to CacheData.wallpaperLastPath (a
+  #     ~/.local/state/DankMaterialShell/cache.json field, outside
+  #     SettingsSpec/SessionSpec — not reachable via `settings set` IPC or
+  #     this seed) or falls back to $HOME. The only real per-mode wallpaper
+  #     primitive is SessionSpec's wallpaperPath{Light,Dark} + perModeWallpaper
+  #     (single files, not folders, and session.json isn't seeded by this
+  #     activation block at all) — set live on this host via `dms ipc call
+  #     wallpaper set` plus a direct session.json edit; not persisted here.
   #
   # Key names verified against upstream quickshell/Common/settings/SettingsSpec.js
   # (AvengeMedia/DankMaterialShell@74896fb): idle timeouts already default to 0
@@ -79,6 +114,67 @@ let
       batteryNotifyLow = true;
       osdPowerProfileEnabled = true;
       inherit customThemeFile;
+      currentThemeName = "dynamic";
+      cornerRadius = 0;
+      showWorkspaceName = true;
+      showOccupiedWorkspacesOnly = true;
+      barConfigs = [
+        {
+          id = "default";
+          name = "Main Bar";
+          enabled = true;
+          position = 0;
+          screenPreferences = [ "all" ];
+          showOnLastDisplay = true;
+          leftWidgets = [ "launcherButton" "workspaceSwitcher" "focusedWindow" ];
+          centerWidgets = [ "music" "clock" "weather" ];
+          rightWidgets = [ "systemTray" "clipboard" "cpuUsage" "memUsage" "notificationButton" "battery" "controlCenterButton" ];
+          spacing = 4;
+          innerPadding = 4;
+          bottomGap = 0;
+          transparency = 1.0;
+          widgetTransparency = 1.0;
+          squareCorners = true;
+          noBackground = false;
+          maximizeWidgetIcons = false;
+          maximizeWidgetText = false;
+          removeWidgetPadding = false;
+          widgetPadding = 8;
+          gothCornersEnabled = false;
+          gothCornerRadiusOverride = false;
+          gothCornerRadiusValue = 12;
+          borderEnabled = false;
+          borderColor = "surfaceText";
+          borderOpacity = 1.0;
+          borderThickness = 1;
+          widgetOutlineEnabled = false;
+          widgetOutlineColor = "primary";
+          widgetOutlineOpacity = 1.0;
+          widgetOutlineThickness = 1;
+          fontScale = 1.0;
+          iconScale = 1.0;
+          autoHide = false;
+          autoHideStrict = false;
+          autoHideDelay = 250;
+          showOnWindowsOpen = false;
+          openOnOverview = false;
+          visible = true;
+          popupGapsAuto = true;
+          popupGapsManual = 4;
+          maximizeDetection = true;
+          useOverlayLayer = false;
+          scrollEnabled = true;
+          scrollXBehavior = "column";
+          scrollYBehavior = "workspace";
+          shadowIntensity = 0;
+          shadowOpacity = 60;
+          shadowColorMode = "default";
+          shadowCustomColor = "#000000";
+          clickThrough = false;
+          hoverPopouts = false;
+          hoverPopoutDelay = 150;
+        }
+      ];
     }
   );
 
