@@ -1,6 +1,21 @@
-{ inputs, ... }:
+{ inputs, config, lib, ... }:
 {
   imports = [ inputs.nix-homebrew.darwinModules.nix-homebrew ];
+
+  # Homebrew 6 (HOMEBREW_REQUIRE_TAP_TRUST) refuses formulae/casks from
+  # untrusted third-party taps. Trust lives in a per-user trust.json whose
+  # location depends on the environment ($XDG_CONFIG_HOME vs ~/.homebrew), so a
+  # manual `brew trust` from an interactive shell can land in a different store
+  # than the one activation's `sudo --user … brew bundle` reads — which is why
+  # trusting kept "not sticking". Re-trust every declared tap in the activation
+  # environment itself, right before the homebrew step runs (preActivation is
+  # ordered ahead of it), so trust is declarative and self-healing.
+  system.activationScripts.preActivation.text =
+    lib.mkIf (config.homebrew.taps != [ ]) ''
+      sudo --user=${lib.escapeShellArg config.homebrew.user} ${config.homebrew.prefix}/bin/brew trust --taps ${
+        lib.escapeShellArgs (map (t: if lib.isString t then t else t.name) config.homebrew.taps)
+      } || true
+    '';
 
   # Manage the Homebrew install itself
   nix-homebrew = {

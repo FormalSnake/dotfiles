@@ -52,7 +52,7 @@
       "syncthing-app"
 
       # — tiling WM (mirrors the g815 niri setup) —
-      "omniwm"             # barutsrb/tap — niri-style tiler; needs one-time `brew trust --cask barutsrb/tap/omniwm`
+      "omniwm"             # barutsrb/tap — niri-style tiler (tap trusted automatically; see modules/darwin/mixins/homebrew.nix)
       "karabiner-elements" # remaps Right Command → the OmniWM "Super" chord (Ctrl+Opt+Cmd)
     ];
 
