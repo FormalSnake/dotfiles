@@ -128,7 +128,7 @@ let
           showOnLastDisplay = true;
           leftWidgets = [ "launcherButton" "workspaceSwitcher" "focusedWindow" ];
           centerWidgets = [ "music" "clock" "weather" ];
-          rightWidgets = [ "systemTray" "discordVoice" "clipboard" "githubNotifier" "cpuUsage" "nvidiaGpuMonitor" "dgpuStatus" "claudeCodeUsage" "memUsage" "gameControllerBattery" "notificationButton" "asusControlCenter" "battery" "displayManager" "controlCenterButton" ];
+          rightWidgets = [ "systemTray" "githubNotifier" "cpuUsage" "nvidiaGpuMonitor" "claudeCodeUsage" "memUsage" "gameControllerBattery" "notificationButton" "asusControlCenter" "battery" "controlCenterButton" ];
           spacing = 4;
           innerPadding = 4;
           bottomGap = 0;
@@ -373,12 +373,10 @@ in
       # NOT run (see modules/nixos/mixins/asus.nix and the dGPU power model in
       # CLAUDE.md) — only the asusctl-backed power-profile control functions.
       asusControlCenter.enable = true;
-      # dGPU power-state (D0 / D3cold) indicator — designed for exactly this
-      # iGPU-primary / dGPU-as-peripheral setup, and works while the dGPU is
-      # powered down (unlike the nvidia-smi widgets).
-      dgpuStatus.enable = true;
       # NVIDIA usage / VRAM / temperature. Reads via nvidia-smi, so it only
-      # shows data when the dGPU is powered (blank on battery, by design).
+      # shows data when the dGPU is powered (blank on battery, by design). The
+      # dgpuStatus D0/D3cold power-state widget was dropped by preference — this
+      # usage widget is the only GPU pill on the bar.
       nvidiaGpuMonitor.enable = true;
       # Emoji & Unicode launcher — bound to Mod+Period in mixins/niri.nix via
       # `spotlight toggleQuery :e` (:e is the plugin's default trigger).
@@ -395,9 +393,6 @@ in
       # DankBar widgets. Bar placement is spliced into rightWidgets by the seed
       # (settingsSeed above) and, for the already-provisioned live bar, by
       # dms-bar-plugins.jq — both kept in the same order.
-      # discordVoice: voice-call overlay (participant avatars, mute/deafen);
-      # needs python3 (present) + Discord RPC enabled in-client.
-      discordVoice.enable = true;
       # githubNotifier: open PRs authored by you + issues assigned to you. Reads
       # via `gh` (present) — run `gh auth login` once; the GitHub brand glyph
       # needs font-awesome (added to fonts.packages in mixins/niri.nix).
@@ -405,12 +400,9 @@ in
       # claudeCodeUsage: token usage / rate limits / daily charts for the Claude
       # Code subscription. Parses ~/.claude logs with jq (added to home.packages).
       claudeCodeUsage.enable = true;
-      # displayManager: toggle niri outputs + DDC/CI monitor controls. niri-only;
-      # DDC brightness/contrast needs ddcutil (present) against an external
-      # monitor — the internal eDP panel is backlight-driven, not DDC.
-      displayManager.enable = true;
       # gameControllerBattery: battery level of connected controllers, via upower
-      # (present).
+      # (present). Seeded with hideWhenNoControllersConnected so the pill only
+      # appears when a controller is present (dmsPluginSettingsSeed below).
       gameControllerBattery.enable = true;
 
       # Scriptable custom bar buttons (Avenge Media, first-party) — the
@@ -614,11 +606,16 @@ in
     tmp="$(mktemp "$pf.XXXXXX")"
     ${pkgs.jq}/bin/jq '
       reduce (
-        "asusControlCenter", "dgpuStatus", "nvidiaGpuMonitor", "emojiLauncher",
-        "calculator", "nixPackageRunner", "discordVoice", "githubNotifier",
-        "claudeCodeUsage", "displayManager", "gameControllerBattery", "dankActions"
+        "asusControlCenter", "nvidiaGpuMonitor", "emojiLauncher",
+        "calculator", "nixPackageRunner", "githubNotifier",
+        "claudeCodeUsage", "gameControllerBattery", "dankActions"
       ) as $id
         (.; if has($id) then . else .[$id] = { enabled: true } end)
+      # gameControllerBattery: hide the pill unless a controller is connected
+      # (only added when the key is absent, so a later manual toggle wins).
+      | if (.gameControllerBattery | type) == "object"
+           and (.gameControllerBattery | has("hideWhenNoControllersConnected") | not)
+        then .gameControllerBattery.hideWhenNoControllersConnected = true else . end
     ' "$pf" > "$tmp"
     if ${pkgs.jq}/bin/jq -e --slurpfile a "$tmp" '. == $a[0]' "$pf" >/dev/null; then
       rm -f "$tmp"
