@@ -22,6 +22,7 @@
       ./mixins/audio.nix
       ./mixins/bluetooth.nix
       ./mixins/niri.nix
+      ./mixins/online-accounts.nix
       ./mixins/gaming.nix
       ./mixins/asus.nix
       ./mixins/power.nix
