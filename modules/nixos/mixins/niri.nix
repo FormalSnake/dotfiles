@@ -167,6 +167,10 @@ in
     # already there) so the trash backend (gvfsd-trash) loads and D-Bus-activates.
     environment.sessionVariables.GIO_EXTRA_MODULES = [ "${pkgs.gvfs}/lib/gio/modules" ];
 
+    # Electron/Chromium apps run native Wayland (moved here from nvidia.nix —
+    # it's a Wayland-desktop concern, not a GPU one).
+    environment.sessionVariables.NIXOS_OZONE_WL = "1";
+
     # UPower: the D-Bus power daemon DMS's battery widget reads battery
     # state from. Enable it explicitly — relying on D-Bus auto-activation made
     # battery detection in the bar flaky.

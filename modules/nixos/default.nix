@@ -23,13 +23,13 @@
       ./mixins/bluetooth.nix
       ./mixins/niri.nix
       ./mixins/online-accounts.nix
-      ./mixins/gaming.nix
+      ./mixins/steam.nix
+      ./mixins/comms.nix
       ./mixins/asus.nix
       ./mixins/power.nix
       ./mixins/phone-integration.nix
       ./mixins/airplay.nix
       ./mixins/flatpak.nix
-      ./mixins/sober.nix
       ./mixins/nordvpn.nix
       ./mixins/onepassword.nix
       ./profiles

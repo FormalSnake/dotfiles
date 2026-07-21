@@ -36,8 +36,5 @@
     "macbook-pro-2"
   ];
 
-  networking.firewall = {
-    enable = true;
-    # Steam/gamescope ports are opened by programs.steam.*.openFirewall (gaming.nix).
-  };
+  networking.firewall.enable = true;
 }

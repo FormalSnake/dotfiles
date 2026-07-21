@@ -1,6 +1,8 @@
 { config, lib, pkgs, ... }:
 let
-  cfg = config.kyan.desktop;
+  # Gated on the nvidia stack, not the desktop: this is a Blackwell-driver
+  # resume workaround, meaningless on a host without the dGPU.
+  cfg = config.kyan.nvidia;
 
   # Blackwell (RTX 5070) + nvidia-drm has an s2idle-resume regression: on wake,
   # the display pipeline's atomic pageflip stalls forever ("Pageflip timed

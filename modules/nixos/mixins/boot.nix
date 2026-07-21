@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 let
   # Fallout Limine theme (https://github.com/Neptune3013/fallout-limine-theme):
   # vault-boy backdrop + retro PHXEGA8 bitmap font. Pinned via fetchFromGitHub so
@@ -111,23 +111,18 @@ in
     };
 
     # CachyOS kernel (provided by the chaotic overlay imported in ../default.nix).
-    kernelPackages = pkgs.linuxPackages_cachyos;
+    # mkDefault so a host can fall back to a stock kernel.
+    kernelPackages = lib.mkDefault pkgs.linuxPackages_cachyos;
 
-    kernelParams = [
-      # Required for the NVIDIA open module + Wayland; also helps suspend.
-      "nvidia-drm.modeset=1"
-    ];
-
-    # Larger /tmp helps big game/shader builds; back it with tmpfs.
+    # Larger /tmp helps big builds (nix, media); back it with tmpfs.
     tmp.useTmpfs = true;
     tmp.tmpfsSize = "50%";
 
     # Cap the dirty page-cache backlog. The defaults (dirty_ratio=20) let up to
     # ~20% of RAM (~6 GB here) go dirty before the kernel forces synchronous
     # writeback on every writing process. When that backlog targets a slow
-    # device — e.g. a Steam download committing to the USB external SSD — the
-    # whole system stalls in bursts, which shows up in games as periodic
-    # slow-motion/freezes. A small absolute cap keeps any single slow device
+    # device — e.g. a big download committing to a USB external SSD — the
+    # whole system stalls in bursts. A small absolute cap keeps any single slow device
     # from building a multi-gigabyte backlog. (dirty_bytes overrides
     # dirty_ratio when nonzero.)
     kernel.sysctl = {
@@ -157,14 +152,14 @@ in
 
   # I/O schedulers, matching CachyOS-Settings 60-ioschedulers.rules. NixOS
   # leaves NVMe on "none"; kyber adds light latency-aware ordering. mq-deadline
-  # on the external USB Steam SSD (sd*) curbs the writeback bursts that the
+  # on external USB SSDs (sd*) curbs the writeback bursts that the
   # dirty_bytes cap above also targets.
   services.udev.extraRules = ''
     ACTION=="add|change", KERNEL=="nvme[0-9]*", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="kyber"
     ACTION=="add|change", KERNEL=="sd[a-z]*", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="mq-deadline"
   '';
 
-  # zram swap — cheap responsiveness win on a 32 GB gaming box.
+  # zram swap — cheap responsiveness win on a 32 GB laptop.
   zramSwap = {
     enable = true;
     memoryPercent = 50;
@@ -189,10 +184,10 @@ in
   # earlyoom — userspace OOM guard. The kernel's own OOM-killer only fires at
   # ~0 bytes free and picks purely by oom_score, which is how a BeamNG-with-
   # traffic spike got Noctalia/Spotify reaped instead of the game. earlyoom acts
-  # earlier (at the free thresholds below) and SIGTERMs the biggest hog — almost
-  # always the game itself — so a memory blowout costs you the game, never the
-  # desktop session. The swapfile above is the capacity fix; this is the
-  # graceful-failure backstop for when even that fills.
+  # earlier (at the free thresholds below) and SIGTERMs the biggest hog, so a
+  # memory blowout costs one process, never the desktop session. The swapfile
+  # above is the capacity fix; this is the graceful-failure backstop for when
+  # even that fills.
   services.earlyoom = {
     enable = true;
     freeMemThreshold = 10; # SIGTERM when free RAM drops under 10% …
@@ -212,15 +207,12 @@ in
       # future nixpkgs change or a non-wrapped invocation ever exposed them.
       "--avoid"
       "^(niri|\\.dms-wrapped|dms|\\.quickshell-wra|quickshell|qs|polkit-kde-aut|sshd|systemd)$"
-      # Prefer to reap the heavy gaming/Wine processes first.
-      "--prefer"
-      "^(BeamNG|wine|wineserver|gamescope)$"
     ];
   };
 
-  # Cap crash-dump storage. Games/compositor crashes (Proton, gamescope, …)
-  # produce large coredumps that are rarely useful here and otherwise grow
-  # unbounded under /var/lib/systemd/coredump.
+  # Cap crash-dump storage. App/compositor crashes produce large coredumps
+  # that are rarely useful here and otherwise grow unbounded under
+  # /var/lib/systemd/coredump.
   systemd.coredump.settings.Coredump.MaxUse = "256M";
 
   # One-click "boot into Windows" support. DMS's powermenu / launcher desktop

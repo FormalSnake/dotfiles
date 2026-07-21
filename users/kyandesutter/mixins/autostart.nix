@@ -42,28 +42,6 @@ in
   # switch (the new definition applies at the next login) while still starting it
   # if it isn't running. Rebuilds no longer disturb the running session.
 
-  # Steam, launched minimized to the tray so it doesn't grab focus at login.
-  # Window rule sends it to workspace 9 (gaming, HDMI-A-1). Runs on the iGPU
-  # like every other app (the client is no longer offload-wrapped — gaming
-  # lives on Windows; see programs.steam in modules/nixos/mixins/gaming.nix),
-  # so it's safe to autostart on any power source and never touches the dGPU.
-  # Steam's Chromium UI repeatedly fails to create a drawable under niri/Xwayland
-  # (black but still interactive window). Software-render its UI only; this does
-  # not affect the renderer used by games or Proton.
-  systemd.user.services.steam = {
-    Unit = {
-      Description = "Steam (minimized to tray)";
-      PartOf = [ "graphical-session.target" ];
-      After = [ "graphical-session.target" ];
-      "X-SwitchMethod" = "keep-old";
-    };
-    Install.WantedBy = [ "graphical-session.target" ];
-    Service = {
-      Type = "simple";
-      ExecStart = loginExec "steam -silent -cef-disable-gpu";
-    };
-  };
-
   # Equibop (Discord), launched minimized to the tray. Window rule sends it to
   # workspace 4 (communication, eDP-1).
   systemd.user.services.equibop = {

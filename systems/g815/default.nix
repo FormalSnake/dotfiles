@@ -57,7 +57,7 @@
     # Disable CPU speculative-execution mitigations for a CPU-bound performance
     # win (~5-15% on some workloads; smaller on Arrow Lake-HX, which is newer
     # silicon needing fewer of them). SECURITY TRADE-OFF: drops Spectre/Meltdown
-    # -class protections. Acceptable here — a single-user personal gaming laptop,
+    # -class protections. Acceptable here — a single-user personal laptop,
     # not a shared/server host running untrusted code.
     "mitigations=off"
   ];
@@ -134,16 +134,25 @@
     nvidiaBusId = "PCI:2:0:0";
   };
 
-  # Profiles (enable the desktop + gaming stacks for this host).
+  # Profiles (enable the desktop stack for this host).
   kyan.profiles.desktop.enable = true;
-  kyan.profiles.gaming.enable = true;
+
+  # NVIDIA dGPU stack (driver, PRIME offload, offload overlay) — this chassis
+  # has the RTX 5070; an Intel-only host leaves this off.
+  kyan.nvidia.enable = true;
+
+  # Bare Steam client — only for downloading Wallpaper Engine workshop scenes
+  # (gaming lives on Windows; see mixins/steam.nix).
+  kyan.steam.enable = true;
+
+  # Declarative Flatpak base. The user-level Spotify Flatpak
+  # (users/kyandesutter/mixins/spicetify.nix) rides on the system flatpak
+  # service this brings up.
+  kyan.flatpak.enable = true;
 
   # ASUS laptop support: asusd, Aura keyboard RGB (Flexoki blue), 80%
   # battery charge limit, dim-LEDs-on-battery.
   kyan.asus.enable = true;
-
-  # Sober — Roblox client for Linux (Flatpak-only, managed declaratively).
-  kyan.sober.enable = true;
 
   # AirPlay screen-mirroring receiver (UxPlay). Run `uxplay -p` to show an
   # iPhone's screen in a window; share that window in meetings.
