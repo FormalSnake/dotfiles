@@ -2,6 +2,8 @@
 let
   cfg = config.kyan.gaming;
 
+  igpuChromium = import ../../../lib/chromium-igpu.nix { inherit pkgs lib; };
+
   # PRIME render-offload env + the launcher-wrapping helper are defined once in
   # ../mixins/nvidia.nix and exposed via an overlay (pkgs.nvidiaOffloadEnv /
   # pkgs.gpuOffloadWrap). See that file for the rationale (push each game
@@ -206,15 +208,13 @@ let
   # The NixOS equibop wrapper just execs electron and ignores the usual
   # `equibop-flags.conf`, so the flag is injected at the package level here —
   # this way it applies regardless of launch path (autostart, the
-  # `Exec=equibop` .desktop entry, or a terminal).
-  equibopNoAgc = pkgs.symlinkJoin {
-    name = "equibop-no-agc";
-    paths = [ pkgs.equibop ];
-    nativeBuildInputs = [ pkgs.makeWrapper ];
-    postBuild = ''
-      wrapProgram $out/bin/equibop \
-        --add-flags "--disable-features=WebRtcAllowInputVolumeAdjustment"
-    '';
+  # `Exec=equibop` .desktop entry, or a terminal). igpuChromium also pins it to
+  # the iGPU (Electron hits the same nvidia-Wayland dmabuf software-fallback as
+  # Helium when docked — see lib/chromium-igpu.nix).
+  equibopNoAgc = igpuChromium {
+    package = pkgs.equibop;
+    exes = [ "equibop" ];
+    extraFlags = [ "--disable-features=WebRtcAllowInputVolumeAdjustment" ];
   };
 
   # game-mode: a no-relog runtime toggle for the platform power profile.

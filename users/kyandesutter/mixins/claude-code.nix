@@ -38,11 +38,20 @@ in
   }
   # skills/ can't be one whole-directory symlink anymore: home-manager's
   # claude-code module (2026-07) installs its generated MCP plugin at
-  # ~/.claude/skills/claude-code-home-manager, so HM must own the directory.
-  # Link each repo skill individually instead (still live-edit; adding or
-  # removing a skill in the repo now needs a rebuild).
+  # ~/.claude/skills/claude-code-home-manager, so HM must own the directory
+  # and each repo skill is installed individually.
+  #
+  # These are STORE COPIES, not mkOutOfStoreSymlink: an out-of-store symlink
+  # here pointed ~/.claude/skills/<name> back at the repo, which HM then
+  # re-exported into its own generated store dir — a self-referential loop
+  # (repo <-> home-manager-files) that ELOOPs and corrupts the working tree.
+  # Copying into the store breaks the cycle; the trade-off is that editing a
+  # vendored skill now needs a rebuild.
   // lib.mapAttrs' (
-    name: _: lib.nameValuePair ".claude/skills/${name}" { source = link "skills/${name}"; }
-  ) (lib.filterAttrs (name: _: name != "claude-code-home-manager")
+    name: _: lib.nameValuePair ".claude/skills/${name}" { source = ../claude/skills + "/${name}"; }
+  ) (lib.filterAttrs (name: type:
+        type == "directory"
+        && name != "claude-code-home-manager"
+        && !(lib.hasSuffix ".before-hm" name))
       (builtins.readDir ../claude/skills));
 }

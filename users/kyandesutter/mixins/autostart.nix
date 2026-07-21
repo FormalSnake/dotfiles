@@ -102,7 +102,11 @@ in
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {
       Type = "simple";
-      ExecStart = loginExec "1password --silent";
+      # iGPU pin (like the browser — Electron hits the same nvidia-Wayland dmabuf
+      # software-fallback when docked; see lib/chromium-igpu.nix). 1Password is a
+      # module-managed setuid app, so it can't be package-wrapped; the render-node
+      # flag alone does the work (mesa auto-selects for the Intel node).
+      ExecStart = loginExec "1password --silent --render-node-override=/dev/dri/by-path/pci-0000:00:02.0-render --enable-features=VaapiVideoDecoder";
       Restart = "on-failure";
       RestartSec = 2;
     };
@@ -150,7 +154,11 @@ in
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {
       Type = "simple";
-      ExecStart = loginExec "flatpak run com.spotify.Client";
+      # iGPU pin (see lib/chromium-igpu.nix). Flags go on the launch command
+      # since the flatpak can't be package-wrapped; inside the sandbox the render
+      # node is the bare /dev/dri/renderD128 (the /dev/dri/by-path symlinks the
+      # native apps use aren't mounted). renderD128 is the iGPU on this host.
+      ExecStart = loginExec "flatpak run com.spotify.Client --render-node-override=/dev/dri/renderD128 --enable-features=VaapiVideoDecoder";
     };
   };
 

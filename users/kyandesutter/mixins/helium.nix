@@ -1,5 +1,7 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 let
+  igpuChromium = import ../../../lib/chromium-igpu.nix { inherit pkgs lib; };
+
   # Widevine DRM. Helium (ungoogled-chromium, chromium 149) is *compiled* with
   # Widevine support (the binary carries CdmAdapter / com.widevine.alpha) but the
   # upstream tarball ships no proprietary CDM, so DRM sites (Netflix, Spotify, …)
@@ -26,7 +28,7 @@ let
   # autoPatchelfHook (find -type f, no -L) and the LD_LIBRARY_PATH wrapper leave it
   # untouched — it is already patched upstream. Linux Widevine is L3 → up to 720p
   # on Netflix (the platform cap).
-  helium = pkgs.helium.overrideAttrs (old: {
+  heliumBase = pkgs.helium.overrideAttrs (old: {
     # Helium's "Use GTK" appearance option dlopens libgtk at runtime (the binary
     # carries the loader strings libgtk-4.so.1 then libgtk-3.so.0). The upstream
     # build ships no GTK, so the dlopen fails and the toggle silently falls back
@@ -35,40 +37,22 @@ let
     # libgtk-3.so.0 on the rpath. GTK3 not 4: Chromium defaults to the GTK3
     # backend (GTK4 is opt-in behind --gtk-version=4 and still incomplete).
     runtimeDependencies = (old.runtimeDependencies or [ ]) ++ [ pkgs.gtk3 ];
-    nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ pkgs.makeWrapper ];
-
-    # Pin the browser to the iGPU (Intel) for GPU rendering. When docked, niri
-    # renders on the dGPU and advertises the nvidia render node to clients;
-    # Chromium's ANGLE/EGL then can't import the compositor dmabuf on nvidia
-    # (eglCreateImage → EGL_BAD_MATCH 0x3009), so its GPU process crash-loops and
-    # falls back to software (--use-gl=disabled). ANGLE-Vulkan is rejected by
-    # Chromium's Wayland Ozone and XWayland GL init fails too — both dead ends on
-    # this stack. Forcing the Intel render node instead makes mesa render the
-    # browser (no dmabuf-import bug) while niri imports that iGPU buffer for
-    # scanout on the dGPU, and keeps the browser off the dGPU entirely (so it
-    # never wakes it on battery). __EGL_VENDOR_LIBRARY_FILENAMES=mesa (set-default,
-    # so niri's own env for niri-child launches — the same value — still wins)
-    # guarantees the nvidia EGL vendor is never loaded. The iGPU is fixed at PCI
-    # 00:02.0 on this laptop (cf. the dGPU at 02:00.0 in niri.nix). This lives in
-    # postInstall (after the wrapper the package builds there); the derivation
-    # runs no fixup phase, so a postFixup hook would silently never fire.
     postInstall = (old.postInstall or "") + ''
       ln -s ${cdmDir} $out/opt/helium/WidevineCdm
-      wrapProgram $out/bin/helium \
-        --add-flags "--use-gl=angle --use-angle=gl --render-node-override=/dev/dri/by-path/pci-0000:00:02.0-render" \
-        --set-default __EGL_VENDOR_LIBRARY_FILENAMES /run/opengl-driver/share/glvnd/egl_vendor.d/50_mesa.json
     '';
   });
+
+  # GPU rendering + VA-API video decode on the iGPU (see lib/chromium-igpu.nix
+  # for the nvidia-Wayland dmabuf reason this is necessary).
+  helium = igpuChromium {
+    package = heliumBase;
+    exes = [ "helium" ];
+  };
 in
 {
   # Helium browser. The overlay (inputs.helium.overlays.default) is applied at
   # the system level in modules/nixos/mixins/nix.nix, so pkgs.helium resolves.
   #
-  # GPU rendering is pinned to the iGPU by the wrapper above (Chromium can't do
-  # hardware GL on the dGPU's nvidia render node under Wayland). This also keeps
-  # the browser from waking the dGPU on battery. Hardware video decode (VA-API)
-  # is a separate concern — still on the iGPU (LIBVA iHD) but not yet enabled via
-  # --enable-features=VaapiVideoDecoder.
   home.packages = [ helium ];
 
   # Widevine component hint file (path #2 above). A JSON dict whose "Path" points

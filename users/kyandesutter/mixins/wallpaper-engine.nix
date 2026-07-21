@@ -39,6 +39,17 @@ let
   workshop = "$HOME/.steam/steam/steamapps/workshop/content/431960";
   dms = config.programs.dank-material-shell.package;
 
+  # Pin the engine to the iGPU (Intel i915, renderD128 at PCI 00:02.0). When
+  # docked, niri renders on the dGPU and advertises the nvidia render node to
+  # Wayland clients; linux-wallpaperengine is a mesa GL app that can't
+  # accelerate on nvidia, so it silently drops to llvmpipe SOFTWARE rendering —
+  # ~15 CPU cores for two 60fps outputs. DRI_PRIME pins mesa to the iGPU node
+  # (niri imports that buffer for scanout on the dGPU-driven HDMI output, the
+  # same cross-GPU path the browser uses), and the EGL vendor pin guarantees the
+  # nvidia vendor is never loaded so the dGPU stays asleep on battery. Same fix
+  # pattern as lib/chromium-igpu.nix.
+  gpuEnv = "DRI_PRIME=pci-0000_00_02_0 __EGL_VENDOR_LIBRARY_FILENAMES=/run/opengl-driver/share/glvnd/egl_vendor.d/50_mesa.json";
+
   # Invoked as the post_hook of the [templates.wallpaper-path] matugen
   # template (dms.nix), which passes the newly themed image path as $1 —
   # matugen's `{{image}}`, interpolated straight into the post_hook command
@@ -130,7 +141,7 @@ let
             # pa_server_info_cb / pa_operation_get_state) — the crash that leaves
             # the wallpaper dead. --no-audio-processing skips the recorder
             # entirely; no scene here uses audio input, so nothing is lost.
-            linux-wallpaperengine "''${ARGS[@]}" --silent --no-audio-processing --fps "$fps" &
+            ${gpuEnv} linux-wallpaperengine "''${ARGS[@]}" --silent --no-audio-processing --fps "$fps" &
             engine_pid=$!
             running_sig="$desired"
           fi
@@ -205,7 +216,7 @@ let
       tmp="$destdir/.we-$id.tmp.png"
       rm -f "$tmp"
       echo "rendering still for $id ($geom)…" >&2
-      linux-wallpaperengine --window "0x0x$geom" --bg "$id" --scaling fill \
+      ${gpuEnv} linux-wallpaperengine --window "0x0x$geom" --bg "$id" --scaling fill \
         --silent --no-audio-processing --screenshot "$tmp" --screenshot-delay 30 >/dev/null 2>&1 &
       pid=$!
       ok=""
