@@ -1,0 +1,55 @@
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Node modules (if any)
+node_modules/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+*.so
+.env
+.venv
+venv/
+
+# Build outputs
+dist/
+build/
+*.min.js
+*.min.css
+
+# Claude Code local configuration
+.claude/
+
+# Development and research files
+research/
+test-examples/
+
+# Spec workflow templates (optional)
+.spec-workflow/
+
+# Project architecture index (for AI use)
+CLAUDE.md
+resources/CLAUDE.md
