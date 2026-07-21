@@ -14,6 +14,20 @@ let
       hash = "sha256-TlBP99MBAT/H0Uut1MF8SnIDoeetcdHLKrWal2oO2Ug=";
     };
   };
+
+  # GnRlLeclerc/dynamic-base16.nvim — same situation as flexoki-neovim above:
+  # not in nixpkgs, unknown to lazyvim-nix ("Could not resolve plugin" at
+  # build), so pin it and hand lazy.nvim a `dir =` store path.
+  dynamicBase16Nvim = pkgs.vimUtils.buildVimPlugin {
+    pname = "dynamic-base16-nvim";
+    version = "0-unstable-2024-07-21";
+    src = pkgs.fetchFromGitHub {
+      owner = "GnRlLeclerc";
+      repo = "dynamic-base16.nvim";
+      rev = "b104678db460fc16bdbfac500ed5b677bd9567d8";
+      hash = "sha256-tKKCHo5/ro5T5cre3LFfozSP4K74RluNoppUDsE3xk8=";
+    };
+  };
 in
 {
   imports = [ inputs.lazyvim.homeManagerModules.default ];
@@ -96,7 +110,8 @@ in
       # the file exists (restart nvim once after the first palette is generated).
       dynamic-base16 = ''
         return {
-          "GnRlLeclerc/dynamic-base16.nvim",
+          dir = "${dynamicBase16Nvim}",
+          name = "dynamic-base16.nvim",
           lazy = false,
           priority = 999,
           config = function()
@@ -199,9 +214,12 @@ in
         }
       '';
 
+      # vim-tmux-navigator IS in nixpkgs, but lazyvim-nix's resolver doesn't
+      # know the mapping — hand it the store path directly.
       tmux-navigator = ''
         return {
-          "christoomey/vim-tmux-navigator",
+          dir = "${pkgs.vimPlugins.vim-tmux-navigator}",
+          name = "vim-tmux-navigator",
           cmd = {
             "TmuxNavigateLeft",
             "TmuxNavigateDown",
