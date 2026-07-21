@@ -66,6 +66,8 @@ let
   # (AvengeMedia/DankMaterialShell@74896fb): idle timeouts already default to 0
   # (= disabled), but they're pinned explicitly here rather than relying on
   # that staying true across DMS updates.
+  customThemeFile = "${config.home.homeDirectory}/.config/DankMaterialShell/flexoki-theme.json";
+
   settingsSeed = pkgs.writeText "dms-settings-seed.json" (
     builtins.toJSON {
       acMonitorTimeout = 0;
@@ -76,7 +78,7 @@ let
       batterySuspendTimeout = 0;
       batteryNotifyLow = true;
       osdPowerProfileEnabled = true;
-      customThemeFile = "${config.home.homeDirectory}/.config/DankMaterialShell/flexoki-theme.json";
+      inherit customThemeFile;
     }
   );
 
@@ -396,13 +398,27 @@ in
 
   # settings.json is DMS's own runtime-mutable config (rewritten by the Settings
   # UI and by DMS itself on every save), so home-manager must not own the whole
-  # file — seed it once, only if absent, so idle stays disabled and battery/
-  # profile notifications are on from the very first session rather than
-  # however long it takes to open Settings manually.
+  # file. Two modes, both minimal:
+  #   - absent: seed it wholesale from settingsSeed above, so idle stays
+  #     disabled and battery/profile notifications are on from the very first
+  #     session rather than however long it takes to open Settings manually.
+  #   - present but missing the customThemeFile key: back-fill just that key,
+  #     nothing else. Covers a re-install (or any future settingsSeed key
+  #     added after a host's first boot) landing on a settings.json that
+  #     already exists — without this, flexoki-pin (below) flips
+  #     currentThemeName to "custom" with no customThemeFile set, so DMS has
+  #     no palette to load. Never touches an existing key, even if it's set
+  #     to "" — that could be a deliberate user clear.
   home.activation.dmsSettingsSeed = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    if [ ! -e "$HOME/.config/DankMaterialShell/settings.json" ]; then
+    settings="$HOME/.config/DankMaterialShell/settings.json"
+    if [ ! -e "$settings" ]; then
       run mkdir -p "$HOME/.config/DankMaterialShell"
-      run cp --no-preserve=mode ${settingsSeed} "$HOME/.config/DankMaterialShell/settings.json"
+      run cp --no-preserve=mode ${settingsSeed} "$settings"
+    elif [ "$(${pkgs.jq}/bin/jq 'has("customThemeFile") | not' "$settings")" = "true" ]; then
+      tmp="$(mktemp "$settings.XXXXXX")"
+      ${pkgs.jq}/bin/jq '. + {customThemeFile: "${customThemeFile}"}' "$settings" > "$tmp"
+      chmod --reference="$settings" "$tmp"
+      run mv "$tmp" "$settings"
     fi
   '';
 
