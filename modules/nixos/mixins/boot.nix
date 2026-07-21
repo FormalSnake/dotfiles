@@ -13,41 +13,6 @@ let
     hash = "sha256-ZZb+x/dglrGEGljeDeHgr809qbFi9dc6ipfU53DIHwE=";
   };
 
-  # One-shot "reboot into Windows" helper. Limine — unlike systemd-boot — does
-  # NOT implement systemd's Boot Loader Interface, so `systemctl reboot
-  # --boot-loader-entry=` (the old mechanism) can't drive a one-shot Windows
-  # boot. Instead we set a UEFI BootNext directly with efibootmgr: reuse the
-  # firmware's existing "Windows Boot Manager" entry if present, otherwise create
-  # a one-shot entry pointing at bootmgfw.efi on the ESP (Windows shares NixOS's
-  # ESP here). BootNext is honoured once by the firmware and then cleared, so the
-  # standing default (Limine → latest NixOS) is left untouched — same semantics
-  # as the old LoaderEntryOneShot flow, but bootloader-agnostic.
-  reboot-to-windows = pkgs.writeShellApplication {
-    name = "reboot-to-windows";
-    runtimeInputs = [
-      pkgs.efibootmgr
-      pkgs.gawk # awk
-      pkgs.util-linux # findmnt, lsblk
-      pkgs.coreutils
-      pkgs.systemd # systemctl
-    ];
-    text = ''
-      num=$(efibootmgr | awk '/Windows Boot Manager/ { n=$1; sub(/^Boot/,"",n); sub(/\*.*/,"",n); print n; exit }')
-      if [ -n "''${num:-}" ]; then
-        efibootmgr --bootnext "$num" >/dev/null
-      else
-        # No firmware entry yet — create a one-shot one pointing at the Windows
-        # bootloader on whatever partition /boot lives on.
-        src=$(findmnt -no SOURCE /boot)
-        bn=$(basename "$src")
-        part=$(cat "/sys/class/block/$bn/partition")
-        disk=$(lsblk -no PKNAME "$src" | head -1)
-        efibootmgr --create-next --disk "/dev/$disk" --part "$part" \
-          --loader '\EFI\Microsoft\Boot\bootmgfw.efi' --label 'Windows Boot Manager' >/dev/null
-      fi
-      systemctl reboot
-    '';
-  };
 in
 {
   boot = {
@@ -92,19 +57,6 @@ in
             brightPalette = "2f3030;ff0000;16de6d;f7cd34;0ddeaa;f5c2e7;16de6d;ffffff";
           };
         };
-
-        # Windows chainload. extraEntries is APPENDED after the auto-generated
-        # NixOS generation entries, giving the closest achievable order to
-        # "NixOS first, Windows after" (the module emits all generations as one
-        # contiguous block, so entries can't be wedged between current and older
-        # generations). Windows and NixOS share this ESP, so boot():/// — the
-        # disk Limine itself booted from — resolves without a cross-disk UUID.
-        extraEntries = ''
-          /Windows 11
-              comment: Chainload the Windows Boot Manager
-              protocol: efi
-              path: boot():///EFI/Microsoft/Boot/bootmgfw.efi
-        '';
       };
       efi.canTouchEfiVariables = true;
       timeout = 4;
@@ -173,7 +125,8 @@ in
   # ext4 root gives genuine spill space so a transient spike pages cold anon
   # memory to NVMe instead of reaping the desktop. Priority 1 (< zram's 5) so
   # it's only touched once zram is exhausted — the slow tier, used last.
-  swapDevices = [
+  # mkDefault: sized for the 32 GB g815; a smaller host can override wholesale.
+  swapDevices = lib.mkDefault [
     {
       device = "/swapfile";
       size = 32 * 1024; # MiB → 32 GiB
@@ -215,36 +168,13 @@ in
   # /var/lib/systemd/coredump.
   systemd.coredump.settings.Coredump.MaxUse = "256M";
 
-  # One-click "boot into Windows" support. DMS's powermenu / launcher desktop
-  # entry (the parity replacement for noctalia's old session button) starts
-  # this oneshot service, which runs the reboot-to-windows helper as root
-  # (setting the UEFI BootNext needs privilege). The service — not a setuid
-  # wrapper — keeps the privileged action declarative and lets a scoped
-  # polkit rule below waive the password prompt.
-  systemd.services.reboot-to-windows = {
-    description = "One-shot reboot into Windows via UEFI BootNext";
-    serviceConfig = {
-      Type = "oneshot";
-      ExecStart = "${reboot-to-windows}/bin/reboot-to-windows";
-    };
-  };
-
-  # Passwordless one-click for the two session buttons, scoped to the active
-  # local wheel session:
-  #   • "Windows" starts reboot-to-windows.service (systemd manage-units, which
-  #     defaults to a password prompt — waived only for that one unit).
-  #   • "BIOS" runs `systemctl reboot --firmware-setup`, which sets the
-  #     boot-to-firmware-UI EFI indication via logind (also auth_admin by
-  #     default). The plain Reboot action is already allowed for the active
-  #     local session, so only the firmware-setup indication needs a grant.
+  # Passwordless one-click for the "BIOS" session button, scoped to the active
+  # local wheel session: `systemctl reboot --firmware-setup` sets the
+  # boot-to-firmware-UI EFI indication via logind (auth_admin by default). The
+  # plain Reboot action is already allowed for the active local session, so
+  # only the firmware-setup indication needs a grant. (The Windows-button
+  # counterpart is host-specific: systems/g815/windows-dualboot.nix.)
   security.polkit.extraConfig = ''
-    polkit.addRule(function(action, subject) {
-      if (action.id == "org.freedesktop.systemd1.manage-units" &&
-          action.lookup("unit") == "reboot-to-windows.service" &&
-          subject.local && subject.active && subject.isInGroup("wheel")) {
-        return polkit.Result.YES;
-      }
-    });
     polkit.addRule(function(action, subject) {
       if (action.id == "org.freedesktop.login1.set-reboot-to-firmware-setup" &&
           subject.local && subject.active && subject.isInGroup("wheel")) {

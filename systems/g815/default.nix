@@ -4,6 +4,9 @@
     # Generated on first boot with `nixos-generate-config` — placeholder for now.
     ./hardware-configuration.nix
 
+    # Windows 11 dual-boot (chainload entry, reboot-to-windows one-shot).
+    ./windows-dualboot.nix
+
     # nixos-hardware: no profile exists for the G815 chassis, so compose generics.
     inputs.nixos-hardware.nixosModules.common-cpu-intel
     inputs.nixos-hardware.nixosModules.common-pc-laptop

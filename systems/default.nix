@@ -18,5 +18,13 @@
         ./g815
       ];
     };
+
+    e1504g = inputs.nixpkgs.lib.nixosSystem {
+      specialArgs = { inherit inputs self; };
+      modules = [
+        self.nixosModules.default
+        ./e1504g
+      ];
+    };
   };
 }
