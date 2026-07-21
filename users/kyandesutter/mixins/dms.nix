@@ -56,6 +56,11 @@ let
   #   - battery/profile notifications: DMS supports both natively (low-battery
   #     toast + a power-profile-change OSD) but ships them off by default;
   #     flip them on here for parity with noctalia's old always-on hooks.
+  #   - customThemeFile: points at the Flexoki theme JSON below so it's ready
+  #     the moment flexoki-pin (also below) or a manual Settings → Theme &
+  #     Colors → Custom pick sets currentThemeName to "custom". Does NOT touch
+  #     currentThemeName itself — DMS's own wallpaper-derived default stands
+  #     until something (flexoki-pin, or the user) opts in.
   #
   # Key names verified against upstream quickshell/Common/settings/SettingsSpec.js
   # (AvengeMedia/DankMaterialShell@74896fb): idle timeouts already default to 0
@@ -71,8 +76,165 @@ let
       batterySuspendTimeout = 0;
       batteryNotifyLow = true;
       osdPowerProfileEnabled = true;
+      customThemeFile = "${config.home.homeDirectory}/.config/DankMaterialShell/flexoki-theme.json";
     }
   );
+
+  # Flexoki as a DMS custom theme (docs/CUSTOM_THEMES.md schema, AvengeMedia/
+  # DankMaterialShell@74896fb): a hardcoded palette DMS loads instead of
+  # matugen's wallpaper-derived one when currentThemeName == "custom" (see
+  # Theme.qml switchTheme/loadCustomThemeFromFile). Values come straight from
+  # users/kyandesutter/mixins/flexoki/palette.nix — the same base tones and
+  # accent stops used everywhere else Flexoki is themed — mapped onto DMS's
+  # M3 role set (a superset of the old Noctalia fixed_palette schema this
+  # replaces; see `git show 3eaefc4:…/noctalia.nix:132-225` for that mapping).
+  # Roles with no direct Noctalia equivalent (primaryContainer, surfaceTint,
+  # backgroundText, the three surfaceContainer* elevation steps) are filled
+  # from the same base-tone ramp rather than introducing new colours:
+  # primaryContainer reuses the *other* blue stop (the "darker/lighter variant
+  # of primary" docs call for), and surfaceContainer/-High/-Highest step one
+  # base tone at a time away from surface/background, in the same direction
+  # accents already lighten/darken between dark and light mode.
+  flexokiTheme =
+    let
+      palette = import ./flexoki/palette.nix;
+      inherit (palette) base accents;
+    in
+    {
+      dark = {
+        name = "Flexoki Dark";
+        primary = accents.blue.d; # #4385BE
+        primaryText = base.black;
+        primaryContainer = accents.blue.l; # #205EA6
+        secondary = accents.cyan.d; # #3AA99F
+        surface = base.black;
+        surfaceText = base.b200;
+        surfaceVariant = base.b900;
+        surfaceVariantText = base.b500;
+        surfaceTint = accents.blue.d;
+        background = base.black;
+        backgroundText = base.b200;
+        outline = base.b800;
+        surfaceContainer = base.b950;
+        surfaceContainerHigh = base.b900;
+        surfaceContainerHighest = base.b850;
+        error = accents.red.d; # #D14D41
+        warning = accents.orange.d; # #DA702C
+        info = accents.cyan.d;
+      };
+      light = {
+        name = "Flexoki Light";
+        primary = accents.blue.l; # #205EA6
+        primaryText = base.paper;
+        primaryContainer = accents.blue.d; # #4385BE
+        secondary = accents.cyan.l; # #24837B
+        surface = base.paper;
+        surfaceText = base.black;
+        surfaceVariant = base.b100;
+        surfaceVariantText = base.b600;
+        surfaceTint = accents.blue.l;
+        background = base.paper;
+        backgroundText = base.black;
+        outline = base.b150;
+        surfaceContainer = base.b50;
+        surfaceContainerHigh = base.b100;
+        surfaceContainerHighest = base.b150;
+        error = accents.red.l; # #AF3029
+        warning = accents.orange.l; # #BC5215
+        info = accents.cyan.l;
+      };
+    };
+
+  # DMS package, patched. `programs.dank-material-shell.package` defaults to
+  # `dmsPkgs.dms-shell` (distro/nix/options.nix), a `buildGoModule` derivation
+  # whose `src` is `./core` (the Go sources only) — the QML tree the IPC fix
+  # below targets lives under `quickshell/`, copied into $out by `postInstall`
+  # from a *separate* path (`rootSrc = ./.`, the whole repo), never unpacked
+  # as `src`. That means the usual `patches = old.patches ++ [...]` (which
+  # only patches `$src`) can't reach it — confirmed by inspecting `postInstall`
+  # in the pinned flake's own flake.nix (`mkDmsShell`), not by guessing. So
+  # this patches the copied-in tree in place, appended after the existing
+  # `cp -r … $out/share/quickshell/dms/` in the same postInstall: the file is
+  # a direct child of that freshly-created (writable) directory, so a `chmod`
+  # + `patch` there works even though the *source* files `cp -r` copied it
+  # from are read-only (the nix store). Built via the flake's own
+  # `lib.mkDmsShell` (not `inputs.….packages.${system}`) so this stays on our
+  # overlay-aware `pkgs`, matching exactly what the module's own default does
+  # internally (`distro/nix/options.nix`: `dmsPkgs = buildDmsPkgs pkgs`).
+  dmsPackage = (inputs.dank-material-shell.lib.mkDmsShell pkgs).overrideAttrs (old: {
+    postInstall = old.postInstall + ''
+      chmod u+w "$out/share/quickshell/dms/DMSShellIPC.qml"
+      patch -p1 -d "$out/share/quickshell/dms" < ${./dms-ipc-settings-set.patch}
+    '';
+  });
+
+  # Reconciler: pin the Flexoki custom theme while a flexoki-named wallpaper
+  # is active, and hand back to the wallpaper-derived theme otherwise —
+  # restoring per-wallpaper Flexoki pinning without Noctalia's
+  # wallpaper_changed hook (DMS has no such per-pick hook; see
+  # wallpaper-engine.nix's header for the equivalent note re: the wallpaper
+  # picker). Session state is DMS's own record of the applied wallpaper
+  # (~/.local/state/DankMaterialShell/session.json, `wallpaperPath` —
+  # SessionData.qml/SessionSpec.js), so watching it (rather than matugen's
+  # `{{image}}`, which only fires for the single theming "target monitor")
+  # catches every wallpaper pick DMS itself makes.
+  #
+  # Loop safety: this watches session.json only. Every write this reconciler
+  # makes goes through `dms ipc call settings set`, which lands in
+  # settings.json (a completely different file, never watched here) — so a
+  # write here can never retrigger the watch that produced it.
+  #
+  # Matching mirrors the old Noctalia `flexoki-scheme` hook's
+  # `[[ "$path" == *flexoki* ]]` substring test (case-insensitive,
+  # `git show 3eaefc4:…/noctalia.nix:87-88`). Idempotent: settings.json is
+  # read before every write, and nothing is written when the sentinel already
+  # matches — the ONLY way this can visibly re-apply the custom theme is a
+  # genuine wallpaper flip, thanks to the patched IPC handler above actually
+  # dispatching Theme.switchTheme instead of silently writing a dead setting.
+  flexokiPin = pkgs.writeShellApplication {
+    name = "flexoki-pin";
+    runtimeInputs = [
+      dmsPackage
+      pkgs.inotify-tools
+      pkgs.jq
+      pkgs.coreutils
+    ];
+    text = ''
+      settings="$HOME/.config/DankMaterialShell/settings.json"
+      statedir="$HOME/.local/state/DankMaterialShell"
+      session="$statedir/session.json"
+      mkdir -p "$statedir"
+      shopt -s nocasematch
+
+      # No-ops gracefully if either file doesn't exist yet (settings.json is
+      # seeded by home-manager activation before this service ever starts;
+      # session.json only appears once DMS itself has run and saved a
+      # session) — the surrounding inotify watch on $statedir still works on
+      # an empty/fresh directory, so the very next write picks this back up.
+      reconcile() {
+        [[ -r "$session" && -r "$settings" ]] || return 0
+        local wallpaper current
+        wallpaper="$(jq -r '.wallpaperPath // empty' "$session" 2>/dev/null || true)"
+        current="$(jq -r '.currentThemeName // empty' "$settings" 2>/dev/null || true)"
+        if [[ "$wallpaper" == *flexoki* ]]; then
+          [[ "$current" == "custom" ]] || dms ipc call settings set currentThemeName custom || true
+        else
+          [[ "$current" != "custom" ]] || dms ipc call settings set currentThemeName dynamic || true
+        fi
+      }
+
+      trap 'exit 0' TERM INT
+
+      reconcile
+      while read -r _; do
+        # Coalesce bursts (a wallpaper pick can touch session.json more than
+        # once in quick succession) so a single flip doesn't fire the IPC
+        # call twice.
+        while read -r -t 0.4 _; do :; done
+        reconcile
+      done < <(inotifywait -q -m -e close_write,create,moved_to "$statedir")
+    '';
+  };
 in
 {
   # Official DankMaterialShell flake home-manager module. DMS is a Quickshell/QML
@@ -90,6 +252,7 @@ in
     enable = true;
     systemd.enable = true; # user service, PartOf the Wayland/graphical-session target
     enableDynamicTheming = true; # pulls in the deps DMS's own theming needs
+    package = dmsPackage; # local patch: IPC `settings set` → SettingsData.set (see dmsPackage above)
   };
 
   # App theming beyond DMS's builtin templates (gtk3/gtk4, qt5ct/qt6ct, ghostty,
@@ -102,6 +265,11 @@ in
   # change DMS runs matugen for. post_hook strings are themselves rendered
   # through the engine (colour tokens interpolated) before running.
   xdg.configFile = {
+    # DMS custom theme (flexokiTheme above): a plain declarative file, unlike
+    # settings.json/session.json below — DMS only ever reads it, never
+    # rewrites it, so it needs no seed-if-absent dance.
+    "DankMaterialShell/flexoki-theme.json".text = builtins.toJSON flexokiTheme;
+
     "matugen/templates/aura.tmpl".source = ../matugen-templates/aura.tmpl;
     "matugen/templates/ghostty.tmpl".source = ../matugen-templates/ghostty.tmpl;
     "matugen/templates/neovim.lua.tmpl".source = ../matugen-templates/neovim.lua.tmpl;
@@ -237,6 +405,24 @@ in
       run cp --no-preserve=mode ${settingsSeed} "$HOME/.config/DankMaterialShell/settings.json"
     fi
   '';
+
+  # flexokiPin above: watches session.json, pins/unpins the Flexoki custom
+  # theme via the patched IPC handler. Same graphical-session.target wiring
+  # as wallpaper-engine.nix's reconciler — restarts on a rebuild that changes
+  # the script, re-reads state on startup.
+  systemd.user.services.flexoki-pin = {
+    Unit = {
+      Description = "Pin the Flexoki custom theme for flexoki-named wallpapers";
+      PartOf = [ "graphical-session.target" ];
+      After = [ "graphical-session.target" ];
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
+    Service = {
+      ExecStart = "${flexokiPin}/bin/flexoki-pin";
+      Restart = "on-failure";
+      RestartSec = 2;
+    };
+  };
 
   # Fallback for the two power-menu actions DMS's own powermenu can't host:
   # its action set is a fixed enum (SettingsData.powerMenuActions — reboot/

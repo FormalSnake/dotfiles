@@ -1,0 +1,24 @@
+Upstream bug: the `settings` IPC target's set(key, value) handler assigns
+SettingsData[key] directly and calls saveSettings() itself, bypassing
+SettingsData.set() (the reactive wrapper around settings/SettingsSpec.js's
+Spec.set, which also calls saveSettings() -- so this is a straight swap, not
+an addition). That wrapper is what dispatches SPEC[key].onChange hooks, e.g.
+currentThemeName -> applyStoredTheme -> Theme.switchTheme. Net effect without
+this patch: `dms ipc call settings set currentThemeName custom` persists the
+value to settings.json and the live SettingsData property, but the rendered
+theme never updates until the shell process restarts or the user reselects a
+theme through the Settings UI -- a silent dead switch for any external
+automation driving theme selection over IPC. Verified against
+AvengeMedia/DankMaterialShell@74896fb87cb9e4bb866dbabcfd754e3e649ad0c7.
+--- a/DMSShellIPC.qml
++++ b/DMSShellIPC.qml
+@@ -1045,8 +1045,7 @@
+                 }
+ 
+                 log.warn("Setting:", key, value);
+-                SettingsData[key] = value;
+-                SettingsData.saveSettings();
++                SettingsData.set(key, value);
+                 return "SETTINGS_SET_SUCCESS";
+             } catch (e) {
+                 log.warn("Failed to set property:", key, "error:", e);
