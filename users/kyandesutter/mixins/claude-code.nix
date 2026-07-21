@@ -51,7 +51,6 @@ in
     name: _: lib.nameValuePair ".claude/skills/${name}" { source = ../claude/skills + "/${name}"; }
   ) (lib.filterAttrs (name: type:
         type == "directory"
-        && name != "claude-code-home-manager"
-        && !(lib.hasSuffix ".before-hm" name))
+        && name != "claude-code-home-manager")
       (builtins.readDir ../claude/skills));
 }

@@ -1,12 +1,12 @@
 #!/usr/bin/env lua
 --
 -- sketchybar (SbarLua) — top bar for the OmniWM macbook session, mirroring the
--- g815 noctalia bar. OmniWM's own workspace bar is off ([workspaceBar] enabled =
+-- g815 DMS bar. OmniWM's own workspace bar is off ([workspaceBar] enabled =
 -- false in omniwm/settings.toml) and the macOS menu bar is auto-hidden
 -- (_HIHideMenuBar), so this owns the top edge.
 --
 -- The physical notch is left empty on purpose: Alcove renders now-playing there,
--- so — unlike noctalia — there is no media/visualiser widget. notch_width splits
+-- so — unlike DMS — there is no media/visualiser widget. notch_width splits
 -- any center items around the notch (we keep center empty).
 --
 -- Workspaces are driven live off OmniWM's IPC: the omniwm-sketchybar-watch
@@ -210,7 +210,7 @@ local function redraw_spaces()
             label = { color = col.subtext, drawing = true },
           })
         else
-          -- empty & not current: hide the pill entirely (noctalia's hide_when_empty)
+          -- empty & not current: hide the pill entirely (DMS's hide_when_empty)
           sp:set({ drawing = false })
         end
       end

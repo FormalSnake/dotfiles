@@ -24,7 +24,7 @@ ipcEnabled = true
 followsMouse = false
 
 # OmniWM's own workspace bar is disabled — sketchybar replaces it (mounted on the
-# top edge, notch-aware, mirroring the g815 noctalia bar). See mixins/sketchybar.nix.
+# top edge, notch-aware, mirroring the g815 DMS bar). See mixins/sketchybar.nix.
 [workspaceBar]
 enabled = false
 

@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 {
   programs.fish = {
     enable = true;
@@ -130,11 +130,12 @@
           set -gx SNACKS_GHOSTTY true
       end
 
+      ${lib.optionalString pkgs.stdenv.isDarwin ''
       # Brew environment
       if test -f /opt/homebrew/bin/brew
           /opt/homebrew/bin/brew shellenv | source
       end
-
+      ''}
       # Nix itself (Determinate owns the install; nix-darwin's set-environment
       # adds this for zsh/bash but fish builds PATH by hand, so source the
       # official profile script — sets PATH, NIX_PROFILES, NIX_SSL_CERT_FILE).
@@ -154,10 +155,12 @@
       fish_add_path ~/.bun/bin
       fish_add_path ~/.local/bin
 
+      ${lib.optionalString pkgs.stdenv.isDarwin ''
       # OrbStack shell integration
       if test -f ~/.orbstack/shell/init2.fish
           source ~/.orbstack/shell/init2.fish
       end
+      ''}
     '';
 
     # Runs for ALL fish sessions (including non-interactive). Secrets and env
