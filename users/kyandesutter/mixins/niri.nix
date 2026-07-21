@@ -1,6 +1,13 @@
-{ pkgs, config, lib, inputs, options, ... }:
+{ pkgs, config, lib, inputs, options, osConfig ? { }, ... }:
 let
   dmsBin = "${config.programs.dank-material-shell.package}/bin/dms";
+
+  # NVIDIA dGPU flag from the host (same gate as dms.nix/godot.nix). Everything
+  # below that exists for the g815's dGPU power model — power-tune,
+  # gpu-relog-prompt, render-device selection, the eDP-1 240Hz seed — is gated
+  # on it, so iGPU-only hosts (e1504g) get a plain niri session with none of
+  # the machinery (and none of its hardcoded g815 PCI paths / panel modes).
+  hasNvidia = (osConfig.kyan or { }).nvidia.enable or false;
 
   # Workspace pill labels: role → Nerd Font glyph + short name, mirroring the
   # macOS aerospace workspace names (see mixins/aerospace.nix). niri-flake orders
@@ -470,9 +477,6 @@ in
         # so this composes the two through a shell (niri spawns argv
         # directly, with no shell of its own).
         "Mod+Shift+Escape".action.spawn = [ "sh" "-c" "${dmsBin} ipc call lock lock && systemctl suspend" ];
-        # Confirm the pending GPU-relog prompt (fallback for a notification
-        # daemon without action buttons). See gpuRelogPrompt above.
-        "Mod+Shift+BackSpace".action.spawn = [ "${gpuRelogPrompt}/bin/gpu-relog-prompt" "confirm" ];
 
         # Vim-style focus/move (aerospace alt-hjkl), mapped onto niri's column
         # model: H/L walk columns, J/K walk windows inside a column.
@@ -525,6 +529,10 @@ in
         "XF86AudioNext".action.spawn = [ dmsBin "ipc" "call" "mpris" "next" ];
         "XF86AudioPrev".action.spawn = [ dmsBin "ipc" "call" "mpris" "previous" ];
         "XF86AudioStop".action.spawn = [ dmsBin "ipc" "call" "mpris" "stop" ];
+      } // lib.optionalAttrs hasNvidia {
+        # Confirm the pending GPU-relog prompt (fallback for a notification
+        # daemon without action buttons). See gpuRelogPrompt above.
+        "Mod+Shift+BackSpace".action.spawn = [ "${gpuRelogPrompt}/bin/gpu-relog-prompt" "confirm" ];
       } // (lib.listToAttrs (lib.concatMap (i: [
         # Workspaces by NAME (the glyphs in wsName, declared above) — a string
         # arg targets the named workspace, an int would target the per-output
@@ -696,14 +704,19 @@ in
         }
       '';
     in
-    lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      if [ ! -e "$HOME/.cache/power-tune/edp-refresh.kdl" ]; then
-        run mkdir -p "$HOME/.cache/power-tune"
-        run cp --no-preserve=mode ${refreshSeed} "$HOME/.cache/power-tune/edp-refresh.kdl"
-      fi
+    lib.hm.dag.entryAfter [ "writeBoundary" ] (''
       if [ ! -e "$HOME/.cache/dank/niri-border.kdl" ]; then
         run mkdir -p "$HOME/.cache/dank"
         run cp --no-preserve=mode ${borderSeed} "$HOME/.cache/dank/niri-border.kdl"
+      fi
+    ''
+    # The g815-only fragments (240Hz eDP mode, render-GPU pick): on iGPU-only
+    # hosts nothing seeds or rewrites them, so the optional include's simply
+    # find nothing and niri uses its own output defaults.
+    + lib.optionalString hasNvidia ''
+      if [ ! -e "$HOME/.cache/power-tune/edp-refresh.kdl" ]; then
+        run mkdir -p "$HOME/.cache/power-tune"
+        run cp --no-preserve=mode ${refreshSeed} "$HOME/.cache/power-tune/edp-refresh.kdl"
       fi
       # Empty render-device fragment → safe iGPU default until
       # niri-render-device.service rewrites it before the first niri start.
@@ -711,14 +724,14 @@ in
         run mkdir -p "$HOME/.cache/niri"
         run touch "$HOME/.cache/niri/render-device.kdl"
       fi
-    '';
+    '');
 
   # Power automation (see powerTune in the let block): refresh rate, keyboard
   # aura and the relog prompt all follow AC/battery. Bound to
   # graphical-session.target so it starts and stops with the niri session and
   # inherits NIRI_SOCKET (niri-session imports its environment into the systemd
   # user manager) — niri msg needs it.
-  systemd.user.services.power-tune = {
+  systemd.user.services.power-tune = lib.mkIf hasNvidia {
     Unit = {
       Description = "Refresh rate + keyboard aura + relog consent prompt follow the power source";
       After = [ "graphical-session.target" ];
@@ -735,7 +748,7 @@ in
   # Pick niri's render GPU before niri starts (see renderDeviceSelect in the let
   # block). Oneshot ordered Before niri.service and pulled in by it, so niri
   # reads a render-device fragment that already matches the live dock state.
-  systemd.user.services.niri-render-device = {
+  systemd.user.services.niri-render-device = lib.mkIf hasNvidia {
     Unit = {
       Description = "Select niri's render GPU (dGPU when docked, else iGPU)";
       Before = [ "niri.service" ];
