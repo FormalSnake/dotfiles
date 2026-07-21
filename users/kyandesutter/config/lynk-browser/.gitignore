@@ -1,2 +1,8 @@
 # User secrets
 secrets.json
+
+# Browser-written runtime state (the mixin symlinks ~/.config/lynk-browser
+# straight at this repo dir, so anything the browser writes lands here)
+TransportSecurity
+newtab-data.json
+onboarding-state.json
