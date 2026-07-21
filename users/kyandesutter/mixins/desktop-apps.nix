@@ -2,9 +2,9 @@
 {
   # GTK ≥4.14 defaults to the Vulkan GSK renderer, which corrupts frames on this
   # laptop's Intel iGPU (ANV) — diagonal tearing across the whole window, most
-  # visible in GNOME Calendar's month grid. Force the cairo renderer for every
-  # GTK4 app; software rendering is imperceptible for these desktop apps.
-  home.sessionVariables.GSK_RENDERER = "cairo";
+  # visible in GNOME Calendar's month grid. Force the older GL renderer, which
+  # keeps GPU acceleration and dodges the ANV bug (verified clean on Calendar).
+  home.sessionVariables.GSK_RENDERER = "gl";
 
   # GNOME/GTK desktop apps + their MIME defaults. Not niri-specific — these
   # round out the desktop so double-clicking files in Nautilus opens something
