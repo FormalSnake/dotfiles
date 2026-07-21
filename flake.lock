@@ -260,26 +260,6 @@
         "type": "github"
       }
     },
-    "fetch": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1784172195,
-        "narHash": "sha256-PljIf56xk6Uq5qn296piJI3ZuwofDsmU0+b8k5KV6gg=",
-        "owner": "areofyl",
-        "repo": "fetch",
-        "rev": "b9b3b5f101c8eafe8fbeb7db390727368a873f40",
-        "type": "github"
-      },
-      "original": {
-        "owner": "areofyl",
-        "repo": "fetch",
-        "type": "github"
-      }
-    },
     "flake-compat": {
       "flake": false,
       "locked": {
@@ -1127,7 +1107,6 @@
         "dankcalendar": "dankcalendar",
         "determinate": "determinate",
         "dms-plugin-registry": "dms-plugin-registry",
-        "fetch": "fetch",
         "flake-parts": "flake-parts_2",
         "helium": "helium",
         "herdr": "herdr",

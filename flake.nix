@@ -63,13 +63,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # areofyl/fetch — animated 3D terminal fetch tool. Linux-only; ships a flake
-    # with a home-manager module (programs.fetch). Not in nixpkgs.
-    fetch = {
-      url = "github:areofyl/fetch";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     # CanaryCode — our own fast, minimal terminal coding agent (Bun/TypeScript).
     # Ships a flake whose package is the prebuilt per-system release binary
     # (autoPatchelf'd on Linux) plus a home-manager module (programs.canarycode).
