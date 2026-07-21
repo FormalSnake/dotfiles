@@ -43,5 +43,6 @@ in
   # removing a skill in the repo now needs a rebuild).
   // lib.mapAttrs' (
     name: _: lib.nameValuePair ".claude/skills/${name}" { source = link "skills/${name}"; }
-  ) (builtins.readDir ../claude/skills);
+  ) (lib.filterAttrs (name: _: name != "claude-code-home-manager")
+      (builtins.readDir ../claude/skills));
 }

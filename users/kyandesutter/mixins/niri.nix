@@ -794,6 +794,7 @@ in
   # and X11/XWayland (x11.enable exports XCURSOR_THEME/SIZE); native Wayland
   # reads it from settings.cursor above.
   home.pointerCursor = {
+    enable = true;
     package = pkgs.bibata-cursors;
     name = "Bibata-Modern-Classic";
     size = 24;

@@ -35,8 +35,28 @@ let
     # libgtk-3.so.0 on the rpath. GTK3 not 4: Chromium defaults to the GTK3
     # backend (GTK4 is opt-in behind --gtk-version=4 and still incomplete).
     runtimeDependencies = (old.runtimeDependencies or [ ]) ++ [ pkgs.gtk3 ];
+    nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ pkgs.makeWrapper ];
+
+    # Pin the browser to the iGPU (Intel) for GPU rendering. When docked, niri
+    # renders on the dGPU and advertises the nvidia render node to clients;
+    # Chromium's ANGLE/EGL then can't import the compositor dmabuf on nvidia
+    # (eglCreateImage → EGL_BAD_MATCH 0x3009), so its GPU process crash-loops and
+    # falls back to software (--use-gl=disabled). ANGLE-Vulkan is rejected by
+    # Chromium's Wayland Ozone and XWayland GL init fails too — both dead ends on
+    # this stack. Forcing the Intel render node instead makes mesa render the
+    # browser (no dmabuf-import bug) while niri imports that iGPU buffer for
+    # scanout on the dGPU, and keeps the browser off the dGPU entirely (so it
+    # never wakes it on battery). __EGL_VENDOR_LIBRARY_FILENAMES=mesa (set-default,
+    # so niri's own env for niri-child launches — the same value — still wins)
+    # guarantees the nvidia EGL vendor is never loaded. The iGPU is fixed at PCI
+    # 00:02.0 on this laptop (cf. the dGPU at 02:00.0 in niri.nix). This lives in
+    # postInstall (after the wrapper the package builds there); the derivation
+    # runs no fixup phase, so a postFixup hook would silently never fire.
     postInstall = (old.postInstall or "") + ''
       ln -s ${cdmDir} $out/opt/helium/WidevineCdm
+      wrapProgram $out/bin/helium \
+        --add-flags "--use-gl=angle --use-angle=gl --render-node-override=/dev/dri/by-path/pci-0000:00:02.0-render" \
+        --set-default __EGL_VENDOR_LIBRARY_FILENAMES /run/opengl-driver/share/glvnd/egl_vendor.d/50_mesa.json
     '';
   });
 in
@@ -44,9 +64,11 @@ in
   # Helium browser. The overlay (inputs.helium.overlays.default) is applied at
   # the system level in modules/nixos/mixins/nix.nix, so pkgs.helium resolves.
   #
-  # No GPU wrapper needed: LIBVA_DRIVER_NAME is chosen per session by power source
-  # (programs.niri.settings.environment in users/kyandesutter/mixins/niri.nix), so on battery Helium
-  # decodes video on the iGPU and leaves the dGPU asleep; on AC it uses nvidia.
+  # GPU rendering is pinned to the iGPU by the wrapper above (Chromium can't do
+  # hardware GL on the dGPU's nvidia render node under Wayland). This also keeps
+  # the browser from waking the dGPU on battery. Hardware video decode (VA-API)
+  # is a separate concern — still on the iGPU (LIBVA iHD) but not yet enabled via
+  # --enable-features=VaapiVideoDecoder.
   home.packages = [ helium ];
 
   # Widevine component hint file (path #2 above). A JSON dict whose "Path" points

@@ -124,8 +124,13 @@ let
           local desired="$SIG@$fps"
           if [[ "$desired" != "$running_sig" ]]; then
             stop
-            # --silent: a desktop background must not blast scene audio.
-            linux-wallpaperengine "''${ARGS[@]}" --silent --fps "$fps" &
+            # --silent mutes output but still opens a PulseAudio *recorder* for
+            # audio-reactive scenes, and that callback path segfaults/aborts on
+            # this host (observed repeatedly, always in libpulse
+            # pa_server_info_cb / pa_operation_get_state) — the crash that leaves
+            # the wallpaper dead. --no-audio-processing skips the recorder
+            # entirely; no scene here uses audio input, so nothing is lost.
+            linux-wallpaperengine "''${ARGS[@]}" --silent --no-audio-processing --fps "$fps" &
             engine_pid=$!
             running_sig="$desired"
           fi
@@ -137,11 +142,30 @@ let
       trap 'stop; exit 0' TERM INT
 
       reconcile
-      while read -r _; do
-        # Coalesce bursts (matugen can re-fire in quick succession, e.g. a
-        # light/dark flip right after a wallpaper pick) so we don't restart
-        # the GL engine on every event.
-        while read -r -t 0.4 _; do :; done
+      while true; do
+        rc=0; read -r -t 10 _ || rc=$?
+        if (( rc == 0 )); then
+          # Coalesce bursts (matugen can re-fire in quick succession, e.g. a
+          # light/dark flip right after a wallpaper pick) so we don't restart
+          # the GL engine on every event.
+          while read -r -t 0.4 _; do :; done
+        elif (( rc > 128 )); then
+          # Watchdog tick (read timed out, no event). The loop is otherwise
+          # blind to the engine dying on its own: no inotify event fires and
+          # running_sig still equals the desired signature, so reconcile() skips
+          # the relaunch and the wallpaper stays dead. If the tracked engine is
+          # gone, clear running_sig so the reconcile below relaunches it.
+          if [[ -n "$running_sig" ]] \
+            && { [[ -z "$engine_pid" ]] || ! kill -0 "$engine_pid" 2>/dev/null; }; then
+            engine_pid=""
+            running_sig=""
+          else
+            continue
+          fi
+        else
+          # inotifywait exited (pipe closed) — let systemd restart the unit.
+          break
+        fi
         reconcile
       done < <(inotifywait -q -m -r -e close_write,create,moved_to,delete "$base" /run/power)
     '';
@@ -182,7 +206,7 @@ let
       rm -f "$tmp"
       echo "rendering still for $id ($geom)…" >&2
       linux-wallpaperengine --window "0x0x$geom" --bg "$id" --scaling fill \
-        --silent --screenshot "$tmp" --screenshot-delay 30 >/dev/null 2>&1 &
+        --silent --no-audio-processing --screenshot "$tmp" --screenshot-delay 30 >/dev/null 2>&1 &
       pid=$!
       ok=""
       # Scene load + shader compile take a couple of seconds; poll up to ~20s for
