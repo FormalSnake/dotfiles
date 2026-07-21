@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 let
   # Live working-copy path (NOT the nix store).
   # mkOutOfStoreSymlink points at this, so edits in the repo are live without rebuilding.
@@ -31,10 +31,17 @@ in
     ".claude/agents".source   = link "agents";
     ".claude/commands".source = link "commands";
     ".claude/hooks".source    = link "hooks";
-    ".claude/skills".source   = link "skills";
 
     # Plugin metadata (config.json, installed_plugins.json, cache/, data/, marketplaces/,
     # repos/, known_marketplaces.json) stays imperative — claude-code rewrites these via
     # `mv`, which breaks symlinks.
-  };
+  }
+  # skills/ can't be one whole-directory symlink anymore: home-manager's
+  # claude-code module (2026-07) installs its generated MCP plugin at
+  # ~/.claude/skills/claude-code-home-manager, so HM must own the directory.
+  # Link each repo skill individually instead (still live-edit; adding or
+  # removing a skill in the repo now needs a rebuild).
+  // lib.mapAttrs' (
+    name: _: lib.nameValuePair ".claude/skills/${name}" { source = link "skills/${name}"; }
+  ) (builtins.readDir ../claude/skills);
 }

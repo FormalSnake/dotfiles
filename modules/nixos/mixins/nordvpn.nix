@@ -15,6 +15,17 @@ in
   # only login stays manual (account credentials, deliberately not in this repo).
   imports = [ inputs.nordvpn-flake.nixosModules.default ];
 
+  # nixpkgs ≥ 2026-07 ships its own services.nordvpn module declaring the same
+  # options; it's not a drop-in (no `users`, daemon is `nordvpnd` running as an
+  # unprivileged user against the same vault), so keep the flake's and disable
+  # the upstream one.
+  disabledModules = [ "services/networking/nordvpn.nix" ];
+
+  # Disabling that module removes its page from the local NixOS manual, which
+  # otherwise fails the manual's static-redirects consistency check
+  # (module-services-nordvpn). Skips only the check, not the manual.
+  documentation.nixos.checkRedirects = false;
+
   services.nordvpn = {
     enable = true;
     users = [ "kyandesutter" ];
