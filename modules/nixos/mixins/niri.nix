@@ -195,6 +195,10 @@ in
       # Emoji.
       noto-fonts-color-emoji # "Noto Color Emoji" — color glyphs
       noto-fonts-monochrome-emoji # "Noto Emoji" — monochrome fallback
+
+      # Font Awesome 6 (Brands) — the githubNotifier DankBar plugin renders the
+      # GitHub logo from this family (mixins/dms.nix).
+      font-awesome
     ];
 
     # Make Geist / GeistMono the default sans/monospace for the whole system

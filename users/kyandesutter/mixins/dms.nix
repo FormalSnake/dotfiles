@@ -128,7 +128,7 @@ let
           showOnLastDisplay = true;
           leftWidgets = [ "launcherButton" "workspaceSwitcher" "focusedWindow" ];
           centerWidgets = [ "music" "clock" "weather" ];
-          rightWidgets = [ "systemTray" "clipboard" "cpuUsage" "nvidiaGpuMonitor" "dgpuStatus" "memUsage" "notificationButton" "asusControlCenter" "battery" "controlCenterButton" ];
+          rightWidgets = [ "systemTray" "discordVoice" "clipboard" "githubNotifier" "cpuUsage" "nvidiaGpuMonitor" "dgpuStatus" "claudeCodeUsage" "memUsage" "gameControllerBattery" "notificationButton" "asusControlCenter" "battery" "displayManager" "controlCenterButton" ];
           spacing = 4;
           innerPadding = 4;
           bottomGap = 0;
@@ -350,8 +350,10 @@ in
 
   # Expose aura-repaint on PATH so power-tune (niri.nix) can call it as the
   # shared keyboard-aura setter (the matugen aura template's post_hook also uses
-  # it, by store path).
-  home.packages = [ auraRepaint ];
+  # it, by store path). jq rides along for the DankBar plugins that shell out to
+  # it (claudeCodeUsage, nixPackageRunner) — DMS's user service inherits the home
+  # profile on PATH.
+  home.packages = [ auraRepaint pkgs.jq ];
 
   programs.dank-material-shell = {
     enable = true;
@@ -381,6 +383,47 @@ in
       # Emoji & Unicode launcher — bound to Mod+Period in mixins/niri.nix via
       # `spotlight toggleQuery :e` (:e is the plugin's default trigger).
       emojiLauncher.enable = true;
+
+      # Launcher-only plugins (spotlight surfaces, no bar widget). Both seed
+      # `enabled: true` below so they index without a manual Settings toggle.
+      # calculator: evaluate expressions, copy result. nixPackageRunner: search
+      # nixpkgs / `nix run` from the launcher (needs nix + jq + wl-clipboard,
+      # all on PATH).
+      calculator.enable = true;
+      nixPackageRunner.enable = true;
+
+      # DankBar widgets. Bar placement is spliced into rightWidgets by the seed
+      # (settingsSeed above) and, for the already-provisioned live bar, by
+      # dms-bar-plugins.jq — both kept in the same order.
+      # discordVoice: voice-call overlay (participant avatars, mute/deafen);
+      # needs python3 (present) + Discord RPC enabled in-client.
+      discordVoice.enable = true;
+      # githubNotifier: open PRs authored by you + issues assigned to you. Reads
+      # via `gh` (present) — run `gh auth login` once; the GitHub brand glyph
+      # needs font-awesome (added to fonts.packages in mixins/niri.nix).
+      githubNotifier.enable = true;
+      # claudeCodeUsage: token usage / rate limits / daily charts for the Claude
+      # Code subscription. Parses ~/.claude logs with jq (added to home.packages).
+      claudeCodeUsage.enable = true;
+      # displayManager: toggle niri outputs + DDC/CI monitor controls. niri-only;
+      # DDC brightness/contrast needs ddcutil (present) against an external
+      # monitor — the internal eDP panel is backlight-driven, not DDC.
+      displayManager.enable = true;
+      # gameControllerBattery: battery level of connected controllers, via upower
+      # (present).
+      gameControllerBattery.enable = true;
+
+      # Scriptable custom bar buttons (Avenge Media, first-party) — the
+      # replacement for noctalia's old custom "Windows" power-menu button, which
+      # DMS's own powermenu can't host (fixed action enum; see the desktop-entry
+      # note near the bottom of this file). Uses DMS's plugin-variant system:
+      # each action is its own bar widget created at runtime (Settings → Plugins
+      # → Dank Actions), so nothing is spliced onto the bar here. Configure one
+      # variant with the left-click command
+      # `systemctl start reboot-to-windows.service` to restore the one-click
+      # boot-to-Windows button (the reboot-to-windows.service + polkit waiver in
+      # modules/nixos/mixins/boot.nix already exist).
+      dankActions.enable = true;
     };
   };
 
@@ -570,7 +613,11 @@ in
     [ -e "$pf" ] || echo '{}' > "$pf"
     tmp="$(mktemp "$pf.XXXXXX")"
     ${pkgs.jq}/bin/jq '
-      reduce ("asusControlCenter", "dgpuStatus", "nvidiaGpuMonitor", "emojiLauncher") as $id
+      reduce (
+        "asusControlCenter", "dgpuStatus", "nvidiaGpuMonitor", "emojiLauncher",
+        "calculator", "nixPackageRunner", "discordVoice", "githubNotifier",
+        "claudeCodeUsage", "displayManager", "gameControllerBattery", "dankActions"
+      ) as $id
         (.; if has($id) then . else .[$id] = { enabled: true } end)
     ' "$pf" > "$tmp"
     if ${pkgs.jq}/bin/jq -e --slurpfile a "$tmp" '. == $a[0]' "$pf" >/dev/null; then

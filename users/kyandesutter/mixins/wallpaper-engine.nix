@@ -39,16 +39,24 @@ let
   workshop = "$HOME/.steam/steam/steamapps/workshop/content/431960";
   dms = config.programs.dank-material-shell.package;
 
-  # Pin the engine to the iGPU (Intel i915, renderD128 at PCI 00:02.0). When
-  # docked, niri renders on the dGPU and advertises the nvidia render node to
-  # Wayland clients; linux-wallpaperengine is a mesa GL app that can't
-  # accelerate on nvidia, so it silently drops to llvmpipe SOFTWARE rendering —
-  # ~15 CPU cores for two 60fps outputs. DRI_PRIME pins mesa to the iGPU node
-  # (niri imports that buffer for scanout on the dGPU-driven HDMI output, the
-  # same cross-GPU path the browser uses), and the EGL vendor pin guarantees the
-  # nvidia vendor is never loaded so the dGPU stays asleep on battery. Same fix
-  # pattern as lib/chromium-igpu.nix.
-  gpuEnv = "DRI_PRIME=pci-0000_00_02_0 __EGL_VENDOR_LIBRARY_FILENAMES=/run/opengl-driver/share/glvnd/egl_vendor.d/50_mesa.json";
+  # Two GPU pins.
+  #
+  # The LIVE engine runs on the dGPU (RTX 5070): the reconciler only ever runs
+  # it while charging, and while charging dgpu-reconcile keeps the dGPU powered
+  # anyway (modules/nixos/mixins/power.nix), so rendering there is free power-
+  # wise and takes the scene load off the iGPU, which visibly lagged. The EGL
+  # vendor pin selects nvidia's EGL (mesa never sees the call, so no llvmpipe
+  # fallback); niri stays iGPU-primary and imports the nvidia dmabuf for
+  # composition — the standard PRIME-offload path. The dGPU-hold worry is
+  # covered: on unplug the reconciler kills the engine within ~2s while
+  # dgpu-power's wait-for-free gives handles up to 60s to disappear.
+  #
+  # The STILL renderer keeps the old iGPU pin (DRI_PRIME to the Intel node,
+  # mesa EGL vendor — same fix pattern as lib/chromium-igpu.nix): stills are
+  # rendered at wallpaper-pick time, which can happen on battery with the dGPU
+  # powered off, and a one-shot off-screen render doesn't care about lag.
+  igpuEnv = "DRI_PRIME=pci-0000_00_02_0 __EGL_VENDOR_LIBRARY_FILENAMES=/run/opengl-driver/share/glvnd/egl_vendor.d/50_mesa.json";
+  dgpuEnv = "__NV_PRIME_RENDER_OFFLOAD=1 __EGL_VENDOR_LIBRARY_FILENAMES=/run/opengl-driver/share/glvnd/egl_vendor.d/10_nvidia.json";
 
   # Invoked as the post_hook of the [templates.wallpaper-path] matugen
   # template (dms.nix), which passes the newly themed image path as $1 —
@@ -88,6 +96,25 @@ let
       engine_pid=""
       running_sig=""
 
+      # Is the nvidia EGL userspace actually usable right now? Two ways it
+      # isn't: the dGPU is powered off (modules unloaded — plug-in race: we get
+      # the power event before dgpu-reconcile finishes loading them), or the
+      # loaded kernel module is a different point release than the current
+      # system's userspace (every nixos-rebuild that bumps the driver leaves
+      # this state until reboot; EGL init then fails with an NVRM API-mismatch
+      # kernel log). In both cases launching pinned to nvidia just dies, so
+      # fall back to the iGPU; the watchdog reconcile converges back to the
+      # dGPU once the versions line up.
+      nv_ok() {
+        local k f
+        k="$(cat /sys/module/nvidia/version 2>/dev/null || true)"
+        [[ -n "$k" ]] || return 1
+        for f in /run/opengl-driver/lib/libnvidia-eglcore.so.*; do
+          [[ -e "$f" && "''${f##*.so.}" == "$k" ]] && return 0
+        done
+        return 1
+      }
+
       stop() {
         if [[ -n "$engine_pid" ]] && kill -0 "$engine_pid" 2>/dev/null; then
           kill "$engine_pid" 2>/dev/null || true
@@ -106,16 +133,26 @@ let
         running_sig=""
       }
 
-      # Builds the launch args (global ARGS) and a stable signature (global SIG)
+      # Builds the launch args (global ARGS), a stable signature (global SIG)
       # spanning every output niri currently reports live, all pointed at the
-      # one selected scene (no per-connector distinction — see the file header).
+      # one selected scene (no per-connector distinction — see the file header),
+      # and the auto fps (global FPS_AUTO): the highest current refresh rate
+      # among those outputs (niri reports mHz), so the engine matches the
+      # fastest panel. The engine has one global --fps, so the slower output
+      # simply drops the extra frames. A refresh change (power-tune flips the
+      # eDP rate with the profile) changes FPS_AUTO and, via the signature,
+      # restarts the engine at the new rate.
       build() {
         ARGS=()
         SIG=""
-        local id="" conns=() conn=""
+        FPS_AUTO=60
+        local id="" conns=() conn="" outputs=""
         [[ -r "$selfile" ]] && id="$(cat "$selfile" 2>/dev/null || true)"
         [[ -n "$id" ]] || return 0
-        mapfile -t conns < <(niri msg --json outputs | jq -r 'keys[]' | sort)
+        outputs="$(niri msg --json outputs || true)"
+        [[ -n "$outputs" ]] || return 0
+        FPS_AUTO="$(jq -r '[.[] | select(.current_mode != null) | .modes[.current_mode].refresh_rate] | (max // 60000) / 1000 | round' <<<"$outputs")"
+        mapfile -t conns < <(jq -r 'keys[]' <<<"$outputs" | sort)
         for conn in "''${conns[@]}"; do
           # --scaling is POSITIONAL: it binds to the *preceding* --screen-root, so
           # it must sit right after each --bg — a single trailing --scaling would
@@ -127,12 +164,16 @@ let
       }
 
       reconcile() {
-        local power="battery" fps="60"
+        local power="battery" fps="" gpu="igpu"
         [[ -r "$powerstate" ]] && power="$(cat "$powerstate" 2>/dev/null || echo battery)"
-        [[ -r "$fpsfile" ]] && fps="$(cat "$fpsfile" 2>/dev/null || echo 60)"
+        nv_ok && gpu="nvidia"
         build
+        # The fps file (written by `we-set <id> <fps>`) is an explicit pin;
+        # without it the engine follows the fastest output's refresh rate.
+        fps="$FPS_AUTO"
+        [[ -r "$fpsfile" ]] && fps="$(cat "$fpsfile" 2>/dev/null || echo "$FPS_AUTO")"
         if [[ -n "$SIG" && "$power" != "battery" ]]; then
-          local desired="$SIG@$fps"
+          local desired="$SIG@$fps@$gpu"
           if [[ "$desired" != "$running_sig" ]]; then
             stop
             # --silent mutes output but still opens a PulseAudio *recorder* for
@@ -141,7 +182,11 @@ let
             # pa_server_info_cb / pa_operation_get_state) — the crash that leaves
             # the wallpaper dead. --no-audio-processing skips the recorder
             # entirely; no scene here uses audio input, so nothing is lost.
-            ${gpuEnv} linux-wallpaperengine "''${ARGS[@]}" --silent --no-audio-processing --fps "$fps" &
+            if [[ "$gpu" == nvidia ]]; then
+              ${dgpuEnv} linux-wallpaperengine "''${ARGS[@]}" --silent --no-audio-processing --fps "$fps" &
+            else
+              ${igpuEnv} linux-wallpaperengine "''${ARGS[@]}" --silent --no-audio-processing --fps "$fps" &
+            fi
             engine_pid=$!
             running_sig="$desired"
           fi
@@ -161,17 +206,16 @@ let
           # the GL engine on every event.
           while read -r -t 0.4 _; do :; done
         elif (( rc > 128 )); then
-          # Watchdog tick (read timed out, no event). The loop is otherwise
-          # blind to the engine dying on its own: no inotify event fires and
-          # running_sig still equals the desired signature, so reconcile() skips
-          # the relaunch and the wallpaper stays dead. If the tracked engine is
-          # gone, clear running_sig so the reconcile below relaunches it.
+          # Watchdog tick (read timed out, no event). Two things only this tick
+          # can catch, because neither fires an inotify event: the engine dying
+          # on its own (running_sig still matches, so reconcile() would skip the
+          # relaunch — clear it), and the nvidia stack becoming usable after an
+          # iGPU-fallback launch (nv_ok is part of the signature, so the
+          # fall-through reconcile below restarts the engine on the dGPU).
           if [[ -n "$running_sig" ]] \
             && { [[ -z "$engine_pid" ]] || ! kill -0 "$engine_pid" 2>/dev/null; }; then
             engine_pid=""
             running_sig=""
-          else
-            continue
           fi
         else
           # inotifywait exited (pipe closed) — let systemd restart the unit.
@@ -216,7 +260,7 @@ let
       tmp="$destdir/.we-$id.tmp.png"
       rm -f "$tmp"
       echo "rendering still for $id ($geom)…" >&2
-      ${gpuEnv} linux-wallpaperengine --window "0x0x$geom" --bg "$id" --scaling fill \
+      ${igpuEnv} linux-wallpaperengine --window "0x0x$geom" --bg "$id" --scaling fill \
         --silent --no-audio-processing --screenshot "$tmp" --screenshot-delay 30 >/dev/null 2>&1 &
       pid=$!
       ok=""
@@ -275,7 +319,9 @@ let
 
   # Apply a scene to EVERY connected output in one command: `we-set <id> [fps]`.
   # Ensures the still is in the picker set (so theming samples it), optionally
-  # sets the engine fps, then sets it as THE wallpaper via DMS's global
+  # pins the engine fps (overriding the reconciler's auto follow-the-refresh-
+  # rate; delete ~/.cache/wallpaper-engine/fps to go back to auto), then sets
+  # it as THE wallpaper via DMS's global
   # `wallpaper set` IPC target (docs/IPC.md). DMS's per-monitor `setFor` only
   # takes effect once per-monitor mode is enabled in Settings — off by
   # default here — so the plain global setter is what actually reaches every
