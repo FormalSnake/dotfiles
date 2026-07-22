@@ -1,10 +1,21 @@
-{ inputs, pkgs, ... }:
+{
+  config,
+  lib,
+  inputs,
+  pkgs,
+  ...
+}:
 let
+  cfg = config.kyan.nordvpn;
   # Absolute path into the system profile (same pattern as power-source) — the
   # upstream module puts the nordvpn binary in environment.systemPackages.
   nordvpn = "/run/current-system/sw/bin/nordvpn";
 in
 {
+  # Per-host: the account/login lives on the g815 only, so other hosts (the
+  # e1504g) leave this off. imports/disabledModules can't be conditional, so
+  # only the service config below is gated.
+  options.kyan.nordvpn.enable = lib.mkEnableOption "NordVPN daemon + declarative settings";
   # NordVPN — laptop privacy/geo VPN exit ONLY. The device mesh to the macbook
   # is Tailscale, kept on a separate job so NordVPN's killswitch can't sever it.
   # This community flake provides the package + the nordvpnd systemd service,
@@ -24,10 +35,10 @@ in
   # Disabling that module removes its page from the local NixOS manual, which
   # otherwise fails the manual's static-redirects consistency check
   # (module-services-nordvpn). Skips only the check, not the manual.
-  documentation.nixos.checkRedirects = false;
+  config.documentation.nixos.checkRedirects = false;
 
-  services.nordvpn = {
-    enable = true;
+  config.services.nordvpn = {
+    enable = cfg.enable;
     users = [ "kyandesutter" ];
   };
 
@@ -40,7 +51,7 @@ in
   # not already in the desired state — the "already set" path returns exit 1, so
   # checking first keeps the unit idempotent while letting a real `set` failure
   # surface instead of being swallowed by `|| true`.
-  systemd.services.nordvpn-settings = {
+  config.systemd.services.nordvpn-settings = lib.mkIf cfg.enable {
     description = "Enforce declarative NordVPN settings (allowlist, LAN discovery)";
     after = [ "nordvpn.service" ];
     requires = [ "nordvpn.service" ];

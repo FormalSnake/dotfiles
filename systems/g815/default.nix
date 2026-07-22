@@ -161,6 +161,9 @@
   # iPhone's screen in a window; share that window in meetings.
   kyan.airplay.enable = true;
 
+  # NordVPN (privacy/geo exit) — this host holds the account login.
+  kyan.nordvpn.enable = true;
+
   # Remote-builder key for the e1504g (nix.buildMachines in
   # systems/e1504g/default.nix): its root connects here as kyandesutter over
   # Tailscale to run builds. Force-commanded to `nix-daemon --stdio` (all
