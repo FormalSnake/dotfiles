@@ -231,10 +231,10 @@ in
     # NixOS-side): keep locks, crash/telemetry state and — the point — all of
     # 1Password's per-machine storage out of sync. 1Password's storage dir is
     # keyed by the profile's internal extension uuid (prefs.js,
-    # extensions.webextensions.uuids), so it's resolved here at activation
-    # time; on a fresh profile prefs.js doesn't exist yet and the line is
-    # simply omitted (there is no 1Password state to leak yet either — the
-    # next activation after first launch adds it). The `?` glob stands in for
+    # extensions.webextensions.uuids); that uuid is actually stable mesh-wide
+    # (prefs.js itself syncs), so the shared uuid is baked in as the default
+    # and the exclusion always renders — the prefs.js resolution in the
+    # fragment only overrides it when it yields a non-empty value. The `?` glob stands in for
     # the literal braces in the addon id: Syncthing's pattern language treats
     # braces specially, `?` matches any single character.
     {
@@ -244,11 +244,14 @@ in
       text = ''
         profileDir="${config.programs.zen-browser.profilesPath}/default"
         mkdir -p "$profileDir"
-        onePassUuid=""
+        onePassUuid="4767e761-756e-45f9-b6dd-485c553781f9"
         if [ -f "$profileDir/prefs.js" ]; then
-          onePassUuid="$(sed -n 's/^user_pref("extensions\.webextensions\.uuids", "\(.*\)");$/\1/p' "$profileDir/prefs.js" \
+          resolvedUuid="$(sed -n 's/^user_pref("extensions\.webextensions\.uuids", "\(.*\)");$/\1/p' "$profileDir/prefs.js" \
             | sed 's/\\"/"/g' \
             | ${lib.getExe pkgs.jq} -r '."{d634138d-c276-4fc8-924b-40a0ea21d284}" // empty' || true)"
+          if [ -n "$resolvedUuid" ]; then
+            onePassUuid="$resolvedUuid"
+          fi
         fi
         {
           echo "(?d)lock"
