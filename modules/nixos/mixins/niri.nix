@@ -17,8 +17,15 @@ let
   # CLI finds it itself once that env var is set, no $WAYLAND_DISPLAY needed.
   # Always exit 0: a lock failure (no session, DMS down) must never block the
   # suspend.
+  #
+  # PATH: `dms ipc` execs `qs` (quickshell) rather than speaking the socket
+  # itself, and a system service has no user PATH — without this the hook dies
+  # with `exec: "qs": executable file not found` and every suspend resumed into
+  # an UNLOCKED session (caught on the e1504g 2026-07-22; the script's exit-0
+  # masked it). The user profile holds the exact qs the session runs.
   lockBeforeSleep = pkgs.writeShellScript "lock-before-sleep" ''
     export XDG_RUNTIME_DIR="/run/user/$(${pkgs.coreutils}/bin/id -u)"
+    export PATH="/etc/profiles/per-user/${config.users.users.kyandesutter.name}/bin:$PATH"
     ${pkgs.coreutils}/bin/timeout 10 ${dms}/bin/dms ipc call lock lock || true
     exit 0
   '';
