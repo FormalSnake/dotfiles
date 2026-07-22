@@ -1,12 +1,14 @@
-{ config, inputs, ... }:
+{ config, lib, inputs, ... }:
 {
   imports = [ inputs.agenix.nixosModules.default ];
 
   # openssh must be enabled for the host key to exist; agenix could fall back to
   # it, but we decrypt with the shared `kyan` age identity instead (below).
+  # Closed on the LAN by default (tailscale0 stays trusted elsewhere); hosts
+  # that want LAN ssh override with openFirewall = true.
   services.openssh = {
     enable = true;
-    openFirewall = false;
+    openFirewall = lib.mkDefault false;
   };
 
   age = {
