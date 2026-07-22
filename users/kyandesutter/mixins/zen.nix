@@ -108,6 +108,50 @@ in
 
       userChrome = renderWabi ../zen-wabi/userChrome.css.template;
       userContent = renderWabi ../zen-wabi/userContent.css.template;
+
+      # Spaces. The two org spaces get their own containers (separate cookie
+      # jars), so the personal Google account (default jar) and the
+      # CanaryCoders workspace account never fight over google.com cookies.
+      # NOTE: close Zen before a home-manager switch that changes spaces or
+      # containers — the activation script needs exclusive access to the
+      # session files.
+      containers = {
+        CanaryCoders = {
+          color = "yellow";
+          icon = "briefcase";
+          id = 2;
+        };
+        KangaCoders = {
+          color = "orange";
+          icon = "briefcase";
+          id = 3;
+        };
+      };
+
+      spacesForce = true; # exactly these three; also removes Zen's starter space
+      spaces = {
+        "Personal" = {
+          id = "d5a017b0-2212-4298-83c0-f2e0ec65149a";
+          position = 1000;
+          icon = "🏠";
+        };
+        "CanaryCoders" = {
+          id = "1bc90784-e304-4f00-a7e3-f9c5fed586b3";
+          position = 2000;
+          icon = "🐤";
+          container = 2;
+          # Claude tabs always land in this space.
+          routes."Claude" = {
+            reference = "claude.ai"; # matchType "contains"
+          };
+        };
+        "KangaCoders" = {
+          id = "d581d21a-46ae-46a6-8f4b-a037833a0bae";
+          position = 3000;
+          icon = "🦘";
+          container = 3;
+        };
+      };
     };
   };
 
