@@ -81,9 +81,9 @@
   # on holding an authorized SSH key or the local login password.
   security.sudo.wheelNeedsPassword = false;
 
-  # Less RAM and a smaller SSD than the 32 GB g815: halve the overflow
-  # swapfile (zram in mixins/boot.nix stays the first tier). Revisit once the
-  # machine's actual RAM is known.
+  # 8 GB RAM (vs the g815's 32): halve the overflow swapfile to 2× RAM so a
+  # spike has real spill room on a small machine (zram in mixins/boot.nix
+  # stays the first, RAM-speed tier).
   swapDevices = [
     {
       device = "/swapfile";
@@ -97,6 +97,11 @@
       self.homeModules.kyandesutter
       self.homeModules.kyandesutter-linux
     ];
+
+    # 15.6" 1080p panel: render at native 1x (without an explicit block niri's
+    # DPI heuristic picks a fractional scale). The shared niri mixin leaves
+    # eDP-1 unset on iGPU-only hosts, so this is the only definition.
+    programs.niri.settings.outputs."eDP-1".scale = 1.0;
   };
 
   # Set once at install and never change.
