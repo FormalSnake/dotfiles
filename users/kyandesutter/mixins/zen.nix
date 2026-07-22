@@ -227,6 +227,43 @@ in
   # has ensured the file exists. No `origin` field -> not "store", hence the
   # sine.allow-unsafe-js pref above.
   programs.zen-browser.activationFragments.default = [
+    # Syncthing ignore rules for the zen-profile folder (mixins/syncthing.nix,
+    # NixOS-side): keep locks, crash/telemetry state and — the point — all of
+    # 1Password's per-machine storage out of sync. 1Password's storage dir is
+    # keyed by the profile's internal extension uuid (prefs.js,
+    # extensions.webextensions.uuids), so it's resolved here at activation
+    # time; on a fresh profile prefs.js doesn't exist yet and the line is
+    # simply omitted (there is no 1Password state to leak yet either — the
+    # next activation after first launch adds it). The `?` glob stands in for
+    # the literal braces in the addon id: Syncthing's pattern language treats
+    # braces specially, `?` matches any single character.
+    {
+      priority = 15;
+      requiresLock = true;
+      skipSubject = "syncthing stignore";
+      text = ''
+        profileDir="${config.programs.zen-browser.profilesPath}/default"
+        mkdir -p "$profileDir"
+        onePassUuid=""
+        if [ -f "$profileDir/prefs.js" ]; then
+          onePassUuid="$(sed -n 's/^user_pref("extensions\.webextensions\.uuids", "\(.*\)");$/\1/p' "$profileDir/prefs.js" \
+            | sed 's/\\"/"/g' \
+            | ${lib.getExe pkgs.jq} -r '."{d634138d-c276-4fc8-924b-40a0ea21d284}" // empty' || true)"
+        fi
+        {
+          echo "(?d)lock"
+          echo "(?d).parentlock"
+          echo "(?d)/crashes"
+          echo "(?d)/minidumps"
+          echo "/datareporting"
+          echo "/saved-telemetry-pings"
+          echo "/browser-extension-data/?d634138d-c276-4fc8-924b-40a0ea21d284?"
+          if [ -n "$onePassUuid" ]; then
+            echo "/storage/default/moz-extension+++$onePassUuid*"
+          fi
+        } > "$profileDir/.stignore"
+      '';
+    }
     # Mod repair: pin every declared mod to the VANILLA zen theme-store layout
     # (theme.json + chrome.css at the dir root). Two failure modes need this:
     # the flake's sine fragment prefers the Sine store, whose zips for several
