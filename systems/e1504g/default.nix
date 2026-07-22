@@ -81,6 +81,21 @@
   # on holding an authorized SSH key or the local login password.
   security.sudo.wheelNeedsPassword = false;
 
+  # PPD instead of TLP (nixos-hardware's common-pc-laptop enables TLP only
+  # when PPD is off, so this cleanly displaces it). PPD is what DMS's battery
+  # popout speaks, making its profile switcher functional — power-saver maps
+  # to EPP `power` plus the firmware's `quiet` platform profile — and it
+  # matches the g815's PPD-based stack. thermald lets the 15 W i3-N305 hold
+  # turbo longer under sustained load instead of tripping firmware throttling.
+  services.power-profiles-daemon.enable = true;
+  services.thermald.enable = true;
+
+  # Battery longevity: cap charge at 80% via the asus-wmi sysfs knob (no asusd
+  # needed — kyan.asus stays off, see above).
+  services.udev.extraRules = ''
+    ACTION=="add", SUBSYSTEM=="power_supply", KERNEL=="BAT0", ATTR{charge_control_end_threshold}="80"
+  '';
+
   # 8 GB RAM (vs the g815's 32): halve the overflow swapfile to 2× RAM so a
   # spike has real spill room on a small machine (zram in mixins/boot.nix
   # stays the first, RAM-speed tier).
@@ -92,17 +107,76 @@
     }
   ];
 
-  home-manager.users.kyandesutter = {
-    imports = [
-      self.homeModules.kyandesutter
-      self.homeModules.kyandesutter-linux
-    ];
+  home-manager.users.kyandesutter =
+    { pkgs, lib, ... }:
+    {
+      imports = [
+        self.homeModules.kyandesutter
+        self.homeModules.kyandesutter-linux
+      ];
 
-    # 15.6" 1080p panel: render at native 1x (without an explicit block niri's
-    # DPI heuristic picks a fractional scale). The shared niri mixin leaves
-    # eDP-1 unset on iGPU-only hosts, so this is the only definition.
-    programs.niri.settings.outputs."eDP-1".scale = 1.0;
-  };
+      # 15.6" 1080p panel: render at native 1x (without an explicit block niri's
+      # DPI heuristic picks a fractional scale). The shared niri mixin leaves
+      # eDP-1 unset on iGPU-only hosts, so this is the only definition.
+      programs.niri.settings.outputs."eDP-1".scale = 1.0;
+
+      # Dim the backlight to 40% while PPD's power-saver profile is active
+      # (toggled from DMS's battery popout) and restore the previous level on
+      # leaving it — the backlight is by far this machine's biggest battery
+      # consumer (~10.6 W total draw at 100%). The restore is skipped if
+      # brightness was adjusted manually while dimmed, so the service never
+      # fights the user.
+      systemd.user.services.power-saver-dim = {
+        Unit = {
+          Description = "Dim backlight while the power-saver profile is active";
+          PartOf = [ "graphical-session.target" ];
+          After = [ "graphical-session.target" ];
+        };
+        Install.WantedBy = [ "graphical-session.target" ];
+        Service = {
+          Type = "simple";
+          ExecStart =
+            let
+              brightnessctl = "${pkgs.brightnessctl}/bin/brightnessctl";
+              gdbus = "${lib.getBin pkgs.glib}/bin/gdbus";
+              ppd = "--system --dest net.hadess.PowerProfiles --object-path /net/hadess/PowerProfiles";
+            in
+            pkgs.writeShellScript "power-saver-dim" ''
+              dim=40
+              state=$XDG_RUNTIME_DIR/power-saver-dim.brightness
+              cur() { ${brightnessctl} -m | cut -d, -f4 | tr -d '%'; }
+
+              apply() {
+                if [ "$1" = power-saver ]; then
+                  [ -e "$state" ] && return
+                  now=$(cur)
+                  if [ "$now" -gt "$dim" ]; then
+                    echo "$now" >"$state"
+                    ${brightnessctl} -q set "$dim%"
+                  fi
+                elif [ -e "$state" ]; then
+                  [ "$(cur)" = "$dim" ] && ${brightnessctl} -q set "$(cat "$state")%"
+                  rm -f "$state"
+                fi
+              }
+
+              apply "$(${gdbus} call ${ppd} \
+                --method org.freedesktop.DBus.Properties.Get net.hadess.PowerProfiles ActiveProfile \
+                | sed -nE "s/.*'([a-z-]+)'.*/\1/p")"
+
+              ${gdbus} monitor ${ppd} | while IFS= read -r line; do
+                case $line in
+                  *"'ActiveProfile': <'power-saver'>"*) apply power-saver ;;
+                  *"'ActiveProfile': <'"*"'>"*) apply other ;;
+                esac
+              done
+            '';
+          # gdbus monitor exits cleanly if PPD restarts; come back either way.
+          Restart = "always";
+          RestartSec = 2;
+        };
+      };
+    };
 
   # Set once at install and never change.
   system.stateVersion = "26.11";
