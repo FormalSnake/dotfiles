@@ -62,13 +62,6 @@ in
   home.file.".config/net.imput.helium/WidevineCdm/latest-component-updated-widevine-cdm".text =
     builtins.toJSON { Path = cdmDir; };
 
-  home.sessionVariables.BROWSER = "helium";
-
-  # TODO (verify on hardware): set helium as the xdg default browser once we know
-  # its .desktop name (e.g. `helium.desktop` or `net.imput.helium.desktop`):
-  #   xdg.mimeApps.defaultApplications = {
-  #     "x-scheme-handler/http"  = "helium.desktop";
-  #     "x-scheme-handler/https" = "helium.desktop";
-  #     "text/html"              = "helium.desktop";
-  #   };
+  # BROWSER + xdg default browser now belong to Zen (mixins/zen.nix,
+  # setAsDefaultBrowser).
 }

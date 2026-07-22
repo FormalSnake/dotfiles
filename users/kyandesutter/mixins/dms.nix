@@ -457,6 +457,7 @@ in
     "matugen/templates/btop.theme.tmpl".source = ../matugen-templates/btop.theme.tmpl;
     "matugen/templates/yazi-flavor.toml.tmpl".source = ../matugen-templates/yazi-flavor.toml.tmpl;
     "matugen/templates/wallpaper-path.tmpl".source = ../matugen-templates/wallpaper-path.tmpl;
+    "matugen/templates/zen-vars.json.tmpl".source = ../matugen-templates/zen-vars.json.tmpl;
 
     # DMS reads ~/.config/matugen/config.toml on every re-theme and splices its
     # [config] and [templates] sections verbatim into the matugen invocation it
@@ -568,6 +569,15 @@ in
       input_path = "~/.config/matugen/templates/wallpaper-path.tmpl"
       output_path = "~/.cache/dank/wallpaper-path"
       post_hook = "${config.kyan.wallpaperEngine.selectCommand} {{image}}"
+
+      # Zen browser (zen-wabi bridge, mixins/zen.nix). Renders the 8-colour
+      # contract wabi's matugen-bridge.uc.js polls (1s mtime check) inside the
+      # profile's chrome dir; the bridge pushes the values live into chrome and
+      # content via prefs + a JSWindowActor, so no post_hook and no browser
+      # restart. First-paint Flexoki fallbacks are baked into userChrome.css.
+      [templates.zen]
+      input_path = "~/.config/matugen/templates/zen-vars.json.tmpl"
+      output_path = "~/.config/zen/default/chrome/matugen-vars.json"
     '';
   };
 
