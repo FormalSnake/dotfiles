@@ -124,6 +124,66 @@
       # eDP-1 unset on iGPU-only hosts, so this is the only definition.
       programs.niri.settings.outputs."eDP-1".scale = 1.0;
 
+      # Suspend after 10 minutes idle (lid close already suspends via logind's
+      # default HandleLidSwitch; DMS's own idle timeouts stay 0 — see the seed
+      # in mixins/dms.nix). swayidle listens on niri's ext-idle-notify. The
+      # lock-before-sleep hook (modules/nixos/mixins/niri.nix) locks on the way
+      # down. Deferred while an SSH connection is established: this machine is
+      # administered remotely (Claude on the g815), and "no local input for 10
+      # minutes" is the NORMAL state of a remote-driven session — suspending
+      # then would cut rebuilds mid-flight. swayidle only fires once per idle
+      # edge, so the timeout starts a transient wait-loop (suspends the moment
+      # the last SSH connection closes) and local activity kills it.
+      services.swayidle = {
+        enable = true;
+        timeouts = [
+          {
+            timeout = 600;
+            command = toString (pkgs.writeShellScript "idle-suspend" ''
+              exec systemd-run --user --unit=idle-suspend-pending --collect \
+                ${pkgs.writeShellScript "idle-suspend-wait" ''
+                  while ${pkgs.iproute2}/bin/ss -Htn state established sport = :22 \
+                      | ${pkgs.gnugrep}/bin/grep -q .; do
+                    ${pkgs.coreutils}/bin/sleep 60
+                  done
+                  /run/current-system/sw/bin/systemctl suspend
+                ''}
+            '');
+            resumeCommand = "systemctl --user stop idle-suspend-pending.service";
+          }
+        ];
+      };
+
+      # Give the budget 1080p panel (~45% NTSC, washed-out) a bit more punch.
+      # niri has NO output saturation/CTM/ICC support (maintainer has deferred
+      # all color management, github.com/YaLTeR/niri#2458), so true vibrance is
+      # impossible here; the one system-wide lever is niri's wlr-gamma-control,
+      # and a mild gamma pull (mids down → deeper, richer-looking colors) is
+      # the honest approximation. wl-gammarelay-rs holds the gamma ramp and
+      # exposes it on DBus; Type=dbus makes systemd wait for the name so the
+      # ExecStartPost that applies our value can't race it. Its ramp is
+      # f(x) = x^gamma (color.rs), so values ABOVE 1.0 darken the mids. Tune:
+      #   busctl --user set-property rs.wl-gammarelay / rs.wl.gammarelay Gamma d 1.15
+      # (1.0 = stock; higher = punchier/darker mids). MUTUALLY EXCLUSIVE with
+      # DMS night mode — both grab the same gamma protocol; night mode is off
+      # on this host, stop this service before enabling it.
+      systemd.user.services.panel-gamma = {
+        Unit = {
+          Description = "Punchier panel gamma via wl-gammarelay-rs";
+          PartOf = [ "graphical-session.target" ];
+          After = [ "graphical-session.target" ];
+        };
+        Install.WantedBy = [ "graphical-session.target" ];
+        Service = {
+          Type = "dbus";
+          BusName = "rs.wl-gammarelay";
+          ExecStart = "${pkgs.wl-gammarelay-rs}/bin/wl-gammarelay-rs run";
+          ExecStartPost = "${pkgs.systemd}/bin/busctl --user set-property rs.wl-gammarelay / rs.wl.gammarelay Gamma d 1.1";
+          Restart = "on-failure";
+          RestartSec = 2;
+        };
+      };
+
       # Dim the backlight to 40% while PPD's power-saver profile is active
       # (toggled from DMS's battery popout) and restore the previous level on
       # leaving it — the backlight is by far this machine's biggest battery

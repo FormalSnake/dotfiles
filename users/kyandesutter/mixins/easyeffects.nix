@@ -29,8 +29,9 @@ let
     text = ''
       map_preset() {
         case "$1" in
-          *pci-0000_02_00.1*)                 echo bass-boost ;;     # GB206 HDMI speakers
-          *pci-0000_80_1f.3*)                 echo laptop-neutral ;; # ALC294 built-in speakers
+          *pci-0000_02_00.1*)                 echo bass-boost ;;     # GB206 HDMI speakers (g815)
+          *pci-0000_80_1f.3*)                 echo laptop-neutral ;; # ALC294 built-in speakers (g815)
+          *skl_hda_dsp_generic.HiFi__Speaker__sink) echo vivobook-bass ;; # e1504g built-in speakers
           bluez_output.14_14_7D_E7_8C_E3.*)   echo airpods-bass ;;   # AirPods Pro 2
           bluez_output.*)                     echo flat ;;           # other bluetooth (CMF Headphone Pro)
           *)                                  echo flat ;;           # anything else: pass-through, no EQ
@@ -122,6 +123,32 @@ let
     mute = false;
     solo = false;
   };
+  # — Neutral voicing for the e1504g's built-in speakers (Vivobook Go 15) —
+  #
+  # Two ~2 W bottom-firing micro-drivers, no woofer. No published measurement
+  # exists for this chassis (checked AutoEq, notebookcheck, community EasyEffects
+  # presets, 2026-07), so this is a derived correction from the universal
+  # small-laptop-speaker defect signature, cut-dominant so it needs no preamp of
+  # its own: cut the ~500 Hz cabinet boxiness and ~900 Hz nasal congestion,
+  # fill the 300 Hz body and 1.5 kHz presence dip a touch, tame the shouty
+  # 2.5 kHz / hard 4 kHz / sibilant 5.5-8 kHz peaks, and shelve back the
+  # top-octave air. Bands 5 and 7 (2.5 k / 5.5 k) are the most unit-variable —
+  # if it still sounds shouty or sharp, sweep a narrow +6 dB probe around them
+  # in the EasyEffects window and move the cut onto the real peak; changes save
+  # back to the vivobook-bass output preset.
+  vivobookCorrectionBands = {
+    band0 = mkApoBand "Lo-shelf" 120.0 0.0 0.70; # flat handoff — filter#1 owns the low end
+    band1 = mkApoBand "Bell" 300.0 1.5 0.90; # body the drivers CAN make
+    band2 = mkApoBand "Bell" 500.0 (-3.0) 1.10; # cabinet boxiness / honk
+    band3 = mkApoBand "Bell" 900.0 (-2.0) 1.20; # nasal lower-mid congestion
+    band4 = mkApoBand "Bell" 1500.0 1.0 1.20; # presence dip, intelligibility
+    band5 = mkApoBand "Bell" 2500.0 (-3.0) 1.40; # shouty upper-mid peak
+    band6 = mkApoBand "Bell" 4000.0 (-2.5) 2.00; # hardness
+    band7 = mkApoBand "Bell" 5500.0 (-3.5) 2.50; # sharp sibilant peak
+    band8 = mkApoBand "Bell" 8000.0 (-2.0) 2.00; # de-sibilance
+    band9 = mkApoBand "Hi-shelf" 12000.0 1.5 0.70; # restore rolled-off air
+  };
+
   airpodsCorrectionBands = {
     band0 = mkApoBand "Lo-shelf" 105.0 (-1.2) 0.70;
     band1 = mkApoBand "Bell" 302.0 (-1.7) 0.51;
@@ -271,6 +298,75 @@ in
       };
     };
 
+    # — e1504g (Vivobook Go 15) built-in speakers: neutral correction + bass boost —
+    #
+    # Same two-stage recipe as airpods-bass (neutral EQ + a shelf on top), plus a
+    # high-pass in front because these micro-drivers have nothing below ~200 Hz:
+    # feeding them sub-bass only buys excursion, rattle and IMD, never output.
+    # The "bass boost" therefore aims at the 200-400 Hz warmth band — the lowest
+    # region the drivers actually reproduce — not at true low bass.
+    #
+    #   1. filter#0 High-pass ~95 Hz — driver protection. Carries the -5 dB
+    #      preamp cut (headroom for the shelf below, same trick as every other
+    #      preset here).
+    #   2. filter#1 Low-shelf 220 Hz +4.5 dB — the warmth lift. Net: lows ≈
+    #      -0.5 dB, everything else ≈ -5 dB. Do NOT push past +5: there is no
+    #      extension to unlock, only 200-350 Hz overdrive.
+    #   3. equalizer#0 — the neutral correction (see vivobookCorrectionBands).
+    extraPresets.vivobook-bass = {
+      output = {
+        blocklist = [ ];
+        plugins_order = [
+          "filter#0"
+          "filter#1"
+          "equalizer#0"
+        ];
+
+        "filter#0" = {
+          bypass = false;
+          "input-gain" = -5.0; # preamp cut for headroom — matches the shelf below
+          "output-gain" = 0.0;
+          type = "High-pass";
+          mode = "RLC (BT)";
+          "equal-mode" = "IIR";
+          slope = "x2";
+          decramp = "Off";
+          frequency = 95.0;
+          width = 4.0;
+          quality = 0.0;
+          gain = 0.0;
+          balance = 0.0;
+        };
+
+        "filter#1" = {
+          bypass = false;
+          "input-gain" = 0.0;
+          "output-gain" = 0.0;
+          type = "Low-shelf";
+          mode = "RLC (BT)";
+          "equal-mode" = "IIR";
+          slope = "x1";
+          decramp = "Off";
+          frequency = 220.0;
+          width = 4.0;
+          quality = 0.0;
+          gain = 4.5; # warmth lift over ~200-400 Hz — hard ceiling +5
+          balance = 0.0;
+        };
+
+        "equalizer#0" = {
+          bypass = false;
+          "input-gain" = 0.0;
+          "output-gain" = 0.0;
+          mode = "IIR";
+          "num-bands" = 10;
+          "split-channels" = false;
+          left = vivobookCorrectionBands;
+          right = vivobookCorrectionBands;
+        };
+      };
+    };
+
     # — AirPods Pro 2: audiophile correction + bass boost on top —
     #
     # Same two-stage recipe as the Pebble `bass-boost` preset, but the voicing EQ
@@ -370,6 +466,19 @@ in
       "device-description" = "800 Series Chipset Family Audio Context Engine (ACE) Analog Stereo";
       "device-profile" = "analog-output-speaker"; # active output ROUTE name
       "preset-name" = "laptop-neutral";
+    };
+
+  # Per-device autoload for the e1504g's built-in speakers → vivobook-bass.
+  # SOF UCM route names contain spaces/brackets ("[Out] Speaker") — EasyEffects
+  # only rewrites "/" in the filename, so they appear verbatim. Values read off
+  # the live machine via pw-dump (2026-07-22). Harmless on the g815: the device
+  # never exists there, same as the g815 entries above never match on the e1504g.
+  xdg.dataFile."easyeffects/autoload/output/alsa_output.pci-0000_00_1f.3-platform-skl_hda_dsp_generic.HiFi__Speaker__sink:[Out] Speaker.json".text =
+    builtins.toJSON {
+      device = "alsa_output.pci-0000_00_1f.3-platform-skl_hda_dsp_generic.HiFi__Speaker__sink";
+      "device-description" = "sof-hda-dsp Speaker";
+      "device-profile" = "[Out] Speaker"; # active output ROUTE name (see GOTCHA above)
+      "preset-name" = "vivobook-bass";
     };
 
   # The default-sink → preset watcher. Lives exactly as long as the EasyEffects
