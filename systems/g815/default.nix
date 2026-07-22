@@ -164,6 +164,10 @@
   # NordVPN (privacy/geo exit) — this host holds the account login.
   kyan.nordvpn.enable = true;
 
+  # Syncthing mesh: wallpapers + Zen profile, macbook as hub
+  # (modules/nixos/mixins/syncthing.nix; spec 2026-07-22).
+  kyan.syncthing.enable = true;
+
   # Remote-builder key for the e1504g (nix.buildMachines in
   # systems/e1504g/default.nix): its root connects here as kyandesutter over
   # Tailscale to run builds. Force-commanded to `nix-daemon --stdio` (all

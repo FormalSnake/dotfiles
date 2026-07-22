@@ -25,6 +25,10 @@
   # asusd (battery charge limit) turns out to be wanted here.
   kyan.profiles.desktop.enable = true;
 
+  # Syncthing mesh: wallpapers + Zen profile, macbook as hub
+  # (modules/nixos/mixins/syncthing.nix; spec 2026-07-22).
+  kyan.syncthing.enable = true;
+
   # This machine is NixOS-only: no Windows dual-boot, no Steam, no Flatpak
   # (enable kyan.flatpak if a Flatpak-only app is ever needed), no NordVPN
   # (kyan.nordvpn — the account login lives on the g815).
