@@ -137,7 +137,7 @@ let
   # in the EasyEffects window and move the cut onto the real peak; changes save
   # back to the vivobook-bass output preset.
   vivobookCorrectionBands = {
-    band0 = mkApoBand "Lo-shelf" 120.0 0.0 0.70; # flat handoff — filter#1 owns the low end
+    band0 = mkApoBand "Hi-pass" 95.0 0.0 0.70; # driver protection — sub-bass buys only rattle
     band1 = mkApoBand "Bell" 300.0 1.5 0.90; # body the drivers CAN make
     band2 = mkApoBand "Bell" 500.0 (-3.0) 1.10; # cabinet boxiness / honk
     band3 = mkApoBand "Bell" 900.0 (-2.0) 1.20; # nasal lower-mid congestion
@@ -301,46 +301,33 @@ in
     # — e1504g (Vivobook Go 15) built-in speakers: neutral correction + bass boost —
     #
     # Same two-stage recipe as airpods-bass (neutral EQ + a shelf on top), plus a
-    # high-pass in front because these micro-drivers have nothing below ~200 Hz:
-    # feeding them sub-bass only buys excursion, rattle and IMD, never output.
-    # The "bass boost" therefore aims at the 200-400 Hz warmth band — the lowest
-    # region the drivers actually reproduce — not at true low bass.
+    # high-pass because these micro-drivers have nothing below ~200 Hz: feeding
+    # them sub-bass only buys excursion, rattle and IMD, never output. The "bass
+    # boost" therefore aims at the 200-400 Hz warmth band — the lowest region
+    # the drivers actually reproduce — not at true low bass.
     #
-    #   1. filter#0 High-pass ~95 Hz — driver protection. Carries the -5 dB
-    #      preamp cut (headroom for the shelf below, same trick as every other
-    #      preset here).
-    #   2. filter#1 Low-shelf 220 Hz +4.5 dB — the warmth lift. Net: lows ≈
-    #      -0.5 dB, everything else ≈ -5 dB. Do NOT push past +5: there is no
-    #      extension to unlock, only 200-350 Hz overdrive.
-    #   3. equalizer#0 — the neutral correction (see vivobookCorrectionBands).
+    # GOTCHA (EasyEffects 8.2.7): a preset with TWO instances of one plugin
+    # ("filter#0" + "filter#1") silently loads as an EMPTY chain — verified by
+    # bisection on the live machine. So the high-pass lives in the equalizer's
+    # band0 (band type "Hi-pass") instead of a second filter instance.
+    #
+    #   1. filter#0 Low-shelf 220 Hz +4.5 dB — the warmth lift, with the -5 dB
+    #      preamp cut for headroom (same trick as every other preset here).
+    #      Net: lows ≈ -0.5 dB, everything else ≈ -5 dB. Do NOT push past +5:
+    #      there is no extension to unlock, only 200-350 Hz overdrive.
+    #   2. equalizer#0 — band0 high-passes at 95 Hz (driver protection), bands
+    #      1-9 are the neutral correction (see vivobookCorrectionBands).
     extraPresets.vivobook-bass = {
       output = {
         blocklist = [ ];
         plugins_order = [
           "filter#0"
-          "filter#1"
           "equalizer#0"
         ];
 
         "filter#0" = {
           bypass = false;
-          "input-gain" = -5.0; # preamp cut for headroom — matches the shelf below
-          "output-gain" = 0.0;
-          type = "High-pass";
-          mode = "RLC (BT)";
-          "equal-mode" = "IIR";
-          slope = "x2";
-          decramp = "Off";
-          frequency = 95.0;
-          width = 4.0;
-          quality = 0.0;
-          gain = 0.0;
-          balance = 0.0;
-        };
-
-        "filter#1" = {
-          bypass = false;
-          "input-gain" = 0.0;
+          "input-gain" = -5.0; # preamp cut for headroom — matches the shelf gain
           "output-gain" = 0.0;
           type = "Low-shelf";
           mode = "RLC (BT)";
