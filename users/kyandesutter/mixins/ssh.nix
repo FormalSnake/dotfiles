@@ -39,13 +39,14 @@
         # Agent forwarding to our own hosts only: pam_ssh_agent_auth on the
         # remote end grants passwordless sudo when the forwarded agent holds an
         # authorized key. Never set this on foreign hosts (root there could use
-        # the forwarded agent). IdentityAgent none makes ssh forward the
-        # *default* agent (gcr on Linux, launchd's on macOS) — those hold the
-        # per-host on-disk keys that are authorized everywhere; with the global
-        # 1Password IdentityAgent in effect, ssh would forward that agent
-        # instead, whose keys aren't in any authorized_keys. Client auth is
-        # unaffected: these logins already ride the on-disk keys.
-        IdentityAgent = "none";
+        # the forwarded agent). IdentityAgent SSH_AUTH_SOCK reverts these hosts
+        # to the *default* agent (gcr on Linux, launchd's on macOS) — those hold
+        # the per-host on-disk keys that are authorized everywhere; with the
+        # global 1Password IdentityAgent in effect, ssh would forward that agent
+        # instead, whose keys aren't in any authorized_keys. (Not "none": that
+        # means "no agent" and silently disables forwarding altogether.) Client
+        # auth is unaffected: these logins already ride the on-disk keys.
+        IdentityAgent = "SSH_AUTH_SOCK";
         ForwardAgent = "yes";
         # Resolved via /etc/hosts (networking.hosts in modules/nixos/mixins/
         # networking.nix), which pins this name to the macbook's stable Tailscale
@@ -92,7 +93,7 @@
       "e1504g" = {
         HostName = "100.109.196.64";
         User = "kyandesutter";
-        IdentityAgent = "none"; # see the macbook entry
+        IdentityAgent = "SSH_AUTH_SOCK"; # see the macbook entry
         ForwardAgent = "yes";
       };
 
@@ -101,7 +102,7 @@
       "g815" = {
         HostName = "100.114.32.78";
         User = "kyandesutter";
-        IdentityAgent = "none"; # see the macbook entry
+        IdentityAgent = "SSH_AUTH_SOCK"; # see the macbook entry
         ForwardAgent = "yes";
       };
 
@@ -110,7 +111,7 @@
       "e1504g-lan" = {
         HostName = "192.168.86.116";
         User = "kyandesutter";
-        IdentityAgent = "none"; # see the macbook entry
+        IdentityAgent = "SSH_AUTH_SOCK"; # see the macbook entry
         ForwardAgent = "yes";
       };
 

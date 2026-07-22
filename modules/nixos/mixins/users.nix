@@ -15,6 +15,11 @@
   # /etc/ssh/authorized_keys.d/%u, which NixOS fills from authorizedKeys.keys.
   security.pam.sshAgentAuth.enable = true;
   security.pam.services.sudo.sshAgentAuth = true;
+  # Without this, `sudo -n` gives up before PAM runs (it assumes PAM will
+  # prompt), so scripts would never reach the agent module.
+  security.sudo.extraConfig = ''
+    Defaults noninteractive_auth
+  '';
 
   users.users.kyandesutter = {
     isNormalUser = true;

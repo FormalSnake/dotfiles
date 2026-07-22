@@ -16,6 +16,12 @@ let
           (o.env.NIX_CFLAGS_COMPILE or "") + " -D_FORTIFY_SOURCE=0 -std=gnu99";
       };
     });
+  machineKeys = [
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIcVJF2yg72gRq6NceAnchCIgIWfC2Xx2Va2vcq1GVOm personal_mac"
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOYmDpRg/oAI5/NSJbEzOZHJqEg8YoTT2Nrv5fwLLXWi kyandesutter@e1504g"
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGxYo1mVlFzYfDSiHH4nWXYs+ZFz29vYlkRkWxQKxMFv kyandesutter@g815"
+  ];
+  machineKeysFile = pkgs.writeText "sudo_authorized_keys" (pkgs.lib.concatLines machineKeys);
 in
 {
   # SSH server hardening for the remote-work-server role. macOS's sshd reads
@@ -37,21 +43,23 @@ in
   # key (docs/remote-server.md step 3) is untouched. Tailscale SSH can't be a
   # macOS server, so mobile devices (iPhone/iPad) reach the Mac via native sshd
   # with key auth; add each device's public key here.
-  users.users.kyandesutter.openssh.authorizedKeys.keys = [
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIcVJF2yg72gRq6NceAnchCIgIWfC2Xx2Va2vcq1GVOm personal_mac"
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOYmDpRg/oAI5/NSJbEzOZHJqEg8YoTT2Nrv5fwLLXWi kyandesutter@e1504g"
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGxYo1mVlFzYfDSiHH4nWXYs+ZFz29vYlkRkWxQKxMFv kyandesutter@g815"
-  ];
+  users.users.kyandesutter.openssh.authorizedKeys.keys = machineKeys;
 
   # Passwordless sudo for SSH sessions from our own machines: pam_ssh_agent_auth
   # accepts sudo when the forwarded agent (the ssh mixin sets ForwardAgent only
-  # for our hosts) holds one of the keys above — same file sshd's
-  # AuthorizedKeysCommand consults. Local sudo still uses Touch ID / password.
+  # for our hosts) holds one of the machine keys. Local sudo still uses
+  # Touch ID / password. The module can't read the nix-darwin-managed
+  # authorized-keys file: its secure_filename() check walks the resolved path
+  # and rejects /nix/store (group-writable), so activation installs a real
+  # root-owned copy outside the store for it. noninteractive_auth makes
+  # `sudo -n` actually try PAM — without it sudo assumes PAM means "will
+  # prompt" and gives up before the agent module ever runs.
   security.pam.services.sudo_local.text = ''
-    auth       sufficient     ${pam_ssh_agent_auth}/libexec/pam_ssh_agent_auth.so file=/etc/ssh/nix_authorized_keys.d/%u
+    auth       sufficient     ${pam_ssh_agent_auth}/libexec/pam_ssh_agent_auth.so file=/etc/ssh/sudo_authorized_keys
   '';
   security.sudo.extraConfig = ''
     Defaults env_keep+=SSH_AUTH_SOCK
+    Defaults noninteractive_auth
   '';
 
   # Best-effort enable of Remote Login (sshd) on activation. postActivation.text
@@ -59,6 +67,10 @@ in
   # macOS TCC the call may silently no-op; the runbook has the manual Settings
   # fallback (System Settings -> General -> Sharing -> Remote Login).
   system.activationScripts.postActivation.text = ''
+    # Real root-owned copy of the machine keys for pam_ssh_agent_auth (see the
+    # sudo_local block above: it can't read through the /nix/store symlink).
+    install -m 444 -o root -g wheel ${machineKeysFile} /etc/ssh/sudo_authorized_keys
+
     /usr/sbin/systemsetup -setremotelogin on >/dev/null 2>&1 || true
 
     # mosh-server is an unsigned Nix binary, so the macOS application firewall
