@@ -22,6 +22,12 @@ That prompt can't be answered non-interactively, so the rebuild may hang or
 fail. If it does, stop and ask the owner to run that step (e.g. via `! <cmd>`)
 or to grant passwordless sudo — don't try to work around it.
 
+**Exception — the e1504g is fully remote-administrable:** it has passwordless
+wheel sudo, and the g815's on-disk key is authorized there, so from the g815
+Claude can run anything on it non-interactively — including rebuilds:
+`ssh e1504g 'cd ~/.config/nix && git pull && sudo nixos-rebuild switch --flake .#e1504g'`
+(`e1504g` = Tailscale IP in the ssh mixin; `e1504g-lan` is the LAN fallback).
+
 Safe, non-building checks you MAY run:
 - `nix-instantiate --parse <file>.nix` — syntax only.
 - `nix eval '.#nixosConfigurations.g815.config.system.stateVersion'` and
@@ -43,12 +49,19 @@ Claude can drive all four steps. Watch for the sudo caveat above on the two
 rebuilds (steps 1 and 4) and the `ssh macbook` auth on step 3 — if either blocks
 on a password, hand that step to the owner and continue once it clears.
 
+The e1504g follows the same flow but needs no owner hand-off (see the
+exception above): after pushing, pull + rebuild it over SSH in one shot.
+
 ## Overview
 
-Declarative config for two machines via one flake (flake-parts):
+Declarative config for three machines via one flake (flake-parts):
 - **`macbook`** — `aarch64-darwin`, nix-darwin + home-manager. Primary dev host.
 - **`g815`** — `x86_64-linux`, NixOS + home-manager. ASUS ROG laptop; niri +
   Dank Material Shell (DMS) desktop, NVIDIA dGPU as a power-managed peripheral.
+- **`e1504g`** — `x86_64-linux`, NixOS + home-manager. ASUS Vivobook (8 GB,
+  Intel-only); same niri + DMS desktop, none of the dGPU/asus machinery. Its
+  nix builds offload to the g815 over Tailscale (LAN fallback) and fall back
+  to local building when the g815 is unreachable.
 
 The macbook is the real development host; the g815 is used as a thin client that
 reaches the mac over SSH/MOSH and remote desktop to work remotely, rather than
