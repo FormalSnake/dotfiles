@@ -20,49 +20,9 @@
     ./mixins/fetch.nix
     ./mixins/lumen.nix
     ./mixins/nordvpn.nix
-    ./mixins/webapps.nix
     ./mixins/godot.nix
     ./mixins/obsidian.nix
     ./mixins/bambu-studio.nix
-  ];
-
-  # Standalone desktop web apps (see mixins/webapps.nix). Bare URL → auto
-  # name+favicon; attrs for overrides. Claude gets a hand-picked icon.
-  kyan.webapps.sites = [
-    {
-      url = "https://claude.ai";
-      name = "Claude";
-      icon = ./mixins/webapps-icons/claude.png;
-      # Reuse the Helium login — Claude enforces a hard device limit, so an
-      # isolated profile would burn a device slot.
-      shareProfile = true;
-    }
-    {
-      # X/Twitter — reuse the Helium login; favicon auto-fetched at activation.
-      url = "https://x.com";
-      name = "Twitter";
-      shareProfile = true;
-    }
-    {
-      # YouTube — reuse the Helium login; favicon auto-fetched at activation.
-      url = "https://youtube.com";
-      name = "YouTube";
-      shareProfile = true;
-    }
-    {
-      # Jump Desktop — reuse the Helium login; favicon auto-fetched at
-      # activation. Connection auth-creds fragment stripped from the URL.
-      url = "https://app.jumpdesktop.com/jump";
-      name = "Jump Desktop";
-      shareProfile = true;
-    }
-    {
-      # Immich (photos.kaiiserni.com) — replaces the Mimick Flatpak client.
-      # Shares the Helium login so the web app opens already authenticated.
-      url = "https://photos.kaiiserni.com";
-      name = "Photos";
-      shareProfile = true;
-    }
   ];
 
   # NixOS rebuild shortcut (linux-only, so it lives here rather than the shared
