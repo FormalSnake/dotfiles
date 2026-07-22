@@ -74,6 +74,15 @@
         ];
       };
 
+      # ASUS Vivobook E1504G over its stable Tailscale IP (works from both the
+      # g815 and the macbook; the IP sidesteps the g815's MagicDNS-hostile DNS
+      # setup — see the macbook entry above). Auth via the 1Password agent key
+      # authorized in modules/nixos/mixins/users.nix.
+      "e1504g" = {
+        HostName = "100.109.196.64";
+        User = "kyandesutter";
+      };
+
       "superserver.local" = {
         HostName = "192.168.86.2";
         Port = 22;
