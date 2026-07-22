@@ -1,4 +1,8 @@
 { config, pkgs, inputs, ... }:
+let
+  flexoki = import ./flexoki/palette.nix;
+  inherit (flexoki) base accents;
+in
 {
   # herdr — terminal workspace manager for AI coding agents.
   # Not in nixpkgs; installed straight from the upstream flake (nixpkgs follows
@@ -15,12 +19,34 @@
   xdg.configFile."herdr/config.toml".text = ''
     onboarding = false
 
-    # Use herdr's built-in "terminal" theme: it inherits the host terminal's
-    # ANSI/OSC colours rather than shipping a static palette. On the g815 that
-    # means herdr follows ghostty's DMS-derived (matugen) colours
-    # dynamically, so it needs no static Flexoki fallback of its own.
+    # Pin Flexoki Dark via [theme.custom]. The "terminal" theme reads the host
+    # terminal's palette through OSC colour queries at runtime; those don't
+    # round-trip over SSH/mosh, so remotely herdr fell back to defaults and
+    # rendered raw-ANSI harsh. Static tokens sourced from the one Flexoki
+    # palette (users/kyandesutter/mixins/flexoki/palette.nix) need no OSC, so
+    # they hold up over SSH, and Flexoki Dark's soft off-white text on a lifted
+    # b950 panel keeps contrast low. Base "catppuccin" only backstops any token
+    # this override doesn't name.
     [theme]
-    name = "terminal"
+    name = "catppuccin"
+
+    [theme.custom]
+    accent = "${accents.blue.d}"
+    panel_bg = "${base.b950}"
+    surface_dim = "${base.black}"
+    surface0 = "${base.b900}"
+    surface1 = "${base.b850}"
+    overlay0 = "${base.b700}"
+    overlay1 = "${base.b600}"
+    text = "${base.b200}"
+    subtext0 = "${base.b500}"
+    mauve = "${accents.purple.d}"
+    green = "${accents.green.d}"
+    yellow = "${accents.yellow.d}"
+    red = "${accents.red.d}"
+    blue = "${accents.blue.d}"
+    teal = "${accents.cyan.d}"
+    peach = "${accents.orange.d}"
 
     [ui.toast]
     delivery = "system"

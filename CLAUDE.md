@@ -123,7 +123,11 @@ it — static Flexoki dark on Linux, appearance-following light/dark on macOS
 (where Flexoki is the *primary* scheme, not a fallback: Ghostty uses its built-in
 Flexoki Light/Dark, bat uses `auto:system`, fish re-selects by appearance). SDDM
 is independent (the `sddm-astronaut` pixel_sakura preset's own colours); Herdr
-uses its built-in `terminal` theme, so it follows ghostty dynamically. When
+pins Flexoki Dark via `[theme.custom]` tokens sourced from `palette.nix`
+(`mixins/herdr.nix`) — it used to follow ghostty via its `terminal` theme, but
+that reads the terminal palette over OSC, which doesn't survive SSH/mosh (herdr
+runs on the macbook, reached over SSH), so the static tokens keep it correct and
+low-contrast remotely. When
 adding a themed surface, prefer a matugen user template + a Flexoki fallback
 derived from `palette.nix` (see the `niri-border` template in `mixins/dms.nix`
 for the render + seeded-fallback pattern).
