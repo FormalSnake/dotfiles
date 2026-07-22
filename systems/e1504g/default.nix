@@ -104,12 +104,6 @@
   # two ucsi-source-psy power_supply entries, which nothing here reads.
   boot.blacklistedKernelModules = [ "ucsi_acpi" ];
 
-  # Battery longevity: cap charge at 80% via the asus-wmi sysfs knob (no asusd
-  # needed — kyan.asus stays off, see above).
-  services.udev.extraRules = ''
-    ACTION=="add", SUBSYSTEM=="power_supply", KERNEL=="BAT0", ATTR{charge_control_end_threshold}="80"
-  '';
-
   # 8 GB RAM (vs the g815's 32): halve the overflow swapfile to 2× RAM so a
   # spike has real spill room on a small machine (zram in mixins/boot.nix
   # stays the first, RAM-speed tier).
