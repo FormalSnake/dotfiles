@@ -21,6 +21,7 @@
     ./mixins/fastfetch.nix
     ./mixins/herdr.nix
     ./mixins/fast.nix
+    ./mixins/spice-edit.nix
   ];
 
   home = {
