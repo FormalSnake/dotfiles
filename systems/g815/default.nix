@@ -161,6 +161,15 @@
   # iPhone's screen in a window; share that window in meetings.
   kyan.airplay.enable = true;
 
+  # Remote-builder key for the e1504g (nix.buildMachines in
+  # systems/e1504g/default.nix): its root connects here as kyandesutter over
+  # Tailscale to run builds. Force-commanded to `nix-daemon --stdio` (all
+  # ssh-ng needs) and `restrict`ed, so the key can build but never open a
+  # shell, forward ports, or run anything else.
+  users.users.kyandesutter.openssh.authorizedKeys.keys = [
+    ''command="/run/current-system/sw/bin/nix-daemon --stdio",restrict ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE68KT/5PWD5x1vVv2GiXcT2KlDdnl1WPH1JTEPnGpZO nix-builder@e1504g''
+  ];
+
   home-manager.users.kyandesutter = {
     imports = [
       self.homeModules.kyandesutter

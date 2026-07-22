@@ -1,7 +1,7 @@
 { inputs, self, ... }:
 {
   imports = [
-    # PLACEHOLDER until the real one is generated at install — see the file.
+    # Generated on the machine with `nixos-generate-config` (2026-07-21).
     ./hardware-configuration.nix
 
     # nixos-hardware: no profile exists for the E1504G chassis, so compose
@@ -28,6 +28,41 @@
   # This machine is NixOS-only: no Windows dual-boot, no Steam, no Flatpak
   # (enable kyan.flatpak if a Flatpak-only app is ever needed).
 
+  # Offload builds to the g815 (Core Ultra 9 275HX, 32 GB) — this CPU is far
+  # slower and the first local build of the desktop closure took all night.
+  # ssh-ng as root using the dedicated /root/.ssh/nix-builder key, whose public
+  # half is force-commanded to `nix-daemon --stdio` on the g815
+  # (systems/g815/default.nix). Reached via the g815's stable Tailscale IP —
+  # same /etc/hosts-over-MagicDNS reasoning as the macbook pin in
+  # modules/nixos/mixins/networking.nix, minus the need for a name at all.
+  # When the g815 is off/asleep the connection fails and nix falls back to
+  # building locally, so this degrades gracefully.
+  nix.distributedBuilds = true;
+  nix.settings.builders-use-substitutes = true; # g815 pulls caches itself
+  nix.buildMachines = [
+    {
+      hostName = "100.114.32.78";
+      system = "x86_64-linux";
+      protocol = "ssh-ng";
+      sshUser = "kyandesutter";
+      sshKey = "/root/.ssh/nix-builder";
+      maxJobs = 8;
+      speedFactor = 4;
+      supportedFeatures = [
+        "big-parallel"
+        "kvm"
+        "nixos-test"
+        "benchmark"
+      ];
+    }
+  ];
+  # Pin the g815's host key so root's first builder connection doesn't stall
+  # on an unverifiable host.
+  programs.ssh.knownHosts.g815 = {
+    hostNames = [ "100.114.32.78" ];
+    publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKgCmAa/QcQhtHNoES8iHx0uYAT+Ze+4lNuHuJ2Rb7Ku";
+  };
+
   # Less RAM and a smaller SSD than the 32 GB g815: halve the overflow
   # swapfile (zram in mixins/boot.nix stays the first tier). Revisit once the
   # machine's actual RAM is known.
@@ -46,7 +81,6 @@
     ];
   };
 
-  # Set once at install and never change. Confirm this matches the release
-  # actually installed from.
+  # Set once at install and never change.
   system.stateVersion = "26.11";
 }
