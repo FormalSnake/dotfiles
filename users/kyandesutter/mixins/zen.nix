@@ -172,6 +172,12 @@ in
           id = "d5a017b0-2212-4298-83c0-f2e0ec65149a";
           position = 1000;
           icon = "chrome://browser/skin/zen-icons/selectable/star.svg";
+          # One GitHub account across all three orgs — route every github URL
+          # here so the login lives in a single (default) cookie jar instead of
+          # three per-container sessions.
+          routes."GitHub" = {
+            reference = "github.com"; # matchType "contains"
+          };
         };
         "CanaryCoders" = {
           id = "1bc90784-e304-4f00-a7e3-f9c5fed586b3";
