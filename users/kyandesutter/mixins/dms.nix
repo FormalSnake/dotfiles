@@ -122,8 +122,10 @@ let
       cornerRadius = 0;
       showWorkspaceName = true;
       showOccupiedWorkspacesOnly = true;
-      # Weather follows real location via IP geolocation instead of the New York
-      # default (weatherCoordinates lives in session.json, which we don't seed).
+      # Weather follows real location: DMS's core resolves it via the system
+      # geoclue2 service (mixins/geolocation.nix, WiFi positioning via beaconDB)
+      # and only falls back to IP geolocation if geoclue is absent.
+      # (weatherCoordinates lives in session.json, which we don't seed.)
       useAutoLocation = true;
       barConfigs = [
         {

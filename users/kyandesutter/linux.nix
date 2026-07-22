@@ -15,6 +15,7 @@
     ./mixins/wallpaper-engine.nix
     ./mixins/beeper.nix
     ./mixins/helium.nix
+    ./mixins/zen.nix
     ./mixins/spicetify.nix
     ./mixins/fetch.nix
     ./mixins/lumen.nix
