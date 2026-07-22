@@ -122,6 +122,9 @@ let
       cornerRadius = 0;
       showWorkspaceName = true;
       showOccupiedWorkspacesOnly = true;
+      # Weather follows real location via IP geolocation instead of the New York
+      # default (weatherCoordinates lives in session.json, which we don't seed).
+      useAutoLocation = true;
       barConfigs = [
         {
           id = "default";
@@ -132,10 +135,10 @@ let
           showOnLastDisplay = true;
           leftWidgets = [ "launcherButton" "workspaceSwitcher" "focusedWindow" ];
           centerWidgets = [ "music" "clock" "weather" ];
-          rightWidgets = [ "systemTray" "cpuUsage" ]
+          rightWidgets = [ "systemTray" "hiddenBar" "cpuUsage" ]
             ++ lib.optional hasNvidia "nvidiaGpuMonitor"
             ++ [ "memUsage" "claudeCodeUsage" "githubNotifier" "notificationButton" "battery" "controlCenterButton" ];
-          spacing = 4;
+          spacing = 0;
           innerPadding = 4;
           bottomGap = 0;
           transparency = 1.0;
@@ -401,6 +404,11 @@ in
       # claudeCodeUsage: token usage / rate limits / daily charts for the Claude
       # Code subscription. Parses ~/.claude logs with jq (added to home.packages).
       claudeCodeUsage.enable = true;
+      # hiddenBar: macOS-Hidden-Bar-style toggle pill that collapses widgets in
+      # its section. Seeded right of systemTray in rightWidgets (above) so the
+      # tray sits in its manageable zone; the plugin_settings seed below pins it
+      # to whitelist mode targeting "systemTray", so a click hides only the tray.
+      hiddenBar.enable = true;
 
       # Scriptable custom bar buttons (Avenge Media, first-party) — the
       # replacement for noctalia's old custom "Windows" power-menu button, which
@@ -425,6 +433,12 @@ in
   # active mode, so each output is rewritten on every mode flip / wallpaper
   # change DMS runs matugen for. post_hook strings are themselves rendered
   # through the engine (colour tokens interpolated) before running.
+  # Profile picture: DMS reads the avatar from AccountsService
+  # (PortalService.getUserIconFile → HeaderPane), and AccountsService falls back
+  # to ~/.face when no icon is set — so seeding it here themes the DMS control
+  # centre and the SDDM greeter from one source.
+  home.file.".face".source = ../assets/profile.jpeg;
+
   xdg.configFile = {
     # DMS custom theme (flexokiTheme above): a plain declarative file, unlike
     # settings.json/session.json below — DMS only ever reads it, never
@@ -608,6 +622,11 @@ in
         "claudeCodeUsage", "dankActions"
       ) as $id
         (.; if has($id) then . else .[$id] = { enabled: true } end)
+    # hiddenBar needs more than the enabled flag: whitelist mode pinned to the
+    # system tray so the toggle hides only that widget (see plugins.hiddenBar).
+    | if has("hiddenBar") then . else
+        .hiddenBar = { enabled: true, widgetSelectionMode: "whitelist", widgetWhitelist: ["systemTray"] }
+      end
     ' "$pf" > "$tmp"
     if ${pkgs.jq}/bin/jq -e --slurpfile a "$tmp" '. == $a[0]' "$pf" >/dev/null; then
       rm -f "$tmp"

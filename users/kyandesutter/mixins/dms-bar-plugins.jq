@@ -11,6 +11,7 @@
 # stale id would render as an empty/broken widget once the source is gone).
 #
 # Placement of the kept plugin widgets (matching settingsSeed.rightWidgets):
+#   hiddenBar             after  systemTray        (insert-if-absent)
 #   nvidiaGpuMonitor      after  cpuUsage          (insert-if-absent)
 #   claudeCodeUsage       after  memUsage          (repositioned)
 #   githubNotifier        before notificationButton (repositioned)
@@ -41,7 +42,9 @@ def insertBefore($arr; $anchor; $new):
   | .centerWidgets = ((.centerWidgets // []) | without($remove) | without($reposition))
   | .rightWidgets  = ((.rightWidgets  // []) | without($remove) | without($reposition))
   | (allWidgets) as $have
+  | (["hiddenBar"] - $have) as $hidden
   | (["nvidiaGpuMonitor"] - $have) as $gpu
+  | .rightWidgets = insertAfter(.rightWidgets; "systemTray"; $hidden)
   | .rightWidgets = insertAfter(.rightWidgets; "cpuUsage"; $gpu)
   | .rightWidgets = insertAfter(.rightWidgets; "memUsage"; ["claudeCodeUsage"])
   | .rightWidgets = insertBefore(.rightWidgets; "notificationButton"; ["githubNotifier"])
