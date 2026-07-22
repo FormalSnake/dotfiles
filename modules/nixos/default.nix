@@ -30,7 +30,7 @@
       ./mixins/phone-integration.nix
       ./mixins/airplay.nix
       ./mixins/flatpak.nix
-      ./mixins/nordvpn.nix
+#      ./mixins/nordvpn.nix
       ./mixins/onepassword.nix
       ./mixins/geolocation.nix
       ./profiles
