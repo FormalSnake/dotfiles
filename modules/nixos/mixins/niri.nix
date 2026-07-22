@@ -176,6 +176,12 @@ in
     # battery detection in the bar flaky.
     services.upower.enable = true;
 
+    # AccountsService: DMS reads the user avatar through it
+    # (PortalService.getUserIconFile → HeaderPane), and it's what falls back to
+    # ~/.face (seeded in users/kyandesutter/mixins/dms.nix). Without the daemon
+    # that whole path is dead and the profile picture never loads.
+    services.accounts-daemon.enable = true;
+
     # Fonts DMS/niri expect (Material Symbols, a Nerd Font, emoji).
     # System UI font is Geist; monospace is GeistMono patched with Nerd Font
     # glyphs (terminal mono + powerline icons). The rest are general coverage

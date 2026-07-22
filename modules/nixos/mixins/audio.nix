@@ -1,6 +1,12 @@
+{ pkgs, ... }:
 {
   # PipeWire audio stack (replaces PulseAudio).
   security.rtkit.enable = true;
+
+  # pactl client: DMS shells out to it for codec/output handling. PipeWire ships
+  # the pulse *server* (pulse.enable) but not the CLI client, and the user
+  # service PATH sees the system profile, not the home one — so install it here.
+  environment.systemPackages = [ pkgs.pulseaudio ];
 
   services.pipewire = {
     enable = true;
