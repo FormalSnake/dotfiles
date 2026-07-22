@@ -133,7 +133,7 @@ let
           position = 0;
           screenPreferences = [ "all" ];
           showOnLastDisplay = true;
-          leftWidgets = [ "launcherButton" "workspaceSwitcher" "focusedWindow" ];
+          leftWidgets = [ "launcherButton" "workspaceSwitcher" ];
           centerWidgets = [ "music" "clock" "weather" ];
           rightWidgets = [ "systemTray" "hiddenBar" "cpuUsage" ]
             ++ lib.optional hasNvidia "nvidiaGpuMonitor"

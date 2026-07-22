@@ -6,9 +6,10 @@
 # duplicates and never fights a widget the user has since moved.
 #
 # Removals ARE unconditional — these ids are stripped from every bar on every
-# switch: clipboard by preference, and discordVoice/displayManager/dgpuStatus/
-# gameControllerBattery/asusControlCenter because their plugins are disabled (a
-# stale id would render as an empty/broken widget once the source is gone).
+# switch: focusedWindow and clipboard by preference, and discordVoice/
+# displayManager/dgpuStatus/gameControllerBattery/asusControlCenter because their
+# plugins are disabled (a stale id would render as an empty/broken widget once
+# the source is gone).
 #
 # Placement of the kept plugin widgets (matching settingsSeed.rightWidgets):
 #   hiddenBar             after  systemTray        (insert-if-absent)
@@ -35,7 +36,7 @@ def insertBefore($arr; $anchor; $new):
   | if $i == null or ($new | length) == 0 then $arr
     else $arr[0:$i] + $new + $arr[$i:] end;
 
-(["discordVoice", "displayManager", "dgpuStatus", "gameControllerBattery", "asusControlCenter", "clipboard"]) as $remove
+(["focusedWindow", "discordVoice", "displayManager", "dgpuStatus", "gameControllerBattery", "asusControlCenter", "clipboard"]) as $remove
 | (["githubNotifier", "claudeCodeUsage"]) as $reposition
 | .barConfigs |= map(
     .leftWidgets   = ((.leftWidgets   // []) | without($remove) | without($reposition))
