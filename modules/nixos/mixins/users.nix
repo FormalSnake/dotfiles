@@ -8,6 +8,14 @@
   # mkDefault so a host driven remotely (the e1504g) can turn it off.
   security.sudo.wheelNeedsPassword = lib.mkDefault true;
 
+  # Passwordless sudo for SSH sessions coming from our own machines:
+  # pam_ssh_agent_auth accepts sudo when the forwarded agent holds one of the
+  # keys authorized below (the ssh mixin sets ForwardAgent only for our hosts).
+  # Local/console sudo still asks for the password. The module reads
+  # /etc/ssh/authorized_keys.d/%u, which NixOS fills from authorizedKeys.keys.
+  security.pam.sshAgentAuth.enable = true;
+  security.pam.services.sudo.sshAgentAuth = true;
+
   users.users.kyandesutter = {
     isNormalUser = true;
     description = "Kyan";
@@ -20,6 +28,7 @@
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIcVJF2yg72gRq6NceAnchCIgIWfC2Xx2Va2vcq1GVOm personal_mac"
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGxYo1mVlFzYfDSiHH4nWXYs+ZFz29vYlkRkWxQKxMFv kyandesutter@g815"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOYmDpRg/oAI5/NSJbEzOZHJqEg8YoTT2Nrv5fwLLXWi kyandesutter@e1504g"
     ];
     extraGroups = [
       "wheel" # sudo

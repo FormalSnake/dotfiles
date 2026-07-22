@@ -1,4 +1,22 @@
 { pkgs, ... }:
+let
+  # nixpkgs marks pam_ssh_agent_auth linux-only, but it builds against macOS's
+  # OpenPAM with two fixes: -std=gnu99 (modern autoconf picks gnu23, which
+  # rejects the K&R definitions in its openbsd-compat code AND breaks the
+  # configure function probes, so half of libc gets "replaced") and
+  # -D_FORTIFY_SOURCE=0 (the Apple SDK's fortify macros collide with those
+  # replacements). NIX_CFLAGS_COMPILE lands after the makefile's flags, so the
+  # -std override wins.
+  pam_ssh_agent_auth =
+    (pkgs.pam_ssh_agent_auth.override { pam = pkgs.openpam; }).overrideAttrs (o: {
+      meta = o.meta // { platforms = pkgs.lib.platforms.unix; };
+      hardeningDisable = [ "fortify" "fortify3" ];
+      env = (o.env or { }) // {
+        NIX_CFLAGS_COMPILE =
+          (o.env.NIX_CFLAGS_COMPILE or "") + " -D_FORTIFY_SOURCE=0 -std=gnu99";
+      };
+    });
+in
 {
   # SSH server hardening for the remote-work-server role. macOS's sshd reads
   # /etc/ssh/sshd_config.d/* (the Include sits near the top of the stock
@@ -22,7 +40,19 @@
   users.users.kyandesutter.openssh.authorizedKeys.keys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIcVJF2yg72gRq6NceAnchCIgIWfC2Xx2Va2vcq1GVOm personal_mac"
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOYmDpRg/oAI5/NSJbEzOZHJqEg8YoTT2Nrv5fwLLXWi kyandesutter@e1504g"
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGxYo1mVlFzYfDSiHH4nWXYs+ZFz29vYlkRkWxQKxMFv kyandesutter@g815"
   ];
+
+  # Passwordless sudo for SSH sessions from our own machines: pam_ssh_agent_auth
+  # accepts sudo when the forwarded agent (the ssh mixin sets ForwardAgent only
+  # for our hosts) holds one of the keys above — same file sshd's
+  # AuthorizedKeysCommand consults. Local sudo still uses Touch ID / password.
+  security.pam.services.sudo_local.text = ''
+    auth       sufficient     ${pam_ssh_agent_auth}/libexec/pam_ssh_agent_auth.so file=/etc/ssh/nix_authorized_keys.d/%u
+  '';
+  security.sudo.extraConfig = ''
+    Defaults env_keep+=SSH_AUTH_SOCK
+  '';
 
   # Best-effort enable of Remote Login (sshd) on activation. postActivation.text
   # is type `lines`, so this concatenates with any other contributor. Under
