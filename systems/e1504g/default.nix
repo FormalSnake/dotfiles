@@ -94,6 +94,16 @@
   services.power-profiles-daemon.enable = true;
   services.thermald.enable = true;
 
+  # The ASUS firmware's UCSI implementation can't answer GET_CABLE_PROPERTY:
+  # with a USB-C charger attached, ucsi_acpi logs
+  #   ucsi_acpi USBC000:00: GET_CABLE_PROPERTY failed (-22)
+  # at KERN_ERR every ~2.6 s — flooding the journal and every TTY console.
+  # The driver is purely informational on this machine (PD negotiation happens
+  # in the EC; AC/charging state comes from the independent ACPI AC0 supply,
+  # battery from ACPI BAT0), so drop it. Costs only /sys/class/typec and the
+  # two ucsi-source-psy power_supply entries, which nothing here reads.
+  boot.blacklistedKernelModules = [ "ucsi_acpi" ];
+
   # Battery longevity: cap charge at 80% via the asus-wmi sysfs knob (no asusd
   # needed — kyan.asus stays off, see above).
   services.udev.extraRules = ''
