@@ -160,10 +160,10 @@ in
   };
 
   # LocalSend receiver (AirDrop-style file/link sharing). Kept running so files
-  # can arrive without manually opening the app. It opens a window at launch;
-  # enable "launch minimized / minimize to tray" in-app to suppress that.
-  # System-level programs.localsend.enable provides the binary (`localsend_app`)
-  # + firewall port.
+  # can arrive without manually opening the app. --hidden starts it in the tray
+  # instead of opening its window (matters on every rebuild that restarts the
+  # unit). System-level programs.localsend.enable provides the binary
+  # (`localsend_app`) + firewall port.
   systemd.user.services.localsend = {
     Unit = {
       Description = "LocalSend (file sharing receiver)";
@@ -174,7 +174,7 @@ in
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {
       Type = "simple";
-      ExecStart = loginExec "localsend_app";
+      ExecStart = loginExec "localsend_app --hidden";
     };
   };
 
