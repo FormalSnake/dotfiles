@@ -170,6 +170,11 @@
     ''command="/run/current-system/sw/bin/nix-daemon --stdio",restrict ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE68KT/5PWD5x1vVv2GiXcT2KlDdnl1WPH1JTEPnGpZO nix-builder@e1504g''
   ];
 
+  # Let the e1504g reach the builder over the home LAN too (its buildMachines
+  # lists 192.168.86.95 as the fallback when tailscale is down); sshd is
+  # otherwise only reachable via the trusted tailscale0 interface.
+  services.openssh.openFirewall = true;
+
   home-manager.users.kyandesutter = {
     imports = [
       self.homeModules.kyandesutter

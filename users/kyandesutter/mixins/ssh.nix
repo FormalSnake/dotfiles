@@ -83,6 +83,13 @@
         User = "kyandesutter";
       };
 
+      # Home-LAN fallback for when tailscale is down on either end (assumes the
+      # router keeps handing it the same lease, like the entries below).
+      "e1504g-lan" = {
+        HostName = "192.168.86.116";
+        User = "kyandesutter";
+      };
+
       "superserver.local" = {
         HostName = "192.168.86.2";
         Port = 22;

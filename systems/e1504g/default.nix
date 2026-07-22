@@ -39,29 +39,41 @@
   # building locally, so this degrades gracefully.
   nix.distributedBuilds = true;
   nix.settings.builders-use-substitutes = true; # g815 pulls caches itself
-  nix.buildMachines = [
-    {
-      hostName = "100.114.32.78";
-      system = "x86_64-linux";
-      protocol = "ssh-ng";
-      sshUser = "kyandesutter";
-      sshKey = "/root/.ssh/nix-builder";
-      maxJobs = 8;
-      speedFactor = 4;
-      supportedFeatures = [
-        "big-parallel"
-        "kvm"
-        "nixos-test"
-        "benchmark"
-      ];
-    }
-  ];
+  nix.buildMachines =
+    let
+      g815 = addr: {
+        hostName = addr;
+        system = "x86_64-linux";
+        protocol = "ssh-ng";
+        sshUser = "kyandesutter";
+        sshKey = "/root/.ssh/nix-builder";
+        maxJobs = 8;
+        speedFactor = 4;
+        supportedFeatures = [
+          "big-parallel"
+          "kvm"
+          "nixos-test"
+          "benchmark"
+        ];
+      };
+    in
+    [
+      (g815 "100.114.32.78") # Tailscale (works away from home)
+      (g815 "192.168.86.95") # home-LAN fallback when tailscale is down
+    ];
   # Pin the g815's host key so root's first builder connection doesn't stall
   # on an unverifiable host.
   programs.ssh.knownHosts.g815 = {
-    hostNames = [ "100.114.32.78" ];
+    hostNames = [
+      "100.114.32.78"
+      "192.168.86.95"
+    ];
     publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKgCmAa/QcQhtHNoES8iHx0uYAT+Ze+4lNuHuJ2Rb7Ku";
   };
+
+  # Reachable over the home LAN even when tailscale is down (the shared
+  # agenix mixin only opens sshd on tailscale0 via trustedInterfaces).
+  services.openssh.openFirewall = true;
 
   # Less RAM and a smaller SSD than the 32 GB g815: halve the overflow
   # swapfile (zram in mixins/boot.nix stays the first tier). Revisit once the
