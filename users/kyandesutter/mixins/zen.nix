@@ -1,6 +1,12 @@
-{ inputs, config, pkgs, lib, ... }:
+{ inputs, config, osConfig, pkgs, lib, ... }:
 let
   flexoki = import ./flexoki/palette.nix;
+
+  # Profile takeover guard (see home.packages below). The peer is the other
+  # Linux laptop in the syncthing mesh; the mac never runs Zen.
+  host = osConfig.networking.hostName;
+  peer = if host == "g815" then "e1504g" else "g815";
+  myDeviceId = osConfig.services.syncthing.settings.devices.${host}.id or "";
 
   # zen-wabi (github.com/parazeeknova/zen-wabi, vendored in ../zen-wabi/):
   # matugen-driven live theming for Zen. The CSS templates carry literal
@@ -221,6 +227,90 @@ in
     "${profileChrome}/JS/Matugen/MatugenParent.sys.mjs".source = ../zen-wabi/Matugen/MatugenParent.sys.mjs;
   };
 
+  # Takeover guard: the profile live-syncs between the two laptops
+  # (mixins/syncthing.nix) under a one-browser-at-a-time model, so launching
+  # here must first cleanly quit the peer's instance and let its final state
+  # replicate before Zen opens the databases. The guard shadows the real
+  # zen-beta via hiPrio (the desktop entry, Mod+B and the CLI all resolve
+  # zen-beta through the profile bin), so every launch path passes through it.
+  # Every failure mode — peer off, ssh broken, syncthing REST down — degrades
+  # to launching immediately; the guard may never strand the browser.
+  #
+  # Fast path first: if Zen already runs locally, this invocation is just a
+  # new-window request (Firefox remoting) and the peer was already dealt with
+  # when the running instance started — exec straight through, no ssh probe.
+  # '.zen-beta-wrapp' is the 15-char comm of the main process only; content
+  # processes rename themselves (Isolated Web Co etc.), so pgrep/pkill on it
+  # never touch children directly.
+  home.packages = [
+    (lib.hiPrio (pkgs.writeShellScriptBin "zen-beta" ''
+      real=${config.programs.zen-browser.package}/bin/zen-beta
+      export PATH=${
+        lib.makeBinPath [ pkgs.procps pkgs.coreutils pkgs.curl pkgs.jq pkgs.gnused pkgs.openssh ]
+      }:$PATH
+
+      if pgrep -x '.zen-beta-wrapp' >/dev/null 2>&1; then
+        exec "$real" "$@"
+      fi
+
+      # Remote side runs under /bin/sh (the login shell is fish, not POSIX)
+      # with absolute tool paths (non-interactive PATH is minimal). It quits
+      # the peer's Zen, waits for it to exit, forces a profile rescan and
+      # waits until the peer reports this device 100% in sync — the
+      # authoritative "everything I had has reached you" signal. Prints
+      # "took" iff it actually quit something, so an idle/offline peer costs
+      # only the ssh probe.
+      took=$(ssh -o BatchMode=yes -o ConnectTimeout=2 ${peer} /bin/sh -s ${myDeviceId} <<'REMOTE' 2>/dev/null
+      myid="$1"
+      P=/run/current-system/sw/bin
+      $P/pgrep -x '.zen-beta-wrapp' >/dev/null 2>&1 || exit 0
+      $P/pkill -TERM -x '.zen-beta-wrapp' 2>/dev/null || true
+      i=0
+      while $P/pgrep -x '.zen-beta-wrapp' >/dev/null 2>&1 && [ "$i" -lt 60 ]; do
+        $P/sleep 0.25; i=$((i+1))
+      done
+      echo took
+      key=$($P/sed -n 's/.*<apikey>\(.*\)<\/apikey>.*/\1/p' "$HOME/.config/syncthing/config.xml" | $P/head -n1)
+      [ -n "$key" ] && [ -n "$myid" ] || exit 0
+      $P/curl -s -m 5 -X POST -H "X-API-Key: $key" \
+        "http://127.0.0.1:8384/rest/db/scan?folder=zen-profile" >/dev/null 2>&1 || exit 0
+      i=0
+      while [ "$i" -lt 40 ]; do
+        c=$($P/curl -s -m 2 -H "X-API-Key: $key" \
+          "http://127.0.0.1:8384/rest/db/completion?folder=zen-profile&device=$myid" \
+          | $P/grep -o '"completion"[: ]*[0-9.]*' | $P/grep -o '[0-9.]*$')
+        case "$c" in 100|100.0*) break ;; esac
+        $P/sleep 0.5; i=$((i+1))
+      done
+      exit 0
+      REMOTE
+      ) || took=""
+
+      # After a takeover, settle locally too: the folder must have nothing
+      # left to pull for two consecutive polls (right after the peer's rescan
+      # a single 0 can be a not-yet-announced index). Capped, then launch
+      # regardless — worst case equals today's manual flow.
+      if [ -n "$took" ]; then
+        key=$(sed -n 's/.*<apikey>\(.*\)<\/apikey>.*/\1/p' "$HOME/.config/syncthing/config.xml" | head -n1)
+        if [ -n "$key" ]; then
+          ok=0 i=0
+          while [ "$i" -lt 20 ]; do
+            if curl -s -m 2 -H "X-API-Key: $key" \
+              "http://127.0.0.1:8384/rest/db/status?folder=zen-profile" \
+              | jq -e '.needTotalItems == 0 and .state == "idle"' >/dev/null 2>&1; then
+              ok=$((ok+1))
+              [ "$ok" -ge 2 ] && break
+            else
+              ok=0
+            fi
+            sleep 0.5; i=$((i+1))
+          done
+        fi
+      fi
+      exec "$real" "$@"
+    ''))
+  ];
+
   # mods.json is runtime-mutable (Sine and the flake's sine fragment both
   # rewrite it), so the bridge's mod entry is injected idempotently via the
   # module's activation bus, after the flake's sine fragment (priority 100)
@@ -228,8 +318,10 @@ in
   # sine.allow-unsafe-js pref above.
   programs.zen-browser.activationFragments.default = [
     # Syncthing ignore rules for the zen-profile folder (mixins/syncthing.nix,
-    # NixOS-side): keep locks, crash/telemetry state and — the point — all of
-    # 1Password's per-machine storage out of sync. 1Password's storage dir is
+    # NixOS-side): keep locks, crash/telemetry state, the matugen palette
+    # (chrome/matugen-vars.json is per-device — each machine's colours follow
+    # its own wallpaper) and — the point — all of 1Password's per-machine
+    # storage out of sync. 1Password's storage dir is
     # keyed by the profile's internal extension uuid (prefs.js,
     # extensions.webextensions.uuids); that uuid is actually stable mesh-wide
     # (prefs.js itself syncs), so the shared uuid is baked in as the default
@@ -237,9 +329,11 @@ in
     # fragment only overrides it when it yields a non-empty value. The `?` glob stands in for
     # the literal braces in the addon id: Syncthing's pattern language treats
     # braces specially, `?` matches any single character.
+    # requiresLock = false: this fragment only reads prefs.js and writes
+    # .stignore (syncthing's file, not Zen's), both safe while Zen runs.
     {
       priority = 15;
-      requiresLock = true;
+      requiresLock = false;
       skipSubject = "syncthing stignore";
       text = ''
         profileDir="${config.programs.zen-browser.profilesPath}/default"
@@ -260,6 +354,7 @@ in
           echo "(?d)/minidumps"
           echo "/datareporting"
           echo "/saved-telemetry-pings"
+          echo "/chrome/matugen-vars.json"
           echo "/browser-extension-data/?d634138d-c276-4fc8-924b-40a0ea21d284?"
           if [ -n "$onePassUuid" ]; then
             echo "/storage/default/moz-extension+++$onePassUuid*"
