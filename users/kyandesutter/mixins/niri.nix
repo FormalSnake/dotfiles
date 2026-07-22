@@ -459,6 +459,10 @@ in
         # niri spawns argv directly, no shell).
         "Mod+Space".action.spawn = [ dmsBin "ipc" "call" "spotlight" "toggle" ];
         "Mod+Return".action.spawn = "ghostty";
+        # Reclaim the laptop's Copilot key: it launches Claude, not Copilot.
+        # Microsoft's spec (which ASUS honours) has the key emit Meta+Shift+F23;
+        # this drops a fresh local ghostty into `claude`, cwd'd at the nix config.
+        "Mod+Shift+F23".action.spawn = [ "ghostty" "--working-directory=${config.home.homeDirectory}/.config/nix" "-e" "claude" ];
         "Mod+Q".action.close-window = [ ];
         "Mod+Shift+F".action.fullscreen-window = [ ];
         "Mod+V".action.toggle-window-floating = [ ];
