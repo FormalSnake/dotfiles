@@ -81,9 +81,11 @@ sbar.bar({
   corner_radius = 0,
   y_offset = 0,
   sticky = true,
-  -- Draw above the auto-hidden macOS menu bar: without this, hovering the top
-  -- edge reveals the menu bar over the bar and swallows clicks on the pills.
-  topmost = true,
+  -- Above all windows, but BELOW the auto-hidden macOS menu bar: lingering at
+  -- the top edge reveals the menu bar in front of the pills (and takes their
+  -- clicks while shown — deliberate, that's how the menu bar stays reachable);
+  -- quick pill clicks land before macOS's reveal delay.
+  topmost = "window",
   shadow = false,
   font_smoothing = true,
 })
