@@ -26,7 +26,8 @@
   kyan.profiles.desktop.enable = true;
 
   # This machine is NixOS-only: no Windows dual-boot, no Steam, no Flatpak
-  # (enable kyan.flatpak if a Flatpak-only app is ever needed).
+  # (enable kyan.flatpak if a Flatpak-only app is ever needed), no NordVPN
+  # (kyan.nordvpn — the account login lives on the g815).
 
   # Offload builds to the g815 (Core Ultra 9 275HX, 32 GB) — this CPU is far
   # slower and the first local build of the desktop closure took all night.
@@ -74,6 +75,11 @@
   # Reachable over the home LAN even when tailscale is down (the shared
   # agenix mixin only opens sshd on tailscale0 via trustedInterfaces).
   services.openssh.openFirewall = true;
+
+  # This machine is administered remotely (Claude on the g815 drives it over
+  # SSH, where a sudo password prompt can't be answered). Root is still gated
+  # on holding an authorized SSH key or the local login password.
+  security.sudo.wheelNeedsPassword = false;
 
   # Less RAM and a smaller SSD than the 32 GB g815: halve the overflow
   # swapfile (zram in mixins/boot.nix stays the first tier). Revisit once the
