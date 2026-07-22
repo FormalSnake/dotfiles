@@ -149,6 +149,10 @@ let
         local id="" conns=() conn="" outputs=""
         [[ -r "$selfile" ]] && id="$(cat "$selfile" 2>/dev/null || true)"
         [[ -n "$id" ]] || return 0
+        # A synced we-<id>.png still can select a scene this machine doesn't
+        # have installed (no Steam on the e1504g) — the still stays the
+        # wallpaper, only the live engine is skipped.
+        [[ -d "${workshop}/$id" ]] || return 0
         outputs="$(niri msg --json outputs || true)"
         [[ -n "$outputs" ]] || return 0
         FPS_AUTO="$(jq -r '[.[] | select(.current_mode != null) | .modes[.current_mode].refresh_rate] | (max // 60000) / 1000 | round' <<<"$outputs")"
