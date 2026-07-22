@@ -7,9 +7,11 @@ in
     lib.mkEnableOption "declarative Flatpak management (nix-flatpak)";
 
   # Base Flatpak service: turns on nix-flatpak, wires the Flathub remote, and
-  # refreshes installed Flatpaks on a daily timer. Individual apps add themselves
-  # to services.flatpak.packages and pull this in via kyan.flatpak.enable (e.g.
-  # ./sober.nix). The nix-flatpak NixOS module is imported in ../default.nix.
+  # refreshes installed Flatpaks on a daily timer. Enabled for every desktop
+  # host by ../profiles/desktop.nix; apps add themselves to
+  # services.flatpak.packages (system) or ride on it as user Flatpaks (Spotify,
+  # users/kyandesutter/mixins/spicetify.nix). The nix-flatpak NixOS module is
+  # imported in ../default.nix.
   config = lib.mkIf cfg.enable {
     services.flatpak = {
       enable = true;

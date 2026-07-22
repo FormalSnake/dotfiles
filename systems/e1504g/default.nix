@@ -29,9 +29,9 @@
   # (modules/nixos/mixins/syncthing.nix; spec 2026-07-22).
   kyan.syncthing.enable = true;
 
-  # This machine is NixOS-only: no Windows dual-boot, no Steam, no Flatpak
-  # (enable kyan.flatpak if a Flatpak-only app is ever needed), no NordVPN
-  # (kyan.nordvpn — the account login lives on the g815).
+  # This machine is NixOS-only: no Windows dual-boot, no Steam, no NordVPN
+  # (kyan.nordvpn — the account login lives on the g815). Flatpak comes in
+  # via the desktop profile (shared base, carries Spotify).
 
   # Offload builds to the g815 (Core Ultra 9 275HX, 32 GB) — this CPU is far
   # slower and the first local build of the desktop closure took all night.

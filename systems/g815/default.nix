@@ -148,11 +148,6 @@
   # (gaming lives on Windows; see mixins/steam.nix).
   kyan.steam.enable = true;
 
-  # Declarative Flatpak base. The user-level Spotify Flatpak
-  # (users/kyandesutter/mixins/spicetify.nix) rides on the system flatpak
-  # service this brings up.
-  kyan.flatpak.enable = true;
-
   # ASUS laptop support: asusd, Aura keyboard RGB (Flexoki blue), 80%
   # battery charge limit, dim-LEDs-on-battery.
   kyan.asus.enable = true;
