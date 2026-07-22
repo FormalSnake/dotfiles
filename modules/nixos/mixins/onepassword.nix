@@ -29,12 +29,12 @@
   # browser-unlock native-messaging integration. 1Password only talks to
   # browsers whose binary name is in its built-in allowlist or this file.
   # Helium's Nix wrapper execs .../opt/helium/helium, so its process name is
-  # "helium"; Zen's wrapper execs the hidden .zen-wrapped binary (the name the
-  # zen-browser flake documents for exactly this file).
+  # "helium"; Zen's beta wrapper (mixins/zen.nix) execs the hidden
+  # .zen-beta-wrapped binary (verified via /proc/<pid>/comm).
   environment.etc."1password/custom_allowed_browsers" = {
     text = ''
       helium
-      .zen-wrapped
+      .zen-beta-wrapped
     '';
     mode = "0755";
   };

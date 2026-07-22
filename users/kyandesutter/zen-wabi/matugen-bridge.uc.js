@@ -6,6 +6,14 @@
 // @ignorecache
 // ==/UserScript==
 
+// PATCH(nix mixins/zen.nix): this file is loaded by Sine as a .sys.mjs module
+// (shared module global, imported once), not by fx-autoconfig into a chrome
+// window scope — DOM globals like setInterval/document don't exist here and
+// must come from Timer.sys.mjs / the browser windows themselves.
+const { setInterval } = ChromeUtils.importESModule(
+  "resource://gre/modules/Timer.sys.mjs",
+);
+
 // Append a string to the log file using lazy OS.File to avoid the
 // complexity of nsIFileOutputStream (which has been flaky — the
 // log file gets created but writes never persist). This opens the
@@ -502,12 +510,21 @@ function collectValues() {
 
 function applyChromeVars(values) {
   if (!values || !Object.keys(values).length) return;
+  // PATCH(nix mixins/zen.nix): no `document` in the module global — apply to
+  // every open browser window instead of the (window-scope) ambient document.
   try {
-    const root = document.documentElement;
-    for (const [varName, val] of Object.entries(values)) {
-      root.style.setProperty(varName, val);
+    let applied = 0;
+    const windows = Services.wm.getEnumerator("navigator:browser");
+    while (windows.hasMoreElements()) {
+      const win = windows.getNext();
+      const root = win.document && win.document.documentElement;
+      if (!root) continue;
+      for (const [varName, val] of Object.entries(values)) {
+        root.style.setProperty(varName, val);
+      }
+      applied++;
     }
-    logInfo(`Applied ${Object.keys(values).length} vars to chrome :root`);
+    logInfo(`Applied ${Object.keys(values).length} vars to ${applied} chrome :root(s)`);
   } catch (e) {
     logError(`applyChromeVars: ${e.message}`);
   }
@@ -1144,5 +1161,23 @@ globalThis.__matugenBridge = {
     }
   },
 };
+
+// PATCH(nix mixins/zen.nix): as a run-once background module the bridge can
+// init before any browser window exists, and later windows open without the
+// inline vars — re-apply (and force one workspace-gradient sync) whenever a
+// browser window finishes its delayed startup.
+Services.obs.addObserver(
+  {
+    observe() {
+      try {
+        applyChromeVars(collectValues());
+        syncWorkspaceTheme(null, true);
+      } catch (e) {
+        logError(`window-startup apply: ${e.message}`);
+      }
+    },
+  },
+  "browser-delayed-startup-finished",
+);
 
 init().catch((e) => logError(`init() failed: ${e.message}\n${e.stack || ""}`));

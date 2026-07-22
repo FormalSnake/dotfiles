@@ -16,15 +16,9 @@
   --matugen-tertiary: {{tertiary}};
 }
 
-/* Text selection highlight on all web pages. Accent bg with
- * dark text gives the strongest contrast on both light and
- * dark page backgrounds. */
-::selection,
-::-moz-selection {
-  background-color: var(--matugen-accent) !important;
-  color: var(--matugen-bg-dark) !important;
-  text-shadow: none !important;
-}
+/* PATCH(nix mixins/zen.nix): global ::selection recolor removed — matugen
+ * themes the browser chrome only, web content stays untouched (the about:*
+ * blocks below are browser surfaces and stay). */
 
 /* Common variables affecting all pages */
 @-moz-document url-prefix("about:") {
@@ -176,26 +170,8 @@
   }
 }
 
-/* Findbar match highlights inside page content. The findbar
- * wraps every match in a <span class="matched-word">. Accent
- * bg with dark fg gives consistent visual style with the
- * ::selection rule above and the findbar's accent border. */
-.matched-word {
-  background-color: color-mix(in srgb, var(--matugen-accent) 60%, transparent) !important;
-  color: var(--matugen-bg-dark) !important;
-  text-decoration: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-  outline: none !important;
-}
-
-.matched-word:focus,
-.matched-word.selected {
-  background-color: var(--matugen-accent) !important;
-  color: var(--matugen-bg-dark) !important;
-  outline: 1px solid var(--matugen-accent) !important;
-}
+/* PATCH(nix mixins/zen.nix): findbar .matched-word recolor removed — it
+ * restyles match highlights inside page content; browser-only theming. */
 
 /* ============================================================
  * GitHub theming has moved to userContent.github.template.

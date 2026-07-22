@@ -462,7 +462,7 @@ in
         "Mod+Q".action.close-window = [ ];
         "Mod+Shift+F".action.fullscreen-window = [ ];
         "Mod+V".action.toggle-window-floating = [ ];
-        "Mod+B".action.spawn = "helium";
+        "Mod+B".action.spawn = "zen-beta";
         # Emoji picker: the emojiLauncher plugin (enabled in mixins/dms.nix)
         # adds an emoji/unicode surface to DMS's spotlight under its `:e`
         # trigger; toggleQuery opens the launcher pre-filled with it, so this is
@@ -544,7 +544,9 @@ in
       # — Window → workspace rules (Linux app classes; niri matches app-id).
       # No terminal rule: ghostty opens on the active workspace.
       window-rules = [
-        { matches = [ { app-id = "^([Hh]elium)$"; } ]; open-on-workspace = wsName."1"; } # web
+        # zen-beta: the wrapper launches with `--name zen-beta` (desktop file),
+        # bare `zen` covers manual CLI launches.
+        { matches = [ { app-id = "^([Hh]elium|zen(-beta)?)$"; } ]; open-on-workspace = wsName."1"; } # web
         { matches = [ { app-id = "^([Cc]ode|[Zz]ed|dev.zed.Zed)$"; } ]; open-on-workspace = wsName."3"; } # development
         { matches = [ { app-id = "^([Ss]lack|WhatsApp|[Ee]quibop|discord|[Bb]eeper|[Bb]lue[Bb]ubbles)$"; } ]; open-on-workspace = wsName."4"; } # communication
         # Beeper/BlueBubbles (Electron) map their main window floating, so they

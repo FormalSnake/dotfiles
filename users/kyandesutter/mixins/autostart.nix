@@ -239,7 +239,8 @@ in
       Wants = [ "dms.service" ];
       "X-SwitchMethod" = "keep-old";
     };
-    Install.WantedBy = [ "graphical-session.target" ];
+    # Not autostarted — Zen (Mod+B) is the browser now. Kept installed and
+    # launchable (`systemctl --user start helium`) until fully retired.
     Service = {
       Type = "simple";
       ExecStartPre = "${pkgs.bash}/bin/bash -lc 'for i in $(seq 50); do busctl --user call org.freedesktop.DBus /org/freedesktop/DBus org.freedesktop.DBus NameHasOwner s org.freedesktop.Notifications 2>/dev/null | grep -q true && break; sleep 0.2; done'";
