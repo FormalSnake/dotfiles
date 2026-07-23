@@ -20,9 +20,10 @@
   };
 
   # 2. Firmware-level: never idle-sleep even if caffeinate dies, and come back
-  #    unattended after a power cut or kernel freeze.
+  #    unattended after a kernel freeze. (restartAfterPowerFailure is rejected
+  #    by nix-darwin's preflight on this machine — unsupported on Apple Silicon
+  #    laptops, the battery covers power cuts anyway.)
   power.sleep.computer = "never";
-  power.restartAfterPowerFailure = true;
   power.restartAfterFreeze = true;
 
   # 3. If it sleeps anyway (lid close, manual sleep), answer Wake-on-LAN and
