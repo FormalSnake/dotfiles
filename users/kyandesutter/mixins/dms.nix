@@ -274,7 +274,7 @@ let
     postInstall = old.postInstall + ''
       chmod u+w "$out/share/quickshell/dms/DMSShellIPC.qml"
       patch -p1 -d "$out/share/quickshell/dms" < ${./dms-ipc-settings-set.patch}
-      chmod u+w "$out/share/quickshell/dms/Services/LocationService.qml"
+      chmod u+w "$out/share/quickshell/dms/Services" "$out/share/quickshell/dms/Services/LocationService.qml"
       patch -p1 -d "$out/share/quickshell/dms" < ${./dms-location-poll.patch}
     '';
   });
