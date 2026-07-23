@@ -72,6 +72,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Prebuilt nix-index database (weekly) — powers comma and the
+    # command-not-found handler without a local `nix-index` run.
+    nix-index-database = {
+      url = "github:nix-community/nix-index-database";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # areofyl/fetch — animated 3D fetch tool (spinning distro-logo relief +
     # system info). Consumed via its home-manager module (programs.fetch);
     # cross-platform since the flake covers all four darwin/linux systems.

@@ -1,0 +1,42 @@
+Upstream bug: location state never reaches the shell after startup. The Go
+core's generic `subscribe` fan-out (core/internal/server/server.go) forwards
+every service EXCEPT "location" -- there is no shouldSubscribe("location")
+block, so the QML's subscribe-all event socket never receives location
+pushes (only a dedicated `location.subscribe` stream would, and nothing in
+the QML tree opens one). LocationService.qml therefore relies on a single
+`location.getState` pull at connect time (~3 s after core start) -- but the
+core can't have a GeoClue2 fix that early: NewClient seeds an IP-derived
+location and the real WiFi fix lands only after the client's 10 s
+TimeThreshold, i.e. the pull always races and always loses. Net effect:
+weather is pinned to the IP-geolocated city (ISP egress, not the machine)
+for the whole session. Fix: poll getState on a 30 s timer; the added
+same-coords guard in handleStateUpdate keeps unchanged polls from
+re-emitting locationChanged (which would refetch weather and re-hit the
+reverse-geocoding services every tick). Verified against
+AvengeMedia/DankMaterialShell@74896fb87cb9e4bb866dbabcfd754e3e649ad0c7.
+--- a/Services/LocationService.qml
++++ b/Services/LocationService.qml
+@@ -20,6 +20,13 @@
+             getState();
+     }
+
++    Timer {
++        running: root.locationAvailable
++        interval: 30000
++        repeat: true
++        onTriggered: root.getState()
++    }
++
+     Connections {
+         target: DMSService
+
+@@ -36,6 +43,9 @@
+         if (lat === 0 && lon === 0)
+             return;
+
++        if (lat === root.latitude && lon === root.longitude)
++            return;
++
+         root.latitude = lat;
+         root.longitude = lon;
+         root.locationChanged(data);

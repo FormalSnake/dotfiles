@@ -256,8 +256,8 @@ let
 
   # DMS package, patched. `programs.dank-material-shell.package` defaults to
   # `dmsPkgs.dms-shell` (distro/nix/options.nix), a `buildGoModule` derivation
-  # whose `src` is `./core` (the Go sources only) — the QML tree the IPC fix
-  # below targets lives under `quickshell/`, copied into $out by `postInstall`
+  # whose `src` is `./core` (the Go sources only) — the QML tree the patches
+  # below target lives under `quickshell/`, copied into $out by `postInstall`
   # from a *separate* path (`rootSrc = ./.`, the whole repo), never unpacked
   # as `src`. That means the usual `patches = old.patches ++ [...]` (which
   # only patches `$src`) can't reach it — confirmed by inspecting `postInstall`
@@ -274,6 +274,8 @@ let
     postInstall = old.postInstall + ''
       chmod u+w "$out/share/quickshell/dms/DMSShellIPC.qml"
       patch -p1 -d "$out/share/quickshell/dms" < ${./dms-ipc-settings-set.patch}
+      chmod u+w "$out/share/quickshell/dms/Services/LocationService.qml"
+      patch -p1 -d "$out/share/quickshell/dms" < ${./dms-location-poll.patch}
     '';
   });
 
@@ -370,7 +372,7 @@ in
     enable = true;
     systemd.enable = true; # user service, PartOf the Wayland/graphical-session target
     enableDynamicTheming = true; # pulls in the deps DMS's own theming needs
-    package = dmsPackage; # local patch: IPC `settings set` → SettingsData.set (see dmsPackage above)
+    package = dmsPackage; # local patches: IPC `settings set` → SettingsData.set, location poll (see dmsPackage above)
 
     # Community plugins from inputs.dms-plugin-registry (imported above). Only
     # `.enable` is set here — no `.settings`, which deliberately keeps

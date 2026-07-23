@@ -22,6 +22,8 @@
     ./mixins/fetch.nix
     ./mixins/herdr.nix
     ./mixins/fast.nix
+    ./mixins/nh.nix
+    ./mixins/nix-index.nix
     ./mixins/spice-edit.nix
   ];
 
