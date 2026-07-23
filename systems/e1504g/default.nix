@@ -1,4 +1,10 @@
-{ inputs, self, ... }:
+{
+  inputs,
+  self,
+  pkgs,
+  lib,
+  ...
+}:
 {
   imports = [
     # Generated on the machine with `nixos-generate-config` (2026-07-21).
@@ -89,10 +95,67 @@
   # when PPD is off, so this cleanly displaces it). PPD is what DMS's battery
   # popout speaks, making its profile switcher functional — power-saver maps
   # to EPP `power` plus the firmware's `quiet` platform profile — and it
-  # matches the g815's PPD-based stack. thermald lets the 15 W i3-N305 hold
-  # turbo longer under sustained load instead of tripping firmware throttling.
+  # matches the g815's PPD-based stack. No thermald: it exists to hold turbo
+  # near the thermal limit, which is the opposite of the quiet-fans policy
+  # below (and on engaging it would restore the firmware's absurd RAPL
+  # defaults over our caps).
   services.power-profiles-daemon.enable = true;
-  services.thermald.enable = true;
+
+  # Quiet fans (owner ask, 2026-07-23): this machine only ever runs a browser,
+  # a terminal and a few apps, so trade peak CPU for noise. The firmware ships
+  # run-flat-out package limits (MSR PL1 200 W; MMIO PL1 15 W / PL2 35 W on a
+  # 15 W-class i3-N305) and the EC fan curve — not directly controllable on
+  # this chassis, pwm1_enable is auto-only — reacts to the resulting temps, so
+  # the fan never spins down. Lower power is the only fan lever: cap RAPL per
+  # PPD profile, on BOTH domains (the enforced limit is the lower of MSR and
+  # MMIO). Tiers: performance merely audible, balanced near-silent,
+  # power-saver minimal. Same PPD-watching shape as power-saver-dim below,
+  # but a system service (sysfs writes need root), and wantedBy PPD rather
+  # than multi-user.target for the ordering reason documented in
+  # modules/nixos/mixins/power.nix.
+  systemd.services.power-cap = {
+    description = "Per-profile RAPL package power caps (quiet fans)";
+    after = [ "power-profiles-daemon.service" ];
+    wants = [ "power-profiles-daemon.service" ];
+    wantedBy = [ "power-profiles-daemon.service" ];
+    serviceConfig = {
+      Type = "simple";
+      Restart = "always";
+      RestartSec = 2;
+    };
+    script =
+      let
+        gdbus = "${lib.getBin pkgs.glib}/bin/gdbus";
+        ppd = "--system --dest net.hadess.PowerProfiles --object-path /net/hadess/PowerProfiles";
+      in
+      ''
+        apply() {
+          case $1 in
+            performance) pl1=12 pl2=18 ;;
+            balanced)    pl1=8  pl2=14 ;;
+            power-saver) pl1=5  pl2=8  ;;
+            *) return 0 ;;
+          esac
+          for d in /sys/class/powercap/intel-rapl:0 /sys/class/powercap/intel-rapl-mmio:0; do
+            [ -d "$d" ] || continue
+            echo $((pl1 * 1000000)) >"$d/constraint_0_power_limit_uw"
+            echo $((pl2 * 1000000)) >"$d/constraint_1_power_limit_uw"
+          done
+        }
+
+        apply "$(${gdbus} call ${ppd} \
+          --method org.freedesktop.DBus.Properties.Get net.hadess.PowerProfiles ActiveProfile \
+          | ${pkgs.gnused}/bin/sed -nE "s/.*'([a-z-]+)'.*/\1/p")"
+
+        ${gdbus} monitor ${ppd} | while IFS= read -r line; do
+          p=$(printf '%s\n' "$line" \
+            | ${pkgs.gnused}/bin/sed -nE "s/.*'ActiveProfile': <'([a-z-]+)'>.*/\1/p")
+          [ -n "$p" ] && apply "$p"
+        done
+      '';
+  };
+  # RAPL limits don't reliably survive suspend; re-apply on the way up.
+  powerManagement.resumeCommands = "/run/current-system/systemd/bin/systemctl try-restart power-cap.service";
 
   # The ASUS firmware's UCSI implementation can't answer GET_CABLE_PROPERTY:
   # with a USB-C charger attached, ucsi_acpi logs
