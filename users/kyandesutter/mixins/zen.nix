@@ -369,6 +369,10 @@ in
           echo "/chrome/userChrome.css"
           echo "/chrome/userContent.css"
           echo "/chrome/sine-mods/zen-wabi-bridge"
+          # Derived per-host cache: the addon manager's startup snapshot.
+          # A peer's older copy syncing over a fresh one leaves toolbar
+          # icons unrendered/unclickable (observed 2026-07-23 on e1504g).
+          echo "/addonStartup.json.lz4"
           echo "/browser-extension-data/?d634138d-c276-4fc8-924b-40a0ea21d284?"
           if [ -n "$onePassUuid" ]; then
             echo "/storage/default/moz-extension+++$onePassUuid*"
