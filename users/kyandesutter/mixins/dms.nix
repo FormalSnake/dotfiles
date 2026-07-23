@@ -503,7 +503,8 @@ in
       input_path = "~/.config/matugen/templates/equibop.css.tmpl"
       output_path = "~/.config/equibop/themes/dank.theme.css"
 
-      # Spotify via spicetify. Writes the Comfy theme's color.ini, then
+      # Spotify via spicetify. Writes the text theme's color.ini (the base
+      # theme's user.css is vendored by mixins/spicetify.nix), then
       # re-applies it to the (Flatpak) Spotify — see mixins/spicetify.nix.
       # Absolute spicetify path: this hook runs inside DMS's systemd user
       # service, whose PATH won't include the home profile bin. If the UI
@@ -517,7 +518,7 @@ in
       # config dir explicitly (the systemd service may not have XDG_CONFIG_HOME).
       [templates.spicetify]
       input_path = "~/.config/matugen/templates/spicetify.ini.tmpl"
-      output_path = "~/.config/spicetify/Themes/Comfy/color.ini"
+      output_path = "~/.config/spicetify/Themes/text/color.ini"
       post_hook = "SPICETIFY_CONFIG=${config.home.homeDirectory}/.config/spicetify ${pkgs.spicetify-cli}/bin/spicetify apply --no-restart || true"
 
       # Obsidian (Minimal theme). Rendered into the vault's snippet dir;
