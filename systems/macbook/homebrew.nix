@@ -1,10 +1,13 @@
 {
   homebrew = {
+    # Homebrew 6 tap trust: `brew bundle` REPLACES ~/.homebrew/trust.json with
+    # exactly the Brewfile's `trusted:` entries on every run, so a manual
+    # `brew trust` never survives an activation — trust must be declared here.
     taps = [
-      "barutsrb/tap"
-      "felixkratz/formulae" # sketchybar
-      "jnsahaj/lumen"
-      "pluk-inc/tap"
+      { name = "barutsrb/tap"; trusted = true; }
+      { name = "felixkratz/formulae"; trusted = true; } # sketchybar
+      { name = "jnsahaj/lumen"; trusted = true; }
+      { name = "pluk-inc/tap"; trusted = true; }
     ];
 
     # CLI tools that genuinely need brew (no Nix equivalent on darwin or version-pinned).
