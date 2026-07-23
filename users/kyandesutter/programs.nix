@@ -60,7 +60,18 @@
       # BlueBubbles desktop client (iMessage). Flutter app; Linux-only in
       # nixpkgs. The Mac runs the BlueBubbles *Server* instead (homebrew cask in
       # systems/macbook/homebrew.nix) — the server is macOS-only.
-      bluebubbles
+      # The nixpkgs wrapper misses glib-networking, so the Google-login webview
+      # (WebKitGTK/libsoup) has no TLS backend ("TLS support is not available");
+      # re-wrap with its GIO module instead of rebuilding the Flutter app.
+      (symlinkJoin {
+        name = "bluebubbles-wrapped";
+        paths = [ bluebubbles ];
+        nativeBuildInputs = [ makeWrapper ];
+        postBuild = ''
+          wrapProgram $out/bin/bluebubbles \
+            --prefix GIO_EXTRA_MODULES : ${glib-networking}/lib/gio/modules
+        '';
+      })
       # TUI for managing bluetooth (bluez) — Linux-only.
       bluetui
     ];
