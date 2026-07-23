@@ -355,6 +355,20 @@ in
           echo "/datareporting"
           echo "/saved-telemetry-pings"
           echo "/chrome/matugen-vars.json"
+          # Home-manager-managed paths are per-host /nix/store symlinks —
+          # syncing them replicates a store path the peer doesn't have
+          # (observed 2026-07-23: e1504g's whole chrome/JS tree + user.js
+          # dangled at g815's home-manager-files hash, killing every mod).
+          # Each host's own activation renders these; syncthing must never
+          # touch them.
+          echo "/user.js"
+          echo "/containers.json"
+          echo "/.keep"
+          echo "/chrome/JS"
+          echo "/chrome/utils"
+          echo "/chrome/userChrome.css"
+          echo "/chrome/userContent.css"
+          echo "/chrome/sine-mods/zen-wabi-bridge"
           echo "/browser-extension-data/?d634138d-c276-4fc8-924b-40a0ea21d284?"
           if [ -n "$onePassUuid" ]; then
             echo "/storage/default/moz-extension+++$onePassUuid*"
