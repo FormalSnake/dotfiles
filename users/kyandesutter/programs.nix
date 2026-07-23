@@ -63,13 +63,28 @@
       # The nixpkgs wrapper misses glib-networking, so the Google-login webview
       # (WebKitGTK/libsoup) has no TLS backend ("TLS support is not available");
       # re-wrap with its GIO module instead of rebuilding the Flutter app.
+      # Flutter apps have no single-instance lock (unlike Electron), so every
+      # launcher click spawns another copy — and the workspace-4 window rule
+      # hides that it's already running. Hold a flock for the app's lifetime
+      # (fd 9 survives the exec); later launches focus the live window instead.
       (symlinkJoin {
         name = "bluebubbles-wrapped";
         paths = [ bluebubbles ];
         nativeBuildInputs = [ makeWrapper ];
         postBuild = ''
           wrapProgram $out/bin/bluebubbles \
-            --prefix GIO_EXTRA_MODULES : ${glib-networking}/lib/gio/modules
+            --prefix GIO_EXTRA_MODULES : ${glib-networking}/lib/gio/modules \
+            --run ${lib.escapeShellArg ''
+              exec 9>"''${XDG_RUNTIME_DIR:-/tmp}/bluebubbles.lock"
+              if ! ${util-linux}/bin/flock -n 9; then
+                if command -v niri >/dev/null 2>&1; then
+                  id=$(niri msg --json windows | ${jq}/bin/jq -r \
+                    'first(.[] | select(.app_id != null and (.app_id | test("^[Bb]lue[Bb]ubbles$"))) | .id) // empty')
+                  [ -n "$id" ] && niri msg action focus-window --id "$id"
+                fi
+                exit 0
+              fi
+            ''}
         '';
       })
       # TUI for managing bluetooth (bluez) — Linux-only.
