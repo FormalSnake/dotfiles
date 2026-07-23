@@ -668,6 +668,18 @@ in
     };
   };
 
+  # GeoClue gets exactly one shot at a WiFi fix when the DMS core connects, and
+  # it loses whenever the laptop has been associated a while: NetworkManager
+  # stops background-scanning once comfortably connected, wpa_supplicant's BSS
+  # cache runs dry, and geoclue's single query fails ("No WiFi networks found")
+  # with no retry — the core then keeps its IP-seeded location (wrong city;
+  # observed pinned to the ISP egress for an hour+ on both Linux hosts,
+  # 2026-07-23). Kick a rescan as the service comes up so the BSS-added events
+  # land while the core's geoclue client is fresh. "-": NM throttles
+  # back-to-back scans, and a throttled rescan means the cache is already fresh.
+  systemd.user.services.dms.Service.ExecStartPost =
+    "-/run/current-system/sw/bin/nmcli device wifi rescan";
+
   # Fallback for the two power-menu actions DMS's own powermenu can't host:
   # its action set is a fixed enum (SettingsData.powerMenuActions — reboot/
   # logout/poweroff/lock/suspend/restart/hibernate/switchuser, see
