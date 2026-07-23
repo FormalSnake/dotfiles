@@ -19,10 +19,22 @@
       "com.apple.swipescrolldirection" = true;
     };
 
+    # Never auto-install macOS updates: an unattended update reboot parks the
+    # machine at the FileVault preboot screen, unreachable remotely until
+    # unlocked over LAN SSH (2026-07-23). Updates are applied manually instead.
+    SoftwareUpdate.AutomaticallyInstallMacOSUpdates = false;
+
+    # No screen-saver password gate — the machine is a headless-ish work server
+    # reached over SSH/VNC; the GUI-set equivalents died with the 2026-07-23
+    # reboot, so declare them here.
+    screensaver.askForPassword = false;
+
     # Untyped preferences (no dedicated nix-darwin option). Written via
     # `defaults import` during activation — idempotent, no shell-out needed.
     CustomUserPreferences = {
       "NSGlobalDomain"."com.apple.mouse.scaling" = 1.5;
+      # Screen saver never starts (idleTime 0 = off).
+      "com.apple.screensaver".idleTime = 0;
       "com.apple.screencapture" = {
         style = "window";
         showsClicks = true;
