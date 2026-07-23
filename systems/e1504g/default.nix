@@ -167,6 +167,12 @@
   # two ucsi-source-psy power_supply entries, which nothing here reads.
   boot.blacklistedKernelModules = [ "ucsi_acpi" ];
 
+  # Disable CPU speculative-execution mitigations, matching the g815 (see
+  # systems/g815/default.nix): ~5-15% on syscall-heavy work, and this 8 GB
+  # Intel machine feels it most. Same SECURITY TRADE-OFF, same verdict —
+  # single-user personal laptop, no untrusted code.
+  boot.kernelParams = [ "mitigations=off" ];
+
   # 8 GB RAM (vs the g815's 32): halve the overflow swapfile to 2× RAM so a
   # spike has real spill room on a small machine (zram in mixins/boot.nix
   # stays the first, RAM-speed tier).

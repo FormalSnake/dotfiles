@@ -16,6 +16,7 @@
       ./mixins/boot.nix
       ./mixins/systemd-tuning.nix
       ./mixins/scx.nix
+      ./mixins/ananicy.nix
       ./mixins/graphics.nix
       ./mixins/nvidia.nix
       ./mixins/nvidia-resume-recovery.nix
