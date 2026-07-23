@@ -16,17 +16,61 @@ work.
 allowed. Always `git add` new/changed files first — the flake only sees
 git-tracked files, so an unstaged file is invisible to the build.
 
-**Sudo caveat:** system rebuilds (`nixos-rebuild switch`, `darwin-rebuild
-switch`, most `just` recipes) need root and will prompt for a sudo password.
-That prompt can't be answered non-interactively, so the rebuild may hang or
-fail. If it does, stop and ask the owner to run that step (e.g. via `! <cmd>`)
-or to grant passwordless sudo — don't try to work around it.
+**Sudo works non-interactively on all three hosts** (since 2026-07-22):
+`sudo -n` succeeds passwordless when the invoking environment carries an SSH
+agent holding one of the three machine keys — which Claude's shell on the g815
+always does (gcr agent at `$SSH_AUTH_SOCK` holds the g815 on-disk key), and
+which SSH sessions between our hosts do via agent forwarding. So Claude can
+rebuild ALL hosts without owner hand-off:
+- g815 (local): `sudo -n nixos-rebuild switch --flake .#g815`
+- e1504g: `ssh e1504g 'cd ~/.config/nix && git pull && sudo -n nixos-rebuild switch --flake .#e1504g'`
+- macbook: `ssh macbook 'cd ~/.config/nix && git pull && sudo -n /run/current-system/sw/bin/darwin-rebuild switch --flake .#macbook'`
+  (absolute path: non-interactive fish on the mac has a minimal PATH).
 
-**Exception — the e1504g is fully remote-administrable:** it has passwordless
-wheel sudo, and the g815's on-disk key is authorized there, so from the g815
-Claude can run anything on it non-interactively — including rebuilds:
-`ssh e1504g 'cd ~/.config/nix && git pull && sudo nixos-rebuild switch --flake .#e1504g'`
-(`e1504g` = Tailscale IP in the ssh mixin; `e1504g-lan` is the LAN fallback).
+If sudo unexpectedly prompts anyway, the agent chain is broken (no
+`SSH_AUTH_SOCK`, or the agent lost the key) — stop and hand the step to the
+owner via `! <cmd>` rather than working around it. One known-benign case:
+sessions born under mosh inherit a dead forwarded socket (OpenSSH 10.1+
+unlinks `~/.ssh/agent/s.*` when the bootstrap ssh exits). Fish `shellInit`
+(`users/kyandesutter/mixins/fish.nix`) self-heals new shells by falling back
+to the local gcr agent; in an already-running session started before that fix,
+`set -x SSH_AUTH_SOCK $XDG_RUNTIME_DIR/gcr/ssh` restores the intended chain —
+that IS the fix, not a workaround.
+
+**⚠️ With great sudo comes great responsibility.** The password prompt used to
+be a natural safety gate; it's gone now, on all three machines at once. Root
+commands run the moment Claude types them. So: use sudo for rebuilds,
+service restarts and diagnostics freely, but treat anything destructive or
+hard to reverse (deleting data, partitioning/formatting, `nix-collect-garbage
+-d`, bootloader changes, firewall/network changes on a remote host that could
+cut off SSH) as owner-confirmation territory — ask first, exactly as if the
+password were still required. Never fan a risky command out to multiple hosts
+in one step; do one host, verify, then the next.
+
+### How the sudo mesh works — don't break it
+
+`pam_ssh_agent_auth` is a `sufficient` auth module for sudo on every host: it
+accepts sudo iff the session's `SSH_AUTH_SOCK` agent holds a key from the
+machine-key list. Console sudo still password/Touch-ID prompts. The moving
+parts, all load-bearing:
+- **Machine-key lists**: `modules/nixos/mixins/users.nix` (Linux hosts, PAM
+  reads `/etc/ssh/authorized_keys.d/%u`) and
+  `modules/darwin/mixins/remote-access.nix` (mac). On the mac PAM can NOT read
+  the nix-managed symlink (its path check rejects /nix/store), so activation
+  installs a real root-owned copy at `/etc/ssh/sudo_authorized_keys`.
+- **`Defaults noninteractive_auth`** (sudoers, both platforms): without it
+  `sudo -n` refuses before PAM even runs.
+- **Agent forwarding** (`users/kyandesutter/mixins/ssh.nix`): our three host
+  entries set `ForwardAgent yes` + `IdentityAgent SSH_AUTH_SOCK`. The latter
+  MUST NOT become `none` (that silently disables forwarding) or be removed
+  (the global 1Password IdentityAgent would be forwarded instead, and its keys
+  aren't authorized). Never enable ForwardAgent for foreign hosts.
+- **The darwin pam_ssh_agent_auth build** (`remote-access.nix`): nixpkgs marks
+  it linux-only; the override builds it against OpenPAM with `-std=gnu99` and
+  fortify off. Both flags are required.
+- mac→Linux sudo needs an interactive mac session (launchd agent + loaded
+  keychain key); chained hops (g815→mac→g815) work because the forwarded
+  agent is re-forwarded.
 
 Safe, non-building checks you MAY run:
 - `nix-instantiate --parse <file>.nix` — syntax only.
@@ -45,12 +89,10 @@ the other. When working from the **g815 (nixos laptop)**, the full flow is:
 3. `ssh macbook`, `cd ~/.config/nix`, `git pull`.
 4. Rebuild on the macbook (`darwin-rebuild` / the `just` recipe).
 
-Claude can drive all four steps. Watch for the sudo caveat above on the two
-rebuilds (steps 1 and 4) and the `ssh macbook` auth on step 3 — if either blocks
-on a password, hand that step to the owner and continue once it clears.
-
-The e1504g follows the same flow but needs no owner hand-off (see the
-exception above): after pushing, pull + rebuild it over SSH in one shot.
+Claude can drive all four steps non-interactively (see the sudo mesh above) —
+steps 3+4 collapse to the one-shot macbook command in the rebuild policy
+section. The e1504g follows the same flow, also in one shot. Only if sudo
+unexpectedly prompts (broken agent chain) does a step go back to the owner.
 
 ## Overview
 
