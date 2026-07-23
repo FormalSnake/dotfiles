@@ -193,6 +193,20 @@
       # Non-secret AI provider settings (formerly in .zprofile)
       set -gx OLLAMA_API_BASE "https://ollama.kaiiserni.com"
       set -gx AIDER_WEAK_MODEL "gemini/gemini-2.0-flash"
+
+      ${lib.optionalString pkgs.stdenv.isLinux ''
+      # OpenSSH 10.1+ creates forwarded-agent sockets under ~/.ssh/agent/ and
+      # unlinks them when their ssh session ends. Mosh's bootstrap ssh does
+      # exactly that right after spawning mosh-server, so every shell inside a
+      # mosh session (and anything launched from it — herdr, Claude) inherits a
+      # dead SSH_AUTH_SOCK. When the socket is gone, fall back to the local gcr
+      # agent: it holds this machine's on-disk key, which every host's sudo
+      # mesh and authorized_keys accept. A live forwarded socket is kept as-is
+      # (it carries the connecting host's richer keyring).
+      if not test -S "$SSH_AUTH_SOCK"; and test -S "$XDG_RUNTIME_DIR/gcr/ssh"
+          set -gx SSH_AUTH_SOCK "$XDG_RUNTIME_DIR/gcr/ssh"
+      end
+      ''}
     '';
   };
 }
