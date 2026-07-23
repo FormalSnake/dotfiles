@@ -19,6 +19,7 @@
     ./mixins/neovim.nix
     ./mixins/flexoki
     ./mixins/fastfetch.nix
+    ./mixins/fetch.nix
     ./mixins/herdr.nix
     ./mixins/fast.nix
     ./mixins/spice-edit.nix

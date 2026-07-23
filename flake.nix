@@ -72,6 +72,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # areofyl/fetch — animated 3D fetch tool (spinning distro-logo relief +
+    # system info). Consumed via its home-manager module (programs.fetch);
+    # cross-platform since the flake covers all four darwin/linux systems.
+    areofyl-fetch = {
+      url = "github:areofyl/fetch";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # — NixOS (g815 gaming laptop) inputs —
 
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";

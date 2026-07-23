@@ -1,13 +1,14 @@
-{ pkgs, ... }:
+{ inputs, ... }:
 {
   # areofyl/fetch — terminal fetch tool that renders the distro logo as a
-  # spinning 3D object alongside live system info. Now in nixpkgs, so install
-  # the package straight from pkgs instead of pinning the upstream flake.
-  home.packages = [ pkgs.fetch ];
+  # spinning 3D object alongside live system info. Installed from the upstream
+  # flake's home-manager module: nixpkgs' fetch (2.1.0) is still linux-only,
+  # while the flake builds 2.2.0 cross-platform with our nixpkgs. Fold back
+  # into pkgs.fetch once nixpkgs catches up.
+  imports = [ inputs.areofyl-fetch.homeManagerModules.default ];
 
-  # The flake's home-manager module is gone with the input; fetch reads a plain
-  # key=value file at ~/.config/fetch/config, so write it directly.
-  xdg.configFile."fetch/config".text = ''
-    spin=y
-  '';
+  programs.fetch = {
+    enable = true;
+    spin = "y";
+  };
 }

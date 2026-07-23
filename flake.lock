@@ -23,6 +23,26 @@
         "type": "github"
       }
     },
+    "areofyl-fetch": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1784764430,
+        "narHash": "sha256-K5VhrwvBfd+38Vj6bzquAHG6Fo5fHAgBraBUtxTIRfo=",
+        "owner": "areofyl",
+        "repo": "fetch",
+        "rev": "e28b2fb3f26c2c78fbe21c3e8d3efd1115f1bad4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "areofyl",
+        "repo": "fetch",
+        "type": "github"
+      }
+    },
     "brew-src": {
       "flake": false,
       "locked": {
@@ -1101,6 +1121,7 @@
     "root": {
       "inputs": {
         "agenix": "agenix",
+        "areofyl-fetch": "areofyl-fetch",
         "canarycode": "canarycode",
         "chaotic": "chaotic",
         "dank-material-shell": "dank-material-shell",

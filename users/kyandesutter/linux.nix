@@ -17,7 +17,6 @@
     ./mixins/helium.nix
     ./mixins/zen.nix
     ./mixins/spicetify.nix
-    ./mixins/fetch.nix
     ./mixins/lumen.nix
     ./mixins/nordvpn.nix
     ./mixins/godot.nix
