@@ -30,11 +30,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1784764430,
-        "narHash": "sha256-K5VhrwvBfd+38Vj6bzquAHG6Fo5fHAgBraBUtxTIRfo=",
+        "lastModified": 1784905246,
+        "narHash": "sha256-S7mTd/9TxbJISNYk8jnWAcJvfhhuIfwBX1zM+6xIBkc=",
         "owner": "areofyl",
         "repo": "fetch",
-        "rev": "e28b2fb3f26c2c78fbe21c3e8d3efd1115f1bad4",
+        "rev": "bdcfe77b283d21700a4320d03fd0813e166eb0a4",
         "type": "github"
       },
       "original": {
