@@ -94,15 +94,17 @@ in
     # niri.service, BindsTo graphical-session.target) — no uwsm.
     programs.niri.enable = true;
 
-    # Exempt the compositor from the Mesa-only EGL pin that
+    # Exempt the compositor from the EGL pin that
     # users/kyandesutter/mixins/niri.nix pushes into environment.d for every
     # user service (igpuPins): when docked, niri's render device IS the nvidia
-    # node, and a Mesa-only vendor list makes its EGL init fail — the dGPU's
-    # outputs are never driven and the desk monitor sits on the dead boot
-    # console (looks like a hang on "a start job is running…"). Unit-level
-    # Environment= overrides the manager's environment.d, so only niri sees
-    # the full vendor list; clients it spawns still get the pin from niri's
-    # own environment block.
+    # node, and a vendor list without nvidia makes its EGL init fail — the
+    # dGPU's outputs are never driven and the desk monitor sits on the dead
+    # boot console (looks like a hang on "a start job is running…"). The pin
+    # is a per-login vendor *dir* nowadays (nvidia included in dGPU sessions),
+    # but niri must never depend on the select oneshot having populated it, so
+    # this static unit-level FILENAMES override (which glvnd prefers over
+    # DIRS) stays. Clients niri spawns do NOT keep it: niri's environment
+    # block unsets FILENAMES and hands them the DIRS pin.
     systemd.user.services.niri.environment."__EGL_VENDOR_LIBRARY_FILENAMES" =
       lib.mkIf config.kyan.nvidia.enable (
         lib.concatStringsSep ":" [

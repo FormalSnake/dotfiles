@@ -14,18 +14,26 @@ let
   # sessionVariables → environment.d (autostarted user services — DMS/
   # quickshell, chat apps, easyeffects — do NOT inherit niri's environment and
   # were opening the nvidia render node, parking ~2 GB of VRAM on the docked
-  # dGPU; observed live 2026-07-26). Mesa-only EGL + Intel-only Vulkan ICD;
-  # offloaded apps (pkgs.nvidiaOffloadEnv) re-expand the vendor list.
+  # dGPU; observed live 2026-07-26). Intel-only Vulkan ICD + iHD VA-API are
+  # static: those APIs enumerate devices, so the Intel pin always yields a
+  # working iGPU device regardless of which GPU niri renders on. The EGL pin
+  # can NOT be static: a Wayland EGL client binds to the compositor's main
+  # DRM device, and in a docked (dGPU-rendered) session that is the nvidia
+  # node — a Mesa-only vendor list then fails dri2 screen creation and the
+  # client silently falls back to llvmpipe (observed 2026-07-26: every
+  # autostarted app at ~110% CPU). So EGL is pinned via a *directory* of
+  # vendor symlinks that niri-render-device-select rewrites per login: mesa
+  # always, nvidia added only when the session renders on the dGPU.
   # Note this does NOT make RTD3 viable — niri itself holds the dGPU by
   # design (see modules/nixos/mixins/power.nix) — it only keeps apps from
   # waking it and wasting its VRAM.
   # niri.service itself is EXEMPT from the EGL pin (unit-level Environment=
-  # override in modules/nixos/mixins/niri.nix): when docked its render device
-  # is the nvidia node, and a Mesa-only vendor list breaks its EGL init,
-  # leaving the dGPU outputs undriven (desk monitor stuck on the boot console).
+  # FILENAMES override in modules/nixos/mixins/niri.nix): its EGL must never
+  # depend on the select oneshot having run.
+  eglVendorDir = "${config.xdg.stateHome}/niri/egl-vendor.d";
   igpuPins = {
     LIBVA_DRIVER_NAME = "iHD";
-    "__EGL_VENDOR_LIBRARY_FILENAMES" = "/run/opengl-driver/share/glvnd/egl_vendor.d/50_mesa.json";
+    "__EGL_VENDOR_LIBRARY_DIRS" = eglVendorDir;
     VK_DRIVER_FILES = "/run/opengl-driver/share/vulkan/icd.d/intel_icd.x86_64.json";
     VK_ICD_FILENAMES = "/run/opengl-driver/share/vulkan/icd.d/intel_icd.x86_64.json";
   };
@@ -377,6 +385,21 @@ let
 
       ideal="$(${renderDeviceIdeal}/bin/niri-render-device-ideal)"
 
+      # EGL vendor dir for the session's clients (__EGL_VENDOR_LIBRARY_DIRS in
+      # igpuPins): mesa always; the nvidia vendor only when niri will render on
+      # the dGPU — Wayland EGL clients must be able to drive the compositor's
+      # main device, and glvnd walks the dir sorted, so 10_nvidia wins when
+      # present (same precedence as the system default).
+      vendors="/run/opengl-driver/share/glvnd/egl_vendor.d"
+      vdir="''${XDG_STATE_HOME:-$HOME/.local/state}/niri/egl-vendor.d"
+      mkdir -p "$vdir"
+      ln -sf "$vendors/50_mesa.json" "$vdir/50_mesa.json"
+      if [ -n "$ideal" ]; then
+        ln -sf "$vendors/10_nvidia.json" "$vdir/10_nvidia.json"
+      else
+        rm -f "$vdir/10_nvidia.json"
+      fi
+
       # This fragment is the single owner of niri's debug{} block — niri rejects
       # a second one — so both debug options live here. force-pipewire-invalid-
       # modifier is ALWAYS set: niri renders on the iGPU but screencast consumers
@@ -626,10 +649,16 @@ in
         # NVIDIA + Wayland hint (explicit-sync is automatic on recent drivers).
         "__GL_GSYNC_ALLOWED" = "1";
       }
-      # iGPU pins (see igpuPins at the top): the session is iGPU-primary
-      # always, so these are static. Also exported to the systemd user
-      # manager below — keep both in sync via the shared binding.
-      // igpuPins;
+      # iGPU pins (see igpuPins at the top) for everything niri spawns; also
+      # exported to the systemd user manager below — keep both in sync via
+      # the shared binding. FILENAMES is explicitly UNSET for children: it
+      # would otherwise leak in from niri.service's own unit-level exemption
+      # (unit Environment= is part of niri's process env, which spawned apps
+      # inherit) and, taking precedence over the DIRS pin, re-open the nvidia
+      # node in iGPU sessions.
+      // lib.optionalAttrs hasNvidia (igpuPins // {
+        "__EGL_VENDOR_LIBRARY_FILENAMES" = null;
+      });
 
       # Cursor for native Wayland + XWayland (niri exports XCURSOR_THEME/SIZE
       # from this block); keep in sync with home.pointerCursor below.
@@ -745,6 +774,13 @@ in
         run mkdir -p "$HOME/.cache/niri"
         run touch "$HOME/.cache/niri/render-device.kdl"
       fi
+      # Mesa-only seed of the EGL vendor dir (__EGL_VENDOR_LIBRARY_DIRS in
+      # igpuPins) → safe iGPU default until niri-render-device.service
+      # rewrites it before the first niri start.
+      if [ ! -e "${eglVendorDir}/50_mesa.json" ]; then
+        run mkdir -p ${eglVendorDir}
+        run ln -sf /run/opengl-driver/share/glvnd/egl_vendor.d/50_mesa.json ${eglVendorDir}/50_mesa.json
+      fi
     '');
 
   # Power automation (see powerTune in the let block): refresh rate, keyboard
@@ -787,7 +823,10 @@ in
   # Same iGPU pins for every systemd user service (environment.d): niri's
   # environment block only reaches processes niri spawns, and the autostarted
   # services were the ones found holding the nvidia render node (2026-07-26).
-  systemd.user.sessionVariables = igpuPins;
+  # Safe ordering-wise: everything EGL-using is bound to graphical-session
+  # .target, which comes up after niri.service, after the select oneshot has
+  # populated the vendor dir.
+  systemd.user.sessionVariables = lib.optionalAttrs hasNvidia igpuPins;
 
   systemd.user.services.polkit-agent = {
     Unit = {
