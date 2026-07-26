@@ -40,11 +40,16 @@ in
 
       powerManagement = {
         enable = true;
-        # RTD3 plumbing. NOTE: RTD3/D3cold does NOT actually work on this Blackwell
-        # RTX 5070 + open kernel module (open-gpu-kernel-modules #882) — the dGPU
-        # never self-suspends and idles at D0. Kept enabled so the udev/modeset
-        # hooks are in place if a driver update fixes it; the real battery win is
-        # the hard power-off in power.nix (dgpu-reconcile).
+        # RTD3 plumbing. The driver side is no longer broken — 610.43.03
+        # reports "Runtime D3: Enabled (fine-grained)" + Video Memory Self
+        # Refresh (open-gpu-kernel-modules #882 closed 2025-07) — but RTD3
+        # still never engages here (verified 2026-07-26: HDMI forced
+        # disconnected + wallpaper stopped, 3 min idle, runtime_status stayed
+        # `active`, lifetime runtime_suspended_time 0 ms). The session pins the
+        # device: niri holds an fd on every GPU it has seen with no release
+        # IPC, so a powered dGPU is always held. Kept enabled for the
+        # udev/modeset hooks; the real battery win remains the hard power-off
+        # in power.nix (dgpu-reconcile).
         finegrained = true;
       };
 

@@ -9,6 +9,23 @@ let
   # the machinery (and none of its hardcoded g815 PCI paths / panel modes).
   hasNvidia = (osConfig.kyan or { }).nvidia.enable or false;
 
+  # VA-API / EGL / Vulkan iGPU pins, applied in TWO places: niri's own
+  # environment block (processes niri spawns) AND the systemd user manager via
+  # sessionVariables → environment.d (autostarted user services — DMS/
+  # quickshell, chat apps, easyeffects — do NOT inherit niri's environment and
+  # were opening the nvidia render node, parking ~2 GB of VRAM on the docked
+  # dGPU; observed live 2026-07-26). Mesa-only EGL + Intel-only Vulkan ICD;
+  # offloaded apps (pkgs.nvidiaOffloadEnv) re-expand the vendor list.
+  # Note this does NOT make RTD3 viable — niri itself holds the dGPU by
+  # design (see modules/nixos/mixins/power.nix) — it only keeps apps from
+  # waking it and wasting its VRAM.
+  igpuPins = {
+    LIBVA_DRIVER_NAME = "iHD";
+    "__EGL_VENDOR_LIBRARY_FILENAMES" = "/run/opengl-driver/share/glvnd/egl_vendor.d/50_mesa.json";
+    VK_DRIVER_FILES = "/run/opengl-driver/share/vulkan/icd.d/intel_icd.x86_64.json";
+    VK_ICD_FILENAMES = "/run/opengl-driver/share/vulkan/icd.d/intel_icd.x86_64.json";
+  };
+
   # Workspace pill labels: role → Nerd Font glyph + short name, mirroring the
   # macOS aerospace workspace names (see mixins/aerospace.nix). niri-flake orders
   # workspaces by attr *key* (kept "1"–"9" below); the workspace `name` is what
@@ -604,17 +621,11 @@ in
         QT_QPA_PLATFORMTHEME = "qt6ct";
         # NVIDIA + Wayland hint (explicit-sync is automatic on recent drivers).
         "__GL_GSYNC_ALLOWED" = "1";
-        # iGPU pins, formerly computed per-login by uwsm/env-hyprland: the
-        # session is iGPU-primary always (niri's default renderer), so these
-        # are static now. VA-API on the iGPU; Mesa-only EGL + Intel-only
-        # Vulkan ICD keep Chromium/Electron (and any GL/Vulkan client) from
-        # opening the nvidia render node and pinning it at D0. Offloaded apps
-        # (pkgs.nvidiaOffloadEnv) re-expand the vendor list themselves.
-        LIBVA_DRIVER_NAME = "iHD";
-        "__EGL_VENDOR_LIBRARY_FILENAMES" = "/run/opengl-driver/share/glvnd/egl_vendor.d/50_mesa.json";
-        VK_DRIVER_FILES = "/run/opengl-driver/share/vulkan/icd.d/intel_icd.x86_64.json";
-        VK_ICD_FILENAMES = "/run/opengl-driver/share/vulkan/icd.d/intel_icd.x86_64.json";
-      };
+      }
+      # iGPU pins (see igpuPins at the top): the session is iGPU-primary
+      # always, so these are static. Also exported to the systemd user
+      # manager below — keep both in sync via the shared binding.
+      // igpuPins;
 
       # Cursor for native Wayland + XWayland (niri exports XCURSOR_THEME/SIZE
       # from this block); keep in sync with home.pointerCursor below.
@@ -769,6 +780,11 @@ in
   # GUI polkit auth agent (generic Qt agent; replaces hyprpolkitagent, which
   # was the last thing launched from a compositor-start hook — everything
   # session-scoped is a plain user service now).
+  # Same iGPU pins for every systemd user service (environment.d): niri's
+  # environment block only reaches processes niri spawns, and the autostarted
+  # services were the ones found holding the nvidia render node (2026-07-26).
+  systemd.user.sessionVariables = igpuPins;
+
   systemd.user.services.polkit-agent = {
     Unit = {
       Description = "polkit-kde authentication agent";

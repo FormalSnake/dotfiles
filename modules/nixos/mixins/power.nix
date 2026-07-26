@@ -39,10 +39,12 @@ let
     '';
   };
 
-  # Hard dGPU power switch. RTD3/D3cold is broken on this Blackwell RTX 5070 +
-  # open-kernel-module 610 (NVIDIA open-gpu-kernel-modules #882): the dGPU never
-  # self-suspends, so it idles at D0 (~10W) no matter how little uses it. The
-  # only way to actually reclaim that power is to power the chip OFF:
+  # Hard dGPU power switch. RTD3/D3cold never engages on this machine: the
+  # 610 driver supports it now (fine-grained + VRAM self-refresh; #882 is
+  # fixed), but the session always holds the powered dGPU — niri keeps an fd
+  # on every GPU it has seen with no release IPC — so the chip idles at D0
+  # (~10W) no matter how little uses it (verified 2026-07-26, see nvidia.nix).
+  # The only way to actually reclaim that power is to power the chip OFF:
   #   off: wait for every handle on the device to be released, unload the
   #        driver stack, remove the GPU from PCI, then flip the ASUS WMI kill
   #        switch (asus-nb-wmi/dgpu_disable → ACPI _PR3) to cut power. If the
@@ -205,7 +207,7 @@ let
   #   charging (ac or powerbank) → powered on. The dGPU exists for the panel
   #       backlight (nvidia_wmi_ec_backlight rides its WMI) and the HDMI port;
   #       nothing renders on it (the session is always iGPU-primary).
-  #   battery → powered off (the only real battery win, RTD3 being broken),
+  #   battery → powered off (the only real battery win, RTD3 never engaging),
   #       EXCEPT while an external monitor is connected on the dGPU — powering
   #       off would kill that output mid-use. A session that still holds the
   #       device (charging-booted, dGPU listed as secondary head) is left
