@@ -16,6 +16,14 @@ let
     rev = "3508edd96a2adebd6daa78d1f2c9e7367ef693f8";
     hash = "sha256-+yMXfVghkq7qExTioCHvwQ/SRAPhMxci/KQ54pukC10=";
   };
+
+  # Marketplace's "Hide Podcasts" extension (podcast/audiobook shelves, search
+  # category and sidebar entries). The repo commits the built file at its root,
+  # so the release tag pins a ready-to-inject single JS file.
+  hidePodcasts = pkgs.fetchurl {
+    url = "https://raw.githubusercontent.com/theRealPadster/spicetify-hide-podcasts/v3.1.4/hidePodcasts.js";
+    hash = "sha256-oV3scKfSFNsyXXIT9bbOqPOJ1M661xTYuPoAoi+HuXE=";
+  };
 in
 {
   # Spotify is installed as a **user** Flatpak (not spicetify-nix, not pkgs.spotify)
@@ -51,6 +59,7 @@ in
   home.packages = [ pkgs.spicetify-cli ];
 
   xdg.configFile."spicetify/Themes/text/user.css".source = "${spicetifyThemes}/text/user.css";
+  xdg.configFile."spicetify/Extensions/hidePodcasts.js".source = hidePodcasts;
 
   # Defensive: re-assert writability of the OSTree app tree after each rebuild.
   # Flatpak re-deploys a fresh read-only tree on every Spotify update (repointing
@@ -80,6 +89,7 @@ in
       prefs_path "${prefsPath}" \
       current_theme text \
       color_scheme Matugen \
-      inject_css 1 replace_colors 1 overwrite_assets 1
+      inject_css 1 replace_colors 1 overwrite_assets 1 \
+      extensions hidePodcasts.js
   '';
 }

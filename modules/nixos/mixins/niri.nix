@@ -94,6 +94,23 @@ in
     # niri.service, BindsTo graphical-session.target) — no uwsm.
     programs.niri.enable = true;
 
+    # Exempt the compositor from the Mesa-only EGL pin that
+    # users/kyandesutter/mixins/niri.nix pushes into environment.d for every
+    # user service (igpuPins): when docked, niri's render device IS the nvidia
+    # node, and a Mesa-only vendor list makes its EGL init fail — the dGPU's
+    # outputs are never driven and the desk monitor sits on the dead boot
+    # console (looks like a hang on "a start job is running…"). Unit-level
+    # Environment= overrides the manager's environment.d, so only niri sees
+    # the full vendor list; clients it spawns still get the pin from niri's
+    # own environment block.
+    systemd.user.services.niri.environment."__EGL_VENDOR_LIBRARY_FILENAMES" =
+      lib.mkIf config.kyan.nvidia.enable (
+        lib.concatStringsSep ":" [
+          "/run/opengl-driver/share/glvnd/egl_vendor.d/10_nvidia.json"
+          "/run/opengl-driver/share/glvnd/egl_vendor.d/50_mesa.json"
+        ]
+      );
+
     # xdg portals: niri routes screencast through xdg-desktop-portal-gnome and
     # the rest through gtk (programs.niri wires the packages; this pins the
     # routing). gnome-keyring's Secret portal is gated `UseIn=gnome`, and

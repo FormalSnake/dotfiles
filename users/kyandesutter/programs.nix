@@ -67,12 +67,19 @@
       # launcher click spawns another copy — and the workspace-4 window rule
       # hides that it's already running. Hold a flock for the app's lifetime
       # (fd 9 survives the exec); later launches focus the live window instead.
+      # Wrap the package's own entrypoint under a fresh name instead of
+      # wrapProgram-ing the symlinkJoin copy in place: the moved-aside file's
+      # basename becomes argv0 (upstream's inner wrapper re-execs with -a "$0")
+      # and GTK derives the Wayland app-id from it — a ".bluebubbles-wrapped_"
+      # app-id breaks the niri workspace-4/tiling rules and the focus fallback
+      # below, which all match ^[Bb]lue[Bb]ubbles$.
       (symlinkJoin {
         name = "bluebubbles-wrapped";
         paths = [ bluebubbles ];
         nativeBuildInputs = [ makeWrapper ];
         postBuild = ''
-          wrapProgram $out/bin/bluebubbles \
+          rm $out/bin/bluebubbles
+          makeWrapper ${bluebubbles}/bin/bluebubbles $out/bin/bluebubbles \
             --prefix GIO_EXTRA_MODULES : ${glib-networking}/lib/gio/modules \
             --run ${lib.escapeShellArg ''
               exec 9>"''${XDG_RUNTIME_DIR:-/tmp}/bluebubbles.lock"

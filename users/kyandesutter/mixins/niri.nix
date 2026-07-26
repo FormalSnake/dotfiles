@@ -19,6 +19,10 @@ let
   # Note this does NOT make RTD3 viable — niri itself holds the dGPU by
   # design (see modules/nixos/mixins/power.nix) — it only keeps apps from
   # waking it and wasting its VRAM.
+  # niri.service itself is EXEMPT from the EGL pin (unit-level Environment=
+  # override in modules/nixos/mixins/niri.nix): when docked its render device
+  # is the nvidia node, and a Mesa-only vendor list breaks its EGL init,
+  # leaving the dGPU outputs undriven (desk monitor stuck on the boot console).
   igpuPins = {
     LIBVA_DRIVER_NAME = "iHD";
     "__EGL_VENDOR_LIBRARY_FILENAMES" = "/run/opengl-driver/share/glvnd/egl_vendor.d/50_mesa.json";
