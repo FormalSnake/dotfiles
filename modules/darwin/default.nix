@@ -16,6 +16,7 @@
       ./mixins/obsidian-scan-watcher.nix
       ./mixins/obsidian-note-watcher.nix
       ./mixins/obsidian-livesync-daemon.nix
+      ./mixins/portless-proxy.nix
       ./profiles
     ];
   };
