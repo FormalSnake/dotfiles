@@ -22,8 +22,9 @@
   # underline,strikeOut,fixedPitch,rawMode); Qt6 maps the legacy weight 50 onto
   # its own 400. The quotes are load-bearing — QSettings splits an unquoted
   # comma-separated value into a QStringList and .toString() on that is empty.
-  # `fixed` is 12pt against `general`'s 11 for the same reason ghostty runs a
-  # size up: MEK Mono's advance is 450/1000em.
+  # `fixed` sits a point under `general` because MEK Mono and MEK Sans share an
+  # x-height (500/1000em) — matched point sizes would make the mono face read
+  # oversized next to the UI text, which is also why ghostty stayed at 10.
   xdg.configFile."qt6ct/qt6ct.conf".text = ''
     [Appearance]
     style=Fusion
@@ -34,7 +35,7 @@
 
     [Fonts]
     general="MEK Sans,11,-1,5,50,0,0,0,0,0"
-    fixed="MEK Mono,12,-1,5,50,0,0,0,0,0"
+    fixed="MEK Mono,10,-1,5,50,0,0,0,0,0"
   '';
   xdg.configFile."qt5ct/qt5ct.conf".text = ''
     [Appearance]
@@ -46,6 +47,6 @@
 
     [Fonts]
     general="MEK Sans,11,-1,5,50,0,0,0,0,0"
-    fixed="MEK Mono,12,-1,5,50,0,0,0,0,0"
+    fixed="MEK Mono,10,-1,5,50,0,0,0,0,0"
   '';
 }

@@ -26,11 +26,12 @@ in
       # every TUI frame, the fish prompt's OS logo and the backtick (U+0060,
       # genuinely absent from MEK Mono's cmap).
       #
-      # 12 rather than 10 because MEK Mono's advance is 450/1000em against
-      # GeistMono's 600 — at the old size the cell is a quarter narrower and the
-      # text reads small.
+      # Size stays 10: MEK Mono's advance is 450/1000em against GeistMono's 600,
+      # so the grid gets denser, but the em box and x-height (500 vs 530) are
+      # near-identical — scaling up to match the old cell width just makes every
+      # glyph and line 20% taller.
       font-family = [ "MEK Mono" "GeistMono Nerd Font" ];
-      font-size = 12;
+      font-size = 10;
 
       cursor-style = "block";
       cursor-style-blink = false;
