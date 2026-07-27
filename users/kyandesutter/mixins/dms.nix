@@ -48,57 +48,6 @@ let
     '';
   };
 
-  # Applies the matugen-rendered COSMIC ThemeBuilder (templates.cosmic below)
-  # to the libcosmic apps from mixins/cosmic-apps.nix. Three jobs matugen
-  # can't do itself:
-  #   1. Normalize colour channels: matugen only emits 0-255 ints, cosmic's
-  #      RON wants 0-1 floats. Idempotent — normalized channels contain a
-  #      dot and no longer match the int pattern.
-  #   2. Match the active mode: the template body is the Dark palette
-  #      variant; in light mode flip it to Light (the colour *values* are
-  #      already right — `.default` tokens track the mode) and keep cosmic's
-  #      Mode flag in step with DMS, since `appearance import` only writes
-  #      the variant the file declares, never the Dark/Light toggle apps
-  #      select by.
-  #   3. Import: `cosmic-settings appearance import` derives the full theme
-  #      from the builder and writes com.system76.CosmicTheme.{Dark,Light};
-  #      running libcosmic apps watch those files and re-colour live.
-  # Runs inside DMS's systemd user service like the other hooks (session
-  # DBus available for gsettings; DMS sets color-scheme on every re-theme —
-  # see the dark-mode block in mixins/niri.nix).
-  cosmicThemeApply = pkgs.writeShellApplication {
-    name = "cosmic-theme-apply";
-    runtimeInputs = [
-      pkgs.gawk
-      pkgs.glib
-      pkgs.gnused
-      pkgs.coreutils
-      pkgs.cosmic-settings
-    ];
-    text = ''
-      f="''${1:?usage: cosmic-theme-apply <builder.ron>}"
-
-      gawk 'match($0, /^([[:space:]]*)(red|green|blue): ([0-9]+),$/, m) \
-              { printf "%s%s: %.8f,\n", m[1], m[2], m[3] / 255; next } { print }' \
-        "$f" > "$f.tmp" && mv "$f.tmp" "$f"
-
-      scheme="$(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null || echo prefer-dark)"
-      case "$scheme" in
-        *prefer-dark*) is_dark=true ;;
-        *)
-          is_dark=false
-          sed -i 's/palette: Dark((/palette: Light((/' "$f"
-          ;;
-      esac
-
-      mode_dir="$HOME/.config/cosmic/com.system76.CosmicTheme.Mode/v1"
-      mkdir -p "$mode_dir"
-      printf '%s' "$is_dark" > "$mode_dir/is_dark"
-
-      cosmic-settings appearance import "$f"
-    '';
-  };
-
   # Seed for ~/.config/DankMaterialShell/settings.json (activation block below):
   #
   #   - idle timeouts: disables every idle monitor DMS's IdleService.qml
@@ -511,7 +460,6 @@ in
     "matugen/templates/yazi-flavor.toml.tmpl".source = ../matugen-templates/yazi-flavor.toml.tmpl;
     "matugen/templates/wallpaper-path.tmpl".source = ../matugen-templates/wallpaper-path.tmpl;
     "matugen/templates/zen-vars.json.tmpl".source = ../matugen-templates/zen-vars.json.tmpl;
-    "matugen/templates/cosmic.theme.ron.tmpl".source = ../matugen-templates/cosmic.theme.ron.tmpl;
 
     # DMS reads ~/.config/matugen/config.toml on every re-theme and splices its
     # [config] and [templates] sections verbatim into the matugen invocation it
@@ -633,17 +581,6 @@ in
       [templates.zen]
       input_path = "~/.config/matugen/templates/zen-vars.json.tmpl"
       output_path = "~/.config/zen/default/chrome/matugen-vars.json"
-
-      # COSMIC (libcosmic) apps — mixins/cosmic-apps.nix. Renders a COSMIC
-      # ThemeBuilder; the hook (cosmicThemeApply above) normalizes channels,
-      # matches the active mode, and applies it headlessly via
-      # `cosmic-settings appearance import` — running libcosmic apps watch
-      # the derived config and re-colour live. The template also pins every
-      # corner radius to 0 (square system).
-      [templates.cosmic]
-      input_path = "~/.config/matugen/templates/cosmic.theme.ron.tmpl"
-      output_path = "~/.cache/dank/cosmic.theme.ron"
-      post_hook = "${cosmicThemeApply}/bin/cosmic-theme-apply ${config.home.homeDirectory}/.cache/dank/cosmic.theme.ron || true"
     '';
   };
 
