@@ -364,9 +364,9 @@ in
     #
     #   1. filter#0 Low-shelf — the bass BOOST + all the headroom. input-gain -8 dB
     #      pulls the whole signal down (AutoEq's own -3.1 dB preamp is subsumed
-    #      here), then +6 dB below ~90 Hz brings the sub-bass back up to roughly
-    #      unity. Net: sub-bass ≈ 0 dB, everything else ≈ -8 dB → bass sits ~6-8 dB
-    #      hotter than the rest with clean headroom and no clipping. The AirPods
+    #      here), then +8 dB below ~90 Hz brings the sub-bass back up to unity.
+    #      Net: sub-bass ≈ 0 dB, everything else ≈ -8 dB → bass sits 8 dB hotter
+    #      than the rest, still peaking at unity so nothing clips. The AirPods
     #      have real sub-bass extension (unlike the 2" Pebbles), so this is a
     #      lower, tighter shelf (90 Hz) aimed at kick/sub PUNCH rather than midbass
     #      mud. Want more thump? Raise `gain`. Too quiet overall? Turn the volume
@@ -393,7 +393,7 @@ in
           frequency = 90.0;
           width = 4.0;
           quality = 0.0;
-          gain = 6.0; # sub-bass lift below ~90 Hz — raise for more thump
+          gain = 8.0; # sub-bass lift below ~90 Hz — raise for more thump (with input-gain to match)
           balance = 0.0;
         };
 
