@@ -112,7 +112,10 @@ let
   # block (unlike customThemeFile these are never absent — DMS ships defaults —
   # so a back-fill would never fire).
   dmsFonts = {
-    fontFamily = "MEK Sans";
+    # MEK Mono on both, not MEK Sans on the UI side: the bar is short labels,
+    # clocks and counters at one size, which is exactly what the mono face is
+    # for — and it keeps the shell reading as one surface with the terminal.
+    fontFamily = "MEK Mono";
     monoFontFamily = "MEK Mono";
   };
 
