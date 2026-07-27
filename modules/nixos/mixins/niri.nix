@@ -237,15 +237,18 @@ in
       font-awesome
     ];
 
-    # Make Geist / GeistMono the default sans/monospace for the whole system
+    # Make MEK Sans / MEK Mono the default sans/monospace for the whole system
     # (GTK apps, anything resolving the generic sans-serif/monospace families).
-    # Noto Serif fills the serif generic, and "Noto Color Emoji" is appended to
-    # every family so emoji render even in apps that don't consult fontconfig's
-    # emoji generic directly (which is why emoji weren't showing up before).
+    # Geist/GeistMono stay directly behind them: the MEK faces carry no
+    # box-drawing, powerline or Nerd Font glyphs, so TUI frames and the fish
+    # prompt's OS logo resolve through GeistMono instead of dropping to tofu.
+    # MEK has no serif, so Noto Serif still fills that generic. "Noto Color
+    # Emoji" is appended to every family so emoji render even in apps that don't
+    # consult fontconfig's emoji generic directly.
     fonts.fontconfig.defaultFonts = {
-      sansSerif = [ "Geist" "Noto Sans" "Noto Color Emoji" ];
+      sansSerif = [ "MEK Sans" "Geist" "Noto Sans" "Noto Color Emoji" ];
       serif = [ "Noto Serif" "Noto Color Emoji" ];
-      monospace = [ "GeistMono Nerd Font" "Noto Sans Mono" "Noto Color Emoji" ];
+      monospace = [ "MEK Mono" "GeistMono Nerd Font" "Noto Sans Mono" "Noto Color Emoji" ];
       emoji = [ "Noto Color Emoji" ];
     };
 

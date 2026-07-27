@@ -898,6 +898,11 @@ in
   #   • gtk-application-prefer-dark-theme in settings.ini — the X11/XWayland
   #     fallback (no xsettingsd here). DMS's gtk theming only touches
   #     gtk.css + gsettings/dconf, never settings.ini.
+  #   • gtk.font — the UI font (gtk-font-name in both settings.ini files).
+  #     GTK3 under Wayland and GTK4 read it from there; GNOME/libadwaita apps
+  #     read org.gnome.desktop.interface instead, so the same pair is written to
+  #     dconf below. Without both, half the GTK apps stay on the fontconfig
+  #     sans-serif default and the desktop looks mixed.
   #   • gtk{3,4}.extraCss — own gtk.css declaratively so it holds ONLY the
   #     dank-colors import. DMS writes dank-colors.css but never gtk.css, so
   #     an unmanaged gtk.css silently accumulates cruft: stale @define-color
@@ -913,9 +918,22 @@ in
       name = "Colloid-Dark";
       package = pkgs.colloid-icon-theme;
     };
+    font = {
+      name = "MEK Sans";
+      size = 11;
+    };
     gtk3.extraConfig.gtk-application-prefer-dark-theme = 1;
     gtk4.extraConfig.gtk-application-prefer-dark-theme = 1;
     gtk3.extraCss = ''@import url("dank-colors.css");'';
     gtk4.extraCss = ''@import url("dank-colors.css");'';
+  };
+
+  # The GSettings half of the GTK font (see the gtk block above). DMS writes
+  # gtk-theme and color-scheme into this same schema at runtime; these two keys
+  # are disjoint from those, so neither side clobbers the other.
+  dconf.settings."org/gnome/desktop/interface" = {
+    font-name = "MEK Sans 11";
+    monospace-font-name = "MEK Mono 12";
+    document-font-name = "MEK Sans 11";
   };
 }

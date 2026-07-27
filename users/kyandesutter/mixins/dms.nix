@@ -107,6 +107,15 @@ let
   # that staying true across DMS updates.
   customThemeFile = "${config.home.homeDirectory}/.config/DankMaterialShell/flexoki-theme.json";
 
+  # Pinned in one place because they're written twice: into the first-session
+  # seed below, and force-set into an existing settings.json by the activation
+  # block (unlike customThemeFile these are never absent — DMS ships defaults —
+  # so a back-fill would never fire).
+  dmsFonts = {
+    fontFamily = "MEK Sans";
+    monoFontFamily = "MEK Mono";
+  };
+
   settingsSeed = pkgs.writeText "dms-settings-seed.json" (
     builtins.toJSON {
       acMonitorTimeout = 0;
@@ -119,6 +128,10 @@ let
       osdPowerProfileEnabled = true;
       inherit customThemeFile;
       currentThemeName = "dynamic";
+      # DMS names its own font families (defaults "Inter Variable"/"Fira Code")
+      # instead of resolving the fontconfig generics, so the bar and every popout
+      # need these set explicitly to match the rest of the desktop.
+      inherit (dmsFonts) fontFamily monoFontFamily;
       cornerRadius = 0;
       showWorkspaceName = true;
       showOccupiedWorkspacesOnly = true;
@@ -607,6 +620,7 @@ in
     else
       tmp="$(mktemp "$settings.XXXXXX")"
       ${pkgs.jq}/bin/jq 'if has("customThemeFile") then . else . + {customThemeFile: "${customThemeFile}"} end' "$settings" \
+        | ${pkgs.jq}/bin/jq --argjson fonts ${lib.escapeShellArg (builtins.toJSON dmsFonts)} '. + $fonts' \
         | ${pkgs.jq}/bin/jq -f ${./dms-bar-plugins.jq} > "$tmp"
       if ${pkgs.jq}/bin/jq -e --slurpfile a "$tmp" '. == $a[0]' "$settings" >/dev/null; then
         rm -f "$tmp"
@@ -615,6 +629,15 @@ in
         run mv "$tmp" "$settings"
       fi
     fi
+    # A running shell holds settings in memory and rewrites the file on its next
+    # save, so the edit above only survives if DMS is told about it too. Both
+    # keys are pushed unconditionally (setting a value DMS already has is a
+    # no-op) and the whole thing is best-effort: no session, no IPC socket.
+    ${lib.concatStringsSep "\n" (
+      lib.mapAttrsToList (
+        k: v: ''${dmsPackage}/bin/dms ipc call settings set ${k} ${lib.escapeShellArg v} >/dev/null 2>&1 || true''
+      ) dmsFonts
+    )}
   '';
 
   # plugin_settings.json holds each plugin's enabled flag plus its own

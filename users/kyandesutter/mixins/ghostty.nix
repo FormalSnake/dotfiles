@@ -20,8 +20,17 @@ in
     enableFishIntegration = false;
 
     settings = {
-      font-family = "GeistMono Nerd Font";
-      font-size = 10;
+      # Repeated font-family keys are ghostty's fallback chain (home-manager
+      # renders a list as duplicate keys). MEK Mono has no box-drawing,
+      # powerline or Nerd Font glyphs, so GeistMono sits behind it and picks up
+      # every TUI frame, the fish prompt's OS logo and the backtick (U+0060,
+      # genuinely absent from MEK Mono's cmap).
+      #
+      # 12 rather than 10 because MEK Mono's advance is 450/1000em against
+      # GeistMono's 600 — at the old size the cell is a quarter narrower and the
+      # text reads small.
+      font-family = [ "MEK Mono" "GeistMono Nerd Font" ];
+      font-size = 12;
 
       cursor-style = "block";
       cursor-style-blink = false;
