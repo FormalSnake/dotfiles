@@ -20,8 +20,11 @@ git-tracked files, so an unstaged file is invisible to the build.
 `sudo -n` succeeds passwordless when the invoking environment carries an SSH
 agent holding one of the three machine keys — which Claude's shell on the g815
 always does (gcr agent at `$SSH_AUTH_SOCK` holds the g815 on-disk key), and
-which SSH sessions between our hosts do via agent forwarding. So Claude can
-rebuild ALL hosts without owner hand-off:
+which SSH sessions between our hosts do via agent forwarding. On the macbook
+the agent is no longer required at all (since 2026-07-27): `kyandesutter` has
+blanket `NOPASSWD: ALL` in sudoers, so ANY process running as that user sudos
+without a prompt, forwarded key or not. So Claude can rebuild ALL hosts
+without owner hand-off:
 - g815 (local): `sudo -n nixos-rebuild switch --flake .#g815`
 - e1504g: `ssh e1504g 'cd ~/.config/nix && git pull && sudo -n nixos-rebuild switch --flake .#e1504g'`
 - macbook: `ssh macbook 'cd ~/.config/nix && git pull && sudo -n /run/current-system/sw/bin/darwin-rebuild switch --flake .#macbook'`
@@ -51,8 +54,9 @@ in one step; do one host, verify, then the next.
 
 `pam_ssh_agent_auth` is a `sufficient` auth module for sudo on every host: it
 accepts sudo iff the session's `SSH_AUTH_SOCK` agent holds a key from the
-machine-key list. Console sudo still password/Touch-ID prompts. The moving
-parts, all load-bearing:
+machine-key list. Console sudo still password/Touch-ID prompts on the Linux
+hosts; on the mac `kyandesutter` is covered by the NOPASSWD line below
+instead, so nothing prompts there. The moving parts, all load-bearing:
 - **Machine-key lists**: `modules/nixos/mixins/users.nix` (Linux hosts, PAM
   reads `/etc/ssh/authorized_keys.d/%u`) and
   `modules/darwin/mixins/remote-access.nix` (mac). On the mac PAM can NOT read
@@ -60,6 +64,11 @@ parts, all load-bearing:
   installs a real root-owned copy at `/etc/ssh/sudo_authorized_keys`.
 - **`Defaults noninteractive_auth`** (sudoers, both platforms): without it
   `sudo -n` refuses before PAM even runs.
+- **`kyandesutter ALL=(ALL) NOPASSWD: ALL`** (mac only, `remote-access.nix`):
+  covers local non-interactive shells that carry no forwarded agent — the case
+  pam_ssh_agent_auth can't help with. It makes that module redundant for this
+  one account on the mac; the module still gates every other user arriving
+  over SSH, so don't drop it.
 - **Agent forwarding** (`users/kyandesutter/mixins/ssh.nix`): our three host
   entries set `ForwardAgent yes` + `IdentityAgent SSH_AUTH_SOCK`. The latter
   MUST NOT become `none` (that silently disables forwarding) or be removed
