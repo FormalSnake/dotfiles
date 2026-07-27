@@ -362,16 +362,21 @@ in
     # these. Loaded whenever the AirPods are the default sink, via ee-preset-sync's
     # `bluez_output.14_14_7D_E7_8C_E3.*` → airpods-bass mapping.
     #
-    #   1. filter#0 Low-shelf — the bass BOOST + all the headroom. input-gain -8 dB
-    #      pulls the whole signal down (AutoEq's own -3.1 dB preamp is subsumed
-    #      here), then +8 dB below ~90 Hz brings the sub-bass back up to unity.
-    #      Net: sub-bass ≈ 0 dB, everything else ≈ -8 dB → bass sits 8 dB hotter
-    #      than the rest, still peaking at unity so nothing clips. The AirPods
-    #      have real sub-bass extension (unlike the 2" Pebbles), so this is a
-    #      lower, tighter shelf (90 Hz) aimed at kick/sub PUNCH rather than midbass
-    #      mud. Want more thump? Raise `gain`. Too quiet overall? Turn the volume
-    #      up (that's the headroom working). Want them neutral again? Bypass
-    #      filter#0 and you're left with just the flat AutoEq correction.
+    #   1. filter#0 Low-shelf — the bass BOOST plus the headroom for the WHOLE
+    #      chain. input-gain -12 dB pulls everything down, then +10 dB below
+    #      ~100 Hz brings the low end back. The preamp is 2 dB deeper than the
+    #      shelf on purpose: equalizer#0 runs AFTER this and adds ~+2 dB more in
+    #      the bass on its own (band3's +3.3 dB bell at 75 Hz, less band0's
+    #      -1.2 dB shelf), so cancelling the shelf alone would push the sub band
+    #      past 0 dBFS and clip at the float→int conversion feeding the bluetooth
+    #      encoder. Net: bass peaks ≈ -1 dB, everything else ≈ -12 dB → the low
+    #      end sits ~11 dB out front and still never clips. The AirPods have real
+    #      sub-bass extension (unlike the 2" Pebbles), and the 100 Hz corner buys
+    #      kick weight as well as sub — if it ever turns boomy or thickens vocals,
+    #      pull `frequency` back to 90. Want more thump? Raise `gain` AND drop
+    #      `input-gain` by the same amount. Too quiet overall? Turn the volume up
+    #      (that's the headroom working). Want them neutral again? Bypass filter#0
+    #      and you're left with just the flat AutoEq correction.
     #   2. equalizer#0 — the AutoEq Harman-neutral correction (10 bands).
     extraPresets.airpods-bass = {
       output = {
@@ -383,17 +388,17 @@ in
 
         "filter#0" = {
           bypass = false;
-          "input-gain" = -8.0; # preamp cut: bass-boost headroom + AutoEq's -3.1 dB
+          "input-gain" = -12.0; # headroom for the shelf AND equalizer#0's own bass gain
           "output-gain" = 0.0;
           type = "Low-shelf";
           mode = "RLC (BT)";
           "equal-mode" = "IIR";
           slope = "x1";
           decramp = "Off";
-          frequency = 90.0;
+          frequency = 100.0;
           width = 4.0;
           quality = 0.0;
-          gain = 8.0; # sub-bass lift below ~90 Hz — raise for more thump (with input-gain to match)
+          gain = 10.0; # low-end lift below ~100 Hz — raise for more thump (with input-gain to match)
           balance = 0.0;
         };
 
