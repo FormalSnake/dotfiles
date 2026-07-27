@@ -39,11 +39,14 @@
       # segment: three machines reached over ssh/mosh means the prompt has to
       # say which one you're on. Colours are ANSI names, not hex, so they ride
       # the terminal palette — matugen-derived on Linux, Flexoki on macOS.
+      # Line one degrades by $COLUMNS so it still fits a phone ssh client.
       fish_prompt = {
-        description = "Two-line prompt: user@host in path, then └─>>";
+        description = "Two-line prompt: user@host in path on branch, then └─>>";
         body = ''
           set -l last_status $status
           set -l normal (set_color normal)
+          set -l cols $COLUMNS
+          test -z "$cols"; and set cols 80
 
           set -l host (string lower (string replace -r '\..*$' "" -- $hostname))
           set -l host_color normal
@@ -57,52 +60,81 @@
                   set host_color green
           end
 
-          echo -n (set_color -o cyan)$USER$normal
-          echo -n (set_color brblack)@$normal
-          echo -n (set_color -o $host_color)$host$normal
+          # Phone/tablet ssh clients hand out ~40 columns. Shed the parts that
+          # carry least information first — the username never varies, and on a
+          # 40-column client every session is remote — so host, path tail and
+          # git state are the last things to go.
+          set -l user_txt "$USER@"
+          test $cols -lt 60; and set user_txt ""
+
+          set -l ssh_txt ""
           if set -q SSH_CONNECTION; or set -q SSH_TTY; or set -q SSH_CLIENT
-              echo -n (set_color brblack)" ssh"$normal
+              set ssh_txt " ssh"
+              test $cols -lt 40; and set ssh_txt ""
           end
 
+          set -l depth 3
+          test $cols -lt 60; and set depth 2
+          test $cols -lt 40; and set depth 1
           set -l dir (string replace -r '^'(string escape --style=regex -- $HOME) '~' -- $PWD)
           set -l parts (string split / $dir)
-          if test (count $parts) -gt 3
-              set dir …/(string join / $parts[-3..-1])
+          if test (count $parts) -gt $depth
+              set dir …/(string join / $parts[(math 0 - $depth)..-1])
           end
-          echo -n " in "(set_color -o yellow)$dir$normal
 
-          if not test -w $PWD
-              echo -n (set_color red)" 🔒"$normal
-          end
+          set -l lock ""
+          not test -w $PWD; and set lock " 🔒"
 
           # One `git status --porcelain=v2 --branch` feeds branch, dirty flags
           # and ahead/behind — a git call per field makes the prompt lag.
+          set -l branch ""
+          set -l flags ""
+          set -l ab_txt ""
           set -l git_lines (command git status --porcelain=v2 --branch 2>/dev/null)
-          and set -l branch (string replace -f '# branch.head ' "" -- $git_lines)
+          and set branch (string replace -f '# branch.head ' "" -- $git_lines)
           if test -n "$branch"
               if test "$branch" = "(detached)"
                   set branch (string sub -l7 -- (string replace -f '# branch.oid ' "" -- $git_lines))
               end
-              echo -n (set_color brblack)" on "$normal(set_color -o magenta)$branch$normal
+              test $cols -lt 50; and set branch (string shorten -m12 -- $branch)
 
               # porcelain v2 changed entries are `1|2 <XY> …`: X staged, Y unstaged.
               set -l xy (string replace -rf '^[12] (\S\S) .*' '$1' -- $git_lines)
-              set -l flags
-              string match -rq '^u ' -- $git_lines; and set flags $flags "="
-              string match -rq '^[^.]' -- $xy; and set flags $flags "+"
-              string match -rq '^.[^.]' -- $xy; and set flags $flags "!"
-              string match -rq '^\? ' -- $git_lines; and set flags $flags "?"
-              test (count $flags) -gt 0
-              and echo -n (set_color -o red)" ["(string join "" $flags)"]"$normal
+              set -l f
+              string match -rq '^u ' -- $git_lines; and set f $f "="
+              string match -rq '^[^.]' -- $xy; and set f $f "+"
+              string match -rq '^.[^.]' -- $xy; and set f $f "!"
+              string match -rq '^\? ' -- $git_lines; and set f $f "?"
+              test (count $f) -gt 0; and set flags " ["(string join "" $f)"]"
 
               set -l ab (string replace -f '# branch.ab ' "" -- $git_lines)
               if test -n "$ab"
-                  set -l parts (string split " " -- $ab)
-                  set -l ahead (string sub -s2 -- $parts[1])
-                  set -l behind (string sub -s2 -- $parts[2])
-                  test $ahead != 0; and echo -n (set_color cyan)" ⇡$ahead"$normal
-                  test $behind != 0; and echo -n (set_color cyan)" ⇣$behind"$normal
+                  set -l p (string split " " -- $ab)
+                  set -l ahead (string sub -s2 -- $p[1])
+                  set -l behind (string sub -s2 -- $p[2])
+                  test $ahead != 0; and set ab_txt "$ab_txt ⇡$ahead"
+                  test $behind != 0; and set ab_txt "$ab_txt ⇣$behind"
               end
+          end
+
+          # Last resort once the tiers above are exhausted: eat into the path
+          # from the left, because a wrapped first line breaks the └─> layout.
+          set -l branch_txt ""
+          test -n "$branch"; and set branch_txt " on $branch"
+          set -l over (math (string length -- "$user_txt$host$ssh_txt in $dir$lock$branch_txt$flags$ab_txt") - $cols + 1)
+          if test $over -gt 0; and test (string length -- $dir) -gt (math $over + 3)
+              set dir …(string sub -s (math $over + 1) -- $dir)
+          end
+
+          test -n "$user_txt"; and echo -n (set_color -o cyan)$USER$normal(set_color brblack)@$normal
+          echo -n (set_color -o $host_color)$host$normal
+          test -n "$ssh_txt"; and echo -n (set_color brblack)$ssh_txt$normal
+          echo -n (set_color brblack)" in "$normal(set_color -o yellow)$dir$normal
+          test -n "$lock"; and echo -n (set_color red)$lock$normal
+          if test -n "$branch"
+              echo -n (set_color brblack)" on "$normal(set_color -o magenta)$branch$normal
+              test -n "$flags"; and echo -n (set_color -o red)$flags$normal
+              test -n "$ab_txt"; and echo -n (set_color cyan)$ab_txt$normal
           end
 
           echo
