@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, inputs, ... }:
 let
   # Live working-copy path (NOT the nix store).
   # mkOutOfStoreSymlink points at this, so edits in the repo are live without rebuilding.
@@ -9,6 +9,10 @@ in
 {
   programs.claude-code = {
     enable = true;
+
+    # claude-code-nix instead of pkgs.claude-code: nixpkgs lags upstream by
+    # days, and new models are gated on current CLI versions.
+    package = inputs.claude-code-nix.packages.${pkgs.system}.default;
 
     # known_marketplaces.json is left imperative — the CLI's `claude /plugin
     # marketplace add ...` writes it directly, which conflicts with HM-owned

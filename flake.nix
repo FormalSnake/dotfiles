@@ -72,6 +72,15 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # claude-code, tracked at upstream release cadence (the flake's CI bumps it
+    # hourly; nixpkgs lags by days). No `inputs.nixpkgs.follows`: its cachix
+    # cache (claude-code.cachix.org) is keyed to its own nixpkgs pin, so
+    # following ours would force local rebuilds. Update with
+    # `just ui claude-code-nix`.
+    claude-code-nix = {
+      url = "github:sadjow/claude-code-nix";
+    };
+
     # Prebuilt nix-index database (weekly) — powers comma and the
     # command-not-found handler without a local `nix-index` run.
     nix-index-database = {

@@ -6,6 +6,7 @@
     ./mixins/niri.nix
     ./mixins/qt.nix
     ./mixins/desktop-apps.nix
+    ./mixins/cosmic-apps.nix
     ./mixins/autostart.nix
     ./mixins/macbook-mount.nix
     ./mixins/airpods.nix

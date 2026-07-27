@@ -9,10 +9,15 @@
       "nix-command"
       "flakes"
     ];
-    # chaotic (CachyOS kernel / scx) binary cache so we don't compile kernels.
-    substituters = [ "https://nyx-cache.chaotic.cx/" ];
+    # chaotic (CachyOS kernel / scx) binary cache so we don't compile kernels;
+    # claude-code cache so the claude-code-nix input never builds locally.
+    substituters = [
+      "https://nyx-cache.chaotic.cx/"
+      "https://claude-code.cachix.org"
+    ];
     trusted-public-keys = [
       "nyx-cache.chaotic.cx:dJxTrgMC3V3cFfyIiBQDQorG6k1LsqurH/srpMSq7qk="
+      "claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk="
     ];
     trusted-users = [
       "root"
