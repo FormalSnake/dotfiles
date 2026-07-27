@@ -47,8 +47,10 @@ in
 
   # Passwordless sudo for SSH sessions from our own machines: pam_ssh_agent_auth
   # accepts sudo when the forwarded agent (the ssh mixin sets ForwardAgent only
-  # for our hosts) holds one of the machine keys. Local sudo still uses
-  # Touch ID / password. The module can't read the nix-darwin-managed
+  # for our hosts) holds one of the machine keys. Local sudo for kyandesutter
+  # is NOPASSWD (below) so non-interactive shells — coding agents included —
+  # can sudo without a TTY; the agent module still covers any other account
+  # arriving over SSH. The module can't read the nix-darwin-managed
   # authorized-keys file: its secure_filename() check walks the resolved path
   # and rejects /nix/store (group-writable), so activation installs a real
   # root-owned copy outside the store for it. noninteractive_auth makes
@@ -60,6 +62,7 @@ in
   security.sudo.extraConfig = ''
     Defaults env_keep+=SSH_AUTH_SOCK
     Defaults noninteractive_auth
+    kyandesutter ALL=(ALL) NOPASSWD: ALL
   '';
 
   # Best-effort enable of Remote Login (sshd) on activation. postActivation.text
