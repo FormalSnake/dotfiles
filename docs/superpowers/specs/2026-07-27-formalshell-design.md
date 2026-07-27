@@ -161,7 +161,14 @@ pinning becomes a shell feature, not an external `inotifywait` systemd unit.
 screen's frozen wallpaper backdrop), no shadows, 2px borders, monospace
 everywhere via the fontconfig `monospace` alias (system mono font change
 reflows the entire shell, no restart), Nerd Font glyphs as the icon language
-(no SVG icon set). Animation posture: snappy functional micro-feedback
+(no SVG icon set).
+
+**Visual reference (added 2026-07-27): https://www.mek.gallery/** — the
+owner's canonical look, matugen-recolored. Codified as the "ruled ledger
+grid" language in the FormalShell repo's `docs/DESIGN.md` (cells sharing
+hairline rules instead of floating cards, selection by fg/bg inversion,
+accent as full-bleed cells, uppercase meta labels, dense spacing). That doc
+binds all UI surfaces from M4 on; M9 retrofits M1–M3 surfaces. Animation posture: snappy functional micro-feedback
 (120–420ms eased color/state transitions, Omarchy's "breathing" opacity pulse
 for active-process states); no showy choreography.
 
