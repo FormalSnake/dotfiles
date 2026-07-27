@@ -1,4 +1,12 @@
 { lib, pkgs, ... }:
+let
+  # Nerd Font logo for the OS this config is built for (nf-linux-apple /
+  # nf-linux-nixos) — both Linux hosts are NixOS, so no generic-Tux case. The
+  # glyph is unconditional: every terminal we use is a Nerd Font one
+  # (GeistMono NF, see mixins/ghostty.nix), and it renders as tofu only on the
+  # bare VT console.
+  osIcon = if pkgs.stdenv.isDarwin then "" else "";
+in
 {
   programs.fish = {
     enable = true;
@@ -41,13 +49,14 @@
       # the terminal palette — matugen-derived on Linux, Flexoki on macOS.
       # Line one degrades by $COLUMNS so it still fits a phone ssh client.
       fish_prompt = {
-        description = "Two-line prompt: user@host in path on branch, then └─>>";
+        description = "Two-line prompt: os user@host in path on branch, then └─>>";
         body = ''
           set -l last_status $status
           set -l normal (set_color normal)
           set -l cols $COLUMNS
           test -z "$cols"; and set cols 80
 
+          set -l os_icon "${osIcon}"
           set -l host (string lower (string replace -r '\..*$' "" -- $hostname))
           set -l host_color normal
           switch $host
@@ -121,11 +130,12 @@
           # from the left, because a wrapped first line breaks the └─> layout.
           set -l branch_txt ""
           test -n "$branch"; and set branch_txt " on $branch"
-          set -l over (math (string length -- "$user_txt$host$ssh_txt in $dir$lock$branch_txt$flags$ab_txt") - $cols + 1)
+          set -l over (math (string length -- "$os_icon $user_txt$host$ssh_txt in $dir$lock$branch_txt$flags$ab_txt") - $cols + 1)
           if test $over -gt 0; and test (string length -- $dir) -gt (math $over + 3)
               set dir …(string sub -s (math $over + 1) -- $dir)
           end
 
+          echo -n (set_color -o $host_color)$os_icon" "$normal
           test -n "$user_txt"; and echo -n (set_color -o cyan)$USER$normal(set_color brblack)@$normal
           echo -n (set_color -o $host_color)$host$normal
           test -n "$ssh_txt"; and echo -n (set_color brblack)$ssh_txt$normal
