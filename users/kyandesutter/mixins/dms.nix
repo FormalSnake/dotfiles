@@ -63,14 +63,14 @@ let
   #   3. Import: `cosmic-settings appearance import` derives the full theme
   #      from the builder and writes com.system76.CosmicTheme.{Dark,Light};
   #      running libcosmic apps watch those files and re-colour live.
-  # Runs inside DMS's systemd user service like the other hooks; the mode is
-  # read back from dconf, where DMS publishes color-scheme on every re-theme
-  # (see the dark-mode block in mixins/niri.nix).
+  # Runs inside DMS's systemd user service like the other hooks (session
+  # DBus available for gsettings; DMS sets color-scheme on every re-theme —
+  # see the dark-mode block in mixins/niri.nix).
   cosmicThemeApply = pkgs.writeShellApplication {
     name = "cosmic-theme-apply";
     runtimeInputs = [
       pkgs.gawk
-      pkgs.dconf
+      pkgs.glib
       pkgs.gnused
       pkgs.coreutils
       pkgs.cosmic-settings
@@ -82,10 +82,7 @@ let
               { printf "%s%s: %.8f,\n", m[1], m[2], m[3] / 255; next } { print }' \
         "$f" > "$f.tmp" && mv "$f.tmp" "$f"
 
-      # dconf read, not gsettings: no schema lookup, so it works regardless
-      # of the invoking environment's XDG_DATA_DIRS. DMS writes the key via
-      # gsettings (dconf-backed) on every re-theme.
-      scheme="$(dconf read /org/gnome/desktop/interface/color-scheme 2>/dev/null || echo prefer-dark)"
+      scheme="$(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null || echo prefer-dark)"
       case "$scheme" in
         *prefer-dark*) is_dark=true ;;
         *)
