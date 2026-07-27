@@ -30,12 +30,92 @@
 
     # HM loads these natively — no fisher needed at the nix layer
     plugins = [
-      { name = "pure"; src = pkgs.fishPlugins.pure.src; }
       { name = "autopair"; src = pkgs.fishPlugins.autopair.src; }
       { name = "done"; src = pkgs.fishPlugins.done.src; }
     ];
 
     functions = {
+      # PrismLinux's pure-fish prompt (prismlinux-themes-fish), plus a host
+      # segment: three machines reached over ssh/mosh means the prompt has to
+      # say which one you're on. Colours are ANSI names, not hex, so they ride
+      # the terminal palette — matugen-derived on Linux, Flexoki on macOS.
+      fish_prompt = {
+        description = "Two-line prompt: user@host in path, then └─>>";
+        body = ''
+          set -l last_status $status
+          set -l normal (set_color normal)
+
+          set -l host (string lower (string replace -r '\..*$' "" -- $hostname))
+          set -l host_color normal
+          switch $host
+              case 'macbook*'
+                  set host macbook
+                  set host_color magenta
+              case g815
+                  set host_color blue
+              case e1504g
+                  set host_color green
+          end
+
+          echo -n (set_color -o cyan)$USER$normal
+          echo -n (set_color brblack)@$normal
+          echo -n (set_color -o $host_color)$host$normal
+          if set -q SSH_CONNECTION; or set -q SSH_TTY; or set -q SSH_CLIENT
+              echo -n (set_color brblack)" ssh"$normal
+          end
+
+          set -l dir (string replace -r '^'(string escape --style=regex -- $HOME) '~' -- $PWD)
+          set -l parts (string split / $dir)
+          if test (count $parts) -gt 3
+              set dir …/(string join / $parts[-3..-1])
+          end
+          echo -n " in "(set_color -o yellow)$dir$normal
+
+          if not test -w $PWD
+              echo -n (set_color red)" 🔒"$normal
+          end
+
+          # One `git status --porcelain=v2 --branch` feeds branch, dirty flags
+          # and ahead/behind — a git call per field makes the prompt lag.
+          set -l git_lines (command git status --porcelain=v2 --branch 2>/dev/null)
+          and set -l branch (string replace -f '# branch.head ' "" -- $git_lines)
+          if test -n "$branch"
+              if test "$branch" = "(detached)"
+                  set branch (string sub -l7 -- (string replace -f '# branch.oid ' "" -- $git_lines))
+              end
+              echo -n (set_color brblack)" on "$normal(set_color -o magenta)$branch$normal
+
+              # porcelain v2 changed entries are `1|2 <XY> …`: X staged, Y unstaged.
+              set -l xy (string replace -rf '^[12] (\S\S) .*' '$1' -- $git_lines)
+              set -l flags
+              string match -rq '^u ' -- $git_lines; and set flags $flags "="
+              string match -rq '^[^.]' -- $xy; and set flags $flags "+"
+              string match -rq '^.[^.]' -- $xy; and set flags $flags "!"
+              string match -rq '^\? ' -- $git_lines; and set flags $flags "?"
+              test (count $flags) -gt 0
+              and echo -n (set_color -o red)" ["(string join "" $flags)"]"$normal
+
+              set -l ab (string replace -f '# branch.ab ' "" -- $git_lines)
+              if test -n "$ab"
+                  set -l parts (string split " " -- $ab)
+                  set -l ahead (string sub -s2 -- $parts[1])
+                  set -l behind (string sub -s2 -- $parts[2])
+                  test $ahead != 0; and echo -n (set_color cyan)" ⇡$ahead"$normal
+                  test $behind != 0; and echo -n (set_color cyan)" ⇣$behind"$normal
+              end
+          end
+
+          echo
+          echo -n (set_color -o green)"└─>"$normal
+          if test $last_status -eq 0
+              echo -n (set_color -o green)">"$normal
+          else
+              echo -n (set_color -o red)">"$normal
+          end
+          echo -n " "
+        '';
+      };
+
       gcommit = {
         description = "Git add and commit with AI message";
         body = ''
