@@ -1,10 +1,17 @@
-{ config, lib, pkgs, inputs, ... }:
+{ config, lib, pkgs, inputs, osConfig ? { }, ... }:
 let
   # Live working-copy path (NOT the nix store).
   # mkOutOfStoreSymlink points at this, so edits in the repo are live without rebuilding.
   claudeSrc = "${config.home.homeDirectory}/.config/nix/users/kyandesutter/claude";
 
   link = sub: config.lib.file.mkOutOfStoreSymlink "${claudeSrc}/${sub}";
+
+  # The flake host name — the label ssh aliases, rebuild targets and CLAUDE.md
+  # itself use. nix-darwin leaves networking.hostName null (the mac's scutil
+  # name is "MacBook-Pro-2", which isn't the name anything else calls it), so
+  # the sole darwin host falls back to its flake attribute.
+  osHostName = (osConfig.networking or { }).hostName or null;
+  host = if osHostName == null || osHostName == "" then "macbook" else osHostName;
 in
 {
   programs.claude-code = {
@@ -30,6 +37,14 @@ in
     ".claude/AGENTS.md".source                 = link "AGENTS.md";
     ".claude/CLAUDE-cloudflare.md".source      = link "CLAUDE-cloudflare.md";
     ".claude/CLAUDE-cloudflare-mini.md".source = link "CLAUDE-cloudflare-mini.md";
+
+    # Which machine this session is on. CLAUDE.md itself can't carry it: it's one
+    # out-of-store symlink into the repo, shared byte-for-byte by all three hosts.
+    # ~/.claude/rules/*.md is loaded with the same always-on, user-level status as
+    # ~/.claude/CLAUDE.md, so a generated file here reaches every session.
+    ".claude/rules/host.md".text = ''
+      YOU ARE ON THIS HOST: ${host}
+    '';
 
     # Directory trees (still live-edit symlinks — these don't get rewritten by claude-code)
     ".claude/agents".source   = link "agents";
