@@ -10,5 +10,10 @@
   programs.fetch = {
     enable = true;
     spin = "y";
+    # Sextant shading samples coverage 2x3 per cell instead of snapping the
+    # silhouette to the character grid. No module option for it yet, so it goes
+    # in raw. Needs a terminal that draws Symbols for Legacy Computing itself —
+    # ghostty does, which is what we run everywhere.
+    extraConfig = "shading_mode=sextants\n";
   };
 }
