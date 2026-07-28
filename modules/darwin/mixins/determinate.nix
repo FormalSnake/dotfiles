@@ -8,12 +8,16 @@
   # determinateNix.customSettings if desired.
   determinateNix.enable = true;
 
-  # claude-code cache so the claude-code-nix input never builds locally
+  # claude-code and kopuz caches so neither input ever builds locally
   # (extra-* so Determinate's own default substituters are kept).
   determinateNix.customSettings = {
-    extra-substituters = [ "https://claude-code.cachix.org" ];
+    extra-substituters = [
+      "https://claude-code.cachix.org"
+      "https://kopuz.cachix.org"
+    ];
     extra-trusted-public-keys = [
       "claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk="
+      "kopuz.cachix.org-1:J2X3AnAYhKTJW5S3aCLoA1ckonQXVNZMQvhZA0YAufw="
     ];
   };
 }

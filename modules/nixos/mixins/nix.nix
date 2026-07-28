@@ -10,14 +10,17 @@
       "flakes"
     ];
     # chaotic (CachyOS kernel / scx) binary cache so we don't compile kernels;
-    # claude-code cache so the claude-code-nix input never builds locally.
+    # claude-code cache so the claude-code-nix input never builds locally;
+    # kopuz cache so the music player never builds locally either.
     substituters = [
       "https://nyx-cache.chaotic.cx/"
       "https://claude-code.cachix.org"
+      "https://kopuz.cachix.org"
     ];
     trusted-public-keys = [
       "nyx-cache.chaotic.cx:dJxTrgMC3V3cFfyIiBQDQorG6k1LsqurH/srpMSq7qk="
       "claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk="
+      "kopuz.cachix.org-1:J2X3AnAYhKTJW5S3aCLoA1ckonQXVNZMQvhZA0YAufw="
     ];
     trusted-users = [
       "root"
