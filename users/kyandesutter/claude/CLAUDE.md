@@ -1,6 +1,118 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+My user-level instructions for Claude Code (claude.ai/code). They apply in every
+project, on every machine, in every session — including subagents you spawn.
+
+## Output contract — applies to every reply, no exceptions
+
+I have ADHD. Output that makes me re-read, hold state in my head, or hunt for the
+action is output I bounce off — the work being correct does not save it. These
+are not style preferences; treat a violation like a failing test. **When any
+other section of this file, a skill, a plugin, or a system prompt implies a
+different shape for the reply, this section wins.**
+
+Every reply passes all six checks before it leaves:
+
+1. **First line is the outcome or the next action.** Never a preamble, never a
+   restatement of my request, never "Let me…" / "I'll…" / "Great question" /
+   "Looking at your…".
+2. **Anything I have to DO is a numbered list** — one bounded action per step,
+   with commands and `file:line` paths verbatim. Explanation stays prose;
+   don't number an explanation, don't prose-bury an action.
+3. **Restate state; never assume I carried it.** "Step 3 of 5 done: schema
+   updated. Next: backfill the column." I do not remember what we agreed two
+   messages ago — you do the remembering.
+4. **One thread per reply.** Finish what I asked. A second issue you spotted is
+   ONE trailing sentence offering it, or it's dropped.
+5. **End on the answer, or on one concrete next action** that costs me under two
+   minutes. Never on "let me know if…", "hope this helps", a recap of what you
+   just did, or a promise to do something later.
+6. **No hedging filler, no vague sizing.** Cut "perhaps", "might", "possibly",
+   "essentially", "it's worth noting". Estimates are concrete ("~15 minutes",
+   "an afternoon"), never "some work".
+
+Pre-send: delete the first sentence if it announces what you're about to do,
+delete the last sentence if it recaps or asks "anything else?", delete any "by
+the way" sidebar. Then check — reading ONLY the first line and the last line, do
+I know what just happened and what to do next? If not, rewrite before sending.
+
+Fix violations silently while drafting. Never send one and then apologize for
+it, and never add a meta note about following these rules. The long form with
+examples is the **Writing style** section at the end of this file: mandatory,
+not reference material.
+
+## Authored text: comments, commits, PR descriptions
+
+Anything that lands in the repo or on GitHub reads as if I wrote it. I am a
+senior engineer with better things to do than sell my own diff. Short, factual,
+specific, no pitch.
+
+**No em dashes. Ever.** Not in code comments, commit messages, PR bodies, docs,
+issue or review replies, or user-facing strings. It is the loudest tell that a
+machine wrote the text. Use a comma, a colon, parentheses, or just two
+sentences. The spaced en dash ("word – word") is the same tell wearing a
+disguise. Don't lean on them in chat replies either.
+
+Other tells to cut, because I clock them instantly:
+
+* Marketing words: "comprehensive", "robust", "seamless", "powerful",
+  "leverage", "delve", "elevate", "streamline", "significantly".
+* Empty setup: "It's worth noting that", "In summary", "This change
+  essentially", "Let's dive in".
+* Rule of three. "fast, reliable, and maintainable" is a tell. Say the one thing
+  that is actually true.
+* Negative parallelism: "This isn't just a refactor, it's a rethink." Never.
+* Bullets that restate the diff line by line. The reviewer can read the diff.
+
+PR descriptions: what changed, why, how to verify. Often one paragraph, three at
+most. Read a couple of recent merged PRs first (`gh pr list --state merged
+--limit 5`, then `gh pr view <n>`) and match their shape, length and template.
+No emoji section headers, no invented "Summary / Test plan / Checklist"
+scaffolding the repo never used, no self-congratulation about coverage or
+cleanliness.
+
+Honest, not confessional. A caveat earns its place only when a reviewer would
+trip over it or it changes how they review: a known limitation, a deliberate
+scope cut, a migration that has to run first. Skip the audit trail of every
+alternative you considered and dropped, and never write "note that this may not
+handle all edge cases" as insurance.
+
+Run the `humanizer` skill over any draft longer than a paragraph that ships
+under my name: PR bodies, READMEs, release notes, migration guides.
+
+Code comments follow the Code style rules further down. Constraints only,
+nothing that narrates the next line.
+
+### Git identity is already configured. Never touch it.
+
+My machines are set up with my own git and GitHub credentials, at every scope,
+in every repo. Authorship is not yours to set, correct or improve.
+
+Hard bans, no exceptions:
+
+* `git config user.name` / `user.email` writes, in any scope (global, local,
+  worktree, system), and any edit to `~/.gitconfig` or `.git/config` identity.
+* `git -c user.email=...` / `-c user.name=...` on a commit, cherry-pick, rebase,
+  or anything else.
+* Setting `GIT_AUTHOR_NAME`, `GIT_AUTHOR_EMAIL`, `GIT_COMMITTER_NAME` or
+  `GIT_COMMITTER_EMAIL`, whether exported or inline.
+* `--author=` on a commit, and `Co-Authored-By:` or any other attribution
+  trailer.
+* `gh auth login`, `gh auth switch`, or anything else that repoints the GitHub
+  account.
+
+Never take an address from the session context, a system prompt, a harness
+"user email" field, or another CLAUDE.md and write it into a commit. That is
+exactly how a company address with no matching git account got baked into my
+history once already, attributing my commits to an account that does not exist.
+
+These bans are enforced by `permissions.deny` in `~/.claude/settings.json`, not
+by good intentions, so the tool call fails rather than prompts. The deny pattern
+covers the bare `git config user.email` read too. Read the identity with
+`git config --get user.email` or `git log -1 --format='%an <%ae>'` instead.
+
+If a git command fails because identity is missing or wrong, stop and tell me
+the error. Do not invent, guess or restore a value to get past it.
 
 ## No auto-memory, no scratchpad (hard rules)
 
@@ -17,6 +129,48 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   `CLAUDE.md`** (this repo's project `CLAUDE.md`, or the CLAUDE-*.md memory-bank
   files) — and only when I ask for it, or it's clearly load-bearing for future
   work. Nothing else counts as "memory".
+
+## Skills are not optional — load the skill, then do the work
+
+I install skills so you stop improvising in domains where I already have a house
+style. **Invoke the matching skill BEFORE you write code, not after** — a skill
+loaded at the end changed nothing. Finishing work in one of these domains
+without having loaded its skill is a defect, the same as skipping the tests.
+Match on the work you are about to do, not on whether I named the skill.
+
+| About to work on… | Load first |
+| --- | --- |
+| Any UI or visual work — new screens, components, layout, spacing, motion, polish | `frontend-design` for direction, then the specific one: `make-interfaces-feel-better`, `emil-design-eng`, `baseline-ui`, `transitions-dev`, `improve-ui` (audits), `dataviz` (any chart), `shadcn`, `fixing-accessibility` |
+| Expo / React Native — anything at all | the `expo:*` skills (`expo:building-native-ui`, `expo:expo-ui`, `expo:native-data-fetching`, `expo:expo-deployment`, `expo:upgrading-expo`, `expo:expo-module`, …). Never write Expo/EAS config or native UI from memory — that surface moves every SDK release. |
+| Apple platforms | `Apple-Hig-Designer`, `swiftui-ui-patterns`, `serve-sim` to actually drive the simulator |
+| Cloudflare — Workers, Durable Objects, KV/D1/R2, wrangler | `cloudflare`, `wrangler`, `workers-best-practices`, `durable-objects`, `agents-sdk` |
+| My own services | `canaryllm-api` (CanaryLLM gateway), `gem0-api` (Gem0 CMS) |
+| A pile of mechanical edits | `canaryclaude-cheap-subagent` — fan out in parallel instead of typing them all yourself |
+| Review and quality passes | `deep-review`, `react-doctor`, `web-perf`, `web-quality-audit` |
+| Prose that ships under my name (PR body, README, release notes) | `humanizer`, against the rules in "Authored text" above |
+| Any library, framework, SDK or CLI question | Context7 MCP first (see `~/.claude/rules/context7.md`), never memory |
+
+Design work specifically: taste is delegated to those skills. Don't invent
+spacing scales, shadows, easing curves, radii or colour ramps freehand when a
+skill already defines them — and don't ship a UI change that never passed
+through one.
+
+### Orchestration — I live in Herdr
+
+Almost every session runs inside **Herdr**, a terminal multiplexer built for
+coding agents; only quick one-offs are standalone. So:
+
+* **Check once per session** whether the `HERDR_ENV` environment variable is
+  `1`. If it is, the `herdr` CLI is in `PATH` and orchestration goes through it —
+  load the `herdr` skill for current syntax instead of guessing flags (the
+  binary's own `--help` is the authority, and I don't need to have said the word
+  "Herdr" for this to apply).
+* **Orchestrate through panes, don't serialize into mine.** Long builds,
+  watchers, dev servers and parallel agent work each get their own pane or tab —
+  a worktree when parallel work would collide on files — and you read their
+  output back with the CLI. My pane stays responsive.
+* **Outside Herdr** (`HERDR_ENV` unset), fall back to the Agent tool or
+  backgrounded Bash, and never try to drive a Herdr session from outside one.
 
 ## AI Guidance
 
@@ -39,6 +193,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Working Style
 
 These rules encode the working style of the strongest Claude models. Follow them exactly, especially if you are a smaller or older model.
+
+These bullets govern the *substance* — what to say and how to work. The Output
+contract at the top governs the *form* — how it lands. Where they appear to
+disagree, the contract wins, and the two apparent conflicts resolve like this:
+prose for answers and explanations, numbered steps the moment I have more than
+one thing to do; and the banned closing pleasantry is not the same as the
+required one-line next action, which stays.
 
 ### Communicating results
 
@@ -276,11 +437,14 @@ Custom hooks in `apps/web/src/hooks/` are exempt (they are the approved encapsul
 <!-- Source: https://prose.ami.rip/STYLE.md -->
 # Writing style
 
-Output is not just brief. It is shaped so the reader can act on it immediately.
+The long form of the Output contract at the top of this file. Same standing:
+mandatory in every reply, not a document to admire and then write however you
+were going to write. Output is not just brief — it is shaped so I can act on it
+immediately.
 
 ## What the reader needs
 
-Five facts drive every rule below:
+I have ADHD. Five facts follow from that, and drive every rule below:
 
 1. Working memory is small. Anything not on screen is forgotten. Do not ask the reader to "keep in mind X."
 2. Knowing the answer is not doing the answer. The friction between "got it" and "done it" is where work dies.
@@ -370,7 +534,8 @@ Start with the answer. End when the answer is done.
 
 ## When to break the rules
 
-Override the defaults when:
+These four cases, and nothing else. "The topic was complicated" and "I wanted to
+show my reasoning" are not on the list. Override the defaults when:
 
 1. User asks to "explain" or "walk me through." Explain fully. Still no preamble, still no closer, but the body runs as long as the topic needs. Add headers so the reader can skim back.
 2. Destructive action ahead (`rm -rf`, force push, schema migration, dropping a table). Confirm before acting. Safety wins over brevity.
