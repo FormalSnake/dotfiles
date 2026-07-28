@@ -48,12 +48,29 @@ let
     package = heliumBase;
     exes = [ "helium" ];
   };
+
+  # Kopuz hosts Spotify's Web Playback SDK in a browser tab and picks one by
+  # binary name on PATH (chromium, chromium-browser, google-chrome, brave,
+  # microsoft-edge, vivaldi — Firefox is excluded upstream because the SDK dies
+  # in it). The SDK needs Widevine, which rules out a bare pkgs.chromium; Helium
+  # is ungoogled-chromium with the CDM above already wired up, so expose it
+  # under the name Kopuz probes for instead of installing a second Chromium.
+  # The symlink lands on the igpu wrapper, whose `exec -a "$0"` leaves argv[0]
+  # alone, and Chromium's singleton hands the URL to the running Helium — so the
+  # player tab reuses the profile that carries the CDM hint file below.
+  kopuzChromium = pkgs.runCommand "helium-chromium-alias" { } ''
+    mkdir -p $out/bin
+    ln -s ${helium}/bin/helium $out/bin/chromium
+  '';
 in
 {
   # Helium browser. The overlay (inputs.helium.overlays.default) is applied at
   # the system level in modules/nixos/mixins/nix.nix, so pkgs.helium resolves.
   #
-  home.packages = [ helium ];
+  home.packages = [
+    helium
+    kopuzChromium
+  ];
 
   # Widevine component hint file (path #2 above). A JSON dict whose "Path" points
   # at the dir holding manifest.json + _platform_specific/…; Chromium reads it via
