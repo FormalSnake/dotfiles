@@ -80,7 +80,15 @@ in
           "Matugen";
     }
     # macos-titlebar-style is rejected by the Linux build.
-    // lib.optionalAttrs isDarwin { macos-titlebar-style = "tabs"; };
+    // lib.optionalAttrs isDarwin { macos-titlebar-style = "tabs"; }
+    # MEK Mono's cell is 450/1000em, and ghostty draws a fallback glyph at that
+    # face's own advance, so anything wider bleeds over the cells after it.
+    # U+23FA (Claude Code's message bullet) is in neither MEK Mono nor
+    # GeistMono, so it landed on Noto Emoji at 1270/1000em: wide enough to cover
+    # the trailing space and the first letter of the word after it. Noto Sans
+    # Symbols 2 draws the same circle at 910/1000em, which stops inside the
+    # space. Linux only, the Noto fonts aren't installed on the mac.
+    // lib.optionalAttrs (!isDarwin) { font-codepoint-map = "U+23FA=Noto Sans Symbols 2"; };
   };
 
   # On macOS the ghostty binary is a Homebrew cask, so nixpkgs has no ghostty
