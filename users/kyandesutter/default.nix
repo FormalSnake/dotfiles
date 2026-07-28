@@ -25,6 +25,7 @@
     ./mixins/nh.nix
     ./mixins/nix-index.nix
     ./mixins/spice-edit.nix
+    ./mixins/kopuz.nix
   ];
 
   home = {

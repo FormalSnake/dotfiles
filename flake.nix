@@ -96,6 +96,16 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Kopuz — Rust/Dioxus music player (local library, Jellyfin/Subsonic/
+    # Spotify). Pinned to a release tag, not a branch: the cachix cache is
+    # populated per push, and a tag keeps all three hosts on the same build.
+    # nixpkgs' kopuz lags (0.10.0). No `inputs.nixpkgs.follows`: kopuz.cachix.org
+    # is keyed to the flake's own nixpkgs pin, and following ours would mean a
+    # full Rust + Dioxus + v8 build on every host.
+    kopuz = {
+      url = "github:Kopuz-org/kopuz/v0.13.0";
+    };
+
     # — NixOS (g815 gaming laptop) inputs —
 
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
