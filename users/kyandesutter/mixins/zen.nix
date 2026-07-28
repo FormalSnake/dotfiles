@@ -50,9 +50,7 @@ let
   # are covered natively instead: GoFullPage (Firefox ships full-page
   # screenshots), SuperPiP (native PiP + the Pimp your PiP mod below), and
   # Playwriter (CDP bridge, Chromium-only by design). Dark Reader, DeArrow and
-  # Equicord Web were dropped by choice in the move, Lisse (corner smoothing)
-  # later — the chrome is square anyway (zen.theme.border-radius = 0 plus the
-  # Disable Rounded Corners mod).
+  # Equicord Web were dropped by choice in the move.
   extensions = {
     "{d634138d-c276-4fc8-924b-40a0ea21d284}" = "1password-x-password-manager";
     "@react-devtools" = "react-devtools";
@@ -62,6 +60,17 @@ let
     # Full uBlock Origin (MV2), not the Lite build — Firefox still ships the
     # blocking webRequest API the full extension needs.
     "uBlock0@raymondhill.net" = "ublock-origin";
+  };
+
+  # Dropping an id from `extensions` above only stops force-installing it;
+  # Firefox leaves the copy already in the profile installed and enabled
+  # (verified 2026-07-28). Only installation_mode "blocked" uninstalls it — and
+  # the entry has to stay, since the profile syncs between both laptops and a
+  # peer that still carried the addon would replicate it straight back.
+  removedExtensions = {
+    # Lisse: corner smoothing, pointless now the chrome is square
+    # (zen.theme.border-radius = 0 plus the Disable Rounded Corners mod).
+    "extension@corne.rs" = { };
   };
 in
 {
@@ -85,10 +94,12 @@ in
     setAsDefaultBrowser = true;
 
     policies = {
-      ExtensionSettings = builtins.mapAttrs (_: slug: {
-        install_url = "https://addons.mozilla.org/firefox/downloads/latest/${slug}/latest.xpi";
-        installation_mode = "force_installed";
-      }) extensions;
+      ExtensionSettings =
+        builtins.mapAttrs (_: slug: {
+          install_url = "https://addons.mozilla.org/firefox/downloads/latest/${slug}/latest.xpi";
+          installation_mode = "force_installed";
+        }) extensions
+        // builtins.mapAttrs (_: _: { installation_mode = "blocked"; }) removedExtensions;
 
       # 1Password owns passwords — kill the built-in manager (no save prompts,
       # no autofill, no about:logins nagging).
