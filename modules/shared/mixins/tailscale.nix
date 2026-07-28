@@ -1,30 +1,20 @@
-{ pkgs, lib, ... }:
+{ ... }:
 {
   # Tailscale device mesh — reach either host (the macbook "remote work server"
   # and the g815 laptop) from the other anywhere. `sudo tailscale up` to
   # authenticate is a manual owner step — see docs/remote-server.md.
   # Valid on both nix-darwin and NixOS.
-  services.tailscale = {
-    enable = true;
-  }
-  // lib.optionalAttrs pkgs.stdenv.isLinux {
-    # Tailscale SSH: tailscaled itself answers port 22 on the tailnet address,
-    # authenticating by tailnet identity instead of a key — so a phone/iPad
-    # terminal connects with no key to install and no passphrase. It only
-    # intercepts connections arriving over tailscale0; sshd still owns the LAN
-    # path (modules/nixos/mixins/agenix.nix), so the g815's remote-builder login
-    # and the LAN fallbacks are untouched.
-    #
-    # extraSetFlags runs `tailscale set` from tailscaled-set.service at boot,
-    # which (unlike extraUpFlags) does not need an authKeyFile — the nodes are
-    # already logged in. Access is still gated by the tailnet policy file's
-    # `ssh` block in the admin console; with no matching rule every connection
-    # is refused.
-    #
-    # Darwin is excluded because it can't work there: the Mac runs the App Store
-    # variant, and only the open-source tailscaled variant can be a Tailscale
-    # SSH *server*. The Mac keeps native Remote Login + key auth — see
-    # docs/remote-server.md.
-    extraSetFlags = [ "--ssh" ];
-  };
+  #
+  # Tailscale SSH (`extraSetFlags = [ "--ssh" ]`) is deliberately NOT enabled.
+  # Tried 2026-07-28 and reverted: tailscaled claims port 22 on the tailnet
+  # addresses, so every inter-host connection stops reaching sshd. That breaks
+  # two load-bearing flows at once — the forwarded-agent sudo mesh (Tailscale
+  # SSH does not forward SSH_AUTH_SOCK, so `sudo -n` on the g815 starts asking
+  # for a password) and the e1504g's remote builder, whose nix-builder key and
+  # its forced `nix-daemon --stdio` command live in sshd's authorized_keys.
+  # There is no fallthrough to sshd for tailnet traffic, and the Mac runs the
+  # App Store variant, which cannot be a Tailscale SSH server at all. Mobile
+  # terminals use sshd with their own key instead (modules/nixos/mixins/
+  # users.nix, modules/darwin/mixins/remote-access.nix).
+  services.tailscale.enable = true;
 }
