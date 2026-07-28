@@ -96,6 +96,8 @@
       })
       # TUI for managing bluetooth (bluez) — Linux-only.
       bluetui
+      # ifconfig/route/netstat. Linux-only because macOS ships them in /sbin.
+      nettools
     ];
 
   programs = {

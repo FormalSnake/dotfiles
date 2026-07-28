@@ -50,14 +50,18 @@ let
   # are covered natively instead: GoFullPage (Firefox ships full-page
   # screenshots), SuperPiP (native PiP + the Pimp your PiP mod below), and
   # Playwriter (CDP bridge, Chromium-only by design). Dark Reader, DeArrow and
-  # Equicord Web were dropped by choice in the move.
+  # Equicord Web were dropped by choice in the move, Lisse (corner smoothing)
+  # later — the chrome is square anyway (zen.theme.border-radius = 0 plus the
+  # Disable Rounded Corners mod).
   extensions = {
     "{d634138d-c276-4fc8-924b-40a0ea21d284}" = "1password-x-password-manager";
     "@react-devtools" = "react-devtools";
     "{a4c4eda4-fb84-4a84-b4a1-f7c1cbf2a1ad}" = "refined-github-";
     "enhancerforyoutube@maximerf.addons.mozilla.org" = "enhancer-for-youtube";
-    "extension@corne.rs" = "lisse";
     "{e7b84430-dae5-41e6-bb6f-9d01b02c4347}" = "elden-email";
+    # Full uBlock Origin (MV2), not the Lite build — Firefox still ships the
+    # blocking webRequest API the full extension needs.
+    "uBlock0@raymondhill.net" = "ublock-origin";
   };
 in
 {
