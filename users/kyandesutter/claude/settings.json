@@ -2,7 +2,31 @@
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "model": "opus",
   "permissions": {
-    "defaultMode": "auto"
+    "defaultMode": "auto",
+    "deny": [
+      "Bash(git config user.*)",
+      "Bash(git config --global user.*)",
+      "Bash(git config --local user.*)",
+      "Bash(git config --system user.*)",
+      "Bash(git config --worktree user.*)",
+      "Bash(git config * user.*)",
+      "Bash(git config set user.*)",
+      "Bash(git config unset user.*)",
+      "Bash(git -c user.*)",
+      "Bash(git commit *--author*)",
+      "Bash(git rebase *--author*)",
+      "Bash(GIT_AUTHOR_NAME=*)",
+      "Bash(GIT_AUTHOR_EMAIL=*)",
+      "Bash(GIT_COMMITTER_NAME=*)",
+      "Bash(GIT_COMMITTER_EMAIL=*)",
+      "Bash(export GIT_AUTHOR_*)",
+      "Bash(export GIT_COMMITTER_*)",
+      "Bash(env GIT_AUTHOR_*)",
+      "Bash(env GIT_COMMITTER_*)",
+      "Bash(gh auth login*)",
+      "Bash(gh auth switch*)",
+      "Bash(gh auth logout*)"
+    ]
   },
   "hooks": {
     "Notification": [
