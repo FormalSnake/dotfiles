@@ -246,9 +246,15 @@ in
   # '.zen-beta-wrapp' is the 15-char comm of the main process only; content
   # processes rename themselves (Isolated Web Co etc.), so pgrep/pkill on it
   # never touch children directly.
+  #
+  # Exec `finalPackage`, NOT `package`: the latter is the bare option value,
+  # whose distribution/policies.json is empty — the module bakes `policies`
+  # into finalPackage. Since the guard shadows every launch path, pointing it
+  # at `package` silently runs a policy-free Zen, so ExtensionSettings never
+  # applies and the extension set above becomes a no-op.
   home.packages = [
     (lib.hiPrio (pkgs.writeShellScriptBin "zen-beta" ''
-      real=${config.programs.zen-browser.package}/bin/zen-beta
+      real=${config.programs.zen-browser.finalPackage}/bin/zen-beta
       export PATH=${
         lib.makeBinPath [ pkgs.procps pkgs.coreutils pkgs.curl pkgs.jq pkgs.gnused pkgs.openssh ]
       }:$PATH
