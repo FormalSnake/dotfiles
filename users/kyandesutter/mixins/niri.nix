@@ -933,7 +933,7 @@ in
   # are disjoint from those, so neither side clobbers the other.
   dconf.settings."org/gnome/desktop/interface" = {
     font-name = "MEK Sans 11";
-    monospace-font-name = "MEK Mono 10";
+    monospace-font-name = "MEK Mono 12";
     document-font-name = "MEK Sans 11";
   };
 }

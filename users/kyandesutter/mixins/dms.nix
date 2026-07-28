@@ -117,6 +117,12 @@ let
     # for — and it keeps the shell reading as one surface with the terminal.
     fontFamily = "MEK Mono";
     monoFontFamily = "MEK Mono";
+    # Both MEK faces carry a 600/1000em cap height and a 500 x-height against
+    # Geist's 710/530, so at DMS's own pixel sizes the shell renders visibly
+    # short of what it did before the switch. 1.2 is the same correction
+    # ghostty and Qt make by running a point size up (12 against 10); it
+    # multiplies with each bar's own fontScale, which stays 1.0.
+    fontScale = 1.2;
   };
 
   settingsSeed = pkgs.writeText "dms-settings-seed.json" (
@@ -134,7 +140,7 @@ let
       # DMS names its own font families (defaults "Inter Variable"/"Fira Code")
       # instead of resolving the fontconfig generics, so the bar and every popout
       # need these set explicitly to match the rest of the desktop.
-      inherit (dmsFonts) fontFamily monoFontFamily;
+      inherit (dmsFonts) fontFamily monoFontFamily fontScale;
       cornerRadius = 0;
       showWorkspaceName = true;
       showOccupiedWorkspacesOnly = true;
@@ -636,6 +642,8 @@ in
     # save, so the edit above only survives if DMS is told about it too. Both
     # keys are pushed unconditionally (setting a value DMS already has is a
     # no-op) and the whole thing is best-effort: no session, no IPC socket.
+    # fontScale goes over the wire as Nix renders a float, "1.200000"; DMS
+    # parses that and stores a plain 1.2, so the jq pass above stays idempotent.
     ${lib.concatStringsSep "\n" (
       lib.mapAttrsToList (
         k: v: ''${dmsPackage}/bin/dms ipc call settings set ${k} ${lib.escapeShellArg v} >/dev/null 2>&1 || true''
