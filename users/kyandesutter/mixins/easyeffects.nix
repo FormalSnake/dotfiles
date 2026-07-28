@@ -70,8 +70,9 @@ let
   # also matches the near-mandatory "Music" V-shape reviewers recommend over the
   # "dull/empty" flat tuning (lows + highs up, slight mid scoop). The low bells
   # (32/64/125 Hz) are ZEROED on purpose: the shelf already owns everything below
-  # ~110 Hz, and lifting them here would just stack into the sub's boomy midbass.
-  # What's left is a gentle 500 Hz–1 kHz scoop to de-mud plus a 4/8/16 kHz
+  # ~200 Hz, and lifting them here would just stack into the sub's boomy midbass.
+  # What's left is a 250 Hz cut that keeps the (now much bigger) shelf from
+  # reading as boom, a gentle 500 Hz–1 kHz scoop to de-mud, plus a 4/8/16 kHz
   # presence + air lift. The satellites are already detailed/slightly bright, so
   # the top lift is kept modest (≤ +2.5) to stay "not too sharp". All Bell,
   # RLC (BT), Q≈1.5. Tune live in the EasyEffects window — changes save back to
@@ -89,7 +90,7 @@ let
     band0 = mkBand 32.0 0.0; # below the sub's ~45 Hz floor — left flat
     band1 = mkBand 64.0 0.0; # owned by the low-shelf — left flat
     band2 = mkBand 125.0 0.0; # midbass boom region — left flat
-    band3 = mkBand 250.0 0.0;
+    band3 = mkBand 250.0 (-2.0); # keeps the shelf's upper skirt from muddying vocals
     band4 = mkBand 500.0 (-1.0); # de-mud (scoop)
     band5 = mkBand 1000.0 (-1.5); # de-mud (scoop)
     band6 = mkBand 2000.0 0.0;
@@ -176,28 +177,27 @@ in
   # — Bass boost for the Creative Pebble X Plus on HDMI —
   #
   # The Pebble X Plus is a 2.1 system with a real 3.5" subwoofer (down to ~45 Hz),
-  # so — unlike the old 2" Pebble V3 — it does NOT need a huge fake-bass shelf to
-  # invent low end it can't produce. It just needs a tasteful lift aimed at the
-  # sub's deep range, kept clear of the ~100–160 Hz midbass where this system can
-  # get boomy. EasyEffects already sits on the OUTPUT pipeline (apps → "Easy
-  # Effects Sink" → the real device), so an output preset is the natural place to
-  # voice it.
+  # so — unlike the old 2" Pebble V3 — it does NOT need a fake-bass shelf to
+  # invent low end it can't produce. What it needs is a lift wide enough to cover
+  # both what the sub does (45–90 Hz shiver) and the 60–120 Hz kick-and-bass band
+  # most music actually puts its weight in. EasyEffects already sits on the OUTPUT
+  # pipeline (apps → "Easy Effects Sink" → the real device), so an output preset
+  # is the natural place to voice it.
   #
-  # Same eqMac-style headroom trick as before, just gentler: boost the sub band
+  # Same eqMac-style headroom trick as everywhere else here: boost the bass band
   # but pull the WHOLE signal down by a matching amount (a "preamp" cut) so the
-  # boosted low end lands at unity instead of clipping. Because we're reinforcing
-  # real bass rather than faking it, the cut is small (-9 dB, not the V3's -11).
+  # boosted low end lands at unity instead of clipping.
   #
   # Two plugins, in order:
-  #   1. filter#0 as a Low-shelf: input-gain -9 dB knocks the whole signal down
-  #      for headroom, then +9 dB below ~75 Hz brings the sub band back to roughly
-  #      unity (so bass ≈ 0 dB, everything else ≈ -9 dB → the deep bass sits ~9 dB
-  #      out front, nothing clips). Aimed LOW (75 Hz) on purpose: it leans on the
-  #      sub's strength (45–90 Hz) and stays out of the boomy midbass.
-  #      The bass-vs-rest emphasis is the shelf `gain`; the overall level/headroom
-  #      is `input-gain`. Want less bass but same loudness? Lower BOTH together.
-  #      Boomy on some tracks? The sub has a physical level knob — use it.
-  #   2. equalizer#0 — voicing EQ (the V-shape; see `perfectEqBands`).
+  #   1. filter#0 as a Low-shelf: input-gain -12 dB knocks the whole signal down
+  #      for headroom, then +12 dB below ~105 Hz brings the bass band back to
+  #      roughly unity (so bass ≈ 0 dB, everything else ≈ -12 dB → the low end
+  #      sits ~12 dB out front, nothing clips). The bass-vs-rest emphasis is the
+  #      shelf `gain`; the overall level/headroom is `input-gain`. Want less bass
+  #      but same loudness? Lower BOTH together. Boomy on some tracks? The sub
+  #      has a physical level knob — use it.
+  #   2. equalizer#0 — voicing EQ (the V-shape; see `perfectEqBands`), whose
+  #      250 Hz cut keeps the shelf's upper skirt from turning into mud.
   #
   # Applied to HDMI ONLY (not the laptop's analog speakers) via a per-device
   # autoload profile written below — see the xdg.dataFile entry. Tune any of
@@ -259,25 +259,35 @@ in
           "equalizer#0"
         ];
 
-        # Low-shelf + preamp: -9 dB on everything (input-gain) for headroom, then
-        # +9 dB below ~75 Hz. The sub band nets ≈ 0 dB, the rest ≈ -9 dB, so the
-        # deep bass sits ~9 dB hotter than the rest and nothing clips. Aimed low
-        # (75 Hz) to lean on the sub (45–90 Hz) and dodge the boomy midbass. RLC
-        # (BT) is a gentle, musical shelf; slope x1 keeps it broad. Too much bass?
-        # Lower `gain`, or use the sub's physical level knob.
+        # Low-shelf + preamp: -12 dB on everything (input-gain) for headroom, then
+        # +12 dB below ~105 Hz. The bass band nets ≈ 0 dB, the rest ≈ -12 dB, so
+        # the low end sits ~12 dB hotter than the rest and nothing clips (the EQ
+        # after this adds nothing below 250 Hz, so the preamp can match the shelf
+        # exactly — unlike airpods-bass, where it has to run 2 dB deeper).
+        #
+        # The 105 Hz corner is the important half of "more oomph": a shelf's
+        # skirt puts roughly half its gain at the corner, so the old 75 Hz one
+        # was spending nearly all of itself below 60 Hz — great on the tracks
+        # with real sub content, nearly silent on the far more common song whose
+        # weight lives in the 60–120 Hz kick-and-bass-fundamental band. Moving
+        # the corner up drags that whole region into the lift; the +12 dB just
+        # sets how much. Boomy or thick on vocals? Pull `frequency` back toward
+        # 90 first — that keeps the deep shiver and drops the midbass. Still too
+        # much? Lower `gain` and `input-gain` together, or use the sub's physical
+        # level knob. RLC (BT) is a gentle, musical shelf; slope x1 keeps it broad.
         "filter#0" = {
           bypass = false;
-          "input-gain" = -9.0;
+          "input-gain" = -12.0;
           "output-gain" = 0.0;
           type = "Low-shelf";
           mode = "RLC (BT)";
           "equal-mode" = "IIR";
           slope = "x1";
           decramp = "Off";
-          frequency = 75.0;
+          frequency = 105.0;
           width = 4.0;
           quality = 0.0;
-          gain = 9.0;
+          gain = 12.0;
           balance = 0.0;
         };
 
