@@ -140,7 +140,8 @@ Match on the work you are about to do, not on whether I named the skill.
 
 | About to work on… | Load first |
 | --- | --- |
-| Any UI or visual work — new screens, components, layout, spacing, motion, polish | `frontend-design` for direction, then the specific one: `make-interfaces-feel-better`, `emil-design-eng`, `baseline-ui`, `transitions-dev`, `improve-ui` (audits), `dataviz` (any chart), `shadcn`, `fixing-accessibility` |
+| Any UI or visual work — new screens, components, layout, spacing, motion, polish | `frontend-design` for direction, then every `better-*` skill the change actually touches (see below), then the stack-specific ones: `shadcn`, `dataviz` (any chart), `transitions-dev`, `emil-design-eng`, `baseline-ui` |
+| A screen or flow reviewed end to end | `better-interface` — it drives the six `better-*` skills and returns one ranked verdict. `improve-ui` for design-system drift; `fixing-metadata`, `fixing-motion-performance` for narrow audits |
 | Expo / React Native — anything at all | the `expo:*` skills (`expo:building-native-ui`, `expo:expo-ui`, `expo:native-data-fetching`, `expo:expo-deployment`, `expo:upgrading-expo`, `expo:expo-module`, …). Never write Expo/EAS config or native UI from memory — that surface moves every SDK release. |
 | Apple platforms | `Apple-Hig-Designer`, `swiftui-ui-patterns`, `serve-sim` to actually drive the simulator |
 | Cloudflare — Workers, Durable Objects, KV/D1/R2, wrangler | `cloudflare`, `wrangler`, `workers-best-practices`, `durable-objects`, `agents-sdk` |
@@ -154,6 +155,35 @@ Design work specifically: taste is delegated to those skills. Don't invent
 spacing scales, shadows, easing curves, radii or colour ramps freehand when a
 skill already defines them — and don't ship a UI change that never passed
 through one.
+
+#### The six `better-*` skills — one per domain, load all that apply
+
+They are deliberately non-overlapping and each defers to the others by name, so
+a change that touches three domains loads three skills. Loading one and guessing
+the rest is the failure mode they exist to prevent.
+
+| Domain | Skill |
+| --- | --- |
+| Radius, shadows, hover/active states, micro-interactions, enter/exit motion, icons | `better-ui` |
+| Structure, grouping, alignment, reading order, breakpoints, progressive disclosure, RTL | `better-layout` |
+| Typefaces, type scale, heading hierarchy, line-height, wrapping, truncation, tabular numbers | `better-typography` |
+| Palettes, OKLCH, contrast, gamut, semantic colour tokens, light/dark | `better-colors` |
+| Focus rings, keyboard support, ARIA, forms, screen readers, hit areas, reduced motion | `better-accessibility` |
+| Button labels, error messages, empty states, settings labels, placeholders, tone | `better-writing` |
+
+Rules that make this binding:
+
+1. Before the first line of UI code, name the domains the change touches and
+   load every matching skill. Two domains, two skills.
+2. Any user-facing string you write or edit — a label, an error, an empty state —
+   loads `better-writing`, even when the change is otherwise a one-line fix.
+3. A new colour value or token loads `better-colors`; a new interactive control
+   loads `better-accessibility`. No exceptions for "small" changes.
+4. `better-interface` is user-invoked only. Never trigger it automatically for a
+   component-level change.
+5. Their rules lose to the project's own system: existing tokens, density and
+   motion language win. Apply the skill's principle inside that system, never by
+   introducing a second one.
 
 ### Orchestration — I live in Herdr
 
