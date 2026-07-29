@@ -14,6 +14,12 @@ let
   uid = "502";
   gid = "20";
 
+  # Navidrome scans player.transcoding_id into a Go string, so a NULL there
+  # makes every lookup for that client fail with "converting NULL to string is
+  # unsupported". It must be an empty string. Bound out here because a literal
+  # '' inside a Nix indented string terminates it.
+  sqlEmpty = "''";
+
   # nixpkgs' navidrome is `broken = stdenv.hostPlatform.isDarwin`, so the whole
   # stack runs in Docker (OrbStack) rather than half launchd, half container.
   # The plugin derivations are plain .ndp data files and still build here, so
@@ -46,13 +52,22 @@ let
           ND_LISTENBRAINZ_ENABLED: "true"
           ND_AGENTS: listenbrainz,lastfm,deezer
 
+          # Without this, Subsonic's getArtist only counts albums an artist is
+          # credited on as *album* artist, so a feature such as Majestic on
+          # "Who's That What's That" is an artist with an empty page — the
+          # track only reachable under Niko B. Navidrome splits the credit
+          # correctly either way; this is what makes the second artist browsable.
+          ND_SUBSONIC_ARTISTPARTICIPATIONS: "true"
+
           # Keeps cellular listening usable: library stays FLAC, clients that
           # ask for less get Opus.
           ND_ENABLETRANSCODINGCONFIG: "true"
           ND_TRANSCODINGCACHESIZE: 2GB
 
           ND_SCANNER_WATCHERWAIT: 10s
-          ND_SCANSCHEDULE: "@every 1h"
+          # ND_SCANSCHEDULE was silently ignored here: 0.63 reads the schedule
+          # from Scanner.Schedule, and the old name left periodic scans off.
+          ND_SCANNER_SCHEDULE: "@every 1h"
         volumes:
           - ${cfg.libraryDir}:/music
           - ${stackDir}/navidrome:/data
@@ -208,6 +223,88 @@ let
         && echo "reconcile: enabled Lidarr track renaming"
     fi
 
+    # Nothing else in the stack puts cover art on disk: Navidrome only reads
+    # art from the album folder or from the file's own tags, and a Soulseek
+    # download carries embedded art only if whoever uploaded it bothered. The
+    # Kodi consumer writes folder.jpg into every album folder from Lidarr's own
+    # metadata, which is first in Navidrome's CoverArtPriority. The .nfo
+    # sidecars are turned off — Navidrome ignores them.
+    meta=$(curl -sf -H "X-Api-Key: $LIDARR_KEY" http://localhost:8686/api/v1/metadata) || exit 0
+    xbmc=$(printf '%s' "$meta" | jq -c 'map(select(.implementation=="XbmcMetadata"))[0] // empty')
+    want=$(printf '%s' "$xbmc" | jq -c '.enable = true
+      | .fields |= map(.value = (.name == "artistImages" or .name == "albumImages"))')
+    if [ -n "$xbmc" ] && [ "$want" != "$xbmc" ]; then
+      printf '%s' "$want" \
+        | curl -sf -X PUT -H "X-Api-Key: $LIDARR_KEY" -H "Content-Type: application/json" -d @- \
+            "http://localhost:8686/api/v1/metadata/$(printf '%s' "$xbmc" | jq -r .id)" >/dev/null \
+        && echo "reconcile: enabled Lidarr album/artist images"
+
+      # Album art is written on import and on refresh, so anything already in
+      # the library needs one refresh to catch up.
+      for aid in $(curl -sf -H "X-Api-Key: $LIDARR_KEY" http://localhost:8686/api/v1/artist | jq -r '.[].id'); do
+        curl -sf -X POST -H "X-Api-Key: $LIDARR_KEY" -H "Content-Type: application/json" \
+          -d "{\"name\":\"RefreshArtist\",\"artistId\":$aid}" \
+          http://localhost:8686/api/v1/command >/dev/null
+      done
+    fi
+
+    # Lidarr models a standalone single as a one-track album, but the stock
+    # "Standard" metadata profile disallows primary types Single and EP, so a
+    # singles-led artist surfaces only their albums. Build a profile that keeps
+    # them and pin the named artists to it. Not enabled globally: on an
+    # album-oriented artist it pulls dozens of single releases that just
+    # duplicate album tracks.
+    profiles=$(curl -sf -H "X-Api-Key: $LIDARR_KEY" http://localhost:8686/api/v1/metadataprofile) || exit 0
+    singles_id=$(printf '%s' "$profiles" | jq -r '(map(select(.name=="Singles and Albums"))[0].id) // empty')
+
+    if [ -z "$singles_id" ]; then
+      singles_id=$(printf '%s' "$profiles" \
+        | jq 'map(select(.name=="Standard"))[0] | del(.id) | .name="Singles and Albums"
+              | .primaryAlbumTypes |= map(if (.albumType.name=="Single" or .albumType.name=="EP") then .allowed=true else . end)' \
+        | curl -sf -X POST -H "X-Api-Key: $LIDARR_KEY" -H "Content-Type: application/json" -d @- \
+            http://localhost:8686/api/v1/metadataprofile | jq -r '.id // empty')
+      [ -n "$singles_id" ] && echo "reconcile: created 'Singles and Albums' metadata profile"
+    fi
+
+    if [ -n "$singles_id" ]; then
+      artists=$(curl -sf -H "X-Api-Key: $LIDARR_KEY" http://localhost:8686/api/v1/artist) || exit 0
+      for want in ${lib.escapeShellArgs cfg.singlesArtists}; do
+        aid=$(printf '%s' "$artists" | jq -r --arg n "$want" '(map(select(.artistName==$n))[0].id) // empty')
+        cur=$(printf '%s' "$artists" | jq -r --arg n "$want" '(map(select(.artistName==$n))[0].metadataProfileId) // empty')
+        [ -n "$aid" ] || continue
+        [ "$cur" = "$singles_id" ] && continue
+
+        printf '%s' "$artists" \
+          | jq --arg n "$want" --argjson p "$singles_id" 'map(select(.artistName==$n))[0] | .metadataProfileId=$p' \
+          | curl -sf -X PUT -H "X-Api-Key: $LIDARR_KEY" -H "Content-Type: application/json" -d @- \
+              "http://localhost:8686/api/v1/artist/$aid" >/dev/null || continue
+
+        # The profile change alone does not surface the newly allowed releases;
+        # Lidarr only re-reads them on a refresh.
+        curl -sf -X POST -H "X-Api-Key: $LIDARR_KEY" -H "Content-Type: application/json" \
+          -d "{\"name\":\"RefreshArtist\",\"artistId\":$aid}" \
+          http://localhost:8686/api/v1/command >/dev/null
+        echo "reconcile: pinned $want to 'Singles and Albums'"
+      done
+    fi
+
+    # The Kodi consumer only writes the artist poster while reacting to a cover
+    # download, so an artist whose covers Lidarr already cached never gets one
+    # and Navidrome falls back to the grey placeholder. Pulling the poster from
+    # Lidarr's own cache is what makes this reproducible on a rebuilt stack.
+    # artist.jpg rather than folder.jpg: that is what ArtistArtPriority looks
+    # for first, with no Navidrome config change needed.
+    curl -sf -H "X-Api-Key: $LIDARR_KEY" http://localhost:8686/api/v1/artist \
+      | jq -r '.[] | select(.images | any(.coverType == "poster")) | "\(.id)\t\(.path)"' \
+      | while IFS="$(printf '\t')" read -r aid apath; do
+          dir="${cfg.libraryDir}/''${apath#/music/}"
+          [ -d "$dir" ] || continue
+          [ -e "$dir/artist.jpg" ] && continue
+          curl -sf -o "$dir/artist.jpg" -H "X-Api-Key: $LIDARR_KEY" \
+            "http://localhost:8686/api/v1/mediacover/artist/$aid/poster.jpg" \
+            && echo "reconcile: wrote artist.jpg for $apath"
+        done
+
     # Navidrome: transcoding profile ids are generated per install, so match the
     # profile by name rather than hardcoding one. Applied unconditionally, which
     # means playerProfiles below is authoritative — a profile changed by hand in
@@ -216,11 +313,110 @@ let
       docker exec navidrome sqlite3 /data/navidrome.db "
         update player
         set transcoding_id = ${
-          if p.profile == null then "NULL" else "(select id from transcoding where name = '${p.profile}')"
+          if p.profile == null then
+            sqlEmpty
+          else
+            "coalesce((select id from transcoding where name = '${p.profile}'), ${sqlEmpty})"
         },
             max_bit_rate = ${toString p.bitrate}
         where name like '${p.match}';" 2>/dev/null
     '') cfg.playerProfiles}
+
+    # slskd only indexes shares at startup or on demand, so a freshly downloaded
+    # album is not offered back to the network until something asks for a
+    # rescan. Left alone the share count stays at whatever it was on boot, the
+    # account keeps looking like a leech, and Soulseek peers reject transfers —
+    # which fails whole albums, since Soularr needs every track from one peer.
+    if [ -n "''${SLSKD_KEY:-}" ]; then
+      shared=$(curl -sf -H "X-API-Key: $SLSKD_KEY" http://localhost:5030/api/v0/application \
+        | jq -r '.shares.files // 0')
+      ondisk=$(find "${cfg.downloadDir}" -type f \( -name '*.flac' -o -name '*.mp3' \) 2>/dev/null | wc -l | tr -d ' ')
+      if [ "''${ondisk:-0}" -gt "''${shared:-0}" ]; then
+        curl -sf -X PUT -H "X-API-Key: $SLSKD_KEY" http://localhost:5030/api/v0/shares >/dev/null \
+          && echo "reconcile: rescanning slskd shares ($shared indexed, $ondisk on disk)"
+      fi
+    fi
+
+    # Kopuz registers a fresh player row on every reconnect rather than reusing
+    # one, so the table grows without bound (423 rows inside a morning). Keep
+    # the most recent row per client name and drop the rest.
+    docker exec navidrome sqlite3 /data/navidrome.db "
+      delete from player where id not in (
+        select id from player p1
+        where last_seen = (select max(last_seen) from player p2 where p2.name = p1.name)
+      );" 2>/dev/null
+  '';
+
+  # Navidrome displays lyrics but never fetches them, and nothing upstream of it
+  # writes any: Lidarr does not do lyrics at all and a Soulseek rip almost never
+  # carries them. LRCLIB is the one free source with timestamped lyrics, and
+  # .lrc sidecars are preferable to embedded tags here — they outrank `embedded`
+  # in Navidrome's LyricsPriority and they leave Lidarr's files alone.
+  lyrics = pkgs.writeShellScript "music-stack-lyrics" ''
+    set -uo pipefail
+    export PATH="/run/current-system/sw/bin:/usr/bin:/bin"
+
+    [ -d "${cfg.libraryDir}" ] || exit 0
+
+    # LRCLIB throttles clients that do not identify themselves, hard enough that
+    # a first full sweep would return empty for most of the library.
+    ua="music-stack (+https://github.com/FormalSnake/nix)"
+
+    # Tracks LRCLIB has nothing for, so a scheduled run costs one request per
+    # newly imported track instead of one per track in the library. Delete this
+    # file to retry the whole library.
+    misses="${stackDir}/.lyrics-misses"
+    touch "$misses"
+
+    ${pkgs.fd}/bin/fd -0 -e flac -e mp3 -e m4a -e ogg -e opus . "${cfg.libraryDir}" \
+      | while IFS= read -r -d "" f; do
+          lrc="''${f%.*}.lrc"
+          [ -e "$lrc" ] && continue
+          grep -qxF "$f" "$misses" && continue
+
+          meta=$(${pkgs.ffmpeg-headless}/bin/ffprobe -v error -of json \
+            -show_entries format=duration:format_tags=title,artist,album "$f") || continue
+
+          # ffprobe echoes each tag key in the case the file used, which differs
+          # between FLAC and MP4, so normalise before reading.
+          tags=$(printf '%s' "$meta" | jq -c '.format.tags // {} | with_entries(.key |= ascii_downcase)')
+          title=$(printf '%s' "$tags" | jq -r '.title // empty')
+          album=$(printf '%s' "$tags" | jq -r '.album // empty')
+          # A collaboration is tagged "A;B"; LRCLIB matches one name.
+          artist=$(printf '%s' "$tags" | jq -r '.artist // empty' | cut -d';' -f1)
+          dur=$(printf '%s' "$meta" | jq -r '.format.duration // 0 | tonumber | round')
+          [ -n "$title" ] && [ -n "$artist" ] || continue
+
+          got=$(curl -sG --max-time 20 -A "$ua" \
+            --data-urlencode "artist_name=$artist" \
+            --data-urlencode "track_name=$title" \
+            --data-urlencode "album_name=$album" \
+            --data-urlencode "duration=$dur" \
+            https://lrclib.net/api/get \
+            | jq -r '(.syncedLyrics // .plainLyrics) // empty' 2>/dev/null)
+
+          # /api/get only matches when the album name and duration agree with
+          # LRCLIB's copy, which a Soulseek rip frequently does not. Searching on
+          # artist and title and re-checking the duration here rescues those.
+          if [ -z "$got" ]; then
+            got=$(curl -sG --max-time 20 -A "$ua" \
+              --data-urlencode "artist_name=$artist" \
+              --data-urlencode "track_name=$title" \
+              https://lrclib.net/api/search \
+              | jq -r --argjson d "$dur" '
+                  [.[]? | select(((.duration // 0) - $d | fabs) <= 5)]
+                  | (map(select(.syncedLyrics != null))[0] // .[0] // {})
+                  | (.syncedLyrics // .plainLyrics) // empty' 2>/dev/null)
+          fi
+
+          if [ -n "$got" ]; then
+            printf '%s\n' "$got" > "$lrc"
+            echo "lyrics: $artist - $title"
+          else
+            printf '%s\n' "$f" >> "$misses"
+          fi
+          sleep 1
+        done
   '';
 
   launcher = pkgs.writeShellScript "music-stack-launch" ''
@@ -301,6 +497,16 @@ in
       description = "Navidrome HTTP port, published on the tailnet.";
     };
 
+    singlesArtists = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ "Niko B" ];
+      description = ''
+        Artists pinned to a metadata profile that allows Single and EP releases,
+        matched on exact Lidarr artist name. Use for artists whose output is
+        singles-led, where the stock profile would show almost nothing.
+      '';
+    };
+
     playerProfiles = lib.mkOption {
       type = lib.types.listOf (
         lib.types.submodule {
@@ -323,13 +529,14 @@ in
         }
       );
       default = [
-        # AirPods cap out at AAC over Bluetooth, so lossless never reaches the
-        # ear. AAC rather than Opus purely for native Apple decoding.
-        {
-          match = "%NaviBeat%";
-          profile = "aac audio";
-          bitrate = 256;
-        }
+        # Transcoded, this buffers: NaviBeat prefetches by opening several
+        # streams at once, each spawning its own ffmpeg, and they contend until
+        # the track actually playing starves (logged as "broken pipe" when the
+        # client gives up). Serving the original is a static file read, so range
+        # requests work and seeking behaves. 1.7 Mbps is nothing on 5G, and the
+        # AirPods re-encode to AAC over Bluetooth regardless, so transcoding was
+        # never buying quality here — only cellular data.
+        { match = "%NaviBeat%"; }
         # Same machine as the server and wired speakers, so bit-perfect costs
         # nothing.
         { match = "%kopuz%"; }
@@ -368,6 +575,23 @@ in
         };
         RunAtLoad = true;
         StartInterval = 600;
+        StandardOutPath = "${home}/Library/Logs/music-stack.log";
+        StandardErrorPath = "${home}/Library/Logs/music-stack.log";
+      };
+    };
+
+    # Separate from the reconcile agent because a first sweep of an untouched
+    # library runs for hours at LRCLIB's rate limit, and launchd will not start
+    # a second copy of an agent that is still running.
+    launchd.user.agents.music-stack-lyrics = {
+      serviceConfig = {
+        Label = "kyan.music-stack-lyrics";
+        ProgramArguments = [ "${lyrics}" ];
+        EnvironmentVariables = {
+          PATH = "/usr/local/bin:/opt/homebrew/bin:/run/current-system/sw/bin:/usr/bin:/bin";
+        };
+        RunAtLoad = true;
+        StartInterval = 3600;
         StandardOutPath = "${home}/Library/Logs/music-stack.log";
         StandardErrorPath = "${home}/Library/Logs/music-stack.log";
       };

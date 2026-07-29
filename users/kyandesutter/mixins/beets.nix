@@ -49,6 +49,10 @@ let
     scrub.auto = true;
     fetchart.auto = true;
     embedart.auto = true;
+    # LRCLib is the only backend that returns timestamped lyrics, and beets
+    # ignores them unless asked. Matches what the stack's own fetcher writes as
+    # .lrc for everything Lidarr imports.
+    lyrics.synced = true;
   };
 in
 {
