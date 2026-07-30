@@ -151,6 +151,29 @@ Lidarr-managed library: it would move files out of Lidarr's layout and leave
 Lidarr's database pointing at paths that no longer exist. To retag in place
 use `beet import -C` (no copy, no move).
 
+## Replacing cover art
+
+`scripts/music-safe-covers.sh <artist>` rewrites an artist's covers as the
+album title over a wash of its own artwork averaged down to a 4x4 grid and
+blurred. Written for Artemas, whose covers are not something to have on screen
+in public.
+
+It writes `cover.jpg` and leaves `folder.jpg` alone. `cover.*` outranks
+`folder.*` in Navidrome's `CoverArtPriority` and the Kodi consumer only ever
+writes `folder.jpg`, so a Lidarr refresh cannot undo it and reverting is
+`rm` on the `cover.jpg` files. Navidrome's watcher picks the new file up in
+about ten seconds; no rescan needed.
+
+Ink colour follows the wash brightness, so the same script works on a
+near-black cover and a washed-out one.
+
+`--embed` additionally rewrites the picture block in every FLAC. Album art and
+track art are separate in Navidrome: a track with its own embedded picture
+serves that, so without `--embed` the grid is clean but the now-playing screen
+still shows the original. It is also what clients reading tags off downloaded
+files use. Re-running is safe either way, since neither `cover.jpg` nor the
+embedded art is ever used as the source to blur.
+
 ## Soulseek
 
 Credentials are the one thing nix cannot generate — set `soulseek.username` and

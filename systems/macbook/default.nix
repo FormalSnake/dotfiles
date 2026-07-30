@@ -18,6 +18,21 @@
   # over Tailscale only.
   kyan.music.enable = true;
 
+  # Singles-led artists from the top of the scrobble history. Names must match
+  # Lidarr's spelling, not MusicBrainz's or the scrobble export's.
+  kyan.music.singlesArtists = [
+    "Niko B"
+    "Artemas"
+    "nicopatty"
+    "nuphory"
+    "Swimming Paul"
+    "Adi T"
+    "CLOUDER"
+    "Starjunk 95"
+    "Adore"
+    "Kavinsky"
+  ];
+
   users.users.kyandesutter = {
     name = "kyandesutter";
     home = "/Users/kyandesutter";
