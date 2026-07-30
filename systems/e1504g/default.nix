@@ -57,7 +57,7 @@
   # When the g815 is off/asleep the connection fails and nix falls back to
   # building locally, so this degrades gracefully.
   nix.distributedBuilds = true;
-  nix.settings.builders-use-substitutes = true; # g815 pulls caches itself
+  nix.settings.builders-use-substitutes = true; # builders pull caches themselves
   nix.buildMachines =
     let
       g815 = addr: {
@@ -79,6 +79,29 @@
     [
       (g815 "100.114.32.78") # Tailscale (works away from home)
       (g815 "192.168.86.95") # home-LAN fallback when tailscale is down
+
+      # Second builder for when the g815 is off: the Rosetta Linux VM on the
+      # macbook (modules/darwin/mixins/rosetta-builder.nix). The macbook itself
+      # is aarch64-darwin and can't build for this host at all — the VM is what
+      # answers, so this points at the ssh alias below, not at the Mac.
+      # speedFactor 4 vs 3 keeps the g815 preferred whenever it is up.
+      #
+      # No kvm/nixos-test: x86_64 there is Rosetta on an aarch64 guest, so
+      # nested VMs can't run and advertising them would only draw in builds
+      # that then fail.
+      {
+        hostName = "macbook-rosetta";
+        system = "x86_64-linux";
+        protocol = "ssh-ng";
+        sshUser = "builder";
+        sshKey = "/root/.ssh/nix-builder";
+        maxJobs = 6;
+        speedFactor = 3;
+        supportedFeatures = [
+          "big-parallel"
+          "benchmark"
+        ];
+      }
     ];
   # Pin the g815's host key so root's first builder connection doesn't stall
   # on an unverifiable host.
@@ -89,6 +112,38 @@
     ];
     publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKgCmAa/QcQhtHNoES8iHx0uYAT+Ze+4lNuHuJ2Rb7Ku";
   };
+  programs.ssh.knownHosts.macbook = {
+    hostNames = [ "100.75.60.102" ];
+    publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGfYr6TMA9v8C93Lgl2qQUAXwb13vu/fZe2HeHpjgD0Q";
+  };
+
+  # Route for the macbook builder. The VM's sshd is published on the Mac's
+  # loopback only, so the hop has to originate there: `macbook-nixjump` is the
+  # authenticated outer connection (its key is restricted on the Mac to exactly
+  # this one permitopen), and ProxyJump makes the inner TCP connect happen on
+  # the Mac. Port must match `port` in the rosetta-builder mixin.
+  #
+  # The VM's host key is generated on the Mac and regenerated whenever the VM
+  # is recreated, so there is nothing stable to pin. Not checking it costs
+  # nothing here: the endpoint is 127.0.0.1 on a host we just authenticated by
+  # its pinned key, so reaching it already means the Mac is compromised.
+  programs.ssh.extraConfig = ''
+    Host macbook-nixjump
+      HostName 100.75.60.102
+      User kyandesutter
+      IdentityFile /root/.ssh/nix-builder
+      IdentitiesOnly yes
+
+    Host macbook-rosetta
+      HostName 127.0.0.1
+      Port 31122
+      User builder
+      ProxyJump macbook-nixjump
+      IdentityFile /root/.ssh/nix-builder
+      IdentitiesOnly yes
+      StrictHostKeyChecking no
+      UserKnownHostsFile /dev/null
+  '';
 
   # Reachable over the home LAN even when tailscale is down (the shared
   # agenix mixin only opens sshd on tailscale0 via trustedInterfaces).

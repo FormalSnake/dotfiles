@@ -13,6 +13,12 @@
 
   kyan.profiles.desktop.enable = true;
 
+  # Rosetta-backed Linux builder VM, so this Mac can serve x86_64-linux builds
+  # to the e1504g (and take its own Linux builds off the network). See
+  # modules/darwin/mixins/rosetta-builder.nix for the bootstrap sequence — the
+  # first switch after enabling needs an existing Linux builder.
+  kyan.rosettaBuilder.enable = true;
+
   # Self-hosted music: Navidrome serves the library on the SD card at
   # /Volumes/Music, Lidarr + slskd + Soularr fill it. Reachable from the iPhone
   # over Tailscale only.

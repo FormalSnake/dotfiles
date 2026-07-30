@@ -13,6 +13,7 @@
       ./mixins/auto-update.nix
       ./mixins/agenix.nix
       ./mixins/remote-access.nix
+      ./mixins/rosetta-builder.nix
       ./mixins/obsidian-scan-watcher.nix
       ./mixins/obsidian-note-watcher.nix
       ./mixins/obsidian-livesync-daemon.nix

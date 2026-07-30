@@ -48,6 +48,14 @@
     # binaries and declares no nixpkgs input of its own to override.
     determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/3";
 
+    # Rosetta-backed Linux builder VM on the macbook — the only way an Apple
+    # Silicon host can build x86_64-linux at a useful speed
+    # (modules/darwin/mixins/rosetta-builder.nix).
+    nix-rosetta-builder = {
+      url = "github:cpick/nix-rosetta-builder";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     agenix = {
       url = "github:ryantm/agenix";
       inputs.nixpkgs.follows = "nixpkgs";
