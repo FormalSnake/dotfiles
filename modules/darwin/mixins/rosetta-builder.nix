@@ -87,33 +87,13 @@ in
       ''restrict,port-forwarding,permitopen="127.0.0.1:${toString port}" ${e1504gBuilderKey}''
     ];
 
-    # nix-rosetta-builder registers the VM via `nix.buildMachines`, which
-    # Determinate's module force-disables along with the rest of nix-darwin's
-    # Nix management (mixins/determinate.nix). Without this mirror the VM would
-    # exist but this Mac would never use it. `rosetta-builder` is the ssh alias
-    # the module drops in /etc/ssh/ssh_config.d/, carrying the user, port,
-    # identity and pinned host key.
-    determinateNix = {
-      distributedBuilds = true;
-      buildMachines = [
-        {
-          hostName = "rosetta-builder";
-          protocol = "ssh-ng";
-          systems = [
-            "aarch64-linux"
-            "x86_64-linux"
-          ];
-          maxJobs = 6;
-          speedFactor = 3;
-          # No kvm/nixos-test: the guest is aarch64, so nested x86 VMs can't run
-          # there and advertising it would only attract builds that then fail.
-          supportedFeatures = [
-            "benchmark"
-            "big-parallel"
-          ];
-        }
-      ];
-      customSettings.builders-use-substitutes = true;
-    };
+    # This Mac deliberately does NOT register the VM as one of its own build
+    # machines. nix-rosetta-builder does that through `nix.buildMachines`, which
+    # Determinate force-disables along with the rest of nix-darwin's Nix
+    # management (mixins/determinate.nix), and the obvious fix — mirroring it
+    # into `determinateNix.buildMachines` — hands /etc/nix/machines to
+    # nix-darwin, evicting the entry determinate-nixd writes there at runtime
+    # for its own native builder. The VM's job here is to answer the e1504g,
+    # which reaches it over SSH and needs nothing from this file.
   };
 }
