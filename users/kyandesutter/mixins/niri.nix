@@ -455,14 +455,15 @@ in
         touchpad = {
           # macOS-like feel. clickfinger: a physical 2-finger press = RMB,
           # 3-finger = MMB (replaces libinput's bottom-corner click areas).
-          # dwt disables the pad while typing so a resting palm/thumb can't
-          # fire a tap or drag mid-keystroke (macOS does the same). adaptive
+          # dwt stays off so the pad keeps working while typing (moving the
+          # pointer or tapping mid-keystroke); libinput's palm detection still
+          # rejects a resting hand. adaptive
           # accel with a small positive speed gives the nonlinear,
           # slightly-quicker pointer macOS uses. scroll-factor stays under 1 to
           # tame libinput's over-sensitive two-finger scroll while landing
           # closer to macOS's pace so it neither undershoots nor coasts past.
           tap = true;
-          dwt = true;
+          dwt = false;
           natural-scroll = true;
           click-method = "clickfinger";
           accel-profile = "adaptive";
