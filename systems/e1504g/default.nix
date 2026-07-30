@@ -24,12 +24,20 @@
   # hardware.enableRedistributableFirmware in mixins/graphics.nix).
   hardware.cpu.intel.updateMicrocode = true;
 
-  # Full niri + DMS desktop. Everything hardware-specific stays off:
+  # Full niri desktop. Everything hardware-specific stays off:
   # kyan.nvidia (no dGPU) and kyan.asus — the latter deliberately, even though
   # this is an ASUS chassis, because kyan.asus also gates the g815's dGPU power
   # machinery (modules/nixos/mixins/power.nix). Decouple that gate first if
   # asusd (battery charge limit) turns out to be wanted here.
   kyan.profiles.desktop.enable = true;
+
+  # FormalShell daily-drive trial (the spec's own gate: e1504g first, g815
+  # follows). Swaps the session shell, lock-before-sleep hook, and the
+  # shell-facing niri binds; DMS stays installed but dormant, and rollback is
+  # deleting this one line (users/kyandesutter/mixins/formalshell.nix has the
+  # full trade-offs: calendar falls back to local .ics, no emoji launcher,
+  # screenshots via niri's own UI). SDDM stays the greeter either way.
+  kyan.desktop.shell = "formalshell";
 
   # Syncthing mesh: wallpapers + Zen profile, macbook as hub
   # (modules/nixos/mixins/syncthing.nix; spec 2026-07-22).

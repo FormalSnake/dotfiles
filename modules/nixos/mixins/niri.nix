@@ -6,6 +6,9 @@ let
   # lock-before-sleep hook below.
   dms = inputs.dank-material-shell.packages.${pkgs.stdenv.hostPlatform.system}.default;
 
+  # FormalShell package, for the formalshell arm of the same hook.
+  formalshell = inputs.formalshell.packages.${pkgs.stdenv.hostPlatform.system}.default;
+
   # Lock the session before the machine suspends. Runs as kyandesutter and talks
   # to the running DMS daemon over its IPC socket in the user's XDG_RUNTIME_DIR.
   # `ipc call lock lock` shows DMS's lock screen without suspending — the
@@ -23,12 +26,23 @@ let
   # with `exec: "qs": executable file not found` and every suspend resumed into
   # an UNLOCKED session (caught on the e1504g 2026-07-22; the script's exit-0
   # masked it). The user profile holds the exact qs the session runs.
-  lockBeforeSleep = pkgs.writeShellScript "lock-before-sleep" ''
-    export XDG_RUNTIME_DIR="/run/user/$(${pkgs.coreutils}/bin/id -u)"
-    export PATH="/etc/profiles/per-user/${config.users.users.kyandesutter.name}/bin:$PATH"
-    ${pkgs.coreutils}/bin/timeout 10 ${dms}/bin/dms ipc call lock lock || true
-    exit 0
-  '';
+  lockBeforeSleep =
+    if cfg.shell == "formalshell" then
+      # formalshell-lock-before-sleep pins its own qs binary and is
+      # exit-0-always by contract (FormalShell spec §8), so it only needs the
+      # user's XDG_RUNTIME_DIR; the timeout is belt and braces on top.
+      pkgs.writeShellScript "lock-before-sleep" ''
+        export XDG_RUNTIME_DIR="/run/user/$(${pkgs.coreutils}/bin/id -u)"
+        ${pkgs.coreutils}/bin/timeout 10 ${formalshell}/bin/formalshell-lock-before-sleep || true
+        exit 0
+      ''
+    else
+      pkgs.writeShellScript "lock-before-sleep" ''
+        export XDG_RUNTIME_DIR="/run/user/$(${pkgs.coreutils}/bin/id -u)"
+        export PATH="/etc/profiles/per-user/${config.users.users.kyandesutter.name}/bin:$PATH"
+        ${pkgs.coreutils}/bin/timeout 10 ${dms}/bin/dms ipc call lock lock || true
+        exit 0
+      '';
 
   # sddm-astronaut with the "pixel_sakura" preset, used as-is with no overrides:
   # the bundled pixel_sakura.conf (animated pixel_sakura.gif background + the
@@ -85,9 +99,25 @@ let
   '';
 in
 {
-  options.kyan.desktop.enable = lib.mkEnableOption "niri desktop (system side)";
+  # Imported unconditionally: everything in it is inert until
+  # services.formalshell.enable flips on below.
+  imports = [ inputs.formalshell.nixosModules.formalshell ];
+
+  options.kyan.desktop = {
+    enable = lib.mkEnableOption "niri desktop (system side)";
+    shell = lib.mkOption {
+      type = lib.types.enum [ "dms" "formalshell" ];
+      default = "dms";
+      description = "Which desktop shell owns the session (bar, lock screen, notification daemon). Picks the lock-before-sleep hook here and gates the shell-facing binds and user services in users/kyandesutter/mixins/{niri,formalshell}.nix.";
+    };
+  };
 
   config = lib.mkIf cfg.enable {
+    # System-side FormalShell prerequisites (the formalshell-lock PAM service,
+    # geoclue; NetworkManager/bluetooth/UPower/PPD/pipewire are mkDefault'd in
+    # the module and already owned by this profile).
+    services.formalshell.enable = cfg.shell == "formalshell";
+
     # niri session (nixpkgs module): installs the package, registers the
     # Wayland session for SDDM, wires portals (gnome for screencast + gtk
     # fallback) and gnome-keyring. niri is systemd-native (niri-session →

@@ -2,6 +2,14 @@
 let
   dmsBin = "${config.programs.dank-material-shell.package}/bin/dms";
 
+  # Shell selector from the host (kyan.desktop.shell, default "dms") picks
+  # which shell the shell-facing binds below spawn into. Both package
+  # references stay lazy: only the active arm's option is ever forced, so the
+  # inactive shell's package option can be unset without breaking eval.
+  useFormalshell = (((osConfig.kyan or { }).desktop or { }).shell or "dms") == "formalshell";
+  fsBin = "${config.programs.formalshell.package}/bin/formalshell";
+  fsIpc = args: [ fsBin "ipc" "--any-display" "call" ] ++ args;
+
   # NVIDIA dGPU flag from the host (same gate as dms.nix/godot.nix). Everything
   # below that exists for the g815's dGPU power model — power-tune,
   # gpu-relog-prompt, render-device selection, the eDP-1 240Hz seed — is gated
@@ -498,19 +506,47 @@ in
       }) (lib.range 1 9));
 
       # — Keybinds (mirror the macOS/aerospace muscle memory, SUPER as mod) —
-      binds = {
+      # Shell-facing binds (launcher, clipboard, theme, lock, screenshots,
+      # media/volume/brightness keys) come in a per-shell arm picked by
+      # kyan.desktop.shell; everything compositor-native is shared below.
+      binds = (if useFormalshell then {
+        # FormalShell IPC (the wrapper is qs pinned at the installed shell dir;
+        # niri spawns argv directly, no shell).
+        "Mod+Space".action.spawn = fsIpc [ "menu" "summon" ];
+        # No emoji surface in FormalShell, so no Mod+Period here.
+        # ñ is a dedicated key on the es layout; its XKB keysym is `ntilde`.
+        "Mod+ntilde".action.spawn = fsIpc [ "menu" "summon" "clipboard" ];
+        "Mod+Shift+T".action.spawn = fsIpc [ "theme" "mode" "toggle" ];
+        # Sleep: lock then suspend on demand, so resume lands on the lock
+        # screen (composed through a shell; niri has none of its own).
+        "Mod+Shift+Escape".action.spawn = [ "sh" "-c" "${fsBin} ipc --any-display call lock lock && systemctl suspend" ];
+
+        # FormalShell ships no screenshot tooling (spec non-goal), so these
+        # fall back to niri's own screenshot UI. Print = whole screen,
+        # Mod+Shift+S = region picker.
+        "Print".action.screenshot-screen = [ ];
+        "Mod+Shift+S".action.screenshot = [ ];
+
+        # Volume via wpctl: FormalShell's AudioService tracks PipeWire
+        # directly and auto-shows the volume OSD on any external change, so
+        # the keys don't need to route through the shell. Brightness has no
+        # such watcher; the documented pattern is brightnessctl plus an
+        # explicit OSD show. Media routes through the shell's active MPRIS
+        # player, same as DMS's mpris verbs.
+        "XF86AudioRaiseVolume" = { allow-when-locked = true; action.spawn = [ "${pkgs.wireplumber}/bin/wpctl" "set-volume" "-l" "1.0" "@DEFAULT_AUDIO_SINK@" "3%+" ]; };
+        "XF86AudioLowerVolume" = { allow-when-locked = true; action.spawn = [ "${pkgs.wireplumber}/bin/wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "3%-" ]; };
+        "XF86AudioMute".action.spawn = [ "${pkgs.wireplumber}/bin/wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle" ];
+        "XF86AudioMicMute".action.spawn = [ "${pkgs.wireplumber}/bin/wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle" ];
+        "XF86MonBrightnessUp" = { allow-when-locked = true; action.spawn = [ "sh" "-c" "${pkgs.brightnessctl}/bin/brightnessctl set 5%+ && ${fsBin} ipc --any-display call osd brightness" ]; };
+        "XF86MonBrightnessDown" = { allow-when-locked = true; action.spawn = [ "sh" "-c" "${pkgs.brightnessctl}/bin/brightnessctl set 5%- && ${fsBin} ipc --any-display call osd brightness" ]; };
+        "XF86AudioPlay".action.spawn = fsIpc [ "media" "playPause" ];
+        "XF86AudioPause".action.spawn = fsIpc [ "media" "playPause" ];
+        "XF86AudioNext".action.spawn = fsIpc [ "media" "next" ];
+        "XF86AudioPrev".action.spawn = fsIpc [ "media" "previous" ];
+      } else {
         # App launcher / clipboard / theme / lock via DMS IPC (absolute path —
         # niri spawns argv directly, no shell).
         "Mod+Space".action.spawn = [ dmsBin "ipc" "call" "spotlight" "toggle" ];
-        "Mod+Return".action.spawn = "ghostty";
-        # Reclaim the laptop's Copilot key: it launches Claude, not Copilot.
-        # Microsoft's spec (which ASUS honours) has the key emit Meta+Shift+F23;
-        # this drops a fresh local ghostty into `claude`, cwd'd at the nix config.
-        "Mod+Shift+F23".action.spawn = [ "ghostty" "--working-directory=${config.home.homeDirectory}/.config/nix" "-e" "claude" ];
-        "Mod+Q".action.close-window = [ ];
-        "Mod+Shift+F".action.fullscreen-window = [ ];
-        "Mod+V".action.toggle-window-floating = [ ];
-        "Mod+B".action.spawn = "zen-beta";
         # Emoji picker: the emojiLauncher plugin (enabled in mixins/dms.nix)
         # adds an emoji/unicode surface to DMS's spotlight under its `:e`
         # trigger; toggleQuery opens the launcher pre-filled with it, so this is
@@ -525,28 +561,6 @@ in
         # so this composes the two through a shell (niri spawns argv
         # directly, with no shell of its own).
         "Mod+Shift+Escape".action.spawn = [ "sh" "-c" "${dmsBin} ipc call lock lock && systemctl suspend" ];
-
-        # Vim-style focus/move (aerospace alt-hjkl), mapped onto niri's column
-        # model: H/L walk columns, J/K walk windows inside a column.
-        "Mod+H".action.focus-column-left = [ ];
-        "Mod+J".action.focus-window-down = [ ];
-        "Mod+K".action.focus-window-up = [ ];
-        "Mod+L".action.focus-column-right = [ ];
-        "Mod+Shift+H".action.move-column-left = [ ];
-        "Mod+Shift+J".action.move-window-down = [ ];
-        "Mod+Shift+K".action.move-window-up = [ ];
-        "Mod+Shift+L".action.move-column-right = [ ];
-
-        "Mod+Tab".action.focus-workspace-previous = [ ];
-
-        # niri-native essentials (no Hyprland equivalent): overview, column
-        # maximize, true maximize, preset/relative column widths.
-        "Mod+O" = { repeat = false; action.toggle-overview = [ ]; };
-        "Mod+F".action.maximize-column = [ ];
-        "Mod+M".action.maximize-window-to-edges = [ ];
-        "Mod+R".action.switch-preset-column-width = [ ];
-        "Mod+Minus".action.set-column-width = "-10%";
-        "Mod+Plus".action.set-column-width = "+10%";
 
         # Screenshots via DMS (owner rule: when the shell has the feature,
         # prefer it over the compositor's built-in — it's WM-agnostic, so the
@@ -577,6 +591,38 @@ in
         "XF86AudioNext".action.spawn = [ dmsBin "ipc" "call" "mpris" "next" ];
         "XF86AudioPrev".action.spawn = [ dmsBin "ipc" "call" "mpris" "previous" ];
         "XF86AudioStop".action.spawn = [ dmsBin "ipc" "call" "mpris" "stop" ];
+      }) // {
+        "Mod+Return".action.spawn = "ghostty";
+        # Reclaim the laptop's Copilot key: it launches Claude, not Copilot.
+        # Microsoft's spec (which ASUS honours) has the key emit Meta+Shift+F23;
+        # this drops a fresh local ghostty into `claude`, cwd'd at the nix config.
+        "Mod+Shift+F23".action.spawn = [ "ghostty" "--working-directory=${config.home.homeDirectory}/.config/nix" "-e" "claude" ];
+        "Mod+Q".action.close-window = [ ];
+        "Mod+Shift+F".action.fullscreen-window = [ ];
+        "Mod+V".action.toggle-window-floating = [ ];
+        "Mod+B".action.spawn = "zen-beta";
+
+        # Vim-style focus/move (aerospace alt-hjkl), mapped onto niri's column
+        # model: H/L walk columns, J/K walk windows inside a column.
+        "Mod+H".action.focus-column-left = [ ];
+        "Mod+J".action.focus-window-down = [ ];
+        "Mod+K".action.focus-window-up = [ ];
+        "Mod+L".action.focus-column-right = [ ];
+        "Mod+Shift+H".action.move-column-left = [ ];
+        "Mod+Shift+J".action.move-window-down = [ ];
+        "Mod+Shift+K".action.move-window-up = [ ];
+        "Mod+Shift+L".action.move-column-right = [ ];
+
+        "Mod+Tab".action.focus-workspace-previous = [ ];
+
+        # niri-native essentials (no Hyprland equivalent): overview, column
+        # maximize, true maximize, preset/relative column widths.
+        "Mod+O" = { repeat = false; action.toggle-overview = [ ]; };
+        "Mod+F".action.maximize-column = [ ];
+        "Mod+M".action.maximize-window-to-edges = [ ];
+        "Mod+R".action.switch-preset-column-width = [ ];
+        "Mod+Minus".action.set-column-width = "-10%";
+        "Mod+Plus".action.set-column-width = "+10%";
       } // lib.optionalAttrs hasNvidia {
         # Confirm the pending GPU-relog prompt (fallback for a notification
         # daemon without action buttons). See gpuRelogPrompt above.
