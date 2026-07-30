@@ -512,7 +512,9 @@ in
       binds = (if useFormalshell then {
         # FormalShell IPC (the wrapper is qs pinned at the installed shell dir;
         # niri spawns argv directly, no shell).
-        "Mod+Space".action.spawn = fsIpc [ "menu" "summon" ];
+        # summon's route arg is mandatory (IpcHandler arity is fixed); "" is
+        # the root level, same invocation the smoke rig uses.
+        "Mod+Space".action.spawn = fsIpc [ "menu" "summon" "" ];
         # Emoji picker (M12): the menu's emoji route, same muscle memory as
         # DMS's spotlight :e trigger. Enter copies the pick, the clipboard
         # service captures it.
