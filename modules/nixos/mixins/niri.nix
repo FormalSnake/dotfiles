@@ -118,6 +118,15 @@ in
     # the module and already owned by this profile).
     services.formalshell.enable = cfg.shell == "formalshell";
 
+    # GOA/EDS calendar backend (M12): evolution-data-server serves calendar
+    # data on the session bus (formalshell-eds reads it over one held D-Bus
+    # connection) and gnome-online-accounts holds the Google account, tokens
+    # in the keyring (gnome-keyring is already wired by programs.niri).
+    # gnome-control-center is the only GOA sign-in UI outside GNOME: run
+    # `XDG_CURRENT_DESKTOP=GNOME gnome-control-center online-accounts` once.
+    services.gnome.evolution-data-server.enable = lib.mkIf (cfg.shell == "formalshell") true;
+    services.gnome.gnome-online-accounts.enable = lib.mkIf (cfg.shell == "formalshell") true;
+
     # niri session (nixpkgs module): installs the package, registers the
     # Wayland session for SDDM, wires portals (gnome for screencast + gtk
     # fallback) and gnome-keyring. niri is systemd-native (niri-session →
@@ -319,6 +328,9 @@ in
       slurp
       ffmpegthumbnailer # video thumbnails for tumbler/Nautilus
       wsdd # GVFS's Windows-network discovery helper; prevents first-launch delay in Nautilus
-    ];
+    ]
+    # GOA sign-in UI (see the services.gnome block above): the only way to add
+    # an online account outside GNOME proper.
+    ++ lib.optionals (cfg.shell == "formalshell") [ gnome-control-center ];
   };
 }

@@ -23,6 +23,10 @@ in
         # Syncthing-synced wallpaper folder (modules/nixos/mixins/syncthing.nix)
         # for the picker's wallpaper mode.
         picker.directory = "${config.home.homeDirectory}/Pictures/Wallpapers";
+        # Today's default right region plus the opt-in github widget (M12):
+        # gh comes from mixins/gh.nix, states degrade honestly without auth.
+        # Left/center regions absent on purpose, they fall back to defaults.
+        bar.layout.right = [ "battery" "audio" "network" "bluetooth" "weather" "github" "tray" "indicators" ];
       };
     };
 

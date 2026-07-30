@@ -513,7 +513,10 @@ in
         # FormalShell IPC (the wrapper is qs pinned at the installed shell dir;
         # niri spawns argv directly, no shell).
         "Mod+Space".action.spawn = fsIpc [ "menu" "summon" ];
-        # No emoji surface in FormalShell, so no Mod+Period here.
+        # Emoji picker (M12): the menu's emoji route, same muscle memory as
+        # DMS's spotlight :e trigger. Enter copies the pick, the clipboard
+        # service captures it.
+        "Mod+Period".action.spawn = fsIpc [ "menu" "summon" "emoji" ];
         # ñ is a dedicated key on the es layout; its XKB keysym is `ntilde`.
         "Mod+ntilde".action.spawn = fsIpc [ "menu" "summon" "clipboard" ];
         "Mod+Shift+T".action.spawn = fsIpc [ "theme" "mode" "toggle" ];
@@ -521,11 +524,13 @@ in
         # screen (composed through a shell; niri has none of its own).
         "Mod+Shift+Escape".action.spawn = [ "sh" "-c" "${fsBin} ipc --any-display call lock lock && systemctl suspend" ];
 
-        # FormalShell ships no screenshot tooling (spec non-goal), so these
-        # fall back to niri's own screenshot UI. Print = whole screen,
-        # Mod+Shift+S = region picker.
-        "Print".action.screenshot-screen = [ ];
-        "Mod+Shift+S".action.screenshot = [ ];
+        # Screenshots via the shell (M12 screenshot IPC target: grim/slurp on
+        # the wrapper PATH, saves to screenshot.directory and wl-copy's the
+        # image, success lands as a shell notification). Same owner rule as
+        # the dms arm: shell-owned screenshots survive compositor changes.
+        # Print = whole screen, Mod+Shift+S = region picker.
+        "Print".action.spawn = fsIpc [ "screenshot" "full" ];
+        "Mod+Shift+S".action.spawn = fsIpc [ "screenshot" "region" ];
 
         # Volume via wpctl: FormalShell's AudioService tracks PipeWire
         # directly and auto-shows the volume OSD on any external change, so
