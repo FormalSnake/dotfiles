@@ -21,26 +21,8 @@ in
 {
   imports = [ inputs.nix-rosetta-builder.darwinModules.default ];
 
-  options.kyan.rosettaBuilder = {
-    enable =
-      lib.mkEnableOption "Rosetta-backed Linux builder VM for x86_64-linux and aarch64-linux";
-
-    bootstrap = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
-      description = ''
-        Temporarily run Determinate's own native aarch64-linux builder
-        alongside this one. The Rosetta VM's image is itself a Linux build, so
-        something has to build it the first time (and after any change to the
-        VM's shape, which recreates it). Flip this on, `darwin-rebuild switch`,
-        switch a second time, then flip it back off — from there the Rosetta VM
-        rebuilds itself.
-
-        Costs a second VM's worth of RAM and disk while enabled, which matters
-        on this host: see the `diskSize` note below.
-      '';
-    };
-  };
+  options.kyan.rosettaBuilder.enable =
+    lib.mkEnableOption "Rosetta-backed Linux builder VM for x86_64-linux and aarch64-linux";
 
   config = lib.mkIf cfg.enable {
     # Apple Silicon cannot build Linux at all, and QEMU-emulating x86_64 would
@@ -49,9 +31,12 @@ in
     # where this Mac is worth offloading to. Needs `softwareupdate
     # --install-rosetta` on the host (already done).
     #
-    # Bootstrapping: building the VM image is itself a Linux build, so the
-    # FIRST `darwin-rebuild switch` after enabling this needs an existing Linux
-    # builder. That is what `kyan.rosettaBuilder.bootstrap` is for.
+    # Building this VM's image is itself a Linux build, so it needs a Linux
+    # builder to bootstrap. Determinate ships one (aarch64-linux, 1 job, over
+    # macOS's Virtualization framework) and leaves it on by default, which is
+    # what covers the first switch — so `determinateNix.determinateNixd.builder`
+    # is deliberately left alone rather than turned off as redundant. It is also
+    # the fallback whenever a change to the VM's shape recreates it.
     nix-rosetta-builder = {
       enable = true;
       inherit port;
@@ -109,8 +94,6 @@ in
     # the module drops in /etc/ssh/ssh_config.d/, carrying the user, port,
     # identity and pinned host key.
     determinateNix = {
-      determinateNixd.builder.state = if cfg.bootstrap then "enabled" else "disabled";
-
       distributedBuilds = true;
       buildMachines = [
         {
