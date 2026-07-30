@@ -54,6 +54,12 @@
       "markdown-preview"  # pluk-inc/tap
       "syncthing-app"
 
+      # — remote desktop —
+      # Also installed on both NixOS hosts (users/kyandesutter/mixins/parsec.nix).
+      # This Mac is the only one of the three that can act as a Parsec *host*:
+      # Parsec has no Linux hosting support, so the laptops are clients.
+      "parsec"
+
       # — tiling WM (mirrors the g815 niri setup) —
       "omniwm"             # barutsrb/tap — niri-style tiler (tap trusted automatically; see modules/darwin/mixins/homebrew.nix)
       "karabiner-elements" # remaps Right Command → the OmniWM "Super" chord (Ctrl+Opt+Cmd)

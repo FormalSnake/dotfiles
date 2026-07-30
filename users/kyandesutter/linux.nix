@@ -23,6 +23,7 @@
     ./mixins/godot.nix
     ./mixins/obsidian.nix
     ./mixins/bambu-studio.nix
+    ./mixins/parsec.nix
   ];
 
   # NixOS rebuild shortcut (linux-only, so it lives here rather than the shared
