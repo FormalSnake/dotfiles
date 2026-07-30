@@ -34,9 +34,10 @@
   # FormalShell daily-drive trial (the spec's own gate: e1504g first, g815
   # follows). Swaps the session shell, lock-before-sleep hook, and the
   # shell-facing niri binds; DMS stays installed but dormant, and rollback is
-  # deleting this one line (users/kyandesutter/mixins/formalshell.nix has the
-  # full trade-offs: calendar falls back to local .ics, no emoji launcher,
-  # screenshots via niri's own UI). SDDM stays the greeter either way.
+  # deleting this one line. M12/M13 closed the launch trade-offs (GOA/EDS
+  # calendar after a one-time `XDG_CURRENT_DESKTOP=GNOME gnome-control-center
+  # online-accounts` sign-in, emoji picker, shell screenshots). SDDM stays
+  # the greeter either way.
   kyan.desktop.shell = "formalshell";
 
   # Syncthing mesh: wallpapers + Zen profile, macbook as hub
