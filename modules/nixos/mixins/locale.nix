@@ -7,9 +7,9 @@
   # by default).
   #
   # The service sets `time.timeZone = null` at normal priority, which beats the
-  # mkDefault below — so the Canary Islands value is only the fallback if
-  # automatic-timezoned is ever turned off. Raising its priority again would
-  # abort the build rather than silently pin the zone.
+  # mkDefault below, so the Canary Islands value is only the fallback for when
+  # automatic-timezoned is turned off. Raising its priority again aborts the
+  # build rather than silently pinning the zone.
   services.automatic-timezoned.enable = true;
   time.timeZone = lib.mkDefault "Atlantic/Canary";
 
