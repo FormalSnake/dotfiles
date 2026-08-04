@@ -305,7 +305,15 @@ in
     # kyandesutter is added to that group in ../mixins/users.nix.
     hardware.i2c.enable = true;
 
+    # tailscale up/down from the FormalShell panel (M16) needs operator mode,
+    # applied by tailscaled at service start.
+    services.tailscale.extraSetFlags = [ "--operator=kyandesutter" ];
+
     environment.systemPackages = with pkgs; [
+      # Night light backend for FormalShell (M16): the shell manages the
+      # wlsunset process itself and only needs the binary on PATH.
+      wlsunset
+
       # SDDM "sddm-astronaut" theme, used as-is with its bundled pixel_sakura
       # preset (animated background + the preset's own colours — see the
       # `sddmAstronaut` let-binding; it's independent of the app theming).

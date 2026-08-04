@@ -902,18 +902,9 @@ in
   # populated the vendor dir.
   systemd.user.sessionVariables = lib.optionalAttrs hasNvidia igpuPins;
 
-  systemd.user.services.polkit-agent = {
-    Unit = {
-      Description = "polkit-kde authentication agent";
-      After = [ "graphical-session.target" ];
-      PartOf = [ "graphical-session.target" ];
-    };
-    Service = {
-      ExecStart = "${pkgs.kdePackages.polkit-kde-agent-1}/libexec/polkit-kde-authentication-agent-1";
-      Restart = "on-failure";
-    };
-    Install.WantedBy = [ "graphical-session.target" ];
-  };
+  # polkit auth agent: FormalShell registers its own in-shell agent (M16,
+  # 2026-08-03), so the standalone polkit-kde service is gone. Two agents
+  # would race for the session registration.
 
   # Compositor-essential session packages. The generic GNOME/desktop apps and
   # their MIME defaults live in users/kyandesutter/mixins/desktop-apps.nix.

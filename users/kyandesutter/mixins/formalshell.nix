@@ -28,7 +28,7 @@ in
         # ~/.claude/.credentials.json and the codex CLI; all three degrade
         # honestly without auth. Left/center regions absent on purpose, they
         # fall back to defaults (which include the M13b bell).
-        bar.layout.right = [ "battery" "audio" "network" "bluetooth" "weather" "github" "usage" "bell" "tray" "indicators" ];
+        bar.layout.right = [ "battery" "audio" "network" "bluetooth" "tailscale" "weather" "github" "usage" "bell" "tray" "indicators" ];
       };
     };
 
