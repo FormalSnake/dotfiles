@@ -237,9 +237,15 @@
   # single-user personal laptop, no untrusted code.
   boot.kernelParams = [ "mitigations=off" ];
 
+  # 8 GB RAM: hand zram all of it. Compressed pages only cost what they compress
+  # to, and zstd gets ~3.7:1 on this workload (3.4 GB of swapped pages held in
+  # 445 MB of RAM), so the 50% default in mixins/boot.nix just fills up and
+  # spills the rest onto the swapfile below at NVMe speed instead of RAM speed.
+  zramSwap.memoryPercent = 100;
+
   # 8 GB RAM (vs the g815's 32): halve the overflow swapfile to 2× RAM so a
-  # spike has real spill room on a small machine (zram in mixins/boot.nix
-  # stays the first, RAM-speed tier).
+  # spike has real spill room on a small machine (zram above stays the first,
+  # RAM-speed tier).
   swapDevices = [
     {
       device = "/swapfile";

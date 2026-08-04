@@ -111,10 +111,11 @@ in
     ACTION=="add|change", KERNEL=="sd[a-z]*", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="mq-deadline"
   '';
 
-  # zram swap — cheap responsiveness win on a 32 GB laptop.
+  # zram swap — cheap responsiveness win on a 32 GB laptop. mkDefault so a
+  # RAM-starved host can lean on it harder (the e1504g runs it at 100%).
   zramSwap = {
     enable = true;
-    memoryPercent = 50;
+    memoryPercent = lib.mkDefault 50;
     priority = 5; # used before the disk swapfile below (RAM-speed first)
   };
 
