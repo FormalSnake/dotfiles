@@ -26,6 +26,7 @@ directory on every start, because Navidrome unpacks each `.ndp` next to itself.
 | Lidarr | 8686 | Wanted-list and importer. Never searches or downloads |
 | slskd | 5030 | Soulseek client |
 | Soularr | 8265 | Bridges Lidarr to slskd |
+| multi-scrobbler | 9078 | Merges Spotify and Navidrome plays into one ListenBrainz history |
 
 One launchd agent (`kyan.music-stack`) runs `docker compose up` in the
 foreground under `KeepAlive`, so launchd restarts the stack if it dies. It
@@ -40,11 +41,36 @@ Navidrome would scan an empty folder and mark the whole library deleted.
 /Volumes/Music/incomplete   slskd partials
 /Volumes/Music/purchases    drop bought albums here, then run `music-import`
 ~/.local/share/music-stack  per-service config + databases
+~/.local/share/music-stack/navidrome-backup  Navidrome DB backups, every 6h, 14 kept
+docker volume music-stack_navidrome-data     Navidrome's own data dir (/data)
 ```
 
 `library` and `downloads` mount at the *same container path* in every service.
 Soularr hands Lidarr the path slskd reported, so a mismatch shows up as a
 confusing "file not found" on import rather than an obvious path bug.
+
+### Never open navidrome.db from macOS
+
+Navidrome's `/data` is a docker volume rather than a bind mount, and that is
+load-bearing. SQLite in WAL mode coordinates through POSIX locks and a shared
+`-shm` mapping; across OrbStack's virtiofs boundary the locks are emulated and
+the mapping is not really shared, so two processes each believe they own the
+write-ahead log and the next checkpoint writes over pages the other side is
+using. The database was destroyed twice this way on 2026-08-02 and 2026-08-03,
+the second time by a single `sqlite3 navidrome.db "select ..."` run from the
+mac while the container had the file open: 377 of 3072 pages ended up zeroed,
+page 1 among them, which is past what `.recover` can read.
+
+Inside the VM's own filesystem the locking works, so the reconcile agent's
+ten-minute `docker exec` writes are safe. To query the database by hand:
+
+```bash
+docker exec navidrome sqlite3 /data/navidrome.db "select count(*) from media_file"
+```
+
+Backups stay on a bind mount on purpose: SQLite's online backup is one
+sequential file write, which that mount handles, and a host-side copy survives
+losing the volume. Restore is `docker cp` of a backup into a stopped container.
 
 ## How a download happens
 
@@ -59,10 +85,49 @@ Lidarr's own indexer and download-client machinery is unused, which is why its
 health page permanently shows three warnings about missing indexers and
 download clients. **Those are expected and will never clear.**
 
+## Scrobbling
+
+Navidrome and Spotify each scrobbled to a different place, which left the
+discovery playlists reading half a history. Both now go through
+multi-scrobbler:
+
+- **Spotify** has no way to push plays out, so multi-scrobbler polls the account
+  every 60s. That covers every device on the account, including Spotify on the
+  g815, with nothing installed there.
+- **Navidrome** posts to multi-scrobbler's `endpointlz` source instead of
+  ListenBrainz, via `ND_LISTENBRAINZ_BASEURL`. Its own scrobbler is used rather
+  than a Subsonic source because that one is the only path that sends multiple
+  artists and replays scrobbles made while offline.
+- multi-scrobbler forwards everything to ListenBrainz. A source scrobbles to
+  every client by default, so adding Maloja later is one more `clients` entry.
+
+Pointing `BaseURL` away from listenbrainz.org is safe: only `submit-listens` and
+`validate-token` follow it. Similar-artists, similar-songs, artist metadata and
+popularity are hardcoded to listenbrainz.org and labs.api.listenbrainz.org in
+Navidrome's client, so radio and the metadata agent are unaffected.
+
+Four things nix cannot do, all one-time:
+
+1. Create a Spotify app at developer.spotify.com with redirect URI
+   `http://127.0.0.1:9078/callback`, and put its id and secret into
+   `~/.local/share/music-stack/multi-scrobbler/config.json`. Spotify rejects
+   `localhost` redirects and requires https for everything except loopback.
+2. Put a ListenBrainz user token and username into the `listenbrainz` client in
+   the same file, then `docker restart multi-scrobbler`.
+3. In Navidrome (profile icon → ListenBrainz), link with `MSLZ_KEY` from
+   `.api-keys`, not the real ListenBrainz token. Existing links break when the
+   base URL moves, so this has to be redone once per user.
+4. Authorise Spotify from the dashboard at http://127.0.0.1:9078.
+
+Live plays only go forward from here. Backfilling older Spotify history is
+still a manual job: request the data export from Spotify, wait the few weeks it
+takes to arrive, then feed the ZIP to ListenBrainz at
+`listenbrainz.org/settings/import/`.
+
 ## API keys
 
 Generated once by the launcher into `~/.local/share/music-stack/.api-keys` and
-substituted into the Lidarr, slskd and Soularr seed configs. Both Lidarr and
+substituted into the Lidarr, slskd, Soularr and multi-scrobbler seed configs. Both Lidarr and
 slskd accept a pre-seeded key, which is what lets Soularr be wired up without
 copying keys out of two web UIs by hand.
 
@@ -99,8 +164,10 @@ every reconnect instead of reusing one, reaching 423 rows in a single morning.
 Library is FLAC; clients get what suits them.
 
 - **Phone (NaviBeat)** — raw FLAC. See below; transcoding made it buffer.
-- **Desktop (Kopuz)** — raw FLAC. Same machine as the server, wired speakers,
-  so bit-perfect costs nothing.
+- **Desktop (Kopuz)** — Opus 128. Kopuz runs on the linux laptops and streams
+  over the tailnet, where a FLAC track took about a minute to load on a bad
+  connection. Opus is safe: kopuz decodes it through
+  `symphonia-adapter-libopus`.
 - **Web UI** — Opus 128.
 
 Measured on a 24-bit source: 98 MB FLAC at 1.69 Mbps versus 8 MB Opus at
@@ -130,9 +197,10 @@ and Weekly Exploration. Requirements, all easy to miss:
   inert.
 - A ListenBrainz account, mapped to the Navidrome username, following
   `troi-bot`.
-- Real listening history. Connecting Spotify imports only the last 30 days and
-  tracks forward; connecting Last.fm does nothing retroactively — the backfill
-  is a separate manual job at `listenbrainz.org/settings/import/`.
+- Real listening history, which is what multi-scrobbler is for (see
+  Scrobbling). ListenBrainz's own Spotify connection imports only the last 30
+  days and connecting Last.fm does nothing retroactively, so anything older
+  than that arrives only through the manual export import.
 - Playlists generate on troi-bot's schedule (daily-jams after local midnight,
   weekly-jams Mondays), not on demand.
 

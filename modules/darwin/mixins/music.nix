@@ -24,7 +24,10 @@ let
   # stack runs in Docker (OrbStack) rather than half launchd, half container.
   # The plugin derivations are plain .ndp data files and still build here, so
   # plugin versions stay pinned by the flake even though the server does not.
-  pluginPkgs = with pkgs.navidromePlugins; [ listenbrainz-daily-playlist ];
+  pluginPkgs = with pkgs.navidromePlugins; [
+    listenbrainz-daily-playlist
+    audiomuseai
+  ];
 
   # Container-side paths are deliberately identical across services: Soularr
   # hands Lidarr the path slskd reported, so a mismatch surfaces as a confusing
@@ -52,6 +55,13 @@ let
           ND_LISTENBRAINZ_ENABLED: "true"
           ND_AGENTS: listenbrainz,lastfm,deezer
 
+          # Scrobbles go through multi-scrobbler so Spotify plays and Navidrome
+          # plays reach ListenBrainz as one history. Only submit-listens and
+          # validate-token follow this URL; similar-artists, artist metadata and
+          # popularity are hardcoded to listenbrainz.org in Navidrome's client,
+          # so discovery keeps working while the stack is pointed here.
+          ND_LISTENBRAINZ_BASEURL: http://multi-scrobbler:9078/1/
+
           # Without this, Subsonic's getArtist only counts albums an artist is
           # credited on as *album* artist, so a feature such as Majestic on
           # "Who's That What's That" is an artist with an empty page — the
@@ -64,13 +74,29 @@ let
           ND_ENABLETRANSCODINGCONFIG: "true"
           ND_TRANSCODINGCACHESIZE: 2GB
 
+          # The database has been corrupted twice (2026-08-02 and 2026-08-03),
+          # so keep restorable copies. Written with SQLite's own online backup,
+          # a single sequential file write, which is safe on the bind mount in
+          # a way that concurrent access is not.
+          ND_BACKUP_PATH: /backup
+          ND_BACKUP_SCHEDULE: "@every 6h"
+          ND_BACKUP_COUNT: "14"
+
           ND_SCANNER_WATCHERWAIT: 10s
           # ND_SCANSCHEDULE was silently ignored here: 0.63 reads the schedule
           # from Scanner.Schedule, and the old name left periodic scans off.
           ND_SCANNER_SCHEDULE: "@every 1h"
+        # /data is a docker volume, NOT a bind mount, and that is load-bearing.
+        # SQLite needs working POSIX locks and a shared -shm mapping; over
+        # OrbStack's virtiofs bind mount neither is reliable, and two writers
+        # (the server plus the reconcile below, or anything run from macOS)
+        # zero out pages. Living inside the VM's own filesystem makes ordinary
+        # concurrent access safe again. Never open this database from the mac:
+        # use `docker exec navidrome sqlite3 /data/navidrome.db`.
         volumes:
           - ${cfg.libraryDir}:/music
-          - ${stackDir}/navidrome:/data
+          - navidrome-data:/data
+          - ${stackDir}/navidrome-backup:/backup
           - ${stackDir}/navidrome-plugins:/plugins
         ports:
           - "${toString cfg.port}:4533"
@@ -122,6 +148,115 @@ let
           - lidarr
           - slskd
         restart: unless-stopped
+
+      # Spotify cannot push plays anywhere, so this polls the account and
+      # forwards them; Navidrome posts into the same instance, which is what
+      # merges both into one ListenBrainz history. The redirect URI is bound to
+      # 127.0.0.1 rather than localhost because Spotify stopped accepting
+      # localhost redirects, and to a loopback address because everything
+      # except loopback has to be https.
+      multi-scrobbler:
+        image: foxxmd/multi-scrobbler:latest
+        container_name: multi-scrobbler
+        environment:
+          - TZ=Atlantic/Canary
+          - PUID=${uid}
+          - PGID=${gid}
+          - BASE_URL=http://127.0.0.1:9078
+        volumes:
+          - ${stackDir}/multi-scrobbler:/config
+        ports:
+          - "9078:9078"
+        restart: unless-stopped
+
+      # AudioMuse analyses the audio itself (tempo, timbre, energy) and answers
+      # the "sounds like this" questions ListenBrainz cannot: it needs no
+      # MusicBrainz ID, no listening history and no upstream batch job, which is
+      # what makes it the discovery path that works on a Soulseek library.
+      # Postgres and redis are its own, unpublished: only the UI on 8000 is
+      # reachable from the host, and the mac already runs postgres elsewhere.
+      audiomuse-redis:
+        image: redis:7-alpine
+        container_name: audiomuse-redis
+        environment:
+          - TZ=Atlantic/Canary
+        volumes:
+          - audiomuse-redis:/data
+        restart: unless-stopped
+
+      audiomuse-postgres:
+        image: postgres:15-alpine
+        container_name: audiomuse-postgres
+        environment:
+          - TZ=Atlantic/Canary
+          - POSTGRES_DB=audiomusedb
+        env_file:
+          - ${stackDir}/audiomuse/audiomuse.env
+        volumes:
+          - audiomuse-postgres:/var/lib/postgresql/data
+        restart: unless-stopped
+
+      audiomuse-flask:
+        image: ghcr.io/neptunehub/audiomuse-ai:latest
+        container_name: audiomuse-flask
+        environment:
+          - SERVICE_TYPE=flask
+          - TZ=Atlantic/Canary
+          - POSTGRES_DB=audiomusedb
+          - POSTGRES_HOST=audiomuse-postgres
+          - POSTGRES_PORT=5432
+          - REDIS_URL=redis://audiomuse-redis:6379/0
+          - TEMP_DIR=/app/temp_audio
+          - MEDIASERVER_TYPE=navidrome
+          - NAVIDROME_URL=http://navidrome:4533
+        env_file:
+          - ${stackDir}/audiomuse/audiomuse.env
+        volumes:
+          - audiomuse-temp-flask:/app/temp_audio
+          - audiomuse-plugins-flask:/app/plugin/installed
+        ports:
+          - "8000:8000"
+        depends_on:
+          - audiomuse-redis
+          - audiomuse-postgres
+        restart: unless-stopped
+
+      # ONNX threads across every core it is given, so uncapped this one
+      # container took 746% CPU and put the machine at load 17. Six of the VM's
+      # ten leaves the mac usable over SSH while analysis runs; it only ever
+      # costs wall-clock on a job that is already measured in hours.
+      audiomuse-worker:
+        image: ghcr.io/neptunehub/audiomuse-ai:latest
+        container_name: audiomuse-worker
+        cpus: 6
+        environment:
+          - SERVICE_TYPE=worker
+          - TZ=Atlantic/Canary
+          - POSTGRES_DB=audiomusedb
+          - POSTGRES_HOST=audiomuse-postgres
+          - POSTGRES_PORT=5432
+          - REDIS_URL=redis://audiomuse-redis:6379/0
+          - TEMP_DIR=/app/temp_audio
+          - MEDIASERVER_TYPE=navidrome
+          - NAVIDROME_URL=http://navidrome:4533
+        env_file:
+          - ${stackDir}/audiomuse/audiomuse.env
+        volumes:
+          - audiomuse-temp-worker:/app/temp_audio
+          - audiomuse-plugins-worker:/app/plugin/installed
+        depends_on:
+          - audiomuse-redis
+          - audiomuse-postgres
+        restart: unless-stopped
+
+    volumes:
+      navidrome-data:
+      audiomuse-redis:
+      audiomuse-postgres:
+      audiomuse-temp-flask:
+      audiomuse-temp-worker:
+      audiomuse-plugins-flask:
+      audiomuse-plugins-worker:
   '';
 
   # All three seeds hold state that outlives the store path (credentials, API
@@ -197,6 +332,60 @@ let
 
     [Logging]
     level = INFO
+  '';
+
+  # A source scrobbles to every client unless told otherwise, so Spotify and the
+  # Navidrome endpoint both reach ListenBrainz with no further wiring. The
+  # Spotify app credentials and the ListenBrainz user token are the two values
+  # nix cannot generate. @MSLZ_KEY@ is what Navidrome authenticates with: it
+  # replaces the real ListenBrainz token in Navidrome's per-user link dialog.
+  msSeed = pkgs.writeText "multi-scrobbler-seed.json" ''
+    {
+      "sources": [
+        {
+          "name": "spotify",
+          "enable": true,
+          "type": "spotify",
+          "data": {
+            "clientId": "CHANGEME",
+            "clientSecret": "CHANGEME",
+            "redirectUri": "http://127.0.0.1:9078/callback",
+            "interval": 60
+          }
+        },
+        {
+          "name": "navidrome",
+          "enable": true,
+          "type": "endpointlz",
+          "data": {
+            "token": "@MSLZ_KEY@"
+          }
+        }
+      ],
+      "clients": [
+        {
+          "name": "listenbrainz",
+          "enable": true,
+          "type": "listenbrainz",
+          "data": {
+            "token": "CHANGEME",
+            "username": "CHANGEME",
+            "url": "https://api.listenbrainz.org"
+          }
+        }
+      ]
+    }
+  '';
+
+  # Shared by the postgres container and both app containers, so the database
+  # password only has to agree with itself. The Navidrome login is a real user
+  # account (AudioMuse streams every track through the Subsonic API to analyse
+  # it), which is why it cannot be generated here.
+  audiomuseSeed = pkgs.writeText "audiomuse-seed.env" ''
+    POSTGRES_USER=audiomuse
+    POSTGRES_PASSWORD=@AUDIOMUSE_PG@
+    NAVIDROME_USER=CHANGEME
+    NAVIDROME_PASSWORD=CHANGEME
   '';
 
   # Lidarr's rename toggle and Navidrome's per-client transcoding both live in
@@ -437,7 +626,7 @@ let
       exit 1
     fi
 
-    mkdir -p "${stackDir}"/{navidrome,navidrome-plugins,lidarr,slskd,soularr} "${incompleteDir}"
+    mkdir -p "${stackDir}"/{navidrome-backup,navidrome-plugins,lidarr,slskd,soularr,multi-scrobbler,audiomuse} "${incompleteDir}"
 
     # Re-staged every start so a nixpkgs plugin bump actually lands. Navidrome
     # unpacks each .ndp next to itself, so the folder must be writable — a
@@ -462,15 +651,31 @@ let
     # shellcheck disable=SC1090
     . "$keyFile"
 
+    # Appended rather than folded into the block above, so a stack seeded before
+    # multi-scrobbler existed gets a key instead of an empty one.
+    if [ -z "''${MSLZ_KEY:-}" ]; then
+      echo "MSLZ_KEY=$(${pkgs.openssl}/bin/openssl rand -hex 16)" >> "$keyFile"
+      # shellcheck disable=SC1090
+      . "$keyFile"
+    fi
+    if [ -z "''${AUDIOMUSE_PG:-}" ]; then
+      echo "AUDIOMUSE_PG=$(${pkgs.openssl}/bin/openssl rand -hex 16)" >> "$keyFile"
+      # shellcheck disable=SC1090
+      . "$keyFile"
+    fi
+
     seed() {
       [ -f "$2" ] && return 0
-      sed -e "s|@SLSKD_KEY@|$SLSKD_KEY|g" -e "s|@LIDARR_KEY@|$LIDARR_KEY|g" "$1" > "$2"
+      sed -e "s|@SLSKD_KEY@|$SLSKD_KEY|g" -e "s|@LIDARR_KEY@|$LIDARR_KEY|g" \
+          -e "s|@MSLZ_KEY@|$MSLZ_KEY|g" -e "s|@AUDIOMUSE_PG@|$AUDIOMUSE_PG|g" "$1" > "$2"
       chmod 600 "$2"
     }
 
     seed ${lidarrSeed} "${stackDir}/lidarr/config.xml"
     seed ${slskdSeed} "${stackDir}/slskd/slskd.yml"
     seed ${soularrSeed} "${stackDir}/soularr/config.ini"
+    seed ${msSeed} "${stackDir}/multi-scrobbler/config.json"
+    seed ${audiomuseSeed} "${stackDir}/audiomuse/audiomuse.env"
 
     exec docker compose -f ${compose} -p music-stack up --remove-orphans
   '';
@@ -537,9 +742,15 @@ in
         # AirPods re-encode to AAC over Bluetooth regardless, so transcoding was
         # never buying quality here — only cellular data.
         { match = "%NaviBeat%"; }
-        # Same machine as the server and wired speakers, so bit-perfect costs
-        # nothing.
-        { match = "%kopuz%"; }
+        # Kopuz reaches the server from the linux laptops over the tailnet, not
+        # from this machine, so bit-perfect is not free: on a slow link a FLAC
+        # track took about a minute to load. Opus is safe here — kopuz decodes
+        # it through symphonia-adapter-libopus.
+        {
+          match = "%kopuz%";
+          profile = "opus audio";
+          bitrate = 128;
+        }
         {
           match = "%NavidromeUI%";
           profile = "opus audio";
