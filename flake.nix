@@ -81,7 +81,7 @@
     };
 
     herdr = {
-      url = "github:ogulcancelik/herdr";
+      url = "github:herdrdev/herdr";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

@@ -74,10 +74,10 @@
       "computedHash": "426dcf33f23419643f2aab71e2253e1a5b5684a808fabb8a4ad135e489ed7a0f"
     },
     "herdr": {
-      "source": "ogulcancelik/herdr",
+      "source": "herdrdev/herdr",
       "sourceType": "github",
-      "skillPath": "SKILL.md",
-      "computedHash": "05535a08387ce1d675cc009165a3b7f88bc6ebd82d184906f18077d1fc7a310f"
+      "skillPath": "skills/herdr/SKILL.md",
+      "computedHash": "489d2c6ff7e951e47071fbc5446d99d20ea215fcc5e55b9e4ceaa5a578f22d06"
     },
     "improve-ui": {
       "source": "ibelick/ui-skills",
