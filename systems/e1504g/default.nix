@@ -229,7 +229,28 @@
   # in the EC; AC/charging state comes from the independent ACPI AC0 supply,
   # battery from ACPI BAT0), so drop it. Costs only /sys/class/typec and the
   # two ucsi-source-psy power_supply entries, which nothing here reads.
-  boot.blacklistedKernelModules = [ "ucsi_acpi" ];
+  boot.blacklistedKernelModules = [
+    "ucsi_acpi"
+
+    # The Integrated Sensor Hub never starts on this chassis: intel_ish_ipc logs
+    #   intel_ish_ipc 0000:00:12.0: Timed out waiting for HW ready
+    #   intel_ish_ipc 0000:00:12.0: ISH: hw start failed
+    # at every boot and leaves 00:12.0 unbound. No lid/tablet/ambient-light
+    # sensor here reads through it, so skip the probe. (This buys log
+    # cleanliness only: the device sits in D0 either way, see the note below.)
+    "intel_ish_ipc"
+  ];
+
+  # No PCI runtime-PM overrides here, deliberately. Measured on the hardware:
+  #   - NVMe (02:00.0) is quirked by the platform ("setting simple suspend",
+  #     "D3 entry latency set to 10 seconds"), so runtime D3 would never pay off.
+  #     APST already parks the drive's own idle states.
+  #   - Wi-Fi (01:00.0) is left at power/control=on by iwlwifi itself, and
+  #     802.11 power save is already enabled, and overriding the driver here is
+  #     how you get idle disconnects.
+  #   - The dead ISH device accepts power/control=auto but stays in D0, so it
+  #     saves nothing.
+  # The usual powertop --auto-tune sweep therefore has nothing left to win.
 
   # Disable CPU speculative-execution mitigations, matching the g815 (see
   # systems/g815/default.nix): ~5-15% on syscall-heavy work, and this 8 GB
