@@ -623,6 +623,26 @@ in
 
         "Mod+Tab".action.focus-workspace-previous = [ ];
 
+        # MX Master 3S, usable without the keyboard. Its three thumb buttons are
+        # remapped to keys in modules/nixos/mixins/mouse.nix: the gesture button
+        # is Mod, so thumb + main wheel walks workspaces, and back/forward
+        # arrive as F13/F14 and walk columns. The cooldown keeps one flick of
+        # the free-spinning wheel from skipping several workspaces.
+        #
+        # The thumb wheel is deliberately left alone. Columns on a bare
+        # WheelScrollLeft/Right would be the obvious fit, but niri then stops
+        # forwarding the vertical wheel to applications entirely
+        # (niri-wm/niri#1584), and a modifier defeats the point of a thumb wheel.
+        "Mod+WheelScrollDown" = { cooldown-ms = 150; action.focus-workspace-down = [ ]; };
+        "Mod+WheelScrollUp" = { cooldown-ms = 150; action.focus-workspace-up = [ ]; };
+        # Back/forward arrive as KEY_F13/KEY_F14, but binds match keysyms, not
+        # keycodes, and the es layout gives those two XF86Tools and XF86Launch5
+        # (it has no F13/F14 keysym at all). Check with
+        # `xkbcli compile-keymap --layout es | rg 'key <FK1[34]>'` before
+        # touching either half.
+        "XF86Tools".action.focus-column-left = [ ];
+        "XF86Launch5".action.focus-column-right = [ ];
+
         # niri-native essentials (no Hyprland equivalent): overview, column
         # maximize, true maximize, preset/relative column widths.
         "Mod+O" = { repeat = false; action.toggle-overview = [ ]; };
