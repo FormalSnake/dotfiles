@@ -267,6 +267,19 @@
       # eDP-1 unset on iGPU-only hosts, so this is the only definition.
       programs.niri.settings.outputs."eDP-1".scale = 1.0;
 
+      # 8 GB: the three chat clients that mixins/autostart.nix pulls in at login
+      # hold ~1.06 GB resident between them (measured on this host: equibop
+      # 563 MB, beeper 385 MB, bluebubbles 115 MB), which is most of what drives
+      # this machine into swap while it does nothing but terminals and a browser.
+      # Drop them from the login set. The units themselves stay, so
+      # `systemctl --user start beeper` still works when they're actually wanted,
+      # and the g815 (32 GB) keeps launching all three automatically.
+      systemd.user.services = {
+        equibop.Install.WantedBy = lib.mkForce [ ];
+        beeper.Install.WantedBy = lib.mkForce [ ];
+        bluebubbles.Install.WantedBy = lib.mkForce [ ];
+      };
+
       # Suspend after 10 minutes idle (lid close already suspends via logind's
       # default HandleLidSwitch; DMS's own idle timeouts stay 0 — see the seed
       # in mixins/dms.nix). swayidle listens on niri's ext-idle-notify. The
