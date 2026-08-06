@@ -21,6 +21,7 @@
     ./mixins/fastfetch.nix
     ./mixins/fetch.nix
     ./mixins/herdr.nix
+    ./mixins/t3code.nix
     ./mixins/fast.nix
     ./mixins/nh.nix
     ./mixins/nix-index.nix
