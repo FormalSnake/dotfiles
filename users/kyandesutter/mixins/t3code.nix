@@ -14,6 +14,22 @@ let
     enableCodex = false;
   };
 
+  # Electron picks its safeStorage backend from XDG_CURRENT_DESKTOP, and "niri"
+  # is not a name it knows, so it falls back to the "basic" store, which
+  # Electron 36+ reports as unavailable. The app then can't write its connection
+  # catalog ("Desktop secure storage is unavailable in this system context") and
+  # no environment can be saved. gnome-keyring already owns
+  # org.freedesktop.secrets on the niri hosts (modules/nixos/mixins/niri.nix),
+  # so name that backend explicitly. macOS has a keychain and needs none of it.
+  desktop = if !pkgs.stdenv.isLinux then t3code else pkgs.symlinkJoin {
+    name = "t3code-${t3code.version}";
+    paths = [ t3code ];
+    nativeBuildInputs = [ pkgs.makeBinaryWrapper ];
+    postBuild = ''
+      wrapProgram "$out/bin/t3code-desktop" --add-flags --password-store=gnome-libsecret
+    '';
+  };
+
   # `t3 serve` binds exactly one address, and the tailnet address only exists
   # once tailscaled is up, so resolve it at start instead of pinning 100.x.y.z
   # into the store. Binding the tailnet IP keeps the server off the LAN and off
@@ -26,7 +42,7 @@ let
   '';
 in
 {
-  home.packages = [ t3code ];
+  home.packages = [ desktop ];
 
   # The macbook hosts the agents; the e1504g runs the desktop client against it
   # over the tailnet. Upstream's own background service (`t3 service install`)
