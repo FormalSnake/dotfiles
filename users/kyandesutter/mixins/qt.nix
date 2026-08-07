@@ -1,10 +1,11 @@
 { config, ... }:
 {
-  # qt6ct / qt5ct config: select the Fusion style and DMS's generated colour
-  # scheme. The colors/matugen.conf files are written at runtime by DMS's
-  # builtin `qt6ct`/`qt5ct` matugen templates; these .conf files just tell
-  # qt{5,6}ct to use them. Managed declaratively (read-only) — don't hand-edit
-  # via the qt6ct GUI.
+  # qt6ct / qt5ct config: select the Fusion style and the shell's generated
+  # colour scheme. The colors/matugen.conf files are written at runtime by the
+  # active shell's matugen templates — DMS's builtin `qt6ct`/`qt5ct` ones, or
+  # FormalShell's qtct-colors.conf.tmpl on formalshell hosts (same output
+  # path) — these .conf files just tell qt{5,6}ct to use them. Managed
+  # declaratively (read-only) — don't hand-edit via the qt6ct GUI.
   #
   # The Qt platform theme itself (QT_QPA_PLATFORMTHEME=qt6ct) is exported from
   # programs.niri.settings.environment in niri.nix so it reaches every niri-spawned Qt app; this

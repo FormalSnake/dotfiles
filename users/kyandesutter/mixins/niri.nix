@@ -969,7 +969,7 @@ in
   #     dconf below. Without both, half the GTK apps stay on the fontconfig
   #     sans-serif default and the desktop looks mixed.
   #   • gtk{3,4}.extraCss — own gtk.css declaratively so it holds ONLY the
-  #     dank-colors import. DMS writes dank-colors.css but never gtk.css, so
+  #     palette import. DMS writes dank-colors.css but never gtk.css, so
   #     an unmanaged gtk.css silently accumulates cruft: stale @define-color
   #     blocks from old theming tools end up ABOVE the import, and GTK
   #     requires @import before any other rule — so it drops the import,
@@ -977,6 +977,13 @@ in
   #     render un-themed adw-gtk3-dark. Managing the file keeps the import
   #     valid and first. (GTK4/libadwaita read the accent from the portal, so
   #     they were unaffected either way.)
+  #
+  # FormalShell hosts get the same treatment with FormalShell's names: its
+  # ThemeEngine renders formalshell-colors.css (gtk template) + the qt{5,6}ct
+  # matugen.conf, and asserts color-scheme/gtk-theme via dconf on every
+  # retheme, flipping adw-gtk3 ↔ adw-gtk3-dark with the mode. The static
+  # settings.ini prefer-dark hint is DMS-only: FormalShell has a real light
+  # mode, and the hint would keep X11/XWayland GTK3 fallback apps dark in it.
   gtk = {
     enable = true;
     iconTheme = {
@@ -987,10 +994,10 @@ in
       name = "MEK Sans";
       size = 11;
     };
-    gtk3.extraConfig.gtk-application-prefer-dark-theme = 1;
-    gtk4.extraConfig.gtk-application-prefer-dark-theme = 1;
-    gtk3.extraCss = ''@import url("dank-colors.css");'';
-    gtk4.extraCss = ''@import url("dank-colors.css");'';
+    gtk3.extraConfig = lib.optionalAttrs (!useFormalshell) { gtk-application-prefer-dark-theme = 1; };
+    gtk4.extraConfig = lib.optionalAttrs (!useFormalshell) { gtk-application-prefer-dark-theme = 1; };
+    gtk3.extraCss = ''@import url("${if useFormalshell then "formalshell-colors.css" else "dank-colors.css"}");'';
+    gtk4.extraCss = ''@import url("${if useFormalshell then "formalshell-colors.css" else "dank-colors.css"}");'';
   };
 
   # The GSettings half of the GTK font (see the gtk block above). DMS writes
