@@ -608,6 +608,118 @@ let
         done
   '';
 
+  # The Spotify export is a one-off dump, but the library it gets matched
+  # against grows for weeks while Soularr works through Lidarr's wanted list, so
+  # a playlist is only ever as complete as the last run. Re-matching on a timer
+  # means a track added to the library shows up in its playlist within the hour.
+  # `playlists.json` is hand-picked runtime data (which exported playlists to
+  # keep, in Spotify's title/artists shape), not something nix writes.
+  playlists = pkgs.writeScript "music-stack-playlists" ''
+    #!${pkgs.python3}/bin/python3
+    import json
+    import os
+    import re
+    import subprocess
+    import sys
+    import unicodedata
+
+    DATA = "${stackDir}/playlists.json"
+    LIB = "${cfg.libraryDir}"
+
+    # Suffixes Spotify puts on a title that the released file usually lacks.
+    NOISE = re.compile(
+        r"\s*[-(\[]\s*(slowed|super slowed|sped up.*|hardstyle|hardtekk|edit|"
+        r"remix|vip|extended mix|radio edit|club mix|bassline club mix|"
+        r"slowed & reverb|slowed and reverb|slowed -pitch|the dark triad|"
+        r"viral version.*|feat\..*|mit .*|with .*)\s*[)\]]?\s*$",
+        re.I)
+
+
+    def norm(s):
+        s = unicodedata.normalize("NFKD", s)
+        s = "".join(c for c in s if not unicodedata.combining(c))
+        s = s.replace("’", "'").replace("&", "and")
+        return re.sub(r"[^a-z0-9]", "", s.lower())
+
+
+    def variants(title):
+        """Progressively stripped forms of a title, most specific first."""
+        out, t = [], title
+        for _ in range(4):
+            out.append(t)
+            stripped = NOISE.sub("", t).strip(" -–")
+            if stripped == t or not stripped:
+                break
+            t = stripped
+        # Drop a trailing " x Something" mashup half, and any parenthetical.
+        out.append(re.sub(r"\s*\(.*?\)\s*", " ", title).strip())
+        return [v for v in dict.fromkeys(out) if v]
+
+
+    def sql(q):
+        # sqlite3 runs inside the container on purpose: reading navidrome.db from
+        # macOS across OrbStack's virtiofs boundary destroys it (see docs/music.md).
+        r = subprocess.run(["docker", "exec", "navidrome", "sqlite3",
+                            "-separator", "\x1f", "/data/navidrome.db", q],
+                           capture_output=True, text=True)
+        if r.returncode != 0:
+            # Stack down or still starting. Leave the playlists alone and retry
+            # next run rather than rewriting them from an empty library.
+            sys.exit(0)
+        return [l.split("\x1f") for l in r.stdout.splitlines() if l]
+
+
+    if not os.path.isdir(LIB) or not os.path.exists(DATA):
+        sys.exit(0)
+
+    rows = sql("select title, artist, album_artist, path from media_file;")
+    by_title = {}
+    for title, artist, aartist, path in rows:
+        by_title.setdefault(norm(title), []).append((artist, aartist, path))
+
+    playlists = json.load(open(DATA))
+    report = {}
+    for name, tracks in playlists.items():
+        lines, hits, misses = ["#EXTM3U", f"#PLAYLIST:{name}"], 0, []
+        for t in tracks:
+            want_artists = {norm(a) for a in t["artists"]}
+            found = None
+            for v in variants(t["title"]):
+                for artist, aartist, path in by_title.get(norm(v), []):
+                    if norm(artist) in want_artists or norm(aartist) in want_artists \
+                            or any(w and w in norm(artist) for w in want_artists):
+                        found = path
+                        break
+                if found:
+                    break
+            if found:
+                # Navidrome resolves relative entries against the playlist's folder.
+                lines.append(found.replace("/music/", "", 1))
+                hits += 1
+            else:
+                misses.append(f'{t["artists"][0]} - {t["title"]}')
+        report[name] = (hits, len(tracks), misses)
+
+        fn = f"{LIB}/{name}.m3u"
+        body = "\n".join(lines) + "\n"
+        # Navidrome reimports a playlist whenever its mtime moves, so an
+        # unchanged match must not touch the file.
+        try:
+            unchanged = open(fn).read() == body
+        except OSError:
+            unchanged = False
+        if not unchanged:
+            with open(fn, "w") as f:
+                f.write(body)
+            print(f"playlists: {name} {hits}/{len(tracks)} matched")
+
+    if "--misses" in sys.argv:
+        for name, (h, n, misses) in report.items():
+            print(f"\n{name} missing ({len(misses)}):")
+            for m in misses:
+                print("  ", m)
+  '';
+
   launcher = pkgs.writeShellScript "music-stack-launch" ''
     set -euo pipefail
 
@@ -786,6 +898,20 @@ in
         };
         RunAtLoad = true;
         StartInterval = 600;
+        StandardOutPath = "${home}/Library/Logs/music-stack.log";
+        StandardErrorPath = "${home}/Library/Logs/music-stack.log";
+      };
+    };
+
+    launchd.user.agents.music-stack-playlists = {
+      serviceConfig = {
+        Label = "kyan.music-stack-playlists";
+        ProgramArguments = [ "${playlists}" ];
+        EnvironmentVariables = {
+          PATH = "/usr/local/bin:/opt/homebrew/bin:/run/current-system/sw/bin:/usr/bin:/bin";
+        };
+        RunAtLoad = true;
+        StartInterval = 3600;
         StandardOutPath = "${home}/Library/Logs/music-stack.log";
         StandardErrorPath = "${home}/Library/Logs/music-stack.log";
       };

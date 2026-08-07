@@ -208,6 +208,26 @@ The plugin matches tracks by MusicBrainz ID, falling back to artist/title for
 `fallbackCount` tracks (default 15). Files without MBIDs are effectively
 invisible to discovery, which is what beets is for.
 
+## Spotify playlists
+
+`~/.local/share/music-stack/playlists.json` holds the tracklists kept from the
+Spotify account export (`Playlist1.json`, in Spotify's `title` + `artists`
+shape). The `kyan.music-stack-playlists` agent matches them against the
+Navidrome library every hour and writes `<name>.m3u` into the library root,
+which Navidrome imports on its next scan.
+
+An export is a snapshot, so the hourly run is not about new Spotify data: it is
+about the library catching up. Most tracks miss on the first pass and appear
+weeks later as Soularr works through Lidarr's wanted list. Matching is
+title-first with the Spotify remix and "slowed" suffixes stripped
+progressively, then an artist check, because a Soulseek rip rarely carries the
+exact title Spotify shows.
+
+The agent leaves the `.m3u` untouched when the match is unchanged (Navidrome
+reimports on mtime) and exits without writing anything if the container is
+down, so a stopped stack cannot blank a playlist. Run it by hand with
+`--misses` to list what is still unmatched.
+
 ## Tagging
 
 Soulseek rip quality varies a lot: the Tame Impala albums arrived with full
