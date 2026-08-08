@@ -60,6 +60,26 @@
         "type": "github"
       }
     },
+    "canary": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1786122847,
+        "narHash": "sha256-9CGFLrj6+Eh5k8FoOotivp6mmgpvx7fK0CPVCtRdynY=",
+        "ref": "refs/heads/main",
+        "rev": "8f53b3d4d204ea2f5828c9c05db3767e2cbf686c",
+        "revCount": 33,
+        "type": "git",
+        "url": "ssh://git@github.com/FormalSnake/CanaryOrchestrator"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@github.com/FormalSnake/CanaryOrchestrator"
+      }
+    },
     "canarycode": {
       "inputs": {
         "nixpkgs": [
@@ -1309,6 +1329,7 @@
         "agenix": "agenix",
         "areofyl-fetch": "areofyl-fetch",
         "brew-src": "brew-src",
+        "canary": "canary",
         "canarycode": "canarycode",
         "chaotic": "chaotic",
         "claude-code-nix": "claude-code-nix",

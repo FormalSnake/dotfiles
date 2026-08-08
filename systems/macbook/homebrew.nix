@@ -13,6 +13,7 @@
     # CLI tools that genuinely need brew (no Nix equivalent on darwin or version-pinned).
     # Everything else moved to nix/home-manager — see users/kyandesutter/programs.nix.
     brews = [
+      "libadwaita" # NativeDesktop's GTK-on-macOS dev loop links brew GTK; cleanup="uninstall" kept wiping the imperative install
       "sketchybar" # felixkratz/formulae — nixpkgs' build crashes the cctools linker; drives the OmniWM bar (users/kyandesutter/mixins/sketchybar.nix)
       "terminal-notifier" # nixpkgs 26.11 crashes in the Darwin linker (SIGTRAP)
       "watchman" # nixpkgs build pulls folly, which fails to compile on darwin
