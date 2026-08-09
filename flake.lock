@@ -1075,6 +1075,23 @@
         "type": "github"
       }
     },
+    "nixpkgs-t3code": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1786167322,
+        "narHash": "sha256-Sw7B6iNYzyVeRMBteDBgMKGb6LZYnhsM9peM92SKrKg=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "664d561730c84c52ded0c7e7a7e6d137805505a8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "664d561730c84c52ded0c7e7a7e6d137805505a8",
+        "type": "github"
+      }
+    },
     "nixpkgs_10": {
       "locked": {
         "lastModified": 1767892417,
@@ -1353,6 +1370,7 @@
         "nix-rosetta-builder": "nix-rosetta-builder",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_11",
+        "nixpkgs-t3code": "nixpkgs-t3code",
         "nordvpn-flake": "nordvpn-flake",
         "zen-browser": "zen-browser"
       }

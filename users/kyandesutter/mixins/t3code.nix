@@ -1,5 +1,40 @@
 { config, lib, pkgs, inputs, ... }:
 let
+  packaging = "${inputs.nixpkgs-t3code}/pkgs/by-name/t3/t3code";
+
+  # Upstream's nightly channel, not a stable tag: the usage page and sidebar v2
+  # as the default both landed after v0.0.32 and only ship in 0.0.33-nightly.
+  # Bumping means a new tag plus fresh `hash` values for the source and the pnpm
+  # store — take them from the build failure, they are not derivable.
+  version = "0.0.33-nightly.20260809.1043";
+
+  unwrapped = (pkgs.callPackage "${packaging}/unwrapped.nix" { }).overrideAttrs (
+    final: prev: {
+      inherit version;
+
+      src = pkgs.fetchFromGitHub {
+        owner = "pingdotgg";
+        repo = "t3code";
+        tag = "v${version}";
+        hash = "sha256-LFY0hs15bBdqjAdTC7RLITV1XsgBmNPVWNRCgp9W108=";
+      };
+
+      # fetchPnpmDeps closes over src, so the pinned nixpkgs hash cannot carry
+      # over; rebuild the fetcher against the nightly tree.
+      pnpmDeps = pkgs.fetchPnpmDeps {
+        inherit (final)
+          pname
+          version
+          src
+          pnpmWorkspaces
+          ;
+        pnpm = pkgs.pnpm_11;
+        fetcherVersion = 4;
+        hash = "sha256-i/xp5RqjDA97yD7heoNets4zx6BAM8atmZCnOf3jEN0=";
+      };
+    }
+  );
+
   # t3code ships two binaries: `t3` (the headless server/CLI) and
   # `t3code-desktop` (the Electron client). nixpkgs wraps them with a PATH
   # prefix holding the agent and VCS CLIs the server may spawn, which is
@@ -7,7 +42,8 @@ let
   # from the same claude-code-nix input as mixins/claude-code.nix so the GUI and
   # the terminal drive one CLI version. Codex is off (no OpenAI CLI on these
   # hosts); git and gh stay on by default.
-  t3code = pkgs.t3code.override {
+  t3code = pkgs.callPackage "${packaging}/package.nix" {
+    t3code-unwrapped = unwrapped;
     enableClaude = true;
     claude-code = inputs.claude-code-nix.packages.${pkgs.system}.default;
     enableOpencode = true;

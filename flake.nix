@@ -113,6 +113,17 @@
       url = "github:sadjow/claude-code-nix";
     };
 
+    # nixpkgs' t3code packaging, pinned at its 0.0.32 bump and consumed as a
+    # plain source tree (`flake = false`): mixins/t3code.nix callPackages these
+    # three files with OUR pkgs, so the build reuses our electron/nodejs closure
+    # rather than dragging in a second nixpkgs. Our own nixpkgs pin still
+    # carries the 0.0.28 packaging, which cannot build current t3code (pnpm 10
+    # vs 11, and a postPatch targeting a vite.config.ts line upstream rewrote).
+    nixpkgs-t3code = {
+      url = "github:NixOS/nixpkgs/664d561730c84c52ded0c7e7a7e6d137805505a8";
+      flake = false;
+    };
+
     # Prebuilt nix-index database (weekly) — powers comma and the
     # command-not-found handler without a local `nix-index` run.
     nix-index-database = {
