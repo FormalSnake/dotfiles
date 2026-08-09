@@ -24,6 +24,14 @@
   # hardware.enableRedistributableFirmware in mixins/graphics.nix).
   hardware.cpu.intel.updateMicrocode = true;
 
+  # FormalShell's power panel samples CPU package watts from RAPL (M20). The
+  # kernel ships energy_uj root-only (PLATYPUS side-channel mitigation);
+  # relax the package-0 zone to world-readable for the user shell. The shell
+  # degrades to charge-rate-only wherever this rule is absent.
+  services.udev.extraRules = ''
+    ACTION=="add", SUBSYSTEM=="powercap", KERNEL=="intel-rapl:0", RUN+="${pkgs.coreutils}/bin/chmod 0444 /sys%p/energy_uj"
+  '';
+
   # Full niri desktop. Everything hardware-specific stays off:
   # kyan.nvidia (no dGPU) and kyan.asus — the latter deliberately, even though
   # this is an ASUS chassis, because kyan.asus also gates the g815's dGPU power
