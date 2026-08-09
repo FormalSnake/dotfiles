@@ -77,10 +77,14 @@ let
   # once tailscaled is up, so resolve it at start instead of pinning 100.x.y.z
   # into the store. Binding the tailnet IP keeps the server off the LAN and off
   # every public interface: pairing tokens are the only authentication.
+  # Clients store the endpoint URL, port included, so the port has to survive a
+  # restart: left to itself the server takes an arbitrary free one and every
+  # paired client fails to reconnect. 3773 is what the clients already hold.
   serve = pkgs.writeShellScript "t3code-serve" ''
     set -euo pipefail
     exec ${lib.getExe' t3code "t3"} serve \
       --no-browser \
+      --port 3773 \
       --host "$(${lib.getExe pkgs.tailscale} ip -4 | head -1)"
   '';
 in
