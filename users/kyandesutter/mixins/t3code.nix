@@ -20,7 +20,11 @@ let
       };
 
       # fetchPnpmDeps closes over src, so the pinned nixpkgs hash cannot carry
-      # over; rebuild the fetcher against the nightly tree.
+      # over; rebuild the fetcher against the nightly tree. The store is keyed
+      # per system: the fetcher passes `--force` to pull dependencies for every
+      # platform, yet darwin and linux still resolve to different trees, so
+      # nixpkgs' single upstream hash only ever matches one of them. Both hosts
+      # need their own value, each read off that host's build failure.
       pnpmDeps = pkgs.fetchPnpmDeps {
         inherit (final)
           pname
@@ -30,7 +34,10 @@ let
           ;
         pnpm = pkgs.pnpm_11;
         fetcherVersion = 4;
-        hash = "sha256-i/xp5RqjDA97yD7heoNets4zx6BAM8atmZCnOf3jEN0=";
+        hash = {
+          aarch64-darwin = "sha256-i/xp5RqjDA97yD7heoNets4zx6BAM8atmZCnOf3jEN0=";
+          x86_64-linux = "sha256-iQ9PmPWktAvAPbkuSrw0BgY4Z9Ho/f9D56G3yMzBE7g=";
+        }.${pkgs.stdenv.hostPlatform.system};
       };
     }
   );
