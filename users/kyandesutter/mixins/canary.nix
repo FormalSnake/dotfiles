@@ -17,5 +17,10 @@
   canary = {
     enable = true;
     daemon.enable = false;
+    # Written into ~/.config/canary/canaryd.json (the module manages that file
+    # even with the service off): the Mac's `canary install`-managed daemon
+    # reads it at boot, and the tailnet entry is what lets the Linux clients
+    # reach it directly instead of over an ssh tunnel.
+    daemon.bindAddrs = [ "127.0.0.1" "tailnet" ];
   };
 }
