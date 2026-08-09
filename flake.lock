@@ -67,11 +67,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1786122847,
-        "narHash": "sha256-9CGFLrj6+Eh5k8FoOotivp6mmgpvx7fK0CPVCtRdynY=",
+        "lastModified": 1786300922,
+        "narHash": "sha256-eZUSF01UqebilTNPhx7138dc5w3PpBPuPaTwrVT6pqU=",
         "ref": "refs/heads/main",
-        "rev": "8f53b3d4d204ea2f5828c9c05db3767e2cbf686c",
-        "revCount": 33,
+        "rev": "a6030a00fee9d031f21499bc2b7707556daff2cd",
+        "revCount": 40,
         "type": "git",
         "url": "ssh://git@github.com/FormalSnake/CanaryOrchestrator"
       },
@@ -559,11 +559,11 @@
         "quickshell": "quickshell"
       },
       "locked": {
-        "lastModified": 1786088218,
-        "narHash": "sha256-uixZwth7mCNpDCNEGkzEsuJIOyuHlp371wbbMrPncx0=",
+        "lastModified": 1786307381,
+        "narHash": "sha256-Of8FYSxSffbBAeLxL26/GERsDPSJGMOk513vcTMGdyE=",
         "owner": "FormalSnake",
         "repo": "FormalShell",
-        "rev": "7ed9189b5bba310bd718d30c4c0a3f0ff0307bdc",
+        "rev": "2051cfb953bbc929e41e260446385c16b8e2455c",
         "type": "github"
       },
       "original": {

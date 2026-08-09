@@ -309,10 +309,21 @@ in
     # applied by tailscaled at service start.
     services.tailscale.extraSetFlags = [ "--operator=kyandesutter" ];
 
+    # LocalSend discovery and transfers (FormalShell menu SHARE route).
+    networking.firewall.allowedTCPPorts = [ 53317 ];
+    networking.firewall.allowedUDPPorts = [ 53317 ];
+
     environment.systemPackages = with pkgs; [
       # Night light backend for FormalShell (M16): the shell manages the
       # wlsunset process itself and only needs the binary on PATH.
       wlsunset
+
+      # ASCII audio visualizer backend (FormalShell M17 era): the shell
+      # runs cava itself, gated on playback; binary on PATH is enough.
+      cava
+
+      # LocalSend, driven by the shell menu SHARE route; port below.
+      localsend
 
       # SDDM "sddm-astronaut" theme, used as-is with its bundled pixel_sakura
       # preset (animated background + the preset's own colours — see the
