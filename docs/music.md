@@ -27,6 +27,7 @@ directory on every start, because Navidrome unpacks each `.ndp` next to itself.
 | slskd | 5030 | Soulseek client |
 | Soularr | 8265 | Bridges Lidarr to slskd |
 | multi-scrobbler | 9078 | Merges Spotify and Navidrome plays into one ListenBrainz history |
+| Explo | 7288 | Downloads ListenBrainz weekly-exploration tracks the library lacks, via slskd |
 
 One launchd agent (`kyan.music-stack`) runs `docker compose up` in the
 foreground under `KeepAlive`, so launchd restarts the stack if it dies. It
@@ -37,6 +38,7 @@ Navidrome would scan an empty folder and mark the whole library deleted.
 
 ```
 /Volumes/Music/library      final library, Navidrome scans this (/music in containers)
+/Volumes/Music/library/explo  Explo's downloads, picked up by the ordinary scan
 /Volumes/Music/downloads    slskd output, shared back to Soulseek (/downloads)
 /Volumes/Music/incomplete   slskd partials
 /Volumes/Music/purchases    drop bought albums here, then run `music-import`
@@ -148,6 +150,14 @@ reapplies them every 600s:
   nothing. Created by name (ids are not stable) and pinned to the artists in
   `kyan.music.singlesArtists`. Pinning is followed by a `RefreshArtist`;
   without it Lidarr never re-reads the newly allowed releases.
+- **A service missing from the stack** — `docker compose start`, run first and
+  ahead of the early exits, since a stopped Lidarr would otherwise abort the
+  whole reconcile. `compose up` can race a container still shutting down from
+  the previous agent run: it reads that container as present, leaves it alone,
+  and the container then exits by itself. `restart: unless-stopped` will not
+  bring back something stopped explicitly, so the stack runs on short one
+  service. slskd lost that race during a rebuild on 2026-08-09 and stayed down
+  for twenty minutes while soularr crash-looped on `Failed to resolve 'slskd'`.
 - **Per-client transcoding** — `kyan.music.playerProfiles`. Applied
   unconditionally, so nix is authoritative: a profile changed by hand in the
   web UI reverts within ten minutes.
@@ -186,6 +196,63 @@ cellular data, never adding quality.
 If data use becomes the problem, prefer 16-bit rips over reintroducing
 transcoding: they are roughly a third the size for identical audible quality on
 this hardware.
+
+## Plugins
+
+Six `.ndp` files, staged by the launcher on every start. Four come from
+nixpkgs (`listenbrainz-daily-playlist`, `audiomuseai`, `apple-music`,
+`discord-rich-presence`); `navibeat-mixes` and `nd-lyrics` are prebuilt
+release files pinned by hash in `music.nix`. Every new or updated plugin must
+be approved in the web UI (profile icon → Plugins) before it does anything —
+discovery alone is inert, and Navidrome re-disables a plugin whenever its file
+changes.
+
+- **navibeat-mixes** — time-of-day / genre / artist mixes as ordinary Subsonic
+  playlists; NaviBeat renders them as its Home shelf. Needs its four
+  permissions approved; time-of-day mixes take weeks to become personal (the
+  Subsonic API exposes only last-played, so it builds its own play log).
+- **nd-lyrics** — replaced the LRCLIB fetch script and its hourly agent
+  (removed 2026-08-09). Fetches on client request, from LRCLIB and lyrics.ovh
+  by default; the manifest also offers lrcmux, NetEase, KuGou, QQ Music, Apple
+  Music (needs a subscriber `media-user-token`) and stixoi.info, settable with
+  `navidrome plugin edit`. `ND_LYRICSPRIORITY` is **reordered from Navidrome's
+  default**, which puts `.yaml`/`.yml`/`.txt` ahead of `.lrc` and the plugin
+  last. The plugin writes a sidecar in whatever format the provider had, so
+  under that order a plain-only `.yml` or `.txt` outranks a synced `.lrc`
+  forever and the plugin never gets asked again to upgrade it. Only the
+  always-synced extensions keep their free local hit now; everything plain sits
+  behind the plugin. Sidecars are read at request time, not at scan time, so
+  editing one takes effect immediately with no rescan. Enable its
+  write-to-files option to keep growing the sidecar collection (it writes the
+  best format the provider had, e.g. `.yml` lyricsfiles, all read directly via
+  LyricsPriority). The plugin sandbox mounts libraries read-only; writing
+  needs `docker exec navidrome /app/navidrome plugin edit nd-lyrics
+  --write-access` plus a container restart — runtime state, reapply after a
+  from-scratch rebuild. The Navidrome web UI cannot display plugin-served
+  lyrics; NaviBeat and kopuz can.
+- **apple-music** — metadata agent for artist images and localized album
+  bios, keyless. Addressed as `apple-music-plugin` in `ND_AGENTS` (agents go
+  by `.ndp` basename, and that is the filename nixpkgs ships), ahead of
+  lastfm so its art wins.
+- **discord-rich-presence** — now-playing in the Discord status. Configured
+  entirely in the plugin UI: a Discord application client id plus a per-user
+  Discord token. Grabbing a user token is against Discord's ToS; decide there,
+  nothing about it lives in nix.
+
+## Explo
+
+Fetches the ListenBrainz weekly-exploration playlist and downloads the tracks
+the library lacks — the one thing the daily-playlist plugin cannot do, since
+it only matches what is already on disk. Soulseek (the existing slskd, same
+API key) is the only configured source: the youtube source would seed lossy
+rips into a FLAC library.
+
+The seed at `~/.local/share/music-stack/explo/.env` needs its `CHANGEME`s
+filled in once: web UI login, ListenBrainz username + token, and a real
+Navidrome login (playlists are created as that user). After that the wizard at
+`:7288` owns the file — it and the settings UI write schedules and options
+back into it, same write-once contract as the other seeds. Downloads land in
+`library/explo`, so Navidrome's ordinary scan imports them.
 
 ## Discovery
 
@@ -271,6 +338,31 @@ Credentials are the one thing nix cannot generate — set `soulseek.username` an
 deprioritise or reject accounts sharing nothing, so a new account sees a high
 rejection rate until files accumulate. slskd only rescans shares at startup or
 on demand (`PUT /api/v0/shares`).
+
+## Broken rips
+
+Nothing between Soulseek and the player checks that a file holds the audio its
+tags promise. A peer sharing a 30-second preview under the full track's name
+gets imported as the real thing, because Lidarr trusts the tags and Navidrome
+trusts the header: the UI shows 3:37 and the audio stops at 0:30. Decoding is
+the only test that catches it.
+
+`kyan.music-stack-verify` decodes the whole library daily and writes
+`~/.local/share/music-stack/broken-tracks.txt`, one line per file, with either
+`audio ends at Ns of Ms` (truncated) or a decode-error count (damaged frames).
+Results are keyed by size and mtime in `.verify-state.json`, so only newly
+imported files cost anything after the first pass. Errors from the attached
+cover art are ignored: a JPEG stored under a PNG signature is a tag defect, not
+a damaged track.
+
+It reports and never deletes. Re-requesting automatically would pull the same
+bad copy from the same peer, so replacing one is manual: delete the track file
+through Lidarr (`DELETE /api/v1/trackfile/{id}`, which removes it from disk and
+marks the album missing) and Soularr picks it up on its next poll.
+
+First sweep, 2026-08-09: 28 bad files in 4656. Five were 30-second previews
+(ACRAZE, three HUGEL singles, Mau P), and John Summit's *Comfort in Chaos* was
+damaged across the whole album. All were deleted and re-requested.
 
 ## Gotchas
 

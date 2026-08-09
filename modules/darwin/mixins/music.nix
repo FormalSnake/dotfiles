@@ -24,10 +24,40 @@ let
   # stack runs in Docker (OrbStack) rather than half launchd, half container.
   # The plugin derivations are plain .ndp data files and still build here, so
   # plugin versions stay pinned by the flake even though the server does not.
-  pluginPkgs = with pkgs.navidromePlugins; [
-    listenbrainz-daily-playlist
-    audiomuseai
-  ];
+  #
+  # Not in nixpkgs yet; both ship a prebuilt .ndp per release. Same $out/share
+  # layout as the nixpkgs plugins so the launcher stages them identically. The
+  # nd-lyrics filename is load-bearing: Navidrome registers the plugin under
+  # the file's basename, which is what LyricsPriority refers to.
+  prebuiltPlugin =
+    name: url: hash:
+    pkgs.runCommand "navidrome-plugin-${name}" { } ''
+      install -Dm644 ${pkgs.fetchurl { inherit url hash; }} $out/share/${name}.ndp
+    '';
+
+  # navibeat-mixes builds time-of-day / genre / artist mixes as ordinary
+  # playlists over the Subsonic API; NaviBeat additionally renders them as its
+  # Home shelf. nd-lyrics replaces the old LRCLIB fetch script: same source
+  # plus several more, fetched when a client asks instead of on an hourly
+  # library sweep, with the existing .lrc sidecars left authoritative via
+  # LyricsPriority below.
+  pluginPkgs =
+    (with pkgs.navidromePlugins; [
+      listenbrainz-daily-playlist
+      audiomuseai
+      apple-music
+      discord-rich-presence
+    ])
+    ++ [
+      (prebuiltPlugin "navibeat-mixes"
+        "https://github.com/nenadjokic/navibeat-mixes/releases/download/v0.7.1/navibeat-mixes.ndp"
+        "sha256-NTPKX6ONbM//yE6ViSJswVPHO+HzSse9ZdMTQwPsaeM="
+      )
+      (prebuiltPlugin "nd-lyrics"
+        "https://github.com/J0R6IT0/navidrome-lyrics-plugin/releases/download/v7.2.0/nd-lyrics.ndp"
+        "sha256-qRluW04sLrKqzLnzXJ+vb0iP6Qgf9WhbFVaQFobHVA8="
+      )
+    ];
 
   # Container-side paths are deliberately identical across services: Soularr
   # hands Lidarr the path slskd reported, so a mismatch surfaces as a confusing
@@ -49,11 +79,26 @@ let
 
           # Discovery: ListenBrainz supplies similar-artists and similar-songs
           # for Navidrome's own radio, and is what the daily-playlist plugin
-          # reads for weekly-jams / daily-jams / weekly-exploration.
+          # reads for weekly-jams / daily-jams / weekly-exploration. It stays
+          # first so radio similarity keeps coming from listening data;
+          # apple-music sits ahead of lastfm because its artist images and
+          # localized bios are current where lastfm's are stale.
           ND_ENABLEEXTERNALSERVICES: "true"
           ND_LASTFM_ENABLED: "true"
           ND_LISTENBRAINZ_ENABLED: "true"
-          ND_AGENTS: listenbrainz,lastfm,deezer
+          # "apple-music-plugin" because agents are addressed by the .ndp
+          # basename, and that is what the nixpkgs derivation ships.
+          ND_AGENTS: listenbrainz,apple-music-plugin,lastfm,deezer
+
+          # Reordered from Navidrome's default, which puts .yaml/.yml/.txt
+          # ahead of .lrc and the plugin last. nd-lyrics writes a sidecar in
+          # whatever format the provider had, so a plain-only .yml or .txt
+          # would then outrank a synced .lrc forever and the plugin would never
+          # be asked again to upgrade it. Only the always-synced extensions
+          # keep their free local hit; everything plain sits behind the plugin,
+          # which caches its answers and still falls through to those files
+          # when it has nothing.
+          ND_LYRICSPRIORITY: ".ttml,.elrc,.lrc,.srt,nd-lyrics,.yaml,.yml,.txt,embedded"
 
           # Scrobbles go through multi-scrobbler so Spotify plays and Navidrome
           # plays reach ListenBrainz as one history. Only submit-listens and
@@ -167,6 +212,32 @@ let
           - ${stackDir}/multi-scrobbler:/config
         ports:
           - "9078:9078"
+        restart: unless-stopped
+
+      # Downloads the ListenBrainz weekly-exploration tracks the library lacks,
+      # the one thing the daily-playlist plugin cannot do: it only matches what
+      # is already on disk. Soulseek is the only download source on purpose —
+      # the youtube source would seed lossy rips into a FLAC library. Explo's
+      # wizard and settings UI write back into the seeded .env, so it follows
+      # the same contract as the other seeds: nix writes it once, never again.
+      explo:
+        image: ghcr.io/lumepart/explo:latest
+        container_name: explo
+        environment:
+          - TZ=Atlantic/Canary
+          - PUID=${uid}
+          - PGID=${gid}
+          - WEB_UI=true
+        volumes:
+          - ${stackDir}/explo/.env:/opt/explo/.env
+          - ${stackDir}/explo/config:/opt/explo/config
+          - ${cfg.libraryDir}/explo:/data
+          - ${cfg.downloadDir}:/slskd
+        ports:
+          - "7288:7288"
+        depends_on:
+          - navidrome
+          - slskd
         restart: unless-stopped
 
       # AudioMuse analyses the audio itself (tempo, timbre, energy) and answers
@@ -377,6 +448,29 @@ let
     }
   '';
 
+  # Explo needs a real Navidrome login (playlists are created as that user),
+  # the personal ListenBrainz account token, and web UI credentials of its
+  # own — none of which nix can generate. Everything else the wizard asks for
+  # is pre-answered here.
+  exploSeed = pkgs.writeText "explo-seed.env" ''
+    UI_USERNAME=CHANGEME
+    UI_PASSWORD=CHANGEME
+
+    LISTENBRAINZ_USER=CHANGEME
+    LISTENBRAINZ_USER_TOKEN=CHANGEME
+
+    EXPLO_SYSTEM=subsonic
+    SYSTEM_URL=http://navidrome:4533
+    SYSTEM_USERNAME=CHANGEME
+    SYSTEM_PASSWORD=CHANGEME
+
+    DOWNLOAD_SERVICES=slskd
+    SLSKD_URL=http://slskd:5030
+    SLSKD_API_KEY=@SLSKD_KEY@
+    MIGRATE_DOWNLOADS=true
+    RENAME_TRACK=true
+  '';
+
   # Shared by the postgres container and both app containers, so the database
   # password only has to agree with itself. The Navidrome login is a real user
   # account (AudioMuse streams every track through the Subsonic API to analyse
@@ -397,6 +491,16 @@ let
   reconcile = pkgs.writeShellScript "music-stack-reconcile" ''
     set -uo pipefail
     export PATH="/usr/local/bin:/run/current-system/sw/bin:/usr/bin:/bin"
+
+    # `compose up` can race a container still shutting down from the previous
+    # agent run: it reads that container as present, leaves it alone, and the
+    # container then exits on its own. `restart: unless-stopped` will not bring
+    # back something that was stopped explicitly, so the stack keeps running
+    # short one service. slskd lost that race during a rebuild on 2026-08-09
+    # and stayed down for twenty minutes while soularr crash-looped on DNS.
+    # `start` is a no-op for anything already running, so this runs first, and
+    # ahead of the early exits below that a stopped Lidarr would trigger.
+    docker compose -f ${compose} -p music-stack start >/dev/null 2>&1 || true
 
     [ -f "${stackDir}/.api-keys" ] || exit 0
     # shellcheck disable=SC1090
@@ -536,78 +640,6 @@ let
       );" 2>/dev/null
   '';
 
-  # Navidrome displays lyrics but never fetches them, and nothing upstream of it
-  # writes any: Lidarr does not do lyrics at all and a Soulseek rip almost never
-  # carries them. LRCLIB is the one free source with timestamped lyrics, and
-  # .lrc sidecars are preferable to embedded tags here — they outrank `embedded`
-  # in Navidrome's LyricsPriority and they leave Lidarr's files alone.
-  lyrics = pkgs.writeShellScript "music-stack-lyrics" ''
-    set -uo pipefail
-    export PATH="/run/current-system/sw/bin:/usr/bin:/bin"
-
-    [ -d "${cfg.libraryDir}" ] || exit 0
-
-    # LRCLIB throttles clients that do not identify themselves, hard enough that
-    # a first full sweep would return empty for most of the library.
-    ua="music-stack (+https://github.com/FormalSnake/nix)"
-
-    # Tracks LRCLIB has nothing for, so a scheduled run costs one request per
-    # newly imported track instead of one per track in the library. Delete this
-    # file to retry the whole library.
-    misses="${stackDir}/.lyrics-misses"
-    touch "$misses"
-
-    ${pkgs.fd}/bin/fd -0 -e flac -e mp3 -e m4a -e ogg -e opus . "${cfg.libraryDir}" \
-      | while IFS= read -r -d "" f; do
-          lrc="''${f%.*}.lrc"
-          [ -e "$lrc" ] && continue
-          grep -qxF "$f" "$misses" && continue
-
-          meta=$(${pkgs.ffmpeg-headless}/bin/ffprobe -v error -of json \
-            -show_entries format=duration:format_tags=title,artist,album "$f") || continue
-
-          # ffprobe echoes each tag key in the case the file used, which differs
-          # between FLAC and MP4, so normalise before reading.
-          tags=$(printf '%s' "$meta" | jq -c '.format.tags // {} | with_entries(.key |= ascii_downcase)')
-          title=$(printf '%s' "$tags" | jq -r '.title // empty')
-          album=$(printf '%s' "$tags" | jq -r '.album // empty')
-          # A collaboration is tagged "A;B"; LRCLIB matches one name.
-          artist=$(printf '%s' "$tags" | jq -r '.artist // empty' | cut -d';' -f1)
-          dur=$(printf '%s' "$meta" | jq -r '.format.duration // 0 | tonumber | round')
-          [ -n "$title" ] && [ -n "$artist" ] || continue
-
-          got=$(curl -sG --max-time 20 -A "$ua" \
-            --data-urlencode "artist_name=$artist" \
-            --data-urlencode "track_name=$title" \
-            --data-urlencode "album_name=$album" \
-            --data-urlencode "duration=$dur" \
-            https://lrclib.net/api/get \
-            | jq -r '(.syncedLyrics // .plainLyrics) // empty' 2>/dev/null)
-
-          # /api/get only matches when the album name and duration agree with
-          # LRCLIB's copy, which a Soulseek rip frequently does not. Searching on
-          # artist and title and re-checking the duration here rescues those.
-          if [ -z "$got" ]; then
-            got=$(curl -sG --max-time 20 -A "$ua" \
-              --data-urlencode "artist_name=$artist" \
-              --data-urlencode "track_name=$title" \
-              https://lrclib.net/api/search \
-              | jq -r --argjson d "$dur" '
-                  [.[]? | select(((.duration // 0) - $d | fabs) <= 5)]
-                  | (map(select(.syncedLyrics != null))[0] // .[0] // {})
-                  | (.syncedLyrics // .plainLyrics) // empty' 2>/dev/null)
-          fi
-
-          if [ -n "$got" ]; then
-            printf '%s\n' "$got" > "$lrc"
-            echo "lyrics: $artist - $title"
-          else
-            printf '%s\n' "$f" >> "$misses"
-          fi
-          sleep 1
-        done
-  '';
-
   # The Spotify export is a one-off dump, but the library it gets matched
   # against grows for weeks while Soularr works through Lidarr's wanted list, so
   # a playlist is only ever as complete as the last run. Re-matching on a timer
@@ -720,6 +752,112 @@ let
                 print("  ", m)
   '';
 
+  # Nothing between Soulseek and the player checks that a file holds the audio
+  # its tags promise. A peer sharing a 30-second preview under the full track's
+  # name gets imported as the real thing: Lidarr trusts the tags, Navidrome
+  # trusts the header, and the first sign of trouble is the audio stopping
+  # mid-song. Decoding is the only test that catches it, so this decodes
+  # everything, keyed by size and mtime so a run only pays for what was
+  # imported since the last one. It reports and never deletes: re-requesting
+  # automatically would just pull the same bad copy from the same peer.
+  verify = pkgs.writeScript "music-stack-verify" ''
+    #!${pkgs.python3}/bin/python3
+    import json
+    import os
+    import re
+    import subprocess
+    from concurrent.futures import ThreadPoolExecutor
+
+    LIB = "${cfg.libraryDir}"
+    STATE = "${stackDir}/.verify-state.json"
+    REPORT = "${stackDir}/broken-tracks.txt"
+    FFPROBE = "${pkgs.ffmpeg-headless}/bin/ffprobe"
+    FFMPEG = "${pkgs.ffmpeg-headless}/bin/ffmpeg"
+    EXTS = (".flac", ".mp3", ".m4a", ".ogg", ".opus")
+
+    TIME = re.compile(rb"time=(\d+):(\d+):([\d.]+)")
+    # Cover art decodes as its own stream, and a JPEG stored under a PNG
+    # signature is a tag defect rather than a damaged track.
+    IMAGE = re.compile(rb"^\[(png|mjpeg|jpeg|image)")
+
+    if not os.path.isdir(LIB):
+        raise SystemExit(0)
+
+
+    def fingerprint(path):
+        st = os.stat(path)
+        return "{}:{}".format(st.st_size, int(st.st_mtime))
+
+
+    def verdict(path):
+        probe = subprocess.run(
+            [FFPROBE, "-v", "error", "-show_entries", "format=duration",
+             "-of", "csv=p=0", path], capture_output=True, timeout=300)
+        try:
+            claimed = float(probe.stdout.strip())
+        except ValueError:
+            return "unreadable header"
+
+        run = subprocess.run(
+            [FFMPEG, "-v", "error", "-stats", "-i", path, "-map", "0:a",
+             "-f", "null", "-"], capture_output=True, timeout=900)
+        errors = [ln for ln in run.stderr.replace(b"\r", b"\n").split(b"\n")
+                  if ln.strip()
+                  and not ln.startswith((b"size=", b"frame="))
+                  and not IMAGE.match(ln)]
+        stamps = TIME.findall(run.stderr)
+        decoded = (int(stamps[-1][0]) * 3600 + int(stamps[-1][1]) * 60
+                   + float(stamps[-1][2])) if stamps else 0.0
+
+        # A truncated rip keeps the full length in its header, so the gap
+        # between that and where the audio actually ran out is the only tell.
+        if abs(claimed - decoded) > 1.0:
+            return "audio ends at {:.0f}s of {:.0f}s".format(decoded, claimed)
+        if errors:
+            return "{} decode errors".format(len(errors))
+        return None
+
+
+    try:
+        with open(STATE) as fh:
+            state = json.load(fh)
+    except (OSError, ValueError):
+        state = {}
+
+    files = [os.path.join(d, n) for d, _, ns in os.walk(LIB) for n in ns
+             if n.lower().endswith(EXTS)]
+    for gone in set(state) - set(files):
+        del state[gone]
+
+
+    def check(path):
+        seen = fingerprint(path)
+        known = state.get(path)
+        if known and known[0] == seen:
+            return path, known
+        try:
+            return path, [seen, verdict(path)]
+        except Exception as err:
+            return path, [seen, "check failed: {}".format(err)]
+
+
+    # Four at a time: the library lives on the SD card, which Navidrome is
+    # reading from at the same time.
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        for path, entry in pool.map(check, files):
+            state[path] = entry
+
+    with open(STATE, "w") as fh:
+        json.dump(state, fh)
+
+    broken = sorted(p for p, entry in state.items() if entry[1])
+    with open(REPORT, "w") as fh:
+        for path in broken:
+            fh.write("{}\t{}\n".format(state[path][1], path))
+    print("verify: {} of {} tracks broken, listed in {}".format(
+        len(broken), len(files), REPORT))
+  '';
+
   launcher = pkgs.writeShellScript "music-stack-launch" ''
     set -euo pipefail
 
@@ -738,7 +876,11 @@ let
       exit 1
     fi
 
-    mkdir -p "${stackDir}"/{navidrome-backup,navidrome-plugins,lidarr,slskd,soularr,multi-scrobbler,audiomuse} "${incompleteDir}"
+    mkdir -p "${stackDir}"/{navidrome-backup,navidrome-plugins,lidarr,slskd,soularr,multi-scrobbler,audiomuse,explo/config} "${incompleteDir}"
+    # Explo downloads into a library subfolder so Navidrome picks its tracks up
+    # on the ordinary scan; created here because the compose bind mount would
+    # otherwise appear root-owned.
+    mkdir -p "${cfg.libraryDir}/explo"
 
     # Re-staged every start so a nixpkgs plugin bump actually lands. Navidrome
     # unpacks each .ndp next to itself, so the folder must be writable — a
@@ -788,6 +930,7 @@ let
     seed ${soularrSeed} "${stackDir}/soularr/config.ini"
     seed ${msSeed} "${stackDir}/multi-scrobbler/config.json"
     seed ${audiomuseSeed} "${stackDir}/audiomuse/audiomuse.env"
+    seed ${exploSeed} "${stackDir}/explo/.env"
 
     exec docker compose -f ${compose} -p music-stack up --remove-orphans
   '';
@@ -917,21 +1060,21 @@ in
       };
     };
 
-    # Separate from the reconcile agent because a first sweep of an untouched
-    # library runs for hours at LRCLIB's rate limit, and launchd will not start
-    # a second copy of an agent that is still running.
-    launchd.user.agents.music-stack-lyrics = {
+    # Daily rather than hourly: only newly imported files are decoded after the
+    # first pass, but that first pass reads the whole library off the SD card.
+    launchd.user.agents.music-stack-verify = {
       serviceConfig = {
-        Label = "kyan.music-stack-lyrics";
-        ProgramArguments = [ "${lyrics}" ];
+        Label = "kyan.music-stack-verify";
+        ProgramArguments = [ "${verify}" ];
         EnvironmentVariables = {
           PATH = "/usr/local/bin:/opt/homebrew/bin:/run/current-system/sw/bin:/usr/bin:/bin";
         };
         RunAtLoad = true;
-        StartInterval = 3600;
+        StartInterval = 86400;
         StandardOutPath = "${home}/Library/Logs/music-stack.log";
         StandardErrorPath = "${home}/Library/Logs/music-stack.log";
       };
     };
+
   };
 }
