@@ -24,12 +24,29 @@
   # hardware.enableRedistributableFirmware in mixins/graphics.nix).
   hardware.cpu.intel.updateMicrocode = true;
 
-  # Full niri + DMS desktop. Everything hardware-specific stays off:
+  # FormalShell's power panel samples CPU package watts from RAPL (M20). The
+  # kernel ships energy_uj root-only (PLATYPUS side-channel mitigation);
+  # relax the package-0 zone to world-readable for the user shell. The shell
+  # degrades to charge-rate-only wherever this rule is absent.
+  services.udev.extraRules = ''
+    ACTION=="add", SUBSYSTEM=="powercap", KERNEL=="intel-rapl:0", RUN+="${pkgs.coreutils}/bin/chmod 0444 /sys%p/energy_uj"
+  '';
+
+  # Full niri desktop. Everything hardware-specific stays off:
   # kyan.nvidia (no dGPU) and kyan.asus — the latter deliberately, even though
   # this is an ASUS chassis, because kyan.asus also gates the g815's dGPU power
   # machinery (modules/nixos/mixins/power.nix). Decouple that gate first if
   # asusd (battery charge limit) turns out to be wanted here.
   kyan.profiles.desktop.enable = true;
+
+  # FormalShell daily-drive trial (the spec's own gate: e1504g first, g815
+  # follows). Swaps the session shell, lock-before-sleep hook, and the
+  # shell-facing niri binds; DMS stays installed but dormant, and rollback is
+  # deleting this one line. M12/M13 closed the launch trade-offs (GOA/EDS
+  # calendar after a one-time `XDG_CURRENT_DESKTOP=GNOME gnome-control-center
+  # online-accounts` sign-in, emoji picker, shell screenshots). SDDM stays
+  # the greeter either way.
+  kyan.desktop.shell = "formalshell";
 
   # Syncthing mesh: wallpapers + Zen profile, macbook as hub
   # (modules/nixos/mixins/syncthing.nix; spec 2026-07-22).
@@ -49,7 +66,7 @@
   # When the g815 is off/asleep the connection fails and nix falls back to
   # building locally, so this degrades gracefully.
   nix.distributedBuilds = true;
-  nix.settings.builders-use-substitutes = true; # g815 pulls caches itself
+  nix.settings.builders-use-substitutes = true; # builders pull caches themselves
   nix.buildMachines =
     let
       g815 = addr: {
@@ -71,6 +88,29 @@
     [
       (g815 "100.114.32.78") # Tailscale (works away from home)
       (g815 "192.168.86.95") # home-LAN fallback when tailscale is down
+
+      # Second builder for when the g815 is off: the Rosetta Linux VM on the
+      # macbook (modules/darwin/mixins/rosetta-builder.nix). The macbook itself
+      # is aarch64-darwin and can't build for this host at all — the VM is what
+      # answers, so this points at the ssh alias below, not at the Mac.
+      # speedFactor 4 vs 3 keeps the g815 preferred whenever it is up.
+      #
+      # No kvm/nixos-test: x86_64 there is Rosetta on an aarch64 guest, so
+      # nested VMs can't run and advertising them would only draw in builds
+      # that then fail.
+      {
+        hostName = "macbook-rosetta";
+        system = "x86_64-linux";
+        protocol = "ssh-ng";
+        sshUser = "builder";
+        sshKey = "/root/.ssh/nix-builder";
+        maxJobs = 6;
+        speedFactor = 3;
+        supportedFeatures = [
+          "big-parallel"
+          "benchmark"
+        ];
+      }
     ];
   # Pin the g815's host key so root's first builder connection doesn't stall
   # on an unverifiable host.
@@ -81,6 +121,38 @@
     ];
     publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKgCmAa/QcQhtHNoES8iHx0uYAT+Ze+4lNuHuJ2Rb7Ku";
   };
+  programs.ssh.knownHosts.macbook = {
+    hostNames = [ "100.75.60.102" ];
+    publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGfYr6TMA9v8C93Lgl2qQUAXwb13vu/fZe2HeHpjgD0Q";
+  };
+
+  # Route for the macbook builder. The VM's sshd is published on the Mac's
+  # loopback only, so the hop has to originate there: `macbook-nixjump` is the
+  # authenticated outer connection (its key is restricted on the Mac to exactly
+  # this one permitopen), and ProxyJump makes the inner TCP connect happen on
+  # the Mac. Port must match `port` in the rosetta-builder mixin.
+  #
+  # The VM's host key is generated on the Mac and regenerated whenever the VM
+  # is recreated, so there is nothing stable to pin. Not checking it costs
+  # nothing here: the endpoint is 127.0.0.1 on a host we just authenticated by
+  # its pinned key, so reaching it already means the Mac is compromised.
+  programs.ssh.extraConfig = ''
+    Host macbook-nixjump
+      HostName 100.75.60.102
+      User kyandesutter
+      IdentityFile /root/.ssh/nix-builder
+      IdentitiesOnly yes
+
+    Host macbook-rosetta
+      HostName 127.0.0.1
+      Port 31122
+      User builder
+      ProxyJump macbook-nixjump
+      IdentityFile /root/.ssh/nix-builder
+      IdentitiesOnly yes
+      StrictHostKeyChecking no
+      UserKnownHostsFile /dev/null
+  '';
 
   # Reachable over the home LAN even when tailscale is down (the shared
   # agenix mixin only opens sshd on tailscale0 via trustedInterfaces).
@@ -165,7 +237,28 @@
   # in the EC; AC/charging state comes from the independent ACPI AC0 supply,
   # battery from ACPI BAT0), so drop it. Costs only /sys/class/typec and the
   # two ucsi-source-psy power_supply entries, which nothing here reads.
-  boot.blacklistedKernelModules = [ "ucsi_acpi" ];
+  boot.blacklistedKernelModules = [
+    "ucsi_acpi"
+
+    # The Integrated Sensor Hub never starts on this chassis: intel_ish_ipc logs
+    #   intel_ish_ipc 0000:00:12.0: Timed out waiting for HW ready
+    #   intel_ish_ipc 0000:00:12.0: ISH: hw start failed
+    # at every boot and leaves 00:12.0 unbound. No lid/tablet/ambient-light
+    # sensor here reads through it, so skip the probe. (This buys log
+    # cleanliness only: the device sits in D0 either way, see the note below.)
+    "intel_ish_ipc"
+  ];
+
+  # No PCI runtime-PM overrides here, deliberately. Measured on the hardware:
+  #   - NVMe (02:00.0) is quirked by the platform ("setting simple suspend",
+  #     "D3 entry latency set to 10 seconds"), so runtime D3 would never pay off.
+  #     APST already parks the drive's own idle states.
+  #   - Wi-Fi (01:00.0) is left at power/control=on by iwlwifi itself, and
+  #     802.11 power save is already enabled, and overriding the driver here is
+  #     how you get idle disconnects.
+  #   - The dead ISH device accepts power/control=auto but stays in D0, so it
+  #     saves nothing.
+  # The usual powertop --auto-tune sweep therefore has nothing left to win.
 
   # Disable CPU speculative-execution mitigations, matching the g815 (see
   # systems/g815/default.nix): ~5-15% on syscall-heavy work, and this 8 GB
@@ -173,9 +266,15 @@
   # single-user personal laptop, no untrusted code.
   boot.kernelParams = [ "mitigations=off" ];
 
+  # 8 GB RAM: hand zram all of it. Compressed pages only cost what they compress
+  # to, and zstd gets ~3.7:1 on this workload (3.4 GB of swapped pages held in
+  # 445 MB of RAM), so the 50% default in mixins/boot.nix just fills up and
+  # spills the rest onto the swapfile below at NVMe speed instead of RAM speed.
+  zramSwap.memoryPercent = 100;
+
   # 8 GB RAM (vs the g815's 32): halve the overflow swapfile to 2× RAM so a
-  # spike has real spill room on a small machine (zram in mixins/boot.nix
-  # stays the first, RAM-speed tier).
+  # spike has real spill room on a small machine (zram above stays the first,
+  # RAM-speed tier).
   swapDevices = [
     {
       device = "/swapfile";
@@ -196,6 +295,19 @@
       # DPI heuristic picks a fractional scale). The shared niri mixin leaves
       # eDP-1 unset on iGPU-only hosts, so this is the only definition.
       programs.niri.settings.outputs."eDP-1".scale = 1.0;
+
+      # 8 GB: the three chat clients that mixins/autostart.nix pulls in at login
+      # hold ~1.06 GB resident between them (measured on this host: equibop
+      # 563 MB, beeper 385 MB, bluebubbles 115 MB), which is most of what drives
+      # this machine into swap while it does nothing but terminals and a browser.
+      # Drop them from the login set. The units themselves stay, so
+      # `systemctl --user start beeper` still works when they're actually wanted,
+      # and the g815 (32 GB) keeps launching all three automatically.
+      systemd.user.services = {
+        equibop.Install.WantedBy = lib.mkForce [ ];
+        beeper.Install.WantedBy = lib.mkForce [ ];
+        bluebubbles.Install.WantedBy = lib.mkForce [ ];
+      };
 
       # Suspend after 10 minutes idle (lid close already suspends via logind's
       # default HandleLidSwitch; DMS's own idle timeouts stay 0 — see the seed

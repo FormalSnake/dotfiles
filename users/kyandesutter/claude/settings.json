@@ -127,6 +127,16 @@
             "command": "[ -f ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh ] && bash ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh claude session_start || true"
           }
         ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/herdr-reap-session.sh",
+            "timeout": 10
+          }
+        ]
       }
     ],
     "Stop": [

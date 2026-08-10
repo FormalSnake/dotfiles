@@ -220,6 +220,48 @@ coding agents; only quick one-offs are standalone. So:
 * Match the repo's existing commit style — read recent `git log` before writing a message. Default: short imperative lowercase subject, with a conventional prefix (`fix(scope): …`) when the history uses one.
 * NEVER HARDCODE SVG UNLESS EXPLICITLY NEEDED. ALWAYS USE THE PROJECT'S ICON SET LIKE LUCIDE OR NUCLEO
 
+## Disk cleanup — measure once, delete only what regenerates
+
+This machine fills up every few months from the same three sources: Rust
+`target/` dirs, `node_modules`, and stale nix generations. Most of the time lost
+to a cleanup goes into exploratory `du` sweeps that end up reclaiming 2 GB. Do
+not do that.
+
+**Measure in one pass, ranked, then act.** `df -h /` for the headline, then
+`du -xh -d 1` at each level, descending only into the largest child. Always pass
+`-x` so it does not walk into `/Volumes` or OrbStack. Never re-run a sweep you
+already ran, and never measure the whole home tree twice in a session.
+
+**Delete without asking, since one command regenerates it:**
+
+* `cargo clean` in any repo whose `target/` is over 2 GB.
+* `nix-collect-garbage --delete-older-than 14d`, then the same under `sudo -n`
+  for the system profile. Never `-d`, which drops every rollback generation.
+* `~/Library/Developer/Xcode/DerivedData`, `~/Library/Caches/Homebrew`, and
+  `node_modules` in a repo untouched for six months or more.
+
+**Ask first, however big it is:**
+
+* VM disk images. Run `pgrep -fl qemu` first: a running VM's `.qcow2` is live
+  state, and both FormalShell VMs (`dev/.testvm`, `dev/.linux-builder`) are
+  usually up.
+* Simulator devices under `CoreSimulator/Devices`. They hold installed app
+  state, and `xcrun simctl delete unavailable` already reclaims the disposable
+  part.
+* Anything in `~/Movies`, `~/Library/Messages`, `~/Library/Photos`, or an
+  Application Support directory belonging to a running app.
+
+**Freed space that does not appear in `df` is an APFS snapshot, not a failed
+delete.** Check `tmutil listlocalsnapshots /` before drawing any conclusion: a
+local snapshot pins every file deleted since it was taken. Leave it alone until
+`tmutil destinationinfo` shows a reachable destination with a recent backup,
+because while the network target is offline that snapshot is the only restore
+point.
+
+**Stop once the target is met.** Rank candidates by size, work down, and treat
+anything under 5 GB as noise on a 1 TB disk. Say what was skipped and why
+instead of grinding through the tail.
+
 ## Working Style
 
 These rules encode the working style of the strongest Claude models. Follow them exactly, especially if you are a smaller or older model.
@@ -263,6 +305,16 @@ required one-line next action, which stays.
 * Find a sibling before writing. Adding a function, module, test, or config block? Locate one existing example of the same kind in this repo and mirror its structure, naming, and imports.
 * Read the code you're changing plus at least one call site — not just the single line a search returned. Most wrong edits come from not knowing how the code is used.
 * Don't delete or refactor code because it "looks unused" — search for usages first, including string references and config files.
+
+### Design and dependencies
+
+* Don't preserve backward compatibility unless I ask for it. Delete the obsolete path instead of wrapping it in a compat shim, a fallback branch, or a migration nobody will ever remove. The paths kept "just in case" are the ones that break in a year.
+* Build the simplest thing that fully meets the requirement as stated. No speculative abstraction, no config knob with a single caller, no indirection layer standing in for a second implementation that doesn't exist yet.
+* Grow the system in layers. Ship the smallest version that works end to end, then add each capability on top of something that already runs. Never trade a working product for unfinished complexity — I would rather have four features that work than seven that half-work.
+* Keep components modular and concerns separated. One job per module, with boundaries you can name in a sentence.
+* Reach for an established, well-maintained library when it genuinely cuts complexity or improves reliability. Don't hand-roll date maths, auth, parsing, retries, or anything else with a boring solved answer.
+* Use what the project already depends on before adding a package or writing your own version. Never assume an existing dependency lacks a capability — check its docs and types first (Context7 MCP, per `~/.claude/rules/context7.md`).
+* Decide architecture for the long term. A stopgap that only works for now, on the understanding that someone replaces it later, is not an acceptable answer: that someone is always me, six months on, with no context.
 
 ### Code style
 

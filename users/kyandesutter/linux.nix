@@ -12,6 +12,7 @@
     ./mixins/easyeffects.nix
     ./mixins/dms.nix
     ./mixins/dankcal.nix
+    ./mixins/formalshell.nix
     ./mixins/wallpaper-engine.nix
     ./mixins/beeper.nix
     ./mixins/helium.nix
@@ -22,6 +23,7 @@
     ./mixins/godot.nix
     ./mixins/obsidian.nix
     ./mixins/bambu-studio.nix
+    ./mixins/parsec.nix
   ];
 
   # NixOS rebuild shortcut (linux-only, so it lives here rather than the shared

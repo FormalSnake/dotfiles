@@ -22,6 +22,7 @@
       ./mixins/nvidia-resume-recovery.nix
       ./mixins/audio.nix
       ./mixins/bluetooth.nix
+      ./mixins/mouse.nix
       ./mixins/niri.nix
       ./mixins/online-accounts.nix
       ./mixins/steam.nix

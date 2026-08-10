@@ -13,6 +13,7 @@
     # CLI tools that genuinely need brew (no Nix equivalent on darwin or version-pinned).
     # Everything else moved to nix/home-manager — see users/kyandesutter/programs.nix.
     brews = [
+      "libadwaita" # NativeDesktop's GTK-on-macOS dev loop links brew GTK; cleanup="uninstall" kept wiping the imperative install
       "sketchybar" # felixkratz/formulae — nixpkgs' build crashes the cctools linker; drives the OmniWM bar (users/kyandesutter/mixins/sketchybar.nix)
       "terminal-notifier" # nixpkgs 26.11 crashes in the Darwin linker (SIGTRAP)
       "watchman" # nixpkgs build pulls folly, which fails to compile on darwin
@@ -53,6 +54,12 @@
       "jump-desktop-connect"
       "markdown-preview"  # pluk-inc/tap
       "syncthing-app"
+
+      # — remote desktop —
+      # Also installed on both NixOS hosts (users/kyandesutter/mixins/parsec.nix).
+      # This Mac is the only one of the three that can act as a Parsec *host*:
+      # Parsec has no Linux hosting support, so the laptops are clients.
+      "parsec"
 
       # — tiling WM (mirrors the g815 niri setup) —
       "omniwm"             # barutsrb/tap — niri-style tiler (tap trusted automatically; see modules/darwin/mixins/homebrew.nix)

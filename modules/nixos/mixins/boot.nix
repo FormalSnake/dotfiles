@@ -85,7 +85,7 @@ in
       # companion CachyOS-Settings package (sysctl/udev/tmpfiles) is Arch-only
       # and NOT applied on NixOS, so replicate the load-bearing tweaks here.
       # Values verbatim from CachyOS-Settings 70-cachyos-settings.conf.
-      "vm.swappiness" = 100; # zram is fast → lean on it before evicting page cache
+      "vm.swappiness" = 100; # boot value; the zram udev rule below raises it to 150
       "vm.page-cluster" = 0; # zram: fault one page at a time, no swap readahead
       "vm.vfs_cache_pressure" = 50; # retain dentry/inode cache longer
       "vm.dirty_writeback_centisecs" = 1500; # flush old dirty data less often
@@ -100,21 +100,34 @@ in
   # default synchronous "madvise"/"always" defrag.
   systemd.tmpfiles.rules = [
     "w! /sys/kernel/mm/transparent_hugepage/defrag - - - - defer+madvise"
+
+    # The cachyos kernel boots with zswap on (verified Y on the g815), which
+    # puts a compressed cache in front of a device that already compresses:
+    # pages get compressed twice and zswap's pool competes with zram's for the
+    # same RAM. CachyOS-Settings kills it from 30-zram.rules; do it at boot
+    # instead, before anything lands in the pool.
+    "w! /sys/module/zswap/parameters/enabled - - - - N"
   ];
 
   # I/O schedulers, matching CachyOS-Settings 60-ioschedulers.rules. NixOS
   # leaves NVMe on "none"; kyber adds light latency-aware ordering. mq-deadline
   # on external USB SSDs (sd*) curbs the writeback bursts that the
   # dirty_bytes cap above also targets.
+  #
+  # The zram rule is CachyOS-Settings 30-zram.rules: once zram0 is up, swapping
+  # anonymous pages into it beats reclaiming page cache, so swappiness goes past
+  # 100 (the cap is 200 since 5.8). The sysctl above stays the pre-zram value.
   services.udev.extraRules = ''
     ACTION=="add|change", KERNEL=="nvme[0-9]*", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="kyber"
     ACTION=="add|change", KERNEL=="sd[a-z]*", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="mq-deadline"
+    ACTION=="change", KERNEL=="zram0", ATTR{initstate}=="1", SYSCTL{vm.swappiness}="150"
   '';
 
-  # zram swap — cheap responsiveness win on a 32 GB laptop.
+  # zram swap — cheap responsiveness win on a 32 GB laptop. mkDefault so a
+  # RAM-starved host can lean on it harder (the e1504g runs it at 100%).
   zramSwap = {
     enable = true;
-    memoryPercent = 50;
+    memoryPercent = lib.mkDefault 50;
     priority = 5; # used before the disk swapfile below (RAM-speed first)
   };
 

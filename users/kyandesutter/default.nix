@@ -13,6 +13,7 @@
     ./mixins/clipssh.nix
     ./mixins/claude-code.nix
     ./mixins/canarycode.nix
+    ./mixins/canary.nix
     ./mixins/pi.nix
     ./mixins/ghostty.nix
     ./mixins/tmux.nix
@@ -21,6 +22,7 @@
     ./mixins/fastfetch.nix
     ./mixins/fetch.nix
     ./mixins/herdr.nix
+    ./mixins/t3code.nix
     ./mixins/fast.nix
     ./mixins/nh.nix
     ./mixins/nix-index.nix

@@ -482,6 +482,7 @@ in
     "matugen/templates/yazi-flavor.toml.tmpl".source = ../matugen-templates/yazi-flavor.toml.tmpl;
     "matugen/templates/wallpaper-path.tmpl".source = ../matugen-templates/wallpaper-path.tmpl;
     "matugen/templates/zen-vars.json.tmpl".source = ../matugen-templates/zen-vars.json.tmpl;
+    "matugen/templates/kopuz.json.tmpl".source = ../matugen-templates/kopuz.json.tmpl;
 
     # DMS reads ~/.config/matugen/config.toml on every re-theme and splices its
     # [config] and [templates] sections verbatim into the matugen invocation it
@@ -603,6 +604,17 @@ in
       [templates.zen]
       input_path = "~/.config/matugen/templates/zen-vars.json.tmpl"
       output_path = "~/.config/zen/default/chrome/matugen-vars.json"
+
+      # Kopuz (mixins/kopuz.nix), since 0.14.0. The keys are the ones its
+      # themes.json uses; unknown keys are ignored and missing ones keep their
+      # built-in colour. Kopuz polls this file twice a second while its "Matugen
+      # / Pywal (live)" theme is selected, so no post_hook. The output name and
+      # location are what it looks for by default (config_dir/matugen.json), so
+      # its live_theme_path can stay empty. One-time: Settings → Appearance →
+      # Matugen / Pywal (live).
+      [templates.kopuz]
+      input_path = "~/.config/matugen/templates/kopuz.json.tmpl"
+      output_path = "~/.config/kopuz/matugen.json"
     '';
   };
 

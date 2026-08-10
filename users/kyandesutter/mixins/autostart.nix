@@ -41,6 +41,10 @@ in
   # `keep-old` tells sd-switch to leave an already-running app untouched across a
   # switch (the new definition applies at the next login) while still starting it
   # if it isn't running. Rebuilds no longer disturb the running session.
+  #
+  # It does NOT stop a *closed* app from coming back: sd-switch has a second
+  # pass that starts every inactive unit an active target wants, and keep-old
+  # has no say there. See spotify below for the pair of options that closes it.
 
   # Equibop (Discord), launched minimized to the tray. Window rule sends it to
   # workspace 4 (communication, eDP-1).
@@ -122,12 +126,25 @@ in
 
   # Spotify music player (installed as the com.spotify.Client flatpak — there is
   # no `spotify` binary on PATH). Window rule pins it to workspace 8 (media).
+  #
+  # No `X-SwitchMethod` here: RefuseManualStart takes precedence over it in
+  # sd-switch and gives the behaviour keep-old only half provided. Every switch
+  # used to relaunch a Spotify that had been closed on purpose (sd-switch starts
+  # inactive units wanted by an active target), which meant a full window
+  # grabbing focus and jumping to workspace 8 in the middle of whatever the
+  # rebuild was for. RefuseManualStart makes sd-switch classify the unit
+  # stop-only, so it skips that start; RefuseManualStop then makes the
+  # running-unit case a no-op, which is what keep-old did. systemd refuses only
+  # *explicit* start/stop requests, so graphical-session.target still pulls
+  # Spotify in at login and still stops it at logout. The one real cost is that
+  # `systemctl --user start spotify` is refused now; launch the app itself.
   systemd.user.services.spotify = {
     Unit = {
       Description = "Spotify";
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
-      "X-SwitchMethod" = "keep-old";
+      RefuseManualStart = true;
+      RefuseManualStop = true;
     };
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {

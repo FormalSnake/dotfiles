@@ -118,6 +118,19 @@ The macbook is the real development host; the g815 is used as a thin client that
 reaches the mac over SSH/MOSH and remote desktop to work remotely, rather than
 building locally.
 
+**The g815 is off until 2026-08-15.** It is not just unreachable, it is expected
+to be: don't diagnose it, don't wait on it. That matters most for the e1504g's
+builds, because `/etc/nix/machines` lists the g815 twice (Tailscale, then LAN)
+ahead of the macbook's rosetta builder and nix walks that list per derivation,
+so every build pays two SSH connect timeouts (measured 2026-08-04: 4m35s per
+derivation) before falling back to local. Until the g815 is back, build the
+e1504g against the mac alone:
+
+```
+ssh e1504g 'cd ~/.config/nix && sudo -n /run/current-system/sw/bin/nixos-rebuild switch --flake .#e1504g \
+  --option builders "ssh-ng://builder@macbook-rosetta x86_64-linux /root/.ssh/nix-builder 6 3 big-parallel,benchmark - -"'
+```
+
 Secrets are agenix-encrypted (`secrets/`). The two hosts are wired in
 `systems/default.nix` (`darwinConfigurations.macbook`, `nixosConfigurations.g815`).
 

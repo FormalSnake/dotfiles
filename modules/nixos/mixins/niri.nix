@@ -6,6 +6,9 @@ let
   # lock-before-sleep hook below.
   dms = inputs.dank-material-shell.packages.${pkgs.stdenv.hostPlatform.system}.default;
 
+  # FormalShell package, for the formalshell arm of the same hook.
+  formalshell = inputs.formalshell.packages.${pkgs.stdenv.hostPlatform.system}.default;
+
   # Lock the session before the machine suspends. Runs as kyandesutter and talks
   # to the running DMS daemon over its IPC socket in the user's XDG_RUNTIME_DIR.
   # `ipc call lock lock` shows DMS's lock screen without suspending — the
@@ -23,12 +26,23 @@ let
   # with `exec: "qs": executable file not found` and every suspend resumed into
   # an UNLOCKED session (caught on the e1504g 2026-07-22; the script's exit-0
   # masked it). The user profile holds the exact qs the session runs.
-  lockBeforeSleep = pkgs.writeShellScript "lock-before-sleep" ''
-    export XDG_RUNTIME_DIR="/run/user/$(${pkgs.coreutils}/bin/id -u)"
-    export PATH="/etc/profiles/per-user/${config.users.users.kyandesutter.name}/bin:$PATH"
-    ${pkgs.coreutils}/bin/timeout 10 ${dms}/bin/dms ipc call lock lock || true
-    exit 0
-  '';
+  lockBeforeSleep =
+    if cfg.shell == "formalshell" then
+      # formalshell-lock-before-sleep pins its own qs binary and is
+      # exit-0-always by contract (FormalShell spec §8), so it only needs the
+      # user's XDG_RUNTIME_DIR; the timeout is belt and braces on top.
+      pkgs.writeShellScript "lock-before-sleep" ''
+        export XDG_RUNTIME_DIR="/run/user/$(${pkgs.coreutils}/bin/id -u)"
+        ${pkgs.coreutils}/bin/timeout 10 ${formalshell}/bin/formalshell-lock-before-sleep || true
+        exit 0
+      ''
+    else
+      pkgs.writeShellScript "lock-before-sleep" ''
+        export XDG_RUNTIME_DIR="/run/user/$(${pkgs.coreutils}/bin/id -u)"
+        export PATH="/etc/profiles/per-user/${config.users.users.kyandesutter.name}/bin:$PATH"
+        ${pkgs.coreutils}/bin/timeout 10 ${dms}/bin/dms ipc call lock lock || true
+        exit 0
+      '';
 
   # sddm-astronaut with the "pixel_sakura" preset, used as-is with no overrides:
   # the bundled pixel_sakura.conf (animated pixel_sakura.gif background + the
@@ -85,9 +99,34 @@ let
   '';
 in
 {
-  options.kyan.desktop.enable = lib.mkEnableOption "niri desktop (system side)";
+  # Imported unconditionally: everything in it is inert until
+  # services.formalshell.enable flips on below.
+  imports = [ inputs.formalshell.nixosModules.formalshell ];
+
+  options.kyan.desktop = {
+    enable = lib.mkEnableOption "niri desktop (system side)";
+    shell = lib.mkOption {
+      type = lib.types.enum [ "dms" "formalshell" ];
+      default = "dms";
+      description = "Which desktop shell owns the session (bar, lock screen, notification daemon). Picks the lock-before-sleep hook here and gates the shell-facing binds and user services in users/kyandesutter/mixins/{niri,formalshell}.nix.";
+    };
+  };
 
   config = lib.mkIf cfg.enable {
+    # System-side FormalShell prerequisites (the formalshell-lock PAM service,
+    # geoclue; NetworkManager/bluetooth/UPower/PPD/pipewire are mkDefault'd in
+    # the module and already owned by this profile).
+    services.formalshell.enable = cfg.shell == "formalshell";
+
+    # GOA/EDS calendar backend (M12): evolution-data-server serves calendar
+    # data on the session bus (formalshell-eds reads it over one held D-Bus
+    # connection) and gnome-online-accounts holds the Google account, tokens
+    # in the keyring (gnome-keyring is already wired by programs.niri).
+    # gnome-control-center is the only GOA sign-in UI outside GNOME: run
+    # `XDG_CURRENT_DESKTOP=GNOME gnome-control-center online-accounts` once.
+    services.gnome.evolution-data-server.enable = lib.mkIf (cfg.shell == "formalshell") true;
+    services.gnome.gnome-online-accounts.enable = lib.mkIf (cfg.shell == "formalshell") true;
+
     # niri session (nixpkgs module): installs the package, registers the
     # Wayland session for SDDM, wires portals (gnome for screencast + gtk
     # fallback) and gnome-keyring. niri is systemd-native (niri-session →
@@ -266,7 +305,26 @@ in
     # kyandesutter is added to that group in ../mixins/users.nix.
     hardware.i2c.enable = true;
 
+    # tailscale up/down from the FormalShell panel (M16) needs operator mode,
+    # applied by tailscaled at service start.
+    services.tailscale.extraSetFlags = [ "--operator=kyandesutter" ];
+
+    # LocalSend discovery and transfers (FormalShell menu SHARE route).
+    networking.firewall.allowedTCPPorts = [ 53317 ];
+    networking.firewall.allowedUDPPorts = [ 53317 ];
+
     environment.systemPackages = with pkgs; [
+      # Night light backend for FormalShell (M16): the shell manages the
+      # wlsunset process itself and only needs the binary on PATH.
+      wlsunset
+
+      # ASCII audio visualizer backend (FormalShell M17 era): the shell
+      # runs cava itself, gated on playback; binary on PATH is enough.
+      cava
+
+      # LocalSend, driven by the shell menu SHARE route; port below.
+      localsend
+
       # SDDM "sddm-astronaut" theme, used as-is with its bundled pixel_sakura
       # preset (animated background + the preset's own colours — see the
       # `sddmAstronaut` let-binding; it's independent of the app theming).
@@ -289,6 +347,9 @@ in
       slurp
       ffmpegthumbnailer # video thumbnails for tumbler/Nautilus
       wsdd # GVFS's Windows-network discovery helper; prevents first-launch delay in Nautilus
-    ];
+    ]
+    # GOA sign-in UI (see the services.gnome block above): the only way to add
+    # an online account outside GNOME proper.
+    ++ lib.optionals (cfg.shell == "formalshell") [ gnome-control-center ];
   };
 }

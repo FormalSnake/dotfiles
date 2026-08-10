@@ -22,5 +22,31 @@
           old.postInstall;
       });
     })
+
+    # The tailnet admin panel flags every host on 1.98.x as running a version
+    # with a known security vulnerability and asks for 1.102.2. nixpkgs master
+    # carries that bump (2026-08-05) but the nixpkgs-unstable branch we track is
+    # still on 1.98.10, so pin the newer source here instead of waiting for the
+    # channel. Hashes and the two extra skipped tests are copied verbatim from
+    # master's pkgs/by-name/ta/tailscale/package.nix (those tests run
+    # `go test -race`, which needs cgo, and we build with CGO_ENABLED=0).
+    # Drop this overlay once nixpkgs-unstable ships >= 1.102.2.
+    (final: prev: {
+      tailscale = prev.tailscale.overrideAttrs (finalAttrs: old: {
+        version = "1.102.2";
+        src = prev.fetchFromGitHub {
+          owner = "tailscale";
+          repo = "tailscale";
+          tag = "v${finalAttrs.version}";
+          hash = "sha256-vqNShvER4jT+8WJCcaSVboXPEP6S3QacmkC39tJkR4g=";
+        };
+        vendorHash = "sha256-amKkUPszyhG4N5ZtrB01swBACYq76raSS+SQRneLmwc=";
+        checkFlags = map (
+          builtins.replaceStrings
+            [ "-skip=^" ]
+            [ "-skip=^TestRaceAttributedToPassingTest$|^TestRaceSuppressesFlakyRetry$|^" ]
+        ) old.checkFlags;
+      });
+    })
   ];
 }

@@ -2,6 +2,14 @@
 let
   dmsBin = "${config.programs.dank-material-shell.package}/bin/dms";
 
+  # Shell selector from the host (kyan.desktop.shell, default "dms") picks
+  # which shell the shell-facing binds below spawn into. Both package
+  # references stay lazy: only the active arm's option is ever forced, so the
+  # inactive shell's package option can be unset without breaking eval.
+  useFormalshell = (((osConfig.kyan or { }).desktop or { }).shell or "dms") == "formalshell";
+  fsBin = "${config.programs.formalshell.package}/bin/formalshell";
+  fsIpc = args: [ fsBin "ipc" "--any-display" "call" ] ++ args;
+
   # NVIDIA dGPU flag from the host (same gate as dms.nix/godot.nix). Everything
   # below that exists for the g815's dGPU power model — power-tune,
   # gpu-relog-prompt, render-device selection, the eDP-1 240Hz seed — is gated
@@ -447,14 +455,15 @@ in
         touchpad = {
           # macOS-like feel. clickfinger: a physical 2-finger press = RMB,
           # 3-finger = MMB (replaces libinput's bottom-corner click areas).
-          # dwt disables the pad while typing so a resting palm/thumb can't
-          # fire a tap or drag mid-keystroke (macOS does the same). adaptive
+          # dwt stays off so the pad keeps working while typing (moving the
+          # pointer or tapping mid-keystroke); libinput's palm detection still
+          # rejects a resting hand. adaptive
           # accel with a small positive speed gives the nonlinear,
           # slightly-quicker pointer macOS uses. scroll-factor stays under 1 to
           # tame libinput's over-sensitive two-finger scroll while landing
           # closer to macOS's pace so it neither undershoots nor coasts past.
           tap = true;
-          dwt = true;
+          dwt = false;
           natural-scroll = true;
           click-method = "clickfinger";
           accel-profile = "adaptive";
@@ -498,19 +507,54 @@ in
       }) (lib.range 1 9));
 
       # — Keybinds (mirror the macOS/aerospace muscle memory, SUPER as mod) —
-      binds = {
+      # Shell-facing binds (launcher, clipboard, theme, lock, screenshots,
+      # media/volume/brightness keys) come in a per-shell arm picked by
+      # kyan.desktop.shell; everything compositor-native is shared below.
+      binds = (if useFormalshell then {
+        # FormalShell IPC (the wrapper is qs pinned at the installed shell dir;
+        # niri spawns argv directly, no shell).
+        # toggle is the no-argument verb M13 added for exactly this bind:
+        # root summon when closed, close when already open.
+        "Mod+Space".action.spawn = fsIpc [ "menu" "toggle" ];
+        # Emoji picker (M12): the menu's emoji route, same muscle memory as
+        # DMS's spotlight :e trigger. Enter copies the pick, the clipboard
+        # service captures it.
+        "Mod+Period".action.spawn = fsIpc [ "menu" "summon" "emoji" ];
+        # ñ is a dedicated key on the es layout; its XKB keysym is `ntilde`.
+        "Mod+ntilde".action.spawn = fsIpc [ "menu" "summon" "clipboard" ];
+        "Mod+Shift+T".action.spawn = fsIpc [ "theme" "mode" "toggle" ];
+        # Sleep: lock then suspend on demand, so resume lands on the lock
+        # screen (composed through a shell; niri has none of its own).
+        "Mod+Shift+Escape".action.spawn = [ "sh" "-c" "${fsBin} ipc --any-display call lock lock && systemctl suspend" ];
+
+        # Screenshots via the shell (M12 screenshot IPC target: grim/slurp on
+        # the wrapper PATH, saves to screenshot.directory and wl-copy's the
+        # image, success lands as a shell notification). Same owner rule as
+        # the dms arm: shell-owned screenshots survive compositor changes.
+        # Print = whole screen, Mod+Shift+S = region picker.
+        "Print".action.spawn = fsIpc [ "screenshot" "full" ];
+        "Mod+Shift+S".action.spawn = fsIpc [ "screenshot" "region" ];
+
+        # Volume via wpctl: FormalShell's AudioService tracks PipeWire
+        # directly and auto-shows the volume OSD on any external change, so
+        # the keys don't need to route through the shell. Brightness has no
+        # such watcher; the documented pattern is brightnessctl plus an
+        # explicit OSD show. Media routes through the shell's active MPRIS
+        # player, same as DMS's mpris verbs.
+        "XF86AudioRaiseVolume" = { allow-when-locked = true; action.spawn = [ "${pkgs.wireplumber}/bin/wpctl" "set-volume" "-l" "1.0" "@DEFAULT_AUDIO_SINK@" "3%+" ]; };
+        "XF86AudioLowerVolume" = { allow-when-locked = true; action.spawn = [ "${pkgs.wireplumber}/bin/wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "3%-" ]; };
+        "XF86AudioMute".action.spawn = [ "${pkgs.wireplumber}/bin/wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle" ];
+        "XF86AudioMicMute".action.spawn = [ "${pkgs.wireplumber}/bin/wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle" ];
+        "XF86MonBrightnessUp" = { allow-when-locked = true; action.spawn = [ "sh" "-c" "${pkgs.brightnessctl}/bin/brightnessctl set 5%+ && ${fsBin} ipc --any-display call osd brightness" ]; };
+        "XF86MonBrightnessDown" = { allow-when-locked = true; action.spawn = [ "sh" "-c" "${pkgs.brightnessctl}/bin/brightnessctl set 5%- && ${fsBin} ipc --any-display call osd brightness" ]; };
+        "XF86AudioPlay".action.spawn = fsIpc [ "media" "playPause" ];
+        "XF86AudioPause".action.spawn = fsIpc [ "media" "playPause" ];
+        "XF86AudioNext".action.spawn = fsIpc [ "media" "next" ];
+        "XF86AudioPrev".action.spawn = fsIpc [ "media" "previous" ];
+      } else {
         # App launcher / clipboard / theme / lock via DMS IPC (absolute path —
         # niri spawns argv directly, no shell).
         "Mod+Space".action.spawn = [ dmsBin "ipc" "call" "spotlight" "toggle" ];
-        "Mod+Return".action.spawn = "ghostty";
-        # Reclaim the laptop's Copilot key: it launches Claude, not Copilot.
-        # Microsoft's spec (which ASUS honours) has the key emit Meta+Shift+F23;
-        # this drops a fresh local ghostty into `claude`, cwd'd at the nix config.
-        "Mod+Shift+F23".action.spawn = [ "ghostty" "--working-directory=${config.home.homeDirectory}/.config/nix" "-e" "claude" ];
-        "Mod+Q".action.close-window = [ ];
-        "Mod+Shift+F".action.fullscreen-window = [ ];
-        "Mod+V".action.toggle-window-floating = [ ];
-        "Mod+B".action.spawn = "zen-beta";
         # Emoji picker: the emojiLauncher plugin (enabled in mixins/dms.nix)
         # adds an emoji/unicode surface to DMS's spotlight under its `:e`
         # trigger; toggleQuery opens the launcher pre-filled with it, so this is
@@ -525,28 +569,6 @@ in
         # so this composes the two through a shell (niri spawns argv
         # directly, with no shell of its own).
         "Mod+Shift+Escape".action.spawn = [ "sh" "-c" "${dmsBin} ipc call lock lock && systemctl suspend" ];
-
-        # Vim-style focus/move (aerospace alt-hjkl), mapped onto niri's column
-        # model: H/L walk columns, J/K walk windows inside a column.
-        "Mod+H".action.focus-column-left = [ ];
-        "Mod+J".action.focus-window-down = [ ];
-        "Mod+K".action.focus-window-up = [ ];
-        "Mod+L".action.focus-column-right = [ ];
-        "Mod+Shift+H".action.move-column-left = [ ];
-        "Mod+Shift+J".action.move-window-down = [ ];
-        "Mod+Shift+K".action.move-window-up = [ ];
-        "Mod+Shift+L".action.move-column-right = [ ];
-
-        "Mod+Tab".action.focus-workspace-previous = [ ];
-
-        # niri-native essentials (no Hyprland equivalent): overview, column
-        # maximize, true maximize, preset/relative column widths.
-        "Mod+O" = { repeat = false; action.toggle-overview = [ ]; };
-        "Mod+F".action.maximize-column = [ ];
-        "Mod+M".action.maximize-window-to-edges = [ ];
-        "Mod+R".action.switch-preset-column-width = [ ];
-        "Mod+Minus".action.set-column-width = "-10%";
-        "Mod+Plus".action.set-column-width = "+10%";
 
         # Screenshots via DMS (owner rule: when the shell has the feature,
         # prefer it over the compositor's built-in — it's WM-agnostic, so the
@@ -577,6 +599,58 @@ in
         "XF86AudioNext".action.spawn = [ dmsBin "ipc" "call" "mpris" "next" ];
         "XF86AudioPrev".action.spawn = [ dmsBin "ipc" "call" "mpris" "previous" ];
         "XF86AudioStop".action.spawn = [ dmsBin "ipc" "call" "mpris" "stop" ];
+      }) // {
+        "Mod+Return".action.spawn = "ghostty";
+        # Reclaim the laptop's Copilot key: it launches Claude, not Copilot.
+        # Microsoft's spec (which ASUS honours) has the key emit Meta+Shift+F23;
+        # this drops a fresh local ghostty into `claude`, cwd'd at the nix config.
+        "Mod+Shift+F23".action.spawn = [ "ghostty" "--working-directory=${config.home.homeDirectory}/.config/nix" "-e" "claude" ];
+        "Mod+Q".action.close-window = [ ];
+        "Mod+Shift+F".action.fullscreen-window = [ ];
+        "Mod+V".action.toggle-window-floating = [ ];
+        "Mod+B".action.spawn = "zen-beta";
+
+        # Vim-style focus/move (aerospace alt-hjkl), mapped onto niri's column
+        # model: H/L walk columns, J/K walk windows inside a column.
+        "Mod+H".action.focus-column-left = [ ];
+        "Mod+J".action.focus-window-down = [ ];
+        "Mod+K".action.focus-window-up = [ ];
+        "Mod+L".action.focus-column-right = [ ];
+        "Mod+Shift+H".action.move-column-left = [ ];
+        "Mod+Shift+J".action.move-window-down = [ ];
+        "Mod+Shift+K".action.move-window-up = [ ];
+        "Mod+Shift+L".action.move-column-right = [ ];
+
+        "Mod+Tab".action.focus-workspace-previous = [ ];
+
+        # MX Master 3S, usable without the keyboard. Its three thumb buttons are
+        # remapped to keys in modules/nixos/mixins/mouse.nix: the gesture button
+        # is Mod, so thumb + main wheel walks workspaces, and back/forward
+        # arrive as F13/F14 and walk columns. The cooldown keeps one flick of
+        # the free-spinning wheel from skipping several workspaces.
+        #
+        # The thumb wheel is deliberately left alone. Columns on a bare
+        # WheelScrollLeft/Right would be the obvious fit, but niri then stops
+        # forwarding the vertical wheel to applications entirely
+        # (niri-wm/niri#1584), and a modifier defeats the point of a thumb wheel.
+        "Mod+WheelScrollDown" = { cooldown-ms = 150; action.focus-workspace-down = [ ]; };
+        "Mod+WheelScrollUp" = { cooldown-ms = 150; action.focus-workspace-up = [ ]; };
+        # Back/forward arrive as KEY_F13/KEY_F14, but binds match keysyms, not
+        # keycodes, and the es layout gives those two XF86Tools and XF86Launch5
+        # (it has no F13/F14 keysym at all). Check with
+        # `xkbcli compile-keymap --layout es | rg 'key <FK1[34]>'` before
+        # touching either half.
+        "XF86Tools".action.focus-column-left = [ ];
+        "XF86Launch5".action.focus-column-right = [ ];
+
+        # niri-native essentials (no Hyprland equivalent): overview, column
+        # maximize, true maximize, preset/relative column widths.
+        "Mod+O" = { repeat = false; action.toggle-overview = [ ]; };
+        "Mod+F".action.maximize-column = [ ];
+        "Mod+M".action.maximize-window-to-edges = [ ];
+        "Mod+R".action.switch-preset-column-width = [ ];
+        "Mod+Minus".action.set-column-width = "-10%";
+        "Mod+Plus".action.set-column-width = "+10%";
       } // lib.optionalAttrs hasNvidia {
         # Confirm the pending GPU-relog prompt (fallback for a notification
         # daemon without action buttons). See gpuRelogPrompt above.
@@ -603,7 +677,7 @@ in
         { matches = [ { app-id = "^([Bb]lue[Bb]ubbles)$"; } ]; open-floating = false; }
         { matches = [ { app-id = "^([Oo]bsidian)$"; } ]; open-on-workspace = wsName."5"; } # productivity
         { matches = [ { app-id = "^([Cc]laude)$"; } ]; open-on-workspace = wsName."7"; } # ai
-        { matches = [ { app-id = "^([Ss]potify)$"; } ]; open-on-workspace = wsName."8"; } # media
+        { matches = [ { app-id = "^([Ss]potify|[Kk]opuz)$"; } ]; open-on-workspace = wsName."8"; } # media
         { matches = [ { app-id = "^([Ss]team|steam)$"; } ]; open-on-workspace = wsName."9"; } # gaming
         # Chromium/helium auxiliary popups float instead of wrecking the layout
         # (niri has no cross-workspace pin — accepted loss vs Hyprland's `pin`).
@@ -828,18 +902,9 @@ in
   # populated the vendor dir.
   systemd.user.sessionVariables = lib.optionalAttrs hasNvidia igpuPins;
 
-  systemd.user.services.polkit-agent = {
-    Unit = {
-      Description = "polkit-kde authentication agent";
-      After = [ "graphical-session.target" ];
-      PartOf = [ "graphical-session.target" ];
-    };
-    Service = {
-      ExecStart = "${pkgs.kdePackages.polkit-kde-agent-1}/libexec/polkit-kde-authentication-agent-1";
-      Restart = "on-failure";
-    };
-    Install.WantedBy = [ "graphical-session.target" ];
-  };
+  # polkit auth agent: FormalShell registers its own in-shell agent (M16,
+  # 2026-08-03), so the standalone polkit-kde service is gone. Two agents
+  # would race for the session registration.
 
   # Compositor-essential session packages. The generic GNOME/desktop apps and
   # their MIME defaults live in users/kyandesutter/mixins/desktop-apps.nix.
@@ -904,7 +969,7 @@ in
   #     dconf below. Without both, half the GTK apps stay on the fontconfig
   #     sans-serif default and the desktop looks mixed.
   #   • gtk{3,4}.extraCss — own gtk.css declaratively so it holds ONLY the
-  #     dank-colors import. DMS writes dank-colors.css but never gtk.css, so
+  #     palette import. DMS writes dank-colors.css but never gtk.css, so
   #     an unmanaged gtk.css silently accumulates cruft: stale @define-color
   #     blocks from old theming tools end up ABOVE the import, and GTK
   #     requires @import before any other rule — so it drops the import,
@@ -912,6 +977,13 @@ in
   #     render un-themed adw-gtk3-dark. Managing the file keeps the import
   #     valid and first. (GTK4/libadwaita read the accent from the portal, so
   #     they were unaffected either way.)
+  #
+  # FormalShell hosts get the same treatment with FormalShell's names: its
+  # ThemeEngine renders formalshell-colors.css (gtk template) + the qt{5,6}ct
+  # matugen.conf, and asserts color-scheme/gtk-theme via dconf on every
+  # retheme, flipping adw-gtk3 ↔ adw-gtk3-dark with the mode. The static
+  # settings.ini prefer-dark hint is DMS-only: FormalShell has a real light
+  # mode, and the hint would keep X11/XWayland GTK3 fallback apps dark in it.
   gtk = {
     enable = true;
     iconTheme = {
@@ -922,10 +994,10 @@ in
       name = "MEK Sans";
       size = 11;
     };
-    gtk3.extraConfig.gtk-application-prefer-dark-theme = 1;
-    gtk4.extraConfig.gtk-application-prefer-dark-theme = 1;
-    gtk3.extraCss = ''@import url("dank-colors.css");'';
-    gtk4.extraCss = ''@import url("dank-colors.css");'';
+    gtk3.extraConfig = lib.optionalAttrs (!useFormalshell) { gtk-application-prefer-dark-theme = 1; };
+    gtk4.extraConfig = lib.optionalAttrs (!useFormalshell) { gtk-application-prefer-dark-theme = 1; };
+    gtk3.extraCss = ''@import url("${if useFormalshell then "formalshell-colors.css" else "dank-colors.css"}");'';
+    gtk4.extraCss = ''@import url("${if useFormalshell then "formalshell-colors.css" else "dank-colors.css"}");'';
   };
 
   # The GSettings half of the GTK font (see the gtk block above). DMS writes

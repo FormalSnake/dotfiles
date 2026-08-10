@@ -40,13 +40,35 @@
 
     # No `inputs.nixpkgs.follows`: nix-homebrew is a pure nix-darwin module with
     # no nixpkgs input of its own to override, so pinning it would be a no-op.
+    # `brew-src` is its only real input, overridden below.
     nix-homebrew = {
       url = "github:zhaofengli/nix-homebrew";
+      inputs.brew-src.follows = "brew-src";
+    };
+
+    # Homebrew itself. nix-homebrew defaults this to the 6.0.11 tag, but the
+    # cask tap keeps auto-updating against brew's main, so casks land stanzas
+    # the pinned brew has never heard of: betterdisplay's `command_wrapper` is
+    # in no release up to 6.0.13, and `brew bundle` aborted every switch with
+    # "undefined method 'command_wrapper'". Tracking main is what the taps
+    # actually target; the rev keeps it reproducible. Move this back to a tag
+    # once one carries the stanza.
+    brew-src = {
+      url = "github:Homebrew/brew/e8cf16d0901fcdaafb531b22664fdef4d7ceca98";
+      flake = false;
     };
 
     # No `inputs.nixpkgs.follows`: the pinned FlakeHub release ships prebuilt
     # binaries and declares no nixpkgs input of its own to override.
     determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/3";
+
+    # Rosetta-backed Linux builder VM on the macbook — the only way an Apple
+    # Silicon host can build x86_64-linux at a useful speed
+    # (modules/darwin/mixins/rosetta-builder.nix).
+    nix-rosetta-builder = {
+      url = "github:cpick/nix-rosetta-builder";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     agenix = {
       url = "github:ryantm/agenix";
@@ -59,7 +81,7 @@
     };
 
     herdr = {
-      url = "github:ogulcancelik/herdr";
+      url = "github:herdrdev/herdr";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -72,6 +94,16 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # CanaryOrchestrator — our remote-dev-session orchestrator (canaryd + canary
+    # CLI + the Linux `canary-desktop` launcher/XDG entry). Private repo, so
+    # `github:` 404s without an access token; git+ssh fetches with the user's
+    # own key, which every box already has authorized — pure, unlike the old
+    # `builtins.getFlake` local-checkout import this replaces (af8161e7).
+    canary = {
+      url = "git+ssh://git@github.com/FormalSnake/CanaryOrchestrator";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # claude-code, tracked at upstream release cadence (the flake's CI bumps it
     # hourly; nixpkgs lags by days). No `inputs.nixpkgs.follows`: its cachix
     # cache (claude-code.cachix.org) is keyed to its own nixpkgs pin, so
@@ -79,6 +111,17 @@
     # `just ui claude-code-nix`.
     claude-code-nix = {
       url = "github:sadjow/claude-code-nix";
+    };
+
+    # nixpkgs' t3code packaging, pinned at its 0.0.32 bump and consumed as a
+    # plain source tree (`flake = false`): mixins/t3code.nix callPackages these
+    # three files with OUR pkgs, so the build reuses our electron/nodejs closure
+    # rather than dragging in a second nixpkgs. Our own nixpkgs pin still
+    # carries the 0.0.28 packaging, which cannot build current t3code (pnpm 10
+    # vs 11, and a postPatch targeting a vite.config.ts line upstream rewrote).
+    nixpkgs-t3code = {
+      url = "github:NixOS/nixpkgs/664d561730c84c52ded0c7e7a7e6d137805505a8";
+      flake = false;
     };
 
     # Prebuilt nix-index database (weekly) — powers comma and the
@@ -103,7 +146,7 @@
     # is keyed to the flake's own nixpkgs pin, and following ours would mean a
     # full Rust + Dioxus + v8 build on every host.
     kopuz = {
-      url = "github:Kopuz-org/kopuz/v0.13.0";
+      url = "github:Kopuz-org/kopuz/v0.14.0";
     };
 
     # — NixOS (g815 gaming laptop) inputs —
@@ -140,6 +183,16 @@
     # (no cachix substituter).
     dank-material-shell = {
       url = "github:AvengeMedia/DankMaterialShell/stable";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # FormalShell — the in-house Quickshell/QML desktop shell (bar, lock,
+    # notifications, menu; github.com/FormalSnake/FormalShell). Trialing as
+    # DMS's replacement, e1504g first (kyan.desktop.shell = "formalshell").
+    # Its pinned quickshell follows our nixpkgs, same as DMS: built from
+    # source, no cachix substituter.
+    formalshell = {
+      url = "github:FormalSnake/FormalShell";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
