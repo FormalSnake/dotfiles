@@ -7,4 +7,10 @@
   # worst case at 10s for both the system manager and per-user managers.
   systemd.settings.Manager.DefaultTimeoutStopSec = lib.mkDefault "10s";
   systemd.user.settings.Manager.DefaultTimeoutStopSec = lib.mkDefault "10s";
+
+  # Same reasoning on the way up, and the same 15s CachyOS-Settings uses: a unit
+  # that hasn't started in 15s is wedged, not slow, and blocking boot on the
+  # default 90s only delays finding that out.
+  systemd.settings.Manager.DefaultTimeoutStartSec = lib.mkDefault "15s";
+  systemd.user.settings.Manager.DefaultTimeoutStartSec = lib.mkDefault "15s";
 }
