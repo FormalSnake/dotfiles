@@ -28,12 +28,12 @@ in
       #
       # MEK Mono is smaller than GeistMono in every dimension at a given point
       # size: cap height 600/1000em against 710, line box 1200 against 1300,
-      # advance 450 against 600. 12 only matched GeistMono at 10, which still
-      # read small; 13.5 puts the caps ~14% above that and lands close to
-      # GeistMono at 12. The cell stays narrower than GeistMono's, so the grid
-      # keeps more columns than it had.
+      # advance 450 against 600. 12 matched GeistMono at 10 and 13.5 only got
+      # to GeistMono at 11.4, both still read small; 15.5 puts the caps level
+      # with GeistMono at 13. The cell stays narrower than GeistMono's, so the
+      # grid keeps more columns than it had.
       font-family = [ "MEK Mono" "GeistMono Nerd Font" ];
-      font-size = 13.5;
+      font-size = 15.5;
 
       cursor-style = "block";
       cursor-style-blink = false;
