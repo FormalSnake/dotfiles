@@ -147,22 +147,6 @@
   # machine, and SDDM stays the greeter.
   kyan.desktop.shell = "formalshell";
 
-  # This machine is worked on remotely, and a greeter waiting for a password is
-  # a session nobody can reach from 3000 km away: SSH still answers, but there
-  # is no desktop to test FormalShell against. Autologin brings niri up on its
-  # own at boot, and `relogin` brings it back after a session exit — the
-  # gpu-relog-prompt dock/undock path quits niri, which would otherwise park the
-  # machine at the greeter. Only host with this: the e1504g is used in person.
-  # Trade-off: physical access to this laptop is now access to the session.
-  services.displayManager = {
-    defaultSession = "niri";
-    autoLogin = {
-      enable = true;
-      user = "kyandesutter";
-    };
-    sddm.autoLogin.relogin = true;
-  };
-
   # NVIDIA dGPU stack (driver, PRIME offload, offload overlay) — this chassis
   # has the RTX 5070; an Intel-only host leaves this off.
   kyan.nvidia.enable = true;
