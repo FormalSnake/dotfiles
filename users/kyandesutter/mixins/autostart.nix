@@ -110,12 +110,17 @@ in
   };
 
   # BlueBubbles messaging client. Window rule pins it to workspace 4.
+  #
+  # RefuseManualStart/Stop instead of X-SwitchMethod, so a rebuild leaves a
+  # deliberately closed BlueBubbles closed; see the Spotify unit below for why
+  # keep-old isn't enough on its own.
   systemd.user.services.bluebubbles = {
     Unit = {
       Description = "BlueBubbles";
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
-      "X-SwitchMethod" = "keep-old";
+      RefuseManualStart = true;
+      RefuseManualStop = true;
     };
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {
