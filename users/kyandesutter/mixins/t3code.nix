@@ -36,7 +36,7 @@ let
         fetcherVersion = 4;
         hash = {
           aarch64-darwin = "sha256-i/xp5RqjDA97yD7heoNets4zx6BAM8atmZCnOf3jEN0=";
-          x86_64-linux = "sha256-iQ9PmPWktAvAPbkuSrw0BgY4Z9Ho/f9D56G3yMzBE7g=";
+          x86_64-linux = "sha256-i/K5bj7CS7PGIX5hfayxAJ7ngNib92w3SDKGXTVWccA=";
         }.${pkgs.stdenv.hostPlatform.system};
       };
     }
