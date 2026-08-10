@@ -140,6 +140,13 @@
   # Profiles (enable the desktop stack for this host).
   kyan.profiles.desktop.enable = true;
 
+  # FormalShell owns the session here too, promoted off the e1504g trial. Same
+  # deal as there: DMS stays installed but dormant, rollback is deleting this
+  # line. The GOA/EDS calendar still needs its one-time
+  # `XDG_CURRENT_DESKTOP=GNOME gnome-control-center online-accounts` sign-in per
+  # machine, and SDDM stays the greeter.
+  kyan.desktop.shell = "formalshell";
+
   # NVIDIA dGPU stack (driver, PRIME offload, offload overlay) — this chassis
   # has the RTX 5070; an Intel-only host leaves this off.
   kyan.nvidia.enable = true;
