@@ -26,7 +26,7 @@ directory on every start, because Navidrome unpacks each `.ndp` next to itself.
 | Lidarr | 8686 | Wanted-list and importer. Never searches or downloads |
 | slskd | 5030 | Soulseek client |
 | Soularr | 8265 | Bridges Lidarr to slskd |
-| multi-scrobbler | 9078 | Merges Spotify and Navidrome plays into one ListenBrainz history |
+| multi-scrobbler | 9078 | Buffers Navidrome's plays on the way to ListenBrainz |
 | Explo | 7288 | Downloads ListenBrainz weekly-exploration tracks the library lacks, via slskd |
 
 One launchd agent (`kyan.music-stack`) runs `docker compose up` in the
@@ -89,42 +89,41 @@ download clients. **Those are expected and will never clear.**
 
 ## Scrobbling
 
-Navidrome and Spotify each scrobbled to a different place, which left the
-discovery playlists reading half a history. Both now go through
-multi-scrobbler:
+Everything is played through Navidrome now, and every listen ends up in
+ListenBrainz:
 
-- **Spotify** has no way to push plays out, so multi-scrobbler polls the account
-  every 60s. That covers every device on the account, including Spotify on the
-  g815, with nothing installed there.
 - **Navidrome** posts to multi-scrobbler's `endpointlz` source instead of
   ListenBrainz, via `ND_LISTENBRAINZ_BASEURL`. Its own scrobbler is used rather
   than a Subsonic source because that one is the only path that sends multiple
   artists and replays scrobbles made while offline.
-- multi-scrobbler forwards everything to ListenBrainz. A source scrobbles to
-  every client by default, so adding Maloja later is one more `clients` entry.
+- multi-scrobbler forwards everything to ListenBrainz, buffering and retrying
+  when the network is down. A source scrobbles to every client by default, so
+  adding Maloja later is one more `clients` entry.
+- ListenBrainz is the history of record, and `kyan.music-stack-listens` reads
+  it back into Navidrome's play counts (see Discovery).
+
+There was a Spotify source too, polled every 60s because Spotify cannot push
+plays out. The subscription was cancelled on 2026-08-11 and the source was
+removed from the seed and from the live config; the years of history it
+collected stay in ListenBrainz. With one source left, multi-scrobbler is now
+only a buffer: dropping it means pointing `ND_LISTENBRAINZ_BASEURL` back at
+listenbrainz.org and re-linking with the real token, which is a manual step
+per user, so it stays.
 
 Pointing `BaseURL` away from listenbrainz.org is safe: only `submit-listens` and
-`validate-token` follow it. Similar-artists, similar-songs, artist metadata and
-popularity are hardcoded to listenbrainz.org and labs.api.listenbrainz.org in
-Navidrome's client, so radio and the metadata agent are unaffected.
+`validate-token` follow it. Verified against 0.63.2
+(`adapters/listenbrainz/client.go`), where `lbzApiUrl` and `labsBase` are
+constants: artist metadata, popularity, similar-artists and similar-recordings
+all ignore `BaseURL`, so radio and the metadata agent are unaffected.
 
-Four things nix cannot do, all one-time:
+Two things nix cannot do, both one-time:
 
-1. Create a Spotify app at developer.spotify.com with redirect URI
-   `http://127.0.0.1:9078/callback`, and put its id and secret into
-   `~/.local/share/music-stack/multi-scrobbler/config.json`. Spotify rejects
-   `localhost` redirects and requires https for everything except loopback.
-2. Put a ListenBrainz user token and username into the `listenbrainz` client in
-   the same file, then `docker restart multi-scrobbler`.
-3. In Navidrome (profile icon → ListenBrainz), link with `MSLZ_KEY` from
+1. Put a ListenBrainz user token and username into the `listenbrainz` client in
+   `~/.local/share/music-stack/multi-scrobbler/config.json`, then
+   `docker restart multi-scrobbler`.
+2. In Navidrome (profile icon → ListenBrainz), link with `MSLZ_KEY` from
    `.api-keys`, not the real ListenBrainz token. Existing links break when the
    base URL moves, so this has to be redone once per user.
-4. Authorise Spotify from the dashboard at http://127.0.0.1:9078.
-
-Live plays only go forward from here. Backfilling older Spotify history is
-still a manual job: request the data export from Spotify, wait the few weeks it
-takes to arrive, then feed the ZIP to ListenBrainz at
-`listenbrainz.org/settings/import/`.
 
 ## API keys
 
@@ -161,6 +160,8 @@ reapplies them every 600s:
 - **Per-client transcoding** — `kyan.music.playerProfiles`. Applied
   unconditionally, so nix is authoritative: a profile changed by hand in the
   web UI reverts within ten minutes.
+- **AudioMuse's clustering cron** — see Discovery. Its schedule table is in its
+  own postgres, so a toggle in its UI would otherwise survive every rebuild.
 
 `transcoding_id` must be an empty string, never NULL. Navidrome scans it into
 a Go string and a NULL makes every lookup for that client fail with
@@ -256,6 +257,57 @@ back into it, same write-once contract as the other seeds. Downloads land in
 
 ## Discovery
 
+Three engines produce the auto playlists and the per-song radio, and in August
+2026 all three were failing at once, which is what made every generated mix
+look like the same thirty songs.
+
+**Radio comes from AudioMuse, not ListenBrainz.** `ND_AGENTS` now leads with
+`audiomuseai`. Navidrome's `SimilarSongs` asks the agent chain for songs like
+the seed track and stops at the first agent that returns anything
+(`core/agents/agents.go`, `callAgentSliceMethod`). ListenBrainz answers a track
+seed out of labs `similar-recordings`, which is chart-level co-listening data:
+for a Soulseek library almost none of it is on disk, and `SimilarSongs` returns
+that empty match set rather than falling back to the similar-artists algorithm
+(`core/external/provider.go`). Measured before the change, seeds carrying a
+recording MBID returned nought to one track (Oliver Tree "Miss You" → 0, Drake
+"Nonstop" → 1) while seeds without one got a full twenty from the healthy
+fallback. After it, all six probe seeds returned nineteen or twenty
+genre-coherent tracks. AudioMuse needs no MBID and no listening history, which
+is why it suits this library; ListenBrainz stays behind it for similar-artists,
+popularity and the daily-playlist plugin.
+
+**AudioMuse's own playlists need its clustering cron.** Analysis (nightly at
+03:00) computes the embeddings; clustering (05:00) is what writes the
+`*_automatic` playlists. Clustering was switched off by hand on 2026-08-09 and
+the playlists it had made were deleted, so analysis kept running and produced
+nothing visible. The schedule lives in AudioMuse's postgres rather than in a
+config file, so `kyan.music-stack-reconcile` now re-enables it, the same way it
+reapplies Lidarr and Navidrome settings. To turn it off for real, remove that
+block; toggling it in the web UI is reverted within ten minutes.
+
+**Play counts come from ListenBrainz.** Navidrome only counts what it played
+itself: 175 plays over 80 of 5063 tracks, against 21,074 listens in
+ListenBrainz from the Spotify years. Everything that ranks by play count read
+that 80-track pool, including NaviBeat, whose mixes fall back to "your most
+played" until it has logged `minEventsForAffinity` (150) plays of its own. That
+is why Morning, Afternoon, Evening and Night came out with an identical thirty
+tracks. `kyan.music-stack-listens` pulls the history back down hourly and
+upserts it into Navidrome's `annotation` table: 6970 listens (33%) match onto
+660 tracks, and the rest name music not on disk yet.
+
+It keys the history by recording MBID, else by artist and title, and rematches
+the whole thing every run rather than only new listens, so a track Soularr
+imports next month picks up the plays it already had. Counts are written with
+`max()`, never `+`, so re-running never inflates them. State lives in
+`~/.local/share/music-stack/.listens-state.json`; delete it to refetch the
+whole history.
+
+NaviBeat's time-of-day split needs its own play log, which Navidrome's play
+counts cannot supply, so those four mixes stay identical to each other until it
+has seen 150 plays (77 as of 2026-08-10). Everything ranked by play count —
+Essentials, On Repeat, Wrapped, the decade mixes, Daily Mix seeds — widened
+immediately.
+
 `navidromePlugins.listenbrainz-daily-playlist` imports Weekly Jams, Daily Jams
 and Weekly Exploration. Requirements, all easy to miss:
 
@@ -265,11 +317,18 @@ and Weekly Exploration. Requirements, all easy to miss:
 - A ListenBrainz account, mapped to the Navidrome username, following
   `troi-bot`.
 - Real listening history, which is what multi-scrobbler is for (see
-  Scrobbling). ListenBrainz's own Spotify connection imports only the last 30
-  days and connecting Last.fm does nothing retroactively, so anything older
-  than that arrives only through the manual export import.
+  Scrobbling). The 21k listens from the Spotify years were imported by hand as
+  a CSV on 2026-07-29; everything since comes from Navidrome.
 - Playlists generate on troi-bot's schedule (daily-jams after local midnight,
   weekly-jams Mondays), not on demand.
+- ListenBrainz has to have processed the account at all. The back history
+  arrived as a bulk CSV import on 2026-07-29 and as of 2026-08-10 the batch
+  side had not caught up: `stats/user/<u>/artists?range=all_time` and
+  `cf/recommendation/user/<u>/recording` both return 204, so troi-bot has
+  generated nothing (`playlists/createdfor` → 0) and the plugin logs "No
+  playlist ... found with algorithm/source patch 'daily-jams'". Nothing local
+  fixes that; it clears when LB's next dump and Spark cycle picks the account
+  up. Those three endpoints are the check.
 
 The plugin matches tracks by MusicBrainz ID, falling back to artist/title for
 `fallbackCount` tracks (default 15). Files without MBIDs are effectively
@@ -283,8 +342,9 @@ shape). The `kyan.music-stack-playlists` agent matches them against the
 Navidrome library every hour and writes `<name>.m3u` into the library root,
 which Navidrome imports on its next scan.
 
-An export is a snapshot, so the hourly run is not about new Spotify data: it is
-about the library catching up. Most tracks miss on the first pass and appear
+An export is a snapshot, and with the account cancelled it is the last one, so
+the hourly run is not about new Spotify data: it is about the library catching
+up. Most tracks miss on the first pass and appear
 weeks later as Soularr works through Lidarr's wanted list. Matching is
 title-first with the Spotify remix and "slowed" suffixes stripped
 progressively, then an artist check, because a Soulseek rip rarely carries the

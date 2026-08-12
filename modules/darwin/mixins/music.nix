@@ -69,6 +69,14 @@ let
         container_name: navidrome
         user: "${uid}:${gid}"
         environment:
+          # Navidrome was the one service left on UTC. Timestamps in the
+          # database are UTC either way, but the plugins bucket by local hour
+          # inside this container: NaviBeat's morning / afternoon / evening /
+          # night mixes were reading an hour early, so a play just before
+          # midnight counted as evening. This variable alone does nothing —
+          # the image carries no tzdata, so the zoneinfo bind mount below is
+          # what makes the zone resolve instead of silently staying UTC.
+          TZ: Atlantic/Canary
           ND_MUSICFOLDER: /music
           ND_DATAFOLDER: /data
           ND_CACHEFOLDER: /data/cache
@@ -77,18 +85,24 @@ let
           ND_PLUGINS_ENABLED: "true"
           ND_PLUGINS_FOLDER: /plugins
 
-          # Discovery: ListenBrainz supplies similar-artists and similar-songs
-          # for Navidrome's own radio, and is what the daily-playlist plugin
-          # reads for weekly-jams / daily-jams / weekly-exploration. It stays
-          # first so radio similarity keeps coming from listening data;
-          # apple-music sits ahead of lastfm because its artist images and
-          # localized bios are current where lastfm's are stale.
+          # Discovery: audiomuseai leads because it answers a track seed from
+          # the library's own audio, and Navidrome stops at the first agent
+          # returning anything (core/agents/agents.go, callAgentSliceMethod).
+          # ListenBrainz answers a track seed out of labs similar-recordings,
+          # which is chart-level co-listening data: for a Soulseek library it
+          # matches almost nothing on disk, and SimilarSongs returns that empty
+          # match set instead of falling back to the similar-artists algorithm
+          # (core/external/provider.go). Every seed carrying an MBID therefore
+          # came back with nought to one track. ListenBrainz stays in the chain
+          # behind it for similar-artists, popularity and the daily-playlist
+          # plugin; apple-music sits ahead of lastfm because its artist images
+          # and localized bios are current where lastfm's are stale.
           ND_ENABLEEXTERNALSERVICES: "true"
           ND_LASTFM_ENABLED: "true"
           ND_LISTENBRAINZ_ENABLED: "true"
           # "apple-music-plugin" because agents are addressed by the .ndp
           # basename, and that is what the nixpkgs derivation ships.
-          ND_AGENTS: listenbrainz,apple-music-plugin,lastfm,deezer
+          ND_AGENTS: audiomuseai,listenbrainz,apple-music-plugin,lastfm,deezer
 
           # Reordered from Navidrome's default, which puts .yaml/.yml/.txt
           # ahead of .lrc and the plugin last. nd-lyrics writes a sidecar in
@@ -100,11 +114,12 @@ let
           # when it has nothing.
           ND_LYRICSPRIORITY: ".ttml,.elrc,.lrc,.srt,nd-lyrics,.yaml,.yml,.txt,embedded"
 
-          # Scrobbles go through multi-scrobbler so Spotify plays and Navidrome
-          # plays reach ListenBrainz as one history. Only submit-listens and
-          # validate-token follow this URL; similar-artists, artist metadata and
-          # popularity are hardcoded to listenbrainz.org in Navidrome's client,
-          # so discovery keeps working while the stack is pointed here.
+          # Scrobbles go through multi-scrobbler, which buffers and retries them
+          # on the way to ListenBrainz. Only submit-listens and validate-token
+          # follow this URL; similar-artists, artist metadata and popularity are
+          # hardcoded to listenbrainz.org in Navidrome's client (verified
+          # against 0.63.2, adapters/listenbrainz/client.go), so discovery keeps
+          # working while the stack is pointed here.
           ND_LISTENBRAINZ_BASEURL: http://multi-scrobbler:9078/1/
 
           # Without this, Subsonic's getArtist only counts albums an artist is
@@ -143,6 +158,9 @@ let
           - navidrome-data:/data
           - ${stackDir}/navidrome-backup:/backup
           - ${stackDir}/navidrome-plugins:/plugins
+          # macOS keeps the real zoneinfo tree here; /usr/share/zoneinfo is a
+          # symlink to it, and a symlink is not what the bind mount wants.
+          - /var/db/timezone/zoneinfo:/usr/share/zoneinfo:ro
         ports:
           - "${toString cfg.port}:4533"
         restart: unless-stopped
@@ -194,12 +212,10 @@ let
           - slskd
         restart: unless-stopped
 
-      # Spotify cannot push plays anywhere, so this polls the account and
-      # forwards them; Navidrome posts into the same instance, which is what
-      # merges both into one ListenBrainz history. The redirect URI is bound to
-      # 127.0.0.1 rather than localhost because Spotify stopped accepting
-      # localhost redirects, and to a loopback address because everything
-      # except loopback has to be https.
+      # Navidrome posts here instead of straight to ListenBrainz, so listens
+      # survive the network being down and a second target (Maloja, say) is one
+      # `clients` entry away. It also polled Spotify until that subscription
+      # was cancelled, which was the original reason for it.
       multi-scrobbler:
         image: foxxmd/multi-scrobbler:latest
         container_name: multi-scrobbler
@@ -405,25 +421,19 @@ let
     level = INFO
   '';
 
-  # A source scrobbles to every client unless told otherwise, so Spotify and the
-  # Navidrome endpoint both reach ListenBrainz with no further wiring. The
-  # Spotify app credentials and the ListenBrainz user token are the two values
-  # nix cannot generate. @MSLZ_KEY@ is what Navidrome authenticates with: it
-  # replaces the real ListenBrainz token in Navidrome's per-user link dialog.
+  # A source scrobbles to every client unless told otherwise, so the Navidrome
+  # endpoint reaches ListenBrainz with no further wiring. The ListenBrainz user
+  # token is the one value nix cannot generate. @MSLZ_KEY@ is what Navidrome
+  # authenticates with: it replaces the real ListenBrainz token in Navidrome's
+  # per-user link dialog.
+  #
+  # There was a Spotify source here too, polling the account because Spotify
+  # cannot push plays anywhere. The subscription was cancelled on 2026-08-11 and
+  # it went with it; everything is played through Navidrome now. The history it
+  # collected lives on in ListenBrainz, which is what music-stack-listens reads.
   msSeed = pkgs.writeText "multi-scrobbler-seed.json" ''
     {
       "sources": [
-        {
-          "name": "spotify",
-          "enable": true,
-          "type": "spotify",
-          "data": {
-            "clientId": "CHANGEME",
-            "clientSecret": "CHANGEME",
-            "redirectUri": "http://127.0.0.1:9078/callback",
-            "interval": 60
-          }
-        },
         {
           "name": "navidrome",
           "enable": true,
@@ -638,6 +648,272 @@ let
         select id from player p1
         where last_seen = (select max(last_seen) from player p2 where p2.name = p1.name)
       );" 2>/dev/null
+
+    # AudioMuse schedules analysis and clustering in its own postgres, not in a
+    # config file, so a toggle made in its web UI outlives every rebuild.
+    # Clustering is what writes the `*_automatic` playlists: with it off,
+    # analysis keeps running nightly and produces nothing anyone can see, which
+    # is the state the stack sat in from 2026-08-09. Credentials come from the
+    # seeded env file, so nothing lands in the store.
+    if [ -f "${stackDir}/audiomuse/audiomuse.env" ]; then
+      # shellcheck disable=SC1090
+      . "${stackDir}/audiomuse/audiomuse.env"
+      docker exec -e PGPASSWORD="$POSTGRES_PASSWORD" audiomuse-postgres \
+        psql -qtAX -U "$POSTGRES_USER" -d audiomusedb \
+        -c "update cron set enabled = true where task_type = 'clustering' and not enabled;" \
+        2>/dev/null | grep -q "UPDATE 1" \
+        && echo "reconcile: re-enabled AudioMuse clustering"
+    fi
+  '';
+
+  # Navidrome only counts what it played itself, which was 175 plays over 80 of
+  # 5063 tracks while ListenBrainz held 21k listens from the Spotify years.
+  # Everything that ranks by play count reads that 80-track pool: Navidrome's
+  # own most-played, and NaviBeat, whose mixes fall back to "your most played"
+  # until it has logged `minEventsForAffinity` plays of its own. That is why the
+  # morning, afternoon, evening and night mixes came out with an identical 30
+  # tracks. This pulls the ListenBrainz history back down into Navidrome's
+  # annotations so the ranking has the whole history behind it.
+  #
+  # Keyed by listen identity (recording MBID, else artist and title) rather than
+  # by track id, and rematched in full every run, so the ~two thirds of listens
+  # that name music not yet on disk land the moment Soularr imports them. Title
+  # matching reuses the progressive suffix stripping the Spotify playlist
+  # matcher needs for the same reason: a Soulseek rip rarely carries the exact
+  # title a streaming service showed.
+  listens = pkgs.writeScript "music-stack-listens" ''
+    #!${pkgs.python3}/bin/python3
+    import http.client
+    import json
+    import re
+    import subprocess
+    import sys
+    import time
+    import unicodedata
+    import urllib.error
+    import urllib.request
+
+    STATE = "${stackDir}/.listens-state.json"
+    MS_CONF = "${stackDir}/multi-scrobbler/config.json"
+    API = "https://api.listenbrainz.org/1"
+    DRY = "--dry-run" in sys.argv
+
+    NOISE = re.compile(
+        r"\s*[-(\[]\s*(slowed|super slowed|sped up.*|hardstyle|hardtekk|edit|"
+        r"remix|vip|extended mix|radio edit|club mix|bassline club mix|"
+        r"slowed & reverb|slowed and reverb|slowed -pitch|the dark triad|"
+        r"viral version.*|feat\..*|ft\..*|with .*)\s*[)\]]?\s*$",
+        re.I)
+
+
+    def listenbrainz_user():
+        """The account multi-scrobbler forwards to. It owns the username, so
+        nix does not carry a second copy of it."""
+        try:
+            with open(MS_CONF) as fh:
+                conf = json.load(fh)
+        except (OSError, ValueError):
+            return None
+        for client in conf.get("clients", []):
+            if client.get("type") != "listenbrainz":
+                continue
+            name = client.get("data", {}).get("username")
+            return name if name and name != "CHANGEME" else None
+        return None
+
+
+    def norm(s):
+        s = unicodedata.normalize("NFKD", s or "")
+        s = "".join(c for c in s if not unicodedata.combining(c))
+        s = s.replace("’", "'").replace("&", "and")
+        return re.sub(r"[^a-z0-9]", "", s.lower())
+
+
+    def variants(title):
+        """Progressively stripped forms of a title, most specific first."""
+        out, t = [], title
+        for _ in range(4):
+            out.append(t)
+            stripped = NOISE.sub("", t).strip(" -–")
+            if stripped == t or not stripped:
+                break
+            t = stripped
+        out.append(re.sub(r"\s*\(.*?\)\s*", " ", title).strip())
+        return [v for v in dict.fromkeys(out) if v]
+
+
+    def artist_forms(artist):
+        """An artist credit and each collaborator named in it."""
+        out = [artist]
+        out += re.split(r"\s*(?:,|&|feat\.|ft\.|with|•|/|\bx\b)\s*", artist)
+        return [a for a in dict.fromkeys(out) if a.strip()]
+
+
+    def sql(query):
+        # Same rule as the playlist matcher: sqlite3 runs inside the container,
+        # because reading navidrome.db from macOS across virtiofs destroys it.
+        r = subprocess.run(["docker", "exec", "navidrome", "sqlite3",
+                            "-separator", "\x1f", "/data/navidrome.db", query],
+                           capture_output=True, text=True)
+        if r.returncode != 0:
+            sys.exit(0)
+        return [l.split("\x1f") for l in r.stdout.splitlines() if l]
+
+
+    def fetch(user, since):
+        """Every listen newer than `since`, walking back a page at a time."""
+        out, max_ts = [], None
+        while True:
+            url = "%s/user/%s/listens?count=500" % (API, user)
+            if max_ts:
+                url += "&max_ts=%d" % max_ts
+            req = urllib.request.Request(url, headers={"User-Agent": "music-stack/1"})
+            # A first run walks the whole history and listenbrainz.org stalls on
+            # some of those pages. Retry rather than abandon the run: the high
+            # water mark only moves on success, so giving up here would make the
+            # next run start over from the same page.
+            page = None
+            for attempt in range(5):
+                try:
+                    page = json.load(urllib.request.urlopen(req, timeout=60))
+                    break
+                except urllib.error.HTTPError as err:
+                    if err.code not in (429, 500, 502, 503, 504):
+                        raise
+                    time.sleep(5 * (attempt + 1))
+                except (OSError, http.client.HTTPException):
+                    time.sleep(5 * (attempt + 1))
+            if page is None:
+                break
+            page = page["payload"]["listens"]
+            if not page:
+                break
+            oldest = min(l["listened_at"] for l in page)
+            out += [l for l in page if l["listened_at"] > since]
+            if oldest <= since:
+                break
+            max_ts = oldest - 1
+        return out
+
+
+    def listen_key(listen):
+        meta = listen["track_metadata"]
+        mbid = (meta.get("mbid_mapping") or {}).get("recording_mbid") \
+            or (meta.get("additional_info") or {}).get("recording_mbid")
+        title, artist = meta["track_name"], meta["artist_name"]
+        key = "m:" + mbid.lower() if mbid else \
+            "t:%s\x1f%s" % (norm(title), norm(artist))
+        return key, [0, 0, (mbid or "").lower(), title, artist]
+
+
+    user = listenbrainz_user()
+    if not user:
+        sys.exit(0)
+
+    try:
+        with open(STATE) as fh:
+            state = json.load(fh)
+    except (OSError, ValueError):
+        state = {"last_ts": 0, "plays": {}}
+
+    listens = fetch(user, state["last_ts"])
+    for listen in listens:
+        key, blank = listen_key(listen)
+        entry = state["plays"].get(key) or blank
+        entry[0] += 1
+        entry[1] = max(entry[1], listen["listened_at"])
+        state["plays"][key] = entry
+    if listens:
+        state["last_ts"] = max(l["listened_at"] for l in listens)
+        with open(STATE, "w") as fh:
+            json.dump(state, fh)
+
+    by_mbid, by_pair = {}, {}
+    for mid, title, artist, album_artist, mbid in sql(
+            "select id, title, artist, album_artist, coalesce(mbz_recording_id,${sqlEmpty}) "
+            "from media_file where missing = 0;"):
+        if mbid:
+            by_mbid.setdefault(mbid.lower(), mid)
+        for v in variants(title):
+            for a in artist_forms(artist) + artist_forms(album_artist):
+                by_pair.setdefault((norm(v), norm(a)), mid)
+
+    counts, dates, matched, unmatched = {}, {}, 0, {}
+    for count, ts, mbid, title, artist in state["plays"].values():
+        mid = by_mbid.get(mbid)
+        if not mid:
+            for v in variants(title):
+                for a in artist_forms(artist):
+                    mid = by_pair.get((norm(v), norm(a)))
+                    if mid:
+                        break
+                if mid:
+                    break
+        if not mid:
+            unmatched[artist + " - " + title] = count
+            continue
+        matched += count
+        counts[mid] = counts.get(mid, 0) + count
+        dates[mid] = max(dates.get(mid, 0), ts)
+
+    total = sum(e[0] for e in state["plays"].values())
+    print("listens: %d new, %d known, %d matched (%.0f%%) onto %d library tracks"
+          % (len(listens), total, matched, 100.0 * matched / max(total, 1), len(counts)))
+    if DRY:
+        for k, v in sorted(unmatched.items(), key=lambda x: -x[1])[:15]:
+            print("  unmatched %4dx %s" % (v, k))
+        sys.exit(0)
+    if not counts:
+        sys.exit(0)
+
+    owner = sql("select id from user where user_name = '%s';"
+                % user.replace("'", "${sqlEmpty}")) or sql("select id from user;")
+    if len(owner) != 1:
+        sys.exit(0)
+    uid = owner[0][0]
+
+
+    def stamp(ts):
+        return time.strftime("%Y-%m-%d %H:%M:%S+00:00", time.gmtime(ts))
+
+
+    # max() rather than a running total, so this is idempotent: the counts are
+    # recomputed from the whole history every run, and a play Navidrome recorded
+    # that ListenBrainz never saw is never lowered.
+    UPSERT = """
+    insert into annotation (user_id, item_id, item_type, play_count, play_date)
+    %s
+    on conflict (user_id, item_id, item_type) do update set
+        play_count = max(annotation.play_count, excluded.play_count),
+        play_date  = max(coalesce(annotation.play_date, ${sqlEmpty}), excluded.play_date);
+    """
+
+    values = ",".join(
+        "('%s','%s','media_file',%d,'%s')" % (uid, mid, n, stamp(dates[mid]))
+        for mid, n in counts.items())
+
+    # Album and artist counts roll up from the annotation table rather than from
+    # `counts`, so plays Navidrome recorded on its own are included too.
+    script = UPSERT % ("values " + values) + UPSERT % """
+    select a.user_id, mf.album_id, 'album', sum(a.play_count), max(a.play_date)
+    from annotation a join media_file mf on mf.id = a.item_id
+    where a.item_type = 'media_file' and a.play_count > 0 and mf.album_id <> ${sqlEmpty}
+    group by a.user_id, mf.album_id
+    """ + UPSERT % """
+    select a.user_id, mfa.artist_id, 'artist', sum(a.play_count), max(a.play_date)
+    from annotation a
+    join media_file_artists mfa on mfa.media_file_id = a.item_id and mfa.role = 'artist'
+    where a.item_type = 'media_file' and a.play_count > 0
+    group by a.user_id, mfa.artist_id
+    """
+
+    r = subprocess.run(["docker", "exec", "-i", "navidrome", "sqlite3",
+                        "/data/navidrome.db"],
+                       input=script, capture_output=True, text=True)
+    if r.returncode != 0:
+        print("annotation write failed: %s" % r.stderr.strip(), file=sys.stderr)
+        sys.exit(1)
+    print("play counts written for %d tracks (%d plays)" % (len(counts), matched))
   '';
 
   # The Spotify export is a one-off dump, but the library it gets matched
@@ -1041,6 +1317,22 @@ in
         };
         RunAtLoad = true;
         StartInterval = 600;
+        StandardOutPath = "${home}/Library/Logs/music-stack.log";
+        StandardErrorPath = "${home}/Library/Logs/music-stack.log";
+      };
+    };
+
+    # Hourly, same as the playlist matcher and for the same reason: the answer
+    # changes when the library grows, not only when new listens arrive.
+    launchd.user.agents.music-stack-listens = {
+      serviceConfig = {
+        Label = "kyan.music-stack-listens";
+        ProgramArguments = [ "${listens}" ];
+        EnvironmentVariables = {
+          PATH = "/usr/local/bin:/opt/homebrew/bin:/run/current-system/sw/bin:/usr/bin:/bin";
+        };
+        RunAtLoad = true;
+        StartInterval = 3600;
         StandardOutPath = "${home}/Library/Logs/music-stack.log";
         StandardErrorPath = "${home}/Library/Logs/music-stack.log";
       };
