@@ -172,6 +172,25 @@ binds all UI surfaces from M4 on; M9 retrofits M1–M3 surfaces. Animation postu
 (120–420ms eased color/state transitions, Omarchy's "breathing" opacity pulse
 for active-process states); no showy choreography.
 
+**Visual-language addendum (M8b, 2026-07-28): DESIGN.md's own revision
+governs, this is not a conflict.** The paragraph above already delegates the
+visual language to `docs/DESIGN.md` ("Codified as... in... docs/DESIGN.md...
+That doc binds all UI surfaces from M4 on") — so when the owner's M8b scope
+pin re-aimed the whole system at Omarchy quattro (mek.gallery downgraded to
+an ASCII-OS accent, monospace throughout, DMS for features not looks),
+`docs/DESIGN.md` was the sanctioned place to make that call, and its
+2026-07-28 revision is the current visual authority: Omarchy quattro is the
+base reference for every surface's structural chrome; mek.gallery's
+ruled-grid/inversion/uppercase-meta idiom is an accent applied only to
+tabular surfaces (menu, panel lists, picker grid, notification center);
+floating chrome (menu, panels, notifications, OSD) is an omarchy-style card,
+not a fused edge-to-edge grid; and the scale roots (`fontBaseSize`,
+`spacingScale`) replace the fixed pixel values implied above. Read
+`docs/DESIGN.md` for the live rules; the paragraph above records when the
+mek.gallery reference entered the spec, not the current rendering contract.
+No feature, IPC target, provider, or state machine changes — the delegation
+covers rendering only, exactly as it always did.
+
 **niri border sync is built in**: the shell renders the `layout {}` KDL
 fragment and calls `niri msg action load-config-file` itself (replacing the
 `niri-border` matugen template + post_hook glue in `dms.nix`).
@@ -368,3 +387,35 @@ Mirrors Omarchy's own incremental phase history:
 - **Scope**: v1 is large. The build order is strictly sequential and each
   milestone leaves a usable partial shell; nothing later may block earlier
   milestones from being daily-drivable in a nested session.
+
+## Addendum (2026-07-30): owner scope override for M12
+
+The e1504g swap review named the features lost moving off DMS; the owner
+ruled them all essential and explicitly authorized a compiled helper where
+pure QML cannot work ("if we really need a CLI, write one with zig or
+something"). The implementing plan is
+`docs/superpowers/plans/2026-07-30-m12-dms-parity-and-eds.md`. The sections
+above stand unedited as the 2026-07-27 record; where this addendum conflicts
+with them, the addendum wins.
+
+1. **EDS/GOA calendar events enter v1.5 scope via one small companion CLI**
+   (`formalshell-eds`: Zig preferred, sd-bus for D-Bus), narrowly amending
+   both the §Non-goals backlog posture and §Stack's "no compiled companion
+   binary in v1" rule. Rationale: the feasibility spike the build order
+   called for (`docs/spikes/2026-07-28-eds-calendar-events.md`) proved the
+   EDS handshake must run over one held D-Bus connection, which no QML/JS
+   path can provide, so the M12 plan adds the smallest possible compiled
+   bridge (a few hundred lines, no daemon, no caching) while everything
+   else stays pure QML/JS.
+2. **Screenshot tooling enters scope** as a thin grim/slurp wrapper behind a
+   `screenshot` IPC target, amending §Non-goals' "screenshot/recording
+   tooling (stays external CLI tools)". Rationale: the owner uses DMS's
+   screenshot flow daily, and the M12 plan restores it as an IPC target
+   because that is the smallest surface giving keybind summonability plus
+   clipboard and notification feedback.
+3. **Menu providers `calc`, `emoji`, and `nix` (package runner) plus a
+   `github` bar widget enter scope**, built on the existing provider/route
+   and bar-builtin architectures, not the §Non-goals plugin registry.
+   Rationale: these are the remaining DMS daily-use surfaces from the
+   owner's list, and the M12 plan builds each as a normal provider or
+   opt-in bar widget so no plugin system is needed.

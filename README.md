@@ -1,10 +1,16 @@
 # nix-config
 
-Declarative configuration for two machines from one flake:
+Declarative configuration for three machines from one flake:
 
 - **`macbook`** — `aarch64-darwin`, nix-darwin + home-manager (primary dev host)
-- **`g815`** — `x86_64-linux`, NixOS + home-manager (ASUS ROG laptop: niri +
-  DMS desktop, gaming, NVIDIA PRIME offload)
+- **`g815`**: `x86_64-linux`, NixOS + home-manager (ASUS ROG laptop, niri +
+  FormalShell desktop, gaming, NVIDIA PRIME offload)
+- **`e1504g`**: `x86_64-linux`, NixOS + home-manager (ASUS Vivobook E1504G,
+  Intel-only iGPU laptop, niri + FormalShell desktop)
+
+Desktop shell on both NixOS hosts is
+[FormalShell](https://github.com/FormalSnake/FormalShell), pulled in as a
+flake input.
 
 Inspired by [getchoo/borealis](https://github.com/getchoo/borealis).
 
@@ -17,7 +23,7 @@ Inspired by [getchoo/borealis](https://github.com/getchoo/borealis).
   - `modules/darwin/` — macOS (homebrew, system defaults, dock, login items)
   - `modules/nixos/` — NixOS (boot, graphics/nvidia, niri, gaming, power, asus, …)
   - each platform has `mixins/` (one concern per file) and `profiles/` (compose mixins)
-- `systems/` — per-host config (`macbook/`, `g815/`)
+- `systems/` — per-host config (`macbook/`, `g815/`, `e1504g/`)
 - `users/` — per-user home-manager config (`kyandesutter/`)
 - `secrets/` — agenix-encrypted secrets
 

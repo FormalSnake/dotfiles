@@ -108,9 +108,10 @@ unexpectedly prompts (broken agent chain) does a step go back to the owner.
 Declarative config for three machines via one flake (flake-parts):
 - **`macbook`** — `aarch64-darwin`, nix-darwin + home-manager. Primary dev host.
 - **`g815`** — `x86_64-linux`, NixOS + home-manager. ASUS ROG laptop; niri +
-  Dank Material Shell (DMS) desktop, NVIDIA dGPU as a power-managed peripheral.
+  FormalShell desktop, NVIDIA dGPU as a power-managed peripheral.
 - **`e1504g`** — `x86_64-linux`, NixOS + home-manager. ASUS Vivobook (8 GB,
-  Intel-only); same niri + DMS desktop, none of the dGPU/asus machinery. Its
+  Intel-only); same niri + FormalShell desktop, none of the dGPU/asus
+  machinery. Its
   nix builds offload to the g815 over Tailscale (LAN fallback) and fall back
   to local building when the g815 is unreachable.
 
@@ -118,13 +119,18 @@ The macbook is the real development host; the g815 is used as a thin client that
 reaches the mac over SSH/MOSH and remote desktop to work remotely, rather than
 building locally.
 
-**The g815 is off until 2026-08-15.** It is not just unreachable, it is expected
-to be: don't diagnose it, don't wait on it. That matters most for the e1504g's
-builds, because `/etc/nix/machines` lists the g815 twice (Tailscale, then LAN)
-ahead of the macbook's rosetta builder and nix walks that list per derivation,
-so every build pays two SSH connect timeouts (measured 2026-08-04: 4m35s per
-derivation) before falling back to local. Until the g815 is back, build the
-e1504g against the mac alone:
+Which shell owns a niri session is `kyan.desktop.shell` (enum `dms` |
+`formalshell`, defined in `modules/nixos/mixins/niri.nix`). Both Linux hosts run
+`formalshell` now: the e1504g as the trial, the g815 promoted 2026-08-10. DMS
+stays installed but dormant on both, so rollback is deleting the host's one
+line. The theming section below still describes the DMS path.
+
+The g815 is back online (2026-08-10) and is the e1504g's build host again. If it
+ever goes down for a stretch, remember that `/etc/nix/machines` lists it twice
+(Tailscale, then LAN) ahead of the macbook's rosetta builder and nix walks that
+list per derivation, so every e1504g build pays two SSH connect timeouts
+(measured 2026-08-04: 4m35s per derivation) before falling back to local. Pin
+the mac as the only builder to skip that:
 
 ```
 ssh e1504g 'cd ~/.config/nix && sudo -n /run/current-system/sw/bin/nixos-rebuild switch --flake .#e1504g \

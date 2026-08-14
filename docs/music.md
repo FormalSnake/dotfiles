@@ -39,6 +39,7 @@ Navidrome would scan an empty folder and mark the whole library deleted.
 ```
 /Volumes/Music/library      final library, Navidrome scans this (/music in containers)
 /Volumes/Music/library/explo  Explo's downloads, picked up by the ordinary scan
+/Volumes/Music/library/_edits  hand-added tracks Lidarr does not own
 /Volumes/Music/downloads    slskd output, shared back to Soulseek (/downloads)
 /Volumes/Music/incomplete   slskd partials
 /Volumes/Music/purchases    drop bought albums here, then run `music-import`
@@ -50,6 +51,46 @@ docker volume music-stack_navidrome-data     Navidrome's own data dir (/data)
 `library` and `downloads` mount at the *same container path* in every service.
 Soularr hands Lidarr the path slskd reported, so a mismatch shows up as a
 confusing "file not found" on import rather than an obvious path bug.
+
+### `_edits`: tracks with no MusicBrainz release
+
+Slowed, sped-up and nightcore edits circulate on YouTube and streaming without
+ever becoming MusicBrainz releases, so Lidarr has nothing to want and Soulseek
+has nothing to find. They go in `_edits/`, one folder per track, tagged by hand.
+
+It sits beside the artist folders rather than inside one because Lidarr owns
+every artist folder under `library/`, and an unmapped file in one lands in its
+manual-import queue on every rescan. Navidrome groups by tags, not by folder,
+so the track still shows up under its real artist; drop a `cover.jpg` in
+alongside it for art.
+
+These are the library's only lossy files. yt-dlp's `bestaudio` is Opus around
+128 kbps, and remuxing that into Ogg Opus (`ffmpeg -c:a copy`) keeps it as-is.
+Re-encoding to FLAC would multiply the size for nothing.
+
+Getting one into a `playlists.json` playlist needs the entry title to match the
+file's title tag exactly, because the matcher tries the unstripped title first:
+`I Took A Pill In Ibiza - Seeb Remix (Slowed + Reverb)` picks the edit, while
+anything shorter normalises to the same key as the plain remix and picks that
+instead. That fallback is deliberate, and it is what the playlist shows until
+the edit exists.
+
+First one, 2026-08-11: the Ibiza edit above, alongside the Seeb remix itself on
+`At Night, Alone. (Expanded Edition)`.
+
+A whole SoundCloud set by one uploader goes in as a single album folder instead
+of one folder per track, since the tracks share an artist and only make sense
+together: `_edits/wtfpreston/` (32 tracks, 2026-08-14) from
+`soundcloud.com/mlicavoli/sets/wtfpreston-songs`, tagged
+`artist = album = wtfpreston` with the playlist position as the track number.
+SoundCloud serves no Opus, so those are the mp3 128 kbps `http_mp3_1_0` stream
+copied through ffmpeg to write the tags. Nothing about them exists in
+MusicBrainz, so Lidarr and Soularr never see them.
+
+The watcher does not notice a folder that did not exist when it started
+watching: the 32 files sat there unscanned for five minutes until
+`touch library/_edits` changed the parent's mtime, which triggered the usual
+`WATCHERWAIT` scan ten seconds later. Otherwise it waits for the hourly scan.
 
 ### Never open navidrome.db from macOS
 
