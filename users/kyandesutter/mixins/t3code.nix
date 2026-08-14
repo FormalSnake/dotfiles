@@ -2,11 +2,10 @@
 let
   packaging = "${inputs.nixpkgs-t3code}/pkgs/by-name/t3/t3code";
 
-  # Upstream's nightly channel, not a stable tag: the usage page and sidebar v2
-  # as the default both landed after v0.0.32 and only ship in 0.0.33-nightly.
-  # Bumping means a new tag plus fresh `hash` values for the source and the pnpm
-  # store — take them from the build failure, they are not derivable.
-  version = "0.0.33-nightly.20260809.1043";
+  # Upstream's nightly channel, not a stable tag. Bumping means a new tag plus
+  # fresh `hash` values for the source and the pnpm store — take them from the
+  # build failure, they are not derivable.
+  version = "0.0.34-nightly.20260811.1064";
 
   unwrapped = (pkgs.callPackage "${packaging}/unwrapped.nix" { }).overrideAttrs (
     final: prev: {
@@ -16,7 +15,7 @@ let
         owner = "pingdotgg";
         repo = "t3code";
         tag = "v${version}";
-        hash = "sha256-LFY0hs15bBdqjAdTC7RLITV1XsgBmNPVWNRCgp9W108=";
+        hash = "sha256-36xkZx5W2nC2V2SZq1c30gIAqwa/9Zpnou20L5eUrDY=";
       };
 
       # fetchPnpmDeps closes over src, so the pinned nixpkgs hash cannot carry
@@ -35,7 +34,7 @@ let
         pnpm = pkgs.pnpm_11;
         fetcherVersion = 4;
         hash = {
-          aarch64-darwin = "sha256-i/xp5RqjDA97yD7heoNets4zx6BAM8atmZCnOf3jEN0=";
+          aarch64-darwin = "sha256-92sXIntCkvzTYWpcjl7bte03xdE0QtToRn1Gg74t2Xw=";
           x86_64-linux = "sha256-i/K5bj7CS7PGIX5hfayxAJ7ngNib92w3SDKGXTVWccA=";
         }.${pkgs.stdenv.hostPlatform.system};
       };
