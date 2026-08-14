@@ -29,7 +29,17 @@ in
         # honestly without auth. Left/center regions absent on purpose, they
         # fall back to defaults (which include the M13b bell).
         bar.layout.center = [ "clock" "nowPlaying" "visualizer" ];
-        bar.layout.right = [ "battery" "audio" "network" "bluetooth" "tailscale" "weather" "github" "usage" "bell" "tray" "indicators" ];
+        # Two-tier right region (M24's chevron): everything before `chevron`
+        # is always on the bar, everything after it collapses behind that one
+        # cell and is a click away. The split is monitor-versus-consult.
+        # Charge, volume, connectivity and pending notifications are state you
+        # glance at; bluetooth, tailscale, weather, github, usage and the SNI
+        # tray are things you go and look at. `indicators` stays out in front
+        # because its cells already self-hide, so they cost nothing at rest
+        # and matter exactly when they appear (recording, DND, night light, a
+        # due reminder). Collapse state is per region in state.json and starts
+        # collapsed, so the bar boots at five cells rather than eleven.
+        bar.layout.right = [ "battery" "audio" "network" "bell" "indicators" "chevron" "bluetooth" "tailscale" "weather" "github" "usage" "tray" ];
         # Apple Music animated album covers in the media panel (off upstream).
         media.appleMusicArt = true;
       };
