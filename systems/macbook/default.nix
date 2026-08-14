@@ -110,6 +110,7 @@
     "belac"
     "boggio"
     "d4vd"
+    "gabester"
     "prod. DTM"
     "wev"
   ];
