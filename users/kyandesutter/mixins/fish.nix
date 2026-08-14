@@ -295,7 +295,9 @@ in
           end
       end
       __load_agenix_secret OPENAI_API_KEY     openai
-      __load_agenix_secret ANTHROPIC_API_KEY  anthropic
+      # Deliberately NOT loading ANTHROPIC_API_KEY: Claude Code prefers it over
+      # the claude.ai OAuth session, so every terminal ran on API billing
+      # instead of the Max plan.
       __load_agenix_secret GEMINI_API_KEY     gemini
       __load_agenix_secret DEEPSEEK_API_KEY   deepseek
       __load_agenix_secret CANARYLLM_API_KEY  canaryllm
