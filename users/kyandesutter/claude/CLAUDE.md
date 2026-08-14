@@ -80,8 +80,63 @@ handle all edge cases" as insurance.
 Run the `humanizer` skill over any draft longer than a paragraph that ships
 under my name: PR bodies, READMEs, release notes, migration guides.
 
-Code comments follow the Code style rules further down. Constraints only,
-nothing that narrates the next line.
+### Code comments
+
+A comment reads as if the person who owns the file wrote it, because that is who
+it ships as. It earns its place by stating a constraint the code cannot state
+itself: a protocol quirk, an ordering requirement, a workaround for an upstream
+bug with the issue link, a value that looks wrong but isn't. Everything else is
+noise, and noise rots at the first refactor.
+
+Never write:
+
+* Anything about a person or a conversation. No "as requested", "per the
+  discussion above", "the user wants", no name, no attribution. A comment has no
+  author inside the file and no audience outside the codebase.
+* Anything about code that is no longer there. Deleted or replaced logic gets no
+  epitaph: no "removed the old retry loop", no "this replaces the manual
+  parser", no commented-out corpse kept for reference. Git already has it, and
+  the next reader has no idea what was there to miss.
+* Anything that narrates the line below it. `// increment the counter` over
+  `count++` is filler, and so is a docstring that restates the signature.
+* Anything that sells the change: "cleaner", "more robust", "now much simpler".
+  A comment is not a review reply.
+
+Tone is a senior developer leaving a note for whoever opens the file next:
+direct, specific, professional without being formal. No em dashes (the ban
+above applies here first), no exclamation marks, no emoji, no ASCII banners, no
+`NOTE:` / `IMPORTANT:` prefixes on ordinary remarks. Match the density and style
+of the comments already in the file. A file with sparse comments that suddenly
+grows an annotated block is a tell on its own.
+
+#### Sweeping a whole codebase
+
+I will sometimes ask for the sweep: "clean up the comments in this repo",
+"rewrite every comment", "strip the AI comments out". That is standing
+permission to touch every file at once, under one hard constraint: the diff is
+comment only. Not one line of behaviour changes, not one rename, not one
+reformat. If a comment is wrong because the code is wrong, say so and leave the
+code alone.
+
+1. Scope before editing. `rg -n --stats '(^|\s)(//|#|/\*|\*|--)' <paths>` over
+   the source dirs only, then tell me the file count and what you excluded.
+   Exclude vendored dependencies, generated output, lockfiles, minified bundles
+   and anything under a build directory.
+2. Sort every comment into keep, rewrite, or delete. Delete narration, history,
+   attribution and sales copy. Keep constraints. When a comment looks like noise
+   but you cannot prove it from the surrounding code, read the call sites before
+   deciding, and keep it if you still cannot disprove it.
+3. Leave load-bearing comments byte for byte. Licence and SPDX headers, tool
+   directives (`eslint-disable`, `# noqa`, `# type: ignore`, `//go:embed`,
+   pragmas, codegen markers), and doc comments a generator publishes. Public API
+   docs get retoned under the rules above, never deleted.
+4. Fan the mechanical bulk out with the `canaryclaude-cheap-subagent` skill, one
+   batch of files per worker, pasting the ban list into each worker's prompt
+   verbatim. Handle the judgement calls from step 2 and step 3 yourself.
+5. Verify, then report. Run the build and the test suite, skim `git diff` for any
+   line that is not a comment, and land it as one comment-only commit so it
+   reviews and reverts in one move. Tell me the counts: files touched, comments
+   deleted, comments rewritten.
 
 ### Git identity is already configured. Never touch it.
 
