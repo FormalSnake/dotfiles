@@ -610,11 +610,11 @@ in
     -- into the target, so the whole path is legible.
     -- At mass 1: zeta = dampening / (2 * sqrt(stiffness)) sets the bounce and
     -- settle time is roughly 4.6 / (zeta * sqrt(stiffness)). `glide` is zeta
-    -- 0.75 (~3% overshoot, ~310ms), `firm` is critically damped (no bounce,
+    -- 0.85 (~1% overshoot, ~255ms), `firm` is critically damped (no bounce,
     -- ~230ms). A spring derives its duration from those numbers and ignores
     -- `speed`, but hl.animation still rejects the call without one, so each
     -- spring leaf carries the speed matching its settle time.
-    hl.curve("glide", { type = "spring", mass = 1, stiffness = 400, dampening = 30 })
+    hl.curve("glide", { type = "spring", mass = 1, stiffness = 450, dampening = 36 })
     hl.curve("firm",  { type = "spring", mass = 1, stiffness = 400, dampening = 40 })
     -- Opacity and border colour must not overshoot, so they stay on a bezier.
     -- Durations are in ds (1 ds = 100ms).
@@ -622,13 +622,13 @@ in
 
     -- Workspaces slide vertically, matching niri's stacked-workspace model:
     -- switching pushes the next one up or down.
-    hl.animation({ leaf = "windows",          enabled = true, spring = "glide", speed = 3 })
+    hl.animation({ leaf = "windows",          enabled = true, spring = "glide", speed = 2.6 })
     hl.animation({ leaf = "windowsOut",       enabled = true, spring = "firm",  speed = 2.3, style = "popin 90%" })
     hl.animation({ leaf = "layers",           enabled = true, spring = "firm",  speed = 2.3 })
     hl.animation({ leaf = "fade",             enabled = true, bezier = "eased", speed = 2.5 })
     hl.animation({ leaf = "border",           enabled = true, bezier = "eased", speed = 5 })
-    hl.animation({ leaf = "workspaces",       enabled = true, spring = "glide", speed = 3, style = "slidevert" })
-    hl.animation({ leaf = "specialWorkspace", enabled = true, spring = "glide", speed = 3, style = "slidevert" })
+    hl.animation({ leaf = "workspaces",       enabled = true, spring = "glide", speed = 2.6, style = "slidevert" })
+    hl.animation({ leaf = "specialWorkspace", enabled = true, spring = "glide", speed = 2.6, style = "slidevert" })
 
     -- — Trackpad gestures (1:1 swipe) —
     -- 3-finger horizontal = workspace switch; 3-finger up = toggle fullscreen.
