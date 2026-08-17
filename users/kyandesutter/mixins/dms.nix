@@ -305,9 +305,8 @@ let
   # Reconciler: pin the Flexoki custom theme while a flexoki-named wallpaper
   # is active, and hand back to the wallpaper-derived theme otherwise —
   # restoring per-wallpaper Flexoki pinning without Noctalia's
-  # wallpaper_changed hook (DMS has no such per-pick hook; see
-  # wallpaper-engine.nix's header for the equivalent note re: the wallpaper
-  # picker). Session state is DMS's own record of the applied wallpaper
+  # wallpaper_changed hook (DMS has no such per-pick hook).
+  # Session state is DMS's own record of the applied wallpaper
   # (~/.local/state/DankMaterialShell/session.json, `wallpaperPath` —
   # SessionData.qml/SessionSpec.js), so watching it (rather than matugen's
   # `{{image}}`, which only fires for the single theming "target monitor")
@@ -481,7 +480,6 @@ in
     "matugen/templates/hypr-border.lua.tmpl".source = ../matugen-templates/hypr-border.lua.tmpl;
     "matugen/templates/btop.theme.tmpl".source = ../matugen-templates/btop.theme.tmpl;
     "matugen/templates/yazi-flavor.toml.tmpl".source = ../matugen-templates/yazi-flavor.toml.tmpl;
-    "matugen/templates/wallpaper-path.tmpl".source = ../matugen-templates/wallpaper-path.tmpl;
     "matugen/templates/zen-vars.json.tmpl".source = ../matugen-templates/zen-vars.json.tmpl;
     "matugen/templates/kopuz.json.tmpl".source = ../matugen-templates/kopuz.json.tmpl;
 
@@ -581,21 +579,6 @@ in
       [templates.yazi]
       input_path = "~/.config/matugen/templates/yazi-flavor.toml.tmpl"
       output_path = "~/.config/yazi/flavors/dank.yazi/flavor.toml"
-
-      # Wallpaper Engine reconciler hook (mixins/wallpaper-engine.nix). matugen
-      # exposes the source image path as {{image}} on every re-theme; this
-      # renders it to a cache file (any future consumer can `cat` it, same
-      # doubles-as-cache pattern as templates.aura above) and the post_hook
-      # feeds that same path straight to wallpaper-engine-select, which
-      # records/clears the picked WE scene for the reconciler's already-
-      # running inotify watch to pick up. Parity replacement for noctalia's
-      # old wallpaper_changed hook — see that mixin for why the per-output
-      # tracking it used to do doesn't carry over (matugen only fires for
-      # DMS's single theming "target monitor" image, no per-output signal).
-      [templates.wallpaper-path]
-      input_path = "~/.config/matugen/templates/wallpaper-path.tmpl"
-      output_path = "~/.cache/dank/wallpaper-path"
-      post_hook = "${config.kyan.wallpaperEngine.selectCommand} {{image}}"
 
       # Zen browser (zen-wabi bridge, mixins/zen.nix). Renders the 8-colour
       # contract wabi's matugen-bridge.uc.js polls (1s mtime check) inside the
@@ -698,9 +681,8 @@ in
   '';
 
   # flexokiPin above: watches session.json, pins/unpins the Flexoki custom
-  # theme via the patched IPC handler. Same graphical-session.target wiring
-  # as wallpaper-engine.nix's reconciler — restarts on a rebuild that changes
-  # the script, re-reads state on startup.
+  # theme via the patched IPC handler. No keep-old wiring: a rebuild that
+  # changes the script restarts it, and it re-reads state on startup.
   systemd.user.services.flexoki-pin = {
     Unit = {
       Description = "Pin the Flexoki custom theme for flexoki-named wallpapers";

@@ -53,7 +53,7 @@ in
     # DMS goes dormant, not away: mixins/dms.nix stays imported because its
     # generated ~/.config/matugen/config.toml and templates are what
     # FormalShell's ThemeEngine merges into its own matugen run (ghostty,
-    # neovim, spicetify, obsidian, btop, yazi, hypr-border, wallpaper-path all
+    # neovim, spicetify, obsidian, btop, yazi, hypr-border all
     # keep re-theming), and rollback is one kyan.desktop.shell flip. Only the
     # running daemons yield the session. dcal serves nothing here: FormalShell
     # reads local .ics dirs only, it cannot consume dankcal's IPC.

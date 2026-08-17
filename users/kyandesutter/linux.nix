@@ -13,7 +13,6 @@
     ./mixins/dms.nix
     ./mixins/dankcal.nix
     ./mixins/formalshell.nix
-    ./mixins/wallpaper-engine.nix
     ./mixins/beeper.nix
     ./mixins/helium.nix
     ./mixins/zen.nix

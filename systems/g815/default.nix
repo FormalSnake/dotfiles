@@ -151,8 +151,8 @@
   # has the RTX 5070; an Intel-only host leaves this off.
   kyan.nvidia.enable = true;
 
-  # Bare Steam client — only for downloading Wallpaper Engine workshop scenes
-  # (gaming lives on Windows; see mixins/steam.nix).
+  # Bare Steam client, workshop downloads only (gaming lives on Windows;
+  # see mixins/steam.nix).
   kyan.steam.enable = true;
 
   # ASUS laptop support: asusd, Aura keyboard RGB (Flexoki blue), 80%
