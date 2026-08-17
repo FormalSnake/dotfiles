@@ -814,6 +814,7 @@ in
     text = ''
       dgpu=$(readlink -f /dev/dri/by-path/pci-0000:02:00.0-card 2>/dev/null)
       igpu=$(readlink -f /dev/dri/by-path/pci-0000:00:02.0-card 2>/dev/null)
+      vendors=/run/opengl-driver/share/glvnd/egl_vendor.d
 
       mode=igpu
       if [ -n "$igpu" ] && [ -n "$dgpu" ]; then
@@ -824,6 +825,20 @@ in
         # buffer for the multi-GPU blit is modifier-independent, so the
         # iGPU→dGPU HDMI copy keeps working across resume.
         export AQ_FORCE_LINEAR_BLIT=1
+        # The compositor MUST be able to load nvidia's EGL here. HDMI-A-1 hangs
+        # off the dGPU, so aquamarine builds a SECOND renderer on that node to
+        # blit the iGPU-rendered frame across for scanout. uwsm feeds this file
+        # to the compositor as well as to the user manager, so a Mesa-only
+        # vendor list breaks that renderer and the desk monitor goes black:
+        # eglInitialize fails with EGL_NOT_INITIALIZED ("DRI2: failed to load
+        # driver") → "Failed to initialize renderer backend for blitting" → the
+        # connector modesets at the right mode in an endless loop and never
+        # receives a frame (observed 2026-08-17, the whole log was that loop).
+        # glvnd walks this list in order, so nvidia first matches the system
+        # default precedence. Clients inherit it too — that is the accepted
+        # cost of uwsm's single env file; the Electron apps that actually
+        # misbehave are pinned per-app by lib/chromium-igpu.nix.
+        export __EGL_VENDOR_LIBRARY_FILENAMES="$vendors/10_nvidia.json:$vendors/50_mesa.json"
         mode="igpu+dgpu"
       elif [ -n "$igpu" ]; then
         # dGPU powered off (battery boot): name ONLY the iGPU. Leaving
@@ -833,6 +848,12 @@ in
         # the nvidia stack; gpu-relog-prompt offers a relog if a monitor shows
         # up wanting it.
         export AQ_DRM_DEVICES="$igpu"
+        # No dGPU in the session at all, so nothing needs nvidia's EGL and a
+        # Mesa-only list keeps every client off the nvidia render node (their
+        # GPU processes enumerate vendors independently and would otherwise
+        # open it, pinning the chip at D0 and parking ~2 GB of VRAM on it —
+        # observed live 2026-07-26).
+        export __EGL_VENDOR_LIBRARY_FILENAMES="$vendors/50_mesa.json"
       fi
       if [ -n "''${XDG_RUNTIME_DIR:-}" ]; then
         printf '%s\n' "$mode" > "$XDG_RUNTIME_DIR/session-gpu-mode" 2>/dev/null || true
@@ -842,13 +863,10 @@ in
       # for video. Offloaded apps (pkgs.nvidiaOffloadEnv) still force nvidia
       # themselves when explicitly asked.
       export LIBVA_DRIVER_NAME=iHD
-      # Keep Chromium/Electron (and any other GL/Vulkan client) off the dGPU:
-      # their GPU processes enumerate EGL/Vulkan vendors independently and would
-      # otherwise open the nvidia render node, pinning it at D0 and parking ~2 GB
-      # of VRAM on it (observed live 2026-07-26). The compositor is always
-      # iGPU-primary, so a Mesa-only EGL vendor list is always correct for
-      # clients; offloaded apps re-expand the vendor list themselves.
-      export __EGL_VENDOR_LIBRARY_FILENAMES=/run/opengl-driver/share/glvnd/egl_vendor.d/50_mesa.json
+      # Vulkan stays Intel-only unconditionally: unlike EGL this is never needed
+      # by the compositor (aquamarine renders through EGL/GBM), so pinning it
+      # costs nothing and still keeps Vulkan clients off the dGPU. Offloaded
+      # apps set their own ICD via nvidiaOffloadEnv.
       export VK_DRIVER_FILES=/run/opengl-driver/share/vulkan/icd.d/intel_icd.x86_64.json
       export VK_ICD_FILENAMES="$VK_DRIVER_FILES"
     '';
