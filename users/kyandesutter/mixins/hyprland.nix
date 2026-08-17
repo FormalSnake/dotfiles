@@ -522,9 +522,10 @@ in
         },
       },
       general = {
-        -- gaps_in is applied per window side, so 8 puts 16px between two tiled
-        -- windows and 8px at the screen edge — the niri `gaps 8` geometry.
-        gaps_in = 8,
+        -- gaps_in is applied per window side, so it doubles between two tiled
+        -- windows, while gaps_out lands once at the screen edge. 4/8 is what
+        -- reads as a uniform 8px everywhere, the niri `gaps 8` geometry.
+        gaps_in = 4,
         gaps_out = 8,
         border_size = 2,
         -- The scrolling tape (Hyprland 0.54+ has it in core; no plugin).
@@ -601,22 +602,32 @@ in
       },
     })
 
-    -- — Animations: snappy, short, with a decisive (non-mushy) landing —
-    -- The default preset eases out with a long, near-zero-velocity tail over
-    -- ~600–700ms, which reads as sluggish and slightly disorienting. `snappy`
-    -- front-loads the motion (fast, responsive start) then lands with a real,
-    -- non-flat end slope, so transitions "arrive" instead of crawling to a stop.
-    -- Durations are in ds (1 ds = 100ms). Workspaces slide vertically, matching
-    -- niri's stacked-workspace model: switching pushes the next one up or down.
-    hl.curve("snappy", { type = "bezier", points = { { 0.15, 0.75 }, { 0.35, 0.9 } } })
+    -- — Animations: spring physics for anything that moves —
+    -- The old `snappy` bezier put 75% of the distance into the first 15% of the
+    -- duration. That fast part is too quick to read as travel, so the only
+    -- motion actually perceived was the shallow tail, which is why everything
+    -- looked linear. A spring starts from rest, accelerates, then decelerates
+    -- into the target, so the whole path is legible.
+    -- At mass 1: zeta = dampening / (2 * sqrt(stiffness)) sets the bounce and
+    -- settle time is roughly 4.6 / (zeta * sqrt(stiffness)). `glide` is zeta
+    -- 0.75 (~3% overshoot, ~310ms), `firm` is critically damped (no bounce,
+    -- ~230ms). Springs derive duration from their own physics and ignore
+    -- `speed`, so it is omitted wherever one is used.
+    hl.curve("glide", { type = "spring", mass = 1, stiffness = 400, dampening = 30 })
+    hl.curve("firm",  { type = "spring", mass = 1, stiffness = 400, dampening = 40 })
+    -- Opacity and border colour must not overshoot, so they stay on a bezier.
+    -- Durations are in ds (1 ds = 100ms).
+    hl.curve("eased", { type = "bezier", points = { { 0.4, 0 }, { 0.2, 1 } } })
 
-    hl.animation({ leaf = "windows",          enabled = true, bezier = "snappy", speed = 3 })
-    hl.animation({ leaf = "windowsOut",       enabled = true, bezier = "snappy", speed = 3, style = "popin 90%" })
-    hl.animation({ leaf = "layers",           enabled = true, bezier = "snappy", speed = 2.5 })
-    hl.animation({ leaf = "fade",             enabled = true, bezier = "snappy", speed = 2.5 })
-    hl.animation({ leaf = "border",           enabled = true, bezier = "snappy", speed = 5 })
-    hl.animation({ leaf = "workspaces",       enabled = true, bezier = "snappy", speed = 3, style = "slidevert" })
-    hl.animation({ leaf = "specialWorkspace", enabled = true, bezier = "snappy", speed = 3, style = "slidevert" })
+    -- Workspaces slide vertically, matching niri's stacked-workspace model:
+    -- switching pushes the next one up or down.
+    hl.animation({ leaf = "windows",          enabled = true, spring = "glide" })
+    hl.animation({ leaf = "windowsOut",       enabled = true, spring = "firm", style = "popin 90%" })
+    hl.animation({ leaf = "layers",           enabled = true, spring = "firm" })
+    hl.animation({ leaf = "fade",             enabled = true, bezier = "eased", speed = 2.5 })
+    hl.animation({ leaf = "border",           enabled = true, bezier = "eased", speed = 5 })
+    hl.animation({ leaf = "workspaces",       enabled = true, spring = "glide", style = "slidevert" })
+    hl.animation({ leaf = "specialWorkspace", enabled = true, spring = "glide", style = "slidevert" })
 
     -- — Trackpad gestures (1:1 swipe) —
     -- 3-finger horizontal = workspace switch; 3-finger up = toggle fullscreen.
