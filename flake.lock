@@ -541,11 +541,11 @@
         "quickshell": "quickshell"
       },
       "locked": {
-        "lastModified": 1786960101,
-        "narHash": "sha256-ArjY2WhSNATJUx115FSQcm4nEI5s3DlJ0Nnd6MbYYEE=",
+        "lastModified": 1786972569,
+        "narHash": "sha256-thJJdSYKgaz9285AIfUeXVcu0Z5v8/RfSDvS9S1QC9Y=",
         "owner": "FormalSnake",
         "repo": "FormalShell",
-        "rev": "397a73b221729187156c481579c88db6724c6284",
+        "rev": "ba06d18f0c4b6b78035831279a043e7f4152bc4b",
         "type": "github"
       },
       "original": {
