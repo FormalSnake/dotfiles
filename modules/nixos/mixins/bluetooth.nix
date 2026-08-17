@@ -20,6 +20,13 @@
         Experimental = true;
         FastConnectable = true;
       };
+      # BlueZ 5.86 refuses HID on a classic-only device that bonded without
+      # MITM protection: `hidp_add_connection() Rejected connection from
+      # !bonded device`. The DualSense pairs Just Works, so it connects but
+      # never gets an input device. Cost: an unauthenticated classic HID link
+      # can be spoofed (CVE-2023-45866 keystroke injection) while the adapter
+      # is connectable.
+      input.General.ClassicBondedOnly = false;
     };
   };
 }
