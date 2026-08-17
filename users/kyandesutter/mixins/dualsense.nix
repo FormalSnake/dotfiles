@@ -73,10 +73,15 @@ let
     name = "dualsense-herdr";
     runtimeInputs = with pkgs; [ openssh jq coreutils dualsenseSync ];
     text = ''
+      # The mac's login shell is fish, which can't parse a `while :; do` loop,
+      # so the remote side is handed to bash explicitly. Absolute path for the
+      # same reason non-interactive fish needs one for darwin-rebuild: minimal
+      # PATH.
+      herdr=/etc/profiles/per-user/kyandesutter/bin/herdr
       last=""
       ssh -o BatchMode=yes -o ClearAllForwardings=yes -o ConnectTimeout=10 \
           -o ServerAliveInterval=15 -o ServerAliveCountMax=2 macbook \
-          'while :; do /etc/profiles/per-user/kyandesutter/bin/herdr agent list 2>/dev/null || echo "{}"; sleep 2; done' |
+          "bash -c 'while :; do $herdr agent list 2>/dev/null || echo null; sleep 2; done'" |
       while read -r line; do
         state="$(printf '%s' "$line" | jq -r '
           [.result.agents[]?.agent_status] as $s
