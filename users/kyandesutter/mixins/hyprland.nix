@@ -606,8 +606,8 @@ in
     -- ~600–700ms, which reads as sluggish and slightly disorienting. `snappy`
     -- front-loads the motion (fast, responsive start) then lands with a real,
     -- non-flat end slope, so transitions "arrive" instead of crawling to a stop.
-    -- Durations are in ds (1 ds = 100ms). Workspaces slide, so a switch visibly
-    -- pushes in the direction you moved.
+    -- Durations are in ds (1 ds = 100ms). Workspaces slide vertically, matching
+    -- niri's stacked-workspace model: switching pushes the next one up or down.
     hl.curve("snappy", { type = "bezier", points = { { 0.15, 0.75 }, { 0.35, 0.9 } } })
 
     hl.animation({ leaf = "windows",          enabled = true, bezier = "snappy", speed = 3 })
@@ -615,7 +615,7 @@ in
     hl.animation({ leaf = "layers",           enabled = true, bezier = "snappy", speed = 2.5 })
     hl.animation({ leaf = "fade",             enabled = true, bezier = "snappy", speed = 2.5 })
     hl.animation({ leaf = "border",           enabled = true, bezier = "snappy", speed = 5 })
-    hl.animation({ leaf = "workspaces",       enabled = true, bezier = "snappy", speed = 3, style = "slide" })
+    hl.animation({ leaf = "workspaces",       enabled = true, bezier = "snappy", speed = 3, style = "slidevert" })
     hl.animation({ leaf = "specialWorkspace", enabled = true, bezier = "snappy", speed = 3, style = "slidevert" })
 
     -- — Trackpad gestures (1:1 swipe) —
