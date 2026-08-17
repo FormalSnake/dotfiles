@@ -74,6 +74,7 @@ let
       power-profiles-daemon # powerprofilesctl
       inotify-tools # inotifywait
       dbus # dbus-monitor
+      jq # set_refresh reads the live rate from `hyprctl monitors -j`
       coreutils
     ];
     text = ''
@@ -87,12 +88,15 @@ let
       # context, so the monitor keyword applies immediately and survives until
       # the next `hyprctl reload` (which re-reads hyprland.lua's own 240Hz
       # line). Hyprland matches the requested refresh to the closest real mode.
+      # Compared against the compositor's live rate, not a cached one: a
+      # `hyprctl reload` mid-power-saver restores 240Hz behind our back, and a
+      # stale cache would leave it there until the next profile flip.
       set_refresh() {
-        if [ "$1" = "$last_rate" ]; then return 0; fi
+        cur="$(hyprctl monitors -j 2>/dev/null | jq -r '.[] | select(.name == "eDP-1") | .refreshRate | round' 2>/dev/null || true)"
+        if [ "$cur" = "$1" ]; then return 0; fi
         hyprctl eval \
           "hl.monitor({ output = \"eDP-1\", mode = \"2560x1600@$1\", position = \"2560x0\", scale = 1.25 })" \
           >/dev/null 2>&1 || true
-        last_rate="$1"
       }
 
       reconcile() {
@@ -124,7 +128,6 @@ let
       /run/current-system/sw/bin/systemctl start dgpu-reconcile.service 2>/dev/null || true
 
       last_src=""
-      last_rate=""
       reconcile
       while read -r line; do
         case "$line" in
