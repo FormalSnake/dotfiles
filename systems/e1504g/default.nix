@@ -163,15 +163,13 @@
   # on holding an authorized SSH key or the local login password.
   security.sudo.wheelNeedsPassword = false;
 
-  # PPD instead of TLP (nixos-hardware's common-pc-laptop enables TLP only
-  # when PPD is off, so this cleanly displaces it). PPD is what DMS's battery
-  # popout speaks, making its profile switcher functional — power-saver maps
-  # to EPP `power` plus the firmware's `quiet` platform profile — and it
-  # matches the g815's PPD-based stack. No thermald: it exists to hold turbo
+  # The profile backend is tuned-ppd (modules/nixos/mixins/tuned.nix), shared
+  # with the g815. It displaces TLP the same way PPD did — nixos-hardware's
+  # common-pc-laptop enables TLP only when power-profiles-daemon is off, and the
+  # tuned module turns that off itself. No thermald: it exists to hold turbo
   # near the thermal limit, which is the opposite of the quiet-fans policy
   # below (and on engaging it would restore the firmware's absurd RAPL
   # defaults over our caps).
-  services.power-profiles-daemon.enable = true;
 
   # Quiet fans (owner ask, 2026-07-23): this machine only ever runs a browser,
   # a terminal and a few apps, so trade peak CPU for noise. The firmware ships
@@ -181,15 +179,17 @@
   # the fan never spins down. Lower power is the only fan lever: cap RAPL per
   # PPD profile, on BOTH domains (the enforced limit is the lower of MSR and
   # MMIO). Tiers: performance merely audible, balanced near-silent,
-  # power-saver minimal. Same PPD-watching shape as power-saver-dim below,
-  # but a system service (sysfs writes need root), and wantedBy PPD rather
-  # than multi-user.target for the ordering reason documented in
-  # modules/nixos/mixins/power.nix.
+  # power-saver minimal. Same profile-watching shape as power-saver-dim below,
+  # but a system service (sysfs writes need root), and wantedBy the backend
+  # rather than multi-user.target for the ordering reason documented in
+  # modules/nixos/mixins/power.nix. The caps key off the PPD-facing profile
+  # name, which is what tuned-ppd exposes, so the on-battery switch to
+  # balanced-battery leaves the balanced caps in place — intended.
   systemd.services.power-cap = {
     description = "Per-profile RAPL package power caps (quiet fans)";
-    after = [ "power-profiles-daemon.service" ];
-    wants = [ "power-profiles-daemon.service" ];
-    wantedBy = [ "power-profiles-daemon.service" ];
+    after = [ "tuned-ppd.service" ];
+    wants = [ "tuned-ppd.service" ];
+    wantedBy = [ "tuned-ppd.service" ];
     serviceConfig = {
       Type = "simple";
       Restart = "always";

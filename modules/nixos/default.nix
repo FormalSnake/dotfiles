@@ -28,6 +28,7 @@
       ./mixins/steam.nix
       ./mixins/comms.nix
       ./mixins/asus.nix
+      ./mixins/tuned.nix
       ./mixins/power.nix
       ./mixins/phone-integration.nix
       ./mixins/airplay.nix

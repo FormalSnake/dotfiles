@@ -268,9 +268,9 @@ let
   # System power reconciler — the single automatic owner of the power profile,
   # and the authority that publishes the current power source to the user session
   # via /run/power/state. Triggered by udev on any ADP0 or ucsi-source-psy change
-  # (and at boot via the service's wantedBy PPD). PPD is the backend the DMS
-  # bar reads/writes (UPower → net.hadess.PowerProfiles), so this is what makes the
-  # shell show the right profile without manual toggling.
+  # (and at boot via the service's wantedBy tuned-ppd). tuned-ppd is the backend
+  # the DMS bar reads/writes (net.hadess.PowerProfiles), so this is what makes
+  # the shell show the right profile without manual toggling.
   #
   # The 1.5s settle is essential: plugging a power bank lands ADP0=online *before*
   # the USB-C PD contract negotiates, so an immediate read would misclassify it as
@@ -286,7 +286,9 @@ let
     runtimeInputs = [
       pkgs.coreutils
       powerSource
-      config.services.power-profiles-daemon.package
+      # powerprofilesctl only, as a D-Bus client — the daemon behind the
+      # interface is tuned-ppd (mixins/tuned.nix), which owns the same name.
+      pkgs.power-profiles-daemon
       config.systemd.package
     ];
     text = ''
@@ -320,12 +322,10 @@ let
 in
 {
   config = lib.mkIf config.kyan.asus.enable {
-    # power-profiles-daemon: the profile backend the DMS bar reads and
-    # writes. The bare Hyprland session doesn't pull it in (no desktop manager
-    # does), so without it the bar is stuck showing a static "Balanced" it
-    # can't change. Coexists with asusd, which keeps Aura/fan/charge-limit
-    # duties; PPD owns the platform profile (the kernel asus-wmi interface).
-    services.power-profiles-daemon.enable = true;
+    # The profile backend itself is tuned-ppd (mixins/tuned.nix, enabled for
+    # every desktop host). It coexists with asusd, which keeps Aura/fan/
+    # charge-limit duties; the active TuneD profile owns the platform profile
+    # (the kernel asus-wmi interface).
 
     # Publish /run/power/state for the user session to subscribe to.
     systemd.tmpfiles.rules = [ "d /run/power 0755 root root -" ];
@@ -373,21 +373,22 @@ in
       };
     };
 
-    # Drive PPD + publish the power source. Bound to PPD itself (wantedBy
-    # power-profiles-daemon), so it runs right after PPD comes up at boot, plus
-    # on every ADP0 / ucsi-source-psy change (udev rules below).
+    # Drive the profile + publish the power source. Bound to the backend itself
+    # (wantedBy tuned-ppd), so it runs right after tuned-ppd comes up at boot,
+    # plus on every ADP0 / ucsi-source-psy change (udev rules below).
     #
-    # NOTE: do NOT use `wantedBy = multi-user.target` here. nixpkgs orders PPD
-    # `After=multi-user.target` (it belongs to graphical.target), so pinning a
-    # unit that is `After=power-profiles-daemon.service` to multi-user.target
-    # closes an ordering loop (multi-user → power-reconcile → PPD →
-    # multi-user). systemd can't break it and drops the whole transaction,
-    # failing sysinit/basic/NetworkManager at switch/boot.
+    # NOTE: do NOT use `wantedBy = multi-user.target` here. This unit stays
+    # ordered only against its backend and inherits nothing but the default
+    # basic.target dependency; pinning it to multi-user.target used to close an
+    # ordering loop under PPD (multi-user → power-reconcile → PPD → multi-user)
+    # that systemd could not break, taking sysinit/basic/NetworkManager down
+    # with it at switch. tuned-ppd runs `Before=multi-user.target` instead, so
+    # the loop is gone, but there is still nothing to gain from the pin.
     systemd.services.power-reconcile = {
       description = "Power profile + /run/power/state follow the power source (AC / power bank / battery)";
-      after = [ "power-profiles-daemon.service" ];
-      wants = [ "power-profiles-daemon.service" ];
-      wantedBy = [ "power-profiles-daemon.service" ];
+      after = [ "tuned-ppd.service" ];
+      wants = [ "tuned-ppd.service" ];
+      wantedBy = [ "tuned-ppd.service" ];
 
       # Robustness: each power event restarts this unit via `systemctl restart`
       # (udev rules below), and a single plug/unplug fires TWO events (ADP0 +
@@ -429,13 +430,13 @@ in
       # exists. nvidia.ko loads at sysinit (modules-load via nvidia_uvm) and
       # nvidia_drm via udev coldplug; SDDM's greeter starts nvidia EGL within
       # ~100ms of nvidia-drm registering, so a battery unload first kicked at
-      # graphical.target time (power-reconcile via PPD) raced it and wedged the
-      # kernel. Ordered here, the unload runs before any userspace can hold or
-      # load nvidia; on a charging boot it's a pure no-op. Later `start`s (power
-      # events, resume, login kick) are unaffected — ordering only shapes the
-      # boot transaction. No ordering cycle: this unit is only After=basic.target
-      # (default deps) and never orders against PPD/multi-user.target, so the
-      # loop documented on power-reconcile stays open.
+      # graphical.target time (power-reconcile behind the profile backend) raced
+      # it and wedged the kernel. Ordered here, the unload runs before any
+      # userspace can hold or load nvidia; on a charging boot it's a pure no-op.
+      # Later `start`s (power events, resume, login kick) are unaffected —
+      # ordering only shapes the boot transaction. No ordering cycle: this unit
+      # is only After=basic.target (default deps) and never orders against
+      # tuned-ppd/multi-user.target.
       before = [ "display-manager.service" ];
       wantedBy = [ "display-manager.service" ];
       # External `start`s, not a crash loop — same rationale as power-reconcile.
