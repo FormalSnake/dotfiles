@@ -7,7 +7,7 @@
   #
   # Client only: Parsec does not support hosting on Linux, so these machines can
   # connect out (to the macbook, to Windows) but never show up as a host
-  # themselves. The app is X11, so it runs under xwayland-satellite, which niri
-  # spawns on demand (modules/nixos/mixins/niri.nix).
+  # themselves. The app is X11, so it runs under the XWayland server Hyprland
+  # starts itself (programs.hyprland.xwayland in modules/nixos/mixins/hyprland.nix).
   home.packages = [ pkgs.parsec-bin ];
 }

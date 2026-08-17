@@ -23,7 +23,7 @@
       ./mixins/audio.nix
       ./mixins/bluetooth.nix
       ./mixins/mouse.nix
-      ./mixins/niri.nix
+      ./mixins/hyprland.nix
       ./mixins/online-accounts.nix
       ./mixins/steam.nix
       ./mixins/comms.nix

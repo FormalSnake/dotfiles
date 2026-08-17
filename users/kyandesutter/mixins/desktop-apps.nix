@@ -6,7 +6,7 @@
   # keeps GPU acceleration and dodges the ANV bug (verified clean on Calendar).
   home.sessionVariables.GSK_RENDERER = "gl";
 
-  # GNOME/GTK desktop apps + their MIME defaults. Not niri-specific — these
+  # GNOME/GTK desktop apps + their MIME defaults. Not Hyprland-specific — these
   # round out the desktop so double-clicking files in Nautilus opens something
   # sensible. Nautilus is the GUI file manager, plus the GNOME companions that
   # make it feel complete: file-roller (extract/create archives from the
@@ -34,7 +34,7 @@
     #   • libreoffice-fresh: the only real office suite here (GNOME has none).
     #     The -fresh build renders through the gtk3 VCL backend, so it follows
     #     the adw-gtk3-dark GTK theme (set by DMS; see the dark-mode block
-    #     in niri.nix). Opens Word/Excel/PowerPoint + ODF.
+    #     in hyprland.nix). Opens Word/Excel/PowerPoint + ODF.
     celluloid
     libreoffice-fresh
   ];

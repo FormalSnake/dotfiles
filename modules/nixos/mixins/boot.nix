@@ -172,7 +172,7 @@ in
       # (wrapProgram hides them) but would unprotect the session shell if a
       # future nixpkgs change or a non-wrapped invocation ever exposed them.
       "--avoid"
-      "^(niri|\\.dms-wrapped|dms|\\.quickshell-wra|quickshell|qs|polkit-kde-aut|sshd|systemd)$"
+      "^(Hyprland|hyprland|\\.dms-wrapped|dms|\\.quickshell-wra|quickshell|qs|polkit-kde-aut|sshd|systemd)$"
     ];
   };
 

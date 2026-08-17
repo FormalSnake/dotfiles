@@ -1,5 +1,5 @@
 { config, lib, pkgs, ... }:
-# Animated Wallpaper Engine scenes on the g815 niri/DMS desktop, without
+# Animated Wallpaper Engine scenes on the g815 Hyprland/DMS desktop, without
 # disturbing the wallpaper-derived matugen theming and without fighting the
 # load-bearing power management. Design: docs/superpowers/specs/
 # 2026-07-13-wallpaper-engine-noctalia-design.md (written for Noctalia; the
@@ -11,15 +11,16 @@
 # rendered from the scene (see weStill; falls back to the scene's own
 # preview.*), so DMS renders and matugen-samples that still exactly as any
 # other wallpaper — the theme pipeline is untouched. The rendered still
-# matters because niri shows it (not the live engine) in the backdrop between
-# workspaces, where the raw ~192px preview would upscale to a blurry smear.
+# matters because it is what the shell actually paints as the wallpaper (the
+# live engine sits below it on its own layer), and the raw ~192px preview would
+# upscale to a blurry smear.
 # On every re-theme matugen runs the `[templates.wallpaper-path]` template
 # (dms.nix), whose post_hook feeds matugen's `{{image}}` straight to
 # `wallpaper-engine-select` (exposed below via kyan.wallpaperEngine.selectCommand),
 # which records/clears the picked scene id in a single selection file. A
 # user-service reconciler subscribes to that file AND to /run/power/state
 # (published by power-reconcile, see modules/nixos/mixins/power.nix) and
-# enforces one rule: the engine spans every output niri currently reports,
+# enforces one rule: the engine spans every output Hyprland currently reports,
 # iff a scene is selected and we're not on battery. This mixin only *reads*
 # /run/power/state — it touches none of the load-bearing power services.
 #
@@ -31,7 +32,7 @@
 # to key off. This isn't a real capability loss in practice — weSet below
 # already applied one scene identically to every connected output — so the
 # reconciler now just mirrors that: one global selection, spanned across
-# whatever outputs niri reports live at reconcile time.
+# whatever outputs Hyprland reports live at reconcile time.
 #
 # Steam workshop path for Wallpaper Engine (appid 431960).
 let
@@ -46,7 +47,7 @@ let
   # anyway (modules/nixos/mixins/power.nix), so rendering there is free power-
   # wise and takes the scene load off the iGPU, which visibly lagged. The EGL
   # vendor pin selects nvidia's EGL (mesa never sees the call, so no llvmpipe
-  # fallback); niri stays iGPU-primary and imports the nvidia dmabuf for
+  # fallback); Hyprland stays iGPU-primary and imports the nvidia dmabuf for
   # composition — the standard PRIME-offload path. The dGPU-hold worry is
   # covered: on unplug the reconciler kills the engine within ~2s while
   # dgpu-power's wait-for-free gives handles up to 60s to disappear.
@@ -85,7 +86,7 @@ let
   # engine PID persists across events.
   wallpaperEngineReconcile = pkgs.writeShellApplication {
     name = "wallpaper-engine-reconcile";
-    runtimeInputs = [ pkgs.linux-wallpaperengine pkgs.inotify-tools pkgs.niri pkgs.jq pkgs.coreutils ];
+    runtimeInputs = [ pkgs.linux-wallpaperengine pkgs.inotify-tools pkgs.hyprland pkgs.jq pkgs.coreutils ];
     text = ''
       base="''${XDG_CACHE_HOME:-$HOME/.cache}/${cacheDir}"
       selfile="$base/selected"
@@ -134,10 +135,10 @@ let
       }
 
       # Builds the launch args (global ARGS), a stable signature (global SIG)
-      # spanning every output niri currently reports live, all pointed at the
-      # one selected scene (no per-connector distinction — see the file header),
-      # and the auto fps (global FPS_AUTO): the highest current refresh rate
-      # among those outputs (niri reports mHz), so the engine matches the
+      # spanning every output Hyprland currently reports live, all pointed at
+      # the one selected scene (no per-connector distinction — see the file
+      # header), and the auto fps (global FPS_AUTO): the highest current refresh
+      # rate among those outputs (hyprctl reports Hz), so the engine matches the
       # fastest panel. The engine has one global --fps, so the slower output
       # simply drops the extra frames. A refresh change (power-tune flips the
       # eDP rate with the profile) changes FPS_AUTO and, via the signature,
@@ -153,10 +154,10 @@ let
         # have installed (no Steam on the e1504g) — the still stays the
         # wallpaper, only the live engine is skipped.
         [[ -d "${workshop}/$id" ]] || return 0
-        outputs="$(niri msg --json outputs || true)"
+        outputs="$(hyprctl monitors -j || true)"
         [[ -n "$outputs" ]] || return 0
-        FPS_AUTO="$(jq -r '[.[] | select(.current_mode != null) | .modes[.current_mode].refresh_rate] | (max // 60000) / 1000 | round' <<<"$outputs")"
-        mapfile -t conns < <(jq -r 'keys[]' <<<"$outputs" | sort)
+        FPS_AUTO="$(jq -r '[.[] | .refreshRate] | (max // 60) | round' <<<"$outputs")"
+        mapfile -t conns < <(jq -r '.[] | .name' <<<"$outputs" | sort)
         for conn in "''${conns[@]}"; do
           # --scaling is POSITIONAL: it binds to the *preceding* --screen-root, so
           # it must sit right after each --bg — a single trailing --scaling would
@@ -232,13 +233,13 @@ let
 
   # Render a full-resolution still for a scene and drop it in the picker set as
   # we-<id>.png, replacing any stale we-<id>.* first. WE ships only a tiny
-  # preview.* thumbnail (often a 192px square), and DMS shows that still in
-  # niri's backdrop (place-within-backdrop) between workspaces — upscaling a
-  # 192px thumbnail to the panel is the blurry, smeared "stretch" you see there,
-  # while the live engine (bottom layer) can't be placed in the backdrop. So we
+  # preview.* thumbnail (often a 192px square), and DMS paints that still as the
+  # wallpaper — upscaling a 192px thumbnail to the panel is the blurry, smeared
+  # "stretch" you see, while the live engine sits on the bottom layer where the
+  # shell has nothing to sample. So we
   # render the scene once at full res via linux-wallpaperengine's --screenshot
-  # (its pywal path): --window mode renders OFF-SCREEN (no visible toplevel in
-  # niri) but never self-exits, so we poll for the file, then kill it. The
+  # (its pywal path): --window mode renders OFF-SCREEN (no visible toplevel) but
+  # never self-exits, so we poll for the file, then kill it. The
   # rendered frame doubles as the matugen sample, so colours now come from the
   # actual scene rather than the thumbnail. Falls back to the raw preview if the
   # render yields nothing.

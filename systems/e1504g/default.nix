@@ -32,7 +32,7 @@
     ACTION=="add", SUBSYSTEM=="powercap", KERNEL=="intel-rapl:0", RUN+="${pkgs.coreutils}/bin/chmod 0444 /sys%p/energy_uj"
   '';
 
-  # Full niri desktop. Everything hardware-specific stays off:
+  # Full Hyprland desktop. Everything hardware-specific stays off:
   # kyan.nvidia (no dGPU) and kyan.asus — the latter deliberately, even though
   # this is an ASUS chassis, because kyan.asus also gates the g815's dGPU power
   # machinery (modules/nixos/mixins/power.nix). Decouple that gate first if
@@ -41,7 +41,7 @@
 
   # FormalShell daily-drive trial (the spec's own gate: e1504g first, g815
   # follows). Swaps the session shell, lock-before-sleep hook, and the
-  # shell-facing niri binds; DMS stays installed but dormant, and rollback is
+  # shell-facing Hyprland binds; DMS stays installed but dormant, and rollback is
   # deleting this one line. M12/M13 closed the launch trade-offs (GOA/EDS
   # calendar after a one-time `XDG_CURRENT_DESKTOP=GNOME gnome-control-center
   # online-accounts` sign-in, emoji picker, shell screenshots). SDDM stays
@@ -291,11 +291,6 @@
         self.homeModules.kyandesutter-linux
       ];
 
-      # 15.6" 1080p panel: render at native 1x (without an explicit block niri's
-      # DPI heuristic picks a fractional scale). The shared niri mixin leaves
-      # eDP-1 unset on iGPU-only hosts, so this is the only definition.
-      programs.niri.settings.outputs."eDP-1".scale = 1.0;
-
       # 8 GB: the three chat clients that mixins/autostart.nix pulls in at login
       # hold ~1.06 GB resident between them (measured on this host: equibop
       # 563 MB, beeper 385 MB, bluebubbles 115 MB), which is most of what drives
@@ -311,8 +306,8 @@
 
       # Suspend after 10 minutes idle (lid close already suspends via logind's
       # default HandleLidSwitch; DMS's own idle timeouts stay 0 — see the seed
-      # in mixins/dms.nix). swayidle listens on niri's ext-idle-notify. The
-      # lock-before-sleep hook (modules/nixos/mixins/niri.nix) locks on the way
+      # in mixins/dms.nix). swayidle listens on Hyprland's ext-idle-notify. The
+      # lock-before-sleep hook (modules/nixos/mixins/hyprland.nix) locks on the way
       # down. Deferred while an SSH connection is established: this machine is
       # administered remotely (Claude on the g815), and "no local input for 10
       # minutes" is the NORMAL state of a remote-driven session — suspending
@@ -340,11 +335,10 @@
       };
 
       # Give the budget 1080p panel (~45% NTSC, washed-out) a bit more punch.
-      # niri has NO output saturation/CTM/ICC support (maintainer has deferred
-      # all color management, github.com/YaLTeR/niri#2458), so true vibrance is
-      # impossible here; the one system-wide lever is niri's wlr-gamma-control,
-      # and a mild gamma pull (mids down → deeper, richer-looking colors) is
-      # the honest approximation. wl-gammarelay-rs holds the gamma ramp and
+      # True per-output saturation needs a CTM/ICC path this panel isn't worth
+      # building; the system-wide lever is wlr-gamma-control, and a mild gamma
+      # pull (mids down → deeper, richer-looking colors) is the honest
+      # approximation. wl-gammarelay-rs holds the gamma ramp and
       # exposes it on DBus; Type=dbus makes systemd wait for the name so the
       # ExecStartPost that applies our value can't race it. Its ramp is
       # f(x) = x^gamma (color.rs), so values ABOVE 1.0 darken the mids. Tune:

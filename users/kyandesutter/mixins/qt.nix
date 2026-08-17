@@ -8,7 +8,8 @@
   # declaratively (read-only) — don't hand-edit via the qt6ct GUI.
   #
   # The Qt platform theme itself (QT_QPA_PLATFORMTHEME=qt6ct) is exported from
-  # programs.niri.settings.environment in niri.nix so it reaches every niri-spawned Qt app; this
+  # both Hyprland's own `hl.env` block and ~/.config/uwsm/env (hyprland.nix), so
+  # it reaches Hyprland-spawned apps and systemd user services alike; this
   # file only owns the qt{5,6}ct.conf colour/style selection. DMS's builtin qt
   # templates (AvengeMedia/DankMaterialShell core/internal/matugen/matugen.go
   # templateRegistry — no user template needed) write

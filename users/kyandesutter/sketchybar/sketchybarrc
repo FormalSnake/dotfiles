@@ -21,11 +21,11 @@
 local sbar = require("sketchybar")
 
 local OMNIWMCTL = "/Applications/OmniWM.app/Contents/MacOS/omniwmctl"
-local FONT_ICON = "GeistMono Nerd Font" -- nerd glyphs (same font niri's ws pills use)
+local FONT_ICON = "GeistMono Nerd Font" -- nerd glyphs (same font Hyprland's ws pills use)
 local FONT_TEXT = "GeistMono Nerd Font" -- labels in the same font, per request
 
 -- Flexoki Dark — the macOS static menu-bar palette. `accent` is Flexoki blue,
--- matching the omniwm/niri active-border accent (Flexoki's UI palette has no
+-- matching the omniwm/Hyprland active-border accent (Flexoki's UI palette has no
 -- purple, so the old Catppuccin mauve maps to blue, not violet).
 local col = {
   bar      = 0xff1c1b1a, -- base-950, opaque
@@ -50,7 +50,7 @@ local ic = {
   wifi     = "\u{f1eb}",
 }
 
--- Workspace pills 1-9, glyph + short label mirroring niri's wsName.
+-- Workspace pills 1-9, glyph + short label mirroring Hyprland's wsName.
 local WS = {
   { glyph = "\u{f0ac}",  name = "web" },
   { glyph = "\u{f120}",  name = "term" },

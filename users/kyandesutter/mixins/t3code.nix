@@ -56,13 +56,14 @@ let
     enableCodex = false;
   };
 
-  # Electron picks its safeStorage backend from XDG_CURRENT_DESKTOP, and "niri"
-  # is not a name it knows, so it falls back to the "basic" store, which
-  # Electron 36+ reports as unavailable. The app then can't write its connection
-  # catalog ("Desktop secure storage is unavailable in this system context") and
-  # no environment can be saved. gnome-keyring already owns
-  # org.freedesktop.secrets on the niri hosts (modules/nixos/mixins/niri.nix),
-  # so name that backend explicitly. macOS has a keychain and needs none of it.
+  # Electron picks its safeStorage backend from XDG_CURRENT_DESKTOP, and
+  # "Hyprland" is not a name it knows, so it falls back to the "basic" store,
+  # which Electron 36+ reports as unavailable. The app then can't write its
+  # connection catalog ("Desktop secure storage is unavailable in this system
+  # context") and no environment can be saved. gnome-keyring already owns
+  # org.freedesktop.secrets on the Linux hosts
+  # (modules/nixos/mixins/hyprland.nix), so name that backend explicitly.
+  # macOS has a keychain and needs none of it.
   desktop = if !pkgs.stdenv.isLinux then t3code else pkgs.symlinkJoin {
     name = "t3code-${t3code.version}";
     paths = [ t3code ];

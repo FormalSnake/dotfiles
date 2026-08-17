@@ -8,7 +8,7 @@
   # has disabled the secret iCal address. GOA feeds the calendar to EDS; dcal
   # reads EDS over D-Bus. Both daemons are D-Bus-activated per user session, so
   # no extra autostart is needed; the token is stored in gnome-keyring (already
-  # enabled in mixins/niri.nix).
+  # enabled in mixins/hyprland.nix).
   #
   # gnome-online-accounts-gtk is the standalone account-add window (avoids
   # pulling in all of gnome-control-center). Run it once to sign in, tick

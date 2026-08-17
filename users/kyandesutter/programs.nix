@@ -71,8 +71,8 @@
       # wrapProgram-ing the symlinkJoin copy in place: the moved-aside file's
       # basename becomes argv0 (upstream's inner wrapper re-execs with -a "$0")
       # and GTK derives the Wayland app-id from it — a ".bluebubbles-wrapped_"
-      # app-id breaks the niri workspace-4/tiling rules and the focus fallback
-      # below, which all match ^[Bb]lue[Bb]ubbles$.
+      # app-id breaks the Hyprland workspace-4/tiling rules and the focus
+      # fallback below, which all match ^[Bb]lue[Bb]ubbles$.
       (symlinkJoin {
         name = "bluebubbles-wrapped";
         paths = [ bluebubbles ];
@@ -84,10 +84,8 @@
             --run ${lib.escapeShellArg ''
               exec 9>"''${XDG_RUNTIME_DIR:-/tmp}/bluebubbles.lock"
               if ! ${util-linux}/bin/flock -n 9; then
-                if command -v niri >/dev/null 2>&1; then
-                  id=$(niri msg --json windows | ${jq}/bin/jq -r \
-                    'first(.[] | select(.app_id != null and (.app_id | test("^[Bb]lue[Bb]ubbles$"))) | .id) // empty')
-                  [ -n "$id" ] && niri msg action focus-window --id "$id"
+                if command -v hyprctl >/dev/null 2>&1; then
+                  hyprctl dispatch 'hl.dsp.focus({ window = "class:^[Bb]lue[Bb]ubbles$" })' >/dev/null 2>&1 || true
                 fi
                 exit 0
               fi

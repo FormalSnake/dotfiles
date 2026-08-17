@@ -3,10 +3,10 @@
 Declarative configuration for three machines from one flake:
 
 - **`macbook`** — `aarch64-darwin`, nix-darwin + home-manager (primary dev host)
-- **`g815`**: `x86_64-linux`, NixOS + home-manager (ASUS ROG laptop, niri +
+- **`g815`**: `x86_64-linux`, NixOS + home-manager (ASUS ROG laptop, Hyprland +
   FormalShell desktop, gaming, NVIDIA PRIME offload)
 - **`e1504g`**: `x86_64-linux`, NixOS + home-manager (ASUS Vivobook E1504G,
-  Intel-only iGPU laptop, niri + FormalShell desktop)
+  Intel-only iGPU laptop, Hyprland + FormalShell desktop)
 
 Desktop shell on both NixOS hosts is
 [FormalShell](https://github.com/FormalSnake/FormalShell), pulled in as a
@@ -21,7 +21,7 @@ Inspired by [getchoo/borealis](https://github.com/getchoo/borealis).
 - `modules/` — reusable module sets
   - `modules/shared/` — cross-platform (nix settings, home-manager glue, tailscale)
   - `modules/darwin/` — macOS (homebrew, system defaults, dock, login items)
-  - `modules/nixos/` — NixOS (boot, graphics/nvidia, niri, gaming, power, asus, …)
+  - `modules/nixos/` — NixOS (boot, graphics/nvidia, Hyprland, gaming, power, asus, …)
   - each platform has `mixins/` (one concern per file) and `profiles/` (compose mixins)
 - `systems/` — per-host config (`macbook/`, `g815/`, `e1504g/`)
 - `users/` — per-user home-manager config (`kyandesutter/`)

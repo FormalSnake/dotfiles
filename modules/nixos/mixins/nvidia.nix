@@ -46,8 +46,8 @@ in
         # still never engages here (verified 2026-07-26: HDMI forced
         # disconnected + wallpaper stopped, 3 min idle, runtime_status stayed
         # `active`, lifetime runtime_suspended_time 0 ms). The session pins the
-        # device: niri holds an fd on every GPU it has seen with no release
-        # IPC, so a powered dGPU is always held. Kept enabled for the
+        # device: aquamarine opens every GPU named in AQ_DRM_DEVICES for the
+        # session's whole lifetime, so a listed dGPU is always held. Kept for the
         # udev/modeset hooks; the real battery win remains the hard power-off
         # in power.nix (dgpu-reconcile).
         finegrained = true;
@@ -82,11 +82,10 @@ in
       options nvidia NVreg_RegistryDwords="PowerMizerEnable=0x1; PerfLevelSrc=0x2222; PowerMizerDefaultAC=0x1; PowerMizerDefault=0x3"
     '';
 
-    # LIBVA_DRIVER_NAME is intentionally NOT set globally. It's chosen per session
-    # by power source in users/kyandesutter/mixins/niri.nix (settings.environment):
-    # nvidia on AC (dGPU decode), iHD on battery so the dGPU can stay asleep instead
-    # of being woken by any app that decodes video. Offloaded apps still get nvidia
-    # decode via nvidiaOffloadEnv below.
+    # LIBVA_DRIVER_NAME is intentionally NOT set globally. The session pins it to
+    # iHD in ~/.config/uwsm/env-hyprland (users/kyandesutter/mixins/hyprland.nix)
+    # so no app can wake the dGPU just by decoding video. Offloaded apps still get
+    # nvidia decode via nvidiaOffloadEnv below.
 
     # PRIME render-offload plumbing for offloaded launchers.
     #
@@ -111,8 +110,8 @@ in
           __GLX_VENDOR_LIBRARY_NAME = "nvidia";
           __VK_LAYER_NV_optimus = "NVIDIA_only";
           # An offloaded process drives the dGPU, so keep its VA-API decode there too.
-          # The session default is now iHD on battery (niri.nix settings.environment),
-          # so offloaded apps must set this explicitly to decode on the dGPU.
+          # The session default is iHD (uwsm/env-hyprland), so offloaded apps must
+          # set this explicitly to decode on the dGPU.
           LIBVA_DRIVER_NAME = "nvidia";
         };
 

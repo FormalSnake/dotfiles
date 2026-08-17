@@ -10,16 +10,11 @@ let
   formalshell = inputs.formalshell.packages.${pkgs.stdenv.hostPlatform.system}.default;
 
   # Lock the session before the machine suspends. Runs as kyandesutter and talks
-  # to the running DMS daemon over its IPC socket in the user's XDG_RUNTIME_DIR.
-  # `ipc call lock lock` shows DMS's lock screen without suspending — the
-  # suspend itself is driven by systemd-suspend.service, ordered after this via
-  # sleep.target.
-  #
-  # Unlike noctalia's per-Wayland-display socket (which needed a glob-and-guess
-  # dance), DMS's socket lives directly in the user's XDG_RUNTIME_DIR — the `dms`
-  # CLI finds it itself once that env var is set, no $WAYLAND_DISPLAY needed.
-  # Always exit 0: a lock failure (no session, DMS down) must never block the
-  # suspend.
+  # to the running shell over its IPC socket in the user's XDG_RUNTIME_DIR.
+  # `ipc call lock lock` shows the lock screen without suspending — the suspend
+  # itself is driven by systemd-suspend.service, ordered after this via
+  # sleep.target. Always exit 0: a lock failure (no session, shell down) must
+  # never block the suspend.
   #
   # PATH: `dms ipc` execs `qs` (quickshell) rather than speaking the socket
   # itself, and a system service has no user PATH — without this the hook dies
@@ -104,11 +99,11 @@ in
   imports = [ inputs.formalshell.nixosModules.formalshell ];
 
   options.kyan.desktop = {
-    enable = lib.mkEnableOption "niri desktop (system side)";
+    enable = lib.mkEnableOption "Hyprland desktop (system side)";
     shell = lib.mkOption {
       type = lib.types.enum [ "dms" "formalshell" ];
       default = "dms";
-      description = "Which desktop shell owns the session (bar, lock screen, notification daemon). Picks the lock-before-sleep hook here and gates the shell-facing binds and user services in users/kyandesutter/mixins/{niri,formalshell}.nix.";
+      description = "Which desktop shell owns the session (bar, lock screen, notification daemon). Picks the lock-before-sleep hook here and gates the shell-facing binds and user services in users/kyandesutter/mixins/{hyprland,formalshell}.nix.";
     };
   };
 
@@ -121,54 +116,44 @@ in
     # GOA/EDS calendar backend (M12): evolution-data-server serves calendar
     # data on the session bus (formalshell-eds reads it over one held D-Bus
     # connection) and gnome-online-accounts holds the Google account, tokens
-    # in the keyring (gnome-keyring is already wired by programs.niri).
-    # gnome-control-center is the only GOA sign-in UI outside GNOME: run
+    # in the keyring (gnome-keyring is wired below). gnome-control-center is
+    # the only GOA sign-in UI outside GNOME: run
     # `XDG_CURRENT_DESKTOP=GNOME gnome-control-center online-accounts` once.
     services.gnome.evolution-data-server.enable = lib.mkIf (cfg.shell == "formalshell") true;
     services.gnome.gnome-online-accounts.enable = lib.mkIf (cfg.shell == "formalshell") true;
 
-    # niri session (nixpkgs module): installs the package, registers the
-    # Wayland session for SDDM, wires portals (gnome for screencast + gtk
-    # fallback) and gnome-keyring. niri is systemd-native (niri-session →
-    # niri.service, BindsTo graphical-session.target) — no uwsm.
-    programs.niri.enable = true;
+    # Hyprland session (nixpkgs module): installs the package, registers the
+    # hyprland-uwsm Wayland session for SDDM, wires the portal and XWayland.
+    #
+    # withUWSM: uwsm owns the session as a systemd unit tree
+    # (wayland-wm@Hyprland.service BindsTo graphical-session.target, which the
+    # autostart user services in users/kyandesutter/mixins/autostart.nix hang
+    # off). It is also what sources ~/.config/uwsm/env{,-hyprland} and imports
+    # them into the systemd user manager, which is how the GPU device set and
+    # the iGPU pins reach both the compositor and every user service — see
+    # users/kyandesutter/mixins/hyprland.nix.
+    programs.hyprland = {
+      enable = true;
+      withUWSM = true;
+      xwayland.enable = true;
+    };
 
-    # Exempt the compositor from the EGL pin that
-    # users/kyandesutter/mixins/niri.nix pushes into environment.d for every
-    # user service (igpuPins): when docked, niri's render device IS the nvidia
-    # node, and a vendor list without nvidia makes its EGL init fail — the
-    # dGPU's outputs are never driven and the desk monitor sits on the dead
-    # boot console (looks like a hang on "a start job is running…"). The pin
-    # is a per-login vendor *dir* nowadays (nvidia included in dGPU sessions),
-    # but niri must never depend on the select oneshot having populated it, so
-    # this static unit-level FILENAMES override (which glvnd prefers over
-    # DIRS) stays. Clients niri spawns do NOT keep it: niri's environment
-    # block unsets FILENAMES and hands them the DIRS pin.
-    systemd.user.services.niri.environment."__EGL_VENDOR_LIBRARY_FILENAMES" =
-      lib.mkIf config.kyan.nvidia.enable (
-        lib.concatStringsSep ":" [
-          "/run/opengl-driver/share/glvnd/egl_vendor.d/10_nvidia.json"
-          "/run/opengl-driver/share/glvnd/egl_vendor.d/50_mesa.json"
-        ]
-      );
-
-    # xdg portals: niri routes screencast through xdg-desktop-portal-gnome and
-    # the rest through gtk (programs.niri wires the packages; this pins the
-    # routing). gnome-keyring's Secret portal is gated `UseIn=gnome`, and
-    # $XDG_CURRENT_DESKTOP=niri bypasses it — keep the explicit pin so
+    # xdg portals: hyprland's own portal for screencast/screenshot, gtk for the
+    # rest (file pickers). gnome-keyring's Secret portal is gated `UseIn=gnome`
+    # and $XDG_CURRENT_DESKTOP=Hyprland bypasses it — keep the explicit pin so
     # sandboxed Flatpaks can reach the keyring.
     xdg.portal = {
       enable = true;
       extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
       config.common = {
-        default = [ "gnome" "gtk" ];
+        default = [ "hyprland" "gtk" ];
         "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];
       };
     };
 
     # SDDM (Qt6, Wayland) with the Keyitdev "sddm-astronaut" theme. SDDM lists
-    # the niri session (niri.desktop, Exec=niri-session — installed by
-    # programs.niri) from /run/current-system/sw/share/wayland-sessions.
+    # the Hyprland uwsm session (hyprland-uwsm.desktop, installed by
+    # programs.hyprland) from /run/current-system/sw/share/wayland-sessions.
     services.displayManager.sddm = {
       enable = true;
       wayland.enable = true;
@@ -193,13 +178,12 @@ in
 
     # Lock on suspend. logind's default HandleLidSwitch=suspend goes straight to
     # s2idle with no lock, so closing the lid used to resume into an unlocked
-    # session. This oneshot raises DMS's lock screen and is ordered Before
+    # session. This oneshot raises the shell's lock screen and is ordered Before
     # sleep.target, so every suspend path — lid close, idle, and the
-    # SUPER+SHIFT+Escape keybind — resumes on the lock screen. (The keybind's
-    # `lock-and-suspend` still locks on its own too; this makes the lid path
-    # match.)
+    # SUPER+SHIFT+Escape keybind — resumes on the lock screen. (The keybind
+    # still locks on its own too; this makes the lid path match.)
     systemd.services.lock-before-sleep = {
-      description = "Lock the DMS session before sleep";
+      description = "Lock the session before sleep";
       before = [ "sleep.target" ];
       wantedBy = [ "sleep.target" ];
       serviceConfig = {
@@ -236,7 +220,7 @@ in
     # it's a Wayland-desktop concern, not a GPU one).
     environment.sessionVariables.NIXOS_OZONE_WL = "1";
 
-    # UPower: the D-Bus power daemon DMS's battery widget reads battery
+    # UPower: the D-Bus power daemon the shell's battery widget reads battery
     # state from. Enable it explicitly — relying on D-Bus auto-activation made
     # battery detection in the bar flaky.
     services.upower.enable = true;
@@ -247,7 +231,7 @@ in
     # that whole path is dead and the profile picture never loads.
     services.accounts-daemon.enable = true;
 
-    # Fonts DMS/niri expect (Material Symbols, a Nerd Font, emoji).
+    # Fonts the shell expects (Material Symbols, a Nerd Font, emoji).
     # System UI font is Geist; monospace is GeistMono patched with Nerd Font
     # glyphs (terminal mono + powerline icons). The rest are general coverage
     # fonts so apps don't fall back to Geist (which carries no emoji, CJK, or
@@ -332,17 +316,13 @@ in
       # .../share/sddm/themes/sddm-astronaut-theme.
       sddmAstronaut
 
-      # X11 apps (Steam & co): niri ≥25.08 spawns xwayland-satellite on demand
-      # and exports DISPLAY by itself — the binary just has to be on PATH.
-      xwayland-satellite
-
       brightnessctl
-      ddcutil # external-monitor brightness over DDC/CI — DMS's brightness backend (drives the slider + the XF86MonBrightness keybinds)
+      ddcutil # external-monitor brightness over DDC/CI — the shell's brightness backend (drives the slider + the XF86MonBrightness keybinds)
       playerctl
       wl-clipboard
-      # grim/slurp: kept installed for DMS's screenshot subcommand (bound on
-      # Print / Mod+Shift+S in users/kyandesutter/mixins/niri.nix), which
-      # likely shells out to them for the actual capture.
+      # grim/slurp: the shell's screenshot subcommand (bound on Print /
+      # Mod+Shift+S in users/kyandesutter/mixins/hyprland.nix) shells out to
+      # them for the actual capture.
       grim
       slurp
       ffmpegthumbnailer # video thumbnails for tumbler/Nautilus

@@ -8,7 +8,7 @@ let
   # apply the effect/brightness appropriate to the current power source. Shared by
   # two triggers — the matugen aura template runs it as a post_hook on every
   # palette change (session start, wallpaper pick, light/dark flip, passing the
-  # new accent), and power-tune (niri.nix) calls it on every power-source change
+  # new accent), and power-tune (hyprland.nix) calls it on every power-source change
   # (passing the cached accent). Having one setter means the two triggers can't
   # disagree.
   #
@@ -79,10 +79,11 @@ let
   #     (SPEC.barConfigs.def) with just that one field flipped — DMS's loader
   #     doesn't deep-merge array values, so a partial object would drop the
   #     rest of the bar's config to `undefined`. niriLayoutRadiusOverride is
-  #     left at its SPEC default (-1, off) — niri's own window-corner radius
-  #     is out of scope here and already matches (see mixins/niri.nix).
-  #   - showWorkspaceName + showOccupiedWorkspacesOnly: renders niri's named
-  #     workspaces (wsName in mixins/niri.nix) on the bar's pills instead of
+  #     left at its SPEC default (-1, off): it is a niri-only knob in DMS and
+  #     does nothing under Hyprland, whose window rounding is set directly in
+  #     mixins/hyprland.nix (decoration.rounding).
+  #   - showWorkspaceName + showOccupiedWorkspacesOnly: renders the named
+  #     workspaces (wsName in mixins/hyprland.nix) on the bar's pills instead of
   #     bare indices, and hides empty ones — the closest match to Noctalia's
   #     old hide_when_empty=true + name-label behaviour. There's no per-widget
   #     "max name length" key upstream (WorkspaceSwitcher.qml renders the full
@@ -372,7 +373,7 @@ in
 {
   # Official DankMaterialShell flake home-manager module. DMS is a Quickshell/QML
   # desktop shell. The module installs the `dms-shell` package + runs it as a user
-  # systemd service bound to the Wayland systemd target (auto-starts once niri
+  # systemd service bound to the Wayland systemd target (auto-starts once the session
   # reaches that target).
   imports = [
     inputs.dank-material-shell.homeModules.dank-material-shell
@@ -383,7 +384,7 @@ in
     inputs.dms-plugin-registry.homeModules.default
   ];
 
-  # Expose aura-repaint on PATH so power-tune (niri.nix) can call it as the
+  # Expose aura-repaint on PATH so power-tune (hyprland.nix) can call it as the
   # shared keyboard-aura setter (the matugen aura template's post_hook also uses
   # it, by store path). jq rides along for the DankBar plugins that shell out to
   # it (claudeCodeUsage, nixPackageRunner) — DMS's user service inherits the home
@@ -408,7 +409,7 @@ in
       # dgpuStatus D0/D3cold power-state widget was dropped by preference — this
       # usage widget is the only GPU pill on the bar.
       nvidiaGpuMonitor.enable = hasNvidia;
-      # Emoji & Unicode launcher — bound to Mod+Period in mixins/niri.nix via
+      # Emoji & Unicode launcher — bound to Mod+Period in mixins/hyprland.nix via
       # `spotlight toggleQuery :e` (:e is the plugin's default trigger).
       emojiLauncher.enable = true;
 
@@ -425,7 +426,7 @@ in
       # dms-bar-plugins.jq — both kept in the same order.
       # githubNotifier: open PRs authored by you + issues assigned to you. Reads
       # via `gh` (present) — run `gh auth login` once; the GitHub brand glyph
-      # needs font-awesome (added to fonts.packages in mixins/niri.nix).
+      # needs font-awesome (added to fonts.packages in mixins/hyprland.nix).
       githubNotifier.enable = true;
       # claudeCodeUsage: token usage / rate limits / daily charts for the Claude
       # Code subscription. Parses ~/.claude logs with jq (added to home.packages).
@@ -477,7 +478,7 @@ in
     "matugen/templates/equibop.css.tmpl".source = ../matugen-templates/equibop.css.tmpl;
     "matugen/templates/spicetify.ini.tmpl".source = ../matugen-templates/spicetify.ini.tmpl;
     "matugen/templates/obsidian.css.tmpl".source = ../matugen-templates/obsidian.css.tmpl;
-    "matugen/templates/niri-border.kdl.tmpl".source = ../matugen-templates/niri-border.kdl.tmpl;
+    "matugen/templates/hypr-border.lua.tmpl".source = ../matugen-templates/hypr-border.lua.tmpl;
     "matugen/templates/btop.theme.tmpl".source = ../matugen-templates/btop.theme.tmpl;
     "matugen/templates/yazi-flavor.toml.tmpl".source = ../matugen-templates/yazi-flavor.toml.tmpl;
     "matugen/templates/wallpaper-path.tmpl".source = ../matugen-templates/wallpaper-path.tmpl;
@@ -497,7 +498,7 @@ in
       [templates]
 
       # ASUS Aura keyboard. Output file doubles as the "current accent" cache
-      # that power-tune (niri.nix) reads to restore today's colour on a
+      # that power-tune (hyprland.nix) reads to restore today's colour on a
       # power-source change; the post_hook does the actual repaint.
       [templates.aura]
       input_path = "~/.config/matugen/templates/aura.tmpl"
@@ -554,17 +555,17 @@ in
       input_path = "~/.config/matugen/templates/obsidian.css.tmpl"
       output_path = "~/Notes/.obsidian/snippets/dank.css"
 
-      # niri window borders. DMS doesn't touch the compositor; this renders the
-      # wallpaper palette into the layout fragment niri's config.kdl includes
-      # (include optional=true, placed LAST so it overrides the rendered
-      # defaults — see mixins/niri.nix), and the post_hook reloads niri's
-      # config so the colours apply instantly. mixins/niri.nix seeds a Flexoki
-      # fallback copy for the first login before the first render here.
-      # primary = active border; error = urgent; outline = inactive.
-      [templates.niri-border]
-      input_path = "~/.config/matugen/templates/niri-border.kdl.tmpl"
-      output_path = "~/.cache/dank/niri-border.kdl"
-      post_hook = "${pkgs.niri}/bin/niri msg action load-config-file || true"
+      # Hyprland window borders. DMS doesn't touch the compositor; this renders
+      # the wallpaper palette into a Lua fragment, and the post_hook runs it
+      # through `hyprctl eval` so the colours apply instantly with no reload.
+      # hyprland.lua also dofile's the same output on every config eval, so a
+      # later `hyprctl reload` keeps the wallpaper colours instead of falling
+      # back to the static Flexoki `general.col` — see mixins/hyprland.nix.
+      # primary = active border; outline = inactive.
+      [templates.hypr-border]
+      input_path = "~/.config/matugen/templates/hypr-border.lua.tmpl"
+      output_path = "~/.cache/dank/hypr-border.lua"
+      post_hook = "${pkgs.hyprland}/bin/hyprctl eval 'pcall(dofile, os.getenv(\"HOME\") .. \"/.cache/dank/hypr-border.lua\")' || true"
 
       # btop. DMS has no builtin btop template; programs.btop.settings.color_theme
       # in programs.nix points at this output. Picks up colours on next launch
