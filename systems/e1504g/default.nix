@@ -15,7 +15,16 @@
     inputs.nixos-hardware.nixosModules.common-cpu-intel
     inputs.nixos-hardware.nixosModules.common-pc-laptop
     inputs.nixos-hardware.nixosModules.common-pc-laptop-ssd
+
+    # 80% charge limit for battery longevity, matching the g815 (asusd there).
+    # This chassis exposes the standard asus-nb-wmi
+    # charge_control_end_threshold node (verified live 2026-08-17, sitting at
+    # 100); the module re-asserts the limit at boot and around suspend, no
+    # asusd needed — so the kyan.asus gate (g815 dGPU machinery) stays off.
+    inputs.nixos-hardware.nixosModules.asus-battery
   ];
+
+  hardware.asus.battery.chargeUpto = 80;
 
   networking.hostName = "e1504g";
 
