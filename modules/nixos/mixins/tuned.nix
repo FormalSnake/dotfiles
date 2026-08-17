@@ -40,5 +40,23 @@
     # with the PPD service that used to put it there. Keep the client — it's the
     # muscle memory, and it drives tuned-ppd exactly as it drove PPD.
     environment.systemPackages = [ pkgs.power-profiles-daemon ];
+
+    # tuned-ppd mirrors /sys/firmware/acpi/platform_profile back into its own
+    # active profile — upstream's Fn-key integration, written for ThinkPads.
+    # On asus-wmi that closes a loop which pins the profile permanently: the
+    # node reads quiet/balanced/performance, tuned-ppd's table only knows
+    # low-power/balanced/performance, and since the 6.14 multi-driver binding
+    # the legacy node is write-only through /sys/class/platform-profile, so
+    # TuneD's own `[acpi]` writes come back EOPNOTSUPP and never move it. Every
+    # `powerprofilesctl set` was reverted ~25 ms later (measured on the g815,
+    # 2026-08-17). asusd owns the platform profile on both laptops, so stop
+    # tuned-ppd watching it. Not expressible via `services.tuned.ppdSettings`:
+    # the module's `main` submodule declares only default/battery_detection and
+    # takes no freeform keys.
+    environment.etc."tuned/ppd.conf".source = lib.mkForce (
+      (pkgs.formats.ini { }).generate "ppd.conf" (
+        lib.recursiveUpdate config.services.tuned.ppdSettings { main.sysfs_acpi_monitor = false; }
+      )
+    );
   };
 }
