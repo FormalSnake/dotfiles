@@ -387,9 +387,13 @@ let
       -- success lands as a shell notification). Owner rule: when the shell has
       -- the feature, prefer it over the compositor's built-in — it's WM-agnostic,
       -- so the binds survive compositor changes. Print = whole screen,
-      -- Mod+Shift+S = region picker (macOS Cmd+Shift+4).
+      -- Mod+Shift+S = the capture picker (macOS Cmd+Shift+5): a toolbar of
+      -- three shot and three record modes, digits 1-6 to switch between them,
+      -- Tab and the arrows to cycle windows, Return to commit. `screenshot
+      -- region` is the older bare-slurp route with no toolbar and no
+      -- recording at all, so it is deliberately not bound here.
       hl.bind("Print", hl.dsp.exec_cmd("${fsIpc [ "screenshot" "full" ]}"))
-      hl.bind(mod .. " + SHIFT + S", hl.dsp.exec_cmd("${fsIpc [ "screenshot" "region" ]}"))
+      hl.bind(mod .. " + SHIFT + S", hl.dsp.exec_cmd("${fsIpc [ "screenshot" "pick" "smart" "default" ]}"))
 
       -- Volume via wpctl: FormalShell's AudioService tracks PipeWire directly
       -- and auto-shows the volume OSD on any external change, so the keys don't
