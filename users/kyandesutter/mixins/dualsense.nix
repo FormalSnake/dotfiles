@@ -1,8 +1,17 @@
-{ lib, pkgs, ... }:
+{ config, lib, pkgs, osConfig ? { }, ... }:
 let
   flexoki = import ./flexoki/palette.nix;
-  inherit (flexoki) accents;
+  inherit (flexoki) accents base;
   stripHash = lib.removePrefix "#";
+
+  # Same shell selector as mixins/hyprland.nix, so the launcher button opens
+  # whichever shell owns the session rather than a second one.
+  useFormalshell = (((osConfig.kyan or { }).desktop or { }).shell or "dms") == "formalshell";
+  launcher =
+    if useFormalshell then
+      "${config.programs.formalshell.package}/bin/formalshell ipc --any-display call menu toggle"
+    else
+      "${config.programs.dank-material-shell.package}/bin/dms ipc call spotlight toggle";
 
   # Herdr agent state, written by dualsense-herdr and read back by
   # dualsense-sync. Runtime dir, not the cache: a state that outlives the
@@ -77,7 +86,7 @@ let
   # works from a user service with no SSH_AUTH_SOCK. It never sudos.
   dualsenseHerdr = pkgs.writeShellApplication {
     name = "dualsense-herdr";
-    runtimeInputs = with pkgs; [ openssh jq coreutils dualsenseSync ];
+    runtimeInputs = with pkgs; [ openssh jq coreutils dualsenseSync dualsenseRumble ];
     text = ''
       # The mac's login shell is fish, which can't parse a `while :; do` loop,
       # so the remote side is handed to bash explicitly. Absolute path for the
@@ -98,6 +107,10 @@ let
         last="$state"
         printf '%s\n' "$state" > ${stateFile}
         dualsense-sync || true
+        # Only on the way into blocked: a buzz every poll would be a pager.
+        if [ "$state" = blocked ]; then
+          dualsense-rumble || true
+        fi
       done
     '';
   };
@@ -129,42 +142,42 @@ let
         "$cap" "$cap" "$status" "$class"
     '';
   };
-  # D-pad as a desk remote for the scrolling tape: left/right walk the windows
-  # on the current workspace, up/down step workspaces. Same dispatchers the
-  # mod+H/L and mod+scroll binds use in mixins/hyprland.nix, so the controller
-  # can't drift from the keyboard.
-  #
-  # Hyprland has no gamepad input path of its own, so this reads evdev
-  # directly. It deliberately does NOT grab the device: a grab would hide the
-  # pad from anything that actually wants to be played with.
-  #
-  # `hyprctl dispatch` takes Lua since 0.55 (it wraps the argument in
-  # hl.dispatch(...)), which is why these are expressions rather than the old
-  # "layoutmsg focus l" strings.
-  #
-  # A hat reports once on press and once on release, with no auto-repeat, so
-  # holding a direction steps once. Repeat would need a timer here.
-  dualsensePad = pkgs.writers.writePython3Bin "dualsense-pad"
+  # On-screen keyboard. FormalShell has no keyboard surface of its own (its
+  # only virtual-keyboard use is wtype for emoji auto-typing), so this is
+  # wvkbd, which speaks the same zwp_virtual_keyboard protocol. Start/stop
+  # rather than --hidden plus SIGUSR1/2: one code path, no state to track, and
+  # it comes up fast enough that the difference isn't visible. Flexoki tones
+  # so it doesn't arrive as a white slab over a dark session.
+  dualsenseOsk = pkgs.writeShellApplication {
+    name = "dualsense-osk";
+    runtimeInputs = with pkgs; [ wvkbd procps ];
+    text = ''
+      if pkill -x wvkbd-mobintl; then
+        exit 0
+      fi
+      exec wvkbd-mobintl -L 380 --fn "monospace 18" \
+        --bg ${stripHash base.b950} --fg ${stripHash base.b900} \
+        --fg-sp ${stripHash base.b850} --press ${stripHash accents.blue.l} \
+        --press-sp ${stripHash accents.blue.l} \
+        --text ${stripHash base.b200} --text-sp ${stripHash base.b300}
+    '';
+  };
+
+  # A buzz for the one state you can't see: an agent that stopped and wants
+  # an answer. hid-playstation implements force feedback, so this goes through
+  # evdev rather than dualsensectl (whose Bluetooth writes never land).
+  # dualsense-herdr calls it on the transition into blocked, never on a repeat.
+  dualsenseRumble = pkgs.writers.writePython3Bin "dualsense-rumble"
     {
       libraries = [ pkgs.python3Packages.evdev ];
       flakeIgnore = [ "E501" ];
     } ''
-    import subprocess
     import time
 
     import evdev
+    from evdev import ecodes as e, ff
 
-    # Exact match: the touchpad and motion sensors are separate devices whose
-    # names extend this one.
     PAD = "DualSense Wireless Controller"
-    HYPRCTL = "${pkgs.hyprland}/bin/hyprctl"
-
-    ACTIONS = {
-        (evdev.ecodes.ABS_HAT0X, -1): 'hl.dsp.layout("focus l")',
-        (evdev.ecodes.ABS_HAT0X, 1): 'hl.dsp.layout("focus r")',
-        (evdev.ecodes.ABS_HAT0Y, -1): 'hl.dsp.focus({ workspace = "e-1" })',
-        (evdev.ecodes.ABS_HAT0Y, 1): 'hl.dsp.focus({ workspace = "e+1" })',
-    }
 
 
     def find_pad():
@@ -180,18 +193,210 @@ let
 
 
     def main():
+        dev = find_pad()
+        if dev is None:
+            return
+        rumble = ff.Rumble(strong_magnitude=0xC000, weak_magnitude=0x8000)
+        effect = ff.Effect(
+            e.FF_RUMBLE, -1, 0,
+            ff.Trigger(0, 0),
+            ff.Replay(350, 0),
+            ff.EffectType(ff_rumble_effect=rumble),
+        )
+        effect_id = dev.upload_effect(effect)
+        dev.write(e.EV_FF, effect_id, 1)
+        # The kernel plays the effect asynchronously; erasing it immediately
+        # cancels it, so wait out the replay length first.
+        time.sleep(0.4)
+        dev.erase_effect(effect_id)
+
+
+    main()
+  '';
+
+  # The controller as a desk remote. Hyprland has no gamepad input path of its
+  # own, so this reads evdev directly and drives three sinks: hyprctl for
+  # window and workspace verbs, wpctl for volume, and a uinput pointer for the
+  # sticks. It deliberately does NOT grab the pad — a grab would hide it from
+  # anything that actually wants to be played with.
+  #
+  #   d-pad left/right   walk windows along the scrolling tape
+  #   d-pad up/down      previous/next workspace
+  #   L1/R1              same walk as the d-pad, for one-handed use
+  #   cross              launcher
+  #   circle             close window
+  #   triangle           fullscreen toggle
+  #   square             maximize toggle
+  #   PS                 on-screen keyboard
+  #   right stick        pointer, left stick scrolls
+  #   stick clicks       right = left button, left = right button
+  #   L2/R2              volume down/up, rate follows how far they're pressed
+  #
+  # Same dispatchers as the mod+H/L, mod+Q and mod+scroll binds in
+  # mixins/hyprland.nix, so the controller can't drift from the keyboard.
+  # `hyprctl dispatch` takes Lua since 0.55 (it wraps the argument in
+  # hl.dispatch(...)), hence expressions rather than the old "layoutmsg focus
+  # l" strings.
+  #
+  # Sticks and triggers are absolute 0-255 axes that only report on change, so
+  # they can't be handled event-by-event: the loop keeps the last value and
+  # applies it on a 60Hz tick. A hat, by contrast, reports once on press and
+  # once on release with no auto-repeat, so holding a direction steps once.
+  dualsensePad = pkgs.writers.writePython3Bin "dualsense-pad"
+    {
+      libraries = [ pkgs.python3Packages.evdev ];
+      flakeIgnore = [ "E501" ];
+    } ''
+    import math
+    import select
+    import subprocess
+    import time
+
+    import evdev
+    from evdev import ecodes as e
+
+    # Exact match: the touchpad and motion sensors are separate devices whose
+    # names extend this one.
+    PAD = "DualSense Wireless Controller"
+    HYPRCTL = "${pkgs.hyprland}/bin/hyprctl"
+    WPCTL = "${pkgs.wireplumber}/bin/wpctl"
+
+    TICK = 1.0 / 60
+    # Sticks rest at 128 and jitter a point or two either side, so the
+    # deadzone is not optional. Past it the response is squared: small
+    # deflections stay slow enough to land on a target.
+    DEADZONE = 0.12
+    POINTER_PX_S = 900.0
+    SCROLL_NOTCH_S = 14.0
+    # Triggers rest at 0 and travel to 255. wpctl is spawned per step, so the
+    # step rate is capped well below the tick rate.
+    TRIGGER_DEADZONE = 30
+    VOLUME_INTERVAL = 0.12
+
+
+    def dispatch(lua):
+        return [HYPRCTL, "dispatch", lua]
+
+
+    BUTTONS = {
+        e.BTN_TL: dispatch('hl.dsp.layout("focus l")'),
+        e.BTN_TR: dispatch('hl.dsp.layout("focus r")'),
+        e.BTN_SOUTH: ${builtins.toJSON (lib.splitString " " launcher)},
+        e.BTN_EAST: dispatch('hl.dsp.window.close()'),
+        e.BTN_NORTH: dispatch('hl.dsp.window.fullscreen({ action = "toggle", mode = "fullscreen" })'),
+        e.BTN_WEST: dispatch('hl.dsp.window.fullscreen({ action = "toggle", mode = "maximized" })'),
+        e.BTN_MODE: ["${dualsenseOsk}/bin/dualsense-osk"],
+    }
+
+    HATS = {
+        (e.ABS_HAT0X, -1): dispatch('hl.dsp.layout("focus l")'),
+        (e.ABS_HAT0X, 1): dispatch('hl.dsp.layout("focus r")'),
+        (e.ABS_HAT0Y, -1): dispatch('hl.dsp.focus({ workspace = "e-1" })'),
+        (e.ABS_HAT0Y, 1): dispatch('hl.dsp.focus({ workspace = "e+1" })'),
+    }
+
+    CLICKS = {e.BTN_THUMBR: e.BTN_LEFT, e.BTN_THUMBL: e.BTN_RIGHT}
+
+    POINTER_CAPS = {
+        e.EV_REL: [e.REL_X, e.REL_Y, e.REL_WHEEL, e.REL_HWHEEL],
+        e.EV_KEY: [e.BTN_LEFT, e.BTN_RIGHT],
+    }
+
+
+    def find_pad():
+        for path in evdev.list_devices():
+            try:
+                dev = evdev.InputDevice(path)
+            except OSError:
+                continue
+            if dev.name == PAD:
+                return dev
+            dev.close()
+        return None
+
+
+    def curve(value):
+        """0-255 axis to -1.0..1.0, deadzoned and squared."""
+        norm = (value - 128) / 127.0
+        if abs(norm) < DEADZONE:
+            return 0.0
+        scaled = (abs(norm) - DEADZONE) / (1.0 - DEADZONE)
+        return math.copysign(scaled * scaled, norm)
+
+
+    def volume_step(axes, last):
+        now = time.monotonic()
+        if now - last < VOLUME_INTERVAL:
+            return last
+        up = axes[e.ABS_RZ]
+        down = axes[e.ABS_Z]
+        depth = max(up, down)
+        if depth <= TRIGGER_DEADZONE:
+            return last
+        span = 255 - TRIGGER_DEADZONE
+        percent = 1 + int(4 * (depth - TRIGGER_DEADZONE) / span)
+        sign = "+" if up >= down else "-"
+        subprocess.run(
+            [WPCTL, "set-volume", "-l", "1.0", "@DEFAULT_AUDIO_SINK@", f"{percent}%{sign}"],
+            check=False,
+        )
+        return now
+
+
+    def pump(dev, pointer):
+        axes = {e.ABS_X: 128, e.ABS_Y: 128, e.ABS_RX: 128, e.ABS_RY: 128, e.ABS_Z: 0, e.ABS_RZ: 0}
+        # Fractional pixels and notches carry across ticks, so a slow push
+        # still moves instead of rounding to nothing every frame.
+        carry = {e.REL_X: 0.0, e.REL_Y: 0.0, e.REL_WHEEL: 0.0, e.REL_HWHEEL: 0.0}
+        last_volume = 0.0
+
+        while True:
+            ready, _, _ = select.select([dev.fd], [], [], TICK)
+            if ready:
+                for event in dev.read():
+                    if event.type == e.EV_ABS:
+                        if event.code in (e.ABS_HAT0X, e.ABS_HAT0Y):
+                            action = HATS.get((event.code, event.value))
+                            if action is not None:
+                                subprocess.run(action, check=False)
+                        elif event.code in axes:
+                            axes[event.code] = event.value
+                    elif event.type == e.EV_KEY:
+                        if event.code in CLICKS:
+                            pointer.write(e.EV_KEY, CLICKS[event.code], event.value)
+                            pointer.syn()
+                        elif event.value == 1 and event.code in BUTTONS:
+                            subprocess.run(BUTTONS[event.code], check=False)
+
+            carry[e.REL_X] += curve(axes[e.ABS_RX]) * POINTER_PX_S * TICK
+            carry[e.REL_Y] += curve(axes[e.ABS_RY]) * POINTER_PX_S * TICK
+            # Pushing up reads as a decreasing axis, and a positive wheel is
+            # scroll-up, so the vertical sign flips here.
+            carry[e.REL_WHEEL] += -curve(axes[e.ABS_Y]) * SCROLL_NOTCH_S * TICK
+            carry[e.REL_HWHEEL] += curve(axes[e.ABS_X]) * SCROLL_NOTCH_S * TICK
+
+            moved = False
+            for code, value in carry.items():
+                whole = int(value)
+                if whole:
+                    carry[code] = value - whole
+                    pointer.write(e.EV_REL, code, whole)
+                    moved = True
+            if moved:
+                pointer.syn()
+
+            last_volume = volume_step(axes, last_volume)
+
+
+    def main():
+        pointer = evdev.UInput(POINTER_CAPS, name="dualsense-pointer")
         while True:
             dev = find_pad()
             if dev is None:
                 time.sleep(5)
                 continue
             try:
-                for event in dev.read_loop():
-                    if event.type != evdev.ecodes.EV_ABS:
-                        continue
-                    action = ACTIONS.get((event.code, event.value))
-                    if action is not None:
-                        subprocess.run([HYPRCTL, "dispatch", action], check=False)
+                pump(dev, pointer)
             except OSError:
                 # Controller went away mid-read; fall back to scanning.
                 time.sleep(2)
@@ -201,7 +406,14 @@ let
   '';
 in
 {
-  home.packages = [ pkgs.dualsensectl dualsenseSync dualsenseBar dualsensePad ];
+  home.packages = [
+    pkgs.dualsensectl
+    dualsenseSync
+    dualsenseBar
+    dualsensePad
+    dualsenseOsk
+    dualsenseRumble
+  ];
 
   # Hotplug: dualsensectl's own udev watcher, so a controller that wakes up or
   # reconnects over Bluetooth is painted immediately instead of waiting for the

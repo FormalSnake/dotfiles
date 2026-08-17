@@ -34,5 +34,11 @@ in
     services.udev.extraRules = ''
       ACTION=="add", SUBSYSTEM=="leds", DRIVERS=="playstation", RUN+="${ledPerms} /sys%p"
     '';
+
+    # dualsense-pad (users/kyandesutter/mixins/dualsense.nix) turns the sticks
+    # into a pointer, which means creating a virtual input device. This is
+    # what puts the uinput group on /dev/uinput and loads the module.
+    hardware.uinput.enable = true;
+    users.users.kyandesutter.extraGroups = [ "uinput" ];
   };
 }
