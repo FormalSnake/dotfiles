@@ -624,6 +624,19 @@ in
       },
     })
 
+    -- The DualSense touchpad lands in Hyprland's Mouse list, not the touchpad
+    -- list, so it inherits the global sensitivity meant for a full-size mouse.
+    -- That surface is about 40mm wide, so 0.2 with adaptive accel means a lot
+    -- of finger for very little pointer, and slow moves get damped on top of
+    -- it. Flat accel plus a hard multiplier makes travel proportional. The
+    -- Bluetooth link still costs ~20ms that no setting here can remove; USB
+    -- does not have it.
+    hl.device({
+      name = "dualsense-wireless-controller-touchpad",
+      accel_profile = "flat",
+      sensitivity = 0.7,
+    })
+
     -- — Animations: spring physics for anything that moves —
     -- The old `snappy` bezier put 75% of the distance into the first 15% of the
     -- duration. That fast part is too quick to read as travel, so the only
