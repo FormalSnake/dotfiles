@@ -43,20 +43,29 @@
 
     # tuned-ppd mirrors /sys/firmware/acpi/platform_profile back into its own
     # active profile — upstream's Fn-key integration, written for ThinkPads.
-    # On asus-wmi that closes a loop which pins the profile permanently: the
-    # node reads quiet/balanced/performance, tuned-ppd's table only knows
-    # low-power/balanced/performance, and since the 6.14 multi-driver binding
-    # the legacy node is write-only through /sys/class/platform-profile, so
-    # TuneD's own `[acpi]` writes come back EOPNOTSUPP and never move it. Every
-    # `powerprofilesctl set` was reverted ~25 ms later (measured on the g815,
-    # 2026-08-17). asusd owns the platform profile on both laptops, so stop
-    # tuned-ppd watching it. Not expressible via `services.tuned.ppdSettings`:
-    # the module's `main` submodule declares only default/battery_detection and
-    # takes no freeform keys.
+    # Here it races the profile it just applied: switching to power-saver makes
+    # TuneD's `[acpi]` plugin write the node, the inotify handler reads it back
+    # before asus-wmi has settled, sees the outgoing value and reverts. Measured
+    # on the g815 (2026-08-17): every `powerprofilesctl set` undone ~35 ms later,
+    # so the profile never left whatever asusd had parked there. The mapping is
+    # no use on this hardware anyway — asus-wmi's low tier is called `quiet`,
+    # which the table doesn't carry. Turn the mirror off; asusd owns the
+    # platform profile, and TuneD still writes it on every switch.
+    #
+    # Not expressible via `services.tuned.ppdSettings`: the module's `main`
+    # submodule declares only default/battery_detection and takes no freeform
+    # keys.
     environment.etc."tuned/ppd.conf".source = lib.mkForce (
       (pkgs.formats.ini { }).generate "ppd.conf" (
         lib.recursiveUpdate config.services.tuned.ppdSettings { main.sysfs_acpi_monitor = false; }
       )
     );
+
+    # ppd.conf is read once at startup, and the nixpkgs module doesn't wire it
+    # up — without this a config change lands in /etc and does nothing until the
+    # next boot.
+    systemd.services.tuned-ppd.restartTriggers = [
+      config.environment.etc."tuned/ppd.conf".source
+    ];
   };
 }
