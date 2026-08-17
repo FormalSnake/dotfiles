@@ -477,6 +477,7 @@ in
     "matugen/templates/equibop.css.tmpl".source = ../matugen-templates/equibop.css.tmpl;
     "matugen/templates/spicetify.ini.tmpl".source = ../matugen-templates/spicetify.ini.tmpl;
     "matugen/templates/obsidian.css.tmpl".source = ../matugen-templates/obsidian.css.tmpl;
+    "matugen/templates/dualsense.tmpl".source = ../matugen-templates/dualsense.tmpl;
     "matugen/templates/hypr-border.lua.tmpl".source = ../matugen-templates/hypr-border.lua.tmpl;
     "matugen/templates/btop.theme.tmpl".source = ../matugen-templates/btop.theme.tmpl;
     "matugen/templates/yazi-flavor.toml.tmpl".source = ../matugen-templates/yazi-flavor.toml.tmpl;
@@ -502,6 +503,16 @@ in
       input_path = "~/.config/matugen/templates/aura.tmpl"
       output_path = "~/.cache/dank/aura-color"
       post_hook = "${auraRepaint}/bin/aura-repaint {{colors.primary.default.hex_stripped}}"
+
+      # DualSense lightbar. Same one-line accent payload as the aura template,
+      # its own output file so the two hooks stay independent; dualsense-sync
+      # (mixins/dualsense.nix) reads it back and also repaints the player LEDs.
+      # Absolute profile path: this hook runs inside the shell's systemd user
+      # service, whose PATH won't include the home profile bin.
+      [templates.dualsense]
+      input_path = "~/.config/matugen/templates/dualsense.tmpl"
+      output_path = "~/.cache/dank/dualsense-color"
+      post_hook = "${config.home.profileDirectory}/bin/dualsense-sync || true"
 
       # Ghostty: written into ghostty's themes dir; config references it with
       # `theme = "Matugen"` (see mixins/ghostty.nix). SIGUSR2 live-reloads it
