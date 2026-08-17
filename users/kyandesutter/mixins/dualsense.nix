@@ -281,7 +281,7 @@ let
     BUTTONS = {
         e.BTN_TL: dispatch('hl.dsp.layout("focus l")'),
         e.BTN_TR: dispatch('hl.dsp.layout("focus r")'),
-        e.BTN_SOUTH: ${builtins.toJSON (lib.splitString " " launcher)},
+        e.BTN_SOUTH: [${lib.concatMapStringsSep ", " builtins.toJSON (lib.splitString " " launcher)}],
         e.BTN_EAST: dispatch('hl.dsp.window.close()'),
         e.BTN_NORTH: dispatch('hl.dsp.window.fullscreen({ action = "toggle", mode = "fullscreen" })'),
         e.BTN_WEST: dispatch('hl.dsp.window.fullscreen({ action = "toggle", mode = "maximized" })'),
