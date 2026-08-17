@@ -26,6 +26,7 @@
       ./mixins/hyprland.nix
       ./mixins/online-accounts.nix
       ./mixins/steam.nix
+      ./mixins/dualsense.nix
       ./mixins/comms.nix
       ./mixins/asus.nix
       ./mixins/tuned.nix

@@ -15,24 +15,23 @@ let
   # gauge. Every other unit here funnels through this script, so the two
   # inputs can never disagree about what the controller is showing.
   #
-  # Everything talks to the controller over hidraw as the session user, which
-  # works because programs.steam.enable (modules/nixos/mixins/steam.nix)
-  # installs 60-steam-input.rules — it tags hidraw for 054c:0ce6 with uaccess.
-  # Drop Steam from a host and this needs its own rule.
+  # Written through hid-playstation's LED class, not dualsensectl: over
+  # Bluetooth its hidraw output reports exit 0 and never reach the controller.
+  # modules/nixos/mixins/dualsense.nix carries the udev rule that makes these
+  # attributes group-writable, and the note about why.
   #
-  # `dualsensectl -l` lists nothing when no controller is attached, which is
-  # the whole guard: every caller here is fire-and-forget, so a run with no
-  # controller has to be a silent no-op rather than an error.
-  #
-  # player-leds takes the console's own player patterns, not a left-to-right
-  # bar: 1 lights the centre LED, 2 the pair around it, up to 5 for all of
-  # them (dualsensectl main.c, player_ids[]). Symmetric fill, still five
-  # readable steps.
+  # The node names are keyed to the controller's input device index, which
+  # changes on every reconnect, so they can only be globbed. First match wins;
+  # a second controller would need a way to say which one this is about.
   dualsenseSync = pkgs.writeShellApplication {
     name = "dualsense-sync";
-    runtimeInputs = with pkgs; [ dualsensectl coreutils gnugrep ];
+    runtimeInputs = with pkgs; [ coreutils ];
     text = ''
-      dualsensectl -l 2>/dev/null | grep -qi dualsense || exit 0
+      shopt -s nullglob
+      rgb=(/sys/class/leds/input*:rgb:indicator)
+      [ ''${#rgb[@]} -gt 0 ] || exit 0
+      lightbar="''${rgb[0]}"
+      base="''${lightbar%:rgb:indicator}"
 
       # Agent state outranks the wallpaper accent: the lightbar is the only
       # thing on the desk that can say "an agent is waiting on you" while the
@@ -46,14 +45,21 @@ let
         *)       colour="$(cat "$HOME/.cache/dank/dualsense-color" 2>/dev/null || true)" ;;
       esac
       [ -n "$colour" ] || colour=b15bf5
-      dualsensectl lightbar \
-        "$((16#''${colour:0:2}))" "$((16#''${colour:2:2}))" "$((16#''${colour:4:2}))" || true
+      printf '%d %d %d\n' \
+        "$((16#''${colour:0:2}))" "$((16#''${colour:2:2}))" "$((16#''${colour:4:2}))" \
+        > "$lightbar/multi_intensity"
 
+      # Unlike dualsensectl's symmetric player patterns, the individual LEDs
+      # fill from one end, so this reads as a bar.
       cap="$(cat /sys/class/power_supply/BAT0/capacity 2>/dev/null || echo 100)"
-      leds=$(( (cap + 19) / 20 ))
-      [ "$leds" -ge 1 ] || leds=1
-      [ "$leds" -le 5 ] || leds=5
-      dualsensectl player-leds "$leds" || true
+      lit=$(( (cap + 19) / 20 ))
+      [ "$lit" -ge 1 ] || lit=1
+      [ "$lit" -le 5 ] || lit=5
+      for i in 1 2 3 4 5; do
+        led="$base:white:player-$i"
+        [ -e "$led/brightness" ] || continue
+        if [ "$i" -le "$lit" ]; then echo 1 > "$led/brightness"; else echo 0 > "$led/brightness"; fi
+      done
     '';
   };
 
@@ -95,23 +101,26 @@ let
       done
     '';
   };
+
   # Waybar-JSON for FormalShell's `command` bar module (mixins/formalshell.nix
-  # registers it as custom:dualsense). Empty text when no controller answers,
-  # which is what keeps the cell out of the way the rest of the time.
-  # dualsensectl prints "<capacity> <status>" and nothing else, so the split is
-  # positional. Capacity is a 10% bucket midpoint, never finer.
+  # registers it as custom:dualsense). Empty text when no controller is
+  # attached, which is what keeps the cell out of the way the rest of the time.
+  # Same sysfs-over-dualsensectl reasoning as the sync; hid-playstation
+  # publishes the pack as a power supply named after the controller's MAC.
+  # Capacity comes in 10% buckets, never finer.
   dualsenseBar = pkgs.writeShellApplication {
     name = "dualsense-bar";
-    runtimeInputs = [ pkgs.dualsensectl ];
+    runtimeInputs = with pkgs; [ coreutils ];
     text = ''
-      out="$(dualsensectl battery 2>/dev/null || true)"
-      if [ -z "$out" ]; then
+      shopt -s nullglob
+      supply=(/sys/class/power_supply/ps-controller-battery-*)
+      if [ ''${#supply[@]} -eq 0 ]; then
         printf '{"text":"","tooltip":"","class":""}\n'
         exit 0
       fi
 
-      cap="''${out%% *}"
-      status="''${out##* }"
+      cap="$(cat "''${supply[0]}/capacity" 2>/dev/null || echo 0)"
+      status="$(cat "''${supply[0]}/status" 2>/dev/null || echo Unknown)"
       class=""
       [ "$cap" -gt 20 ] || class="warning"
       [ "$cap" -gt 10 ] || class="critical"
@@ -127,7 +136,8 @@ in
   # Hotplug: dualsensectl's own udev watcher, so a controller that wakes up or
   # reconnects over Bluetooth is painted immediately instead of waiting for the
   # drift timer. It keeps running with no controller attached, so this is a
-  # plain long-lived unit.
+  # plain long-lived unit. The LED nodes appear slightly after the hidraw one,
+  # hence the settle sleep before the sync.
   systemd.user.services.dualsense-sync = {
     Unit = {
       Description = "Paint the DualSense lightbar and player LEDs on hotplug";
@@ -135,7 +145,10 @@ in
       After = [ "graphical-session.target" ];
     };
     Service = {
-      ExecStart = "${pkgs.dualsensectl}/bin/dualsensectl monitor add ${dualsenseSync}/bin/dualsense-sync";
+      ExecStart = "${pkgs.dualsensectl}/bin/dualsensectl monitor add ${pkgs.writeShellScript "dualsense-settle" ''
+        sleep 2
+        exec ${dualsenseSync}/bin/dualsense-sync
+      ''}";
       Restart = "always";
       RestartSec = 5;
     };
