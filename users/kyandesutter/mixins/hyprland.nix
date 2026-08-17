@@ -562,6 +562,21 @@ in
         focus_fit_method = 1,
         follow_focus = true,
       },
+      -- Trackpad swipe feel (the gestures themselves are registered below).
+      gestures = {
+        -- A vertical swipe walks past the neighbouring workspace instead of
+        -- clamping to it, so one long swipe crosses the stack the way niri's
+        -- does. workspace_swipe_invert stays at its default true: that is the
+        -- direction where the workspaces follow the fingers.
+        workspace_swipe_forever = true,
+        scrolling = {
+          -- Snapping the pointer into the newly focused window is Hyprland's
+          -- default; niri leaves it where you put it, and with follow_mouse = 2
+          -- a warped pointer only means the next hover lands somewhere you
+          -- didn't aim at.
+          move_snap_cursor = false,
+        },
+      },
       decoration = {
         rounding = 0,
         -- Ever-so-slight transparency on every window, active and inactive
@@ -633,10 +648,17 @@ in
     hl.animation({ leaf = "workspaces",       enabled = true, spring = "glide", speed = 2.6, style = "slidevert" })
     hl.animation({ leaf = "specialWorkspace", enabled = true, spring = "glide", speed = 2.6, style = "slidevert" })
 
-    -- — Trackpad gestures (1:1 swipe) —
-    -- 3-finger horizontal = workspace switch; 3-finger up = toggle fullscreen.
-    hl.gesture({ fingers = 3, direction = "horizontal", action = "workspace" })
-    hl.gesture({ fingers = 3, direction = "up", action = "fullscreen" })
+    -- — Trackpad gestures (niri's set, 1:1 under the fingers) —
+    -- Horizontal scrolls the tape, vertical walks workspaces: the same split
+    -- niri had, and the one the tape/stack geometry implies. `scroll_move` is
+    -- the scrolling layout's own gesture (0.56+): it drags the tape 1:1, then
+    -- projects the release velocity and snaps to a column, so a flick carries.
+    -- Both stay on 3 fingers: niri's four-finger overview swipe has no
+    -- equivalent, Hyprland has no overview. A directional ("up") gesture would
+    -- shadow the vertical one over half the axis, which is why fullscreen went
+    -- keyboard-only (Mod+Shift+F).
+    hl.gesture({ fingers = 3, direction = "horizontal", action = "scroll_move" })
+    hl.gesture({ fingers = 3, direction = "vertical", action = "workspace" })
 
     -- — Keybinds (mirror the macOS/aerospace muscle memory, SUPER as mod) —
     ${shellBinds}
