@@ -1,4 +1,9 @@
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 {
   config = lib.mkIf config.kyan.desktop.enable {
     # TuneD as the power-profile backend, in place of power-profiles-daemon
@@ -30,5 +35,10 @@
     # we got here, so say no to its replacement directly (its mkDefault yields
     # to this) or TuneD's conflict assertion fires.
     services.tlp.enable = false;
+
+    # `tuned-adm` arrives with the daemon, but powerprofilesctl left PATH along
+    # with the PPD service that used to put it there. Keep the client — it's the
+    # muscle memory, and it drives tuned-ppd exactly as it drove PPD.
+    environment.systemPackages = [ pkgs.power-profiles-daemon ];
   };
 }
