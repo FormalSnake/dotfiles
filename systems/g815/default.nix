@@ -184,12 +184,49 @@
   # otherwise only reachable via the trusted tailscale0 interface.
   services.openssh.openFirewall = true;
 
-  home-manager.users.kyandesutter = {
-    imports = [
-      self.homeModules.kyandesutter
-      self.homeModules.kyandesutter-linux
-    ];
-  };
+  home-manager.users.kyandesutter =
+    { pkgs, ... }:
+    {
+      imports = [
+        self.homeModules.kyandesutter
+        self.homeModules.kyandesutter-linux
+      ];
+
+      # Suspend after 10 minutes idle, ON BATTERY ONLY — on AC this is a desk
+      # machine and must never sleep under a remote session or a download.
+      # Same transient wait-loop shape as the e1504g: swayidle fires once per
+      # idle edge, the loop pulls the trigger only while /run/power/state
+      # (power.nix's reconciler) still says battery AND no SSH connection is
+      # established (this host is the e1504g's remote builder), and local
+      # activity kills the wait. Covers the unplug-while-already-idle case
+      # too, since the loop re-reads the source every pass. Browsers hold a
+      # Wayland idle inhibitor during playback, so video doesn't count as
+      # idle. lock-before-sleep locks on the way down; the dGPU side is
+      # untouched (dgpu-reconcile holds its own sleep inhibitor mid-transition).
+      services.swayidle = {
+        enable = true;
+        timeouts = [
+          {
+            timeout = 600;
+            command = toString (pkgs.writeShellScript "idle-suspend" ''
+              exec systemd-run --user --unit=idle-suspend-pending --collect \
+                ${pkgs.writeShellScript "idle-suspend-wait" ''
+                  while :; do
+                    if [ "$(${pkgs.coreutils}/bin/cat /run/power/state 2>/dev/null || echo unknown)" = battery ] \
+                      && ! ${pkgs.iproute2}/bin/ss -Htn state established sport = :22 \
+                        | ${pkgs.gnugrep}/bin/grep -q .; then
+                      break
+                    fi
+                    ${pkgs.coreutils}/bin/sleep 60
+                  done
+                  /run/current-system/sw/bin/systemctl suspend
+                ''}
+            '');
+            resumeCommand = "systemctl --user stop idle-suspend-pending.service";
+          }
+        ];
+      };
+    };
 
   # Set once at install and never change (matches the macbook's pattern).
   system.stateVersion = "25.11";
