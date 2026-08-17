@@ -44,7 +44,21 @@ in
         # appear (recording, DND, night light, a due reminder). Collapse state
         # is per region in state.json and starts collapsed, so the bar boots
         # at five cells rather than eleven.
-        bar.layout.right = [ "bluetooth" "tailscale" "weather" "github" "usage" "tray" "chevron" "battery" "audio" "network" "bell" "indicators" ];
+        bar.layout.right = [ "bluetooth" "custom:dualsense" "tailscale" "weather" "github" "usage" "tray" "chevron" "battery" "audio" "network" "bell" "indicators" ];
+        # Controller charge, next to the bluetooth cell it arrives through.
+        # Sits in the collapsible tier because it's blank whenever no
+        # controller is connected, which is most of the time. Absolute profile
+        # path: the shell's own systemd user service has no home profile bin
+        # on PATH. 30s beats the 5s default here — the controller reports
+        # charge in 10% buckets, so a faster poll can't say anything new.
+        bar.modules = [
+          {
+            id = "dualsense";
+            type = "command";
+            command = [ "${config.home.profileDirectory}/bin/dualsense-bar" ];
+            interval = 30000;
+          }
+        ];
         # Apple Music animated album covers in the media panel (off upstream).
         media.appleMusicArt = true;
       };
