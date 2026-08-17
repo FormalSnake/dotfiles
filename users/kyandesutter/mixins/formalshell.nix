@@ -28,7 +28,11 @@ in
         # ~/.claude/.credentials.json and the codex CLI; all three degrade
         # honestly without auth. Left/center regions absent on purpose, they
         # fall back to defaults (which include the M13b bell).
-        bar.layout.center = [ "clock" "nowPlaying" "visualizer" ];
+        # Weather sits next to the clock rather than out in the right region:
+        # both are ambient facts you read without acting on, and pairing them
+        # leaves nowPlaying and visualizer to read as the one media group they
+        # are.
+        bar.layout.center = [ "clock" "weather" "nowPlaying" "visualizer" ];
         # Two-tier right region. A chevron in the right region governs what
         # PRECEDES it (M25), so the collapsible group leads and the permanent
         # cells sit outboard against the screen edge. That ordering is what
@@ -38,13 +42,17 @@ in
         #
         # The split is monitor-versus-consult. Charge, volume, connectivity
         # and pending notifications are state you glance at; bluetooth,
-        # tailscale, weather, github, usage and the SNI tray are things you go
+        # tailscale, github, usage and the SNI tray are things you go
         # and look at. `indicators` stays permanent because its cells already
         # self-hide, so they cost nothing at rest and matter exactly when they
         # appear (recording, DND, night light, a due reminder). Collapse state
         # is per region in state.json and starts collapsed, so the bar boots
         # at five cells rather than eleven.
-        bar.layout.right = [ "bluetooth" "custom:dualsense" "tailscale" "weather" "github" "usage" "tray" "chevron" "battery" "audio" "network" "bell" "indicators" ];
+        bar.layout.right = [ "bluetooth" "custom:dualsense" "tailscale" "github" "usage" "tray" "chevron" "battery" "audio" "network" "bell" "indicators" ];
+        # Codex off: the usage panel polls and renders a section per provider,
+        # and this machine only ever signs into Claude, so the CODEX section
+        # was permanently reporting on a tool that never gets used.
+        usage.codex = false;
         # Controller charge, next to the bluetooth cell it arrives through.
         # Sits in the collapsible tier because it's blank whenever no
         # controller is connected, which is most of the time. Absolute profile
