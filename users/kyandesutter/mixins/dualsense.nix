@@ -129,9 +129,79 @@ let
         "$cap" "$cap" "$status" "$class"
     '';
   };
+  # D-pad as a desk remote for the scrolling tape: left/right walk the windows
+  # on the current workspace, up/down step workspaces. Same dispatchers the
+  # mod+H/L and mod+scroll binds use in mixins/hyprland.nix, so the controller
+  # can't drift from the keyboard.
+  #
+  # Hyprland has no gamepad input path of its own, so this reads evdev
+  # directly. It deliberately does NOT grab the device: a grab would hide the
+  # pad from anything that actually wants to be played with.
+  #
+  # `hyprctl dispatch` takes Lua since 0.55 (it wraps the argument in
+  # hl.dispatch(...)), which is why these are expressions rather than the old
+  # "layoutmsg focus l" strings.
+  #
+  # A hat reports once on press and once on release, with no auto-repeat, so
+  # holding a direction steps once. Repeat would need a timer here.
+  dualsensePad = pkgs.writers.writePython3Bin "dualsense-pad"
+    {
+      libraries = [ pkgs.python3Packages.evdev ];
+      flakeIgnore = [ "E501" ];
+    } ''
+    import subprocess
+    import time
+
+    import evdev
+
+    # Exact match: the touchpad and motion sensors are separate devices whose
+    # names extend this one.
+    PAD = "DualSense Wireless Controller"
+    HYPRCTL = "${pkgs.hyprland}/bin/hyprctl"
+
+    ACTIONS = {
+        (evdev.ecodes.ABS_HAT0X, -1): 'hl.dsp.layout("focus l")',
+        (evdev.ecodes.ABS_HAT0X, 1): 'hl.dsp.layout("focus r")',
+        (evdev.ecodes.ABS_HAT0Y, -1): 'hl.dsp.focus({ workspace = "e-1" })',
+        (evdev.ecodes.ABS_HAT0Y, 1): 'hl.dsp.focus({ workspace = "e+1" })',
+    }
+
+
+    def find_pad():
+        for path in evdev.list_devices():
+            try:
+                dev = evdev.InputDevice(path)
+            except OSError:
+                continue
+            if dev.name == PAD:
+                return dev
+            dev.close()
+        return None
+
+
+    def main():
+        while True:
+            dev = find_pad()
+            if dev is None:
+                time.sleep(5)
+                continue
+            try:
+                for event in dev.read_loop():
+                    if event.type != evdev.ecodes.EV_ABS:
+                        continue
+                    action = ACTIONS.get((event.code, event.value))
+                    if action is not None:
+                        subprocess.run([HYPRCTL, "dispatch", action], check=False)
+            except OSError:
+                # Controller went away mid-read; fall back to scanning.
+                time.sleep(2)
+
+
+    main()
+  '';
 in
 {
-  home.packages = [ pkgs.dualsensectl dualsenseSync dualsenseBar ];
+  home.packages = [ pkgs.dualsensectl dualsenseSync dualsenseBar dualsensePad ];
 
   # Hotplug: dualsensectl's own udev watcher, so a controller that wakes up or
   # reconnects over Bluetooth is painted immediately instead of waiting for the
@@ -172,6 +242,21 @@ in
       Type = "oneshot";
       ExecStart = "${dualsenseSync}/bin/dualsense-sync";
     };
+  };
+
+  # Scans for the pad itself and keeps scanning, so it needs no hotplug hook.
+  systemd.user.services.dualsense-pad = {
+    Unit = {
+      Description = "DualSense D-pad as a window and workspace remote";
+      PartOf = [ "graphical-session.target" ];
+      After = [ "graphical-session.target" ];
+    };
+    Service = {
+      ExecStart = "${dualsensePad}/bin/dualsense-pad";
+      Restart = "always";
+      RestartSec = 5;
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
   };
 
   # Restart on failure covers the mac being asleep or off the network: the
