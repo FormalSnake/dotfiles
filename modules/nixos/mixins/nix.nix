@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ config, inputs, ... }:
 {
   # nixpkgs.config.allowUnfree + the pi-coding-agent overlay live in ../../shared.
   # This module adds the NixOS-only Nix daemon settings (the macbook uses
@@ -29,10 +29,18 @@
     auto-optimise-store = true;
   };
 
+  # Owner policy (2026-08-17): keep only the last 3 system generations, the
+  # same window the limine boot menu shows. nix-collect-garbage can only
+  # delete generations by age (the old --delete-older-than 2d let 14 same-day
+  # generations pile up, and would conversely reap 2 of the kept 3 whenever
+  # the config sat stable for a few days), so trim the profile to the last 3
+  # first and let the plain collection pass reap whatever that unpinned.
+  systemd.services.nix-gc.preStart = ''
+    ${config.nix.package}/bin/nix-env --delete-generations +3 -p /nix/var/nix/profiles/system
+  '';
   nix.gc = {
     automatic = true;
     dates = "daily";
-    options = "--delete-older-than 2d";
   };
 
   # `sudo nixos-rebuild` evaluates as root, so the private flake inputs
