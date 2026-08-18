@@ -57,6 +57,9 @@ in
         usage.codex = false;
         # Apple Music animated album covers in the media panel (off upstream).
         media.appleMusicArt = true;
+        # Toast corner (M34). Matches the shipped default on purpose: the
+        # choice is the owner's, so it is written down rather than inherited.
+        notifications.position = "bottom-right";
       };
     };
 
@@ -69,6 +72,17 @@ in
     # reads local .ics dirs only, it cannot consume dankcal's IPC.
     programs.dank-material-shell.systemd.enable = lib.mkForce false;
     programs.dank-calendar.systemd.enable = lib.mkForce false;
+
+    # Everything launched from the shell's menu lands in formalshell.service's
+    # cgroup: quickshell's DesktopEntry.execute only double-forks, it never
+    # moves the child into a scope of its own. With the default
+    # KillMode=control-group that means every rebuild restart takes the
+    # launched apps down with the shell, kopuz mid-track included. Killing
+    # only the main process leaves them running. Quickshell's own Process
+    # children (the wl-paste watchers, cava) still go, since it kills managed
+    # processes when it exits, and detached apps are exactly the set that
+    # should survive a shell restart.
+    systemd.user.services.formalshell.Service.KillMode = "process";
 
     # helium waits for the session notification daemon (see autostart.nix);
     # with dms.service gone that is formalshell.service.
