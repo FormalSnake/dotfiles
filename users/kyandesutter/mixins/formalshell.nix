@@ -28,11 +28,7 @@ in
         # ~/.claude/.credentials.json and the codex CLI; all three degrade
         # honestly without auth. Left/center regions absent on purpose, they
         # fall back to defaults (which include the M13b bell).
-        # Weather sits next to the clock rather than out in the right region:
-        # both are ambient facts you read without acting on, and pairing them
-        # leaves nowPlaying and visualizer to read as the one media group they
-        # are.
-        bar.layout.center = [ "clock" "weather" "nowPlaying" "visualizer" ];
+        bar.layout.center = [ "clock" "nowPlaying" "visualizer" ];
         # Two-tier right region. A chevron in the right region governs what
         # PRECEDES it (M25), so the collapsible group leads and the permanent
         # cells sit outboard against the screen edge. That ordering is what
@@ -51,7 +47,10 @@ in
         # dualsense keeps its old collapsible slot. Collapse state is per
         # region in state.json and starts collapsed, so the bar boots at
         # five cells rather than eleven.
-        bar.layout.right = [ "bluetooth" "dualsense" "tailscale" "github" "usage" "tray" "chevron" "battery" "airpods" "audio" "network" "bell" "indicators" ];
+        # Weather rides the permanent tier (owner ask 2026-08-18, out of the
+        # center group), leading it so the battery/audio/network cluster
+        # stays contiguous against the screen edge.
+        bar.layout.right = [ "bluetooth" "dualsense" "tailscale" "github" "usage" "tray" "chevron" "weather" "battery" "airpods" "audio" "network" "bell" "indicators" ];
         # Codex off: the usage panel polls and renders a section per provider,
         # and this machine only ever signs into Claude, so the CODEX section
         # was permanently reporting on a tool that never gets used.
