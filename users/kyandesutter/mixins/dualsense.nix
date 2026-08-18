@@ -115,33 +115,6 @@ let
     '';
   };
 
-  # Waybar-JSON for FormalShell's `command` bar module (mixins/formalshell.nix
-  # registers it as custom:dualsense). Empty text when no controller is
-  # attached, which is what keeps the cell out of the way the rest of the time.
-  # Same sysfs-over-dualsensectl reasoning as the sync; hid-playstation
-  # publishes the pack as a power supply named after the controller's MAC.
-  # Capacity comes in 10% buckets, never finer.
-  dualsenseBar = pkgs.writeShellApplication {
-    name = "dualsense-bar";
-    runtimeInputs = with pkgs; [ coreutils ];
-    text = ''
-      shopt -s nullglob
-      supply=(/sys/class/power_supply/ps-controller-battery-*)
-      if [ ''${#supply[@]} -eq 0 ]; then
-        printf '{"text":"","tooltip":"","class":""}\n'
-        exit 0
-      fi
-
-      cap="$(cat "''${supply[0]}/capacity" 2>/dev/null || echo 0)"
-      status="$(cat "''${supply[0]}/status" 2>/dev/null || echo Unknown)"
-      class=""
-      [ "$cap" -gt 20 ] || class="warning"
-      [ "$cap" -gt 10 ] || class="critical"
-
-      printf '{"text":"DS %s%%","tooltip":"DualSense — %s%%, %s","class":"%s"}\n' \
-        "$cap" "$cap" "$status" "$class"
-    '';
-  };
   # On-screen keyboard. FormalShell has no keyboard surface of its own (its
   # only virtual-keyboard use is wtype for emoji auto-typing), so this is
   # wvkbd, which speaks the same zwp_virtual_keyboard protocol. Start/stop
@@ -409,7 +382,6 @@ in
   home.packages = [
     pkgs.dualsensectl
     dualsenseSync
-    dualsenseBar
     dualsensePad
     dualsenseOsk
     dualsenseRumble

@@ -220,26 +220,6 @@ in
     };
   };
 
-  # librepods — AirPods tray app (package in mixins/airpods.nix). DE-agnostic
-  # tray app, so it lives here like the other login items. Absolute store path
-  # (no loginExec needed); starts hidden to the tray, and its icon is picked up
-  # by DMS's `tray` widget. No Restart: quitting from the tray must not
-  # relaunch it. g815-only (imported via linux.nix); macOS handles AirPods
-  # natively.
-  systemd.user.services.librepods = {
-    Unit = {
-      Description = "librepods (AirPods daemon, hidden to tray)";
-      PartOf = [ "graphical-session.target" ];
-      After = [ "graphical-session.target" ];
-      "X-SwitchMethod" = "keep-old";
-    };
-    Install.WantedBy = [ "graphical-session.target" ];
-    Service = {
-      Type = "simple";
-      ExecStart = "${pkgs.librepods}/bin/librepods --hide";
-    };
-  };
-
   # Helium (Chromium browser). Window rule pins it to workspace 1 (web).
   #
   # Helium picks its notification backend ONCE at startup: it probes the

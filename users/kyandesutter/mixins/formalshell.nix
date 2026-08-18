@@ -45,28 +45,17 @@ in
         # tailscale, github, usage and the SNI tray are things you go
         # and look at. `indicators` stays permanent because its cells already
         # self-hide, so they cost nothing at rest and matter exactly when they
-        # appear (recording, DND, night light, a due reminder). Collapse state
-        # is per region in state.json and starts collapsed, so the bar boots
-        # at five cells rather than eleven.
-        bar.layout.right = [ "bluetooth" "custom:dualsense" "tailscale" "github" "usage" "tray" "chevron" "battery" "audio" "network" "bell" "indicators" ];
+        # appear (recording, DND, night light, a due reminder). airpods and
+        # dualsense (M29 builtins) self-hide the same way, so airpods earns
+        # the permanent tier next to audio (owner ask 2026-08-18) and
+        # dualsense keeps its old collapsible slot. Collapse state is per
+        # region in state.json and starts collapsed, so the bar boots at
+        # five cells rather than eleven.
+        bar.layout.right = [ "bluetooth" "dualsense" "tailscale" "github" "usage" "tray" "chevron" "battery" "airpods" "audio" "network" "bell" "indicators" ];
         # Codex off: the usage panel polls and renders a section per provider,
         # and this machine only ever signs into Claude, so the CODEX section
         # was permanently reporting on a tool that never gets used.
         usage.codex = false;
-        # Controller charge, next to the bluetooth cell it arrives through.
-        # Sits in the collapsible tier because it's blank whenever no
-        # controller is connected, which is most of the time. Absolute profile
-        # path: the shell's own systemd user service has no home profile bin
-        # on PATH. 30s beats the 5s default here — the controller reports
-        # charge in 10% buckets, so a faster poll can't say anything new.
-        bar.modules = [
-          {
-            id = "dualsense";
-            type = "command";
-            command = [ "${config.home.profileDirectory}/bin/dualsense-bar" ];
-            interval = 30000;
-          }
-        ];
         # Apple Music animated album covers in the media panel (off upstream).
         media.appleMusicArt = true;
       };
