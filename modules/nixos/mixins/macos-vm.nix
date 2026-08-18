@@ -215,6 +215,32 @@ let
             index += 1
   '';
 
+  # The GUI installer on this media is the App Store *downloader* stub: it asks
+  # for an Apple ID because it wants to fetch an installer we already have. This
+  # drives the payload directly instead, and works around two things that only
+  # bite when booting the raw BaseSystem volume rather than createinstallmedia
+  # media: the migration step needs "Recovered Items" to already exist, and the
+  # boot volume owns the /Volumes/OS X Base System name that BaseSystem.dmg
+  # needs when the installer mounts it for BaseSystemResources.pkg.
+  guestInstaller = pkgs.writeText "install-mavericks" ''
+    #!/bin/sh
+    set -e
+
+    target="''${1:-/Volumes/Mavericks}"
+    if [ ! -d "$target" ]; then
+      echo "usage: $0 /Volumes/<target volume>" >&2
+      echo "erase one first, e.g.: diskutil eraseVolume JHFS+ Mavericks disk3s2" >&2
+      exit 1
+    fi
+
+    mkdir -p "$target/Recovered Items/System/Library/Caches"
+    rm -f "/Volumes/OS X Base System"
+    hdiutil attach "/Volumes/OS X Install ESD/BaseSystem.dmg" -readonly -noverify
+
+    installer -verbose -pkg /System/Installation/Packages/OSInstall.mpkg -target "$target"
+    echo "Done. Reboot and pick $target in the OpenCore picker."
+  '';
+
   fetchInstaller = pkgs.writeShellApplication {
     name = "macos-vm-fetch";
     runtimeInputs = with pkgs; [
@@ -289,6 +315,7 @@ let
           sudo -n rm -rf "$mnt/System/Installation/$payload"
           sudo -n ln -s "/Volumes/OS X Install ESD/$payload" "$mnt/System/Installation/$payload"
         done
+        sudo -n install -m 0755 ${guestInstaller} "$mnt/install-mavericks"
         sudo -n umount "$mnt"
         rmdir "$mnt"
         trap - EXIT
@@ -386,7 +413,12 @@ let
         # cropping it. The guest resolution is fixed at boot and macOS offers no
         # other mode, so without this a window smaller than `resolution` hides
         # the bottom of the screen.
-        -display "''${MACOS_VM_DISPLAY:-gtk,zoom-to-fit=on,show-menubar=off}"
+        #
+        # The menubar stays visible on purpose: QEMU hangs Ctrl+Alt+G (grab) and
+        # Ctrl+Alt+Q (quit) off its menu items, so show-menubar=off silently
+        # kills both accelerators and leaves no way to capture the pointer or
+        # close the window.
+        -display "''${MACOS_VM_DISPLAY:-gtk,zoom-to-fit=on}"
         -monitor "unix:$state/monitor.sock,server,nowait"
       )
 

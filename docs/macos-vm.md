@@ -11,7 +11,9 @@ commands, a desktop entry, and `ignore_msrs=1` on the kvm module.
   relative USB mouse. Ungrabbed it does nothing at first and then drifts out of
   sync with the host cursor, leaving parts of the screen unreachable; grabbed,
   the host cursor is hidden and confined, so the two are one pointer.
-  Ctrl+Alt+G again releases.
+  Ctrl+Alt+G again releases, and **View → Grab Input** does the same from the
+  menubar (which is why the menubar is left visible: QEMU's accelerators live on
+  those menu items and die with it).
   Fullscreen with Hyprland's binding, not QEMU's: QEMU's `-full-screen` grabs
   the keyboard and then eats its own Ctrl+Alt+Q, leaving no way out.
   **Ctrl+Alt+Q** quits, and `pkill -f '^qemu-system'` is the hard stop.
@@ -106,21 +108,34 @@ framebuffer; which one OVMF drives cleanly has changed across QEMU versions.
 
 ## Walkthrough: install to first boot
 
-1. `macos-vm` (or the **macOS Mavericks** app-grid entry). Fullscreen with
-   Hyprland if you want it, not with QEMU.
-2. OpenCore's picker: `basesystem`. First boot to the **OS X Utilities** window
-   takes about a minute on a verbose boot.
-3. **Disk Utility** → select `QEMU HARDDISK` (the 64 GB one, not `basesystem` or
-   `OS X Install ESD`) → **Partition** tab → 1 Partition → **Options…** →
-   **GUID Partition Map** → format **Mac OS Extended (Journaled)** → name it →
-   Apply. Quit Disk Utility.
-4. **Reinstall OS X** → Continue → agree → pick the volume you just made. It
-   installs from the attached ESD (no download) and reboots itself.
-5. Back at OpenCore's picker, select the new volume and press **Ctrl+Enter** to
-   make it the default so future boots go straight there.
-6. Setup Assistant: skip the Apple ID (10.9-era iCloud auth is dead), create a
-   local account, skip registration.
-7. Once it boots on its own:
+The GUI installer on this media is the App Store *downloader* stub: it asks for
+an Apple ID because it wants to download an installer we already have locally.
+`macos-vm-fetch` puts an `/install-mavericks` script on the media that drives
+the payload directly instead.
+
+1. `macos-vm` (or the **macOS Mavericks** app-grid entry), then Ctrl+Alt+G to
+   capture the mouse.
+2. OpenCore's picker: `basesystem`. ~90s to the **OS X Utilities** window.
+3. **Disk Utility** → the 64 GB `QEMU HARDDISK` → Partition → 1 Partition →
+   Options… → **GUID Partition Map** → **Mac OS Extended (Journaled)** → name it
+   `Mavericks` → Apply. Quit Disk Utility.
+4. **Utilities → Terminal**, then:
+
+   ```
+   /install-mavericks /Volumes/Mavericks
+   ```
+
+   Roughly 15 minutes, ending in `The install was successful.` Do not use
+   **Reinstall OS X** in the Utilities window; that is the stub that wants an
+   Apple ID.
+5. `reboot`. OpenCore boots the new volume; press **Ctrl+Enter** on it in the
+   picker to make it the default.
+6. Setup Assistant runs. Skip the Apple ID (10.9-era iCloud auth is dead) and
+   create a local account.
+7. The system language follows whatever the installer environment used, which is
+   not necessarily English. Fix it from Terminal with `sudo languagesetup`, then
+   restart.
+8. Once it boots on its own,
    `rm ~/.local/share/macos-vm/{InstallESD.dmg,esd.*,basesystem.*}` frees ~12 GB.
 
 ## Post-install: the mavericksforever patch set
