@@ -8,7 +8,10 @@ commands, a desktop entry, and `ignore_msrs=1` on the kvm module.
   it to a raw disk. Run once, ~5 GB.
 - `macos-vm` — boots the guest in a window. **Ctrl+Alt+G captures the mouse**
   and you need it: 10.9 ignores QEMU's absolute tablet, so the pointer is a
-  relative USB mouse and does nothing until captured. Ctrl+Alt+G again releases.
+  relative USB mouse. Ungrabbed it does nothing at first and then drifts out of
+  sync with the host cursor, leaving parts of the screen unreachable; grabbed,
+  the host cursor is hidden and confined, so the two are one pointer.
+  Ctrl+Alt+G again releases.
   Fullscreen with Hyprland's binding, not QEMU's: QEMU's `-full-screen` grabs
   the keyboard and then eats its own Ctrl+Alt+Q, leaving no way out.
   **Ctrl+Alt+Q** quits, and `pkill -f '^qemu-system'` is the hard stop.
