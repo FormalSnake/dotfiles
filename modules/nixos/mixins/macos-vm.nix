@@ -355,6 +355,15 @@ let
       state=${lib.escapeShellArg stateDir}
       mkdir -p "$state"
 
+      # One instance only. A second QEMU would fail on the disk's write lock
+      # anyway, but not before replacing the first one's monitor socket, which
+      # leaves the running guest undrivable.
+      exec 9>"$state/.lock"
+      if ! flock -n 9; then
+        echo "macos-vm is already running" >&2
+        exit 1
+      fi
+
       # OVMF's variable store has to be writable; OpenCore persists its boot
       # selection there.
       if [ ! -f "$state/OVMF_VARS.fd" ]; then
