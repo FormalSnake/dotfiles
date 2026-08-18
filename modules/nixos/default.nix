@@ -38,6 +38,7 @@
       ./mixins/onepassword.nix
       ./mixins/syncthing.nix
       ./mixins/geolocation.nix
+      ./mixins/macos-vm.nix
       ./profiles
     ];
   };

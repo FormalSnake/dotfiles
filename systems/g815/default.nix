@@ -170,6 +170,11 @@
   # (modules/nixos/mixins/syncthing.nix; spec 2026-07-22).
   kyan.syncthing.enable = true;
 
+  # macOS 10.9 guest (docs/macos-vm.md). Nothing runs until `macos-vm-fetch`
+  # pulls the installer; the mixin only adds the two commands and the KVM
+  # ignore_msrs option.
+  kyan.macosVm.enable = true;
+
   # Remote-builder key for the e1504g (nix.buildMachines in
   # systems/e1504g/default.nix): its root connects here as kyandesutter over
   # Tailscale to run builds. Force-commanded to `nix-daemon --stdio` (all
