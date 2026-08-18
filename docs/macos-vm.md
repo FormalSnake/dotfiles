@@ -6,11 +6,12 @@ commands, a desktop entry, and `ignore_msrs=1` on the kvm module.
 
 - `macos-vm-fetch` — downloads Apple's Mavericks `InstallESD.dmg` and converts
   it to a raw disk. Run once, ~5 GB.
-- `macos-vm` — boots the guest in a window. Fullscreen it with Hyprland's own
-  binding, not QEMU's: QEMU's `-full-screen` grabs the keyboard and then eats
-  its own Ctrl+Alt+Q, which leaves no way out. **Ctrl+Alt+G** grabs and releases
-  input on demand, **Ctrl+Alt+Q** quits, and `pkill -f '^qemu-system'` is the
-  hard stop.
+- `macos-vm` — boots the guest in a window. **Ctrl+Alt+G captures the mouse**
+  and you need it: 10.9 ignores QEMU's absolute tablet, so the pointer is a
+  relative USB mouse and does nothing until captured. Ctrl+Alt+G again releases.
+  Fullscreen with Hyprland's binding, not QEMU's: QEMU's `-full-screen` grabs
+  the keyboard and then eats its own Ctrl+Alt+Q, leaving no way out.
+  **Ctrl+Alt+Q** quits, and `pkill -f '^qemu-system'` is the hard stop.
 - App grid entry: **macOS Mavericks**.
 
 State (not in the flake, delete to start over):
@@ -91,6 +92,10 @@ nc -U ~/.local/share/macos-vm/monitor.sock
 `screendump /tmp/vm.ppm` in that monitor captures the framebuffer, which is the
 only way to read a panic if the display is wedged. For a headless run:
 `MACOS_VM_DISPLAY=none macos-vm` (this also drops `-full-screen`).
+
+USB devices are on an ICH9 UHCI controller, not XHCI: 10.9's AppleUSBXHCI only
+matches real Intel/NEC hardware, so on `qemu-xhci` the whole bus is dead and
+neither keyboard nor pointer works.
 
 Black screen instead of the OpenCore picker: swap `-device vmware-svga` for
 `-device VGA,vgamem_mb=128` in the mixin. Both give an unaccelerated

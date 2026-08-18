@@ -359,13 +359,20 @@ let
         -drive id=hdd,if=none,format=raw,cache=none,aio=io_uring,discard=unmap,file="$state/disk.img"
         -device ide-hd,bus=sata.1,drive=hdd
 
-        -device qemu-xhci,id=xhci
-        # usb-tablet is an absolute pointing device: no guest-side mouse
-        # acceleration fighting the host's.
-        -device usb-kbd,bus=xhci.0
-        -device usb-tablet,bus=xhci.0
+        # Input hangs off UHCI, not XHCI: 10.9's AppleUSBXHCI only matches real
+        # Intel/NEC controllers, so on qemu-xhci the entire USB bus stays dead
+        # (no keyboard, no pointer). AppleUSBUHCI matches the ICH9 function.
+        # usb-mouse, not usb-tablet: 10.9 ignores the tablet's absolute HID
+        # report descriptor (keyboard on the same bus works, the pointer never
+        # moves), so the pointer is relative and needs Ctrl+Alt+G to capture.
+        -device ich9-usb-uhci1,id=uhci
+        -device usb-kbd,bus=uhci.0
+        -device usb-mouse,bus=uhci.0
+        # Audio sits on the same UHCI bus: QEMU's usb-audio is a full-speed
+        # device, so EHCI refuses it. Stereo 48kHz fits in 12Mbps, and 10.9
+        # drives it with in-box AppleUSBAudio.
         -audiodev pipewire,id=snd
-        -device usb-audio,bus=xhci.0,audiodev=snd
+        -device usb-audio,bus=uhci.0,audiodev=snd
 
         -netdev user,id=net0
         -device e1000-82545em,netdev=net0,mac=52:54:00:c9:18:27
