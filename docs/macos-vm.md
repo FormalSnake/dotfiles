@@ -71,8 +71,14 @@ All under `kyan.macosVm` in `systems/g815/default.nix`:
 
 `resolution` is the one worth tuning. There is no guest driver, so macOS sees
 exactly one mode and the Displays pane offers nothing else. `Max` gives the
-panel's 2560x1600 (sharp, but 3x the compositing work of 1080p); a fixed
-`1920x1200` is smoother and gets scaled by the host.
+panel's 2560x1600 (sharp at 1:1, but 3x the compositing work of 1080p); a fixed
+`1920x1200` keeps the 16:10 aspect and is noticeably smoother.
+
+The GTK window scales the guest screen to fit (`zoom-to-fit=on`), so nothing is
+ever cropped, but any non-1:1 scale looks soft. For a sharp 2560x1600 guest you
+need the window at the panel's full size: Hyprland's real fullscreen
+(`fullscreen 0`) covers the bar, while a maximize-style fullscreen leaves the
+bar's reserved space and forces a slight downscale.
 
 ## Debugging
 

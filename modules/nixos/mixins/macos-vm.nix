@@ -375,7 +375,11 @@ let
         # an input grab that swallows its own Ctrl+Alt+Q accelerator, which
         # leaves no way out. Hyprland's fullscreen binding does the same job
         # without touching the keyboard. Ctrl+Alt+G grabs on demand.
-        -display "''${MACOS_VM_DISPLAY:-gtk,zoom-to-fit=off,show-menubar=off}"
+        # zoom-to-fit scales the guest framebuffer into the window instead of
+        # cropping it. The guest resolution is fixed at boot and macOS offers no
+        # other mode, so without this a window smaller than `resolution` hides
+        # the bottom of the screen.
+        -display "''${MACOS_VM_DISPLAY:-gtk,zoom-to-fit=on,show-menubar=off}"
         -monitor "unix:$state/monitor.sock,server,nowait"
       )
 
