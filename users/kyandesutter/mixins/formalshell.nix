@@ -65,6 +65,12 @@ in
         # Toast corner (M34). Matches the shipped default on purpose: the
         # choice is the owner's, so it is written down rather than inherited.
         notifications.position = "bottom-right";
+        # One screen animates the screensaver, and it should be the desk
+        # monitor: a frame is a full-screen repaint, plus a cross-GPU copy
+        # for the head hanging off the dGPU. Every other screen holds the
+        # converged banner instead. Falls back to the built-in panel when
+        # nothing is plugged in, which is what e1504g always resolves to.
+        screensaver.outputPriority = [ "HDMI" "internal" ];
       };
     };
 
