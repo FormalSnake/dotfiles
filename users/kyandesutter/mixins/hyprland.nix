@@ -780,6 +780,16 @@ in
     -- never tile. Force them back into the layout.
     hl.window_rule({ match = { class = "^([Bb]eeper)$" }, float = false })
     hl.window_rule({ match = { class = "^([Bb]lue[Bb]ubbles)$" }, float = false })
+    -- The quake console maps straight onto its own special workspace,
+    -- floating, without ever touching the layout you are looking at. The
+    -- shell sizes and reveals it afterwards either way, but without this
+    -- rule the terminal tiles into the current workspace for the frames
+    -- before that lands, and the layout reflows twice for nothing.
+    hl.window_rule({
+      match = { class = "^(dev.formalshell.console)$" },
+      workspace = "special:formalshell-console silent",
+      float = true,
+    })
     hl.window_rule({ match = { class = "^([Oo]bsidian)$" }, workspace = "5" })
     hl.window_rule({ match = { class = "^([Cc]laude)$" }, workspace = "7" })
     hl.window_rule({ match = { class = "^([Ss]potify|[Kk]opuz)$" }, workspace = "8" })
