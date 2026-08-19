@@ -172,6 +172,12 @@ in
       # undeclared on purpose: the wabi bridge injects the matugen accent
       # gradient into the active space on every palette change
       # (syncWorkspaceTheme), and a static theme here would just fight it.
+      # Overwrite without the .before-hm backup dance: zen rewrites this file
+      # at runtime, so every switch found a differing file, and a stale
+      # backup from the previous switch then aborted the whole home-manager
+      # activation (both hosts hit this, 2026-08-18/19). Declared containers
+      # are the whole intended set, same stance spacesForce already takes.
+      containersForce = true;
       containers = {
         CanaryCoders = {
           color = "orange";
