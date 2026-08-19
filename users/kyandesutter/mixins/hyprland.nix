@@ -589,6 +589,11 @@ in
       },
       decoration = {
         rounding = 0,
+        # Separates the quake console from the workspace it drops over. Only
+        # applies while a special workspace is on screen, so it costs the
+        # rest of the session nothing, and the console is the only special
+        # workspace here.
+        dim_special = 0.6,
         -- Ever-so-slight transparency on every window, active and inactive
         -- alike, so the backdrop blur below has something to show through.
         active_opacity = 0.96,
