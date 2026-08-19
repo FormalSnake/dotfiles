@@ -12,6 +12,11 @@ in
   imports = [ inputs.formalshell.homeModules.default ];
 
   config = lib.mkIf useFormalshell {
+    # notify-send, for testing and scripting against the shell's own
+    # notification daemon (2026-08-19: neither host had it installed, which
+    # read as "toasts are broken" when they were merely never fired).
+    home.packages = [ pkgs.libnotify ];
+
     programs.formalshell = {
       enable = true;
       package = fsPkg;
@@ -50,7 +55,7 @@ in
         # Weather rides the permanent tier (owner ask 2026-08-18, out of the
         # center group), leading it so the battery/audio/network cluster
         # stays contiguous against the screen edge.
-        bar.layout.right = [ "bluetooth" "dualsense" "tailscale" "github" "usage" "tray" "chevron" "weather" "battery" "airpods" "audio" "network" "bell" "indicators" ];
+        bar.layout.right = [ "display" "bluetooth" "dualsense" "tailscale" "github" "usage" "tray" "chevron" "weather" "battery" "airpods" "audio" "network" "bell" "indicators" ];
         # Codex off: the usage panel polls and renders a section per provider,
         # and this machine only ever signs into Claude, so the CODEX section
         # was permanently reporting on a tool that never gets used.
