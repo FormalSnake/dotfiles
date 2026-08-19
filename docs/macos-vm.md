@@ -175,3 +175,32 @@ Do not delete System Preferences or anything in Utilities.
 Two VM-specific notes: video playback through the codec components is CPU-only
 here, so expect 1080p to struggle and 4K to fail outright; and audio arrives as a
 USB audio device, which 10.9 drives with its in-box AppleUSBAudio.
+
+## Claude Code in the guest
+
+It runs, with two caveats: the current CLI cannot, and a shim is required.
+
+The npm package stopped shipping JavaScript at **2.1.113** — from there on it is a
+Bun-compiled Mach-O with `minos 13.0`, which 10.9's dyld cannot load at all
+(nor could it run Bun). **2.1.112 is the last version that works here.**
+
+Node's official darwin-x64 builds are compiled with a 10.15 deployment target,
+so they reference libSystem symbols Mavericks lacks. Three stubs cover it, built
+as an x86_64 dylib and injected with `DYLD_INSERT_LIBRARIES` +
+`DYLD_FORCE_FLAT_NAMESPACE=1`:
+
+| Symbol | Added in | Stub |
+| --- | --- | --- |
+| `___chkstk_darwin` | 10.15 | `ret` (skips the stack probe) |
+| `_CCRandomGenerateBytes` | 10.12 | `arc4random_buf`, returns 0 |
+| `_mach_continuous_time` | 10.12 | `mach_absolute_time` |
+
+With those, Node 18 runs. Node 22 needs more than these three and was not chased.
+
+Guest layout: Node 18 in `~/node18`, the shim at `~/node18/lib/libchkstk.dylib`,
+and `~/bin/claude` as a wrapper that exports both DYLD variables and execs
+`node .../claude-code/cli.js`. Log in with `claude` → option 1; Safari cannot
+reach the OAuth page (no modern TLS), so paste the printed URL into Momiji and
+paste the code back. Copying `~/.claude/.credentials.json` from another machine
+does not authenticate it — the macOS build reads the Keychain, and a
+hand-written `Claude Code-credentials` item was not accepted either.
