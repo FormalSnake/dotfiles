@@ -6,18 +6,18 @@ let
   # Widevine support (the binary carries CdmAdapter / com.widevine.alpha) but the
   # upstream tarball ships no proprietary CDM, so DRM sites (Netflix, Spotify, …)
   # won't play. pkgs.widevine-cdm provides Chrome's CDM in the layout Chromium
-  # expects: a dir with manifest.json + _platform_specific/linux_x64/libwidevinecdm.so.
+  # expects (a dir with manifest.json + _platform_specific/linux_x64/libwidevinecdm.so).
   cdmDir = "${pkgs.widevine-cdm}/share/google/chrome/WidevineCdm";
 
   # Chromium can locate the CDM two ways; Helium is built for the *second* one, so
-  # the hint file below is what actually enables playback. We provide both anyway —
+  # the hint file below is what actually enables playback. We provide both anyway:
   # they point at the same CDM, so there is no version skew.
   #
-  #  1. Bundled (DIR_BUNDLED_WIDEVINE_CDM) — a `WidevineCdm/` dir next to the
+  #  1. Bundled (DIR_BUNDLED_WIDEVINE_CDM): a `WidevineCdm/` dir next to the
   #     binary. Honored only under the bundle_widevine_cdm build flag, which Helium
   #     does NOT set (the symlinked CDM is silently ignored). Kept as a no-cost
   #     fallback in case a future build flips the flag.
-  #  2. Component hint (FILE_COMPONENT_WIDEVINE_CDM_HINT) — Helium is built with
+  #  2. Component hint (FILE_COMPONENT_WIDEVINE_CDM_HINT): Helium is built with
   #     enable_widevine_cdm_component, so on first run it creates an empty
   #     ~/.config/net.imput.helium/WidevineCdm/ and, at CDM registration, reads a
   #     hint file there to find the CDM. Normally the component updater writes it,
@@ -26,13 +26,13 @@ let
   #
   # Symlinking the *directory* keeps the .so a real file in another store path, so
   # autoPatchelfHook (find -type f, no -L) and the LD_LIBRARY_PATH wrapper leave it
-  # untouched — it is already patched upstream. Linux Widevine is L3 → up to 720p
+  # untouched: it is already patched upstream. Linux Widevine is L3 → up to 720p
   # on Netflix (the platform cap).
   heliumBase = pkgs.helium.overrideAttrs (old: {
     # Helium's "Use GTK" appearance option dlopens libgtk at runtime (the binary
     # carries the loader strings libgtk-4.so.1 then libgtk-3.so.0). The upstream
     # build ships no GTK, so the dlopen fails and the toggle silently falls back
-    # to the Classic theme. runtimeDependencies (not buildInputs — GTK is
+    # to the Classic theme. runtimeDependencies (not buildInputs: GTK is
     # dlopen'd, not DT_NEEDED, so autoPatchelfHook won't add it otherwise) puts
     # libgtk-3.so.0 on the rpath. GTK3 not 4: Chromium defaults to the GTK3
     # backend (GTK4 is opt-in behind --gtk-version=4 and still incomplete).
@@ -51,12 +51,12 @@ let
 
   # Kopuz hosts Spotify's Web Playback SDK in a browser tab and picks one by
   # binary name on PATH (chromium, chromium-browser, google-chrome, brave,
-  # microsoft-edge, vivaldi — Firefox is excluded upstream because the SDK dies
-  # in it). The SDK needs Widevine, which rules out a bare pkgs.chromium; Helium
+  # microsoft-edge, vivaldi). Firefox is excluded upstream because the SDK dies
+  # in it. The SDK needs Widevine, which rules out a bare pkgs.chromium; Helium
   # is ungoogled-chromium with the CDM above already wired up, so expose it
   # under the name Kopuz probes for instead of installing a second Chromium.
   # The symlink lands on the igpu wrapper, whose `exec -a "$0"` leaves argv[0]
-  # alone, and Chromium's singleton hands the URL to the running Helium — so the
+  # alone, and Chromium's singleton hands the URL to the running Helium, so the
   # player tab reuses the profile that carries the CDM hint file below.
   kopuzChromium = pkgs.runCommand "helium-chromium-alias" { } ''
     mkdir -p $out/bin
@@ -73,7 +73,7 @@ in
   ];
 
   # Widevine component hint file (path #2 above). A JSON dict whose "Path" points
-  # at the dir holding manifest.json + _platform_specific/…; Chromium reads it via
+  # at the dir holding manifest.json + _platform_specific/…. Chromium reads it via
   # FILE_COMPONENT_WIDEVINE_CDM_HINT = <user-data-dir>/WidevineCdm/<this file>.
   # net.imput.helium is Helium's user-data dir (cf. its Crash Reports path).
   home.file.".config/net.imput.helium/WidevineCdm/latest-component-updated-widevine-cdm".text =

@@ -14,7 +14,7 @@ in
     # colours are wallpaper-derived: DMS renders the live matugen palette into
     # ~/.config/ghostty/themes/Matugen and SIGUSR2-reloads ghostty (see the
     # `ghostty` user template in mixins/dms.nix). On macOS (no DMS) we
-    # follow the system appearance with Ghostty's built-in Flexoki themes — no
+    # follow the system appearance with Ghostty's built-in Flexoki themes: no
     # theme files to install, they ship with the app.
     package = if isDarwin then null else pkgs.ghostty;
     enableFishIntegration = false;
@@ -29,7 +29,7 @@ in
       # MEK Mono is smaller than GeistMono in every dimension at a given point
       # size: cap height 600/1000em against 710, line box 1200 against 1300,
       # advance 450 against 600. 12 matched GeistMono at 10 and 13.5 only got
-      # to GeistMono at 11.4, both still read small; 15.5 puts the caps level
+      # to GeistMono at 11.4, both still read small. 15.5 puts the caps level
       # with GeistMono at 13. The cell stays narrower than GeistMono's, so the
       # grid keeps more columns than it had.
       font-family = [ "MEK Mono" "GeistMono Nerd Font" ];
@@ -59,7 +59,7 @@ in
       clipboard-read = "allow";
       clipboard-write = "allow";
 
-      # shift+enter helper is cross-platform; the cmd-based global quick-terminal
+      # shift+enter helper is cross-platform. The cmd-based global quick-terminal
       # toggle is macOS-only (the `cmd` key doesn't exist on the Linux build).
       keybind = [
         "shift+enter=text:\\x1b\\r"
@@ -71,7 +71,7 @@ in
       # (light ↔ dark). The names carry a space, which Ghostty's `light:…,dark:…`
       # theme syntax handles (it only splits on the comma).
       # NOTE (Linux cold start): the Matugen file only exists once DMS has
-      # generated a wallpaper palette — populate ~/Pictures/Wallpapers/{light,dark}
+      # generated a wallpaper palette. Populate ~/Pictures/Wallpapers/{light,dark}
       # or ghostty starts themeless until the first palette is generated.
       theme =
         if isDarwin then
@@ -87,17 +87,17 @@ in
     # GeistMono, so it landed on Noto Emoji at 1270/1000em: wide enough to cover
     # the trailing space and the first letter of the word after it. Noto Sans
     # Symbols 2 draws the same circle at 910/1000em, which stops inside the
-    # space. Linux only, the Noto fonts aren't installed on the mac.
+    # space. Linux only. The Noto fonts aren't installed on the mac.
     // lib.optionalAttrs (!isDarwin) { font-codepoint-map = "U+23FA=Noto Sans Symbols 2"; };
   };
 
   # On macOS the ghostty binary is a Homebrew cask, so nixpkgs has no ghostty
-  # package and an incoming SSH session — TERM=xterm-ghostty, sent from the Linux
-  # box — can't find the terminfo entry, so full-screen apps error with "unknown
+  # package and an incoming SSH session (TERM=xterm-ghostty, sent from the Linux
+  # box) can't find the terminfo entry, so full-screen apps error with "unknown
   # terminal type". Compile the captured source (./xterm-ghostty.terminfo, from
   # `infocmp -x xterm-ghostty`) into ~/.terminfo using the *system* tic so the
   # output matches Apple's ncurses readers. ~/.terminfo is searched
-  # unconditionally, so no env var is needed. This is the declarative stand-in
+  # unconditionally. No env var is needed. This is the declarative stand-in
   # for ghostty's `ssh-terminfo` shell-integration feature, disabled above
   # because it hung on connect.
   home.activation.ghosttyTerminfo = lib.mkIf isDarwin (

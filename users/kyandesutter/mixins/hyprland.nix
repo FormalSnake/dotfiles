@@ -13,8 +13,8 @@ let
   fsIpc = args: "${fsBin} ipc --any-display call " + lib.concatStringsSep " " args;
 
   # NVIDIA dGPU flag from the host (same gate as dms.nix/godot.nix). Everything
-  # below that exists for the g815's dGPU power model — power-tune,
-  # gpu-relog-prompt, the AQ_DRM_DEVICES pick, the two-monitor layout — is
+  # below that exists for the g815's dGPU power model (power-tune,
+  # gpu-relog-prompt, the AQ_DRM_DEVICES pick, the two-monitor layout) is
   # gated on it, so iGPU-only hosts (e1504g) get a plain Hyprland session with
   # none of the machinery (and none of its hardcoded g815 PCI paths / modes).
   hasNvidia = (osConfig.kyan or { }).nvidia.enable or false;
@@ -25,9 +25,9 @@ let
   # `name` and what FormalShell's HyprlandBackend puts on the bar pills
   # (shell/Compositor/hyprland/HyprlandBackend.qml maps `w.name` straight
   # through).
-  # Glyph and name are joined by an EM SPACE ( ), not an ASCII space —
+  # Glyph and name are joined by an EM SPACE ( ), not an ASCII space:
   # the bar widget collapses ASCII/nbsp whitespace in the label but preserves
-  # it. Written as JSON \u escapes so the private-use glyphs survive editing;
+  # it. Written as JSON \u escapes so the private-use glyphs survive editing,
   # glyphs verified present in GeistMono Nerd Font 3.4.0.
   wsName = builtins.fromJSON ''
     {"1": " web", "2": " term", "3": " dev", "4": " chat", "5": " prod", "6": " print", "7": "󰚩 ai", "8": " media", "9": " game"}
@@ -37,10 +37,10 @@ let
   # Power-source-aware refresh rate + keyboard aura + relog consent prompt (see
   # systemd.user.services.power-tune).
   #
-  # Subscribes to /run/power/state — published by the system reconciler in
+  # Subscribes to /run/power/state: published by the system reconciler in
   # modules/nixos/mixins/power.nix, the single authority on the power source
   # (ac / powerbank / battery). A power bank reports as ADP0=online to UPower, so
-  # we deliberately do NOT use UPower's OnBattery here; the state file is what
+  # we deliberately do NOT use UPower's OnBattery here: the state file is what
   # tells a ~50W power bank apart from the ~300W barrel.
   #
   # This owns only the *session* side (the power profile itself is owned by the
@@ -48,22 +48,22 @@ let
   #   - keyboard aura: delegated to aura-repaint (the shared single setter, see
   #     dms.nix), passing the cached wallpaper accent. ac=static,
   #     powerbank=breathe ("charging" vibe), battery=dark.
-  #   - refresh rate: eDP-1 is 2560x1600@240Hz; drop to 60Hz whenever the active
+  #   - refresh rate: eDP-1 is 2560x1600@240Hz, drop to 60Hz whenever the active
   #     PPD profile is power-saver, restore 240Hz otherwise. Refresh follows the
   #     *profile* (not the source) so a manual power-saver toggle in the shell
-  #     also drops to 60Hz. Applied live through `hyprctl eval` — Hyprland has
+  #     also drops to 60Hz. Applied live through `hyprctl eval`: Hyprland has
   #     real runtime monitor control, so unlike the niri era there is no config
   #     fragment to rewrite and no reload to trigger.
   #   - relog consent prompt: every event re-runs gpu-relog-prompt (below),
   #     which decides whether a GPU-topology relog is worth OFFERING (persistent
-  #     notification, user confirms or dismisses — NEVER automatic).
+  #     notification, user confirms or dismisses; NEVER automatic).
   #   - dGPU convergence kick: once at startup, `systemctl start
   #     dgpu-reconcile.service` (polkit rule in power.nix) so a fresh login
   #     finally powers off a dGPU a previous session was holding.
   #
   # Event-driven, no polling: three monitors feed one loop through a single
   # process substitution (which keeps the loop in this shell so last_src/
-  # last_rate persist) — inotifywait on /run/power/state for source changes,
+  # last_rate persist): inotifywait on /run/power/state for source changes,
   # dbus-monitor on PPD for profile changes (the refresh follow), and udevadm
   # on the drm subsystem for monitor/GPU hotplug. The inner `wait` keeps the
   # substitution alive while the backgrounded monitors run.
@@ -103,7 +103,7 @@ let
         src="$(source_now)"
         if [ "$src" != "$last_src" ]; then
           # Repaint the keyboard for the new source via the shared setter (in the
-          # home profile — user services have a limited PATH, so reference it
+          # home profile; user services have a limited PATH, so reference it
           # absolutely), using the cached wallpaper accent (fall back to the seed).
           colour="$(cat "$HOME/.cache/dank/aura-color" 2>/dev/null || echo b15bf5)"
           ${config.home.profileDirectory}/bin/aura-repaint "$colour" || true
@@ -139,24 +139,24 @@ let
           "type='signal',interface='org.freedesktop.DBus.Properties',path='/org/freedesktop/UPower/PowerProfiles'" \
           2>/dev/null &
         # GPU/monitor hotplug (drm "change" uevents). udevadm via the system
-        # profile — user services have a limited PATH.
+        # profile: user services have a limited PATH.
         /run/current-system/sw/bin/udevadm monitor --udev --subsystem-match=drm 2>/dev/null &
         wait
       } )
     '';
   };
 
-  # Consent relog prompt — the ONLY path to a GPU-topology relog.
+  # Consent relog prompt: the ONLY path to a GPU-topology relog.
   #
   # aquamarine freezes the session's GPU set at init from AQ_DRM_DEVICES (see
   # uwsm/env-hyprland below), so changing it needs a full session restart.
   # Exactly two situations qualify:
-  #   monitor — a monitor is connected on the powered dGPU but this session
-  #             booted without the dGPU (marker `igpu`), so it can't light it
-  #             up. (If aquamarine hot-adds the card by itself, hyprctl shows
-  #             the output and this never fires — self-adapting.)
-  #   battery — on battery with no external monitor, but the session still
-  #             holds the dGPU (marker `igpu+dgpu`), so it can't power off.
+  #   monitor: a monitor is connected on the powered dGPU but this session
+  #            booted without the dGPU (marker `igpu`), so it can't light it
+  #            up. (If aquamarine hot-adds the card by itself, hyprctl shows
+  #            the output and this never fires; self-adapting.)
+  #   battery: on battery with no external monitor, but the session still
+  #            holds the dGPU (marker `igpu+dgpu`), so it can't power off.
   # No countdown, no default action: a persistent notification with [Relog now]/
   # [Not now] buttons (both shells' notification daemons support actions via
   # notify-send -A; Super+Shift+BackSpace is a belt-and-braces confirm for a
@@ -259,7 +259,7 @@ let
         *) printf '%s' "$need" > "$dismissed"; exit 0 ;;
       esac
 
-      # Re-check right before acting — the situation may have evaporated
+      # Re-check right before acting: the situation may have evaporated
       # between click and here.
       [ "$(evaluate)" = "$need" ] || exit 0
       notify-send -t 2000 "GPU mode" "Relogging…" || true
@@ -272,7 +272,7 @@ let
   #
   # DMS's own `brightness increment/decrement` with an empty device selector
   # resolves to its "preferred device", and its default picks the internal
-  # backlight whenever the internal panel is active AT ALL — not whichever
+  # backlight whenever the internal panel is active AT ALL, not whichever
   # output is currently focused. On a docked laptop that means the brightness
   # keys always hit the internal panel, even while focused on the desk monitor.
   # So this script picks the device itself, keyed off Hyprland's *focused*
@@ -314,15 +314,15 @@ let
     '';
   };
 
-  # — Monitors —
+  # Monitors
   #
   # g815: the desk monitor (ASUS PA278CGV, 1440p144) is wired to the dGPU. Its
   # EDID-preferred timing is 60Hz, so the 144Hz mode is pinned explicitly.
-  # Placed at the ORIGIN (0x0) so it is the *primary* display — fullscreen games
+  # Placed at the ORIGIN (0x0) so it is the *primary* display: fullscreen games
   # with no monitor selector target the monitor at (0,0) and enumerate only its
   # modes. vrr = 0: adaptive sync OFF, the panel stays locked at a steady 144Hz
-  # (vrr = 1 flickered on the desktop, vrr = 2 left games chasing the framerate
-  # — and gaming lives on Windows now). The internal 18" WQXGA 240Hz panel sits
+  # (vrr = 1 flickered on the desktop, vrr = 2 left games chasing the framerate,
+  # and gaming lives on Windows now). The internal 18" WQXGA 240Hz panel sits
   # to its RIGHT at x = 2560, scale 1.25; power-tune flips its refresh at
   # runtime via `hyprctl eval`.
   #
@@ -391,7 +391,7 @@ let
       -- Screenshots via the shell (M12 screenshot IPC target: grim/slurp on the
       -- wrapper PATH, saves to screenshot.directory and wl-copy's the image,
       -- success lands as a shell notification). Owner rule: when the shell has
-      -- the feature, prefer it over the compositor's built-in — it's WM-agnostic,
+      -- the feature, prefer it over the compositor's built-in: it's WM-agnostic,
       -- so the binds survive compositor changes. Print = whole screen,
       -- Mod+Shift+S = the capture picker (macOS Cmd+Shift+5): a toolbar of
       -- three shot and three record modes, digits 1-6 to switch between them,
@@ -403,7 +403,7 @@ let
 
       -- Volume via wpctl: FormalShell's AudioService tracks PipeWire directly
       -- and auto-shows the volume OSD on any external change, so the keys don't
-      -- need to route through the shell. Brightness has no such watcher; the
+      -- need to route through the shell. Brightness has no such watcher, the
       -- documented pattern is brightnessctl plus an explicit OSD show. Media
       -- routes through the shell's active MPRIS player.
       hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("${pkgs.wireplumber}/bin/wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 3%+"), { locked = true, repeating = true })
@@ -420,7 +420,7 @@ let
       -- App launcher / clipboard / theme / lock via DMS IPC.
       hl.bind(mod .. " + Space", hl.dsp.exec_cmd("${dmsBin} ipc call spotlight toggle"))
       -- Emoji picker: the emojiLauncher plugin (enabled in mixins/dms.nix) adds
-      -- an emoji/unicode surface to DMS's spotlight under its `:e` trigger;
+      -- an emoji/unicode surface to DMS's spotlight under its `:e` trigger,
       -- toggleQuery opens the launcher pre-filled with it.
       hl.bind(mod .. " + period", hl.dsp.exec_cmd("${dmsBin} ipc call spotlight toggleQuery :e"))
       -- ñ is a dedicated key on the es layout; its XKB keysym is `ntilde`.
@@ -433,7 +433,7 @@ let
       -- Screenshots via DMS (owner rule: the shell owns it, so the binds
       -- survive compositor changes). `dms screenshot` is a top-level
       -- subcommand, not `ipc call`. Print = whole screen; Mod+Shift+S = region
-      -- picker (macOS Cmd+Shift+4 — bare `dms screenshot` defaults to region).
+      -- picker (macOS Cmd+Shift+4; bare `dms screenshot` defaults to region).
       hl.bind("Print", hl.dsp.exec_cmd("${dmsBin} screenshot full"))
       hl.bind(mod .. " + SHIFT + S", hl.dsp.exec_cmd("${dmsBin} screenshot"))
 
@@ -456,7 +456,7 @@ let
 in
 {
   # Hyprland is enabled at the system level (programs.hyprland in
-  # modules/nixos/mixins/hyprland.nix); this module owns the user config.
+  # modules/nixos/mixins/hyprland.nix), this module owns the user config.
   #
   # Hyprland 0.55 replaced the hyprlang `.conf` config with Lua at
   # ~/.config/hypr/hyprland.lua (the old syntax was removed, not deprecated).
@@ -465,32 +465,32 @@ in
   # ("<name> expected near '$'"), so we write the file ourselves and skip the
   # HM module rather than have it emit a conflicting one.
   #
-  # Nix `''` strings are safe here because the Lua contains no literal `${…}`
-  # — every `${…}` below is a deliberate Nix interpolation of a store path.
+  # Nix `''` strings are safe here because the Lua contains no literal `${…}`:
+  # every `${…}` below is a deliberate Nix interpolation of a store path.
   # API reference: https://wiki.hypr.land/Configuring/ (hl.config, hl.monitor,
   # hl.env, hl.bind, hl.dsp.*, hl.window_rule, hl.workspace_rule, hl.gesture).
   xdg.configFile."hypr/hyprland.lua".text = ''
-    -- — Monitors —
+    -- Monitors
     ${monitors}
     -- Catch-all: any other external display at its highest refresh rate
     -- ("highrr" forces the panel's max, unlike "preferred" which is usually
     -- 60Hz), placed to the right of whatever precedes it.
     hl.monitor({ output = "", mode = "highrr", position = "auto", scale = 1.0 })
 
-    -- — Variables —
+    -- Variables
     local mod = "SUPER"        -- primary modifier (the physical Cmd-position key)
     local terminal = "ghostty"
 
-    -- — Workspaces —
+    -- Workspaces
     -- Nine named workspaces mirroring the macOS/aerospace assignment. The name
-    -- is what the bar renders on each pill; binds and window rules address the
+    -- is what the bar renders on each pill, binds and window rules address the
     -- numeric id.
     local wsName = { ${wsLua} }
 
     ${workspaceRules}
 
-    -- — Environment —
-    -- Cursor theme/size for XWayland (X11) clients — without XCURSOR_THEME they
+    -- Environment
+    -- Cursor theme/size for XWayland (X11) clients: without XCURSOR_THEME they
     -- fall back to a default theme and show a *different* cursor than native
     -- Wayland apps (which read it from home.pointerCursor below).
     hl.env("XCURSOR_THEME", "Bibata-Modern-Classic")
@@ -506,14 +506,14 @@ in
     -- NVIDIA + Wayland hint (explicit-sync is automatic on recent drivers).
     hl.env("__GL_GSYNC_ALLOWED", "1")''}
 
-    -- — General options —
+    -- General options
     hl.config({
       input = {
         kb_layout = "es",
-        -- caps:escape — Caps Lock acts as Escape (no Caps Lock function).
+        -- caps:escape: Caps Lock acts as Escape (no Caps Lock function).
         kb_options = "caps:escape",
         -- 2 = keyboard focus only changes on click (focus-follows-mouse off), but
-        -- the hovered window still receives pointer events — so you can scroll an
+        -- the hovered window still receives pointer events: so you can scroll an
         -- unfocused window under the cursor without it stealing keyboard focus.
         follow_mouse = 2,
         -- macOS-like feel: adaptive accel with a small positive speed gives the
@@ -527,7 +527,7 @@ in
           natural_scroll = true,
           clickfinger_behavior = true,
           -- Keep the pad working while typing (moving the pointer or tapping
-          -- mid-keystroke); libinput's palm detection still rejects a resting hand.
+          -- mid-keystroke), libinput's palm detection still rejects a resting hand.
           disable_while_typing = false,
           -- Under 1 to tame libinput's over-sensitive two-finger scroll and land
           -- closer to macOS's pace, so it neither undershoots nor coasts past.
@@ -541,7 +541,7 @@ in
         gaps_in = 4,
         gaps_out = 8,
         border_size = 2,
-        -- The scrolling tape (Hyprland 0.54+ has it in core; no plugin).
+        -- The scrolling tape (Hyprland 0.54+ has it in core, no plugin).
         layout = "scrolling",
         resize_on_border = true,
         -- Static Flexoki fallback (blue active / base-700 inactive). The shell's
@@ -554,14 +554,14 @@ in
           active_border = "rgb(${lib.removePrefix "#" flexoki.accents.blue.d})",
           inactive_border = "rgb(${lib.removePrefix "#" flexoki.base.b700})",
         },
-        -- Master switch for screen tearing. Does nothing on its own — a window
+        -- Master switch for screen tearing. Does nothing on its own: a window
         -- must also carry the `immediate` rule (see the steam_app rule below).
         allow_tearing = true,
       },
       -- Scrolling tape behaviour. Deliberately close to niri's column model:
       -- half-width columns by default, the same four preset widths Mod+R cycles,
       -- and a lone column keeps its width (centered) instead of stretching to
-      -- fill the screen — flip fullscreen_on_one_column to true for the
+      -- fill the screen. Flip fullscreen_on_one_column to true for the
       -- Omarchy-style "single window is always full screen" feel.
       scrolling = {
         column_width = 0.5,
@@ -648,7 +648,7 @@ in
       sensitivity = 0.7,
     })
 
-    -- — Animations: spring physics for anything that moves —
+    -- Animations: spring physics for anything that moves
     -- The old `snappy` bezier put 75% of the distance into the first 15% of the
     -- duration. That fast part is too quick to read as travel, so the only
     -- motion actually perceived was the shallow tail, which is why everything
@@ -676,7 +676,7 @@ in
     hl.animation({ leaf = "workspaces",       enabled = true, spring = "glide", speed = 2.6, style = "slidevert" })
     hl.animation({ leaf = "specialWorkspace", enabled = true, spring = "glide", speed = 2.6, style = "slidevert" })
 
-    -- — Trackpad gestures (niri's set, 1:1 under the fingers) —
+    -- Trackpad gestures (niri's set, 1:1 under the fingers)
     -- Horizontal scrolls the tape, vertical walks workspaces: the same split
     -- niri had, and the one the tape/stack geometry implies. `scroll_move` is
     -- the scrolling layout's own gesture (0.56+): it drags the tape 1:1, then
@@ -688,7 +688,7 @@ in
     hl.gesture({ fingers = 3, direction = "horizontal", action = "scroll_move" })
     hl.gesture({ fingers = 3, direction = "vertical", action = "workspace" })
 
-    -- — Keybinds (mirror the macOS/aerospace muscle memory, SUPER as mod) —
+    -- Keybinds (mirror the macOS/aerospace muscle memory, SUPER as mod)
     ${shellBinds}
 
     hl.bind(mod .. " + Return", hl.dsp.exec_cmd(terminal))
@@ -768,9 +768,9 @@ in
     -- without action buttons). See gpuRelogPrompt / powerTune in hyprland.nix.
     hl.bind(mod .. " + SHIFT + BackSpace", hl.dsp.exec_cmd("${gpuRelogPrompt}/bin/gpu-relog-prompt confirm"))''}
 
-    -- — Window → workspace rules (Linux app classes; Hyprland matches `class`) —
+    -- Window → workspace rules (Linux app classes; Hyprland matches `class`)
     -- No `silent`: when one of these apps opens, Hyprland follows the window to
-    -- its assigned workspace. No terminal rule — ghostty opens where you are.
+    -- its assigned workspace. No terminal rule: ghostty opens where you are.
     -- zen-beta: the wrapper launches with `--name zen-beta` (desktop file),
     -- bare `zen` covers manual CLI launches.
     hl.window_rule({ match = { class = "^([Hh]elium|zen(-beta)?)$" }, workspace = "1" })
@@ -800,8 +800,8 @@ in
     -- without vsync, so launch games with vsync OFF.
     hl.window_rule({ match = { class = "^(steam_app_.*)$" }, immediate = true })
 
-    -- — Chromium/helium auxiliary popups: float, pin across every workspace, and
-    --   tuck into a corner. `pin` is Hyprland's "show on all workspaces" — niri
+    --: Chromium/helium auxiliary popups: float, pin across every workspace, and
+    --   tuck into a corner. `pin` is Hyprland's "show on all workspaces": niri
     --   had no equivalent, so these used to just float. helium gives these three
     --   windows distinct identities, captured live with `hyprctl clients`:
     --     • Video PiP      → class "" (empty), title "Picture in picture"
@@ -824,7 +824,7 @@ in
       size = { "(monitor_w*0.28)", "(monitor_h*0.28)" },
       move = { "(monitor_w-window_w-16)", "(monitor_h-window_h-16)" } })
     -- Chrome built-in notification → empty class AND empty title. Float (it
-    -- tiles otherwise — a calendar alert wrecking the layout), pin, top-right.
+    -- tiles otherwise: a calendar alert wrecking the layout), pin, top-right.
     -- The empty title is what sets it apart from the video PiP above.
     hl.window_rule({ match = { class = "^$", title = "^$" },
       float = true, pin = true,
@@ -835,7 +835,7 @@ in
     hl.window_rule({ match = { class = "^(org.gnome.NautilusPreviewer)$" },
       float = true, center = true })
 
-    -- — Border colours: persist the last wallpaper palette across reloads —
+    -- Border colours: persist the last wallpaper palette across reloads
     -- The shell renders the live wallpaper-derived border colours to
     -- ~/.cache/dank/hypr-border.lua on every palette change and also pushes them
     -- live via `hyprctl eval` (see the matugen template in mixins/dms.nix). That
@@ -843,12 +843,12 @@ in
     -- first palette render) would drop back to the static Flexoki fallback in
     -- `general.col` above. Re-applying the cache file here on every config eval
     -- keeps the wallpaper colours instead. pcall: the file is absent before the
-    -- first render — fall through to the fallback rather than erroring the whole
+    -- first render: fall through to the fallback rather than erroring the whole
     -- config, which would leave the session unusable.
     pcall(dofile, os.getenv("HOME") .. "/.cache/dank/hypr-border.lua")
   '';
 
-  # — Session environment (uwsm) —
+  # Session environment (uwsm)
   #
   # uwsm sources ~/.config/uwsm/env and ~/.config/uwsm/env-${XDG_CURRENT_DESKTOP,,}
   # once per login, before launching Hyprland, and imports the result into the
@@ -860,23 +860,23 @@ in
     export QT_QPA_PLATFORMTHEME="qt6ct"
   '';
 
-  # — Multi-GPU selection (hybrid laptop) —
+  # Multi-GPU selection (hybrid laptop)
   #
   # The g815 is a hybrid laptop: the Intel iGPU (PCI 0000:00:02.0) drives the
   # internal panel (eDP-1), while the NVIDIA dGPU (PCI 0000:02:00.0) drives the
-  # external ports — including HDMI-A-1, the 1440p144 desk monitor.
+  # external ports: including HDMI-A-1, the 1440p144 desk monitor.
   #
   # The session is ALWAYS iGPU-primary. Gaming lives on Windows; on Linux the
   # dGPU is nothing but a power-managed peripheral for the panel backlight (its
   # WMI) and the HDMI port. AQ_DRM_DEVICES is a ':'-separated device list; the
   # FIRST entry becomes the primary GPU (aquamarine src/backend/drm/DRM.cpp).
-  # When the dGPU is powered at login (we were charging) it is listed SECOND — a
+  # When the dGPU is powered at login (we were charging) it is listed SECOND: a
   # scanout-only head for the desk monitor, fed by an iGPU→dGPU blit (trivial for
   # desktop work). When it's absent (battery boot) only the iGPU is listed, so
   # nothing in the session ever touches the nvidia stack and the chip can be hard
   # powered off.
   #
-  # Keyed on device PRESENCE, not the power source — it cannot disagree with
+  # Keyed on device PRESENCE, not the power source: it cannot disagree with
   # reality. The set is frozen at aquamarine init, so the only situations that
   # want a different set mid-session go through the consent popup
   # (gpu-relog-prompt above), never an automatic relog. This file records the
@@ -910,14 +910,14 @@ in
         # connector modesets at the right mode in an endless loop and never
         # receives a frame (observed 2026-08-17, the whole log was that loop).
         # glvnd walks this list in order, so nvidia first matches the system
-        # default precedence. Clients inherit it too — that is the accepted
+        # default precedence. Clients inherit it too: that is the accepted
         # cost of uwsm's single env file; the Electron apps that actually
         # misbehave are pinned per-app by lib/chromium-igpu.nix.
         export __EGL_VENDOR_LIBRARY_FILENAMES="$vendors/10_nvidia.json:$vendors/50_mesa.json"
         mode="igpu+dgpu"
       elif [ -n "$igpu" ]; then
         # dGPU powered off (battery boot): name ONLY the iGPU. Leaving
-        # AQ_DRM_DEVICES unset is NOT enough if the card reappears — aquamarine
+        # AQ_DRM_DEVICES unset is NOT enough if the card reappears: aquamarine
         # would probe every card and Xwayland would grab the nvidia node,
         # pinning it at D0. With only the iGPU named, the session never touches
         # the nvidia stack; gpu-relog-prompt offers a relog if a monitor shows
@@ -926,7 +926,7 @@ in
         # No dGPU in the session at all, so nothing needs nvidia's EGL and a
         # Mesa-only list keeps every client off the nvidia render node (their
         # GPU processes enumerate vendors independently and would otherwise
-        # open it, pinning the chip at D0 and parking ~2 GB of VRAM on it —
+        # open it, pinning the chip at D0 and parking ~2 GB of VRAM on it,
         # observed live 2026-07-26).
         export __EGL_VENDOR_LIBRARY_FILENAMES="$vendors/50_mesa.json"
       fi
@@ -934,7 +934,7 @@ in
         printf '%s\n' "$mode" > "$XDG_RUNTIME_DIR/session-gpu-mode" 2>/dev/null || true
       fi
 
-      # VA-API video decode on the iGPU, always — no app should wake the dGPU
+      # VA-API video decode on the iGPU, always: no app should wake the dGPU
       # for video. Offloaded apps (pkgs.nvidiaOffloadEnv) still force nvidia
       # themselves when explicitly asked.
       export LIBVA_DRIVER_NAME=iHD
@@ -951,7 +951,7 @@ in
   # aura and the relog prompt all follow AC/battery. Bound to
   # graphical-session.target so it starts and stops with the Hyprland session
   # and inherits HYPRLAND_INSTANCE_SIGNATURE (uwsm finalises it into the systemd
-  # user manager) — hyprctl needs it.
+  # user manager): hyprctl needs it.
   systemd.user.services.power-tune = lib.mkIf hasNvidia {
     Unit = {
       Description = "Refresh rate + keyboard aura + relog consent prompt follow the power source";
@@ -997,7 +997,7 @@ in
     libsForQt5.qt5ct
   ];
 
-  # Cursor theme — Bibata Modern Classic, the black variant. Sets it for GTK,
+  # Cursor theme: Bibata Modern Classic, the black variant. Sets it for GTK,
   # native Wayland (hyprcursor) and X11/XWayland (x11.enable exports
   # XCURSOR_THEME/SIZE), so every app shows the same cursor; the hl.env pair
   # above covers XWayland clients Hyprland spawns itself.
@@ -1017,29 +1017,29 @@ in
   # dms.nix, plus DMS's own builtin gtk template). The builtin gtk3/gtk4
   # templates write the palette to ~/.config/gtk-{3,4}.0/dank-colors.css
   # (imported via gtk.css), and DMS drives the *runtime* dark signal on every
-  # re-theme — `gsettings set org.gnome.desktop.interface color-scheme
+  # re-theme: `gsettings set org.gnome.desktop.interface color-scheme
   # prefer-dark` + `gtk-theme adw-gtk3-dark` (also written to dconf).
   # xdg-desktop-portal reports that to native-Wayland libadwaita/GTK4 apps. So
-  # we don't pin the theme *name* here — the shell chooses it, and pinning our
+  # we don't pin the theme *name* here: the shell chooses it, and pinning our
   # own would drift.
   #
   # We keep this module for the things the shell does NOT do:
-  #   • gtk.iconTheme — sets Colloid-Dark as the icon theme. Neither shell
+  #   • gtk.iconTheme: sets Colloid-Dark as the icon theme. Neither shell
   #     touches the icon theme; without this GTK falls back to hicolor and
   #     renders every app/mime icon as the broken-image placeholder.
-  #   • gtk-application-prefer-dark-theme in settings.ini — the X11/XWayland
+  #   • gtk-application-prefer-dark-theme in settings.ini: the X11/XWayland
   #     fallback (no xsettingsd here). DMS's gtk theming only touches
   #     gtk.css + gsettings/dconf, never settings.ini.
-  #   • gtk.font — the UI font (gtk-font-name in both settings.ini files).
+  #   • gtk.font: the UI font (gtk-font-name in both settings.ini files).
   #     GTK3 under Wayland and GTK4 read it from there; GNOME/libadwaita apps
   #     read org.gnome.desktop.interface instead, so the same pair is written to
   #     dconf below. Without both, half the GTK apps stay on the fontconfig
   #     sans-serif default and the desktop looks mixed.
-  #   • gtk{3,4}.extraCss — own gtk.css declaratively so it holds ONLY the
+  #   • gtk{3,4}.extraCss: own gtk.css declaratively so it holds ONLY the
   #     palette import. The shell writes the colour file but never gtk.css, so
   #     an unmanaged gtk.css silently accumulates cruft: stale @define-color
   #     blocks from old theming tools end up ABOVE the import, and GTK
-  #     requires @import before any other rule — so it drops the import, the
+  #     requires @import before any other rule: so it drops the import, the
   #     colour file never loads, and GTK3 apps render un-themed adw-gtk3-dark.
   #     Managing the file keeps the import valid and first.
   #

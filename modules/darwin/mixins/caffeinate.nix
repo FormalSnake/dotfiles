@@ -2,7 +2,7 @@
   # Keep the machine permanently awake and remotely reachable. This is the
   # remote work server, so the guarantees must hold from BOOT, not from login:
   # on 2026-07-23 an unattended reboot parked the mac at the login window with
-  # no session — the old launchd *user agent* caffeinate wasn't running, the
+  # no session: the old launchd *user agent* caffeinate wasn't running, the
   # login window's stock power settings slept the machine within minutes, and
   # wake-on-network was off, leaving it unreachable until a remote FileVault
   # unlock over LAN SSH. Three layers, each sufficient on its own:
@@ -21,7 +21,7 @@
 
   # 2. Firmware-level: never idle-sleep even if caffeinate dies, and come back
   #    unattended after a kernel freeze. (restartAfterPowerFailure is rejected
-  #    by nix-darwin's preflight on this machine — unsupported on Apple Silicon
+  #    by nix-darwin's preflight on this machine: unsupported on Apple Silicon
   #    laptops, the battery covers power cuts anyway.)
   power.sleep.computer = "never";
   power.restartAfterFreeze = true;

@@ -85,13 +85,13 @@ export default function modeCycleExtension(pi: ExtensionAPI): void {
 		setMode(ORDER[(idx + 1) % ORDER.length], ctx);
 	}
 
-	// --- Shift+Tab cycles the mode ----------------------------------------
+	// Shift+Tab cycles the mode:
 	pi.registerShortcut("shift+tab", {
 		description: "Cycle agent mode (normal → plan → auto)",
 		handler: async (ctx) => cycle(ctx),
 	});
 
-	// --- /mode command + direct selectors ---------------------------------
+	// /mode command + direct selectors:
 	pi.registerCommand("mode", {
 		description: "Cycle or set agent mode (normal | plan | auto)",
 		getArgumentCompletions: (prefix) => {
@@ -113,7 +113,7 @@ export default function modeCycleExtension(pi: ExtensionAPI): void {
 		},
 	});
 
-	// --- Plan mode: restrict bash to read-only allowlist ------------------
+	// Plan mode: restrict bash to read-only allowlist
 	pi.on("tool_call", async (event) => {
 		if (mode !== "plan" || event.toolName !== "bash") return;
 		const command = event.input.command as string;
@@ -125,7 +125,7 @@ export default function modeCycleExtension(pi: ExtensionAPI): void {
 		}
 	});
 
-	// --- Inject per-mode guidance for the model ---------------------------
+	// Inject per-mode guidance for the model
 	pi.on("before_agent_start", async () => {
 		if (mode === "plan") {
 			return {
@@ -135,7 +135,7 @@ export default function modeCycleExtension(pi: ExtensionAPI): void {
 You are in read-only plan mode. You can only use: read, bash, grep, find, ls.
 You CANNOT edit or write files, and bash is restricted to read-only commands.
 Investigate, then produce a clear numbered plan under a "Plan:" header.
-Do NOT attempt to make changes — describe what you would do.`,
+Do NOT attempt to make changes: describe what you would do.`,
 					display: false,
 				},
 			};
@@ -154,7 +154,7 @@ and avoid irreversible/destructive actions unless clearly required by the task.`
 		}
 	});
 
-	// --- Drop stale mode context when not in that mode --------------------
+	// Drop stale mode context when not in that mode
 	pi.on("context", async (event) => {
 		if (mode !== "normal") return;
 		return {
@@ -165,7 +165,7 @@ and avoid irreversible/destructive actions unless clearly required by the task.`
 		};
 	});
 
-	// --- Restore mode on session start / resume ---------------------------
+	// Restore mode on session start / resume
 	pi.on("session_start", async (_event, ctx) => {
 		const entries = ctx.sessionManager.getEntries();
 		const last = entries

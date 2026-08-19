@@ -1,7 +1,7 @@
 { config, ... }:
 let
   # Android Studio (homebrew cask in systems/macbook/homebrew.nix) owns the SDK
-  # and installs it here — this mixin only wires up the env the CLI toolchain
+  # and installs it here: this mixin only wires up the env the CLI toolchain
   # (gradle, Expo/React Native, adb) needs to find it. macOS-only: the Library
   # path is wrong on Linux, so this is imported from ../darwin.nix.
   sdk = "${config.home.homeDirectory}/Library/Android/sdk";
@@ -14,7 +14,7 @@ in
 
   # sessionPath rather than fish_add_path: fish_add_path writes a *universal*
   # variable, so the entries persist as imperative state in fish_variables and
-  # survive removal from this config. home-manager instead renders these into
+  # survive removal from this config. Home-manager instead renders these into
   # hm-session-vars.fish, which every fish session sources.
   home.sessionPath = [
     "${sdk}/platform-tools" # adb, fastboot

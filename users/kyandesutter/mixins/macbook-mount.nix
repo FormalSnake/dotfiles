@@ -1,6 +1,6 @@
 { pkgs, config, ... }:
 {
-  # Browse the macbook's home over SSHFS at ~/macbook — a real filesystem path, so
+  # Browse the macbook's home over SSHFS at ~/macbook: a real filesystem path, so
   # it shows up as a folder in Files/Nautilus AND works with rg, nvim, etc. Reuses
   # the `macbook` SSH host (mixins/ssh.nix → Tailscale + 1Password agent); no
   # dedicated key. g815-only (imported via linux.nix); irrelevant on the Mac itself.
@@ -28,7 +28,7 @@
       PartOf = [ "graphical-session.target" ];
       # 1Password holds the SSH key (IdentityAgent in ssh.nix); order after its
       # tray daemon so the agent socket exists on the first mount attempt. Only a
-      # hint — a too-early attempt just fails and Restart retries.
+      # hint: a too-early attempt just fails and Restart retries.
       After = [ "graphical-session.target" "1password.service" ];
       Wants = [ "1password.service" ];
       "X-SwitchMethod" = "keep-old";
@@ -46,7 +46,7 @@
         "${pkgs.coreutils}/bin/mkdir -p %h/.macbook"
       ];
       # `bash -lc` rebuilds the full session PATH so sshfs finds fusermount3
-      # (/run/wrappers/bin) and ssh — the early `systemd --user` PATH lacks both.
+      # (/run/wrappers/bin) and ssh: the early `systemd --user` PATH lacks both.
       # See the loginExec note in mixins/autostart.nix. sshfs resolves `macbook:`
       # (empty remote path = the Mac's home) via ~/.ssh/config, so no hardcoded
       # /Users path. ConnectTimeout makes an unreachable Mac fail fast (no hang);
@@ -59,7 +59,7 @@
   };
 
   # Files/Nautilus sidebar entries (GtkPlacesSidebar reads gtk-3.0/bookmarks even
-  # under GTK4 Nautilus). Declarative — this file now owns the list, so the Macbook
+  # under GTK4 Nautilus). Declarative: this file now owns the list, so the Macbook
   # mount sits alongside the previously hand-added folders. Add future bookmarks
   # here rather than through the Nautilus UI, which would be overwritten on switch.
   xdg.configFile."gtk-3.0/bookmarks".text = ''

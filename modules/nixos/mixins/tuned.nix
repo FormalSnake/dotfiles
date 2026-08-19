@@ -13,14 +13,14 @@
     # same API. Only the backend changes: PPD wrote the EPP hint and the
     # firmware platform profile and stopped there, while a TuneD profile also
     # carries governor, disk, SATA link-power, audio and sysctl settings, and
-    # ships a separate on-battery variant. That split is the point — the AC
+    # ships a separate on-battery variant. That split is the point: the AC
     # profile can be aggressive without the battery paying for it.
     #
     # The nixpkgs module disables power-profiles-daemon itself and asserts
     # against tlp/auto-cpufreq/system76-power, so no host has to. It also needs
     # upower (mixins/hyprland.nix already enables it) and polkit.
     #
-    # Defaults are left alone deliberately: they already are Fedora's mapping —
+    # Defaults are left alone deliberately: they already are Fedora's mapping:
     # power-saver→powersave, balanced→balanced, performance→
     # throughput-performance, plus balanced→balanced-battery once upower reports
     # discharging. TuneD's `balanced` writes platform_profile itself (its
@@ -37,18 +37,18 @@
     services.tlp.enable = false;
 
     # `tuned-adm` arrives with the daemon, but powerprofilesctl left PATH along
-    # with the PPD service that used to put it there. Keep the client — it's the
+    # with the PPD service that used to put it there. Keep the client: it's the
     # muscle memory, and it drives tuned-ppd exactly as it drove PPD.
     environment.systemPackages = [ pkgs.power-profiles-daemon ];
 
     # tuned-ppd mirrors /sys/firmware/acpi/platform_profile back into its own
-    # active profile — upstream's Fn-key integration, written for ThinkPads.
+    # active profile: upstream's Fn-key integration, written for ThinkPads.
     # Here it races the profile it just applied: switching to power-saver makes
     # TuneD's `[acpi]` plugin write the node, the inotify handler reads it back
     # before asus-wmi has settled, sees the outgoing value and reverts. Measured
     # on the g815 (2026-08-17): every `powerprofilesctl set` undone ~35 ms later,
     # so the profile never left whatever asusd had parked there. The mapping is
-    # no use on this hardware anyway — asus-wmi's low tier is called `quiet`,
+    # no use on this hardware anyway: asus-wmi's low tier is called `quiet`,
     # which the table doesn't carry. Turn the mirror off; asusd owns the
     # platform profile, and TuneD still writes it on every switch.
     #
@@ -62,7 +62,7 @@
     );
 
     # ppd.conf is read once at startup, and the nixpkgs module doesn't wire it
-    # up — without this a config change lands in /etc and does nothing until the
+    # up: without this a config change lands in /etc and does nothing until the
     # next boot.
     systemd.services.tuned-ppd.restartTriggers = [
       config.environment.etc."tuned/ppd.conf".source

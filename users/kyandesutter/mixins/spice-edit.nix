@@ -1,6 +1,6 @@
 { pkgs, lib, ... }:
 let
-  # spice-edit — mouse-first terminal code editor for SSH/tmux workflows
+  # spice-edit: mouse-first terminal code editor for SSH/tmux workflows
   # (spice-edit.com). Not in nixpkgs; single static Go binary.
   spice-edit = pkgs.buildGoModule rec {
     pname = "spice-edit";

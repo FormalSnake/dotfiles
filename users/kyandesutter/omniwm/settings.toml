@@ -1,9 +1,9 @@
-# OmniWM — mirrors the g815 Hyprland setup.
+# OmniWM: mirrors the g815 Hyprland setup.
 #
 # "Super" here is Right Command, which Karabiner remaps to Ctrl+Opt+Cmd (see
 # karabiner.json). Shift is deliberately left OUT of that chord so it can still
 # discriminate the Hyprland move-bindings (Super+Shift+hjkl). OmniWM's own native
-# Hyper trigger is NOT used — it always injects Shift, which would collapse
+# Hyper trigger is NOT used: it always injects Shift, which would collapse
 # focus and move onto the same chord.
 #
 # Only the tables/keys that differ from OmniWM's defaults are written; the
@@ -16,14 +16,14 @@ defaultLayoutType = "niri"
 # Turn on the omniwmctl IPC socket (~/Library/Caches/com.barut.OmniWM/ipc.sock).
 # Off by default; sketchybar drives its workspace pills off `omniwmctl query
 # workspaces` / `omniwmctl watch active-workspace`, so this is load-bearing for
-# the bar (users/kyandesutter/mixins/sketchybar.nix).
+# the bar (mixins/sketchybar.nix).
 ipcEnabled = true
 
 [focus]
 # Hyprland keeps keyboard focus on click only.
 followsMouse = false
 
-# OmniWM's own workspace bar is disabled — sketchybar replaces it (mounted on the
+# OmniWM's own workspace bar is disabled: sketchybar replaces it (mounted on the
 # top edge, notch-aware, mirroring the g815 DMS bar). See mixins/sketchybar.nix.
 [workspaceBar]
 enabled = false
@@ -48,7 +48,7 @@ enabled = true
 width = 2.0
 
 [borders.color]
-# Flexoki blue (#4385be) — the same static border accent the g815 Hyprland config
+# Flexoki blue (#4385be): the same static border accent the g815 Hyprland config
 # falls back to before Noctalia themes it.
 red = 0.263
 green = 0.522
@@ -59,7 +59,7 @@ alpha = 1.0
 # Ghostty drop-down on Super+Return (Hyprland binds Super+Return to a terminal).
 enabled = true
 
-# ── Workspaces ───────────────────────────────────────────────────────────────
+# Workspaces
 # Numeric names drive the Super+N binds; displayName is the role label shown in
 # the bar. Roles match the g815 Hyprland / aerospace workspace layout.
 
@@ -126,7 +126,7 @@ displayName = "game"
 layoutType = "niri"
 monitorAssignment = { type = "main" }
 
-# ── Hotkeys (Super = Ctrl+Opt+Cmd) ───────────────────────────────────────────
+# Hotkeys (Super = Ctrl+Opt+Cmd)
 # Focus (Hyprland Super+hjkl)
 [[hotkeys]]
 id = "focus.left"
@@ -277,7 +277,7 @@ binding = "Unassigned"
 id = "setWindowHeight.increase10Percent"
 binding = "Unassigned"
 
-# ── App rules (bundle IDs from the mac's aerospace mapping) ───────────────────
+# App rules (bundle IDs from the mac's aerospace mapping)
 [[appRules]]
 bundleId = "com.brave.Browser"
 assignToWorkspace = "1"

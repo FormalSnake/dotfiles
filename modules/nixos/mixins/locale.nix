@@ -23,7 +23,7 @@
     };
   };
 
-  # Spanish (ISO) keyboard — matches the G815LP's physical ES layout.
+  # Spanish (ISO) keyboard: matches the G815LP's physical ES layout.
   # Applies to the TTY console and to greetd/X11; the Hyprland Wayland session
   # sets its own kb_layout in users/kyandesutter/mixins/hyprland.nix.
   console.keyMap = "es";

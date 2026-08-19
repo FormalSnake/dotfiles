@@ -3,13 +3,13 @@ let
   # Follow-the-newest-device daemon. WirePlumber on this chassis intermittently
   # leaves a freshly-connected Bluetooth card parked at profile "off" (its flaky
   # BR/EDR link loses the A2DP transport during setup), so no sink node is ever
-  # created and there is nothing for audio to switch to — the "AirPods connected
+  # created and there is nothing for audio to switch to: the "AirPods connected
   # but sound stayed on the speakers" bug. This reconcile loop fixes both halves:
   #   1. any connected bluez card sitting at profile "off" is kicked onto its
   #      generic a2dp-sink profile (retried every tick, so a transport that only
   #      comes up on the third attempt still recovers);
   #   2. whenever a new *device-backed* sink appears (BT card, HDMI hotplug,
-  #      redocked USB DAC) it becomes the default — EasyEffects and every
+  #      redocked USB DAC) it becomes the default. EasyEffects and every
   #      untargeted stream follow the default automatically, so the whole chain
   #      moves with one set-default and links are left untouched.
   # Virtual sinks (easyeffects_sink, null sinks) carry no device.id and are
@@ -78,7 +78,7 @@ in
 
   # pactl client: DMS shells out to it for codec/output handling. PipeWire ships
   # the pulse *server* (pulse.enable) but not the CLI client, and the user
-  # service PATH sees the system profile, not the home one — so install it here.
+  # service PATH sees the system profile, not the home one, so install it here.
   environment.systemPackages = [ pkgs.pulseaudio ];
 
   services.pipewire = {
@@ -89,9 +89,9 @@ in
     jack.enable = true;
 
     # Floor the graph quantum at 1024 frames (~21ms). Games (e.g. Cities2)
-    # otherwise negotiate the whole graph down to 256 frames (~5.3ms); under
-    # gaming CPU load the EasyEffects DSP chain misses that deadline and xruns,
-    # which are audible as pops/crackle. A larger buffer absorbs the jitter.
+    # otherwise negotiate the whole graph down to 256 frames (~5.3ms). Under
+    # gaming CPU load the EasyEffects DSP chain misses that deadline and xruns:
+    # pops/crackle. A larger buffer absorbs the jitter.
     extraConfig.pipewire."92-min-quantum"."context.properties"."default.clock.min-quantum" = 1024;
 
     # Never auto-switch Bluetooth headsets to the HFP/headset profile. This
@@ -99,13 +99,13 @@ in
     # unknown connection handle"), so the AirPods mic only ever captures silence
     # anyway. Left on, WirePlumber flips A2DP→headset whenever an app opens that
     # dead mic, which swaps the high-quality stereo sink for a separate HFP sink
-    # whose volume collapses toward 0 — the media volume "randomly" dropping.
-    # Off: AirPods stay A2DP (full stereo, stable volume); calls use the laptop
+    # whose volume collapses toward 0: the media volume "randomly" dropping.
+    # Off: AirPods stay A2DP (full stereo, stable volume). Calls use the laptop
     # mic, which WirePlumber then picks as the default source on its own.
     wireplumber.extraConfig."51-airpods-a2dp-only"."wireplumber.settings"."bluetooth.autoswitch-to-headset-profile" = false;
 
     # Device-specific output priorities (headphone MACs, this chassis's PCI
-    # audio addresses) live in systems/g815/default.nix — they are hardware
+    # audio addresses) live in systems/g815/default.nix: they are hardware
     # facts, not portable audio-stack config.
   };
 

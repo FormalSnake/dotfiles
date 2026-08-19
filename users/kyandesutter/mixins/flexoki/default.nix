@@ -57,7 +57,7 @@ let
 
   # Official Flexoki fish themes (github.com/kepano/flexoki/fish). fish persists
   # colours as *universal* variables via `fish_config theme choose`, so the old
-  # catppuccin values survive removing that module — re-choosing a flexoki theme
+  # catppuccin values survive removing that module: re-choosing a flexoki theme
   # every login overwrites them.
   fishDark = pkgs.writeText "Flexoki Dark.theme" ''
     # name: Flexoki Dark
@@ -109,7 +109,7 @@ lib.mkMerge [
     # bat: Flexoki tmThemes generated from the palette. macOS follows the system
     # appearance (`auto:system` reads AppleInterfaceStyle live per-invocation);
     # on Linux that mode is unsupported and silently falls back to bat's builtin
-    # dark theme, so pin the dark theme by name (DMS has no bat template —
+    # dark theme, so pin the dark theme by name (DMS has no bat template,
     # this is the static fallback that replaces catppuccin mocha here).
     programs.bat = {
       themes = {
@@ -150,8 +150,8 @@ lib.mkMerge [
 
   # On macOS fzf and lazygit are left un-themed so they inherit ghostty's Flexoki
   # ANSI palette and switch with the system appearance. On Linux the terminal is
-  # DMS/matugen-driven, so pin them to a static Flexoki dark palette — the
-  # fallback slot catppuccin used to fill.
+  # DMS/matugen-driven, so pin them to a static Flexoki dark palette (the
+  # fallback slot catppuccin used to fill).
   (lib.mkIf (!isDarwin) {
     programs.fzf.colors = {
       "fg" = "#878580";

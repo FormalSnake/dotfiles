@@ -1,7 +1,7 @@
 { config, pkgs, lib, ... }:
 let
   dir = "${config.home.homeDirectory}/.config/nix/users/kyandesutter/sketchybar";
-  # sketchybar comes from Homebrew (FelixKratz/formulae) — nixpkgs' build crashes
+  # sketchybar comes from Homebrew (FelixKratz/formulae): nixpkgs' build crashes
   # the cctools linker on this darwin (ld Trace/BPT trap). See systems/macbook/
   # homebrew.nix. The Lua side (interpreter + sbarlua module) stays on nix.
   sketchybarBin = "/opt/homebrew/bin/sketchybar";
@@ -29,7 +29,7 @@ in
   home.packages = [ pkgs.jq ]; # sketchybar itself is from Homebrew (see above)
 
   # Whole config dir as one out-of-store symlink (git-tracked source), so the bar
-  # can be edited and hot-reloaded live (sbar.hotload(true)) without a rebuild —
+  # can be edited and hot-reloaded live (sbar.hotload(true)) without a rebuild:
   # same pattern as the OmniWM config (mixins/omniwm.nix). sketchybarrc keeps its
   # executable bit from git.
   xdg.configFile."sketchybar".source = config.lib.file.mkOutOfStoreSymlink dir;
@@ -39,7 +39,7 @@ in
   '';
 
   # The bar daemon. sketchybar auto-loads ~/.config/sketchybar/sketchybarrc, which
-  # is a lua script — LUA_CPATH points `require("sketchybar")` at the sbarlua .so.
+  # is a lua script: LUA_CPATH points `require("sketchybar")` at the sbarlua .so.
   launchd.agents.sketchybar = {
     enable = true;
     config = {

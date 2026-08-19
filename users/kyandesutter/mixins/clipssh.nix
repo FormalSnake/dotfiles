@@ -1,4 +1,4 @@
-# clipssh — paste local clipboard images into agents running over SSH.
+# clipssh: paste local clipboard images into agents running over SSH.
 #
 # Runs on the machine you're sitting at (the one with the clipboard): grabs a
 # PNG from the clipboard, scp's it to the remote, and copies the remote path

@@ -3,7 +3,7 @@
     NSGlobalDomain = {
       AppleInterfaceStyle = "Dark";
       AppleShowAllExtensions = true;
-      # Auto-hide the macOS menu bar — sketchybar owns the top edge now
+      # Auto-hide the macOS menu bar: sketchybar owns the top edge now
       # (users/kyandesutter/mixins/sketchybar.nix). The native bar still reveals
       # on hover into the notch region.
       _HIHideMenuBar = true;
@@ -19,18 +19,18 @@
       "com.apple.swipescrolldirection" = true;
     };
 
-    # Never auto-install macOS updates: an unattended update reboot parks the
+    # Never auto-install macOS updates (an unattended update reboot parks the
     # machine at the FileVault preboot screen, unreachable remotely until
-    # unlocked over LAN SSH (2026-07-23). Updates are applied manually instead.
+    # unlocked over LAN SSH (2026-07-23)). Updates are applied manually instead.
     SoftwareUpdate.AutomaticallyInstallMacOSUpdates = false;
 
-    # No screen-saver password gate — the machine is a headless-ish work server
-    # reached over SSH/VNC; the GUI-set equivalents died with the 2026-07-23
+    # No screen-saver password gate: the machine is a headless-ish work server
+    # reached over SSH/VNC. The GUI-set equivalents died with the 2026-07-23
     # reboot, so declare them here.
     screensaver.askForPassword = false;
 
     # Untyped preferences (no dedicated nix-darwin option). Written via
-    # `defaults import` during activation — idempotent, no shell-out needed.
+    # `defaults import` during activation: idempotent, no shell-out needed.
     CustomUserPreferences = {
       "NSGlobalDomain"."com.apple.mouse.scaling" = 1.5;
       # Screen saver never starts (idleTime 0 = off).
@@ -39,7 +39,7 @@
         style = "window";
         showsClicks = true;
       };
-      # Stage Manager — disabled; using plain macOS window management.
+      # Stage Manager: disabled; using plain macOS window management.
       "com.apple.WindowManager".GloballyEnabled = false;
     };
 

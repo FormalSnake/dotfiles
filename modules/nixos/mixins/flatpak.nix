@@ -15,7 +15,7 @@ in
     services.flatpak = {
       enable = true;
 
-      # Flatpak apps such as Sober track fast-moving upstreams (Roblox) — refresh
+      # Flatpak apps such as Sober track fast-moving upstreams (Roblox): refresh
       # installed Flatpaks on a daily timer so they stay current without manual
       # `flatpak update` / rebuilds.
       update.auto = {

@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name matugen-bridge
-// @description Bridges matugen color JSON to Firefox CSS variables (chrome + content via JSWindowActor), and pushes per-site userstyles CSS to Zen's per-domain Boost system. The actor handles global :root vars on every page (since userContent.css is unreliable on Zen 1.20.1b); Zen's built-in ZenBoostsChild actor handles per-site customCSS via AGENT_SHEET registration.
+// @description Bridges matugen color JSON to Firefox CSS variables (chrome + content via JSWindowActor), and pushes per-site userstyles CSS to Zen's per-domain Boost system. The actor handles global :root vars on every page, since userContent.css is unreliable on Zen 1.20.1b. Zen's built-in ZenBoostsChild actor handles per-site customCSS via AGENT_SHEET registration.
 // @author parazeeknova
 // @version 1.7
 // @ignorecache
@@ -8,14 +8,14 @@
 
 // PATCH(nix mixins/zen.nix): this file is loaded by Sine as a .sys.mjs module
 // (shared module global, imported once), not by fx-autoconfig into a chrome
-// window scope — DOM globals like setInterval/document don't exist here and
-// must come from Timer.sys.mjs / the browser windows themselves.
+// window scope. DOM globals like setInterval/document don't exist here and
+// must come from Timer.sys.mjs or the browser windows themselves.
 const { setInterval } = ChromeUtils.importESModule(
   "resource://gre/modules/Timer.sys.mjs",
 );
 
 // Append a string to the log file using lazy OS.File to avoid the
-// complexity of nsIFileOutputStream (which has been flaky — the
+// complexity of nsIFileOutputStream (which has been flaky, the
 // log file gets created but writes never persist). This opens the
 // file lazily and writes synchronously.
 let _logPath = null;
@@ -64,7 +64,7 @@ function logError(msg) {
   _appendLog("ERROR", msg);
 }
 
-logInfo("SCRIPT TOP — version 1.7");
+logInfo("SCRIPT TOP: version 1.7");
 
 ("use strict");
 
@@ -102,7 +102,7 @@ const USERSTYLES_GLOBAL = "matugen-userstyles.css";
 
 // Map hostname suffix -> file suffix (after matugen-userstyles-).
 // github.com, gist.github.com, docs.github.com, etc. all match
-// suffix "github". Add more sites here as we author more templates.
+// suffix "github" (add more sites here as we author more templates).
 const HOST_TO_FILE = {
   "github.com": "github",
   "gist.github.com": "github",
@@ -110,13 +110,13 @@ const HOST_TO_FILE = {
   "raw.githubusercontent.com": "github",
 };
 
-// Per-site boost config — sibling of HOST_TO_FILE. When a hostname
+// Per-site boost config: sibling of HOST_TO_FILE. When a hostname
 // matches a suffix here, the bridge also pushes the CSS into a
 // Zen Boost's customCSS field. Zen's ZenBoostsChild actor then
 // registers it as an AGENT_SHEET (survives Fission, hot-reloadable
 // via the 'zen-boosts-update' observer event).
 //
-// `enableColorBoost: false` because we have explicit CSS — the
+// `enableColorBoost: false` because we have explicit CSS: the
 // C++ tint layer would fight the customCSS. Zen's own editor can
 // override these per-site if a user wants the tint instead.
 let boostsManager = null;
@@ -318,7 +318,7 @@ function syncBoostForDomain(domain, config, css) {
 // Default boost knobs applied to any visited domain that doesn't
 // already have a boost with customCSS. Tints every color toward
 // the active Zen workspace's gradient color (which is set from the
-// wallpaper). This is the "every site gets tinted" layer — the
+// wallpaper). This is the "every site gets tinted" layer: the
 // whole point of Zen Boosts.
 const UNIVERSAL_BOOST_OPTIONS = {
   boostName: "matugen universal",
@@ -393,7 +393,7 @@ function syncUniversalBoosts() {
             skippedNoHost++;
             continue;
           }
-          // Only HTTP/HTTPS — Zen restricts boost schemes to these
+          // Only HTTP/HTTPS: Zen restricts boost schemes to these
           // (see canBoostSite() in ZenBoostsManager).
           if (!uri.schemeIs("http") && !uri.schemeIs("https")) {
             skippedNoHost++;
@@ -406,7 +406,7 @@ function syncUniversalBoosts() {
             continue;
           }
           // Skip domains that have an explicit per-site boost
-          // entry in BOOST_SITES — BUT only if their userstyles
+          // entry in BOOST_SITES, BUT only if their userstyles
           // file actually exists on disk. If the file is missing
           // (e.g. user renamed the template to .disabled), fall
           // through to the universal tint so the domain doesn't
@@ -434,7 +434,7 @@ function syncUniversalBoosts() {
           }
           // Create a new boost with the universal tint knobs.
           // getOrCreateActiveBoost handles both the "no entry" case
-          // (creates + activates) and the "existing entry, not active"
+          // (creates and activates) and the "existing entry, not active"
           // case (activates an existing one).
           const boost = getOrCreateActiveBoost(domain);
           if (!boost) {
@@ -460,7 +460,7 @@ function syncUniversalBoosts() {
   logInfo(
     `Universal sync: ${windows}w/${tabs}t (http=${httpTabs}, noHost=${skippedNoHost}, perSite=${skippedPerSite}, registered=${skippedRegistered}, already=${skippedAlreadyBoosted}) created=${created}`,
   );
-  // Always re-run the workspace sync after the universal sync —
+  // Always re-run the workspace sync after the universal sync:
   // this picks up the HSL path for any domains we now know about
   // (whether just created or pre-existing in Zen's storage).
   if (universalBoostedDomains.size > 0) {
@@ -510,7 +510,7 @@ function collectValues() {
 
 function applyChromeVars(values) {
   if (!values || !Object.keys(values).length) return;
-  // PATCH(nix mixins/zen.nix): no `document` in the module global — apply to
+  // PATCH(nix mixins/zen.nix): no `document` in the module global. Apply to
   // every open browser window instead of the (window-scope) ambient document.
   try {
     let applied = 0;
@@ -686,8 +686,8 @@ function applyJson(data) {
     // theme gradient. Zen's boost C++ layer reads
     // workspace.theme.gradientColors[primary].c when
     // boostData.autoTheme is true, so without this push the
-    // universal tints won't hot-reload — they keep the gradient
-    // color from when the boost was first applied.
+    // universal tints won't hot-reload (they keep the gradient
+    // color from when the boost was first applied).
     syncWorkspaceTheme(data);
   }
 }
@@ -821,7 +821,7 @@ function syncWorkspaceTheme(data, force = false) {
 
     // Path 2: directly update the dot-picker knobs on every
     // universal-boosted domain. The C++ tint layer reads
-    // dotAngleDeg/saturation/brightness (HSL in disguise) — see
+    // dotAngleDeg/saturation/brightness (HSL in disguise). See
     // ZenBoostsChild.#buildBoostColor. This works for users
     // without Zen Workspaces enabled.
     if (!boostsManager) {
@@ -943,7 +943,7 @@ function poll() {
             if (fname === USERSTYLES_GLOBAL) continue;
             if (!f.isFile()) continue;
             const suffix = fname.slice(USERSTYLES_PREFIX.length, -4);
-            // Skip disabled files (e.g. foo.css.disabled) — they're
+            // Skip disabled files (e.g. foo.css.disabled): they're
             // not active userstyles.
             if (fname.endsWith(".disabled")) continue;
             const m = f.lastModifiedTime;
@@ -1012,7 +1012,7 @@ function startPolling() {
   pollTimer = setInterval(poll, POLL_MS);
   logInfo(`Polling every ${POLL_MS}ms`);
 
-  // Universal boost sync runs less frequently — it walks all open
+  // Universal boost sync runs less frequently: it walks all open
   // tabs and creates a Zen Boost for any unhosted domain. We don't
   // need to do this every second; a few seconds is fine because the
   // user only notices after they navigate to a new site anyway.
@@ -1066,7 +1066,7 @@ async function init() {
     }
     logInfo(`chrome dir: ${chromeDir.path}`);
 
-    // openLog is no longer needed — _appendLog opens the file per-write
+    // openLog is no longer needed (_appendLog opens the file per-write)
 
     jsonFile = chromeDir.clone();
     jsonFile.append("matugen-vars.json");
@@ -1080,15 +1080,15 @@ async function init() {
     lastWebThemeStateMtime = state.mtime;
     logInfo(`Initial custom web theme enabled state: ${customWebThemeEnabled}`);
 
-    // Load Zen's boost manager — used to push per-site userstyles into
+    // Load Zen's boost manager: used to push per-site userstyles into
     // Zen Boosts (customCSS) so Zen's built-in actor injects them as
-    // AGENT_SHEETs. Failure is non-fatal: we just skip boost sync.
+    // AGENT_SHEETs (failure is non-fatal, we just skip boost sync).
     boostsManager = await loadBoostsManager();
     if (boostsManager) {
       logInfo("Loaded Zen Boosts Manager");
     } else {
       logWarn(
-        "Zen Boosts Manager not available — per-site CSS will only be injected via the actor fallback",
+        "Zen Boosts Manager not available: per-site CSS will only be injected via the actor fallback",
       );
     }
 
@@ -1130,8 +1130,8 @@ async function init() {
 // in a different scope. The parent uses globalThis.__matugenBridge
 // set by fx-autoconfig's actor wrapper. We expose the userstyles
 // cache and a getter (by hostname) that the parent's
-// receiveMessage can call. Also a log() helper so the parent
-// can forward child-actor log messages to our log file.
+// receiveMessage can call (also a log() helper so the parent
+// can forward child-actor log messages to our log file).
 globalThis.__matugenBridge = {
   getUserstyles: (hostname) => {
     const result = getUserstylesForHostname(hostname);
@@ -1164,7 +1164,7 @@ globalThis.__matugenBridge = {
 
 // PATCH(nix mixins/zen.nix): as a run-once background module the bridge can
 // init before any browser window exists, and later windows open without the
-// inline vars — re-apply (and force one workspace-gradient sync) whenever a
+// inline vars. Re-apply and force one workspace-gradient sync whenever a
 // browser window finishes its delayed startup.
 Services.obs.addObserver(
   {

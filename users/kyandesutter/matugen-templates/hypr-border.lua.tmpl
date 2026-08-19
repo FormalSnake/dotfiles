@@ -5,7 +5,7 @@
 --     in `general.col`;
 --   • the template's post_hook in mixins/dms.nix runs the same dofile through
 --     `hyprctl eval`, so the colours land instantly without a reload.
--- Absent before the first render — the pcall is what makes that safe.
+-- Absent before the first render: the pcall is what makes that safe.
 -- primary = active border; outline = inactive (surface was invisible against
 -- the wallpaper once gaps opened the layout up; outline is M3's mid-tone made
 -- for exactly this).

@@ -9,7 +9,7 @@ let
   # -j launches it hidden, so menu-bar utilities start silently instead of
   # bombarding you with windows on login.
   apps = [
-    # aerospace is launched via programs.aerospace.launchd (currently disabled — see users/kyandesutter/mixins/aerospace.nix)
+    # aerospace is launched via programs.aerospace.launchd (currently disabled, see users/kyandesutter/mixins/aerospace.nix)
     { id = "omniwm";        path = "/Applications/OmniWM.app"; }
     { id = "nordvpn";       path = "/Applications/NordVPN.app"; }
     { id = "raycast-beta";  path = "/Applications/Raycast Beta.app"; }

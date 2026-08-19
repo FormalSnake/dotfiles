@@ -73,7 +73,7 @@ let
           # database are UTC either way, but the plugins bucket by local hour
           # inside this container: NaviBeat's morning / afternoon / evening /
           # night mixes were reading an hour early, so a play just before
-          # midnight counted as evening. This variable alone does nothing —
+          # midnight counted as evening. This variable alone does nothing:
           # the image carries no tzdata, so the zoneinfo bind mount below is
           # what makes the zone resolve instead of silently staying UTC.
           TZ: Atlantic/Canary
@@ -124,8 +124,8 @@ let
 
           # Without this, Subsonic's getArtist only counts albums an artist is
           # credited on as *album* artist, so a feature such as Majestic on
-          # "Who's That What's That" is an artist with an empty page — the
-          # track only reachable under Niko B. Navidrome splits the credit
+          # "Who's That What's That" is an artist with an empty page (the
+          # track only reachable under Niko B). Navidrome splits the credit
           # correctly either way; this is what makes the second artist browsable.
           ND_SUBSONIC_ARTISTPARTICIPATIONS: "true"
 
@@ -232,7 +232,7 @@ let
 
       # Downloads the ListenBrainz weekly-exploration tracks the library lacks,
       # the one thing the daily-playlist plugin cannot do: it only matches what
-      # is already on disk. Soulseek is the only download source on purpose —
+      # is already on disk. Soulseek is the only download source on purpose:
       # the youtube source would seed lossy rips into a FLAC library. Explo's
       # wizard and settings UI write back into the seeded .env, so it follows
       # the same contract as the other seeds: nix writes it once, never again.
@@ -348,7 +348,7 @@ let
 
   # All three seeds hold state that outlives the store path (credentials, API
   # keys, whatever the web UIs write back), so nix writes them once and never
-  # rewrites them — same contract as DMS settings.json. @SLSKD_KEY@ and
+  # rewrites them (same contract as DMS settings.json). @SLSKD_KEY@ and
   # @LIDARR_KEY@ are filled in by the launcher on first seed.
   lidarrSeed = pkgs.writeText "lidarr-seed.xml" ''
     <Config>
@@ -411,7 +411,7 @@ let
     minimum_peer_upload_speed = 0
     minimum_filename_match_ratio = 0.5
     allowed_filetypes = flac,mp3
-    # Defaults to false upstream, which searches for the bare album title —
+    # Defaults to false upstream, which searches for the bare album title:
     # "Currents" alone matches nothing useful on Soulseek.
     album_prepend_artist = True
     search_type = incrementing_page
@@ -460,7 +460,7 @@ let
 
   # Explo needs a real Navidrome login (playlists are created as that user),
   # the personal ListenBrainz account token, and web UI credentials of its
-  # own — none of which nix can generate. Everything else the wizard asks for
+  # own (none of which nix can generate). Everything else the wizard asks for
   # is pre-answered here.
   exploSeed = pkgs.writeText "explo-seed.env" ''
     UI_USERNAME=CHANGEME
@@ -531,7 +531,7 @@ let
     # download carries embedded art only if whoever uploaded it bothered. The
     # Kodi consumer writes folder.jpg into every album folder from Lidarr's own
     # metadata, which is first in Navidrome's CoverArtPriority. The .nfo
-    # sidecars are turned off — Navidrome ignores them.
+    # sidecars are turned off (Navidrome ignores them).
     meta=$(curl -sf -H "X-Api-Key: $LIDARR_KEY" http://localhost:8686/api/v1/metadata) || exit 0
     xbmc=$(printf '%s' "$meta" | jq -c 'map(select(.implementation=="XbmcMetadata"))[0] // empty')
     want=$(printf '%s' "$xbmc" | jq -c '.enable = true
@@ -610,7 +610,7 @@ let
 
     # Navidrome: transcoding profile ids are generated per install, so match the
     # profile by name rather than hardcoding one. Applied unconditionally, which
-    # means playerProfiles below is authoritative — a profile changed by hand in
+    # means playerProfiles below is authoritative: a profile changed by hand in
     # the web UI is reverted within ten minutes.
     ${lib.concatMapStringsSep "\n" (p: ''
       docker exec navidrome sqlite3 /data/navidrome.db "
@@ -628,7 +628,7 @@ let
     # slskd only indexes shares at startup or on demand, so a freshly downloaded
     # album is not offered back to the network until something asks for a
     # rescan. Left alone the share count stays at whatever it was on boot, the
-    # account keeps looking like a leech, and Soulseek peers reject transfers —
+    # account keeps looking like a leech, and Soulseek peers reject transfers,
     # which fails whole albums, since Soularr needs every track from one peer.
     if [ -n "''${SLSKD_KEY:-}" ]; then
       shared=$(curl -sf -H "X-API-Key: $SLSKD_KEY" http://localhost:5030/api/v0/application \
@@ -1159,8 +1159,8 @@ let
     mkdir -p "${cfg.libraryDir}/explo"
 
     # Re-staged every start so a nixpkgs plugin bump actually lands. Navidrome
-    # unpacks each .ndp next to itself, so the folder must be writable — a
-    # store symlink is not enough.
+    # unpacks each .ndp next to itself, so the folder must be writable (a
+    # store symlink is not enough).
     rm -rf "${stackDir}/navidrome-plugins"/*
     ${lib.concatMapStringsSep "\n" (p: ''
       install -m 0644 ${p}/share/*.ndp "${stackDir}/navidrome-plugins/"
@@ -1271,11 +1271,11 @@ in
         # client gives up). Serving the original is a static file read, so range
         # requests work and seeking behaves. 1.7 Mbps is nothing on 5G, and the
         # AirPods re-encode to AAC over Bluetooth regardless, so transcoding was
-        # never buying quality here — only cellular data.
+        # never buying quality here: only cellular data.
         { match = "%NaviBeat%"; }
         # Kopuz reaches the server from the linux laptops over the tailnet, not
         # from this machine, so bit-perfect is not free: on a slow link a FLAC
-        # track took about a minute to load. Opus is safe here — kopuz decodes
+        # track took about a minute to load. Opus is safe here: kopuz decodes
         # it through symphonia-adapter-libopus.
         {
           match = "%kopuz%";

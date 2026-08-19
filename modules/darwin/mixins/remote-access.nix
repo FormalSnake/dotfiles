@@ -2,7 +2,7 @@
 let
   # nixpkgs marks pam_ssh_agent_auth linux-only, but it builds against macOS's
   # OpenPAM with two fixes: -std=gnu99 (modern autoconf picks gnu23, which
-  # rejects the K&R definitions in its openbsd-compat code AND breaks the
+  # rejects the K&R definitions in its openbsd-compat code and breaks the
   # configure function probes, so half of libc gets "replaced") and
   # -D_FORTIFY_SOURCE=0 (the Apple SDK's fortify macros collide with those
   # replacements). NIX_CFLAGS_COMPILE lands after the makefile's flags, so the
@@ -39,8 +39,8 @@ in
 
   # Authorized keys for SSH into this Mac over Tailscale. nix-darwin delivers
   # these via an AuthorizedKeysCommand (/etc/ssh/nix_authorized_keys.d/%u),
-  # which is *additive* to ~/.ssh/authorized_keys — the laptop's hand-installed
-  # key (docs/remote-server.md step 3) is untouched. Tailscale SSH can't be a
+  # which is *additive* to ~/.ssh/authorized_keys (the laptop's hand-installed
+  # key (docs/remote-server.md step 3) is untouched). Tailscale SSH can't be a
   # macOS server, so mobile devices (iPhone/iPad) reach the Mac via native sshd
   # with key auth; add each device's public key here.
   users.users.kyandesutter.openssh.authorizedKeys.keys = machineKeys;
@@ -48,13 +48,13 @@ in
   # Passwordless sudo for SSH sessions from our own machines: pam_ssh_agent_auth
   # accepts sudo when the forwarded agent (the ssh mixin sets ForwardAgent only
   # for our hosts) holds one of the machine keys. Local sudo for kyandesutter
-  # is NOPASSWD (below) so non-interactive shells — coding agents included —
+  # is NOPASSWD (below) so non-interactive shells (coding agents included)
   # can sudo without a TTY; the agent module still covers any other account
   # arriving over SSH. The module can't read the nix-darwin-managed
   # authorized-keys file: its secure_filename() check walks the resolved path
   # and rejects /nix/store (group-writable), so activation installs a real
   # root-owned copy outside the store for it. noninteractive_auth makes
-  # `sudo -n` actually try PAM — without it sudo assumes PAM means "will
+  # `sudo -n` actually try PAM: without it sudo assumes PAM means "will
   # prompt" and gives up before the agent module ever runs.
   security.pam.services.sudo_local.text = ''
     auth       sufficient     ${pam_ssh_agent_auth}/libexec/pam_ssh_agent_auth.so file=/etc/ssh/sudo_authorized_keys
@@ -71,7 +71,7 @@ in
   # fallback (System Settings -> General -> Sharing -> Remote Login).
   system.activationScripts.postActivation.text = ''
     # Real root-owned copy of the machine keys for pam_ssh_agent_auth (see the
-    # sudo_local block above: it can't read through the /nix/store symlink).
+    # sudo_local block above): it can't read through the /nix/store symlink.
     install -m 444 -o root -g wheel ${machineKeysFile} /etc/ssh/sudo_authorized_keys
 
     /usr/sbin/systemsetup -setremotelogin on >/dev/null 2>&1 || true
@@ -84,8 +84,8 @@ in
   # be maintained either: socketfilterfw --add/--unblockapp exit 0 but change
   # nothing (the per-activation re-add loop that used to live here went dead),
   # and even allow-listed store paths stopped passing traffic. So the firewall
-  # stays off, declaratively — inbound exposure is governed by Tailscale and
-  # the network edge instead. Verified 2026-07-23: signed /usr/bin/python3
+  # stays off, declaratively (inbound exposure is governed by Tailscale and
+  # the network edge instead). Verified 2026-07-23: signed /usr/bin/python3
   # echo server receives UDP over the tailnet, the Nix python on the next
   # port receives nothing until the firewall is disabled.
   networking.applicationFirewall.enable = false;

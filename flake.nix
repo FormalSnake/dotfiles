@@ -62,7 +62,7 @@
     # binaries and declares no nixpkgs input of its own to override.
     determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/3";
 
-    # Rosetta-backed Linux builder VM on the macbook — the only way an Apple
+    # Rosetta-backed Linux builder VM on the macbook: the only way an Apple
     # Silicon host can build x86_64-linux at a useful speed
     # (modules/darwin/mixins/rosetta-builder.nix).
     nix-rosetta-builder = {
@@ -85,7 +85,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # CanaryCode — our own fast, minimal terminal coding agent (Bun/TypeScript).
+    # CanaryCode: our own fast, minimal terminal coding agent (Bun/TypeScript).
     # Ships a flake whose package is the prebuilt per-system release binary
     # (autoPatchelf'd on Linux) plus a home-manager module (programs.canarycode).
     # Cross-platform: the release covers all four darwin/linux systems.
@@ -94,18 +94,18 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # CanaryOrchestrator — our remote-dev-session orchestrator (canaryd + canary
+    # CanaryOrchestrator: our remote-dev-session orchestrator (canaryd + canary
     # CLI + the Linux `canary-desktop` launcher/XDG entry). Private repo, so
     # `github:` 404s without an access token; git+ssh fetches with the user's
-    # own key, which every box already has authorized — pure, unlike the old
-    # `builtins.getFlake` local-checkout import this replaces (af8161e7).
+    # own key, which every box already has authorized (pure, unlike the old
+    # `builtins.getFlake` local-checkout import this replaces (af8161e7)).
     canary = {
       url = "git+ssh://git@github.com/FormalSnake/CanaryOrchestrator";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # claude-code, tracked at upstream release cadence (the flake's CI bumps it
-    # hourly; nixpkgs lags by days). No `inputs.nixpkgs.follows`: its cachix
+    # hourly; nixpkgs lags by days). No `inputs.nixpkgs.follows`, its cachix
     # cache (claude-code.cachix.org) is keyed to its own nixpkgs pin, so
     # following ours would force local rebuilds. Update with
     # `just ui claude-code-nix`.
@@ -114,7 +114,7 @@
     };
 
     # nixpkgs' t3code packaging, pinned at its 0.0.32 bump and consumed as a
-    # plain source tree (`flake = false`): mixins/t3code.nix callPackages these
+    # plain source tree (`flake = false`), mixins/t3code.nix callPackages these
     # three files with OUR pkgs, so the build reuses our electron/nodejs closure
     # rather than dragging in a second nixpkgs. Our own nixpkgs pin still
     # carries the 0.0.28 packaging, which cannot build current t3code (pnpm 10
@@ -124,14 +124,14 @@
       flake = false;
     };
 
-    # Prebuilt nix-index database (weekly) — powers comma and the
+    # Prebuilt nix-index database (weekly): powers comma and the
     # command-not-found handler without a local `nix-index` run.
     nix-index-database = {
       url = "github:nix-community/nix-index-database";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # areofyl/fetch — animated 3D fetch tool (spinning distro-logo relief +
+    # areofyl/fetch: animated 3D fetch tool (spinning distro-logo relief +
     # system info). Consumed via its home-manager module (programs.fetch);
     # cross-platform since the flake covers all four darwin/linux systems.
     areofyl-fetch = {
@@ -139,25 +139,25 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Kopuz — Rust/Dioxus music player (local library, Jellyfin/Subsonic/
+    # Kopuz: Rust/Dioxus music player (local library, Jellyfin/Subsonic/
     # Spotify). Pinned to a release tag, not a branch: the cachix cache is
     # populated per push, and a tag keeps all three hosts on the same build.
-    # nixpkgs' kopuz lags (0.10.0). No `inputs.nixpkgs.follows`: kopuz.cachix.org
+    # nixpkgs' kopuz lags (0.10.0). No `inputs.nixpkgs.follows`, kopuz.cachix.org
     # is keyed to the flake's own nixpkgs pin, and following ours would mean a
     # full Rust + Dioxus + v8 build on every host.
     kopuz = {
       url = "github:Kopuz-org/kopuz/v0.15.0";
     };
 
-    # — NixOS (g815 gaming laptop) inputs —
+    # NixOS (g815 gaming laptop) inputs
 
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
-    # NordVPN — laptop VPN exit only (the device mesh is Tailscale). No
+    # NordVPN: laptop VPN exit only (the device mesh is Tailscale). No
     # first-party nixpkgs module exists; this community flake provides the
-    # package + a NixOS module (services.nordvpn). No `inputs.nixpkgs.follows`:
+    # package + a NixOS module (services.nordvpn). No `inputs.nixpkgs.follows`,
     # its package is built (with a vendored .deb FOD) against its own pinned
-    # nixpkgs — leave it self-contained rather than risk a mismatch.
+    # nixpkgs. Leave it self-contained rather than risk a mismatch.
     #
     # The flake consumes the NordVPN .deb as `flake = false` inputs pinned to
     # 4.2.0, which NordVPN has since removed from their repo (404). Override
@@ -172,12 +172,12 @@
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
 
     # Declarative Flatpak management (used for Sober, the Roblox client, which
-    # is only distributed as a Flatpak — not packaged in nixpkgs). No
+    # is only distributed as a Flatpak, not packaged in nixpkgs). No
     # `inputs.nixpkgs.follows`: it's a pure NixOS/home-manager module with no
     # nixpkgs input of its own to override.
     nix-flatpak.url = "github:gmodena/nix-flatpak";
 
-    # Dank Material Shell (DMS) desktop shell — Quickshell/QML, official flake
+    # Dank Material Shell (DMS) desktop shell: Quickshell/QML, official flake
     # (home-manager module under homeModules.dank-material-shell). Pinned to the
     # `stable` branch rather than main. Build from source following our nixpkgs
     # (no cachix substituter).
@@ -186,7 +186,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # FormalShell — the in-house Quickshell/QML desktop shell (bar, lock,
+    # FormalShell: the in-house Quickshell/QML desktop shell (bar, lock,
     # notifications, menu; github.com/FormalSnake/FormalShell). Trialing as
     # DMS's replacement, e1504g first (kyan.desktop.shell = "formalshell").
     # Its pinned quickshell follows our nixpkgs, same as DMS: built from
@@ -196,7 +196,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # DMS plugin registry — a flake that packages every community plugin
+    # DMS plugin registry: a flake that packages every community plugin
     # (built daily) and ships a home-manager module exposing them as
     # `programs.dank-material-shell.plugins.<id>.enable`. We enable a handful in
     # mixins/dms.nix; each is a `fetchgit` + copy-into-$out derivation, so only
@@ -206,7 +206,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # DankCalendar (dcal) — the calendar daemon behind DMS's native "dankcal"
+    # DankCalendar (dcal): the calendar daemon behind DMS's native "dankcal"
     # backend (unifies Local/Google/Microsoft/CalDAV/iCloud accounts, stores
     # OAuth tokens in the keyring). Its home-manager module installs `dcal` and
     # runs `dcal run --session --hidden`; DMS's calendarBackend defaults to
@@ -216,13 +216,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Helium browser (Chromium fork) — exposes overlays.default -> pkgs.helium.
+    # Helium browser (Chromium fork): exposes overlays.default -> pkgs.helium.
     helium = {
       url = "github:schembriaiden/helium-browser-nix-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Zen browser (Firefox fork) — homeModules.beta + prebuilt beta packages.
+    # Zen browser (Firefox fork): homeModules.beta + prebuilt beta packages.
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
       inputs = {

@@ -1,6 +1,6 @@
 { inputs, ... }:
 {
-  # CanaryCode (CanaryCoders/CanaryCodeCli) — our own fast, minimal terminal
+  # CanaryCode (CanaryCoders/CanaryCodeCli): our own fast, minimal terminal
   # coding agent. Installed from the upstream flake's home-manager module
   # (nixpkgs follows ours); the package is the prebuilt per-system release binary
   # with self-update disabled by the wrapper, so it's safe under Nix's immutable
