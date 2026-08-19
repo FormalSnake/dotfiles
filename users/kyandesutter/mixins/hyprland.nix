@@ -377,6 +377,12 @@ let
       hl.bind(mod .. " + period", hl.dsp.exec_cmd("${fsIpc [ "menu" "summon" "emoji" ]}"))
       -- ñ is a dedicated key on the es layout; its XKB keysym is `ntilde`.
       hl.bind(mod .. " + ntilde", hl.dsp.exec_cmd("${fsIpc [ "menu" "summon" "clipboard" ]}"))
+      -- Quake console (FormalShell M37): one ghostty that drops over whatever
+      -- workspace you are on and parks on Hyprland's special:formalshell-console
+      -- when toggled off, session intact. The shell spawns it from
+      -- console.command; nothing here needs a window rule, since it places the
+      -- window itself on every show. `+` is unshifted on the es layout.
+      hl.bind(mod .. " + plus", hl.dsp.exec_cmd("${fsIpc [ "console" "toggle" ]}"))
       hl.bind(mod .. " + SHIFT + T", hl.dsp.exec_cmd("${fsBin} theme mode toggle"))
       -- Sleep: lock then suspend on demand, so resume lands on the lock screen
       -- (the shell has no combined verb, and exec_cmd runs through sh -c).
