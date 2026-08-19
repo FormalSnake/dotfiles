@@ -475,7 +475,6 @@ in
     "matugen/templates/ghostty.tmpl".source = ../matugen-templates/ghostty.tmpl;
     "matugen/templates/neovim.lua.tmpl".source = ../matugen-templates/neovim.lua.tmpl;
     "matugen/templates/equibop.css.tmpl".source = ../matugen-templates/equibop.css.tmpl;
-    "matugen/templates/spicetify.ini.tmpl".source = ../matugen-templates/spicetify.ini.tmpl;
     "matugen/templates/obsidian.css.tmpl".source = ../matugen-templates/obsidian.css.tmpl;
     "matugen/templates/dualsense.tmpl".source = ../matugen-templates/dualsense.tmpl;
     "matugen/templates/hypr-border.lua.tmpl".source = ../matugen-templates/hypr-border.lua.tmpl;
@@ -535,24 +534,6 @@ in
       [templates.equibop]
       input_path = "~/.config/matugen/templates/equibop.css.tmpl"
       output_path = "~/.config/equibop/themes/dank.theme.css"
-
-      # Spotify via spicetify. Writes the text theme's color.ini (the base
-      # theme's user.css is vendored by mixins/spicetify.nix), then
-      # re-applies it to the (Flatpak) Spotify — see mixins/spicetify.nix.
-      # Absolute spicetify path: this hook runs inside DMS's systemd user
-      # service, whose PATH won't include the home profile bin. If the UI
-      # doesn't visibly recolour, Ctrl+Shift+R inside Spotify forces it.
-      #
-      # The config dir is selected via the SPICETIFY_CONFIG env var, NOT a
-      # `-c <path>` flag: in spicetify-cli v2 `-c`/`--config` is a standalone,
-      # non-chainable flag that just prints the config path and exits, so
-      # `spicetify -c <path> apply` silently runs nothing (exit 0) and Spotify
-      # never gets re-patched. Setting SPICETIFY_CONFIG points apply at this
-      # config dir explicitly (the systemd service may not have XDG_CONFIG_HOME).
-      [templates.spicetify]
-      input_path = "~/.config/matugen/templates/spicetify.ini.tmpl"
-      output_path = "~/.config/spicetify/Themes/text/color.ini"
-      post_hook = "SPICETIFY_CONFIG=${config.home.homeDirectory}/.config/spicetify ${pkgs.spicetify-cli}/bin/spicetify apply --no-restart || true"
 
       # Obsidian (Minimal theme). Rendered into the vault's snippet dir;
       # Obsidian watches ~/Notes/.obsidian/snippets and hot-reloads on write,

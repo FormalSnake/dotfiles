@@ -44,7 +44,7 @@ in
   #
   # It does NOT stop a *closed* app from coming back: sd-switch has a second
   # pass that starts every inactive unit an active target wants, and keep-old
-  # has no say there. See spotify below for the pair of options that closes it.
+  # has no say there. See bluebubbles below for the pair of options that closes it.
 
   # Equibop (Discord), launched minimized to the tray. Window rule sends it to
   # workspace 4 (communication, eDP-1).
@@ -112,8 +112,18 @@ in
   # BlueBubbles messaging client. Window rule pins it to workspace 4.
   #
   # RefuseManualStart/Stop instead of X-SwitchMethod, so a rebuild leaves a
-  # deliberately closed BlueBubbles closed; see the Spotify unit below for why
-  # keep-old isn't enough on its own.
+  # deliberately closed BlueBubbles closed. No `X-SwitchMethod` here:
+  # RefuseManualStart takes precedence over it in sd-switch and gives the
+  # behaviour keep-old only half provided. Every switch used to relaunch an app
+  # that had been closed on purpose (sd-switch starts inactive units wanted by
+  # an active target), which meant a full window grabbing focus and jumping to
+  # its workspace in the middle of whatever the rebuild was for.
+  # RefuseManualStart makes sd-switch classify the unit stop-only, so it skips
+  # that start; RefuseManualStop then makes the running-unit case a no-op,
+  # which is what keep-old did. systemd refuses only *explicit* start/stop
+  # requests, so graphical-session.target still pulls the app in at login and
+  # still stops it at logout. The one real cost is that
+  # `systemctl --user start bluebubbles` is refused now; launch the app itself.
   systemd.user.services.bluebubbles = {
     Unit = {
       Description = "BlueBubbles";
@@ -126,39 +136,6 @@ in
     Service = {
       Type = "simple";
       ExecStart = loginExec "bluebubbles";
-    };
-  };
-
-  # Spotify music player (installed as the com.spotify.Client flatpak — there is
-  # no `spotify` binary on PATH). Window rule pins it to workspace 8 (media).
-  #
-  # No `X-SwitchMethod` here: RefuseManualStart takes precedence over it in
-  # sd-switch and gives the behaviour keep-old only half provided. Every switch
-  # used to relaunch a Spotify that had been closed on purpose (sd-switch starts
-  # inactive units wanted by an active target), which meant a full window
-  # grabbing focus and jumping to workspace 8 in the middle of whatever the
-  # rebuild was for. RefuseManualStart makes sd-switch classify the unit
-  # stop-only, so it skips that start; RefuseManualStop then makes the
-  # running-unit case a no-op, which is what keep-old did. systemd refuses only
-  # *explicit* start/stop requests, so graphical-session.target still pulls
-  # Spotify in at login and still stops it at logout. The one real cost is that
-  # `systemctl --user start spotify` is refused now; launch the app itself.
-  systemd.user.services.spotify = {
-    Unit = {
-      Description = "Spotify";
-      PartOf = [ "graphical-session.target" ];
-      After = [ "graphical-session.target" ];
-      RefuseManualStart = true;
-      RefuseManualStop = true;
-    };
-    Install.WantedBy = [ "graphical-session.target" ];
-    Service = {
-      Type = "simple";
-      # iGPU pin (see lib/chromium-igpu.nix). Flags go on the launch command
-      # since the flatpak can't be package-wrapped; inside the sandbox the render
-      # node is the bare /dev/dri/renderD128 (the /dev/dri/by-path symlinks the
-      # native apps use aren't mounted). renderD128 is the iGPU on this host.
-      ExecStart = loginExec "flatpak run com.spotify.Client --render-node-override=/dev/dri/renderD128 --enable-features=VaapiVideoDecoder";
     };
   };
 

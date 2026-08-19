@@ -792,7 +792,7 @@ in
     })
     hl.window_rule({ match = { class = "^([Oo]bsidian)$" }, workspace = "5" })
     hl.window_rule({ match = { class = "^([Cc]laude)$" }, workspace = "7" })
-    hl.window_rule({ match = { class = "^([Ss]potify|[Kk]opuz)$" }, workspace = "8" })
+    hl.window_rule({ match = { class = "^([Kk]opuz)$" }, workspace = "8" })
     hl.window_rule({ match = { class = "^([Ss]team|steam)$" }, workspace = "9" })
     -- Allow tearing for Steam games (any steam_app_<id> window). Pairs with
     -- general.allow_tearing to present frames immediately instead of on the
