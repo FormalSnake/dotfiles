@@ -48,5 +48,24 @@
         ) old.checkFlags;
       });
     })
+
+    # curl-cffi 0.15.0 pins four tests to curl's old error strings and cookie
+    # behaviour; the curl bump in nixpkgs-unstable (2026-08-19) changed both, so
+    # the test suite fails and takes yt-dlp (and everything downstream of it:
+    # mpv, celluloid, formalshell) with it. Deselect just those four. Drop this
+    # overlay once nixpkgs ships a curl-cffi whose tests pass against the
+    # packaged curl.
+    (final: prev: {
+      pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+        (pyfinal: pyprev: {
+          curl-cffi = pyprev.curl-cffi.overrideAttrs (old: {
+            disabledTests = (old.disabledTests or [ ]) ++ [
+              "test_verify"
+              "test_delete_cookies"
+            ];
+          });
+        })
+      ];
+    })
   ];
 }
