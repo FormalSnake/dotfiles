@@ -15,7 +15,7 @@ let
   # Claude Code draws on the alternate screen and wipes it on exit, so the
   # conversation has to be captured with colour intact before the kill and
   # written back into the pane afterwards. The capture reaches as far as the
-  # rendered screen and no further; everything above it stays in Claude's own
+  # rendered screen and no further. Everything above it stays in Claude's own
   # transcript, which `claude --resume` in that pane reopens. The file copy
   # matters too: herdr's pane history does not survive a server restart
   # (experimental.pane_history is off).
@@ -58,7 +58,7 @@ let
       }
 
       # A workspace nobody has an agent in is still a row in the sidebar. This
-      # is hand-run, never scheduled: closing takes its panes with it.
+      # is hand-run, never scheduled (closing takes its panes with it).
       if [ "$close_empty" = 1 ]; then
         herdr workspace list | jq -r '.result.workspaces[] | [.workspace_id, .label] | @tsv' |
         while IFS=$'\t' read -r ws label; do
@@ -70,7 +70,7 @@ let
           fi
 
           # Anything in the foreground other than the pane's own shell is work
-          # in progress: a dev server, a build, an editor.
+          # in progress (a dev server, a build, an editor).
           busy=0
           while read -r pane; do
             info=$(herdr pane process-info --pane "$pane") || { busy=1; break; }
@@ -171,7 +171,7 @@ let
         fi
 
         archive="$archive_dir/$(date +%Y%m%d-%H%M%S)-''${pane//:/-}.txt"
-        # Only what is currently rendered can be read back, so zoom first: a
+        # Only what is currently rendered can be read back, so zoom first. A
         # full window holds roughly twice the lines of one split, which is the
         # difference between catching the final message and catching its tail.
         herdr pane zoom "$pane" --on >/dev/null || true
@@ -217,13 +217,13 @@ let
   };
 in
 {
-  # herdr — terminal workspace manager for AI coding agents.
-  # Not in nixpkgs; installed straight from the upstream flake (nixpkgs follows
+  # herdr: terminal workspace manager for AI coding agents.
+  # Not in nixpkgs. Installed straight from the upstream flake (nixpkgs follows
   # ours, so it builds against this config's pkgs). Replaces the previous
   # imperative `curl … | sh` install that dropped a binary in ~/.local/bin.
   home.packages = [ herdr reap ];
 
-  # Only the macbook runs a herdr server; the Linux hosts reach it over SSH, so
+  # Only the macbook runs a herdr server. The Linux hosts reach it over SSH, so
   # a timer there would have no session to talk to. `herdr-reap --now` is on
   # PATH everywhere for a manual sweep.
   launchd.agents = lib.optionalAttrs pkgs.stdenv.isDarwin {
@@ -246,14 +246,14 @@ in
   };
 
   # herdr ships a Nix flake but no home-manager module, so manage its config as
-  # a plain-text TOML file. Read-only (lives in the nix store); runtime state
+  # a plain-text TOML file. Read-only (lives in the nix store). Runtime state
   # (sockets, logs, session.json) is written to ~/.config/herdr separately and
   # is untouched by this.
   xdg.configFile."herdr/config.toml".text = ''
     onboarding = false
 
     # Pin Flexoki Dark via [theme.custom]. The "terminal" theme reads the host
-    # terminal's palette through OSC colour queries at runtime; those don't
+    # terminal's palette through OSC colour queries at runtime. Those don't
     # round-trip over SSH/mosh, so remotely herdr fell back to defaults and
     # rendered raw-ANSI harsh. Static tokens sourced from the one Flexoki
     # palette (users/kyandesutter/mixins/flexoki/palette.nix) need no OSC, so

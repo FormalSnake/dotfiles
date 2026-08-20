@@ -1,7 +1,7 @@
 { inputs, self, ... }:
 {
   imports = [
-    # Generated on first boot with `nixos-generate-config` — placeholder for now.
+    # Generated on first boot with `nixos-generate-config` (placeholder for now).
     ./hardware-configuration.nix
 
     # Windows 11 dual-boot (chainload entry, reboot-to-windows one-shot).
@@ -11,7 +11,7 @@
     inputs.nixos-hardware.nixosModules.common-cpu-intel
     inputs.nixos-hardware.nixosModules.common-pc-laptop
     inputs.nixos-hardware.nixosModules.common-pc-laptop-ssd
-    # common-gpu-nvidia == PRIME offload (despite the bare name).
+    # common-gpu-nvidia: PRIME offload (despite the bare name).
     inputs.nixos-hardware.nixosModules.common-gpu-nvidia
 
     # NOTE: this laptop's Wi-Fi is an Intel BE200 (iwlwifi/iwlmld), NOT a
@@ -45,14 +45,14 @@
     # while its backlight is driven by nvidia_wmi_ec_backlight (stays at 100% →
     # "lit"). The actual failure is at modeset: the kernel logs
     #   i915 0000:00:02.0: [drm] PHY A failed to request refclk
-    # on every attempt to bring the panel back — the eDP PHY can't get its
+    # on every attempt to bring the panel back: the eDP PHY can't get its
     # reference clock, so no image, even though the connector reports
     # connected/enabled/dpms On. No compositor IPC command recovers it (tested via hyprctl at the time);
     # only a full GPU re-init (reboot / suspend-resume) does. The cause is i915
     # display power management gating the PHY refclk over idle:
-    #   • enable_dc=0  — keep the display power wells up (don't enter DC5/DC6),
+    #   • enable_dc=0: keep the display power wells up (don't enter DC5/DC6),
     #                    which is what gates the refclk; primary fix.
-    #   • enable_psr=0 — disable Panel Self Refresh (same failure family).
+    #   • enable_psr=0: disable Panel Self Refresh (same failure family).
     # Cost is a little idle power on the iGPU; no other behavioural change.
     "i915.enable_dc=0"
     "i915.enable_psr=0"
@@ -60,7 +60,7 @@
     # Disable CPU speculative-execution mitigations for a CPU-bound performance
     # win (~5-15% on some workloads; smaller on Arrow Lake-HX, which is newer
     # silicon needing fewer of them). SECURITY TRADE-OFF: drops Spectre/Meltdown
-    # -class protections. Acceptable here — a single-user personal laptop,
+    # -class protections. Acceptable here: a single-user personal laptop,
     # not a shared/server host running untrusted code.
     "mitigations=off"
   ];
@@ -68,7 +68,7 @@
   # Belt-and-suspenders: keep NetworkManager from re-enabling Wi-Fi powersave.
   networking.networkmanager.wifi.powersave = false;
 
-  # Automatic output routing by priority — device-specific (headphone MACs, this
+  # Automatic output routing by priority (device-specific: headphone MACs, this
   # chassis's PCI audio addresses), so it lives here rather than in the generic
   # audio mixin. WirePlumber always switches the default sink to the
   # highest-priority *available* node, and auto-falls back when it disappears.
@@ -76,7 +76,7 @@
   # (DMS / `wpctl set-default` / pavucontrol) is stored as a "configured
   # default" and overrides this until you change it again.
   services.pipewire.wireplumber.extraConfig."51-output-priorities" = {
-    # CMF Headphone Pro (bluetooth, MAC 2C:BE:EE:65:A0:21) — highest priority.
+    # CMF Headphone Pro (bluetooth, MAC 2C:BE:EE:65:A0:21): highest priority.
     "monitor.bluez.rules" = [
       {
         matches = [ { "node.name" = "~bluez_output.2C_BE_EE_65_A0_21.*"; } ];
@@ -90,7 +90,7 @@
       # with `bluez5.profile = "off"`, so no sink/source node is ever created
       # and they don't appear as an audio device. Pin the initial profile to
       # A2DP (high-fidelity AAC playback) and auto-connect that profile so the
-      # sink always shows up. Trade-off: A2DP has no microphone — switch the
+      # sink always shows up. Trade-off: A2DP has no microphone; switch the
       # card to `headset-head-unit` (via DMS/wpctl) when you need the mic.
       {
         matches = [ { "device.name" = "bluez_card.14_14_7D_E7_8C_E3"; } ];
@@ -100,7 +100,7 @@
         };
       }
 
-      # …and make the AirPods a preferred default output when present.
+      # And make the AirPods a preferred default output when present.
       {
         matches = [ { "node.name" = "~bluez_output.14_14_7D_E7_8C_E3.*"; } ];
         actions.update-props = {
@@ -129,7 +129,7 @@
     ];
   };
 
-  # PRIME offload bus IDs — verified on the real hardware via `lspci -D`:
+  # PRIME offload bus IDs (verified on the real hardware via `lspci -D`):
   #   0000:00:02.0 Intel Arrow Lake-S iGPU → PCI:0:2:0
   #   0000:02:00.0 NVIDIA GB206M (RTX 5070 Mobile, Blackwell) → PCI:2:0:0
   hardware.nvidia.prime = {
@@ -147,23 +147,23 @@
   # machine, and SDDM stays the greeter.
   kyan.desktop.shell = "formalshell";
 
-  # NVIDIA dGPU stack (driver, PRIME offload, offload overlay) — this chassis
+  # NVIDIA dGPU stack (driver, PRIME offload, offload overlay). This chassis
   # has the RTX 5070; an Intel-only host leaves this off.
   kyan.nvidia.enable = true;
 
-  # Bare Steam client, workshop downloads only (gaming lives on Windows;
+  # Bare Steam client, workshop downloads only (gaming lives on Windows,
   # see mixins/steam.nix).
   kyan.steam.enable = true;
 
   # ASUS laptop support: asusd, Aura keyboard RGB (Flexoki blue), 80%
-  # battery charge limit, dim-LEDs-on-battery.
+  # battery charge limit, dim LEDs on battery.
   kyan.asus.enable = true;
 
   # AirPlay screen-mirroring receiver (UxPlay). Run `uxplay -p` to show an
-  # iPhone's screen in a window; share that window in meetings.
+  # iPhone's screen in a window, share that window in meetings.
   kyan.airplay.enable = true;
 
-  # NordVPN (privacy/geo exit) — this host holds the account login.
+  # NordVPN (privacy/geo exit). This host holds the account login.
   kyan.nordvpn.enable = true;
 
   # Syncthing mesh: wallpapers + Zen profile, macbook as hub
@@ -176,7 +176,7 @@
   kyan.macosVm.enable = true;
 
   # Remote-builder key for the e1504g (nix.buildMachines in
-  # systems/e1504g/default.nix): its root connects here as kyandesutter over
+  # systems/e1504g/default.nix). Its root connects here as kyandesutter over
   # Tailscale to run builds. Force-commanded to `nix-daemon --stdio` (all
   # ssh-ng needs) and `restrict`ed, so the key can build but never open a
   # shell, forward ports, or run anything else.
@@ -185,7 +185,7 @@
   ];
 
   # Let the e1504g reach the builder over the home LAN too (its buildMachines
-  # lists 192.168.86.95 as the fallback when tailscale is down); sshd is
+  # lists 192.168.86.95 as the fallback when tailscale is down). Sshd is
   # otherwise only reachable via the trusted tailscale0 interface.
   services.openssh.openFirewall = true;
 
@@ -197,7 +197,7 @@
         self.homeModules.kyandesutter-linux
       ];
 
-      # Suspend after 10 minutes idle, ON BATTERY ONLY — on AC this is a desk
+      # Suspend after 10 minutes idle, ON BATTERY ONLY. On AC this is a desk
       # machine and must never sleep under a remote session or a download.
       # Same transient wait-loop shape as the e1504g: swayidle fires once per
       # idle edge, the loop pulls the trigger only while /run/power/state
@@ -206,7 +206,7 @@
       # activity kills the wait. Covers the unplug-while-already-idle case
       # too, since the loop re-reads the source every pass. Browsers hold a
       # Wayland idle inhibitor during playback, so video doesn't count as
-      # idle. lock-before-sleep locks on the way down; the dGPU side is
+      # idle. lock-before-sleep locks on the way down, the dGPU side is
       # untouched (dgpu-reconcile holds its own sleep inhibitor mid-transition).
       services.swayidle = {
         enable = true;

@@ -5,7 +5,7 @@
 # (left+center+right), so re-running on every home-manager switch never
 # duplicates and never fights a widget the user has since moved.
 #
-# Removals ARE unconditional — these ids are stripped from every bar on every
+# Removals ARE unconditional: these ids are stripped from every bar on every
 # switch: focusedWindow and clipboard by preference, and discordVoice/
 # displayManager/dgpuStatus/gameControllerBattery/asusControlCenter because their
 # plugins are disabled (a stale id would render as an empty/broken widget once
@@ -17,10 +17,10 @@
 #   claudeCodeUsage       after  memUsage          (repositioned)
 #   githubNotifier        before notificationButton (repositioned)
 #
-# githubNotifier and claudeCodeUsage are *repositioned* — stripped first, then
-# re-inserted — so a copy already on the live bar at the old spot actually
-# moves rather than being left in place (insert-if-absent can't relocate an
-# existing widget). Their anchors (memUsage, notificationButton) are core
+# githubNotifier and claudeCodeUsage are *repositioned*: stripped first, then
+# re-inserted, so a copy already on the live bar at the old spot actually
+# moves rather than being left in place. (insert-if-absent can't relocate an
+# existing widget.) Their anchors (memUsage, notificationButton) are core
 # seeded widgets, so they're always present.
 def allWidgets: (.leftWidgets // []) + (.centerWidgets // []) + (.rightWidgets // []);
 

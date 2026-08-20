@@ -73,9 +73,9 @@ let
   };
 
   # Herdr runs on the macbook and the controller is on this host, so the agent
-  # states arrive over SSH. Herdr has no event stream to subscribe to — the
+  # states arrive over SSH. Herdr has no event stream to subscribe to: the
   # CLI is request/response over a unix socket and `--remote` only tunnels the
-  # TUI — so this polls, and the loop runs on the *remote* side of one
+  # TUI. So this polls, and the loop runs on the *remote* side of one
   # long-lived connection rather than paying an SSH handshake every tick.
   #
   # ClearAllForwardings: the macbook host entry in mixins/ssh.nix carries
@@ -190,7 +190,7 @@ let
   # The controller as a desk remote. Hyprland has no gamepad input path of its
   # own, so this reads evdev directly and drives three sinks: hyprctl for
   # window and workspace verbs, wpctl for volume, and a uinput pointer for the
-  # sticks. It deliberately does NOT grab the pad — a grab would hide it from
+  # sticks. It deliberately does NOT grab the pad: a grab would hide it from
   # anything that actually wants to be played with.
   #
   #   d-pad left/right   walk windows along the scrolling tape

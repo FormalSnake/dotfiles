@@ -7,7 +7,7 @@
       just
       zulu21
 
-      # — migrated from homebrew formulae —
+      # migrated from homebrew formulae
       assimp
       chafa
       cloudflared
@@ -59,18 +59,18 @@
     ++ lib.optionals stdenv.isLinux [
       # BlueBubbles desktop client (iMessage). Flutter app; Linux-only in
       # nixpkgs. The Mac runs the BlueBubbles *Server* instead (homebrew cask in
-      # systems/macbook/homebrew.nix) — the server is macOS-only.
+      # systems/macbook/homebrew.nix): the server is macOS-only.
       # The nixpkgs wrapper misses glib-networking, so the Google-login webview
-      # (WebKitGTK/libsoup) has no TLS backend ("TLS support is not available");
-      # re-wrap with its GIO module instead of rebuilding the Flutter app.
+      # (WebKitGTK/libsoup) has no TLS backend ("TLS support is not available").
+      # Re-wrap with its GIO module instead of rebuilding the Flutter app.
       # Flutter apps have no single-instance lock (unlike Electron), so every
-      # launcher click spawns another copy — and the workspace-4 window rule
+      # launcher click spawns another copy, and the workspace-4 window rule
       # hides that it's already running. Hold a flock for the app's lifetime
-      # (fd 9 survives the exec); later launches focus the live window instead.
+      # (fd 9 survives the exec). Later launches focus the live window instead.
       # Wrap the package's own entrypoint under a fresh name instead of
-      # wrapProgram-ing the symlinkJoin copy in place: the moved-aside file's
-      # basename becomes argv0 (upstream's inner wrapper re-execs with -a "$0")
-      # and GTK derives the Wayland app-id from it — a ".bluebubbles-wrapped_"
+      # wrapProgram-ing the symlinkJoin copy in place (the moved-aside file's
+      # basename becomes argv0; upstream's inner wrapper re-execs with -a "$0")
+      # and GTK derives the Wayland app-id from it. A ".bluebubbles-wrapped_"
       # app-id breaks the Hyprland workspace-4/tiling rules and the focus
       # fallback below, which all match ^[Bb]lue[Bb]ubbles$.
       (symlinkJoin {
@@ -92,7 +92,7 @@
             ''}
         '';
       })
-      # TUI for managing bluetooth (bluez) — Linux-only.
+      # TUI for managing bluetooth (bluez), Linux-only.
       bluetui
       # ifconfig/route/netstat. Linux-only because macOS ships them in /sbin.
       nettools

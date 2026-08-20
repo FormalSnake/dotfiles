@@ -9,7 +9,7 @@
   # is reachable with the mouse alone (see the wheel binds in
   # users/kyandesutter/mixins/hyprland.nix). Back/forward become F13/F14, which
   # no physical key here emits, and drive column focus. The thumb wheel is
-  # deliberately left alone — a bare horizontal-wheel bind would take the axis
+  # deliberately left alone: a bare horizontal-wheel bind would take the axis
   # away from applications, and a modifier defeats the point of a thumb wheel.
   #
   # Those two bind as XF86Tools and XF86Launch5, not F13/F14: binds match
@@ -18,7 +18,7 @@
   # systemd's 60-evdev.rules runs the hwdb lookup and the `keyboard` builtin on
   # every event device with no ID_INPUT_KEY gate, so a pointer-only device is
   # remapped at device-add, before the compositor opens it. The match is cut
-  # before the `-e...` capability suffix, which changes once the remap lands.
+  # before the `-e...` capability suffix (which changes once the remap lands).
   options.kyan.mouse.enable = lib.mkEnableOption "MX Master 3S thumb button remap" // {
     default = config.kyan.desktop.enable;
   };

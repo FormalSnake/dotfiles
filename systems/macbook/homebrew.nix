@@ -2,7 +2,7 @@
   homebrew = {
     # Homebrew 6 tap trust: `brew bundle` REPLACES ~/.homebrew/trust.json with
     # exactly the Brewfile's `trusted:` entries on every run, so a manual
-    # `brew trust` never survives an activation — trust must be declared here.
+    # `brew trust` never survives an activation. Trust must be declared here.
     taps = [
       { name = "barutsrb/tap"; trusted = true; }
       { name = "felixkratz/formulae"; trusted = true; } # sketchybar
@@ -11,10 +11,10 @@
     ];
 
     # CLI tools that genuinely need brew (no Nix equivalent on darwin or version-pinned).
-    # Everything else moved to nix/home-manager — see users/kyandesutter/programs.nix.
+    # Everything else moved to nix/home-manager: see users/kyandesutter/programs.nix.
     brews = [
       "libadwaita" # NativeDesktop's GTK-on-macOS dev loop links brew GTK; cleanup="uninstall" kept wiping the imperative install
-      "sketchybar" # felixkratz/formulae — nixpkgs' build crashes the cctools linker; drives the OmniWM bar (users/kyandesutter/mixins/sketchybar.nix)
+      "sketchybar" # felixkratz/formulae: nixpkgs' build crashes the cctools linker; drives the OmniWM bar (users/kyandesutter/mixins/sketchybar.nix)
       "terminal-notifier" # nixpkgs 26.11 crashes in the Darwin linker (SIGTRAP)
       "watchman" # nixpkgs build pulls folly, which fails to compile on darwin
       "wireguard-tools"
@@ -29,11 +29,11 @@
     ];
 
     casks = [
-      # — previously-declared casks —
+      # (previously-declared casks)
       "alcove"
       "balenaetcher"
       "betterdisplay"
-      "bluebubbles" # BlueBubbles Server (iMessage bridge) — macOS-only, this Mac is the host
+      "bluebubbles" # BlueBubbles Server (iMessage bridge): macOS-only, this Mac is the host
       "clop"
       "docker-desktop"
       "firefox"
@@ -45,7 +45,7 @@
       "thaw"
       "the-unarchiver"
 
-      # — newly imported from /Applications (previously imperative) —
+      # (newly imported from /Applications; previously imperative)
       "1password"
       "aldente"
       "android-studio"
@@ -55,18 +55,18 @@
       "markdown-preview"  # pluk-inc/tap
       "syncthing-app"
 
-      # — remote desktop —
+      # (remote desktop)
       # Also installed on both NixOS hosts (users/kyandesutter/mixins/parsec.nix).
       # This Mac is the only one of the three that can act as a Parsec *host*:
       # Parsec has no Linux hosting support, so the laptops are clients.
       "parsec"
 
-      # — tiling WM (mirrors the g815 niri setup) —
-      "omniwm"             # barutsrb/tap — niri-style tiler (tap trusted automatically; see modules/darwin/mixins/homebrew.nix)
+      # (tiling WM; mirrors the g815 niri setup)
+      "omniwm"             # barutsrb/tap: niri-style tiler (tap trusted automatically, see modules/darwin/mixins/homebrew.nix)
       "karabiner-elements" # remaps Right Command → the OmniWM "Super" chord (Ctrl+Opt+Cmd)
     ];
 
-    # Mac App Store auto-install disabled — `mas install` is broken at the OS level (https://github.com/orgs/Homebrew/discussions/6550); apps remain installed manually.
+    # Mac App Store auto-install disabled: `mas install` is broken at the OS level (https://github.com/orgs/Homebrew/discussions/6550). Apps remain installed manually.
     masApps = { };
   };
 }

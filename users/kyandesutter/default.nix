@@ -1,7 +1,7 @@
 { pkgs, ... }:
 {
   # Cross-platform base only. Platform-specific mixins live in ./darwin.nix and
-  # ./linux.nix, wired per-host (self.homeModules.kyandesutter-{darwin,linux}) —
+  # ./linux.nix, wired per-host (self.homeModules.kyandesutter-{darwin,linux}):
   # imports must not depend on `pkgs`/`config` (that causes infinite recursion).
   imports = [
     ./programs.nix
@@ -35,7 +35,7 @@
     homeDirectory = if pkgs.stdenv.isDarwin then "/Users/kyandesutter" else "/home/kyandesutter";
     stateVersion = "26.05";
     # nixpkgs tracks unstable; home-manager master still reports 26.05.
-    # The mismatch is transient — silence until HM master bumps to 26.11.
+    # The mismatch is transient: silence until HM master bumps to 26.11.
     enableNixpkgsReleaseCheck = false;
   };
 

@@ -3,7 +3,7 @@ let
   src = "${config.home.homeDirectory}/.config/nix/users/kyandesutter/config/tmux";
 
   # Plugins are nix-managed store copies loaded by explicit run-shell lines at
-  # the bottom of tmux.conf — no TPM, no vendored plugin trees in the repo.
+  # the bottom of tmux.conf: no TPM, no vendored plugin trees in the repo.
   # The two agent plugins aren't in nixpkgs, so they're pinned here.
   agentNotifications = pkgs.tmuxPlugins.mkTmuxPlugin {
     pluginName = "tmux-agent-notifications";
@@ -58,7 +58,7 @@ let
 in
 {
   # tmux.conf and the theme stay live-editable (out-of-store symlinks into the
-  # repo); the plugins/ subdir is store-managed.
+  # repo), the plugins/ subdir is store-managed.
   xdg.configFile = {
     "tmux/tmux.conf".source = config.lib.file.mkOutOfStoreSymlink "${src}/tmux.conf";
     "tmux/dynamic-theme.conf".source = config.lib.file.mkOutOfStoreSymlink "${src}/dynamic-theme.conf";

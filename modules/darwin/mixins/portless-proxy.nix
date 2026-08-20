@@ -4,7 +4,7 @@ let
   # Zero-dependency bundled CLI; pin the exact npm tarball so the daemon never
   # depends on a project's node_modules (rewritten by bun install) or a
   # GC-able dev-shell node. Keep in sync with the portless devDependency in
-  # consuming repos — pre-1.0 releases may change the ~/.portless state format.
+  # consuming repos (pre-1.0 releases may change the ~/.portless state format).
   portless = pkgs.fetchzip {
     url = "https://registry.npmjs.org/portless/-/portless-0.15.4.tgz";
     hash = "sha256-7SIqXt/4/pi4dqN3HVySIGA4+77iy6bQWLh64nbisbc=";
@@ -15,7 +15,7 @@ in
   # Tailscale serve (CouchDB LiveSync) holds *:443 from login, and macOS only
   # lets root bind a specific address (127.0.0.1:443) over another user's
   # wildcard socket. Ad-hoc sudo starts from dev sessions died on every
-  # reboot/rebuild and left root-owned droppings in ~/.portless — this daemon
+  # reboot/rebuild and left root-owned droppings in ~/.portless. This daemon
   # replaces them (same flags portless's own `service install` would write).
   launchd.daemons.portless-proxy = {
     serviceConfig = {

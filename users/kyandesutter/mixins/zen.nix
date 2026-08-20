@@ -13,7 +13,7 @@ let
   # first-paint colours in :root that the wabi bridge clobbers at runtime with
   # the wallpaper palette, so per the repo's theming model the baked-in values
   # are the static Flexoki dark fallback. Placeholder names are wabi's, not
-  # matugen's — rendered here at eval time, not by matugen.
+  # matugen's: rendered here at eval time, not by matugen.
   renderWabi =
     src:
     builtins.replaceStrings
@@ -57,14 +57,14 @@ let
     "{a4c4eda4-fb84-4a84-b4a1-f7c1cbf2a1ad}" = "refined-github-";
     "enhancerforyoutube@maximerf.addons.mozilla.org" = "enhancer-for-youtube";
     "{e7b84430-dae5-41e6-bb6f-9d01b02c4347}" = "elden-email";
-    # Full uBlock Origin (MV2), not the Lite build — Firefox still ships the
+    # Full uBlock Origin (MV2), not the Lite build. Firefox still ships the
     # blocking webRequest API the full extension needs.
     "uBlock0@raymondhill.net" = "ublock-origin";
   };
 
   # Dropping an id from `extensions` above only stops force-installing it;
   # Firefox leaves the copy already in the profile installed and enabled
-  # (verified 2026-07-28). Only installation_mode "blocked" uninstalls it — and
+  # (verified 2026-07-28). Only installation_mode "blocked" uninstalls it, and
   # the entry has to stay, since the profile syncs between both laptops and a
   # peer that still carried the addon would replicate it straight back.
   removedExtensions = {
@@ -101,7 +101,7 @@ in
         }) extensions
         // builtins.mapAttrs (_: _: { installation_mode = "blocked"; }) removedExtensions;
 
-      # 1Password owns passwords — kill the built-in manager (no save prompts,
+      # 1Password owns passwords: kill the built-in manager (no save prompts,
       # no autofill, no about:logins nagging).
       PasswordManagerEnabled = false;
       OfferToSaveLogins = false;
@@ -109,7 +109,7 @@ in
 
     profiles.default = {
       settings = {
-        # Hardware video decode — off by default in Firefox on Linux.
+        # Hardware video decode: off by default in Firefox on Linux.
         "media.ffmpeg.vaapi.enabled" = true;
 
         # Borderless web frame (the Arc look): collapse the 8px gap Zen keeps
@@ -132,8 +132,8 @@ in
         "sine.allow-unsafe-js" = true;
 
         # Sine's auto-updater replaces nix-installed mods with Sine-store repo
-        # layouts (no root theme.json/chrome.css), silently unregistering them
-        # — observed 2026-07-22 with Better CtrlTab / Zen Context Menu /
+        # layouts (no root theme.json/chrome.css), silently unregistering them,
+        # observed 2026-07-22 with Better CtrlTab / Zen Context Menu /
         # Floating Status Bar. Mod state is nix-managed; updates arrive via the
         # repair fragment below, never at runtime.
         "sine.auto-updates" = false;
@@ -143,7 +143,7 @@ in
         "browser.ctrlTab.sortByRecentlyUsed" = true;
 
         # Matugen themes the browser chrome ONLY. Zen Boosts is the per-domain
-        # tint machinery the wabi bridge uses to recolor websites — off kills
+        # tint machinery the wabi bridge uses to recolor websites: off kills
         # both Zen's own tinting and the bridge's universal-boost sync (its
         # boosts manager never loads). The workspace-gradient sync is separate
         # and unaffected.
@@ -152,7 +152,7 @@ in
 
       # Sine (fx-autoconfig based mod loader). Enabling it makes the flake patch
       # the zen package with the autoconfig bootstrap (config.js +
-      # defaults/pref) and install the bootloader into chrome/utils — the same
+      # defaults/pref) and install the bootloader into chrome/utils, the same
       # loader the wabi bridge below rides on. Mods resolve from the Sine store
       # first, falling back to the vanilla Zen theme store by UUID.
       sine.enable = true;
@@ -165,10 +165,10 @@ in
       # jars), so the personal Google account (default jar) and the
       # CanaryCoders workspace account never fight over google.com cookies.
       # NOTE: close Zen before a home-manager switch that changes spaces or
-      # containers — the activation script needs exclusive access to the
+      # containers: the activation script needs exclusive access to the
       # session files.
       # Container colors are Firefox's fixed 8-colour enum (tab stripe/badge
-      # only) — matugen can't drive them. The space *gradients* are left
+      # only): matugen can't drive them. The space *gradients* are left
       # undeclared on purpose: the wabi bridge injects the matugen accent
       # gradient into the active space on every palette change
       # (syncWorkspaceTheme), and a static theme here would just fight it.
@@ -199,7 +199,7 @@ in
           id = "d5a017b0-2212-4298-83c0-f2e0ec65149a";
           position = 1000;
           icon = "chrome://browser/skin/zen-icons/selectable/star.svg";
-          # One GitHub account across all three orgs — route every github URL
+          # One GitHub account across all three orgs: route every github URL
           # here so the login lives in a single (default) cookie jar instead of
           # three per-container sessions.
           routes."GitHub" = {
@@ -230,14 +230,14 @@ in
   # dms.nix) renders the wallpaper palette to chrome/matugen-vars.json; the
   # bridge polls its mtime, mirrors the 8 colours into matugen.theme.* prefs,
   # sets --matugen-* vars inline on the chrome :root, and a JSWindowActor child
-  # applies the same vars in every content process — colours flip live, no
+  # applies the same vars in every content process: colours flip live, no
   # restart.
   #
   # Loading: Sine's config.js only imports sine.sys.mjs, which executes
-  # scripts LISTED IN sine-mods/mods.json — loose *.uc.js under chrome/JS are
+  # scripts LISTED IN sine-mods/mods.json: loose *.uc.js under chrome/JS are
   # never picked up (unlike stock fx-autoconfig, which wabi was written for).
   # So the bridge ships as a local Sine script mod, renamed to .sys.mjs: Sine
-  # importESModule()s those exactly once into the shared module global — which
+  # importESModule()s those exactly once into the shared module global, which
   # is also what lets MatugenParent see globalThis.__matugenBridge. The actor
   # modules stay under chrome/JS because their chrome://userscripts/ URIs map
   # there (bootloader chrome.manifest: `content userscripts ../JS/`).
@@ -254,18 +254,18 @@ in
   # replicate before Zen opens the databases. The guard shadows the real
   # zen-beta via hiPrio (the desktop entry, Mod+B and the CLI all resolve
   # zen-beta through the profile bin), so every launch path passes through it.
-  # Every failure mode — peer off, ssh broken, syncthing REST down — degrades
+  # Every failure mode (peer off, ssh broken, syncthing REST down) degrades
   # to launching immediately; the guard may never strand the browser.
   #
   # Fast path first: if Zen already runs locally, this invocation is just a
   # new-window request (Firefox remoting) and the peer was already dealt with
-  # when the running instance started — exec straight through, no ssh probe.
+  # when the running instance started: exec straight through, no ssh probe.
   # '.zen-beta-wrapp' is the 15-char comm of the main process only; content
   # processes rename themselves (Isolated Web Co etc.), so pgrep/pkill on it
   # never touch children directly.
   #
   # Exec `finalPackage`, NOT `package`: the latter is the bare option value,
-  # whose distribution/policies.json is empty — the module bakes `policies`
+  # whose distribution/policies.json is empty: the module bakes `policies`
   # into finalPackage. Since the guard shadows every launch path, pointing it
   # at `package` silently runs a policy-free Zen, so ExtensionSettings never
   # applies and the extension set above becomes a no-op.
@@ -283,7 +283,7 @@ in
       # Remote side runs under /bin/sh (the login shell is fish, not POSIX)
       # with absolute tool paths (non-interactive PATH is minimal). It quits
       # the peer's Zen, waits for it to exit, forces a profile rescan and
-      # waits until the peer reports this device 100% in sync — the
+      # waits until the peer reports this device 100% in sync, the
       # authoritative "everything I had has reached you" signal. Prints
       # "took" iff it actually quit something, so an idle/offline peer costs
       # only the ssh probe.
@@ -316,7 +316,7 @@ in
       # After a takeover, settle locally too: the folder must have nothing
       # left to pull for two consecutive polls (right after the peer's rescan
       # a single 0 can be a not-yet-announced index). Capped, then launch
-      # regardless — worst case equals today's manual flow.
+      # regardless: worst case equals today's manual flow.
       if [ -n "$took" ]; then
         key=$(sed -n 's/.*<apikey>\(.*\)<\/apikey>.*/\1/p' "$HOME/.config/syncthing/config.xml" | head -n1)
         if [ -n "$key" ]; then
@@ -346,13 +346,13 @@ in
   programs.zen-browser.activationFragments.default = [
     # Syncthing ignore rules for the zen-profile folder (mixins/syncthing.nix,
     # NixOS-side): keep locks, crash/telemetry state, the matugen palette
-    # (chrome/matugen-vars.json is per-device — each machine's colours follow
-    # its own wallpaper) and — the point — all of 1Password's per-machine
+    # (chrome/matugen-vars.json is per-device: each machine's colours follow
+    # its own wallpaper) and (the point) all of 1Password's per-machine
     # storage out of sync. 1Password's storage dir is
     # keyed by the profile's internal extension uuid (prefs.js,
     # extensions.webextensions.uuids); that uuid is actually stable mesh-wide
     # (prefs.js itself syncs), so the shared uuid is baked in as the default
-    # and the exclusion always renders — the prefs.js resolution in the
+    # and the exclusion always renders: the prefs.js resolution in the
     # fragment only overrides it when it yields a non-empty value. The `?` glob stands in for
     # the literal braces in the addon id: Syncthing's pattern language treats
     # braces specially, `?` matches any single character.
@@ -382,7 +382,7 @@ in
           echo "/datareporting"
           echo "/saved-telemetry-pings"
           echo "/chrome/matugen-vars.json"
-          # Home-manager-managed paths are per-host /nix/store symlinks —
+          # Home-manager-managed paths are per-host /nix/store symlinks,
           # syncing them replicates a store path the peer doesn't have
           # (observed 2026-07-23: e1504g's whole chrome/JS tree + user.js
           # dangled at g815's home-manager-files hash, killing every mod).
@@ -410,7 +410,7 @@ in
     # Mod repair: pin every declared mod to the VANILLA zen theme-store layout
     # (theme.json + chrome.css at the dir root). Two failure modes need this:
     # the flake's sine fragment prefers the Sine store, whose zips for several
-    # of these mods are repo dumps without a root theme.json — it then writes
+    # of these mods are repo dumps without a root theme.json: it then writes
     # no mods.json entry, so the mod is present but never styled; and Sine's
     # runtime updater used to rewrite installed dirs the same way (now off via
     # sine.auto-updates=false). A dir without theme.json is wiped and

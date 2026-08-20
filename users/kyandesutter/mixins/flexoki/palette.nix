@@ -1,6 +1,6 @@
 # Flexoki palette (github.com/kepano/flexoki, stephango.com/flexoki) as pure Nix
-# data. Importable from anywhere (`import ./flexoki/palette.nix`) — home-manager
-# mixins and, if ever needed, system modules — so every consumer derives its
+# data. Importable from anywhere (`import ./flexoki/palette.nix`): home-manager
+# mixins and, if ever needed, system modules, so every consumer derives its
 # colours from one place. This replaces the old `config.catppuccin.*` surface.
 #
 # Values are the canonical palette, cross-checked against Ghostty's bundled
@@ -30,7 +30,7 @@ rec {
   };
 
   # Chromatic accents. `l` is the light-mode stop (600), `d` the dark-mode stop
-  # (400) — the two used by the terminal theme; the full ramps are kept for any
+  # (400): the two used by the terminal theme; the full ramps are kept for any
   # consumer that wants them.
   accents = {
     red = { d = "#D14D41"; l = "#AF3029"; };

@@ -6,7 +6,7 @@ in
 {
   # Notebook-scan pipeline: images synced into the vault's scan inbox are
   # transcribed to notes by headless Claude. The script lives in the repo
-  # (live-editable without a rebuild — same pattern as auto-update.nix).
+  # (live-editable without a rebuild, same pattern as auto-update.nix).
   # WatchPaths fires on any change under the dir; the script is idempotent
   # (processed/failed images are moved out) and self-locks, so extra fires
   # are harmless. StartInterval is the safety net for missed events / the

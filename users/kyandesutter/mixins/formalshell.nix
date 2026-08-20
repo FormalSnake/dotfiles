@@ -4,7 +4,13 @@ let
   # modules/nixos/mixins/hyprland.nix, default "dms").
   useFormalshell = (((osConfig.kyan or { }).desktop or { }).shell or "dms") == "formalshell";
 
-  fsPkg = inputs.formalshell.packages.${pkgs.stdenv.hostPlatform.system}.default;
+  # FormalShell's flake builds its own pkgs, so the curl-cffi overlay in
+  # modules/shared/mixins/nix.nix does not reach the mpv it wraps and the
+  # broken yt-dlp test suite fails the whole shell. Feed it ours instead.
+  # Drop this override together with that overlay.
+  fsPkg = inputs.formalshell.packages.${pkgs.stdenv.hostPlatform.system}.default.override {
+    inherit (pkgs) mpv;
+  };
 in
 {
   # Imported unconditionally so programs.formalshell is declared on every

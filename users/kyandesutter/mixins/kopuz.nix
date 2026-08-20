@@ -3,8 +3,8 @@ let
   kopuz = inputs.kopuz.packages.${pkgs.stdenv.hostPlatform.system}.default;
 
   # On darwin the upstream package installs the bundle as $out/bin/kopuz.app
-  # (with $out/bin/kopuz symlinked at the Mach-O inside it), so mac-app-util —
-  # which only looks at $out/Applications — never sees it and Kopuz stays
+  # (with $out/bin/kopuz symlinked at the Mach-O inside it), so mac-app-util,
+  # which only looks at $out/Applications, never sees it and Kopuz stays
   # invisible to Spotlight, Launchpad and the Dock. A separate symlink-only
   # derivation puts the bundle where mac-app-util looks without touching
   # kopuz's own derivation hash, which would cost us the cachix hit and a full
@@ -23,7 +23,7 @@ let
   # vendor moves the web process onto renderD128 next to the compositor
   # (verified 2026-08-19: renderD129 + libEGL_nvidia before, renderD128 +
   # libEGL_mesa on hardware gallium after). WEBKIT_WEB_RENDER_DEVICE_FILE does
-  # not help — the vendor, not the device file, decides which GPU it lands on.
+  # not help: the vendor, not the device file, decides which GPU it lands on.
   #
   # Per-app rather than session-wide: nvidiaOffloadEnv
   # (modules/nixos/mixins/nvidia.nix) still needs the nvidia vendor reachable
@@ -43,7 +43,7 @@ let
   };
 in
 {
-  # Kopuz — music player (local library, Jellyfin/Subsonic/Spotify backends).
+  # Kopuz: music player (local library, Jellyfin/Subsonic/Spotify backends).
   # Built by the upstream flake and fetched from kopuz.cachix.org; the
   # substituter is configured per platform in modules/{nixos/mixins/nix.nix,
   # darwin/mixins/determinate.nix}.

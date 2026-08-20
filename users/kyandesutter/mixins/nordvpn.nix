@@ -1,13 +1,13 @@
 { pkgs, ... }:
 let
   # Absolute path into the system profile (same pattern as the system-side
-  # nordvpn mixin) — the upstream module puts the CLI in environment.systemPackages.
+  # nordvpn mixin): the upstream module puts the CLI in environment.systemPackages.
   nordvpn = "/run/current-system/sw/bin/nordvpn";
 
   # NordVPN's per-user norduserd registers its system-tray StatusNotifierItem on
   # *two* D-Bus connections (an upstream double-registration bug), so two
-  # identical "NordVPN" entries appear in the tray — the watcher can't dedup
-  # them because they share an Id but sit on different bus names. We drive
+  # identical "NordVPN" entries appear in the tray (the watcher can't dedup
+  # them because they share an Id but sit on different bus names). We drive
   # NordVPN entirely via the CLI + the declarative system nordvpn-settings
   # oneshot, so the tray icon serves no purpose; disable it.
   #
@@ -22,8 +22,8 @@ let
       ${pkgs.coreutils}/bin/sleep 1
     done
 
-    # Flip only when currently enabled — the "already disabled" path returns
-    # exit 1, so checking first keeps the unit idempotent while letting a real
+    # Flip only when currently enabled (the "already disabled" path returns
+    # exit 1), so checking first keeps the unit idempotent while letting a real
     # `set` failure surface instead of being swallowed by `|| true`.
     ${nordvpn} settings 2>/dev/null | ${pkgs.gnugrep}/bin/grep -qi 'Tray: enabled' \
       && ${nordvpn} set tray off \
@@ -36,7 +36,7 @@ in
       Description = "Disable the NordVPN system-tray icon (upstream double-registers it)";
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
-      # Leave an already-applied setting untouched across `nixos-rebuild switch`
+      # Leave an already-applied setting untouched across `nixos-rebuild switch`,
       # rather than re-running the oneshot on every rebuild (matches autostart).
       "X-SwitchMethod" = "keep-old";
     };

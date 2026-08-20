@@ -1,9 +1,9 @@
 { config, pkgs, ... }:
 let
-  # — Default-sink → preset sync (the reason EasyEffects' own autoload isn't enough) —
+  # Default-sink → preset sync (the reason EasyEffects' own autoload isn't enough)
   #
   # EasyEffects 8 (the Qt6 rewrite) only autoloads a preset when a device's active
-  # output ROUTE changes (e.g. plugging headphones into the analog jack) — see
+  # output ROUTE changes (e.g. plugging headphones into the analog jack): see
   # pw_manager.cpp: `outputRouteChanged` triggers autoload, but `defaultSinkChanged`
   # does NOT. Switching the default sink in DMS (HDMI ↔ speakers ↔ bluetooth)
   # is a default-sink change, so EE never reacts and the wrong preset stays loaded.
@@ -13,7 +13,7 @@ let
   # on connect, so the right preset is applied at startup too), maps the new sink's
   # node.name to a preset, and runs `easyeffects -l <preset>`. The per-device autoload
   # files below still cover the native route-change case (analog jack); this covers the
-  # default-sink case. The two can both fire and just load the same preset — harmless.
+  # default-sink case. The two can both fire and just load the same preset, harmless.
   #
   # Sink → preset map mirrors the identifiers in modules/nixos/mixins/audio.nix's
   # output-priority rules. Runs in a user service with a limited PATH, so its tools
@@ -59,12 +59,12 @@ let
     '';
   };
 
-  # — Voicing EQ for the Pebble X Plus (the "general sound" improvement) —
+  # Voicing EQ for the Pebble X Plus (the "general sound" improvement):
   #
   # The Pebble X Plus is a 2.1 system: two 2" satellites + a dedicated 3.5"
   # subwoofer (dual passive radiators) reaching ~45 Hz. Unlike the old 2" Pebble
   # V3 it makes REAL low end, so the sub-bass is handled entirely by filter#0's
-  # low-shelf below — this EQ only shapes everything above it.
+  # low-shelf below: this EQ only shapes everything above it.
   #
   # Based on the upper half of Ziyad Nazem's community "Perfect EQ" smile, which
   # also matches the near-mandatory "Music" V-shape reviewers recommend over the
@@ -75,8 +75,8 @@ let
   # reading as boom, a gentle 500 Hz–1 kHz scoop to de-mud, plus a 4/8/16 kHz
   # presence + air lift. The satellites are already detailed/slightly bright, so
   # the top lift is kept modest (≤ +2.5) to stay "not too sharp". All Bell,
-  # RLC (BT), Q≈1.5. Tune live in the EasyEffects window — changes save back to
-  # the bass-boost output preset.
+  # RLC (BT), Q≈1.5. Tune live in the EasyEffects window (changes save back to
+  # the bass-boost output preset).
   mkBand = frequency: gain: {
     inherit frequency gain;
     type = "Bell";
@@ -87,9 +87,9 @@ let
     solo = false;
   };
   perfectEqBands = {
-    band0 = mkBand 32.0 0.0; # below the sub's ~45 Hz floor — left flat
-    band1 = mkBand 64.0 0.0; # owned by the low-shelf — left flat
-    band2 = mkBand 125.0 0.0; # midbass boom region — left flat
+    band0 = mkBand 32.0 0.0; # below the sub's ~45 Hz floor: left flat
+    band1 = mkBand 64.0 0.0; # owned by the low-shelf: left flat
+    band2 = mkBand 125.0 0.0; # midbass boom region: left flat
     band3 = mkBand 250.0 (-2.0); # keeps the shelf's upper skirt from muddying vocals
     band4 = mkBand 500.0 (-1.0); # de-mud (scoop)
     band5 = mkBand 1000.0 (-1.5); # de-mud (scoop)
@@ -99,24 +99,24 @@ let
     band9 = mkBand 16000.0 2.5; # air
   };
 
-  # — Audiophile (Harman-neutral) correction for the AirPods Pro 2 —
+  # Audiophile (Harman-neutral) correction for the AirPods Pro 2:
   #
   # These bands are the AutoEq parametric result for the AirPods Pro 2, measured
   # by HypetheSonics on a standardized GRAS RA0045 in-ear coupler
   # (github.com/jaakkopasanen/AutoEq → results/HypetheSonics/GRAS RA0045 in-ear/).
-  # It corrects the stock response toward the Harman IE target — i.e. what makes
+  # It corrects the stock response toward the Harman IE target: i.e. what makes
   # them sound "flat/reference". The bass BOOST is a separate low-shelf stacked on
-  # top in filter#0 below (same pattern as the Pebble HDMI preset). So: this EQ
+  # top in filter#0 below (same pattern as the Pebble HDMI preset). So this EQ
   # makes them neutral, the shelf makes them thump.
   #
-  # `mode = "APO (DR)"` is the LSP "digital biquad" band mode — it reproduces the
+  # `mode = "APO (DR)"` is the LSP "digital biquad" band mode: it reproduces the
   # EqualizerAPO/AutoEq filter math exactly, so these land as measured (RLC (BT),
   # used for the Pebbles' hand-tuned voicing, would drift slightly from AutoEq's
   # numbers). AutoEq's own preamp of -3.1 dB is folded into filter#0's input-gain
   # together with the bass-boost headroom. Type map: LSC→Lo-shelf, PK→Bell,
   # HSC→Hi-shelf. Alternative measurement (Harpo) exists in the same repo if you
   # want to A/B; regenerate from AutoEq if you ever re-measure. Tune live in the
-  # EasyEffects window — changes save back to the airpods-bass output preset.
+  # EasyEffects window (changes save back to the airpods-bass output preset).
   mkApoBand = type: frequency: gain: q: {
     inherit type frequency gain q;
     mode = "APO (DR)";
@@ -124,7 +124,7 @@ let
     mute = false;
     solo = false;
   };
-  # — Neutral voicing for the e1504g's built-in speakers (Vivobook Go 15) —
+  # Neutral voicing for the e1504g's built-in speakers (Vivobook Go 15):
   #
   # Two ~2 W bottom-firing micro-drivers, no woofer. No published measurement
   # exists for this chassis (checked AutoEq, notebookcheck, community EasyEffects
@@ -133,12 +133,12 @@ let
   # its own: cut the ~500 Hz cabinet boxiness and ~900 Hz nasal congestion,
   # fill the 300 Hz body and 1.5 kHz presence dip a touch, tame the shouty
   # 2.5 kHz / hard 4 kHz / sibilant 5.5-8 kHz peaks, and shelve back the
-  # top-octave air. Bands 5 and 7 (2.5 k / 5.5 k) are the most unit-variable —
+  # top-octave air. Bands 5 and 7 (2.5 k / 5.5 k) are the most unit-variable:
   # if it still sounds shouty or sharp, sweep a narrow +6 dB probe around them
   # in the EasyEffects window and move the cut onto the real peak; changes save
   # back to the vivobook-bass output preset.
   vivobookCorrectionBands = {
-    band0 = mkApoBand "Hi-pass" 95.0 0.0 0.70; # driver protection — sub-bass buys only rattle
+    band0 = mkApoBand "Hi-pass" 95.0 0.0 0.70; # driver protection: sub-bass buys only rattle
     band1 = mkApoBand "Bell" 300.0 1.5 0.90; # body the drivers CAN make
     band2 = mkApoBand "Bell" 500.0 (-3.0) 1.10; # cabinet boxiness / honk
     band3 = mkApoBand "Bell" 900.0 (-2.0) 1.20; # nasal lower-mid congestion
@@ -166,18 +166,18 @@ in
 {
   # EasyEffects runs as a user daemon (systemd graphical-session service) and
   # sits on the OUTPUT pipeline (apps → "Easy Effects Sink" → the real device).
-  # Its job here is to voice the HDMI speakers — bass boost + a clarity EQ —
+  # Its job here is to voice the HDMI speakers: bass boost + a clarity EQ,
   # applied to the HDMI sink only via the per-device autoload profile.
   #
   # Preset format note (EasyEffects 8): the top-level block ("output" here)
   # selects the pipeline folder, `plugins_order` lists the active plugin
   # instances, parameter keys are hyphenated, and enum-valued keys (type/mode)
   # take their string label exactly as shown in the GUI. Tune any of this live in
-  # the EasyEffects window — changes save back to the output preset.
-  # — Bass boost for the Creative Pebble X Plus on HDMI —
+  # the EasyEffects window (changes save back to the output preset).
+  # Bass boost for the Creative Pebble X Plus on HDMI:
   #
   # The Pebble X Plus is a 2.1 system with a real 3.5" subwoofer (down to ~45 Hz),
-  # so — unlike the old 2" Pebble V3 — it does NOT need a fake-bass shelf to
+  # so (unlike the old 2" Pebble V3) it does NOT need a fake-bass shelf to
   # invent low end it can't produce. What it needs is a lift wide enough to cover
   # both what the sub does (45–90 Hz shiver) and the 60–120 Hz kick-and-bass band
   # most music actually puts its weight in. EasyEffects already sits on the OUTPUT
@@ -195,17 +195,17 @@ in
   #      sits ~12 dB out front, nothing clips). The bass-vs-rest emphasis is the
   #      shelf `gain`; the overall level/headroom is `input-gain`. Want less bass
   #      but same loudness? Lower BOTH together. Boomy on some tracks? The sub
-  #      has a physical level knob — use it.
-  #   2. equalizer#0 — voicing EQ (the V-shape; see `perfectEqBands`), whose
+  #      has a physical level knob: use it.
+  #   2. equalizer#0: voicing EQ (the V-shape; see `perfectEqBands`), whose
   #      250 Hz cut keeps the shelf's upper skirt from turning into mud.
   #
   # Applied to HDMI ONLY (not the laptop's analog speakers) via a per-device
-  # autoload profile written below — see the xdg.dataFile entry. Tune any of
+  # autoload profile written below: see the xdg.dataFile entry. Tune any of
   # this live in the EasyEffects window; changes save back to the output preset.
   services.easyeffects = {
     enable = true;
 
-    # — Flat / pass-through preset for devices that should get NO processing —
+    # Flat / pass-through preset for devices that should get NO processing:
     #
     # Loaded by ee-preset-sync (above) whenever the default sink is the bluetooth
     # headphones (CMF Headphone Pro) or any unmapped device. Empty plugins_order =
@@ -217,10 +217,10 @@ in
       };
     };
 
-    # — Neutral + gentle bass for the laptop's BUILT-IN speakers (ALC294) —
+    # Neutral + gentle bass for the laptop's BUILT-IN speakers (ALC294):
     #
     # Separate from the HDMI `bass-boost` preset: the built-in drivers are voiced
-    # reasonably flat already, so this stays "as neutral as possible" — NO smile
+    # reasonably flat already, so this stays "as neutral as possible": NO smile
     # EQ, no presence/air lift, no mid scoop. Just one low-shelf to add the low end
     # the small drivers roll off, with a matching preamp cut so the boosted bass
     # lands at unity instead of clipping (same headroom trick as bass-boost, just
@@ -235,7 +235,7 @@ in
 
         "filter#0" = {
           bypass = false;
-          "input-gain" = -4.0; # preamp cut for headroom — matches the +4 shelf
+          "input-gain" = -4.0; # preamp cut for headroom (matches the +4 shelf)
           "output-gain" = 0.0;
           type = "Low-shelf";
           mode = "RLC (BT)";
@@ -261,18 +261,18 @@ in
 
         # Low-shelf + preamp: -12 dB on everything (input-gain) for headroom, then
         # +12 dB below ~105 Hz. The bass band nets ≈ 0 dB, the rest ≈ -12 dB, so
-        # the low end sits ~12 dB hotter than the rest and nothing clips (the EQ
+        # the low end sits ~12 dB hotter than the rest and nothing clips. (The EQ
         # after this adds nothing below 250 Hz, so the preamp can match the shelf
-        # exactly — unlike airpods-bass, where it has to run 2 dB deeper).
+        # exactly, unlike airpods-bass, where it has to run 2 dB deeper.)
         #
         # The 105 Hz corner is the important half of "more oomph": a shelf's
         # skirt puts roughly half its gain at the corner, so the old 75 Hz one
-        # was spending nearly all of itself below 60 Hz — great on the tracks
+        # was spending nearly all of itself below 60 Hz (great on the tracks
         # with real sub content, nearly silent on the far more common song whose
-        # weight lives in the 60–120 Hz kick-and-bass-fundamental band. Moving
+        # weight lives in the 60–120 Hz kick-and-bass-fundamental band). Moving
         # the corner up drags that whole region into the lift; the +12 dB just
         # sets how much. Boomy or thick on vocals? Pull `frequency` back toward
-        # 90 first — that keeps the deep shiver and drops the midbass. Still too
+        # 90 first (that keeps the deep shiver and drops the midbass). Still too
         # much? Lower `gain` and `input-gain` together, or use the sub's physical
         # level knob. RLC (BT) is a gentle, musical shelf; slope x1 keeps it broad.
         "filter#0" = {
@@ -291,7 +291,7 @@ in
           balance = 0.0;
         };
 
-        # Voicing EQ — final stage, shapes the already bass-boosted signal.
+        # Voicing EQ: final stage, shapes the already bass-boosted signal.
         # See `perfectEqBands` above for the curve and rationale. split-channels
         # off, so the single (mirrored) band set applies to both L and R; both
         # `left`/`right` are written identically for a clean, explicit preset.
@@ -308,24 +308,24 @@ in
       };
     };
 
-    # — e1504g (Vivobook Go 15) built-in speakers: neutral correction + bass boost —
+    # e1504g (Vivobook Go 15) built-in speakers: neutral correction + bass boost:
     #
     # Same two-stage recipe as airpods-bass (neutral EQ + a shelf on top), plus a
     # high-pass because these micro-drivers have nothing below ~200 Hz: feeding
     # them sub-bass only buys excursion, rattle and IMD, never output. The "bass
-    # boost" therefore aims at the 200-400 Hz warmth band — the lowest region
-    # the drivers actually reproduce — not at true low bass.
+    # boost" therefore aims at the 200-400 Hz warmth band (the lowest region
+    # the drivers actually reproduce), not at true low bass.
     #
     # GOTCHA (EasyEffects 8.2.7): a preset with TWO instances of one plugin
-    # ("filter#0" + "filter#1") silently loads as an EMPTY chain — verified by
-    # bisection on the live machine. So the high-pass lives in the equalizer's
+    # ("filter#0" + "filter#1") silently loads as an EMPTY chain (verified by
+    # bisection on the live machine). So the high-pass lives in the equalizer's
     # band0 (band type "Hi-pass") instead of a second filter instance.
     #
-    #   1. filter#0 Low-shelf 220 Hz +4.5 dB — the warmth lift, with the -5 dB
+    #   1. filter#0 Low-shelf 220 Hz +4.5 dB: the warmth lift, with the -5 dB
     #      preamp cut for headroom (same trick as every other preset here).
     #      Net: lows ≈ -0.5 dB, everything else ≈ -5 dB. Do NOT push past +5:
     #      there is no extension to unlock, only 200-350 Hz overdrive.
-    #   2. equalizer#0 — band0 high-passes at 95 Hz (driver protection), bands
+    #   2. equalizer#0: band0 high-passes at 95 Hz (driver protection), bands
     #      1-9 are the neutral correction (see vivobookCorrectionBands).
     extraPresets.vivobook-bass = {
       output = {
@@ -337,7 +337,7 @@ in
 
         "filter#0" = {
           bypass = false;
-          "input-gain" = -5.0; # preamp cut for headroom — matches the shelf gain
+          "input-gain" = -5.0; # preamp cut for headroom: matches the shelf gain
           "output-gain" = 0.0;
           type = "Low-shelf";
           mode = "RLC (BT)";
@@ -347,7 +347,7 @@ in
           frequency = 220.0;
           width = 4.0;
           quality = 0.0;
-          gain = 4.5; # warmth lift over ~200-400 Hz — hard ceiling +5
+          gain = 4.5; # warmth lift over ~200-400 Hz: hard ceiling +5
           balance = 0.0;
         };
 
@@ -364,7 +364,7 @@ in
       };
     };
 
-    # — AirPods Pro 2: audiophile correction + bass boost on top —
+    # AirPods Pro 2: audiophile correction + bass boost on top:
     #
     # Same two-stage recipe as the Pebble `bass-boost` preset, but the voicing EQ
     # is a real measured AutoEq correction (see `airpodsCorrectionBands` above)
@@ -372,7 +372,7 @@ in
     # these. Loaded whenever the AirPods are the default sink, via ee-preset-sync's
     # `bluez_output.14_14_7D_E7_8C_E3.*` → airpods-bass mapping.
     #
-    #   1. filter#0 Low-shelf — the bass BOOST plus the headroom for the WHOLE
+    #   1. filter#0 Low-shelf: the bass BOOST plus the headroom for the WHOLE
     #      chain. input-gain -12 dB pulls everything down, then +10 dB below
     #      ~100 Hz brings the low end back. The preamp is 2 dB deeper than the
     #      shelf on purpose: equalizer#0 runs AFTER this and adds ~+2 dB more in
@@ -382,12 +382,12 @@ in
     #      encoder. Net: bass peaks ≈ -1 dB, everything else ≈ -12 dB → the low
     #      end sits ~11 dB out front and still never clips. The AirPods have real
     #      sub-bass extension (unlike the 2" Pebbles), and the 100 Hz corner buys
-    #      kick weight as well as sub — if it ever turns boomy or thickens vocals,
+    #      kick weight as well as sub. If it ever turns boomy or thickens vocals,
     #      pull `frequency` back to 90. Want more thump? Raise `gain` AND drop
     #      `input-gain` by the same amount. Too quiet overall? Turn the volume up
     #      (that's the headroom working). Want them neutral again? Bypass filter#0
     #      and you're left with just the flat AutoEq correction.
-    #   2. equalizer#0 — the AutoEq Harman-neutral correction (10 bands).
+    #   2. equalizer#0: the AutoEq Harman-neutral correction (10 bands).
     extraPresets.airpods-bass = {
       output = {
         blocklist = [ ];
@@ -408,7 +408,7 @@ in
           frequency = 100.0;
           width = 4.0;
           quality = 0.0;
-          gain = 10.0; # low-end lift below ~100 Hz — raise for more thump (with input-gain to match)
+          gain = 10.0; # low-end lift below ~100 Hz: raise for more thump (with input-gain to match)
           balance = 0.0;
         };
 
@@ -429,11 +429,11 @@ in
   # Per-device autoload profile: tie the bass-boost OUTPUT preset to the HDMI
   # sink. EasyEffects 8 looks for ~/.local/share/easyeffects/autoload/
   # output/<device>:<route>.json whenever a device's active output ROUTE changes
-  # (not on default-sink changes — that's what ee-preset-sync above handles); if
+  # (not on default-sink changes, that's what ee-preset-sync above handles); if
   # it matches, it loads `preset-name`.
   #
   # GOTCHA (EasyEffects 8): despite the JSON key being named "device-profile", v8
-  # matches on the active output ROUTE name, NOT the card profile name — see
+  # matches on the active output ROUTE name, NOT the card profile name: see
   # presets_autoload_manager.cpp (`device_route == json["device-profile"]`) and
   # pw_manager.cpp (autoload is driven by `device.output_route_name`). The v7
   # scheme used the card profile ("hdmi-stereo"); using that here silently never
@@ -460,8 +460,8 @@ in
   # Per-device autoload for the BUILT-IN analog speakers → laptop-neutral preset.
   # Same route-name rule as above; the analog card's active output route when the
   # internal speakers are selected is "analog-output-speaker" (plugging the 3.5mm
-  # jack switches it to "analog-output-headphones" — add a file for that route if
-  # you ever want a headphone-jack preset).
+  # jack switches it to "analog-output-headphones" (add a file for that route if
+  # you ever want a headphone-jack preset)).
   xdg.dataFile."easyeffects/autoload/output/alsa_output.pci-0000_80_1f.3.analog-stereo:analog-output-speaker.json".text =
     builtins.toJSON {
       device = "alsa_output.pci-0000_80_1f.3.analog-stereo";
@@ -471,7 +471,7 @@ in
     };
 
   # Per-device autoload for the e1504g's built-in speakers → vivobook-bass.
-  # SOF UCM route names contain spaces/brackets ("[Out] Speaker") — EasyEffects
+  # SOF UCM route names contain spaces/brackets ("[Out] Speaker"): EasyEffects
   # only rewrites "/" in the filename, so they appear verbatim. Values read off
   # the live machine via pw-dump (2026-07-22). Harmless on the g815: the device
   # never exists there, same as the g815 entries above never match on the e1504g.

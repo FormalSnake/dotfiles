@@ -2,7 +2,7 @@
 let
   # kepano/flexoki-neovim (the only actively-maintained Flexoki colorscheme, by
   # Flexoki's author). Not in nixpkgs and unknown to lazyvim-nix's plugin data,
-  # so package it here and hand lazy.nvim a `dir =` store path — fully pinned, no
+  # so package it here and hand lazy.nvim a `dir =` store path: fully pinned, no
   # runtime git clone. `variant = "auto"` tracks vim.o.background.
   flexokiNvim = pkgs.vimUtils.buildVimPlugin {
     pname = "flexoki-neovim";
@@ -15,7 +15,7 @@ let
     };
   };
 
-  # GnRlLeclerc/dynamic-base16.nvim — same situation as flexoki-neovim above:
+  # GnRlLeclerc/dynamic-base16.nvim: same situation as flexoki-neovim above:
   # not in nixpkgs, unknown to lazyvim-nix ("Could not resolve plugin" at
   # build), so pin it and hand lazy.nvim a `dir =` store path.
   dynamicBase16Nvim = pkgs.vimUtils.buildVimPlugin {
@@ -66,7 +66,7 @@ in
         installDependencies = true;
         installRuntimeDependencies = true;
       };
-      # vtsls is the real TS LSP — lives under a nested extra, so the bare
+      # vtsls is the real TS LSP: lives under a nested extra, so the bare
       # lang.typescript options never installed it.
       lang.typescript.vtsls = {
         enable = true;
@@ -85,8 +85,8 @@ in
             priority = 1000,
             config = function()
               -- variant = "auto" follows vim.o.background (auto-dark-mode toggles
-              -- it below). Defaults to dark; reach light with `:set background=light`.
-              -- Transparency isn't a plugin option here; the ColorScheme autocmd
+              -- it below). Defaults to dark, reach light with `:set background=light`.
+              -- Transparency isn't a plugin option here, the ColorScheme autocmd
               -- backstop at the bottom of this file paints the backgrounds none.
               require("flexoki").setup({ variant = "auto" })
             end,
@@ -100,13 +100,13 @@ in
 
       # Wallpaper-derived colours (Linux/DMS). matugen renders the live M3
       # palette into ~/.config/nvim/lua/dank_base16.lua as a base00..base0F
-      # table (see the `neovim` user template in mixins/dms.nix);
+      # table (see the `neovim` user template in mixins/dms.nix),
       # dynamic-base16.nvim maps it onto all Treesitter/LSP highlight groups and,
       # with watch = true, hot-reloads when DMS rewrites the file (on every
       # wallpaper change / light-dark flip). flexoki (above) stays the base
       # colourscheme and the fallback: the setup is pcall-guarded so a missing file
       # (cold start before the first palette, or the macOS host where DMS
-      # doesn't run) never breaks startup — nvim simply stays on flexoki until
+      # doesn't run) never breaks startup. nvim simply stays on flexoki until
       # the file exists (restart nvim once after the first palette is generated).
       dynamic-base16 = ''
         return {
@@ -185,10 +185,10 @@ in
             -- During session :source the foreground :edit fires BufReadPre,
             -- which lazy.nvim hijacks to load nvim-lspconfig / nvim-treesitter.
             -- Empirically the natural :edit continuation (BufRead → filetype
-            -- detect → FileType) does not complete for that buffer — &filetype
+            -- detect → FileType) does not complete for that buffer. &filetype
             -- ends up empty, so vim.lsp.enable's FileType autocmd and the TS
             -- highlighter never match anything. Re-run filetype detection on
-            -- every restored buffer; setting &filetype fires FileType, which
+            -- every restored buffer, setting &filetype fires FileType, which
             -- in turn starts LSP (via vim.lsp.enable's autocmd) and TS.
             vim.api.nvim_create_autocmd("User", {
               pattern = "VeryLazy",
@@ -215,7 +215,7 @@ in
       '';
 
       # vim-tmux-navigator IS in nixpkgs, but lazyvim-nix's resolver doesn't
-      # know the mapping — hand it the store path directly.
+      # know the mapping. Hand it the store path directly.
       tmux-navigator = ''
         return {
           dir = "${pkgs.vimPlugins.vim-tmux-navigator}",

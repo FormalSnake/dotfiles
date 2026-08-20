@@ -3,7 +3,7 @@
   # GNOME Online Accounts + Evolution Data Server, wired purely as a
   # credential/sync backend for DankCalendar's `evolution` provider (see
   # users/kyandesutter/mixins/dankcal.nix). GOA does the Google login with
-  # GNOME's own registered OAuth client — no personal Google Cloud project and
+  # GNOME's own registered OAuth client: no personal Google Cloud project and
   # nothing published, which is the only live route left when a Workspace admin
   # has disabled the secret iCal address. GOA feeds the calendar to EDS; dcal
   # reads EDS over D-Bus. Both daemons are D-Bus-activated per user session, so

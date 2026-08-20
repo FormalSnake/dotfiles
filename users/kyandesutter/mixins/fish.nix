@@ -1,7 +1,7 @@
 { lib, pkgs, ... }:
 let
   # Nerd Font logo for the OS this config is built for (nf-linux-apple /
-  # nf-linux-nixos) — both Linux hosts are NixOS, so no generic-Tux case. The
+  # nf-linux-nixos): both Linux hosts are NixOS, so no generic-Tux case. The
   # glyph is unconditional: every terminal we use is a Nerd Font one
   # (GeistMono NF, see mixins/ghostty.nix), and it renders as tofu only on the
   # bare VT console.
@@ -36,7 +36,7 @@ in
       y = "yazi";
     };
 
-    # HM loads these natively — no fisher needed at the nix layer
+    # HM loads these natively: no fisher needed at the nix layer
     plugins = [
       { name = "autopair"; src = pkgs.fishPlugins.autopair.src; }
       { name = "done"; src = pkgs.fishPlugins.done.src; }
@@ -46,7 +46,7 @@ in
       # PrismLinux's pure-fish prompt (prismlinux-themes-fish), plus a host
       # segment: three machines reached over ssh/mosh means the prompt has to
       # say which one you're on. Colours are ANSI names, not hex, so they ride
-      # the terminal palette — matugen-derived on Linux, Flexoki on macOS.
+      # the terminal palette (matugen-derived on Linux, Flexoki on macOS).
       # Line one degrades by $COLUMNS so it still fits a phone ssh client.
       fish_prompt = {
         description = "Two-line prompt: os user@host in path on branch, then └─>>";
@@ -70,8 +70,8 @@ in
           end
 
           # Phone/tablet ssh clients hand out ~40 columns. Shed the parts that
-          # carry least information first — the username never varies, and on a
-          # 40-column client every session is remote — so host, path tail and
+          # carry least information first: the username never varies, and on a
+          # 40-column client every session is remote, so host, path tail and
           # git state are the last things to go.
           set -l user_txt "$USER@"
           test $cols -lt 60; and set user_txt ""
@@ -95,7 +95,7 @@ in
           not test -w $PWD; and set lock " 🔒"
 
           # One `git status --porcelain=v2 --branch` feeds branch, dirty flags
-          # and ahead/behind — a git call per field makes the prompt lag.
+          # and ahead/behind (a git call per field makes the prompt lag).
           set -l branch ""
           set -l flags ""
           set -l ab_txt ""
@@ -107,7 +107,7 @@ in
               end
               test $cols -lt 50; and set branch (string shorten -m12 -- $branch)
 
-              # porcelain v2 changed entries are `1|2 <XY> …`: X staged, Y unstaged.
+              # porcelain v2 changed entries are `1|2 <XY> …` (X staged, Y unstaged).
               set -l xy (string replace -rf '^[12] (\S\S) .*' '$1' -- $git_lines)
               set -l f
               string match -rq '^u ' -- $git_lines; and set f $f "="
@@ -208,7 +208,7 @@ in
               return 1
           end
 
-          echo "Merge conflicts detected — launching Claude Code…"
+          echo "Merge conflicts detected: launching Claude Code…"
           set prompt (printf '%s\n' "Fix the following merge errors:" $conflicts | string collect)
           claude $prompt
         '';
@@ -258,14 +258,14 @@ in
           /opt/homebrew/bin/brew shellenv | source
       end
       ''}
-      # Nix itself (Determinate owns the install; nix-darwin's set-environment
+      # Nix itself (Determinate owns the install). nix-darwin's set-environment
       # adds this for zsh/bash but fish builds PATH by hand, so source the
-      # official profile script — sets PATH, NIX_PROFILES, NIX_SSL_CERT_FILE).
+      # official profile script, which sets PATH, NIX_PROFILES, NIX_SSL_CERT_FILE.
       if test -f /nix/var/nix/profiles/default/etc/profile.d/nix.fish
           source /nix/var/nix/profiles/default/etc/profile.d/nix.fish
       end
 
-      # Home-manager user profile (declared `home.packages`, e.g. `just`)
+      # Home-manager user profile (declared `home.packages`, e.g. `just`).
       fish_add_path /etc/profiles/per-user/kyandesutter/bin
       fish_add_path /run/current-system/sw/bin
       if test -d /run/wrappers/bin
@@ -288,16 +288,16 @@ in
     # Runs for ALL fish sessions (including non-interactive). Secrets and env
     # vars that scripts/subshells need belong here, not in interactiveShellInit.
     shellInit = ''
-      # Agenix-decrypted secrets (mounted by nix-darwin at /run/agenix/<name>)
+      # Agenix-decrypted secrets (mounted by nix-darwin at /run/agenix/<name>).
       function __load_agenix_secret -a env_name file
           if test -r "/run/agenix/$file"
               set -gx $env_name (cat "/run/agenix/$file")
           end
       end
       __load_agenix_secret OPENAI_API_KEY     openai
-      # Deliberately NOT loading ANTHROPIC_API_KEY: Claude Code prefers it over
+      # Deliberately NOT loading ANTHROPIC_API_KEY (Claude Code prefers it over
       # the claude.ai OAuth session, so every terminal ran on API billing
-      # instead of the Max plan.
+      # instead of the Max plan).
       __load_agenix_secret GEMINI_API_KEY     gemini
       __load_agenix_secret DEEPSEEK_API_KEY   deepseek
       __load_agenix_secret CANARYLLM_API_KEY  canaryllm
@@ -314,7 +314,7 @@ in
           set -gx LUMEN_AI_MODEL "gpt-5-mini"
       end
 
-      # Non-secret AI provider settings (formerly in .zprofile)
+      # Non-secret AI provider settings (formerly in .zprofile).
       set -gx OLLAMA_API_BASE "https://ollama.kaiiserni.com"
       set -gx AIDER_WEAK_MODEL "gemini/gemini-2.0-flash"
 
@@ -322,10 +322,10 @@ in
       # OpenSSH 10.1+ creates forwarded-agent sockets under ~/.ssh/agent/ and
       # unlinks them when their ssh session ends. Mosh's bootstrap ssh does
       # exactly that right after spawning mosh-server, so every shell inside a
-      # mosh session (and anything launched from it — herdr, Claude) inherits a
+      # mosh session (and anything launched from it, herdr, Claude) inherits a
       # dead SSH_AUTH_SOCK. When the socket is gone, fall back to the local gcr
-      # agent: it holds this machine's on-disk key, which every host's sudo
-      # mesh and authorized_keys accept. A live forwarded socket is kept as-is
+      # agent (it holds this machine's on-disk key, which every host's sudo
+      # mesh and authorized_keys accept). A live forwarded socket is kept as-is
       # (it carries the connecting host's richer keyring).
       if not test -S "$SSH_AUTH_SOCK"; and test -S "$XDG_RUNTIME_DIR/gcr/ssh"
           set -gx SSH_AUTH_SOCK "$XDG_RUNTIME_DIR/gcr/ssh"

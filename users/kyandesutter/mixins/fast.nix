@@ -1,6 +1,6 @@
 { pkgs, ... }:
 let
-  # fast — command-line internet speed test powered by fast.com
+  # fast: command-line internet speed test powered by fast.com
   # (maaslalani/fast). Not in nixpkgs and upstream ships no release tags, so we
   # build it from source pinned to a commit. Bubbletea/lipgloss TUI.
   fast = pkgs.buildGoModule {

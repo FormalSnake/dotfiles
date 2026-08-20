@@ -7,8 +7,8 @@
  * Server sources (merged, later overrides earlier):
  *   1. ~/.claude.json                ("mcpServers")
  *   2. ~/.claude/settings.json       ("mcpServers")
- *   3. ~/.pi/agent/mcp.json          ("mcpServers")  — pi-specific overrides
- *   4. ./.mcp.json                   ("mcpServers")  — project-local
+ *   3. ~/.pi/agent/mcp.json          ("mcpServers")  (pi-specific overrides)
+ *   4. ./.mcp.json                   ("mcpServers")  (project-local)
  *
  * Each entry: { command, args?, env?, cwd? } for stdio servers, or
  *             { url, headers? } / { type: "sse"|"http", url } for remote servers.
@@ -86,7 +86,7 @@ export default async function mcpBridge(pi: ExtensionAPI): Promise<void> {
 
 	if (names.length === 0) return;
 
-	// Lazy connection cache: server name -> connected Client (or pending promise).
+	// Lazy connection cache: server name to connected Client (or pending promise).
 	const clients = new Map<string, Promise<Client>>();
 
 	function connect(serverName: string): Promise<Client> {
@@ -120,7 +120,7 @@ export default async function mcpBridge(pi: ExtensionAPI): Promise<void> {
 	let registered = 0;
 
 	// Discover tools from every server up front so the LLM sees them, but keep
-	// connections only as long as needed for discovery is not required — we keep
+	// connections only as long as needed for discovery is not required: we keep
 	// them open for reuse during the session.
 	for (const serverName of names) {
 		try {

@@ -95,6 +95,16 @@
             "timeout": 10
           }
         ]
+      },
+      {
+        "matcher": "Write|Edit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh ~/.claude/hooks/no-em-dash.sh",
+            "timeout": 10
+          }
+        ]
       }
     ],
     "SessionEnd": [
@@ -255,6 +265,9 @@
   },
   "spinnerVerbs": {
     "mode": "append",
-    "verbs": ["Gooning", "Jorking it"]
+    "verbs": [
+      "Gooning",
+      "Jorking it"
+    ]
   }
 }

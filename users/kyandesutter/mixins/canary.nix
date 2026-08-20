@@ -1,4 +1,4 @@
-# CanaryOrchestrator (canaryd + the canary CLI + the Linux desktop launcher) —
+# CanaryOrchestrator (canaryd + the canary CLI + the Linux desktop launcher):
 # our own remote-dev-session orchestrator. Consumed as a pure git+ssh flake
 # input (see flake.nix `canary`), which replaces the impure
 # `builtins.getFlake` local-checkout import dropped in af8161e7.

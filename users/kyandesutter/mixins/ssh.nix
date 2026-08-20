@@ -34,16 +34,16 @@
       # Remote work server over Tailscale (reachable anywhere). `mosh macbook`
       # uses this entry for the resilient shell; a separate `ssh -fN macbook`
       # holds the tunnels (mosh cannot forward ports). serve-sim needs BOTH
-      # 3200 (preview UI) and 3100 (MJPEG/WS stream) — see docs/remote-server.md.
+      # 3200 (preview UI) and 3100 (MJPEG/WS stream): see docs/remote-server.md.
       "macbook" = {
         # Agent forwarding to our own hosts only: pam_ssh_agent_auth on the
         # remote end grants passwordless sudo when the forwarded agent holds an
         # authorized key. Never set this on foreign hosts (root there could use
         # the forwarded agent). IdentityAgent SSH_AUTH_SOCK reverts these hosts
-        # to the *default* agent (gcr on Linux, launchd's on macOS) — those hold
+        # to the *default* agent (gcr on Linux, launchd's on macOS): those hold
         # the per-host on-disk keys that are authorized everywhere; with the
         # global 1Password IdentityAgent in effect, ssh would forward that agent
-        # instead, whose keys aren't in any authorized_keys. (Not "none": that
+        # instead, whose keys aren't in any authorized_keys. (Not "none", that
         # means "no agent" and silently disables forwarding altogether.) Client
         # auth is unaffected: these logins already ride the on-disk keys.
         IdentityAgent = "SSH_AUTH_SOCK";
@@ -51,10 +51,10 @@
         # Resolved via /etc/hosts (networking.hosts in modules/nixos/mixins/
         # networking.nix), which pins this name to the macbook's stable Tailscale
         # IP. Plain MagicDNS doesn't work here: the host forces Google DNS and
-        # NordVPN overwrites /etc/resolv.conf when connected — both bypass the
+        # NordVPN overwrites /etc/resolv.conf when connected, both bypass the
         # tailnet resolver. /etc/hosts is consulted before DNS, so the name
         # resolves regardless. (NordVPN coexistence also needs `lan-discovery`
-        # enabled so the direct LAN handshake isn't firewalled off — enforced by
+        # enabled so the direct LAN handshake isn't firewalled off, enforced by
         # nordvpn-settings.service.)
         HostName = "macbook-pro-2";
         User = "kyandesutter";
@@ -62,11 +62,11 @@
         # Vite/Astro dev servers bind only to IPv6 [::1], while workerd/bun bind
         # IPv4. Targeting `localhost` makes sshd on the Mac try every address for
         # the name, so the forward connects regardless of which stack the server
-        # chose — otherwise IPv6-only servers fail with `channel N: open failed`.
+        # chose (otherwise IPv6-only servers fail with `channel N: open failed`).
         # The local listen side is pinned to 127.0.0.1 (not bare `localhost`):
         # localhost resolves to both 127.0.0.1 and [::1], and when NordVPN is
         # connected it disables IPv6 system-wide (leak protection), so the [::1]
-        # bind fails with "Cannot assign requested address" — 8 warnings per
+        # bind fails with "Cannot assign requested address", 8 warnings per
         # connect. Pinning IPv4 skips that bind and keeps the localhost-only
         # (cookies/CORS) semantics the browser needs.
         LocalForward = [
@@ -74,7 +74,7 @@
           "127.0.0.1:3100 localhost:3100"
           "127.0.0.1:8080 localhost:8080"
           "127.0.0.1:3000 localhost:3000" # generic dev server (Next.js/Vite default)
-          # CanaryPulse dev servers — so the browser on the client can reach them
+          # CanaryPulse dev servers: so the browser on the client can reach them
           # as localhost (auth/CORS/cookies are localhost-only in dev). The admin
           # SPA loads its API/scraper URLs as http://localhost:<port> in the
           # browser, so 3001 (API) is required alongside 4322 (admin) for login.
@@ -88,7 +88,7 @@
 
       # ASUS Vivobook E1504G over its stable Tailscale IP (works from both the
       # g815 and the macbook; the IP sidesteps the g815's MagicDNS-hostile DNS
-      # setup — see the macbook entry above). Auth via the 1Password agent key
+      # setup, see the macbook entry above). Auth via the 1Password agent key
       # authorized in modules/nixos/mixins/users.nix.
       "e1504g" = {
         HostName = "100.109.196.64";
@@ -98,7 +98,7 @@
       };
 
       # ASUS ROG g815 over its stable Tailscale IP (for the macbook and the
-      # e1504g; same IP-instead-of-MagicDNS reasoning as the e1504g entry).
+      # e1504g, same IP-instead-of-MagicDNS reasoning as the e1504g entry).
       "g815" = {
         HostName = "100.114.32.78";
         User = "kyandesutter";

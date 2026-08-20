@@ -16,7 +16,7 @@
   --matugen-tertiary: {{tertiary}};
 }
 
-/* PATCH(nix mixins/zen.nix): global ::selection recolor removed — matugen
+/* PATCH(nix mixins/zen.nix): global ::selection recolor removed. matugen
  * themes the browser chrome only, web content stays untouched (the about:*
  * blocks below are browser surfaces and stay). */
 
@@ -170,8 +170,8 @@
   }
 }
 
-/* PATCH(nix mixins/zen.nix): findbar .matched-word recolor removed — it
- * restyles match highlights inside page content; browser-only theming. */
+/* PATCH(nix mixins/zen.nix): findbar .matched-word recolor removed (it
+ * restyles match highlights inside page content; browser-only theming). */
 
 /* ============================================================
  * GitHub theming has moved to userContent.github.template.

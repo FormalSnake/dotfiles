@@ -1,25 +1,25 @@
 { config, lib, pkgs, inputs, osConfig ? { }, ... }:
 let
   # Whether this host has the NVIDIA dGPU stack (g815 yes, Intel-only hosts
-  # no) — gates the GPU bar widget, which reads via nvidia-smi.
+  # no): gates the GPU bar widget, which reads via nvidia-smi.
   hasNvidia = (osConfig.kyan or { }).nvidia.enable or false;
 
   # The single keyboard-aura setter: paint the Aura keyboard to a given accent and
   # apply the effect/brightness appropriate to the current power source. Shared by
-  # two triggers — the matugen aura template runs it as a post_hook on every
+  # two triggers: the matugen aura template runs it as a post_hook on every
   # palette change (session start, wallpaper pick, light/dark flip, passing the
   # new accent), and power-tune (hyprland.nix) calls it on every power-source change
-  # (passing the cached accent). Having one setter means the two triggers can't
+  # (passing the cached accent). Having one setter: the two triggers can't
   # disagree.
   #
   # By power source (see modules/nixos/mixins/power.nix `power-source`):
-  #   ac        — static themed colour, full brightness.
-  #   powerbank — slow breathe of the themed accent (a "charging" vibe) while still
+  #   ac        : static themed colour, full brightness.
+  #   powerbank : slow breathe of the themed accent (a "charging" vibe) while still
   #               being treated as battery for power; full brightness.
-  #   battery   — themed colour staged but brightness dropped to dark (so a later
+  #   battery   : themed colour staged but brightness dropped to dark (so a later
   #               AC/relog brings the colour back). This is also the fix for the
-  #               LEDs lighting up after a relog on battery: setting an Aura effect
-  #               re-enables the backlight, so we re-assert the dark level here.
+  #               LEDs lighting up after a relog on battery (setting an Aura effect
+  #               re-enables the backlight), so we re-assert the dark level here.
   # Runs inside DMS's systemd *user* service (limited PATH), so power-source is
   # pinned by absolute path; brightness is driven through asusd (asusctl leds) since
   # the user can't write the root-owned /sys LED node directly.
@@ -51,7 +51,7 @@ let
   # Seed for ~/.config/DankMaterialShell/settings.json (activation block below):
   #
   #   - idle timeouts: disables every idle monitor DMS's IdleService.qml
-  #     drives — screen-off, lock, and suspend, on both AC and battery. Same
+  #     drives (screen-off, lock, and suspend) on both AC and battery. Same
   #     reason noctalia's idle was force-disabled: the internal panel (eDP-1)
   #     fails its wake modeset with `PHY A failed to request refclk` (see
   #     systems/g815/default.nix), and that modeset only happens coming back
@@ -63,10 +63,10 @@ let
   #   - customThemeFile: points at the Flexoki theme JSON below so it's ready
   #     the moment flexoki-pin (also below) or a manual Settings → Theme &
   #     Colors → Custom pick sets currentThemeName to "custom". Does NOT touch
-  #     currentThemeName itself — DMS's own wallpaper-derived default stands
+  #     currentThemeName itself; DMS's own wallpaper-derived default stands
   #     until something (flexoki-pin, or the user) opts in.
   #   - currentThemeName "dynamic": SPEC's own default is "purple" (a fixed
-  #     registry theme, not wallpaper-derived) — without this a fresh install
+  #     registry theme, not wallpaper-derived). Without this, a fresh install
   #     shows purple until someone opens Settings and picks a theme. "dynamic"
   #     is Theme.qml's own sentinel for "wallpaper-derived" (`readonly property
   #     string dynamic: "dynamic"`), so this just makes the real default match
@@ -76,31 +76,31 @@ let
   #     0). cornerRadius is the single global radius Theme.qml applies to
   #     popups/notifications/dock/widgets; the bar has its own separate
   #     squareCorners flag, hence seeding the whole default barConfigs entry
-  #     (SPEC.barConfigs.def) with just that one field flipped — DMS's loader
+  #     (SPEC.barConfigs.def) with just that one field flipped (DMS's loader
   #     doesn't deep-merge array values, so a partial object would drop the
-  #     rest of the bar's config to `undefined`. niriLayoutRadiusOverride is
+  #     rest of the bar's config to `undefined`). niriLayoutRadiusOverride is
   #     left at its SPEC default (-1, off): it is a niri-only knob in DMS and
   #     does nothing under Hyprland, whose window rounding is set directly in
   #     mixins/hyprland.nix (decoration.rounding).
   #   - showWorkspaceName + showOccupiedWorkspacesOnly: renders the named
   #     workspaces (wsName in mixins/hyprland.nix) on the bar's pills instead of
-  #     bare indices, and hides empty ones — the closest match to Noctalia's
-  #     old hide_when_empty=true + name-label behaviour. There's no per-widget
+  #     bare indices, and hides empty ones (the closest match to Noctalia's
+  #     old hide_when_empty=true + name-label behaviour). There's no per-widget
   #     "max name length" key upstream (WorkspaceSwitcher.qml renders the full
   #     name on a horizontal bar; it only truncates to the first character in
   #     vertical-bar orientation), so none is seeded.
   #   - no wallpaper-folder key: verified there isn't one. DMS has no
-  #     directory-scanning wallpaper gallery — SettingsSpec.js/SessionSpec.js
+  #     directory-scanning wallpaper gallery; SettingsSpec.js/SessionSpec.js
   #     have no wallpaperFolder/wallpaperDirectory key at all. The Settings
   #     wallpaper picker (SettingsWallpaperPicker.qml) is a generic
   #     FileBrowserModal that opens to CacheData.wallpaperLastPath (a
   #     ~/.local/state/DankMaterialShell/cache.json field, outside
-  #     SettingsSpec/SessionSpec — not reachable via `settings set` IPC or
+  #     SettingsSpec/SessionSpec, not reachable via `settings set` IPC or
   #     this seed) or falls back to $HOME. The only real per-mode wallpaper
   #     primitive is SessionSpec's wallpaperPath{Light,Dark} + perModeWallpaper
   #     (single files, not folders, and session.json isn't seeded by this
-  #     activation block at all) — set live on this host via `dms ipc call
-  #     wallpaper set` plus a direct session.json edit; not persisted here.
+  #     activation block at all); set live on this host via `dms ipc call
+  #     wallpaper set` plus a direct session.json edit, not persisted here.
   #
   # Key names verified against upstream quickshell/Common/settings/SettingsSpec.js
   # (AvengeMedia/DankMaterialShell@74896fb): idle timeouts already default to 0
@@ -110,12 +110,12 @@ let
 
   # Pinned in one place because they're written twice: into the first-session
   # seed below, and force-set into an existing settings.json by the activation
-  # block (unlike customThemeFile these are never absent — DMS ships defaults —
-  # so a back-fill would never fire).
+  # block. (Unlike customThemeFile these are never absent: DMS ships defaults,
+  # so a back-fill would never fire.)
   dmsFonts = {
-    # MEK Mono on both, not MEK Sans on the UI side: the bar is short labels,
+    # MEK Mono on both, not MEK Sans on the UI side; the bar is short labels,
     # clocks and counters at one size, which is exactly what the mono face is
-    # for — and it keeps the shell reading as one surface with the terminal.
+    # for, and it keeps the shell reading as one surface with the terminal.
     fontFamily = "MEK Mono";
     monoFontFamily = "MEK Mono";
     # Both MEK faces carry a 600/1000em cap height and a 500 x-height against
@@ -216,13 +216,13 @@ let
   # DankMaterialShell@74896fb): a hardcoded palette DMS loads instead of
   # matugen's wallpaper-derived one when currentThemeName == "custom" (see
   # Theme.qml switchTheme/loadCustomThemeFromFile). Values come straight from
-  # users/kyandesutter/mixins/flexoki/palette.nix — the same base tones and
-  # accent stops used everywhere else Flexoki is themed — mapped onto DMS's
+  # users/kyandesutter/mixins/flexoki/palette.nix (the same base tones and
+  # accent stops used everywhere else Flexoki is themed), mapped onto DMS's
   # M3 role set (a superset of the old Noctalia fixed_palette schema this
   # replaces; see `git show 3eaefc4:…/noctalia.nix:132-225` for that mapping).
   # Roles with no direct Noctalia equivalent (primaryContainer, surfaceTint,
   # backgroundText, the three surfaceContainer* elevation steps) are filled
-  # from the same base-tone ramp rather than introducing new colours:
+  # from the same base-tone ramp rather than introducing new colours.
   # primaryContainer reuses the *other* blue stop (the "darker/lighter variant
   # of primary" docs call for), and surfaceContainer/-High/-Highest step one
   # base tone at a time away from surface/background, in the same direction
@@ -279,17 +279,17 @@ let
 
   # DMS package, patched. `programs.dank-material-shell.package` defaults to
   # `dmsPkgs.dms-shell` (distro/nix/options.nix), a `buildGoModule` derivation
-  # whose `src` is `./core` (the Go sources only) — the QML tree the patches
+  # whose `src` is `./core` (the Go sources only); the QML tree the patches
   # below target lives under `quickshell/`, copied into $out by `postInstall`
   # from a *separate* path (`rootSrc = ./.`, the whole repo), never unpacked
   # as `src`. That means the usual `patches = old.patches ++ [...]` (which
-  # only patches `$src`) can't reach it — confirmed by inspecting `postInstall`
+  # only patches `$src`) can't reach it; confirmed by inspecting `postInstall`
   # in the pinned flake's own flake.nix (`mkDmsShell`), not by guessing. So
   # this patches the copied-in tree in place, appended after the existing
-  # `cp -r … $out/share/quickshell/dms/` in the same postInstall: the file is
-  # a direct child of that freshly-created (writable) directory, so a `chmod`
+  # `cp -r … $out/share/quickshell/dms/` in the same postInstall (the file is
+  # a direct child of that freshly-created writable directory, so a `chmod`
   # + `patch` there works even though the *source* files `cp -r` copied it
-  # from are read-only (the nix store). Built via the flake's own
+  # from are read-only, the nix store). Built via the flake's own
   # `lib.mkDmsShell` (not `inputs.….packages.${system}`) so this stays on our
   # overlay-aware `pkgs`, matching exactly what the module's own default does
   # internally (`distro/nix/options.nix`: `dmsPkgs = buildDmsPkgs pkgs`).
@@ -303,25 +303,25 @@ let
   });
 
   # Reconciler: pin the Flexoki custom theme while a flexoki-named wallpaper
-  # is active, and hand back to the wallpaper-derived theme otherwise —
+  # is active, and hand back to the wallpaper-derived theme otherwise,
   # restoring per-wallpaper Flexoki pinning without Noctalia's
   # wallpaper_changed hook (DMS has no such per-pick hook).
   # Session state is DMS's own record of the applied wallpaper
-  # (~/.local/state/DankMaterialShell/session.json, `wallpaperPath` —
+  # (~/.local/state/DankMaterialShell/session.json, `wallpaperPath`:
   # SessionData.qml/SessionSpec.js), so watching it (rather than matugen's
   # `{{image}}`, which only fires for the single theming "target monitor")
   # catches every wallpaper pick DMS itself makes.
   #
   # Loop safety: this watches session.json only. Every write this reconciler
   # makes goes through `dms ipc call settings set`, which lands in
-  # settings.json (a completely different file, never watched here) — so a
+  # settings.json (a completely different file, never watched here); a
   # write here can never retrigger the watch that produced it.
   #
   # Matching mirrors the old Noctalia `flexoki-scheme` hook's
   # `[[ "$path" == *flexoki* ]]` substring test (case-insensitive,
   # `git show 3eaefc4:…/noctalia.nix:87-88`). Idempotent: settings.json is
   # read before every write, and nothing is written when the sentinel already
-  # matches — the ONLY way this can visibly re-apply the custom theme is a
+  # matches; the ONLY way this can visibly re-apply the custom theme is a
   # genuine wallpaper flip, thanks to the patched IPC handler above actually
   # dispatching Theme.switchTheme instead of silently writing a dead setting.
   flexokiPin = pkgs.writeShellApplication {
@@ -342,7 +342,7 @@ let
       # No-ops gracefully if either file doesn't exist yet (settings.json is
       # seeded by home-manager activation before this service ever starts;
       # session.json only appears once DMS itself has run and saved a
-      # session) — the surrounding inotify watch on $statedir still works on
+      # session): the surrounding inotify watch on $statedir still works on
       # an empty/fresh directory, so the very next write picks this back up.
       reconcile() {
         [[ -r "$session" && -r "$settings" ]] || return 0
@@ -386,7 +386,7 @@ in
   # Expose aura-repaint on PATH so power-tune (hyprland.nix) can call it as the
   # shared keyboard-aura setter (the matugen aura template's post_hook also uses
   # it, by store path). jq rides along for the DankBar plugins that shell out to
-  # it (claudeCodeUsage, nixPackageRunner) — DMS's user service inherits the home
+  # it (claudeCodeUsage, nixPackageRunner); DMS's user service inherits the home
   # profile on PATH.
   home.packages = [ auraRepaint pkgs.jq ];
 
@@ -394,10 +394,10 @@ in
     enable = true;
     systemd.enable = true; # user service, PartOf the Wayland/graphical-session target
     enableDynamicTheming = true; # pulls in the deps DMS's own theming needs
-    package = dmsPackage; # local patches: IPC `settings set` → SettingsData.set, location poll (see dmsPackage above)
+    package = dmsPackage; # local patches: IPC `settings set` → SettingsData.set; location poll (see dmsPackage above)
 
     # Community plugins from inputs.dms-plugin-registry (imported above). Only
-    # `.enable` is set here — no `.settings`, which deliberately keeps
+    # `.enable` is set here (no `.settings`), which deliberately keeps
     # managePluginSettings off so plugin_settings.json stays runtime-mutable
     # (the plugins persist their own config there, and it's seeded with
     # `enabled: true` by the activation block below). All four are dankbar/
@@ -405,41 +405,41 @@ in
     plugins = {
       # NVIDIA usage / VRAM / temperature. Reads via nvidia-smi, so it only
       # shows data when the dGPU is powered (blank on battery, by design). The
-      # dgpuStatus D0/D3cold power-state widget was dropped by preference — this
+      # dgpuStatus D0/D3cold power-state widget was dropped by preference; this
       # usage widget is the only GPU pill on the bar.
       nvidiaGpuMonitor.enable = hasNvidia;
-      # Emoji & Unicode launcher — bound to Mod+Period in mixins/hyprland.nix via
+      # Emoji & Unicode launcher, bound to Mod+Period in mixins/hyprland.nix via
       # `spotlight toggleQuery :e` (:e is the plugin's default trigger).
       emojiLauncher.enable = true;
 
       # Launcher-only plugins (spotlight surfaces, no bar widget). Both seed
       # `enabled: true` below so they index without a manual Settings toggle.
-      # calculator: evaluate expressions, copy result. nixPackageRunner: search
-      # nixpkgs / `nix run` from the launcher (needs nix + jq + wl-clipboard,
+      # calculator: evaluate expressions, copy result. nixPackageRunner (search
+      # nixpkgs / `nix run` from the launcher; needs nix + jq + wl-clipboard,
       # all on PATH).
       calculator.enable = true;
       nixPackageRunner.enable = true;
 
       # DankBar widgets. Bar placement is spliced into rightWidgets by the seed
       # (settingsSeed above) and, for the already-provisioned live bar, by
-      # dms-bar-plugins.jq — both kept in the same order.
-      # githubNotifier: open PRs authored by you + issues assigned to you. Reads
-      # via `gh` (present) — run `gh auth login` once; the GitHub brand glyph
+      # dms-bar-plugins.jq (both kept in the same order).
+      # githubNotifier (open PRs authored by you + issues assigned to you). Reads
+      # via `gh` (present); run `gh auth login` once. The GitHub brand glyph
       # needs font-awesome (added to fonts.packages in mixins/hyprland.nix).
       githubNotifier.enable = true;
       # claudeCodeUsage: token usage / rate limits / daily charts for the Claude
       # Code subscription. Parses ~/.claude logs with jq (added to home.packages).
       claudeCodeUsage.enable = true;
-      # hiddenBar: macOS-Hidden-Bar-style toggle pill that collapses widgets in
-      # its section. Seeded right of systemTray in rightWidgets (above) so the
+      # hiddenBar (macOS-Hidden-Bar-style toggle pill that collapses widgets in
+      # its section). Seeded right of systemTray in rightWidgets (above) so the
       # tray sits in its manageable zone; the plugin_settings seed below pins it
       # to whitelist mode targeting "systemTray", so a click hides only the tray.
       hiddenBar.enable = true;
 
-      # Scriptable custom bar buttons (Avenge Media, first-party) — the
+      # Scriptable custom bar buttons (Avenge Media, first-party), the
       # replacement for noctalia's old custom "Windows" power-menu button, which
       # DMS's own powermenu can't host (fixed action enum; see the desktop-entry
-      # note near the bottom of this file). Uses DMS's plugin-variant system:
+      # note near the bottom of this file). Uses DMS's plugin-variant system;
       # each action is its own bar widget created at runtime (Settings → Plugins
       # → Dank Actions), so nothing is spliced onto the bar here. Configure one
       # variant with the left-click command
@@ -451,7 +451,7 @@ in
   };
 
   # App theming beyond DMS's builtin templates (gtk3/gtk4, qt5ct/qt6ct, ghostty,
-  # …, all unconditionally detected + rendered by DMS itself — see
+  # …, all unconditionally detected + rendered by DMS itself; see
   # AvengeMedia/DankMaterialShell core/internal/matugen/matugen.go
   # templateRegistry). These `user` templates push the same live wallpaper
   # palette into apps DMS can't theme natively. Sources are installed to
@@ -461,13 +461,13 @@ in
   # through the engine (colour tokens interpolated) before running.
   # Profile picture: DMS reads the avatar from AccountsService
   # (PortalService.getUserIconFile → HeaderPane), and AccountsService falls back
-  # to ~/.face when no icon is set — so seeding it here themes the DMS control
+  # to ~/.face when no icon is set, so seeding it here themes the DMS control
   # centre and the SDDM greeter from one source.
   home.file.".face".source = ../assets/profile.jpeg;
 
   xdg.configFile = {
     # DMS custom theme (flexokiTheme above): a plain declarative file, unlike
-    # settings.json/session.json below — DMS only ever reads it, never
+    # settings.json/session.json below. DMS only ever reads it, never
     # rewrites it, so it needs no seed-if-absent dance.
     "DankMaterialShell/flexoki-theme.json".text = builtins.toJSON flexokiTheme;
 
@@ -485,9 +485,9 @@ in
 
     # DMS reads ~/.config/matugen/config.toml on every re-theme and splices its
     # [config] and [templates] sections verbatim into the matugen invocation it
-    # runs itself (buildMergedConfig in matugen.go) — so this is matugen's own
+    # runs itself (buildMergedConfig in matugen.go), so this is matugen's own
     # TOML syntax, not a DMS-specific format. A bare `[templates]` header is
-    # required before the first `[templates.*]` subtable: DMS's merge locates
+    # required before the first `[templates.*]` subtable; DMS's merge locates
     # the literal substring "[templates]", which "[templates.aura]" alone does
     # not contain. `~` in input_path/output_path is expanded by matugen itself.
     "matugen/config.toml".text = ''
@@ -497,14 +497,14 @@ in
 
       # ASUS Aura keyboard. Output file doubles as the "current accent" cache
       # that power-tune (hyprland.nix) reads to restore today's colour on a
-      # power-source change; the post_hook does the actual repaint.
+      # power-source change, the post_hook does the actual repaint.
       [templates.aura]
       input_path = "~/.config/matugen/templates/aura.tmpl"
       output_path = "~/.cache/dank/aura-color"
       post_hook = "${auraRepaint}/bin/aura-repaint {{colors.primary.default.hex_stripped}}"
 
       # DualSense lightbar. Same one-line accent payload as the aura template,
-      # its own output file so the two hooks stay independent; dualsense-sync
+      # its own output file so the two hooks stay independent, dualsense-sync
       # (mixins/dualsense.nix) reads it back and also repaints the player LEDs.
       # Absolute profile path: this hook runs inside the shell's systemd user
       # service, whose PATH won't include the home profile bin.
@@ -513,7 +513,7 @@ in
       output_path = "~/.cache/dank/dualsense-color"
       post_hook = "${config.home.profileDirectory}/bin/dualsense-sync || true"
 
-      # Ghostty: written into ghostty's themes dir; config references it with
+      # Ghostty, written into ghostty's themes dir; config references it with
       # `theme = "Matugen"` (see mixins/ghostty.nix). SIGUSR2 live-reloads it
       # (ghostty >= 1.2) without a restart. DMS's own builtin ghostty template
       # writes a separate `themes/dankcolors` file we don't reference, so the
@@ -523,8 +523,8 @@ in
       output_path = "~/.config/ghostty/themes/Matugen"
       post_hook = "pkill -SIGUSR2 ghostty || true"
 
-      # Neovim: base16 lua module consumed by dynamic-base16.nvim (watch =
-      # true) — no hook needed, the plugin watches the file. See neovim.nix.
+      # Neovim (base16 lua module consumed by dynamic-base16.nvim, watch =
+      # true); no hook needed, the plugin watches the file. See neovim.nix.
       [templates.neovim]
       input_path = "~/.config/matugen/templates/neovim.lua.tmpl"
       output_path = "~/.config/nvim/lua/dank_base16.lua"
@@ -535,10 +535,10 @@ in
       input_path = "~/.config/matugen/templates/equibop.css.tmpl"
       output_path = "~/.config/equibop/themes/dank.theme.css"
 
-      # Obsidian (Minimal theme). Rendered into the vault's snippet dir;
+      # Obsidian (Minimal theme). Rendered into the vault's snippet dir,
       # Obsidian watches ~/Notes/.obsidian/snippets and hot-reloads on write,
       # so no post_hook. macOS rides Minimal's built-in Flexoki preset instead
-      # — no DMS there — so this template is Linux-only (dms.nix is
+      # (no DMS there), so this template is Linux-only (dms.nix is
       # g815-only). scripts/obsidian-vault-bootstrap.sh seeds an empty enabled
       # snippet before the first render.
       [templates.obsidian]
@@ -550,14 +550,14 @@ in
       # through `hyprctl eval` so the colours apply instantly with no reload.
       # hyprland.lua also dofile's the same output on every config eval, so a
       # later `hyprctl reload` keeps the wallpaper colours instead of falling
-      # back to the static Flexoki `general.col` — see mixins/hyprland.nix.
+      # back to the static Flexoki `general.col` (see mixins/hyprland.nix).
       # primary = active border; outline = inactive.
       [templates.hypr-border]
       input_path = "~/.config/matugen/templates/hypr-border.lua.tmpl"
       output_path = "~/.cache/dank/hypr-border.lua"
       post_hook = "${pkgs.hyprland}/bin/hyprctl eval 'pcall(dofile, os.getenv(\"HOME\") .. \"/.cache/dank/hypr-border.lua\")' || true"
 
-      # btop. DMS has no builtin btop template; programs.btop.settings.color_theme
+      # btop. DMS has no builtin btop template, programs.btop.settings.color_theme
       # in programs.nix points at this output. Picks up colours on next launch
       # (no live reload).
       [templates.btop]
@@ -602,13 +602,13 @@ in
   #     session rather than however long it takes to open Settings manually.
   #   - present: back-fill two things, both idempotently. The customThemeFile
   #     key when absent (covers a re-install landing on a settings.json that
-  #     already exists — without it flexoki-pin flips currentThemeName to
-  #     "custom" with no palette to load; never touches an existing key, even
+  #     already exists; without it flexoki-pin flips currentThemeName to
+  #     "custom" with no palette to load, never touches an existing key, even
   #     "", which could be a deliberate user clear). And the plugin bar widgets
   #     (dms-bar-plugins.jq), spliced into the live bar the same way the seed
-  #     places them — each id added only when missing from the whole bar, so a
+  #     places them (each id added only when missing from the whole bar, so a
   #     widget the user later moves or removes isn't duplicated on the next
-  #     switch. The file is only rewritten when that pass actually changes it.
+  #     switch). The file is only rewritten when that pass actually changes it.
   home.activation.dmsSettingsSeed = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     settings="$HOME/.config/DankMaterialShell/settings.json"
     if [ ! -e "$settings" ]; then
@@ -629,7 +629,7 @@ in
     # A running shell holds settings in memory and rewrites the file on its next
     # save, so the edit above only survives if DMS is told about it too. Both
     # keys are pushed unconditionally (setting a value DMS already has is a
-    # no-op) and the whole thing is best-effort: no session, no IPC socket.
+    # no-op) and the whole thing is best-effort (no session, no IPC socket).
     # fontScale goes over the wire as Nix renders a float, "1.200000"; DMS
     # parses that and stores a plain 1.2, so the jq pass above stays idempotent.
     ${lib.concatStringsSep "\n" (
@@ -641,10 +641,10 @@ in
 
   # plugin_settings.json holds each plugin's enabled flag plus its own
   # runtime-written config. The registry HM module only manages this file when a
-  # plugin declares `.settings` (we deliberately don't — see plugins above), so
-  # DMS owns it; we just seed `enabled: true` for the plugins wired in above so
+  # plugin declares `.settings` (we deliberately don't; see plugins above), so
+  # DMS owns it. We just seed `enabled: true` for the plugins wired in above so
   # they load on the first session with no manual Settings → Plugins toggle.
-  # Only a missing top-level id is added — an existing entry (even
+  # Only a missing top-level id is added; an existing entry (even
   # {enabled:false}) is left as a deliberate user choice. Rewritten only when
   # the seed actually adds something.
   home.activation.dmsPluginSettingsSeed = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
@@ -659,8 +659,8 @@ in
         "claudeCodeUsage", "dankActions"
       ) as $id
         (.; if has($id) then . else .[$id] = { enabled: true } end)
-    # hiddenBar needs more than the enabled flag: whitelist mode pinned to the
-    # system tray so the toggle hides only that widget (see plugins.hiddenBar).
+    # hiddenBar needs more than the enabled flag (whitelist mode pinned to the
+    # system tray so the toggle hides only that widget; see plugins.hiddenBar).
     | if has("hiddenBar") then . else
         .hiddenBar = { enabled: true, widgetSelectionMode: "whitelist", widgetWhitelist: ["systemTray"] }
       end
@@ -673,8 +673,8 @@ in
   '';
 
   # flexokiPin above: watches session.json, pins/unpins the Flexoki custom
-  # theme via the patched IPC handler. No keep-old wiring: a rebuild that
-  # changes the script restarts it, and it re-reads state on startup.
+  # theme via the patched IPC handler. No keep-old wiring (a rebuild that
+  # changes the script restarts it, and it re-reads state on startup).
   systemd.user.services.flexoki-pin = {
     Unit = {
       Description = "Pin the Flexoki custom theme for flexoki-named wallpapers";
@@ -693,7 +693,7 @@ in
   # it loses whenever the laptop has been associated a while: NetworkManager
   # stops background-scanning once comfortably connected, wpa_supplicant's BSS
   # cache runs dry, and geoclue's single query fails ("No WiFi networks found")
-  # with no retry — the core then keeps its IP-seeded location (wrong city;
+  # with no retry. The core then keeps its IP-seeded location (wrong city;
   # observed pinned to the ISP egress for an hour+ on both Linux hosts,
   # 2026-07-23). Kick a rescan as the service comes up so the BSS-added events
   # land while the core's geoclue client is fresh. "-": NM throttles
@@ -701,8 +701,8 @@ in
   systemd.user.services.dms.Service.ExecStartPost =
     "-/run/current-system/sw/bin/nmcli device wifi rescan";
 
-  # Fallback for the two power-menu actions DMS's own powermenu can't host:
-  # its action set is a fixed enum (SettingsData.powerMenuActions — reboot/
+  # Fallback for the two power-menu actions DMS's own powermenu can't host;
+  # its action set is a fixed enum (SettingsData.powerMenuActions: reboot/
   # logout/poweroff/lock/suspend/restart/hibernate/switchuser, see
   # PowerMenuModal.qml upstream), with no custom-command entry, so "Reboot to
   # Windows" and "UEFI Firmware Setup" can't be wired in declaratively there.

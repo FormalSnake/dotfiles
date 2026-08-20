@@ -44,8 +44,8 @@
   };
 
   # `sudo nixos-rebuild` evaluates as root, so the private flake inputs
-  # (CanaryOrchestrator, FormalShell) are fetched over SSH by root — which has
-  # an empty ~/.ssh and no way to answer a host-key prompt, so the fetch died
+  # (CanaryOrchestrator, FormalShell) are fetched over SSH by root (which has
+  # an empty ~/.ssh and no way to answer a host-key prompt), so the fetch died
   # with "Host key verification failed" and took the whole rebuild with it.
   # System-wide known_hosts fixes it for every user, root included. The mac is
   # unaffected: darwin-rebuild evaluates as the invoking user.
@@ -62,10 +62,10 @@
   nixpkgs.overlays = [
     inputs.helium.overlays.default
 
-    # nixpkgs removed the `buildFHSEnvChroot` alias (it now `throw`s — added
+    # nixpkgs removed the `buildFHSEnvChroot` alias (it now `throw`s, added
     # upstream 2026-05-21), but the pinned nordvpn-flake (already at its latest
     # commit) still calls `pkgs.buildFHSEnvChroot` to wrap the NordVPN .deb.
-    # Restore the alias to `buildFHSEnv` — exactly the migration the deprecation
+    # Restore the alias to `buildFHSEnv`: exactly the migration the deprecation
     # message recommends. Remove once nordvpn-flake migrates to buildFHSEnv.
     (final: prev: {
       buildFHSEnvChroot = prev.buildFHSEnv;

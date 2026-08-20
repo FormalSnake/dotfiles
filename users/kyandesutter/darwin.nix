@@ -3,7 +3,7 @@
   # self.homeModules.kyandesutter-darwin (kept out of ./default.nix so imports
   # don't depend on the platform).
   imports = [
-    # Disabled for a lighter dev host — using Apple's Stage Manager instead of
+    # Disabled for a lighter dev host: using Apple's Stage Manager instead of
     # aerospace tiling. Configs are kept; just not imported.
     # ./mixins/aerospace.nix
     ./mixins/android.nix
@@ -14,7 +14,7 @@
     ./mixins/sketchybar.nix
   ];
 
-  # macOS rebuild shortcut — the darwin counterpart to the g815 `rebuild`
+  # macOS rebuild shortcut: the darwin counterpart to the g815 `rebuild`
   # (linux.nix). Drives the darwin flake through the justfile `r` recipe, which
   # already targets `#macbook`; `-f` points just at the repo so it's runnable
   # from any directory. Extra flags (e.g. --show-trace) pass through via $argv.

@@ -7,10 +7,10 @@ let
   # Blackwell (RTX 5070) + nvidia-drm has an s2idle-resume regression: on wake,
   # the display pipeline's atomic pageflip stalls forever ("Pageflip timed
   # out"), so an external monitor comes up detected-but-dark and the Hyprland
-  # session — blocked waiting on that flip — stops servicing input and IPC (which
+  # session (blocked waiting on that flip) stops servicing input and IPC (which
   # also makes freshly hot-plugged USB look dead: nothing is processing it).
   # Present on driver 610.43.02, unfixed upstream as of 2026-07, and it hits KWin
-  # too — so it's driver-side, NOT a compositor/session-freeze race (our sessions
+  # too: so it's driver-side, NOT a compositor/session-freeze race (our sessions
   # freeze normally on suspend and there are no nvidia-suspend services in the
   # finegrained/RTD3 setup here).
   #
@@ -18,7 +18,7 @@ let
   # string is unreliable, so detection is a liveness probe instead: a wedged
   # compositor blocks its event loop on the stalled flip and stops answering
   # `hyprctl`. If the compositor is unresponsive for a sustained window after
-  # resume, restart the display-manager — a fresh greeter/compositor re-modesets
+  # resume, restart the display-manager: a fresh greeter/compositor re-modesets
   # the dGPU, which is the one confirmed recovery short of the full power-cycle
   # it otherwise takes.
   resumeRecovery = pkgs.writeShellApplication {
@@ -38,7 +38,7 @@ let
       # No live Hyprland instance (e.g. resumed to the greeter, or the session
       # already gone) → nothing here to recover, and don't restart-loop the DM.
       # hyprctl keys off HYPRLAND_INSTANCE_SIGNATURE, which is the name of the
-      # per-instance directory holding the socket — recover it from the
+      # per-instance directory holding the socket: recover it from the
       # directory that actually exists rather than guessing.
       sig=""
       for d in "$runtime"/hypr/*/; do
@@ -58,14 +58,14 @@ let
       sleep 8
 
       # A stalled pageflip never recovers on its own, so require sustained
-      # unresponsiveness (~30s of failed probes) before the disruptive restart —
-      # a momentarily busy compositor must not trip it.
+      # unresponsiveness (~30s of failed probes) before the disruptive restart, a
+      # momentarily busy compositor must not trip it.
       for _ in 1 2 3 4 5 6; do
         if alive; then exit 0; fi
         sleep 4
       done
 
-      echo "nvidia-resume-recovery: Hyprland unresponsive after resume — restarting display-manager to recover the display" >&2
+      echo "nvidia-resume-recovery: Hyprland unresponsive after resume, restarting display-manager to recover the display" >&2
       systemctl restart display-manager.service
     '';
   };

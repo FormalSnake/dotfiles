@@ -27,7 +27,7 @@
     shell = pkgs.fish;
     # The personal 1Password SSH key (same one authorized on the macbook in
     # modules/darwin/mixins/remote-access.nix), so any of the machines can SSH
-    # into the Linux hosts over Tailscale without password auth — plus the
+    # into the Linux hosts over Tailscale without password auth, plus the
     # g815's on-disk key so non-interactive sessions there (Claude, scripts,
     # cron) can reach the other Linux hosts without the 1Password agent.
     openssh.authorizedKeys.keys = [

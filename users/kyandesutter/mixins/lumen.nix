@@ -1,6 +1,6 @@
 { pkgs, ... }:
 let
-  # lumen — AI git commit-message generator (jnsahaj/lumen). Referenced by the
+  # lumen: AI git commit-message generator (jnsahaj/lumen). Referenced by the
   # gcommit/gpush/commitai fish helpers and the LUMEN_* env in mixins/fish.nix.
   # Not in nixpkgs and upstream ships darwin-only release binaries, so on the
   # macbook it comes from the homebrew tap (systems/macbook/homebrew.nix) and on

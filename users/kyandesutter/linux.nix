@@ -26,7 +26,7 @@
   ];
 
   # NixOS rebuild shortcut (linux-only, so it lives here rather than the shared
-  # fish.nix — `nixos-rebuild` doesn't exist on the darwin host). Merges into the
+  # fish.nix: `nixos-rebuild` doesn't exist on the darwin host). Merges into the
   # programs.fish.functions set defined in mixins/fish.nix.
   #
   # The flake is referenced by absolute path (~/.config/nix#<host>), not `.#…`,
@@ -55,7 +55,7 @@
       let
         prism = pkgs.prismlauncher.override { jdks = [ pkgs.zulu17 pkgs.zulu21 pkgs.zulu25 ]; };
       in
-      # On the PRIME laptop, wrap so Minecraft (OpenGL — it can't grab the dGPU
+      # On the PRIME laptop, wrap so Minecraft (OpenGL: it can't grab the dGPU
       # opportunistically the way Vulkan games can) renders on the RTX 5070.
       # gpuOffloadWrap comes from the nvidia mixin's overlay (g815); other Linux
       # hosts fall through to the plain package.

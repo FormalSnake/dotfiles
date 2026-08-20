@@ -6,7 +6,7 @@ in
 {
   # Free-text note inbox: text typed into the vault's Inbox/index.md is filed
   # into notes by headless Claude once it ends with a "done" signal. The script
-  # lives in the repo (live-editable without a rebuild — same pattern as the
+  # lives in the repo (live-editable without a rebuild, same pattern as the
   # scan watcher). Pure 5-minute poll (no WatchPaths): each tick short-circuits
   # unless the freeform changed, so a parked draft costs nothing. Self-locking,
   # so overlapping ticks are harmless.
