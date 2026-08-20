@@ -1,8 +1,8 @@
-// Animated backdrop for the SDDM greeter: glyph rain, a faint grid, CRT
-// scanlines and a decorative boot log, all on black. Spliced into the
-// sddm-astronaut theme by the override in modules/nixos/mixins/hyprland.nix,
-// behind a Loader, so a QML error here costs the wallpaper and leaves the
-// login form working.
+// Animated overlay for the SDDM greeter: glyph rain, a faint grid, CRT
+// scanlines and a decorative boot log. Spliced into the
+// sddm-astronaut theme by the override in modules/nixos/mixins/hyprland.nix
+// as a layer over the preset wallpaper, behind a Loader, so a QML error here
+// costs the animation and leaves the login form working.
 //
 // Everything is generated at runtime rather than shipped as a video: the
 // greeter has to look right on the 1080p panels and on whatever is plugged
@@ -13,7 +13,6 @@ import QtQuick
 Item {
     id: bg
 
-    readonly property color baseColor: "#04070a"
     readonly property color rainColor: "#2ef58a"
     readonly property color headColor: "#c8fff0"
     readonly property color gridColor: "#0d3b34"
@@ -34,11 +33,6 @@ Item {
 
     function randomGlyph() {
         return glyphs.charAt(Math.floor(Math.random() * glyphs.length))
-    }
-
-    Rectangle {
-        anchors.fill: parent
-        color: bg.baseColor
     }
 
     // Static grid. Painted once per resize, not per frame.
@@ -181,7 +175,7 @@ Item {
         gradient: Gradient {
             orientation: Gradient.Horizontal
             GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, 0) }
-            GradientStop { position: 0.5; color: Qt.rgba(0, 0, 0, 0.82) }
+            GradientStop { position: 0.5; color: Qt.rgba(0, 0, 0, 0.7) }
             GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0) }
         }
     }

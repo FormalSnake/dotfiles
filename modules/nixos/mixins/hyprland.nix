@@ -50,22 +50,21 @@ let
   # any user session exists, so there is no wallpaper to derive colours from.
   #
   # themeConfig lands as Themes/cyberpunk.conf.user, which SDDM reads on top of
-  # the preset's own conf. Background is blanked so the AnimatedImage renders
-  # nothing and the backdrop below it shows through; the blur options depend on
-  # that image, so they have to stay off.
+  # the preset's own conf. Empty values there do NOT override, they fall back to
+  # the preset, so every key here carries a real value. The preset wallpaper is
+  # kept and dimmed; the backdrop layers over it.
   sddmAstronaut = (pkgs.sddm-astronaut.override {
     embeddedTheme = "cyberpunk";
     themeConfig = {
       Font = "GeistMono Nerd Font";
       FontSize = "13";
       RoundCorners = "0";
-      HeaderText = "";
+      HeaderText = "// system online";
       HourFormat = "HH:mm";
       DateFormat = "ddd dd MMM";
 
-      Background = "";
-      BackgroundPlaceholder = "";
-      DimBackground = "0.0";
+      # Pushes the preset's artwork back so the rain and the form read over it.
+      DimBackground = "0.45";
       BackgroundColor = "#04070a";
       DimBackgroundColor = "#04070a";
       FormBackgroundColor = "#04070a";
