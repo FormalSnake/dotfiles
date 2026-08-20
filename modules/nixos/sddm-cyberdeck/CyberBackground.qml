@@ -20,10 +20,13 @@ Item {
     readonly property color logColor: "#1f8f5c"
 
     // Halfwidth katakana carries the look; the hex digits and symbols keep it
-    // readable as machine output. Katakana resolves through the Noto CJK
-    // fallback in glyphFonts, GeistMono has none.
+    // readable as machine output. The rain runs in Noto CJK Mono because
+    // GeistMono has no katakana at all; the log line below is ASCII, so it
+    // keeps the system terminal face. font.families does not exist in this Qt
+    // build, so both are single families rather than a fallback list.
     readonly property string glyphs: "ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ0123456789ABCDEF<>/|=+*#%"
-    readonly property var glyphFonts: ["GeistMono Nerd Font", "Noto Sans Mono CJK JP", "Noto Sans Mono", "monospace"]
+    readonly property string glyphFont: "Noto Sans Mono CJK JP"
+    readonly property string logFont: "GeistMono Nerd Font"
 
     readonly property int cell: 26
     readonly property int trail: 18
@@ -105,7 +108,7 @@ Item {
                             height: bg.cell
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
-                            font.families: bg.glyphFonts
+                            font.family: bg.glyphFont
                             font.pixelSize: bg.cell - 7
                             color: index === bg.trail - 1 ? bg.headColor : bg.rainColor
                             // Square falloff so only the last few glyphs read
@@ -116,16 +119,37 @@ Item {
                     }
                 }
 
-                SequentialAnimation on y {
-                    loops: Animation.Infinite
+                property int speed: 4500 + Math.round(Math.random() * 9000)
+                property real seed: Math.random()
 
-                    PauseAnimation { duration: Math.round(Math.random() * 5500) }
+                SequentialAnimation {
+                    // Held until the backdrop has a height, otherwise the
+                    // Loader can start the fall against a zero-height parent
+                    // and every column parks at y 0.
+                    running: bg.height > 0
 
+                    // The first pass starts partway down, so the rain is
+                    // already spread over the screen when the greeter paints
+                    // instead of filling in over the first ten seconds.
                     NumberAnimation {
-                        from: -column.height
+                        target: column
+                        property: "y"
+                        from: -column.height + column.seed * (bg.height + column.height)
                         to: bg.height
-                        duration: 4500 + Math.round(Math.random() * 9000)
-                        onStarted: column.reroll()
+                        duration: Math.max(1, Math.round(column.speed * (1 - column.seed)))
+                    }
+
+                    SequentialAnimation {
+                        loops: Animation.Infinite
+
+                        NumberAnimation {
+                            target: column
+                            property: "y"
+                            from: -column.height
+                            to: bg.height
+                            duration: column.speed
+                            onStarted: column.reroll()
+                        }
                     }
                 }
 
@@ -249,6 +273,7 @@ Item {
         ]
 
         property var shown: []
+        property int cursor: 0
 
         Repeater {
             model: bootLog.shown
@@ -256,7 +281,7 @@ Item {
             Text {
                 text: modelData
                 color: bg.logColor
-                font.families: bg.glyphFonts
+                font.family: bg.logFont
                 font.pixelSize: 13
             }
         }
@@ -264,7 +289,7 @@ Item {
         Text {
             text: "_"
             color: bg.headColor
-            font.families: bg.glyphFonts
+            font.family: bg.logFont
             font.pixelSize: 13
 
             SequentialAnimation on opacity {
@@ -283,7 +308,8 @@ Item {
             triggeredOnStart: true
             onTriggered: {
                 var next = bootLog.shown.slice()
-                next.push(bootLog.lines[Math.floor(Math.random() * bootLog.lines.length)])
+                next.push(bootLog.lines[bootLog.cursor % bootLog.lines.length])
+                bootLog.cursor++
                 if (next.length > 9)
                     next.shift()
                 bootLog.shown = next
