@@ -7,6 +7,8 @@
   # stops competing with the foreground. Coexists with scx (CachyOS ships both).
   services.ananicy = {
     enable = true;
+    # The module still defaults to pkgs.ananicy, which nixpkgs removed.
+    package = pkgs.ananicy-cpp;
     rulesProvider = pkgs.ananicy-rules-cachyos;
   };
 }
