@@ -7,7 +7,11 @@ let
   dms = inputs.dank-material-shell.packages.${pkgs.stdenv.hostPlatform.system}.default;
 
   # FormalShell package, for the formalshell arm of the same hook.
-  formalshell = inputs.formalshell.packages.${pkgs.stdenv.hostPlatform.system}.default;
+  # Same mpv override as users/kyandesutter/mixins/formalshell.nix, so both
+  # references resolve to one derivation.
+  formalshell = inputs.formalshell.packages.${pkgs.stdenv.hostPlatform.system}.default.override {
+    inherit (pkgs) mpv;
+  };
 
   # Lock the session before the machine suspends. Runs as kyandesutter and talks
   # to the running shell over its IPC socket in the user's XDG_RUNTIME_DIR.
