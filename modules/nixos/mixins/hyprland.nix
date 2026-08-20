@@ -43,12 +43,109 @@ let
         exit 0
       '';
 
-  # sddm-astronaut with the "pixel_sakura" preset, used as-is with no overrides.
-  # The bundled pixel_sakura.conf (animated pixel_sakura.gif background + the
-  # theme's own colors) applies unchanged.
-  sddmAstronaut = pkgs.sddm-astronaut.override {
-    embeddedTheme = "pixel_sakura";
-  };
+  # sddm-astronaut on its "cyberpunk" preset, recoloured to a neon-green
+  # terminal palette and with the preset's static wallpaper swapped for a
+  # generated animated backdrop (modules/nixos/sddm-cyberdeck/). The greeter
+  # stays outside the matugen/Flexoki theming model on purpose: it runs before
+  # any user session exists, so there is no wallpaper to derive colours from.
+  #
+  # themeConfig lands as Themes/cyberpunk.conf.user, which SDDM reads on top of
+  # the preset's own conf. Background is blanked so the AnimatedImage renders
+  # nothing and the backdrop below it shows through; the blur options depend on
+  # that image, so they have to stay off.
+  sddmAstronaut = (pkgs.sddm-astronaut.override {
+    embeddedTheme = "cyberpunk";
+    themeConfig = {
+      Font = "GeistMono Nerd Font";
+      FontSize = "13";
+      RoundCorners = "0";
+      HeaderText = "";
+      HourFormat = "HH:mm";
+      DateFormat = "ddd dd MMM";
+
+      Background = "";
+      BackgroundPlaceholder = "";
+      DimBackground = "0.0";
+      BackgroundColor = "#04070a";
+      DimBackgroundColor = "#04070a";
+      FormBackgroundColor = "#04070a";
+
+      PartialBlur = "false";
+      FullBlur = "false";
+      HaveFormBackground = "false";
+      FormPosition = "center";
+      VirtualKeyboardPosition = "center";
+
+      HeaderTextColor = "#2ef58a";
+      DateTextColor = "#1f8f5c";
+      TimeTextColor = "#c8fff0";
+
+      LoginFieldBackgroundColor = "#0a1a16";
+      PasswordFieldBackgroundColor = "#0a1a16";
+      LoginFieldTextColor = "#c8fff0";
+      PasswordFieldTextColor = "#c8fff0";
+      UserIconColor = "#2ef58a";
+      PasswordIconColor = "#2ef58a";
+
+      PlaceholderTextColor = "#1f8f5c";
+      WarningColor = "#ff2b6b";
+
+      LoginButtonTextColor = "#04070a";
+      LoginButtonBackgroundColor = "#2ef58a";
+      SystemButtonsIconsColor = "#2ef58a";
+      SessionButtonTextColor = "#1f8f5c";
+      VirtualKeyboardButtonTextColor = "#1f8f5c";
+
+      DropdownTextColor = "#c8fff0";
+      DropdownSelectedBackgroundColor = "#12463a";
+      DropdownBackgroundColor = "#07120f";
+
+      HighlightTextColor = "#04070a";
+      HighlightBackgroundColor = "#2ef58a";
+      HighlightBorderColor = "#2ef58a";
+
+      HoverUserIconColor = "#00e5ff";
+      HoverPasswordIconColor = "#00e5ff";
+      HoverSystemButtonsIconsColor = "#00e5ff";
+      HoverSessionButtonTextColor = "#00e5ff";
+      HoverVirtualKeyboardButtonTextColor = "#00e5ff";
+
+      # Same shape the pixel_sakura preset had: centred form, no form panel,
+      # keyboard and system buttons hidden, last user pre-filled.
+      HideVirtualKeyboard = "true";
+      HideSystemButtons = "true";
+      HideLoginButton = "true";
+      UseRealName = "true";
+      ForceLastUser = "true";
+      PasswordFocus = "true";
+      HideCompletePassword = "true";
+      AllowEmptyPassword = "false";
+
+      TranslatePlaceholderUsername = "operator";
+      TranslatePlaceholderPassword = "passphrase";
+      TranslateLogin = "AUTHENTICATE";
+      TranslateLoginFailedWarning = "ACCESS DENIED";
+      TranslateCapslockWarning = "CAPS LOCK";
+    };
+  }).overrideAttrs (old: {
+    postInstall = (old.postInstall or "") + ''
+      themeDir=$out/share/sddm/themes/sddm-astronaut-theme
+      # installPhase copies the theme straight out of $src, so everything
+      # arrives read-only, directories included.
+      chmod u+w $themeDir $themeDir/Components $themeDir/Main.qml
+
+      install -Dm444 ${../sddm-cyberdeck/CyberBackground.qml} $themeDir/Components/CyberBackground.qml
+
+      # Splice the backdrop in as the first child of Main.qml's root Item. Every
+      # other element there sits at z: 1 or higher, so it lands underneath the
+      # form without reordering anything upstream owns.
+      sed -i '/^            id: sizeHelper$/r ${../sddm-cyberdeck/background-loader.qml.frag}' $themeDir/Main.qml
+      grep -q CyberBackground.qml $themeDir/Main.qml || {
+        echo "Main.qml no longer has the 'id: sizeHelper' anchor; re-point the splice" >&2
+        exit 1
+      }
+    '';
+  });
 
   # weston.ini for the SDDM Wayland greeter compositor. Mirrors what the NixOS
   # sddm module generates by default (keyboard from the xkb config, the module's
@@ -313,9 +410,9 @@ in
       # LocalSend, driven by the shell menu SHARE route (port below).
       localsend
 
-      # SDDM "sddm-astronaut" theme, used as-is with its bundled pixel_sakura
-      # preset (animated background + the preset's own colours). See the
-      # `sddmAstronaut` let-binding; it's independent of the app theming.
+      # SDDM "sddm-astronaut" theme on the cyberpunk preset, recoloured and
+      # carrying the generated animated backdrop. See the `sddmAstronaut`
+      # let-binding; it's independent of the app theming.
       # Installed into the system profile so SDDM finds it under
       # .../share/sddm/themes/sddm-astronaut-theme.
       sddmAstronaut
