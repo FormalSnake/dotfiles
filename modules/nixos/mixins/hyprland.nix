@@ -139,7 +139,7 @@ let
       # Splice the backdrop in as the first child of Main.qml's root Item. Every
       # other element there sits at z: 1 or higher, so it lands underneath the
       # form without reordering anything upstream owns.
-      sed -i '/^            id: sizeHelper$/r ${../sddm-cyberdeck/background-loader.qml.frag}' $themeDir/Main.qml
+      sed -i '/^[[:space:]]*id: sizeHelper$/r ${../sddm-cyberdeck/background-loader.qml.frag}' $themeDir/Main.qml
       grep -q CyberBackground.qml $themeDir/Main.qml || {
         echo "Main.qml no longer has the 'id: sizeHelper' anchor; re-point the splice" >&2
         exit 1
