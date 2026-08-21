@@ -18,9 +18,11 @@
       gdk-pixbuf
       graphene
       harfbuzz
-      webkitgtk_6_0
       # GTK4's GSK links libvulkan.so.1 unconditionally on the FHS builds.
       vulkan-loader
+      # No webkitgtk here: the engine is dlopened, not linked, and its
+      # gstreamer closure clashes with the one a dev shell brings along.
+      # WebKit comes from the shell, CEF from its own distribution.
     ];
   };
 }
