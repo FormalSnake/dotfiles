@@ -20,6 +20,9 @@
       harfbuzz
       # GTK4's GSK links libvulkan.so.1 unconditionally on the FHS builds.
       vulkan-loader
+      # Without libGL.so.1 CEF's GPU process exits on every launch and
+      # Chromium falls back to software rasterisation.
+      libglvnd
       # libcef.so's runtime floor (the chromium engine is dlopened from the
       # CEF distribution; these are its own link-time needs).
       nss
