@@ -101,7 +101,8 @@ in
     # can reach them through `pkgs`:
     #   • pkgs.nvidiaOffloadEnv: the attrset, for env-style consumers.
     #   • pkgs.gpuOffloadWrap: wraps a package's executables to always render on
-    #     the dGPU, for native launchers (Modrinth, via mixins/minecraft.nix).
+    #     the dGPU, for native launchers. Unused since Prism went away: Modrinth
+    #     is WebKitGTK and dies under it, see mixins/minecraft.nix.
     nixpkgs.overlays = [
       (final: _prev: {
         nvidiaOffloadEnv = {

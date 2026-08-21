@@ -10,12 +10,11 @@ in
   # up Nix JDKs. Without it the launcher downloads an Adoptium build whose FHS
   # interpreter cannot exec here, and every instance fails to start.
   config = lib.mkIf cfg.enable {
-    # On the PRIME laptop, wrap so Minecraft (OpenGL: it cannot grab the dGPU
-    # opportunistically the way Vulkan games can) renders on the RTX 5070. The
-    # game inherits the launcher's environment. gpuOffloadWrap comes from the
-    # nvidia mixin's overlay; hosts without it get the plain package.
-    environment.systemPackages = [
-      (if pkgs ? gpuOffloadWrap then pkgs.gpuOffloadWrap pkgs.modrinth-app else pkgs.modrinth-app)
-    ];
+    # Do not wrap this in gpuOffloadWrap the way Prism was. The launcher is
+    # WebKitGTK, and __GLX_VENDOR_LIBRARY_NAME=nvidia kills its web process the
+    # moment it starts ("WebKit encountered an internal error"). The game has to
+    # be offloaded from the profile's own environment variables in Modrinth's
+    # settings instead.
+    environment.systemPackages = [ pkgs.modrinth-app ];
   };
 }
