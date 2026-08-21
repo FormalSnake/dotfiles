@@ -10,6 +10,12 @@ in
   # up Nix JDKs. Without it the launcher downloads an Adoptium build whose FHS
   # interpreter cannot exec here, and every instance fails to start.
   config = lib.mkIf cfg.enable {
-    environment.systemPackages = [ pkgs.modrinth-app ];
+    # On the PRIME laptop, wrap so Minecraft (OpenGL: it cannot grab the dGPU
+    # opportunistically the way Vulkan games can) renders on the RTX 5070. The
+    # game inherits the launcher's environment. gpuOffloadWrap comes from the
+    # nvidia mixin's overlay; hosts without it get the plain package.
+    environment.systemPackages = [
+      (if pkgs ? gpuOffloadWrap then pkgs.gpuOffloadWrap pkgs.modrinth-app else pkgs.modrinth-app)
+    ];
   };
 }

@@ -101,7 +101,7 @@ in
     # can reach them through `pkgs`:
     #   • pkgs.nvidiaOffloadEnv: the attrset, for env-style consumers.
     #   • pkgs.gpuOffloadWrap: wraps a package's executables to always render on
-    #     the dGPU, for native launchers (Prism, via users/kyandesutter/linux.nix).
+    #     the dGPU, for native launchers (Modrinth, via mixins/minecraft.nix).
     nixpkgs.overlays = [
       (final: _prev: {
         nvidiaOffloadEnv = {
