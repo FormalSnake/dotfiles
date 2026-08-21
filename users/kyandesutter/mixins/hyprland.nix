@@ -799,6 +799,13 @@ in
     -- vblank. Tearing only actually happens when the game itself presents
     -- without vsync, so launch games with vsync OFF.
     hl.window_rule({ match = { class = "^(steam_app_.*)$" }, immediate = true })
+    -- Minecraft locks the pointer with an X11 grab plus a recentering warp,
+    -- which Hyprland does not hold the way it holds a Wayland pointer
+    -- constraint: the cursor drifts out of the window, and the warp back on
+    -- re-grab arrives as a mouse-look delta, so a stray click spins the camera.
+    -- Matched by class rather than the wiki's `content = "game"`, which
+    -- XWayland clients never set, and it applies windowed as well as fullscreen.
+    hl.window_rule({ match = { class = "^(Minecraft.*)$" }, confine_pointer = true })
 
     --: Chromium/helium auxiliary popups: float, pin across every workspace, and
     --   tuck into a corner. `pin` is Hyprland's "show on all workspaces": niri
