@@ -19,6 +19,8 @@
       graphene
       harfbuzz
       webkitgtk_6_0
+      # GTK4's GSK links libvulkan.so.1 unconditionally on the FHS builds.
+      vulkan-loader
     ];
   };
 }
