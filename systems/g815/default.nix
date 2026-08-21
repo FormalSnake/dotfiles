@@ -155,6 +155,11 @@
   # see mixins/steam.nix).
   kyan.steam.enable = true;
 
+  # Modrinth App. Instance content is shared with the Windows install by
+  # sync-minecraft-from-windows (./windows-dualboot.nix), so there is one set
+  # of mods to keep up to date instead of two.
+  kyan.minecraft.enable = true;
+
   # ASUS laptop support: asusd, Aura keyboard RGB (Flexoki blue), 80%
   # battery charge limit, dim LEDs on battery.
   kyan.asus.enable = true;

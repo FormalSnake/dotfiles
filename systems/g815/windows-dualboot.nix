@@ -35,8 +35,81 @@ let
       systemctl reboot
     '';
   };
+
+  # Share the Windows Modrinth instance's content with the NixOS one instead of
+  # keeping two copies of the same modpack in step by hand. mods,
+  # resourcepacks and shaderpacks become symlinks into /mnt/windows: the game
+  # only reads those, so the read-only NTFS mount is enough, and Windows stays
+  # the single place mods get installed or updated.
+  #
+  # config, options.txt and servers.dat are copied instead. Mods write their
+  # config as they run, and Minecraft rewrites options.txt and servers.dat
+  # through a temp file and a rename, none of which survives a read-only
+  # source. Sodium in particular raises rather than degrading when its config
+  # write fails. Copying means Windows seeds them once and the NixOS side owns
+  # them from there.
+  #
+  # Re-run after installing or updating mods on the Windows side. Repeat runs
+  # are fine; the copied files are overwritten from Windows each time.
+  sync-minecraft-from-windows = pkgs.writeShellApplication {
+    name = "sync-minecraft-from-windows";
+    runtimeInputs = [ pkgs.coreutils ];
+    text = ''
+      profile="''${1:-Fabric 26.2}"
+      win="/mnt/windows/Users/Kyan/AppData/Roaming/ModrinthApp/profiles/$profile"
+      lin="$HOME/.local/share/ModrinthApp/profiles/$profile"
+
+      [ -d "$win" ] || { echo "no such Windows profile: $win" >&2; exit 1; }
+      [ -d "$lin" ] || { echo "create the instance in Modrinth first: $lin" >&2; exit 1; }
+
+      for dir in mods resourcepacks shaderpacks; do
+        if [ -L "$lin/$dir" ] || [ ! -e "$lin/$dir" ]; then
+          ln -sfn "$win/$dir" "$lin/$dir"
+        elif rmdir "$lin/$dir" 2>/dev/null; then
+          ln -s "$win/$dir" "$lin/$dir"
+        else
+          echo "$lin/$dir holds local files; move it aside and re-run" >&2
+          exit 1
+        fi
+      done
+
+      cp -rT --no-preserve=mode,ownership "$win/config" "$lin/config"
+      for file in options.txt servers.dat; do
+        cp --no-preserve=mode,ownership "$win/$file" "$lin/$file"
+      done
+
+      echo "linked mods, resourcepacks, shaderpacks; copied config, options.txt, servers.dat"
+    '';
+  };
 in
 {
+  environment.systemPackages = [ sync-minecraft-from-windows ];
+
+  # Windows C:, for reading and writing the Windows install's own files rather
+  # than keeping a second copy on the NixOS side (Modrinth instance content is
+  # the reason it exists; see kyan.minecraft in ./default.nix).
+  #
+  # Read-only on purpose. ntfs3 (in-kernel, no FUSE) refuses a read-write mount
+  # while the volume is dirty, and Fast Startup leaves it dirty after every
+  # Windows shutdown, so a read-write mount here would fail on any normal boot
+  # rather than only after a crash. Read-only also removes the standing risk of
+  # two operating systems writing the same NTFS metadata. Windows therefore
+  # owns everything under here; the NixOS side reads and copies.
+  # nofail keeps a detached or unreadable volume from holding up boot.
+  fileSystems."/mnt/windows" = {
+    device = "/dev/disk/by-uuid/D0409F99409F84BE";
+    fsType = "ntfs3";
+    options = [
+      "ro"
+      "uid=1000"
+      "gid=100"
+      "umask=022"
+      "windows_names"
+      "noatime"
+      "nofail"
+    ];
+  };
+
   # Windows chainload. Host-specific (this laptop dual-boots the gaming Windows
   # install; other hosts are NixOS-only). extraEntries is APPENDED after the
   # auto-generated NixOS generation entries, giving the closest achievable order

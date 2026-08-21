@@ -101,7 +101,8 @@ in
     # can reach them through `pkgs`:
     #   • pkgs.nvidiaOffloadEnv: the attrset, for env-style consumers.
     #   • pkgs.gpuOffloadWrap: wraps a package's executables to always render on
-    #     the dGPU, for native launchers (Prism, via users/kyandesutter/linux.nix).
+    #     the dGPU, for native launchers (Modrinth, via mixins/minecraft.nix).
+    #     The second argument is extra env the wrapped app needs on top.
     nixpkgs.overlays = [
       (final: _prev: {
         nvidiaOffloadEnv = {
@@ -116,7 +117,7 @@ in
         };
 
         gpuOffloadWrap =
-          pkg:
+          pkg: extraEnv:
           final.symlinkJoin {
             name = "${pkg.pname or pkg.name}-offload";
             paths = [ pkg ];
@@ -130,7 +131,9 @@ in
                 rm "$bin"
                 makeWrapper "$target" "$bin" \
                   ${lib.concatStringsSep " \\\n                  " (
-                    lib.mapAttrsToList (k: v: "--set ${k} ${lib.escapeShellArg v}") final.nvidiaOffloadEnv
+                    lib.mapAttrsToList (k: v: "--set ${k} ${lib.escapeShellArg v}") (
+                      final.nvidiaOffloadEnv // extraEnv
+                    )
                   )}
               done
             '';

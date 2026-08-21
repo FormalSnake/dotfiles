@@ -27,6 +27,7 @@
       ./mixins/online-accounts.nix
       ./mixins/steam.nix
       ./mixins/dualsense.nix
+      ./mixins/minecraft.nix
       ./mixins/comms.nix
       ./mixins/asus.nix
       ./mixins/tuned.nix
@@ -38,6 +39,7 @@
       ./mixins/onepassword.nix
       ./mixins/syncthing.nix
       ./mixins/geolocation.nix
+      ./mixins/nix-ld.nix
       ./mixins/macos-vm.nix
       ./profiles
     ];
