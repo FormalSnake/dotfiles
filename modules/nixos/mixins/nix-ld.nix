@@ -20,6 +20,27 @@
       harfbuzz
       # GTK4's GSK links libvulkan.so.1 unconditionally on the FHS builds.
       vulkan-loader
+      # libcef.so's runtime floor (the chromium engine is dlopened from the
+      # CEF distribution; these are its own link-time needs).
+      nss
+      nspr
+      atk
+      at-spi2-atk
+      at-spi2-core
+      libdrm
+      libgbm
+      libxkbcommon
+      expat
+      alsa-lib
+      cups
+      dbus
+      xorg.libX11
+      xorg.libXcomposite
+      xorg.libXdamage
+      xorg.libXfixes
+      xorg.libXrandr
+      xorg.libXext
+      xorg.libxcb
       # No webkitgtk here: the engine is dlopened, not linked, and its
       # gstreamer closure clashes with the one a dev shell brings along.
       # WebKit comes from the shell, CEF from its own distribution.
