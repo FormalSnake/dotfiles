@@ -22,27 +22,24 @@ in
     settings = {
       # The Nerd Font patch, so box-drawing, powerline segments and the fish
       # prompt's OS logo come out of the primary face with no fallback chain.
-      # It has to be the "Mono" cut: its icons are squeezed to one cell, so
-      # CoreText reports the family fixed-pitch and ghostty accepts it. The
-      # plain "GeistMono Nerd Font" draws them 1.5-2 cells wide, which keeps it
-      # out of `ghostty +list-fonts` on the mac entirely, and an unresolvable
-      # font-family silently falls back to ghostty's own default.
+      #
+      # Two cuts, one per platform. Linux takes the plain family, where the
+      # icons keep their drawn 1.5-2 cell width. CoreText won't report that
+      # family as fixed-pitch, so on the mac it never appears in `ghostty
+      # +list-fonts` and an unresolvable font-family falls back to ghostty's own
+      # default without saying so; the "Mono" cut squeezes the icons to one cell
+      # and is accepted there.
       #
       # 10 is the size this ran at before MEK Mono; the 15.5 that replaced it
       # only existed to make up MEK's 600/1000em cap height against GeistMono's
       # 710 and its 450 advance against 600.
-      font-family = "GeistMono Nerd Font Mono";
+      font-family = if isDarwin then "GeistMono Nerd Font Mono" else "GeistMono Nerd Font";
       font-size = 10;
       # Regular reads thin at this size. Medium is a real cut in the family, so
       # this picks a drawn weight rather than the synthetic thickening
       # font-thicken would apply (which is macOS-only anyway). Bold still
       # resolves to the Bold face, so the two stay apart.
       font-style = "Medium";
-      # GeistMono's advance is the usual 600/1000em, so the grid is already
-      # standard width; this just opens it up a little. adjust-* values are
-      # deltas on the font's own metric, not absolutes, and the glyph stays
-      # centred in the wider cell. adjust-cell-height is the vertical twin.
-      adjust-cell-width = "5%";
 
       cursor-style = "block";
       cursor-style-blink = false;
