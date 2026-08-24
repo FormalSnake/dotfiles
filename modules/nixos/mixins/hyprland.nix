@@ -374,15 +374,21 @@ in
       emoji = [ "Noto Color Emoji" ];
     };
 
-    # The CSS system-font keywords. Chromium and Electron hand these to
-    # fontconfig verbatim and nothing in the shipped conf.d maps them, so
-    # system-ui, ui-monospace, ui-serif and -apple-system all resolved to the
-    # sans default (checked with fc-match) and web/Electron code blocks came out
-    # proportional. `prefer` inserts the generic straight after the requested
-    # family, ahead of the one 48-guessfamily.conf appends. localConf lands as
-    # local.conf at priority 51, so 52-nixos-default-fonts.conf still resolves
-    # the generic to defaultFonts above. It is written verbatim as a whole file,
-    # hence the declaration and wrapper.
+    # The CSS system-font keywords, which Chromium and Electron hand to
+    # fontconfig verbatim. 48-guessfamily.conf already routes ui-monospace and
+    # ui-serif through genericfamily, but `system-ui` fell through it and
+    # matched "Noto Sans Arabic UI" on the "ui" substring, so any page or
+    # Electron app whose stack starts with system-ui drew Latin text in an
+    # Arabic UI face. -apple-system and BlinkMacSystemFont only reached the sans
+    # default by fallback. Pinning all seven keeps the mapping explicit.
+    #
+    # localConf lands as local.conf at priority 51, so 52-nixos-default-fonts
+    # still resolves the generic to defaultFonts above. It is written verbatim
+    # as a whole file, hence the declaration and wrapper.
+    #
+    # Testing these with fc-match needs the dashes escaped (fc-match 'system\-ui'):
+    # FcNameParse reads an unescaped `-` as the point-size separator, so plain
+    # `fc-match system-ui` queries the family "ui" and reports a bogus answer.
     fonts.fontconfig.localConf = ''
       <?xml version="1.0"?>
       <!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd">
