@@ -360,20 +360,63 @@ in
       font-awesome
     ];
 
-    # Make MEK Sans / MEK Mono the default sans/monospace for the whole system
+    # Geist / GeistMono are the default sans/monospace for the whole system
     # (GTK apps, anything resolving the generic sans-serif/monospace families).
-    # Geist/GeistMono stay directly behind them. The MEK faces carry no
-    # box-drawing, powerline or Nerd Font glyphs, so TUI frames and the fish
-    # prompt's OS logo resolve through GeistMono instead of dropping to tofu.
-    # MEK has no serif, so Noto Serif still fills that generic. "Noto Color
-    # Emoji" is appended to every family so emoji render even in apps that don't
-    # consult fontconfig's emoji generic directly.
+    # GeistMono is the Nerd Font patch, so TUI frames, powerline segments and
+    # the fish prompt's OS logo resolve without dropping to tofu. Geist has no
+    # serif, so Noto Serif fills that generic. "Noto Color Emoji" is appended to
+    # every family so emoji render even in apps that don't consult fontconfig's
+    # emoji generic directly.
     fonts.fontconfig.defaultFonts = {
-      sansSerif = [ "MEK Sans" "Geist" "Noto Sans" "Noto Color Emoji" ];
+      sansSerif = [ "Geist" "Noto Sans" "Noto Color Emoji" ];
       serif = [ "Noto Serif" "Noto Color Emoji" ];
-      monospace = [ "MEK Mono" "GeistMono Nerd Font" "Noto Sans Mono" "Noto Color Emoji" ];
+      monospace = [ "GeistMono Nerd Font" "Noto Sans Mono" "Noto Color Emoji" ];
       emoji = [ "Noto Color Emoji" ];
     };
+
+    # The CSS system-font keywords. Chromium and Electron hand these to
+    # fontconfig verbatim and nothing in the shipped conf.d maps them, so
+    # system-ui, ui-monospace, ui-serif and -apple-system all resolved to the
+    # sans default (checked with fc-match) and web/Electron code blocks came out
+    # proportional. `prefer` inserts the generic straight after the requested
+    # family, ahead of the one 48-guessfamily.conf appends. localConf lands as
+    # local.conf at priority 51, so 52-nixos-default-fonts.conf still resolves
+    # the generic to defaultFonts above. It is written verbatim as a whole file,
+    # hence the declaration and wrapper.
+    fonts.fontconfig.localConf = ''
+      <?xml version="1.0"?>
+      <!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd">
+      <fontconfig>
+        <alias binding="same">
+          <family>system-ui</family>
+          <prefer><family>sans-serif</family></prefer>
+        </alias>
+        <alias binding="same">
+          <family>ui-sans-serif</family>
+          <prefer><family>sans-serif</family></prefer>
+        </alias>
+        <alias binding="same">
+          <family>ui-rounded</family>
+          <prefer><family>sans-serif</family></prefer>
+        </alias>
+        <alias binding="same">
+          <family>-apple-system</family>
+          <prefer><family>sans-serif</family></prefer>
+        </alias>
+        <alias binding="same">
+          <family>BlinkMacSystemFont</family>
+          <prefer><family>sans-serif</family></prefer>
+        </alias>
+        <alias binding="same">
+          <family>ui-serif</family>
+          <prefer><family>serif</family></prefer>
+        </alias>
+        <alias binding="same">
+          <family>ui-monospace</family>
+          <prefer><family>monospace</family></prefer>
+        </alias>
+      </fontconfig>
+    '';
 
     # Backlight permissions: let the `video` group (which kyandesutter is in)
     # write the panel brightness node so `brightnessctl` works without root.

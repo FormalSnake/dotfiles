@@ -17,16 +17,13 @@
   # PATH, and the qt6ct.conf below points at it with a Fusion style (Fusion
   # honours the custom palette). Qt apps pick up the colours at launch: no
   # live recolour (Qt has no palette hot-reload).
-  # [Fonts] pins the MEK faces so Qt apps match the GTK side instead of taking
+  # [Fonts] pins Geist/GeistMono so Qt apps match the GTK side instead of taking
   # whatever QGuiApplication::font() resolves to. Both qt5ct and qt6ct read
   # these through QFont::fromString on a plain string, so the value is the
   # Qt5-style 10-field spec (family,pointSize,pixelSize,styleHint,weight,style,
   # underline,strikeOut,fixedPitch,rawMode); Qt6 maps the legacy weight 50 onto
   # its own 400. The quotes are load-bearing: QSettings splits an unquoted
   # comma-separated value into a QStringList and .toString() on that is empty.
-  # `fixed` is 12pt against `general`'s 11 for the same reason ghostty runs a
-  # size up: MEK Mono's cap height is 600/1000em and its advance 450, so at a
-  # matched point size it reads smaller than the UI text, not larger.
   xdg.configFile."qt6ct/qt6ct.conf".text = ''
     [Appearance]
     style=Fusion
@@ -36,8 +33,8 @@
     standard_dialogs=default
 
     [Fonts]
-    general="MEK Sans,11,-1,5,50,0,0,0,0,0"
-    fixed="MEK Mono,12,-1,5,50,0,0,0,0,0"
+    general="Geist,11,-1,5,50,0,0,0,0,0"
+    fixed="GeistMono Nerd Font,11,-1,5,50,0,0,0,0,0"
   '';
   xdg.configFile."qt5ct/qt5ct.conf".text = ''
     [Appearance]
@@ -48,7 +45,7 @@
     standard_dialogs=default
 
     [Fonts]
-    general="MEK Sans,11,-1,5,50,0,0,0,0,0"
-    fixed="MEK Mono,12,-1,5,50,0,0,0,0,0"
+    general="Geist,11,-1,5,50,0,0,0,0,0"
+    fixed="GeistMono Nerd Font,11,-1,5,50,0,0,0,0,0"
   '';
 }

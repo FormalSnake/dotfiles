@@ -20,20 +20,13 @@ in
     enableFishIntegration = false;
 
     settings = {
-      # Repeated font-family keys are ghostty's fallback chain (home-manager
-      # renders a list as duplicate keys). MEK Mono has no box-drawing,
-      # powerline or Nerd Font glyphs, so GeistMono sits behind it and picks up
-      # every TUI frame, the fish prompt's OS logo and the backtick (U+0060,
-      # genuinely absent from MEK Mono's cmap).
-      #
-      # MEK Mono is smaller than GeistMono in every dimension at a given point
-      # size: cap height 600/1000em against 710, line box 1200 against 1300,
-      # advance 450 against 600. 12 matched GeistMono at 10 and 13.5 only got
-      # to GeistMono at 11.4, both still read small. 15.5 puts the caps level
-      # with GeistMono at 13. The cell stays narrower than GeistMono's, so the
-      # grid keeps more columns than it had.
-      font-family = [ "MEK Mono" "GeistMono Nerd Font" ];
-      font-size = 15.5;
+      # The Nerd Font patch, so box-drawing, powerline segments and the fish
+      # prompt's OS logo come out of the primary face with no fallback chain.
+      # 13 holds the cap height MEK Mono at 15.5 was set for (600/1000em
+      # against GeistMono's 710); the cell is wider, so the grid loses columns
+      # at a given window size.
+      font-family = "GeistMono Nerd Font";
+      font-size = 13;
 
       cursor-style = "block";
       cursor-style-blink = false;
@@ -81,13 +74,12 @@ in
     }
     # macos-titlebar-style is rejected by the Linux build.
     // lib.optionalAttrs isDarwin { macos-titlebar-style = "tabs"; }
-    # MEK Mono's cell is 450/1000em, and ghostty draws a fallback glyph at that
-    # face's own advance, so anything wider bleeds over the cells after it.
-    # U+23FA (Claude Code's message bullet) is in neither MEK Mono nor
-    # GeistMono, so it landed on Noto Emoji at 1270/1000em: wide enough to cover
-    # the trailing space and the first letter of the word after it. Noto Sans
-    # Symbols 2 draws the same circle at 910/1000em, which stops inside the
-    # space. Linux only. The Noto fonts aren't installed on the mac.
+    # Ghostty draws a fallback glyph at that face's own advance, so anything
+    # wider than the cell bleeds over the ones after it. U+23FA (Claude Code's
+    # message bullet) is absent from GeistMono and landed on Noto Emoji at
+    # 1270/1000em against the 600 cell: wide enough to cover the trailing space
+    # and the first letter of the word after it. Noto Sans Symbols 2 draws the
+    # same circle at 910/1000em. Linux only, the Noto fonts aren't on the mac.
     // lib.optionalAttrs (!isDarwin) { font-codepoint-map = "U+23FA=Noto Sans Symbols 2"; };
   };
 

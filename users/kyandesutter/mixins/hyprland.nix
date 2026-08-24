@@ -746,7 +746,7 @@ in
       package = pkgs.colloid-icon-theme;
     };
     font = {
-      name = "MEK Sans";
+      name = "Geist";
       size = 11;
     };
     gtk3.extraConfig = lib.optionalAttrs (!useFormalshell) { gtk-application-prefer-dark-theme = 1; };
@@ -759,8 +759,8 @@ in
   # writes gtk-theme and color-scheme into this same schema at runtime; these
   # keys are disjoint from those, so neither side clobbers the other.
   dconf.settings."org/gnome/desktop/interface" = {
-    font-name = "MEK Sans 11";
-    monospace-font-name = "MEK Mono 12";
-    document-font-name = "MEK Sans 11";
+    font-name = "Geist 11";
+    monospace-font-name = "GeistMono Nerd Font 11";
+    document-font-name = "Geist 11";
   };
 }
