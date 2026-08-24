@@ -38,6 +38,11 @@ in
       # font-thicken would apply (which is macOS-only anyway). Bold still
       # resolves to the Bold face, so the two stay apart.
       font-style = "Medium";
+      # GeistMono's advance is the usual 600/1000em, so the grid is already
+      # standard width; this just opens it up a little. adjust-* values are
+      # deltas on the font's own metric, not absolutes, and the glyph stays
+      # centred in the wider cell. adjust-cell-height is the vertical twin.
+      adjust-cell-width = "5%";
 
       cursor-style = "block";
       cursor-style-blink = false;
