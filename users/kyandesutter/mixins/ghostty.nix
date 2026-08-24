@@ -33,6 +33,11 @@ in
       # 710 and its 450 advance against 600.
       font-family = "GeistMono Nerd Font Mono";
       font-size = 10;
+      # Regular reads thin at this size. Medium is a real cut in the family, so
+      # this picks a drawn weight rather than the synthetic thickening
+      # font-thicken would apply (which is macOS-only anyway). Bold still
+      # resolves to the Bold face, so the two stay apart.
+      font-style = "Medium";
 
       cursor-style = "block";
       cursor-style-blink = false;
