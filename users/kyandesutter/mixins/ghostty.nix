@@ -22,11 +22,11 @@ in
     settings = {
       # The Nerd Font patch, so box-drawing, powerline segments and the fish
       # prompt's OS logo come out of the primary face with no fallback chain.
-      # 13 holds the cap height MEK Mono at 15.5 was set for (600/1000em
-      # against GeistMono's 710); the cell is wider, so the grid loses columns
-      # at a given window size.
+      # 10 is the size this ran at before MEK Mono; the 15.5 that replaced it
+      # only existed to make up MEK's 600/1000em cap height against GeistMono's
+      # 710 and its 450 advance against 600.
       font-family = "GeistMono Nerd Font";
-      font-size = 13;
+      font-size = 10;
 
       cursor-style = "block";
       cursor-style-blink = false;
