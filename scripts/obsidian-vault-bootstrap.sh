@@ -34,11 +34,15 @@ patch_json() { # patch_json <rel-path> <jq-filter>
 }
 patch_json .obsidian/appearance.json "$(cat <<JQ
   .cssTheme = "Verso"
+| .showRibbon = false
+| .showViewHeader = true
+| $($LINUX && echo '.' || echo '.translucency = true')
 | .enabledCssSnippets = (
     ((.enabledCssSnippets // []) - ["noctalia"] + $($LINUX && echo '["dank"]' || echo '[]')) | unique
   )
 JQ
 )"
+patch_json .obsidian/app.json '.showInlineTitle = false | .readableLineLength = true'
 patch_json .obsidian/community-plugins.json '. - ["obsidian-minimal-settings"]'
 
 # --- .obsidian settings (only if absent — Obsidian owns these after first run) ---
@@ -54,18 +58,26 @@ put .obsidian/app.json <<'EOF'
   "newFileFolderPath": "Inbox",
   "attachmentFolderPath": "Attachments",
   "alwaysUpdateLinks": true,
-  "showUnsupportedFiles": true
+  "showUnsupportedFiles": true,
+  "showInlineTitle": false,
+  "readableLineLength": true
 }
 EOF
 
 # Verso everywhere; follow the OS light/dark (mac → Verso's own light/dark, Linux →
 # the SUPER+SHIFT+T toggle drives the desktop color-scheme signal). On Linux,
-# enable the dank snippet so the wallpaper palette overrides Verso.
+# enable the dank snippet so the wallpaper palette overrides Verso. The rest is
+# Verso's recommended layout, written out even where it already matches an
+# Obsidian default. Window frame style ("hidden") is the one recommendation that
+# is not a vault setting: it lives in ~/.config/obsidian/obsidian.json, and
+# hidden is what an absent key already means.
 if $LINUX; then
   put .obsidian/appearance.json <<'EOF'
 {
   "cssTheme": "Verso",
   "theme": "system",
+  "showRibbon": false,
+  "showViewHeader": true,
   "enabledCssSnippets": ["dank"]
 }
 EOF
@@ -73,7 +85,10 @@ else
   put .obsidian/appearance.json <<'EOF'
 {
   "cssTheme": "Verso",
-  "theme": "system"
+  "theme": "system",
+  "showRibbon": false,
+  "showViewHeader": true,
+  "translucency": true
 }
 EOF
 fi
