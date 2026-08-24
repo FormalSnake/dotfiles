@@ -18,9 +18,11 @@ let
   # session with none of the hardcoded g815 PCI paths / modes.
   hasNvidia = (osConfig.kyan or { }).nvidia.enable or false;
 
-  # Internal panel connector. On the g815 the MUX routes it through the dGPU
-  # (systems/g815/default.nix), where nvidia-drm names it eDP-2.
-  panel = if hasNvidia then "eDP-2" else "eDP-1";
+  # Internal panel selector. On the g815 the MUX (systems/g815/default.nix)
+  # decides which driver owns it, and the connector name changes with the
+  # driver (eDP-1 under i915, eDP-2 under nvidia-drm), so match its EDID
+  # description instead. Both hl.monitor and hl.workspace_rule take `desc:`.
+  panel = if hasNvidia then "desc:BOE NE180QDM-NZC" else "eDP-1";
 
   # Workspace pill labels: role → Nerd Font glyph + short name, mirroring the
   # macOS aerospace workspace names (see mixins/aerospace.nix). Rendered into

@@ -236,8 +236,9 @@ removed on 2026-08-24 (git has them). What remains:
 - The ASUS MUX routes the internal panel through the dGPU
   (`gpu-mux-dgpu.service` in `systems/g815/default.nix` writes
   `asus-nb-wmi/gpu_mux_mode=0`, firmware-persistent, applies at the next boot;
-  Windows boots in the same mode). Both the panel (`eDP-2` under nvidia-drm)
-  and HDMI-A-1 scan out from the RTX 5070; the iGPU is idle and not named in
+  Windows boots in the same mode). Both the panel (matched by `desc:` since
+  its connector name follows the driver) and HDMI-A-1 scan out from the RTX
+  5070; the iGPU is idle and not named in
   `AQ_DRM_DEVICES` (`~/.config/uwsm/env-hyprland`,
   `users/kyandesutter/mixins/hyprland.nix`).
 - `modules/nixos/mixins/nvidia.nix`: open driver, `powerManagement.enable`
