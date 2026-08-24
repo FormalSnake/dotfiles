@@ -10,13 +10,36 @@ VAULT="${2:-$HOME/Notes}"
 
 # Linux is the only host where DMS (via a matugen user template) repaints
 # Obsidian from the wallpaper palette (a rendered snippet at
-# .obsidian/snippets/dank.css); every other host (macbook, mobile) rides
-# Minimal's built-in Flexoki preset. .obsidian is device-local (LiveSync
-# hidden-file sync is off), so the two never collide.
+# .obsidian/snippets/dank.css); every other host (macbook, mobile) rides Verso's
+# own light/dark palette. .obsidian is device-local (LiveSync hidden-file sync
+# is off), so the two never collide.
 LINUX=false; [ "$(uname -s)" = Linux ] && LINUX=true
 
 mkdir -p "$VAULT"/{Inbox,Projects,Startup,Meetings,Ideas,Archive,Attachments,_inbox/scans/failed} \
-         "$VAULT"/.obsidian/{plugins/obsidian-livesync,plugins/obsidian-minimal-settings,themes/Minimal,snippets}
+         "$VAULT"/.obsidian/{plugins/obsidian-livesync,themes/Verso,snippets}
+
+# --- Minimal -> Verso migration --------------------------------------------
+# Verso is standalone, so Minimal Theme Settings goes with Minimal. Obsidian owns
+# appearance.json and community-plugins.json after first run, so patch those in
+# place instead of leaving them pointing at a theme that is no longer on disk.
+# Runs before the seeds below; on a fresh vault there is nothing to patch.
+rm -rf "$VAULT"/.obsidian/themes/Minimal \
+       "$VAULT"/.obsidian/plugins/obsidian-minimal-settings
+rm -f  "$VAULT"/.obsidian/snippets/noctalia.css   # dead since the DMS swap
+patch_json() { # patch_json <rel-path> <jq-filter>
+  local f="$VAULT/$1" t
+  [ -e "$f" ] || return 0
+  t=$(mktemp)
+  jq "$2" "$f" > "$t" && mv "$t" "$f" && echo "patch $1"
+}
+patch_json .obsidian/appearance.json "$(cat <<JQ
+  .cssTheme = "Verso"
+| .enabledCssSnippets = (
+    ((.enabledCssSnippets // []) - ["noctalia"] + $($LINUX && echo '["dank"]' || echo '[]')) | unique
+  )
+JQ
+)"
+patch_json .obsidian/community-plugins.json '. - ["obsidian-minimal-settings"]'
 
 # --- .obsidian settings (only if absent — Obsidian owns these after first run) ---
 put() { # put <path> <<EOF...  (write only if missing)
@@ -35,13 +58,13 @@ put .obsidian/app.json <<'EOF'
 }
 EOF
 
-# Minimal everywhere; follow the OS light/dark (mac → Flexoki light/dark, Linux →
+# Verso everywhere; follow the OS light/dark (mac → Verso's own light/dark, Linux →
 # the SUPER+SHIFT+T toggle drives the desktop color-scheme signal). On Linux,
-# enable the dank snippet so the wallpaper palette overrides Minimal.
+# enable the dank snippet so the wallpaper palette overrides Verso.
 if $LINUX; then
   put .obsidian/appearance.json <<'EOF'
 {
-  "cssTheme": "Minimal",
+  "cssTheme": "Verso",
   "theme": "system",
   "enabledCssSnippets": ["dank"]
 }
@@ -49,27 +72,17 @@ EOF
 else
   put .obsidian/appearance.json <<'EOF'
 {
-  "cssTheme": "Minimal",
+  "cssTheme": "Verso",
   "theme": "system"
 }
 EOF
 fi
 
 put .obsidian/community-plugins.json <<'EOF'
-["obsidian-livesync", "obsidian-minimal-settings"]
+["obsidian-livesync"]
 EOF
 
-# Minimal Theme Settings: pin both color schemes to Flexoki (the theme's built-in
-# preset). The dank snippet overrides these on Linux; on every other host this
-# is the whole color story. Field names + values are the plugin's own settings.
-put .obsidian/plugins/obsidian-minimal-settings/data.json <<'EOF'
-{
-  "lightScheme": "minimal-flexoki-light",
-  "darkScheme": "minimal-flexoki-dark"
-}
-EOF
-
-# --- LiveSync plugin (latest release assets) + Minimal theme ---
+# --- LiveSync plugin (latest release assets) + Verso theme ---
 fetch() { # fetch <url> <dest-rel>  (only if missing)
   local f="$VAULT/$2"
   [ -e "$f" ] && { echo "skip  $2"; return; }
@@ -79,13 +92,9 @@ LS=https://github.com/vrtmrz/obsidian-livesync/releases/latest/download
 fetch "$LS/main.js"       .obsidian/plugins/obsidian-livesync/main.js
 fetch "$LS/manifest.json" .obsidian/plugins/obsidian-livesync/manifest.json
 fetch "$LS/styles.css"    .obsidian/plugins/obsidian-livesync/styles.css
-MTS=https://github.com/kepano/obsidian-minimal-settings/releases/latest/download
-fetch "$MTS/main.js"       .obsidian/plugins/obsidian-minimal-settings/main.js
-fetch "$MTS/manifest.json" .obsidian/plugins/obsidian-minimal-settings/manifest.json
-fetch "$MTS/styles.css"    .obsidian/plugins/obsidian-minimal-settings/styles.css
-MIN=https://raw.githubusercontent.com/kepano/obsidian-minimal/master
-fetch "$MIN/manifest.json" .obsidian/themes/Minimal/manifest.json
-fetch "$MIN/theme.css"     .obsidian/themes/Minimal/theme.css
+VER=https://github.com/linuz90/obsidian-verso/releases/latest/download
+fetch "$VER/manifest.json" .obsidian/themes/Verso/manifest.json
+fetch "$VER/theme.css"     .obsidian/themes/Verso/theme.css
 
 # Linux only: seed an empty enabled snippet so Obsidian has it toggled on and
 # ready before DMS's first render fills it (DMS owns the contents thereafter,

@@ -535,9 +535,9 @@ in
       input_path = "~/.config/matugen/templates/equibop.css.tmpl"
       output_path = "~/.config/equibop/themes/dank.theme.css"
 
-      # Obsidian (Minimal theme). Rendered into the vault's snippet dir,
+      # Obsidian (Verso theme). Rendered into the vault's snippet dir,
       # Obsidian watches ~/Notes/.obsidian/snippets and hot-reloads on write,
-      # so no post_hook. macOS rides Minimal's built-in Flexoki preset instead
+      # so no post_hook. macOS rides Verso's own light/dark palette instead
       # (no DMS there), so this template is Linux-only (dms.nix is
       # g815-only). scripts/obsidian-vault-bootstrap.sh seeds an empty enabled
       # snippet before the first render.
