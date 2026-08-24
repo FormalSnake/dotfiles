@@ -22,10 +22,16 @@ in
     settings = {
       # The Nerd Font patch, so box-drawing, powerline segments and the fish
       # prompt's OS logo come out of the primary face with no fallback chain.
+      # It has to be the "Mono" cut: its icons are squeezed to one cell, so
+      # CoreText reports the family fixed-pitch and ghostty accepts it. The
+      # plain "GeistMono Nerd Font" draws them 1.5-2 cells wide, which keeps it
+      # out of `ghostty +list-fonts` on the mac entirely, and an unresolvable
+      # font-family silently falls back to ghostty's own default.
+      #
       # 10 is the size this ran at before MEK Mono; the 15.5 that replaced it
       # only existed to make up MEK's 600/1000em cap height against GeistMono's
       # 710 and its 450 advance against 600.
-      font-family = "GeistMono Nerd Font";
+      font-family = "GeistMono Nerd Font Mono";
       font-size = 10;
 
       cursor-style = "block";
