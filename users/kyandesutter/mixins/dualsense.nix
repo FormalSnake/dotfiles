@@ -49,8 +49,8 @@ let
         blocked) colour=${stripHash accents.red.d} ;;
         working) colour=${stripHash accents.yellow.d} ;;
         # Rendered by matugen's [templates.dualsense] block (dms.nix) on every
-        # wallpaper/light-dark change. The seed matches power-tune's fallback
-        # so a first boot before the first retheme doesn't blank the lightbar.
+        # wallpaper/light-dark change. The seed keeps a first boot before the
+        # first retheme from blanking the lightbar.
         *)       colour="$(cat "$HOME/.cache/dank/dualsense-color" 2>/dev/null || true)" ;;
       esac
       [ -n "$colour" ] || colour=b15bf5

@@ -47,7 +47,7 @@ in
   # has no say there (see bluebubbles below for the pair of options that closes it).
 
   # Equibop (Discord), launched minimized to the tray. Window rule sends it to
-  # workspace 4 (communication, eDP-1).
+  # workspace 4 (communication, the internal panel).
   systemd.user.services.equibop = {
     Unit = {
       Description = "Equibop (minimized to tray)";
@@ -84,11 +84,7 @@ in
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {
       Type = "simple";
-      # iGPU pin (like the browser): Electron hits the same nvidia-Wayland dmabuf
-      # software-fallback when docked (see lib/chromium-igpu.nix). 1Password is a
-      # module-managed setuid app, so it can't be package-wrapped: the render-node
-      # flag alone does the work (mesa auto-selects for the Intel node).
-      ExecStart = loginExec "1password --silent --render-node-override=/dev/dri/by-path/pci-0000:00:02.0-render --enable-features=VaapiVideoDecoder";
+      ExecStart = loginExec "1password --silent";
       Restart = "on-failure";
       RestartSec = 2;
     };

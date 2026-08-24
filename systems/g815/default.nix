@@ -11,8 +11,6 @@
     inputs.nixos-hardware.nixosModules.common-cpu-intel
     inputs.nixos-hardware.nixosModules.common-pc-laptop
     inputs.nixos-hardware.nixosModules.common-pc-laptop-ssd
-    # common-gpu-nvidia: PRIME offload (despite the bare name).
-    inputs.nixos-hardware.nixosModules.common-gpu-nvidia
 
     # NOTE: this laptop's Wi-Fi is an Intel BE200 (iwlwifi/iwlmld), NOT a
     # MediaTek MT7925. The old MT7925 nixos-hardware import was a no-op against
@@ -39,23 +37,6 @@
   # available channels). Spain (Canary Islands).
   boot.kernelParams = [
     "cfg80211.ieee80211_regdom=ES"
-
-    # Internal eDP-1 panel (i915) goes "lit but black" after a long idle on
-    # this hybrid laptop. The BOE NE180QDM panel is scanned out by the iGPU
-    # while its backlight is driven by nvidia_wmi_ec_backlight (stays at 100% →
-    # "lit"). The actual failure is at modeset: the kernel logs
-    #   i915 0000:00:02.0: [drm] PHY A failed to request refclk
-    # on every attempt to bring the panel back: the eDP PHY can't get its
-    # reference clock, so no image, even though the connector reports
-    # connected/enabled/dpms On. No compositor IPC command recovers it (tested via hyprctl at the time);
-    # only a full GPU re-init (reboot / suspend-resume) does. The cause is i915
-    # display power management gating the PHY refclk over idle:
-    #   • enable_dc=0: keep the display power wells up (don't enter DC5/DC6),
-    #                    which is what gates the refclk; primary fix.
-    #   • enable_psr=0: disable Panel Self Refresh (same failure family).
-    # Cost is a little idle power on the iGPU; no other behavioural change.
-    "i915.enable_dc=0"
-    "i915.enable_psr=0"
 
     # Disable CPU speculative-execution mitigations for a CPU-bound performance
     # win (~5-15% on some workloads; smaller on Arrow Lake-HX, which is newer
@@ -129,12 +110,34 @@
     ];
   };
 
-  # PRIME offload bus IDs (verified on the real hardware via `lspci -D`):
-  #   0000:00:02.0 Intel Arrow Lake-S iGPU → PCI:0:2:0
-  #   0000:02:00.0 NVIDIA GB206M (RTX 5070 Mobile, Blackwell) → PCI:2:0:0
-  hardware.nvidia.prime = {
-    intelBusId = "PCI:0:2:0";
-    nvidiaBusId = "PCI:2:0:0";
+  # GPU MUX: route the internal panel through the dGPU (Armoury Crate's
+  # "Ultimate" mode) so the desktop renders and scans out on the RTX 5070 for
+  # both outputs instead of blitting HDMI frames across from the iGPU.
+  # gpu_mux_mode is the asus-wmi
+  # knob supergfxd would write: 0 = dGPU, 1 = Optimus. The firmware keeps the
+  # value and a change only takes effect at the next boot, so this only writes
+  # when the mode is wrong. Windows shares the setting and boots in dGPU mode
+  # as well. The kernel refuses the write while dgpu_disable=1; nothing here
+  # sets that any more.
+  systemd.services.gpu-mux-dgpu = {
+    description = "Route the internal panel through the dGPU (ASUS MUX)";
+    after = [ "asusd.service" ];
+    wantedBy = [ "multi-user.target" ];
+    unitConfig.ConditionPathExists = "/sys/devices/platform/asus-nb-wmi/gpu_mux_mode";
+    serviceConfig.Type = "oneshot";
+    script = ''
+      knob=/sys/devices/platform/asus-nb-wmi/gpu_mux_mode
+      [ "$(cat "$knob")" = 0 ] && exit 0
+      echo 0 > "$knob"
+      echo "MUX switched to dGPU, takes effect at the next boot"
+    '';
+  };
+
+  # Always on the barrel charger: start tuned-ppd in performance and never
+  # let it swap to the battery variant.
+  services.tuned.ppdSettings.main = {
+    default = "performance";
+    battery_detection = false;
   };
 
   # Profiles (enable the desktop stack for this host).
@@ -147,8 +150,8 @@
   # machine, and SDDM stays the greeter.
   kyan.desktop.shell = "formalshell";
 
-  # NVIDIA dGPU stack (driver, PRIME offload, offload overlay). This chassis
-  # has the RTX 5070; an Intel-only host leaves this off.
+  # NVIDIA dGPU stack. This chassis has the RTX 5070; an Intel-only host
+  # leaves this off.
   kyan.nvidia.enable = true;
 
   # Bare Steam client, workshop downloads only (gaming lives on Windows,
@@ -161,7 +164,7 @@
   kyan.minecraft.enable = true;
 
   # ASUS laptop support: asusd, Aura keyboard RGB (Flexoki blue), 80%
-  # battery charge limit, dim LEDs on battery.
+  # battery charge limit.
   kyan.asus.enable = true;
 
   # AirPlay screen-mirroring receiver (UxPlay). Run `uxplay -p` to show an
@@ -194,49 +197,12 @@
   # otherwise only reachable via the trusted tailscale0 interface.
   services.openssh.openFirewall = true;
 
-  home-manager.users.kyandesutter =
-    { pkgs, ... }:
-    {
-      imports = [
-        self.homeModules.kyandesutter
-        self.homeModules.kyandesutter-linux
-      ];
-
-      # Suspend after 10 minutes idle, ON BATTERY ONLY. On AC this is a desk
-      # machine and must never sleep under a remote session or a download.
-      # Same transient wait-loop shape as the e1504g: swayidle fires once per
-      # idle edge, the loop pulls the trigger only while /run/power/state
-      # (power.nix's reconciler) still says battery AND no SSH connection is
-      # established (this host is the e1504g's remote builder), and local
-      # activity kills the wait. Covers the unplug-while-already-idle case
-      # too, since the loop re-reads the source every pass. Browsers hold a
-      # Wayland idle inhibitor during playback, so video doesn't count as
-      # idle. lock-before-sleep locks on the way down, the dGPU side is
-      # untouched (dgpu-reconcile holds its own sleep inhibitor mid-transition).
-      services.swayidle = {
-        enable = true;
-        timeouts = [
-          {
-            timeout = 600;
-            command = toString (pkgs.writeShellScript "idle-suspend" ''
-              exec systemd-run --user --unit=idle-suspend-pending --collect \
-                ${pkgs.writeShellScript "idle-suspend-wait" ''
-                  while :; do
-                    if [ "$(${pkgs.coreutils}/bin/cat /run/power/state 2>/dev/null || echo unknown)" = battery ] \
-                      && ! ${pkgs.iproute2}/bin/ss -Htn state established sport = :22 \
-                        | ${pkgs.gnugrep}/bin/grep -q .; then
-                      break
-                    fi
-                    ${pkgs.coreutils}/bin/sleep 60
-                  done
-                  /run/current-system/sw/bin/systemctl suspend
-                ''}
-            '');
-            resumeCommand = "systemctl --user stop idle-suspend-pending.service";
-          }
-        ];
-      };
-    };
+  home-manager.users.kyandesutter = {
+    imports = [
+      self.homeModules.kyandesutter
+      self.homeModules.kyandesutter-linux
+    ];
+  };
 
   # Set once at install and never change (matches the macbook's pattern).
   system.stateVersion = "25.11";

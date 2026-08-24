@@ -4,47 +4,17 @@ let
   # no): gates the GPU bar widget, which reads via nvidia-smi.
   hasNvidia = (osConfig.kyan or { }).nvidia.enable or false;
 
-  # The single keyboard-aura setter: paint the Aura keyboard to a given accent and
-  # apply the effect/brightness appropriate to the current power source. Shared by
-  # two triggers: the matugen aura template runs it as a post_hook on every
-  # palette change (session start, wallpaper pick, light/dark flip, passing the
-  # new accent), and power-tune (hyprland.nix) calls it on every power-source change
-  # (passing the cached accent). Having one setter: the two triggers can't
-  # disagree.
-  #
-  # By power source (see modules/nixos/mixins/power.nix `power-source`):
-  #   ac        : static themed colour, full brightness.
-  #   powerbank : slow breathe of the themed accent (a "charging" vibe) while still
-  #               being treated as battery for power; full brightness.
-  #   battery   : themed colour staged but brightness dropped to dark (so a later
-  #               AC/relog brings the colour back). This is also the fix for the
-  #               LEDs lighting up after a relog on battery (setting an Aura effect
-  #               re-enables the backlight), so we re-assert the dark level here.
-  # Runs inside DMS's systemd *user* service (limited PATH), so power-source is
-  # pinned by absolute path; brightness is driven through asusd (asusctl leds) since
-  # the user can't write the root-owned /sys LED node directly.
+  # Paint the Aura keyboard to a given accent at full brightness. The matugen
+  # aura template runs it as a post_hook on every palette change (session
+  # start, wallpaper pick, light/dark flip). Brightness goes through asusd
+  # (asusctl leds) since the user can't write the root-owned /sys LED node.
   auraRepaint = pkgs.writeShellApplication {
     name = "aura-repaint";
-    runtimeInputs = [
-      pkgs.asusctl
-      pkgs.coreutils
-    ];
+    runtimeInputs = [ pkgs.asusctl ];
     text = ''
       colour="''${1:?usage: aura-repaint <hex>}"
-      case "$(/run/current-system/sw/bin/power-source 2>/dev/null || echo ac)" in
-        ac)
-          asusctl aura effect static -c "$colour" || true
-          asusctl leds set high || true
-          ;;
-        powerbank)
-          asusctl aura effect breathe --colour "$colour" --colour2 000000 --speed med || true
-          asusctl leds set high || true
-          ;;
-        *)
-          asusctl aura effect static -c "$colour" || true
-          asusctl leds set off || true
-          ;;
-      esac
+      asusctl aura effect static -c "$colour" || true
+      asusctl leds set high || true
     '';
   };
 
@@ -383,11 +353,10 @@ in
     inputs.dms-plugin-registry.homeModules.default
   ];
 
-  # Expose aura-repaint on PATH so power-tune (hyprland.nix) can call it as the
-  # shared keyboard-aura setter (the matugen aura template's post_hook also uses
-  # it, by store path). jq rides along for the DankBar plugins that shell out to
-  # it (claudeCodeUsage, nixPackageRunner); DMS's user service inherits the home
-  # profile on PATH.
+  # aura-repaint on PATH for manual repaints (the matugen aura template's
+  # post_hook uses it by store path). jq rides along for the DankBar plugins
+  # that shell out to it (claudeCodeUsage, nixPackageRunner); DMS's user
+  # service inherits the home profile on PATH.
   home.packages = [ auraRepaint pkgs.jq ];
 
   programs.dank-material-shell = {
@@ -403,10 +372,9 @@ in
     # `enabled: true` by the activation block below). All four are dankbar/
     # launcher surfaces, not daemons.
     plugins = {
-      # NVIDIA usage / VRAM / temperature. Reads via nvidia-smi, so it only
-      # shows data when the dGPU is powered (blank on battery, by design). The
-      # dgpuStatus D0/D3cold power-state widget was dropped by preference; this
-      # usage widget is the only GPU pill on the bar.
+      # NVIDIA usage / VRAM / temperature via nvidia-smi. The dgpuStatus
+      # power-state widget was dropped by preference; this usage widget is the
+      # only GPU pill on the bar.
       nvidiaGpuMonitor.enable = hasNvidia;
       # Emoji & Unicode launcher, bound to Mod+Period in mixins/hyprland.nix via
       # `spotlight toggleQuery :e` (:e is the plugin's default trigger).
@@ -496,8 +464,8 @@ in
       [templates]
 
       # ASUS Aura keyboard. Output file doubles as the "current accent" cache
-      # that power-tune (hyprland.nix) reads to restore today's colour on a
-      # power-source change, the post_hook does the actual repaint.
+      # asus-aura (modules/nixos/mixins/asus.nix) seeds the keyboard from at
+      # boot, the post_hook does the actual repaint.
       [templates.aura]
       input_path = "~/.config/matugen/templates/aura.tmpl"
       output_path = "~/.cache/dank/aura-color"

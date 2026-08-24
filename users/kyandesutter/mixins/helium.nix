@@ -1,7 +1,5 @@
 { pkgs, lib, ... }:
 let
-  igpuChromium = import ../../../lib/chromium-igpu.nix { inherit pkgs lib; };
-
   # Widevine DRM. Helium (ungoogled-chromium, chromium 149) is *compiled* with
   # Widevine support (the binary carries CdmAdapter / com.widevine.alpha) but the
   # upstream tarball ships no proprietary CDM, so DRM sites (Netflix, Spotify, …)
@@ -42,12 +40,7 @@ let
     '';
   });
 
-  # GPU rendering + VA-API video decode on the iGPU (see lib/chromium-igpu.nix
-  # for the nvidia-Wayland dmabuf reason this is necessary).
-  helium = igpuChromium {
-    package = heliumBase;
-    exes = [ "helium" ];
-  };
+  helium = heliumBase;
 
   # Kopuz hosts Spotify's Web Playback SDK in a browser tab and picks one by
   # binary name on PATH (chromium, chromium-browser, google-chrome, brave,
@@ -55,9 +48,8 @@ let
   # in it. The SDK needs Widevine, which rules out a bare pkgs.chromium; Helium
   # is ungoogled-chromium with the CDM above already wired up, so expose it
   # under the name Kopuz probes for instead of installing a second Chromium.
-  # The symlink lands on the igpu wrapper, whose `exec -a "$0"` leaves argv[0]
-  # alone, and Chromium's singleton hands the URL to the running Helium, so the
-  # player tab reuses the profile that carries the CDM hint file below.
+  # Chromium's singleton hands the URL to the running Helium, so the player
+  # tab reuses the profile that carries the CDM hint file below.
   kopuzChromium = pkgs.runCommand "helium-chromium-alias" { } ''
     mkdir -p $out/bin
     ln -s ${helium}/bin/helium $out/bin/chromium

@@ -19,7 +19,6 @@
       ./mixins/ananicy.nix
       ./mixins/graphics.nix
       ./mixins/nvidia.nix
-      ./mixins/nvidia-resume-recovery.nix
       ./mixins/audio.nix
       ./mixins/bluetooth.nix
       ./mixins/mouse.nix
@@ -31,7 +30,6 @@
       ./mixins/comms.nix
       ./mixins/asus.nix
       ./mixins/tuned.nix
-      ./mixins/power.nix
       ./mixins/phone-integration.nix
       ./mixins/airplay.nix
       ./mixins/flatpak.nix

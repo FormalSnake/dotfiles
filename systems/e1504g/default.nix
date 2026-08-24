@@ -42,10 +42,8 @@
   '';
 
   # Full Hyprland desktop. Everything hardware-specific stays off:
-  # kyan.nvidia (no dGPU) and kyan.asus: the latter deliberately, even though
-  # this is an ASUS chassis, because kyan.asus also gates the g815's dGPU power
-  # machinery (modules/nixos/mixins/power.nix). Decouple that gate first if
-  # asusd (battery charge limit) turns out to be wanted here.
+  # kyan.nvidia (no dGPU) and kyan.asus (asusd + Aura; the charge limit comes
+  # from nixos-hardware's asus-battery module above instead).
   kyan.profiles.desktop.enable = true;
 
   # FormalShell daily-drive trial (the spec's own gate: e1504g first, g815
@@ -190,8 +188,9 @@
   # MMIO). Tiers: performance merely audible, balanced near-silent,
   # power-saver minimal. Same profile-watching shape as power-saver-dim below,
   # but a system service (sysfs writes need root), and wantedBy the backend
-  # rather than multi-user.target for the ordering reason documented in
-  # modules/nixos/mixins/power.nix. The caps key off the PPD-facing profile
+  # rather than multi-user.target: pinning it to multi-user.target closes an
+  # ordering loop (multi-user → power-cap → tuned-ppd → multi-user) systemd
+  # can't break. The caps key off the PPD-facing profile
   # name, which is what tuned-ppd exposes, so the on-battery switch to
   # balanced-battery leaves the balanced caps in place: intended.
   systemd.services.power-cap = {

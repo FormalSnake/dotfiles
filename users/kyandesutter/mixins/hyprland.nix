@@ -12,12 +12,15 @@ let
   fsBin = "${config.programs.formalshell.package}/bin/formalshell";
   fsIpc = args: "${fsBin} ipc --any-display call " + lib.concatStringsSep " " args;
 
-  # NVIDIA dGPU flag from the host (same gate as dms.nix/godot.nix). Everything
-  # below that exists for the g815's dGPU power model (power-tune,
-  # gpu-relog-prompt, the AQ_DRM_DEVICES pick, the two-monitor layout) is
-  # gated on it, so iGPU-only hosts (e1504g) get a plain Hyprland session with
-  # none of the machinery (and none of its hardcoded g815 PCI paths / modes).
+  # NVIDIA dGPU flag from the host (same gate as dms.nix/godot.nix). The g815
+  # specifics below (the AQ_DRM_DEVICES pick, the nvidia env, the two-monitor
+  # layout) are gated on it, so iGPU-only hosts (e1504g) get a plain Hyprland
+  # session with none of the hardcoded g815 PCI paths / modes.
   hasNvidia = (osConfig.kyan or { }).nvidia.enable or false;
+
+  # Internal panel connector. On the g815 the MUX routes it through the dGPU
+  # (systems/g815/default.nix), where nvidia-drm names it eDP-2.
+  panel = if hasNvidia then "eDP-2" else "eDP-1";
 
   # Workspace pill labels: role → Nerd Font glyph + short name, mirroring the
   # macOS aerospace workspace names (see mixins/aerospace.nix). Rendered into
@@ -33,239 +36,6 @@ let
     {"1": " web", "2": " term", "3": " dev", "4": " chat", "5": " prod", "6": " print", "7": "󰚩 ai", "8": " media", "9": " game"}
   '';
   wsLua = lib.concatMapStringsSep ", " (i: ''"${wsName.${toString i}}"'') (lib.range 1 9);
-
-  # Power-source-aware refresh rate + keyboard aura + relog consent prompt (see
-  # systemd.user.services.power-tune).
-  #
-  # Subscribes to /run/power/state: published by the system reconciler in
-  # modules/nixos/mixins/power.nix, the single authority on the power source
-  # (ac / powerbank / battery). A power bank reports as ADP0=online to UPower, so
-  # we deliberately do NOT use UPower's OnBattery here: the state file is what
-  # tells a ~50W power bank apart from the ~300W barrel.
-  #
-  # This owns only the *session* side (the power profile itself is owned by the
-  # system reconciler):
-  #   - keyboard aura: delegated to aura-repaint (the shared single setter, see
-  #     dms.nix), passing the cached wallpaper accent. ac=static,
-  #     powerbank=breathe ("charging" vibe), battery=dark.
-  #   - refresh rate: eDP-1 is 2560x1600@240Hz, drop to 60Hz whenever the active
-  #     PPD profile is power-saver, restore 240Hz otherwise. Refresh follows the
-  #     *profile* (not the source) so a manual power-saver toggle in the shell
-  #     also drops to 60Hz. Applied live through `hyprctl eval`: Hyprland has
-  #     real runtime monitor control, so unlike the niri era there is no config
-  #     fragment to rewrite and no reload to trigger.
-  #   - relog consent prompt: every event re-runs gpu-relog-prompt (below),
-  #     which decides whether a GPU-topology relog is worth OFFERING (persistent
-  #     notification, user confirms or dismisses; NEVER automatic).
-  #   - dGPU convergence kick: once at startup, `systemctl start
-  #     dgpu-reconcile.service` (polkit rule in power.nix) so a fresh login
-  #     finally powers off a dGPU a previous session was holding.
-  #
-  # Event-driven, no polling: three monitors feed one loop through a single
-  # process substitution (which keeps the loop in this shell so last_src/
-  # last_rate persist): inotifywait on /run/power/state for source changes,
-  # dbus-monitor on PPD for profile changes (the refresh follow), and udevadm
-  # on the drm subsystem for monitor/GPU hotplug. The inner `wait` keeps the
-  # substitution alive while the backgrounded monitors run.
-  powerTune = pkgs.writeShellApplication {
-    name = "power-tune";
-    runtimeInputs = with pkgs; [
-      hyprland # hyprctl
-      power-profiles-daemon # powerprofilesctl
-      inotify-tools # inotifywait
-      dbus # dbus-monitor
-      jq # set_refresh reads the live rate from `hyprctl monitors -j`
-      coreutils
-    ];
-    text = ''
-      source_now() { cat /run/power/state 2>/dev/null || echo battery; }
-
-      profile() {
-        powerprofilesctl get 2>/dev/null
-      }
-
-      # `hyprctl eval` takes a Lua string and runs it against the live config
-      # context, so the monitor keyword applies immediately and survives until
-      # the next `hyprctl reload` (which re-reads hyprland.lua's own 240Hz
-      # line). Hyprland matches the requested refresh to the closest real mode.
-      # Compared against the compositor's live rate, not a cached one: a
-      # `hyprctl reload` mid-power-saver restores 240Hz behind our back, and a
-      # stale cache would leave it there until the next profile flip.
-      set_refresh() {
-        cur="$(hyprctl monitors -j 2>/dev/null | jq -r '.[] | select(.name == "eDP-1") | .refreshRate | round' 2>/dev/null || true)"
-        if [ "$cur" = "$1" ]; then return 0; fi
-        hyprctl eval \
-          "hl.monitor({ output = \"eDP-1\", mode = \"2560x1600@$1\", position = \"2560x0\", scale = 1.25 })" \
-          >/dev/null 2>&1 || true
-      }
-
-      reconcile() {
-        src="$(source_now)"
-        if [ "$src" != "$last_src" ]; then
-          # Repaint the keyboard for the new source via the shared setter (in the
-          # home profile; user services have a limited PATH, so reference it
-          # absolutely), using the cached wallpaper accent (fall back to the seed).
-          colour="$(cat "$HOME/.cache/dank/aura-color" 2>/dev/null || echo b15bf5)"
-          ${config.home.profileDirectory}/bin/aura-repaint "$colour" || true
-          last_src="$src"
-        fi
-        case "$(profile)" in
-          power-saver) set_refresh 60 ;;
-          *)           set_refresh 240 ;;
-        esac
-        # Consent popup (self-guarding: single instance, remembers dismissals,
-        # no-ops when the session already fits the situation). Backgrounded so
-        # this loop stays responsive; on a confirmed relog it ends in
-        # `uwsm stop`, which tears this unit down with the session.
-        ${gpuRelogPrompt}/bin/gpu-relog-prompt &
-      }
-
-      # Converge dGPU power for THIS login: a popup-confirmed relog happens
-      # long after the battery event that wanted the dGPU off, so the fresh
-      # session kicks the (start-only, serialized) system reconciler once.
-      # Passwordless via a polkit rule scoped to exactly this unit+verb
-      # (modules/nixos/mixins/power.nix).
-      /run/current-system/sw/bin/systemctl start dgpu-reconcile.service 2>/dev/null || true
-
-      last_src=""
-      reconcile
-      while read -r line; do
-        case "$line" in
-          *state*|*PropertiesChanged*|*member=Changed*|*drm*|*DRM*) reconcile ;;
-        esac
-      done < <( {
-        inotifywait -m -q -e close_write,moved_to,create /run/power 2>/dev/null &
-        dbus-monitor --system \
-          "type='signal',interface='org.freedesktop.DBus.Properties',path='/org/freedesktop/UPower/PowerProfiles'" \
-          2>/dev/null &
-        # GPU/monitor hotplug (drm "change" uevents). udevadm via the system
-        # profile: user services have a limited PATH.
-        /run/current-system/sw/bin/udevadm monitor --udev --subsystem-match=drm 2>/dev/null &
-        wait
-      } )
-    '';
-  };
-
-  # Consent relog prompt: the ONLY path to a GPU-topology relog.
-  #
-  # aquamarine freezes the session's GPU set at init from AQ_DRM_DEVICES (see
-  # uwsm/env-hyprland below), so changing it needs a full session restart.
-  # Exactly two situations qualify:
-  #   monitor: a monitor is connected on the powered dGPU but this session
-  #            booted without the dGPU (marker `igpu`), so it can't light it
-  #            up. (If aquamarine hot-adds the card by itself, hyprctl shows
-  #            the output and this never fires; self-adapting.)
-  #   battery: on battery with no external monitor, but the session still
-  #            holds the dGPU (marker `igpu+dgpu`), so it can't power off.
-  # No countdown, no default action: a persistent notification with [Relog now]/
-  # [Not now] buttons (both shells' notification daemons support actions via
-  # notify-send -A; Super+Shift+BackSpace is a belt-and-braces confirm for a
-  # daemon that doesn't). A dismissal is remembered per-situation and never
-  # re-prompted until the situation clears (the `dismissed` file is dropped
-  # whenever evaluate() says `none`). Confirming re-checks the situation and
-  # `uwsm stop`s; autostart.nix's login services come back with the new session.
-  gpuRelogPrompt = pkgs.writeShellApplication {
-    name = "gpu-relog-prompt";
-    runtimeInputs = with pkgs; [ libnotify coreutils util-linux jq uwsm hyprland ];
-    text = ''
-      rt="''${XDG_RUNTIME_DIR:-/tmp}"
-      confirm="$rt/gpu-relog.confirm"
-      dismissed="$rt/gpu-relog.dismissed"
-      outfile="$rt/gpu-relog.action"
-      marker="$rt/session-gpu-mode"
-
-      # Keybind fallback: Super+Shift+BackSpace drops the confirm flag.
-      if [ "''${1:-}" = confirm ]; then : > "$confirm"; exit 0; fi
-
-      # Which relog (if any) does the current situation want?
-      evaluate() {
-        cur=igpu
-        [ -r "$marker" ] && cur=$(cat "$marker")
-        # Default `unknown`, NOT `battery`: at login this runs before
-        # power-reconcile has written /run/power/state (a ~2s window), so a
-        # `battery` default would fire a spurious relog offer on a charger
-        # boot. Only positively-confirmed battery reaches the prompt below.
-        src=unknown
-        [ -r /run/power/state ] && src=$(cat /run/power/state)
-        card="$(readlink -f /dev/dri/by-path/pci-0000:02:00.0-card 2>/dev/null || true)"
-        kern_conn=
-        if [ -n "$card" ]; then
-          for s in "/sys/class/drm/''${card##*/}"-*/status; do
-            [ -e "$s" ] || continue
-            if [ "$(cat "$s" 2>/dev/null)" = connected ]; then kern_conn=1; break; fi
-          done
-        fi
-        # Does the session already drive any external output?
-        sess_ext=
-        if hyprctl monitors -j 2>/dev/null | jq -e 'map(select(.name != "eDP-1")) | length > 0' >/dev/null 2>&1; then
-          sess_ext=1
-        fi
-        if [ "$cur" = igpu ] && [ -n "$kern_conn" ] && [ -z "$sess_ext" ]; then
-          echo monitor
-        elif [ "$cur" = "igpu+dgpu" ] && [ "$src" = battery ] && [ -z "$kern_conn" ]; then
-          echo battery
-        else
-          echo none
-        fi
-      }
-
-      need=$(evaluate)
-      if [ "$need" = none ]; then
-        rm -f "$dismissed"
-        exit 0
-      fi
-      # Already dismissed for THIS situation (reason-keyed, so dismissing the
-      # dock offer doesn't also silence a later battery offer) → stay quiet.
-      [ -e "$dismissed" ] && [ "$(cat "$dismissed" 2>/dev/null)" = "$need" ] && exit 0
-
-      # One prompt at a time.
-      exec 9>"$rt/gpu-relog.lock"
-      flock -n 9 || exit 0
-
-      rm -f "$confirm" "$outfile"
-      case "$need" in
-        monitor)
-          title="External monitor detected"
-          body="This session can't drive the dGPU's outputs. Relog to enable the monitor? (Super+Shift+BackSpace also confirms)" ;;
-        *)
-          title="On battery"
-          body="This session holds the dGPU (~10W). Relog to power it off? (Super+Shift+BackSpace also confirms)" ;;
-      esac
-
-      notify-send -t 0 -u critical \
-        -A relog="Relog now" -A dismiss="Not now" \
-        "$title" "$body" \
-        > "$outfile" 2>/dev/null &
-      np=$!
-
-      act=dismiss
-      while :; do
-        if [ -e "$confirm" ]; then act=relog; break; fi
-        if ! kill -0 "$np" 2>/dev/null; then
-          # Button clicked (stdout has the action) or notification closed.
-          act="$(cat "$outfile" 2>/dev/null || true)"
-          [ -n "$act" ] || act=dismiss
-          break
-        fi
-        if [ "$(evaluate)" != "$need" ]; then act=stale; break; fi
-        sleep 2
-      done
-      kill "$np" 2>/dev/null || true
-      rm -f "$confirm" "$outfile"
-
-      case "$act" in
-        relog) ;;
-        stale) exit 0 ;;
-        *) printf '%s' "$need" > "$dismissed"; exit 0 ;;
-      esac
-
-      # Re-check right before acting: the situation may have evaporated
-      # between click and here.
-      [ "$(evaluate)" = "$need" ] || exit 0
-      notify-send -t 2000 "GPU mode" "Relogging…" || true
-      uwsm stop
-    '';
-  };
 
   # Focused-output-aware brightness keys (dms arm only; the formalshell arm
   # drives brightnessctl + an OSD call directly).
@@ -316,31 +86,30 @@ let
 
   # Monitors
   #
-  # g815: the desk monitor (ASUS PA278CGV, 1440p144) is wired to the dGPU. Its
-  # EDID-preferred timing is 60Hz, so the 144Hz mode is pinned explicitly.
-  # Placed at the ORIGIN (0x0) so it is the *primary* display: fullscreen games
-  # with no monitor selector target the monitor at (0,0) and enumerate only its
-  # modes. vrr = 0: adaptive sync OFF, the panel stays locked at a steady 144Hz
-  # (vrr = 1 flickered on the desktop, vrr = 2 left games chasing the framerate,
-  # and gaming lives on Windows now). The internal 18" WQXGA 240Hz panel sits
-  # to its RIGHT at x = 2560, scale 1.25; power-tune flips its refresh at
-  # runtime via `hyprctl eval`.
+  # g815: both outputs hang off the dGPU. The desk monitor (ASUS PA278CGV,
+  # 1440p144) has a 60Hz EDID-preferred timing, so the 144Hz mode is pinned
+  # explicitly. Placed at the ORIGIN (0x0) so it is the *primary* display:
+  # fullscreen games with no monitor selector target the monitor at (0,0) and
+  # enumerate only its modes. vrr = 0: adaptive sync OFF, the panel stays
+  # locked at a steady 144Hz (vrr = 1 flickered on the desktop, vrr = 2 left
+  # games chasing the framerate). The internal 18" WQXGA 240Hz panel sits to
+  # its RIGHT at x = 2560, scale 1.25.
   #
   # Everywhere else: the internal panel at its preferred mode, native 1x (the
   # e1504g's 15.6" 1080p panel would otherwise land on a fractional scale).
   monitors =
     if hasNvidia then ''
       hl.monitor({ output = "HDMI-A-1", mode = "2560x1440@144", position = "0x0", scale = 1.0, vrr = 0 })
-      hl.monitor({ output = "eDP-1", mode = "2560x1600@240", position = "2560x0", scale = 1.25 })
+      hl.monitor({ output = "${panel}", mode = "2560x1600@240", position = "2560x0", scale = 1.25 })
     '' else ''
-      hl.monitor({ output = "eDP-1", mode = "preferred", position = "auto", scale = 1.0 })
+      hl.monitor({ output = "${panel}", mode = "preferred", position = "auto", scale = 1.0 })
     '';
 
   # Workspace → monitor binding. On the two-monitor g815, communication (4) and
   # media (8) live on the internal panel and the other seven on the desk
   # monitor; each monitor gets one `default` workspace shown when it comes up
-  # (1 on HDMI-A-1, 4 on eDP-1). When HDMI-A-1 is absent Hyprland relocates its
-  # workspaces to eDP-1 and moves them back on reconnect. Single-panel hosts
+  # (1 on HDMI-A-1, 4 on the panel). When HDMI-A-1 is absent Hyprland relocates
+  # its workspaces to the panel and moves them back on reconnect. Single-panel hosts
   # take the names and nothing else.
   workspaceRules =
     if hasNvidia then ''
@@ -349,7 +118,7 @@ let
         hl.workspace_rule({
           workspace = tostring(i),
           default_name = wsName[i],
-          monitor = internalWorkspaces[i] and "eDP-1" or "HDMI-A-1",
+          monitor = internalWorkspaces[i] and "${panel}" or "HDMI-A-1",
           default = (i == 1 or i == 4),
         })
       end
@@ -503,8 +272,13 @@ in
     hl.env("QS_ICON_THEME", "Colloid-Dark")
     hl.env("QT_QPA_PLATFORMTHEME", "qt6ct")
     ${lib.optionalString hasNvidia ''
-    -- NVIDIA + Wayland hint (explicit-sync is automatic on recent drivers).
-    hl.env("__GL_GSYNC_ALLOWED", "1")''}
+    -- NVIDIA + Wayland (explicit-sync is automatic on recent drivers). The
+    -- VA-API / GLX vendor picks are also exported from uwsm/env-hyprland below
+    -- so user services get them too.
+    hl.env("__GL_GSYNC_ALLOWED", "1")
+    hl.env("LIBVA_DRIVER_NAME", "nvidia")
+    hl.env("NVD_BACKEND", "direct")
+    hl.env("__GLX_VENDOR_LIBRARY_NAME", "nvidia")''}
 
     -- General options
     hl.config({
@@ -625,7 +399,7 @@ in
         -- (hdredid, uses the panel's EDID primaries) if HDR colours look off.
         cm_auto_hdr = 1,
       },
-      -- eDP-1 runs at fractional scale (1.25) on the g815. XWayland can't do
+      -- The panel runs at fractional scale (1.25) on the g815. XWayland can't do
       -- fractional scaling, so Hyprland upscales X11 surfaces → blurry output
       -- and per-frame upscale overhead. force_zero_scaling makes XWayland render
       -- at scale 1 (crisp, native rate); X11 apps that look small can be nudged
@@ -762,11 +536,6 @@ in
     -- Mouse drag/resize (aerospace SUPER+LMB move, SUPER+RMB resize).
     hl.bind(mod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
     hl.bind(mod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
-    ${lib.optionalString hasNvidia ''
-
-    -- Confirm the pending GPU-relog prompt (fallback for a notification daemon
-    -- without action buttons). See gpuRelogPrompt / powerTune in hyprland.nix.
-    hl.bind(mod .. " + SHIFT + BackSpace", hl.dsp.exec_cmd("${gpuRelogPrompt}/bin/gpu-relog-prompt confirm"))''}
 
     -- Window → workspace rules (Linux app classes; Hyprland matches `class`)
     -- No `silent`: when one of these apps opens, Hyprland follows the window to
@@ -867,110 +636,22 @@ in
     export QT_QPA_PLATFORMTHEME="qt6ct"
   '';
 
-  # Multi-GPU selection (hybrid laptop)
+  # GPU selection (g815)
   #
-  # The g815 is a hybrid laptop: the Intel iGPU (PCI 0000:00:02.0) drives the
-  # internal panel (eDP-1), while the NVIDIA dGPU (PCI 0000:02:00.0) drives the
-  # external ports: including HDMI-A-1, the 1440p144 desk monitor.
-  #
-  # The session is ALWAYS iGPU-primary. Gaming lives on Windows; on Linux the
-  # dGPU is nothing but a power-managed peripheral for the panel backlight (its
-  # WMI) and the HDMI port. AQ_DRM_DEVICES is a ':'-separated device list; the
-  # FIRST entry becomes the primary GPU (aquamarine src/backend/drm/DRM.cpp).
-  # When the dGPU is powered at login (we were charging) it is listed SECOND: a
-  # scanout-only head for the desk monitor, fed by an iGPU→dGPU blit (trivial for
-  # desktop work). When it's absent (battery boot) only the iGPU is listed, so
-  # nothing in the session ever touches the nvidia stack and the chip can be hard
-  # powered off.
-  #
-  # Keyed on device PRESENCE, not the power source: it cannot disagree with
-  # reality. The set is frozen at aquamarine init, so the only situations that
-  # want a different set mid-session go through the consent popup
-  # (gpu-relog-prompt above), never an automatic relog. This file records the
-  # chosen set in $XDG_RUNTIME_DIR/session-gpu-mode (igpu | igpu+dgpu) for it.
-  #
-  # GPUs are resolved through the stable by-path PCI symlinks (DRM card numbers
-  # can reorder across boots) back to the canonical /dev/dri/cardN nodes that
-  # aquamarine enumerates and matches against.
+  # The MUX routes the internal panel through the dGPU (systems/g815/
+  # default.nix), so the session renders and scans out on the RTX 5070 alone.
+  # Named explicitly: aquamarine otherwise probes the iGPU too and Xwayland
+  # grabs whichever node it finds first. Resolved through the stable by-path
+  # PCI symlink (DRM card numbers reorder across boots). uwsm feeds this file
+  # to the compositor and the user manager, so the VA-API and GLX vendor picks
+  # reach autostarted services too.
   xdg.configFile."uwsm/env-hyprland" = lib.mkIf hasNvidia {
     text = ''
-      dgpu=$(readlink -f /dev/dri/by-path/pci-0000:02:00.0-card 2>/dev/null)
-      igpu=$(readlink -f /dev/dri/by-path/pci-0000:00:02.0-card 2>/dev/null)
-      vendors=/run/opengl-driver/share/glvnd/egl_vendor.d
-
-      mode=igpu
-      if [ -n "$igpu" ] && [ -n "$dgpu" ]; then
-        export AQ_DRM_DEVICES="$igpu:$dgpu"
-        # Cross-GPU scanout must survive suspend: after s2idle the dGPU side can
-        # re-export buffers with a tiling modifier the peer can't import
-        # (EGL_BAD_MATCH → permanently stuck pageflip). A LINEAR intermediate
-        # buffer for the multi-GPU blit is modifier-independent, so the
-        # iGPU→dGPU HDMI copy keeps working across resume.
-        export AQ_FORCE_LINEAR_BLIT=1
-        # The compositor MUST be able to load nvidia's EGL here. HDMI-A-1 hangs
-        # off the dGPU, so aquamarine builds a SECOND renderer on that node to
-        # blit the iGPU-rendered frame across for scanout. uwsm feeds this file
-        # to the compositor as well as to the user manager, so a Mesa-only
-        # vendor list breaks that renderer and the desk monitor goes black:
-        # eglInitialize fails with EGL_NOT_INITIALIZED ("DRI2: failed to load
-        # driver") → "Failed to initialize renderer backend for blitting" → the
-        # connector modesets at the right mode in an endless loop and never
-        # receives a frame (observed 2026-08-17, the whole log was that loop).
-        # glvnd walks this list in order, so nvidia first matches the system
-        # default precedence. Clients inherit it too: that is the accepted
-        # cost of uwsm's single env file; the Electron apps that actually
-        # misbehave are pinned per-app by lib/chromium-igpu.nix.
-        export __EGL_VENDOR_LIBRARY_FILENAMES="$vendors/10_nvidia.json:$vendors/50_mesa.json"
-        mode="igpu+dgpu"
-      elif [ -n "$igpu" ]; then
-        # dGPU powered off (battery boot): name ONLY the iGPU. Leaving
-        # AQ_DRM_DEVICES unset is NOT enough if the card reappears: aquamarine
-        # would probe every card and Xwayland would grab the nvidia node,
-        # pinning it at D0. With only the iGPU named, the session never touches
-        # the nvidia stack; gpu-relog-prompt offers a relog if a monitor shows
-        # up wanting it.
-        export AQ_DRM_DEVICES="$igpu"
-        # No dGPU in the session at all, so nothing needs nvidia's EGL and a
-        # Mesa-only list keeps every client off the nvidia render node (their
-        # GPU processes enumerate vendors independently and would otherwise
-        # open it, pinning the chip at D0 and parking ~2 GB of VRAM on it,
-        # observed live 2026-07-26).
-        export __EGL_VENDOR_LIBRARY_FILENAMES="$vendors/50_mesa.json"
-      fi
-      if [ -n "''${XDG_RUNTIME_DIR:-}" ]; then
-        printf '%s\n' "$mode" > "$XDG_RUNTIME_DIR/session-gpu-mode" 2>/dev/null || true
-      fi
-
-      # VA-API video decode on the iGPU, always: no app should wake the dGPU
-      # for video. Offloaded apps (pkgs.nvidiaOffloadEnv) still force nvidia
-      # themselves when explicitly asked.
-      export LIBVA_DRIVER_NAME=iHD
-      # Vulkan stays Intel-only unconditionally: unlike EGL this is never needed
-      # by the compositor (aquamarine renders through EGL/GBM), so pinning it
-      # costs nothing and still keeps Vulkan clients off the dGPU. Offloaded
-      # apps set their own ICD via nvidiaOffloadEnv.
-      export VK_DRIVER_FILES=/run/opengl-driver/share/vulkan/icd.d/intel_icd.x86_64.json
-      export VK_ICD_FILENAMES="$VK_DRIVER_FILES"
+      export AQ_DRM_DEVICES="$(readlink -f /dev/dri/by-path/pci-0000:02:00.0-card)"
+      export LIBVA_DRIVER_NAME=nvidia
+      export NVD_BACKEND=direct
+      export __GLX_VENDOR_LIBRARY_NAME=nvidia
     '';
-  };
-
-  # Power automation (see powerTune in the let block): refresh rate, keyboard
-  # aura and the relog prompt all follow AC/battery. Bound to
-  # graphical-session.target so it starts and stops with the Hyprland session
-  # and inherits HYPRLAND_INSTANCE_SIGNATURE (uwsm finalises it into the systemd
-  # user manager): hyprctl needs it.
-  systemd.user.services.power-tune = lib.mkIf hasNvidia {
-    Unit = {
-      Description = "Refresh rate + keyboard aura + relog consent prompt follow the power source";
-      After = [ "graphical-session.target" ];
-      PartOf = [ "graphical-session.target" ];
-    };
-    Service = {
-      ExecStart = "${powerTune}/bin/power-tune";
-      Restart = "on-failure";
-      RestartSec = 3;
-    };
-    Install.WantedBy = [ "graphical-session.target" ];
   };
 
   # polkit auth agent: FormalShell registers its own in-shell agent (M16,

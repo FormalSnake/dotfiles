@@ -77,14 +77,8 @@ in
   # Zen browser (Firefox fork) via the community flake's home-manager module.
   imports = [ inputs.zen-browser.homeModules.beta ];
 
-  # GPU: deliberately NOT pinned to the iGPU (contrast helium.nix). Firefox
-  # follows the compositor's dmabuf-feedback device, and Hyprland is always
-  # iGPU-primary here (see the AQ_DRM_DEVICES comment in hyprland.nix), so Zen
-  # lands on the iGPU by itself and never wakes the dGPU. The Chromium
-  # dmabuf-import bug that forced lib/chromium-igpu.nix is ANGLE-specific and
-  # doesn't apply here.
-  # VA-API likewise auto-selects its driver from the active render node, so no
-  # LIBVA_DRIVER_NAME.
+  # GPU: Firefox follows the compositor's dmabuf-feedback device, so Zen lands
+  # on whichever GPU Hyprland renders on with nothing pinned here.
   programs.zen-browser = {
     enable = true;
 

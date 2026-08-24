@@ -1,7 +1,5 @@
 { config, lib, pkgs, ... }:
 let
-  igpuChromium = import ../../../lib/chromium-igpu.nix { inherit pkgs lib; };
-
   # Equibop with WebRTC mic auto-gain disabled
   # Equibop is Electron (Chromium under the hood). On Linux specifically,
   # Chromium's WebRTC stack is allowed to reach into PipeWire and ride the
@@ -15,13 +13,16 @@ let
   # The NixOS equibop wrapper just execs electron and ignores the usual
   # `equibop-flags.conf`, so the flag is injected at the package level here:
   # this way it applies regardless of launch path (autostart, the
-  # `Exec=equibop` .desktop entry, or a terminal). igpuChromium also pins it to
-  # the iGPU (Electron hits the same nvidia-Wayland dmabuf software-fallback as
-  # Helium when docked: see lib/chromium-igpu.nix).
-  equibopNoAgc = igpuChromium {
-    package = pkgs.equibop;
-    exes = [ "equibop" ];
-    extraFlags = [ "--disable-features=WebRtcAllowInputVolumeAdjustment" ];
+  # `Exec=equibop` .desktop entry, or a terminal).
+  equibopNoAgc = pkgs.symlinkJoin {
+    name = "equibop-no-agc";
+    paths = [ pkgs.equibop ];
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+    postBuild = ''
+      wrapProgram "$out/bin/equibop" \
+        --add-flags "--disable-features=WebRtcAllowInputVolumeAdjustment"
+    '';
+    inherit (pkgs.equibop) meta;
   };
 in
 {

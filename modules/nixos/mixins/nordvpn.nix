@@ -7,7 +7,7 @@
 }:
 let
   cfg = config.kyan.nordvpn;
-  # Absolute path into the system profile (same pattern as power-source): the
+  # Absolute path into the system profile: the
   # upstream module puts the nordvpn binary in environment.systemPackages.
   nordvpn = "/run/current-system/sw/bin/nordvpn";
 in
