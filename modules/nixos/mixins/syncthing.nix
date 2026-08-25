@@ -31,7 +31,7 @@ let
   peers = lib.attrNames devices;
 in
 {
-  options.kyan.syncthing.enable = lib.mkEnableOption "Syncthing mesh (wallpapers + zen profile) with the macbook as the always-on hub";
+  options.kyan.syncthing.enable = lib.mkEnableOption "Syncthing mesh (wallpapers + helium profile) with the macbook as the always-on hub";
 
   config = lib.mkIf cfg.enable {
     services.syncthing = {
@@ -59,11 +59,14 @@ in
             path = "${home}/Pictures/Wallpapers";
             devices = peers;
           };
-          # Live Zen profile. One browser at a time; .stignore (rendered by
-          # mixins/zen.nix) excludes locks, crash state and 1Password.
-          zen-profile = {
-            id = "zen-profile";
-            path = "${home}/.config/zen/default";
+          # Live Helium user-data dir (all three profiles). One browser at a
+          # time, enforced by the launch guard in mixins/helium.nix, which also
+          # renders the .stignore (locks, caches, crash state, 1Password). The
+          # mac holds a hub copy under ~/Sync/helium-profile; its own Helium
+          # is not part of this.
+          helium-profile = {
+            id = "helium-profile";
+            path = "${home}/.config/net.imput.helium";
             devices = peers;
           };
         };

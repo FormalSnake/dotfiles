@@ -359,7 +359,3 @@ layout = "float"
 bundleId = "net.imput.helium"
 titleRegex = "Picture.?in.?Picture|Scherm-in-scherm"
 layout = "float"
-[[appRules]]
-bundleId = "app.zen-browser.zen"
-titleRegex = "Picture-in-Picture"
-layout = "float"

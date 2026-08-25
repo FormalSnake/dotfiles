@@ -55,7 +55,7 @@
   # the greeter either way.
   kyan.desktop.shell = "formalshell";
 
-  # Syncthing mesh: wallpapers + Zen profile, macbook as hub
+  # Syncthing mesh: wallpapers + Helium profile, macbook as hub
   # (modules/nixos/mixins/syncthing.nix; spec 2026-07-22).
   kyan.syncthing.enable = true;
 

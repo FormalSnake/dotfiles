@@ -445,7 +445,6 @@ in
     "matugen/templates/hypr-border.lua.tmpl".source = ../matugen-templates/hypr-border.lua.tmpl;
     "matugen/templates/btop.theme.tmpl".source = ../matugen-templates/btop.theme.tmpl;
     "matugen/templates/yazi-flavor.toml.tmpl".source = ../matugen-templates/yazi-flavor.toml.tmpl;
-    "matugen/templates/zen-vars.json.tmpl".source = ../matugen-templates/zen-vars.json.tmpl;
     "matugen/templates/kopuz.json.tmpl".source = ../matugen-templates/kopuz.json.tmpl;
 
     # DMS reads ~/.config/matugen/config.toml on every re-theme and splices its
@@ -536,15 +535,6 @@ in
       [templates.yazi]
       input_path = "~/.config/matugen/templates/yazi-flavor.toml.tmpl"
       output_path = "~/.config/yazi/flavors/dank.yazi/flavor.toml"
-
-      # Zen browser (zen-wabi bridge, mixins/zen.nix). Renders the 8-colour
-      # contract wabi's matugen-bridge.uc.js polls (1s mtime check) inside the
-      # profile's chrome dir; the bridge pushes the values live into chrome and
-      # content via prefs + a JSWindowActor, so no post_hook and no browser
-      # restart. First-paint Flexoki fallbacks are baked into userChrome.css.
-      [templates.zen]
-      input_path = "~/.config/matugen/templates/zen-vars.json.tmpl"
-      output_path = "~/.config/zen/default/chrome/matugen-vars.json"
 
       # Kopuz (mixins/kopuz.nix), since 0.14.0. The keys are the ones its
       # themes.json uses; unknown keys are ignored and missing ones keep their

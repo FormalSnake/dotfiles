@@ -475,7 +475,7 @@ in
     hl.bind(mod .. " + Q", hl.dsp.window.close())
     hl.bind(mod .. " + SHIFT + F", hl.dsp.window.fullscreen({ action = "toggle", mode = "fullscreen" }))
     hl.bind(mod .. " + V", hl.dsp.window.float({ action = "toggle" }))
-    hl.bind(mod .. " + B", hl.dsp.exec_cmd("zen-beta"))
+    hl.bind(mod .. " + B", hl.dsp.exec_cmd("helium"))
 
     -- Vim-style focus/move (aerospace alt-hjkl), mapped onto the scrolling
     -- tape's column model: H/L walk columns (layout-aware, so they wrap and
@@ -542,9 +542,7 @@ in
     -- Window → workspace rules (Linux app classes; Hyprland matches `class`)
     -- No `silent`: when one of these apps opens, Hyprland follows the window to
     -- its assigned workspace. No terminal rule: ghostty opens where you are.
-    -- zen-beta: the wrapper launches with `--name zen-beta` (desktop file),
-    -- bare `zen` covers manual CLI launches.
-    hl.window_rule({ match = { class = "^([Hh]elium|zen(-beta)?)$" }, workspace = "1" })
+    hl.window_rule({ match = { class = "^([Hh]elium)$" }, workspace = "1" })
     hl.window_rule({ match = { class = "^([Cc]ode|[Zz]ed|dev.zed.Zed)$" }, workspace = "3" })
     hl.window_rule({ match = { class = "^([Ss]lack|WhatsApp|[Ee]quibop|discord|[Bb]eeper|[Bb]lue[Bb]ubbles)$" }, workspace = "4" })
     -- Beeper/BlueBubbles (Electron) map their main window floating, so they

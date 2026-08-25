@@ -214,8 +214,10 @@ in
       Wants = [ "dms.service" ];
       "X-SwitchMethod" = "keep-old";
     };
-    # Not autostarted (Zen (Mod+B) is the browser now). Kept installed and
-    # launchable (`systemctl --user start helium`) until fully retired.
+    # Not autostarted: the launch guard (mixins/helium.nix) quits the other
+    # laptop's Helium, and doing that on every login would steal the browser
+    # from a laptop still in use. Mod+B launches it; the unit stays for
+    # `systemctl --user start helium`.
     Service = {
       Type = "simple";
       ExecStartPre = "${pkgs.bash}/bin/bash -lc 'for i in $(seq 50); do busctl --user call org.freedesktop.DBus /org/freedesktop/DBus org.freedesktop.DBus NameHasOwner s org.freedesktop.Notifications 2>/dev/null | grep -q true && break; sleep 0.2; done'";

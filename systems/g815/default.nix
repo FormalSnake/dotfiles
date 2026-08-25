@@ -174,7 +174,7 @@
   # NordVPN (privacy/geo exit). This host holds the account login.
   kyan.nordvpn.enable = true;
 
-  # Syncthing mesh: wallpapers + Zen profile, macbook as hub
+  # Syncthing mesh: wallpapers + Helium profile, macbook as hub
   # (modules/nixos/mixins/syncthing.nix; spec 2026-07-22).
   kyan.syncthing.enable = true;
 

@@ -16,7 +16,6 @@
     ./mixins/formalshell.nix
     ./mixins/beeper.nix
     ./mixins/helium.nix
-    ./mixins/zen.nix
     ./mixins/lumen.nix
     ./mixins/nordvpn.nix
     ./mixins/godot.nix

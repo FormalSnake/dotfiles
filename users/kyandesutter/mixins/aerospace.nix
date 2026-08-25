@@ -127,13 +127,6 @@ in
         (workspaceFor "com.apple.iCal" "productivity")
         (workspaceFor "dev.warp.Warp-stable" "terminal")
         { "if".app-id = "com.apple.Stickies"; run = [ "layout floating" ]; }
-        {
-          "if" = {
-            app-id = "app.zen-browser.zen";
-            window-title-regex-substring = "Picture-in-Picture";
-          };
-          run = [ "layout floating" ];
-        }
         # Helium Picture-in-Picture: always float (kept on the focused workspace by exec-on-workspace-change)
         {
           "if" = {
