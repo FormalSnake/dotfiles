@@ -197,7 +197,7 @@
     };
 
     # qylock: SDDM greeter themes plus a Quickshell lock screen that renders the
-    # same theme dirs. Both Linux hosts run its `clockwork/orbital` theme (see
+    # same theme dirs. Both Linux hosts run its `sword` theme (see
     # modules/nixos/mixins/hyprland.nix). Heavy input: the repo carries ~650 MB
     # of background video for the themes we don't use, and its derivations copy
     # all of them into the store, so a `nix flake update` here is a long fetch.

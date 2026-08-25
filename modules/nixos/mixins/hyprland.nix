@@ -5,13 +5,10 @@ let
   # qylock's Quickshell lock screen. Same builder call the programs.qylock
   # module makes below, with the same arguments, so both references resolve to
   # one derivation rather than two builds of the same 650 MB theme tree.
-  qylockTheme = "clockwork/orbital";
-  qylockThemeOptions = {
-    clockwork.orbital = {
-      themeMode = "dark";
-      enableWindup = true;
-    };
-  };
+  qylockTheme = "sword";
+  # sword takes none of the per-theme conf edits qylock's module can apply
+  # (only terraria, Genshin, clockwork and osu have any).
+  qylockThemeOptions = { };
   qylockLock = inputs.qylock.legacyPackages.${pkgs.stdenv.hostPlatform.system}.mkQuickshell {
     defaultTheme = qylockTheme;
     themeOptions = qylockThemeOptions;
@@ -129,15 +126,16 @@ in
       wayland.enable = true;
       wayland.compositorCommand = toString sddmGreeterCompositor;
       package = pkgs.kdePackages.sddm;
-      # On-screen keyboard. The Qt runtime clockwork's QML needs (svg,
+      # On-screen keyboard. The Qt runtime sword's QML needs (svg,
       # multimedia, Qt5Compat) is contributed by the qylock module.
       extraPackages = [ pkgs.kdePackages.qtvirtualkeyboard ];
     };
 
     # qylock: one theme tree rendered by two frontends, the SDDM greeter and a
-    # Quickshell `ext-session-lock-v1` client. clockwork/orbital is the black
-    # rotating-dial clock; enableWindup is its spin-up intro, which the lock
-    # frontend also uses to time its exit animation.
+    # Quickshell `ext-session-lock-v1` client. sword draws over a looping 43 MB
+    # bg.mp4 and loads its own bundled font, so both frontends need Qt
+    # Multimedia's backend plugin as well as its QML (see the unit below for
+    # the lock half; the greeter gets it through sddm's Qt wrapper).
     #
     # This replaces both the sddm-astronaut cyberdeck greeter and the shell's
     # own lock screen, so the greeter and the lock screen finally match. It
@@ -167,6 +165,12 @@ in
       # hyprctl: the lock client sets misc:allow_session_lock_restore through
       # it on a successful unlock.
       path = [ pkgs.bash config.programs.hyprland.package ];
+      # qylock's wrapper puts Qt Multimedia's QML on the import path but not
+      # its multimedia backend plugin, which lives in a store path of its own
+      # and so is invisible to quickshell's Qt. Without it sword's MediaPlayer
+      # has no backend and the video background stays black. quickshell's own
+      # wrapper prefixes this, so the platform plugins still win.
+      environment.QT_PLUGIN_PATH = "${pkgs.qt6.qtmultimedia}/lib/qt-6/plugins";
       serviceConfig = {
         Type = "exec";
         ExecStart = "${qylockLock}/bin/qylock-lock";

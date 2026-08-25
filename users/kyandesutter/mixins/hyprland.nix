@@ -12,7 +12,7 @@ let
   fsBin = "${config.programs.formalshell.package}/bin/formalshell";
   fsIpc = args: "${fsBin} ipc --any-display call " + lib.concatStringsSep " " args;
 
-  # Lock screen (qylock, clockwork/orbital), owned by neither shell. The unit
+  # Lock screen (qylock, sword theme), owned by neither shell. The unit
   # is declared in modules/nixos/mixins/hyprland.nix; starting it returns as
   # soon as the lock surface is up, so `&& systemctl suspend` behind it
   # suspends onto the locked screen rather than after the unlock.

@@ -216,10 +216,10 @@ pure Nix data in
 it — static Flexoki dark on Linux, appearance-following light/dark on macOS
 (where Flexoki is the *primary* scheme, not a fallback: Ghostty uses its built-in
 Flexoki Light/Dark, bat uses `auto:system`, fish re-selects by appearance). The
-greeter and the lock screen sit outside all of it: both are qylock on
-`clockwork/orbital` (`programs.qylock` in `modules/nixos/mixins/hyprland.nix`),
-since the greeter runs before any user session exists and so has no wallpaper
-to derive colours from. Herdr pins Flexoki Dark via `[theme.custom]` tokens
+greeter and the lock screen sit outside all of it: both are qylock on `sword`
+(`programs.qylock` in `modules/nixos/mixins/hyprland.nix`), since the greeter
+runs before any user session exists and so has no wallpaper to derive colours
+from. Herdr pins Flexoki Dark via `[theme.custom]` tokens
 sourced from `palette.nix` (`mixins/herdr.nix`) — it used to follow ghostty via its `terminal` theme, but
 that reads the terminal palette over OSC, which doesn't survive SSH/mosh (herdr
 runs on the macbook, reached over SSH), so the static tokens keep it correct and
