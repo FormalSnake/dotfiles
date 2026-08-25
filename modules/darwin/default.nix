@@ -11,6 +11,7 @@
       ./mixins/login-items.nix
       ./mixins/caffeinate.nix
       ./mixins/auto-update.nix
+      ./mixins/storage-gc.nix
       ./mixins/agenix.nix
       ./mixins/remote-access.nix
       ./mixins/rosetta-builder.nix

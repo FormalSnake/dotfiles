@@ -64,7 +64,7 @@ manual-import queue on every rescan. Navidrome groups by tags, not by folder,
 so the track still shows up under its real artist; drop a `cover.jpg` in
 alongside it for art.
 
-These are the library's only lossy files. yt-dlp's `bestaudio` is Opus around
+These and the YouTube singles below are the library's only lossy files. yt-dlp's `bestaudio` is Opus around
 128 kbps, and remuxing that into Ogg Opus (`ffmpeg -c:a copy`) keeps it as-is.
 Re-encoding to FLAC would multiply the size for nothing.
 
@@ -91,6 +91,28 @@ The watcher does not notice a folder that did not exist when it started
 watching: the 32 files sat there unscanned for five minutes until
 `touch library/_edits` changed the parent's mtime, which triggered the usual
 `WATCHERWAIT` scan ten seconds later. Otherwise it waits for the hourly scan.
+
+### Singles Soulseek never has
+
+A single that stays on the wanted list for weeks is one nobody on Soulseek
+shares, and waiting longer does not change that. Those come from the artist's
+own YouTube upload instead: yt-dlp `bestaudio[ext=webm]`, remuxed with
+`ffmpeg -c:a copy` and tagged with the MusicBrainz ids Lidarr already holds
+(`/api/v1/track?albumId=`), named the way Lidarr would name them and dropped
+into the album folder. A `RefreshArtist` then maps the file, so Lidarr stops
+wanting the album and Soularr stops searching for it. Lidarr grades it
+`OGG Vorbis Q5`, so a lossless copy that turns up later still upgrades it.
+
+The nixpkgs yt-dlp (2026.07 on this channel) gets a 403 on every YouTube
+stream; `nix shell github:NixOS/nixpkgs/nixpkgs-unstable#yt-dlp` works.
+
+If Lidarr's metadata mirror has no release for the album (`releases: []` on
+the album, "Couldn't find similar album" on manual import) the file cannot be
+mapped and would sit in the manual-import queue on every rescan, so it goes to
+`Non-Album/<artist>/<title>.opus` like the Moonshine singles instead.
+
+First two, 2026-08-25: Niko B's *Quick Drive* (mapped) and *Canada Goose*
+(`Non-Album/`, MusicBrainz has the release but Lidarr does not).
 
 ### Never open navidrome.db from macOS
 
@@ -396,6 +418,18 @@ reimports on mtime) and exits without writing anything if the container is
 down, so a stopped stack cannot blank a playlist. Run it by hand with
 `--misses` to list what is still unmatched.
 
+### Smart playlists
+
+A `.nsp` file in the library root is a Navidrome smart playlist: it is
+re-evaluated on every scan, so it needs no matcher run and picks up new imports
+on its own. `Quattro.nsp` (rally house) is the first, matching genre
+`rally house` or `Speed House`, or artist containing Noxygen, wev or Obsk.
+`contains` on artist is what catches the casing and collaboration spellings the
+tags carry (`wev`, `Wev`, `worldwidewev`, `wev & Nick AM`).
+
+The playlist agent only writes `<name>.m3u` for names in `playlists.json`, so
+the two mechanisms never touch each other's files.
+
 ## Tagging
 
 Soulseek rip quality varies a lot: the Tame Impala albums arrived with full
@@ -429,6 +463,48 @@ serves that, so without `--embed` the grid is clean but the now-playing screen
 still shows the original. It is also what clients reading tags off downloaded
 files use. Re-running is safe either way, since neither `cover.jpg` nor the
 embedded art is ever used as the source to blur.
+
+### Covers for albums that have none
+
+`scripts/music-fill-covers.py` gives every album Navidrome shows blank a cover.
+Twenty-five are, almost all hardstyle and nightcore edits plus a run of Eminem
+bootlegs: a Soulseek rip of an edit carries no art, and neither Lidarr nor
+MusicBrainz has any to fetch.
+
+It works from Navidrome's own view of which albums have art rather than from a
+directory walk, because an embedded picture counts and half of these are loose
+singles under `Non-Album/` and `_edits/` where the folder name says nothing.
+
+**No local file does not mean blank.** `CoverArtPriority` ends in `external`, so
+for an album with no image and no embedded picture Navidrome asks its metadata
+agents and shows whatever Apple Music, Last.fm or Deezer has. A `cover.jpg`
+outranks that. The first run of this script, on 2026-08-19, did not know it and
+buried 89 albums under placeholders, Niko B's `just call me` among them. So
+every candidate is now fetched over `getCoverArt` first and skipped if a real
+image comes back. Navidrome answers an album it has nothing for with the grey
+note embedded in its binary rather than an error, so the check is a hash of the
+response against `PLACEHOLDER_MD5`; if a Navidrome release changes that asset
+every album reads as covered and the script writes nothing, which is the
+harmless way for it to break. Sixty of the ninety candidates turned out to have
+agent art. The Subsonic login comes from the audiomuse container, the one part
+of the stack seeded with a real Navidrome account.
+
+An edit takes the original release's cover: `Nevada - Slowed & Reverb` by
+PANTHEON ends up with Vicetone's Nevada art, matched by the same progressive
+suffix stripping the playlist and listens agents use, same artist first and
+then a title only one artist in the library claims. Six matched that way.
+
+Everything left gets a generated cover in the same shape as the Artemas ones:
+the album title in Spotify Mix Black over a four-point mesh gradient, artist
+and year along the bottom. The colours are hashed from artist and album, so a
+re-run repaints the same cover and no two neighbouring albums come out alike.
+Cyrillic and anything else outside Latin falls back to Arial Unicode, since
+Spotify Mix draws blanks for it and ImageMagick has no font fallback.
+
+Same `cover.jpg` rule and the same revert as above. It skips a folder that
+already has one, which is also how the three Moonshine singles sharing
+`Non-Album/Moonshine/` end up sharing a cover: one folder, one image.
+`--dry-run` lists what it would write and where each carried cover comes from.
 
 ## Soulseek
 
@@ -465,8 +541,24 @@ First sweep, 2026-08-09: 28 bad files in 4656. Five were 30-second previews
 (ACRAZE, three HUGEL singles, Mau P), and John Summit's *Comfort in Chaos* was
 damaged across the whole album. All were deleted and re-requested.
 
+## Removing artists
+
+`scripts/music-forget-artists.sh <lidarr id | from-to> ...` deletes artists
+from Lidarr with their files and prunes their `downloads/` and
+`downloads/failed_imports/` folders, which Lidarr's own delete leaves behind.
+Lidarr ids are contiguous per add session, so a batch added in one sitting
+is one range: the 42 artists added for the grandparents on 2026-08-14 were
+`165-206`, 33 GB, removed 2026-08-25. A playlist that only made sense with
+them goes out of `playlists.json` by hand, together with its `.m3u`.
+
 ## Gotchas
 
+- **A full SD card stops everything and nothing says so.** slskd fails every
+  download with `No space left on device` in its own log, Soularr reports
+  each as "failed to find a match" and Lidarr's wanted list just stops
+  shrinking. Filled up 2026-08-25 (`failed_imports/` alone was 14 GB);
+  `df -h /Volumes/Music` is the first check when nothing has arrived for
+  days.
 - **Soularr crashes rather than skipping when an album vanishes mid-flight.**
   Changing a metadata profile or deleting an artist while downloads are queued
   invalidates album ids; Soularr's cleanup path asks Lidarr for one, gets a
