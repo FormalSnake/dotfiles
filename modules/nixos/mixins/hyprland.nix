@@ -162,35 +162,11 @@ let
     left-handed=false
   '';
 
-  # SDDM Wayland greeter compositor launcher.
-  #
-  # HDMI-A-1 (the desk monitor) is wired to the NVIDIA dGPU, whose DRM card is a
-  # different device from the Intel iGPU that drives the internal eDP-1 panel,
-  # and the iGPU (boot_vga) is the card weston picks by default. The iGPU cannot
-  # see the HDMI port, so to show the login screen on HDMI we must point weston
-  # at the card that actually owns the connected HDMI connector:
-  #
-  #   • HDMI connected: run weston on that connector's card (the dGPU). The
-  #                     greeter appears on the desk monitor.
-  #   • HDMI absent: no --drm-device, Weston falls back to boot_vga (the
-  #                  iGPU), and the greeter appears on the internal panel.
-  #
-  # cardN numbering isn't stable across boots, so we resolve the card fresh from
-  # the connected connector's sysfs path every time the greeter starts (which is
-  # every boot AND every logout, since SDDM respawns the greeter each time). That
-  # makes log-out/log-in behave exactly like a fresh boot.
+  # SDDM Wayland greeter compositor launcher. Weston picks the boot_vga card,
+  # which on both hosts owns every connector (the g815 panel and HDMI both
+  # hang off the dGPU since the MUX switch, see systems/g815/default.nix).
   sddmGreeterCompositor = pkgs.writeShellScript "sddm-greeter-compositor" ''
-    set -u
-    drmarg=""
-    for status in /sys/class/drm/card*-HDMI*/status; do
-      [ -e "$status" ] || continue
-      if [ "$(cat "$status")" = "connected" ]; then
-        conn=$(basename "$(dirname "$status")")   # e.g., card0-HDMI-A-1
-        drmarg="--drm-device=''${conn%%-*}"        # e.g., --drm-device=card0
-        break
-      fi
-    done
-    exec ${pkgs.weston}/bin/weston --shell=kiosk -c ${sddmWestonIni} $drmarg
+    exec ${pkgs.weston}/bin/weston --shell=kiosk -c ${sddmWestonIni}
   '';
 in
 {
@@ -257,9 +233,6 @@ in
     services.displayManager.sddm = {
       enable = true;
       wayland.enable = true;
-      # Pick the greeter compositor's GPU based on whether HDMI is connected, so
-      # the login screen lands on the desk monitor (dGPU) when docked and falls
-      # back to the internal panel (iGPU) otherwise. See `sddmGreeterCompositor`.
       wayland.compositorCommand = toString sddmGreeterCompositor;
       package = pkgs.kdePackages.sddm;
       theme = "sddm-astronaut-theme";

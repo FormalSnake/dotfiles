@@ -71,9 +71,9 @@ in
   # without a `Restart=` the tray daemon just vanished until the next login,
   # taking `op` CLI and browser unlock with it. `on-failure` (not `always`) brings
   # it back on a crash while still honouring an intentional quit from the tray
-  # (clean exit 0). It does NOT interfere with the dGPU/AC relog or a reboot:
-  # those stop the unit via graphical-session.target going down (a commanded stop),
-  # and `Restart=` never fires on a commanded stop.
+  # (clean exit 0). A logout or reboot stops the unit via
+  # graphical-session.target going down (a commanded stop), and `Restart=`
+  # never fires on a commanded stop.
   systemd.user.services."1password" = {
     Unit = {
       Description = "1Password (tray)";

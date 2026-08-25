@@ -12,8 +12,16 @@ in
     # Builds the NVIDIA kernel module against boot.kernelPackages (CachyOS).
     services.xserver.videoDrivers = [ "nvidia" ];
 
-    # Required for the NVIDIA open module + Wayland.
-    boot.kernelParams = [ "nvidia-drm.modeset=1" ];
+    # nvidia-drm.modeset=1 is required for the open module + Wayland.
+    # acpi_backlight=native: with the MUX routing the panel through the dGPU
+    # the kernel still picks nvidia_wmi_ec_backlight (EC over WMI), which
+    # accepts writes that never reach the panel. nvidia-modeset only registers
+    # its own nvidia_0 backlight (the one that drives a GPU-connected eDP
+    # panel) when acpi_video_backlight_use_native() is true, which this forces.
+    boot.kernelParams = [
+      "nvidia-drm.modeset=1"
+      "acpi_backlight=native"
+    ];
 
     hardware.nvidia = {
       modesetting.enable = true;

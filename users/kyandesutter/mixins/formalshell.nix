@@ -74,8 +74,7 @@ in
         # The shell's main display: the desk monitor while it's plugged in,
         # the built-in panel otherwise, which is what e1504g always resolves
         # to. The screensaver animates only this screen (a frame is a
-        # full-screen repaint, plus a cross-GPU copy for the head hanging
-        # off the dGPU; every other screen holds the converged banner), and
+        # full-screen repaint; every other screen holds the converged banner), and
         # the monitor panel, the launcher's monitor view and the display
         # panel all name it.
         display.outputPriority = [ "HDMI" "internal" ];
