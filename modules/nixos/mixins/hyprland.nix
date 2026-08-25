@@ -2,149 +2,36 @@
 let
   cfg = config.kyan.desktop;
 
-  # dms binary (same package the home-manager user service runs), used by the
-  # lock-before-sleep hook below.
-  dms = inputs.dank-material-shell.packages.${pkgs.stdenv.hostPlatform.system}.default;
-
-  # FormalShell package, for the formalshell arm of the same hook.
-  # Same mpv override as users/kyandesutter/mixins/formalshell.nix, so both
-  # references resolve to one derivation.
-  formalshell = inputs.formalshell.packages.${pkgs.stdenv.hostPlatform.system}.default.override {
-    inherit (pkgs) mpv;
+  # qylock's Quickshell lock screen. Same builder call the programs.qylock
+  # module makes below, with the same arguments, so both references resolve to
+  # one derivation rather than two builds of the same 650 MB theme tree.
+  qylockTheme = "clockwork/orbital";
+  qylockThemeOptions = {
+    clockwork.orbital = {
+      themeMode = "dark";
+      enableWindup = true;
+    };
+  };
+  qylockLock = inputs.qylock.legacyPackages.${pkgs.stdenv.hostPlatform.system}.mkQuickshell {
+    defaultTheme = qylockTheme;
+    themeOptions = qylockThemeOptions;
   };
 
-  # Lock the session before the machine suspends. Runs as kyandesutter and talks
-  # to the running shell over its IPC socket in the user's XDG_RUNTIME_DIR.
-  # `ipc call lock lock` shows the lock screen without suspending. The suspend
-  # itself is driven by systemd-suspend.service, ordered after this via
-  # sleep.target. Always exit 0: a lock failure (no session, shell down) must
-  # never block the suspend.
-  #
-  # PATH: `dms ipc` execs `qs` (quickshell) rather than speaking the socket
-  # itself, and a system service has no user PATH, so without this the hook dies
-  # with `exec: "qs": executable file not found` and every suspend resumed into
-  # an UNLOCKED session (caught on the e1504g 2026-07-22; the script's exit-0
-  # masked it). The user profile holds the exact qs the session runs.
-  lockBeforeSleep =
-    if cfg.shell == "formalshell" then
-      # formalshell-lock-before-sleep pins its own qs binary and is
-      # exit-0-always by contract (FormalShell spec §8), so it only needs the
-      # user's XDG_RUNTIME_DIR; the timeout is belt and braces on top.
-      pkgs.writeShellScript "lock-before-sleep" ''
-        export XDG_RUNTIME_DIR="/run/user/$(${pkgs.coreutils}/bin/id -u)"
-        ${pkgs.coreutils}/bin/timeout 10 ${formalshell}/bin/formalshell-lock-before-sleep || true
-        exit 0
-      ''
-    else
-      pkgs.writeShellScript "lock-before-sleep" ''
-        export XDG_RUNTIME_DIR="/run/user/$(${pkgs.coreutils}/bin/id -u)"
-        export PATH="/etc/profiles/per-user/${config.users.users.kyandesutter.name}/bin:$PATH"
-        ${pkgs.coreutils}/bin/timeout 10 ${dms}/bin/dms ipc call lock lock || true
-        exit 0
-      '';
-
-  # sddm-astronaut on its "cyberpunk" preset, recoloured to a neon-green
-  # terminal palette and with the preset's static wallpaper swapped for a
-  # generated animated backdrop (modules/nixos/sddm-cyberdeck/). The greeter
-  # stays outside the matugen/Flexoki theming model on purpose: it runs before
-  # any user session exists, so there is no wallpaper to derive colours from.
-  #
-  # themeConfig lands as Themes/cyberpunk.conf.user, which SDDM reads on top of
-  # the preset's own conf. Empty values there do NOT override, they fall back to
-  # the preset, so every key here carries a real value. The preset wallpaper is
-  # kept and dimmed; the backdrop layers over it.
-  sddmAstronaut = (pkgs.sddm-astronaut.override {
-    embeddedTheme = "cyberpunk";
-    themeConfig = {
-      Font = "GeistMono Nerd Font";
-      FontSize = "13";
-      RoundCorners = "0";
-      HeaderText = "// system online";
-      HourFormat = "HH:mm";
-      DateFormat = "ddd dd MMM";
-
-      # Pushes the preset's artwork back so the rain and the form read over it.
-      DimBackground = "0.45";
-      BackgroundColor = "#04070a";
-      DimBackgroundColor = "#04070a";
-      FormBackgroundColor = "#04070a";
-
-      PartialBlur = "false";
-      FullBlur = "false";
-      HaveFormBackground = "false";
-      FormPosition = "center";
-      VirtualKeyboardPosition = "center";
-
-      HeaderTextColor = "#2ef58a";
-      DateTextColor = "#1f8f5c";
-      TimeTextColor = "#c8fff0";
-
-      LoginFieldBackgroundColor = "#0a1a16";
-      PasswordFieldBackgroundColor = "#0a1a16";
-      LoginFieldTextColor = "#c8fff0";
-      PasswordFieldTextColor = "#c8fff0";
-      UserIconColor = "#2ef58a";
-      PasswordIconColor = "#2ef58a";
-
-      PlaceholderTextColor = "#1f8f5c";
-      WarningColor = "#ff2b6b";
-
-      LoginButtonTextColor = "#04070a";
-      LoginButtonBackgroundColor = "#2ef58a";
-      SystemButtonsIconsColor = "#2ef58a";
-      SessionButtonTextColor = "#1f8f5c";
-      VirtualKeyboardButtonTextColor = "#1f8f5c";
-
-      DropdownTextColor = "#c8fff0";
-      DropdownSelectedBackgroundColor = "#12463a";
-      DropdownBackgroundColor = "#07120f";
-
-      HighlightTextColor = "#04070a";
-      HighlightBackgroundColor = "#2ef58a";
-      HighlightBorderColor = "#2ef58a";
-
-      HoverUserIconColor = "#00e5ff";
-      HoverPasswordIconColor = "#00e5ff";
-      HoverSystemButtonsIconsColor = "#00e5ff";
-      HoverSessionButtonTextColor = "#00e5ff";
-      HoverVirtualKeyboardButtonTextColor = "#00e5ff";
-
-      # Same shape the pixel_sakura preset had: centred form, no form panel,
-      # keyboard and system buttons hidden, last user pre-filled.
-      HideVirtualKeyboard = "true";
-      HideSystemButtons = "true";
-      HideLoginButton = "true";
-      UseRealName = "true";
-      ForceLastUser = "true";
-      PasswordFocus = "true";
-      HideCompletePassword = "true";
-      AllowEmptyPassword = "false";
-
-      TranslatePlaceholderUsername = "operator";
-      TranslatePlaceholderPassword = "passphrase";
-      TranslateLogin = "AUTHENTICATE";
-      TranslateLoginFailedWarning = "ACCESS DENIED";
-      TranslateCapslockWarning = "CAPS LOCK";
-    };
-  }).overrideAttrs (old: {
-    postInstall = (old.postInstall or "") + ''
-      themeDir=$out/share/sddm/themes/sddm-astronaut-theme
-      # installPhase copies the theme straight out of $src, so everything
-      # arrives read-only, directories included.
-      chmod u+w $themeDir $themeDir/Components $themeDir/Main.qml
-
-      install -Dm444 ${../sddm-cyberdeck/CyberBackground.qml} $themeDir/Components/CyberBackground.qml
-
-      # Splice the backdrop in as the first child of Main.qml's root Item. Every
-      # other element there sits at z: 1 or higher, so it lands underneath the
-      # form without reordering anything upstream owns.
-      sed -i '/^[[:space:]]*id: sizeHelper$/r ${../sddm-cyberdeck/background-loader.qml.frag}' $themeDir/Main.qml
-      grep -q CyberBackground.qml $themeDir/Main.qml || {
-        echo "Main.qml no longer has the 'id: sizeHelper' anchor; re-point the splice" >&2
-        exit 1
-      }
-    '';
-  });
+  # Lock the session before the machine suspends. Runs as kyandesutter and
+  # starts qylock-lock.service through the user manager, reached over
+  # $XDG_RUNTIME_DIR/bus (systemctl --user derives the bus address from
+  # XDG_RUNTIME_DIR when DBUS_SESSION_BUS_ADDRESS is unset, which it is in a
+  # system unit). Starting an already-running unit is a no-op, so the paths
+  # where the keybind locked first cost nothing. The suspend itself is driven
+  # by systemd-suspend.service, ordered after this via sleep.target. Always
+  # exit 0: a lock failure (no session, no user manager) must never block the
+  # suspend.
+  lockBeforeSleep = pkgs.writeShellScript "lock-before-sleep" ''
+    export XDG_RUNTIME_DIR="/run/user/$(${pkgs.coreutils}/bin/id -u)"
+    ${pkgs.coreutils}/bin/timeout 10 \
+      ${pkgs.systemd}/bin/systemctl --user start qylock-lock.service || true
+    exit 0
+  '';
 
   # weston.ini for the SDDM Wayland greeter compositor. Mirrors what the NixOS
   # sddm module generates by default (keyboard from the xkb config, the module's
@@ -172,14 +59,20 @@ in
 {
   # Imported unconditionally. Everything in it is inert until
   # services.formalshell.enable flips on below.
-  imports = [ inputs.formalshell.nixosModules.formalshell ];
+  #
+  # qylock declares programs.qylock, which owns both the SDDM theme and the
+  # qylock-lock wrapper (configured in the programs.qylock block below).
+  imports = [
+    inputs.formalshell.nixosModules.formalshell
+    inputs.qylock.nixosModules.default
+  ];
 
   options.kyan.desktop = {
     enable = lib.mkEnableOption "Hyprland desktop (system side)";
     shell = lib.mkOption {
       type = lib.types.enum [ "dms" "formalshell" ];
       default = "dms";
-      description = "Which desktop shell owns the session (bar, lock screen, notification daemon). Picks the lock-before-sleep hook here and gates the shell-facing binds and user services in users/kyandesutter/mixins/{hyprland,formalshell}.nix.";
+      description = "Which desktop shell owns the session (bar, notification daemon). Gates the shell-facing binds and user services in users/kyandesutter/mixins/{hyprland,formalshell}.nix. Not the lock screen: qylock owns that on both shells.";
     };
   };
 
@@ -227,22 +120,61 @@ in
       };
     };
 
-    # SDDM (Qt6, Wayland) with the Keyitdev "sddm-astronaut" theme. SDDM lists
-    # the Hyprland uwsm session (hyprland-uwsm.desktop, installed by
-    # programs.hyprland) from /run/current-system/sw/share/wayland-sessions.
+    # SDDM (Qt6, Wayland). SDDM lists the Hyprland uwsm session
+    # (hyprland-uwsm.desktop, installed by programs.hyprland) from
+    # /run/current-system/sw/share/wayland-sessions. The theme itself is set by
+    # programs.qylock below, not here.
     services.displayManager.sddm = {
       enable = true;
       wayland.enable = true;
       wayland.compositorCommand = toString sddmGreeterCompositor;
       package = pkgs.kdePackages.sddm;
-      theme = "sddm-astronaut-theme";
-      # Qt runtime the theme's QML needs (svg, multimedia for the animated
-      # background, the on-screen virtual keyboard).
-      extraPackages = with pkgs.kdePackages; [
-        qtsvg
-        qtmultimedia
-        qtvirtualkeyboard
-      ];
+      # On-screen keyboard. The Qt runtime clockwork's QML needs (svg,
+      # multimedia, Qt5Compat) is contributed by the qylock module.
+      extraPackages = [ pkgs.kdePackages.qtvirtualkeyboard ];
+    };
+
+    # qylock: one theme tree rendered by two frontends, the SDDM greeter and a
+    # Quickshell `ext-session-lock-v1` client. clockwork/orbital is the black
+    # rotating-dial clock; enableWindup is its spin-up intro, which the lock
+    # frontend also uses to time its exit animation.
+    #
+    # This replaces both the sddm-astronaut cyberdeck greeter and the shell's
+    # own lock screen, so the greeter and the lock screen finally match. It
+    # stays outside the matugen/Flexoki theming model for the same reason the
+    # cyberdeck greeter did: the greeter runs before any user session exists,
+    # so there is no wallpaper to derive colours from.
+    programs.qylock = {
+      enable = true;
+      theme = qylockTheme;
+      themeOptions = qylockThemeOptions;
+    };
+
+    # The lock screen, as a user unit. qylock-lock runs for as long as the
+    # session is locked, so it has to outlive whatever raised it: the keybind
+    # in users/kyandesutter/mixins/hyprland.nix and lockBeforeSleep above both
+    # start this unit instead of exec'ing the binary. PartOf, not WantedBy: it
+    # is only ever started on demand, but it must not survive the compositor.
+    systemd.user.services.qylock-lock = {
+      description = "qylock lock screen";
+      partOf = [ "graphical-session.target" ];
+      after = [ "graphical-session.target" ];
+      # bash: qylock-lock is a makeWrapper script around a lock.sh carrying a
+      # `#!/usr/bin/env bash` shebang, and the wrapper's own PATH prefix
+      # (quickshell, psmisc, systemd, coreutils) has no shell in it. A unit
+      # PATH is the systemd default, not the session's, so without this the
+      # lock dies at exec with `env: bash: No such file or directory`.
+      # hyprctl: the lock client sets misc:allow_session_lock_restore through
+      # it on a successful unlock.
+      path = [ pkgs.bash config.programs.hyprland.package ];
+      serviceConfig = {
+        Type = "exec";
+        ExecStart = "${qylockLock}/bin/qylock-lock";
+        # The lock surface is only handed to the compositor a beat after the
+        # process starts. Hold the start job over that gap so a suspend queued
+        # right behind it cannot race the screen going black.
+        ExecStartPost = "${pkgs.coreutils}/bin/sleep 1";
+      };
     };
 
     # polkit agent + secrets/keyring so GUI auth prompts and saved logins work.
@@ -430,13 +362,6 @@ in
 
       # LocalSend, driven by the shell menu SHARE route (port below).
       localsend
-
-      # SDDM "sddm-astronaut" theme on the cyberpunk preset, recoloured and
-      # carrying the generated animated backdrop. See the `sddmAstronaut`
-      # let-binding; it's independent of the app theming.
-      # Installed into the system profile so SDDM finds it under
-      # .../share/sddm/themes/sddm-astronaut-theme.
-      sddmAstronaut
 
       brightnessctl
       ddcutil # external-monitor brightness over DDC/CI (the shell's brightness backend; drives the slider + the XF86MonBrightness keybinds)

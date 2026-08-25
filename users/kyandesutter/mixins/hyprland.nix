@@ -12,6 +12,12 @@ let
   fsBin = "${config.programs.formalshell.package}/bin/formalshell";
   fsIpc = args: "${fsBin} ipc --any-display call " + lib.concatStringsSep " " args;
 
+  # Lock screen (qylock, clockwork/orbital), owned by neither shell. The unit
+  # is declared in modules/nixos/mixins/hyprland.nix; starting it returns as
+  # soon as the lock surface is up, so `&& systemctl suspend` behind it
+  # suspends onto the locked screen rather than after the unlock.
+  lockCmd = "${pkgs.systemd}/bin/systemctl --user start qylock-lock.service";
+
   # NVIDIA dGPU flag from the host (same gate as dms.nix/godot.nix). The g815
   # specifics below (the AQ_DRM_DEVICES pick, the nvidia env, the two-monitor
   # layout) are gated on it, so iGPU-only hosts (e1504g) get a plain Hyprland
@@ -156,8 +162,8 @@ let
       hl.bind(mod .. " + plus", hl.dsp.exec_cmd("${fsIpc [ "console" "toggle" ]}"))
       hl.bind(mod .. " + SHIFT + T", hl.dsp.exec_cmd("${fsBin} theme mode toggle"))
       -- Sleep: lock then suspend on demand, so resume lands on the lock screen
-      -- (the shell has no combined verb, and exec_cmd runs through sh -c).
-      hl.bind(mod .. " + SHIFT + Escape", hl.dsp.exec_cmd("${fsIpc [ "lock" "lock" ]} && systemctl suspend"))
+      -- (exec_cmd runs through sh -c).
+      hl.bind(mod .. " + SHIFT + Escape", hl.dsp.exec_cmd("${lockCmd} && systemctl suspend"))
 
       -- Screenshots via the shell (M12 screenshot IPC target: grim/slurp on the
       -- wrapper PATH, saves to screenshot.directory and wl-copy's the image,
@@ -198,8 +204,7 @@ let
       hl.bind(mod .. " + ntilde", hl.dsp.exec_cmd("${dmsBin} ipc call clipboard toggle"))
       hl.bind(mod .. " + SHIFT + T", hl.dsp.exec_cmd("${dmsBin} ipc call theme toggle"))
       -- Sleep: lock then suspend on demand, so resume lands on the lock screen.
-      -- DMS's lock IPC only locks (no combined lock+suspend verb).
-      hl.bind(mod .. " + SHIFT + Escape", hl.dsp.exec_cmd("${dmsBin} ipc call lock lock && systemctl suspend"))
+      hl.bind(mod .. " + SHIFT + Escape", hl.dsp.exec_cmd("${lockCmd} && systemctl suspend"))
 
       -- Screenshots via DMS (owner rule: the shell owns it, so the binds
       -- survive compositor changes). `dms screenshot` is a top-level

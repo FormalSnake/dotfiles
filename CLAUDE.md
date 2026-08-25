@@ -215,11 +215,12 @@ pure Nix data in
 `light`/`dark` terminal views), and `mixins/flexoki/` themes the CLI tools from
 it — static Flexoki dark on Linux, appearance-following light/dark on macOS
 (where Flexoki is the *primary* scheme, not a fallback: Ghostty uses its built-in
-Flexoki Light/Dark, bat uses `auto:system`, fish re-selects by appearance). SDDM
-is independent (the `sddm-astronaut` cyberpunk preset, recoloured neon green
-with a generated animated backdrop in `modules/nixos/sddm-cyberdeck/`); Herdr
-pins Flexoki Dark via `[theme.custom]` tokens sourced from `palette.nix`
-(`mixins/herdr.nix`) — it used to follow ghostty via its `terminal` theme, but
+Flexoki Light/Dark, bat uses `auto:system`, fish re-selects by appearance). The
+greeter and the lock screen sit outside all of it: both are qylock on
+`clockwork/orbital` (`programs.qylock` in `modules/nixos/mixins/hyprland.nix`),
+since the greeter runs before any user session exists and so has no wallpaper
+to derive colours from. Herdr pins Flexoki Dark via `[theme.custom]` tokens
+sourced from `palette.nix` (`mixins/herdr.nix`) — it used to follow ghostty via its `terminal` theme, but
 that reads the terminal palette over OSC, which doesn't survive SSH/mosh (herdr
 runs on the macbook, reached over SSH), so the static tokens keep it correct and
 low-contrast remotely. When
@@ -246,9 +247,9 @@ removed on 2026-08-24 (git has them). What remains:
   on nvidia. PRIME and the per-app GPU wrappers are gone.
 - tuned-ppd starts in `performance` (`services.tuned.ppdSettings` on the g815).
 - `modules/nixos/mixins/asus.nix`: asusd, 80% charge limit, Aura keyboard seed.
-- `lock-before-sleep` (`modules/nixos/mixins/hyprland.nix`) locks before
-  sleep.target and must never fail (exit-0 always) so a dead shell can't block
-  suspend.
+- `lock-before-sleep` (`modules/nixos/mixins/hyprland.nix`) starts
+  `qylock-lock.service` before sleep.target and must never fail (exit-0 always)
+  so a dead session can't block suspend.
 
 ## Autostart (g815)
 
