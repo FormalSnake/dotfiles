@@ -158,9 +158,9 @@
   # see mixins/steam.nix).
   kyan.steam.enable = true;
 
-  # Modrinth App. Instance content is shared with the Windows install by
-  # sync-minecraft-from-windows (./windows-dualboot.nix), so there is one set
-  # of mods to keep up to date instead of two.
+  # Modrinth App. The instance directory is the Windows one, symlinked by
+  # link-minecraft-to-windows (./windows-dualboot.nix), so both OSes launch the
+  # same mods, config and worlds instead of two copies that drift.
   kyan.minecraft.enable = true;
 
   # ASUS laptop support: asusd, Aura keyboard RGB (Flexoki blue), 80%

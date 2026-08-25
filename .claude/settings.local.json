@@ -6,7 +6,8 @@
       "Bash(rg -rn \"SpotifyUri\" --files-with-matches src/)",
       "Bash(rg -n \"pub enum SpotifyUri\" -r \"\" src/)",
       "Read(//Users/kyandesutter/.cargo/registry/src/**)",
-      "Read(//private/tmp/kopuz-spotify-test/**)"
+      "Read(//private/tmp/kopuz-spotify-test/**)",
+      "Bash(ssh g815 *)"
     ]
   }
 }
