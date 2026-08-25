@@ -244,7 +244,8 @@ in
   # Nix `''` strings are safe here because the Lua contains no literal `${…}`:
   # every `${…}` below is a deliberate Nix interpolation of a store path.
   # API reference: https://wiki.hypr.land/Configuring/ (hl.config, hl.monitor,
-  # hl.env, hl.bind, hl.dsp.*, hl.window_rule, hl.workspace_rule, hl.gesture).
+  # hl.env, hl.bind, hl.dsp.*, hl.window_rule, hl.layer_rule, hl.workspace_rule,
+  # hl.gesture).
   xdg.configFile."hypr/hyprland.lua".text = ''
     -- Monitors
     ${monitors}
@@ -615,6 +616,15 @@ in
     -- sizes itself to the previewed content, so no size rule.
     hl.window_rule({ match = { class = "^(org.gnome.NautilusPreviewer)$" },
       float = true, center = true })
+
+    -- Blur behind the shell's own layer surfaces: FormalShell paints its cards
+    -- at theme.surfaceOpacity, so the blur under them is what shows through.
+    -- ignore_alpha 0.2 keeps the fully transparent gaps in the bar unblurred.
+    hl.layer_rule({ match = { namespace = "^(formalshell:bar)$" }, blur = true, ignore_alpha = 0.2 })
+    hl.layer_rule({ match = { namespace = "^(formalshell:panel)$" }, blur = true, ignore_alpha = 0.2 })
+    hl.layer_rule({ match = { namespace = "^(formalshell:menu)$" }, blur = true, ignore_alpha = 0.2 })
+    hl.layer_rule({ match = { namespace = "^(formalshell:notifications-center)$" }, blur = true, ignore_alpha = 0.2 })
+    hl.layer_rule({ match = { namespace = "^(formalshell:tooltip)$" }, blur = true, ignore_alpha = 0.2 })
 
     -- Border colours: persist the last wallpaper palette across reloads
     -- The shell renders the live wallpaper-derived border colours to
