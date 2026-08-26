@@ -57,14 +57,19 @@ let
     runtimeInputs = [
       pkgs.ntfs3g # ntfsinfo, ntfsfix
       pkgs.gawk
+      pkgs.util-linux # findmnt
     ];
     text = ''
       dev="${winDevice}"
       [ -b "$dev" ] || exit 0
+      # Never touch a mounted volume: the force flag below opens one happily,
+      # and ntfs3 keeps the dirty bit set for as long as it holds the volume
+      # read-write, so a mounted volume always reads dirty.
+      if findmnt -rn -S "$dev" >/dev/null 2>&1; then exit 0; fi
 
-      # ntfsinfo refuses a volume held open by anything, the already-mounted
-      # case included, which is also the case with nothing to do.
-      flags=$(ntfsinfo -m "$dev" 2>/dev/null | awk '/Volume Flags:/ { print $3 }') || true
+      # Force, because a dirty volume is exactly what ntfsinfo refuses to open
+      # otherwise. It only ever reads.
+      flags=$(ntfsinfo -f -m "$dev" 2>/dev/null | awk '/Volume Flags:/ { print $3 }') || true
       [ -n "$flags" ] || exit 0
       # Bit 0 of the volume flags is VOLUME_IS_DIRTY.
       [ $(( flags & 1 )) -eq 1 ] || exit 0
