@@ -54,7 +54,7 @@ in
         bar.position = "left";
         # The screen frame (2026-08-26): the bar's fill carried round the other
         # three edges as a 10px band, the desktop in a rounded cut-out.
-        frame.thickness = 10;
+        frame.thickness = 6;
         frame.radius = 20;
         bar.layout.center = [ "clock" "nowPlaying" "visualizer" ];
         # Two-tier right region. A chevron in the right region governs what
