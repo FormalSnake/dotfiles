@@ -19,4 +19,5 @@ in
   "wstunnel-endpoint.age".publicKeys    = [ kyan ];
   "couchdb-admin.age".publicKeys        = [ kyan ];
   "livesync-passphrase.age".publicKeys  = [ kyan ];
+  "office-dc-bot.age".publicKeys        = [ kyan ];
 }

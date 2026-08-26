@@ -27,6 +27,7 @@
         wstunnel-endpoint    = mkSecret "wstunnel-endpoint";
         couchdb-admin        = mkSecret "couchdb-admin";
         livesync-passphrase  = mkSecret "livesync-passphrase";
+        office-dc-bot        = mkSecret "office-dc-bot";
       };
   };
 }

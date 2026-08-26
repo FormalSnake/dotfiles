@@ -23,6 +23,10 @@
   # over Tailscale only.
   kyan.music.enable = true;
 
+  # Office Discord bot: watches the Minecraft server and answers /status. Runs
+  # as a container on the local Docker, source pinned in the mixin.
+  kyan.officeDcBot.enable = true;
+
   # Singles-led artists from the top of the scrobble history. Names must match
   # Lidarr's spelling, not MusicBrainz's or the scrobble export's.
   kyan.music.singlesArtists = [

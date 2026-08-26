@@ -20,6 +20,7 @@
       ./mixins/obsidian-livesync-daemon.nix
       ./mixins/portless-proxy.nix
       ./mixins/music.nix
+      ./mixins/office-dc-bot.nix
       ./profiles
     ];
   };
