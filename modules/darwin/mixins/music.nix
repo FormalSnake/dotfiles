@@ -597,16 +597,40 @@ let
       [ -n "$singles_id" ] && echo "reconcile: created 'Singles and Albums' metadata profile"
     fi
 
-    if [ -n "$singles_id" ]; then
-      artists=$(curl -sf -H "X-Api-Key: $LIDARR_KEY" http://localhost:8686/api/v1/artist) || exit 0
-      for want in ${lib.escapeShellArgs cfg.singlesArtists}; do
+    # Every profile cloned from Standard denies the secondary type Soundtrack,
+    # so a film credit stays invisible even on an artist pinned to the singles
+    # profile above (Diplo & Oliver Tree's ULTRAMAN, from Ultraman: Rising).
+    # Allowing it on that profile instead would refresh all 130-odd artists
+    # sharing it, and the ones still carrying monitorNewItems=all would monitor
+    # whatever the refresh turned up.
+    soundtracks_id=$(printf '%s' "$profiles" | jq -r '(map(select(.name=="Singles, Albums and Soundtracks"))[0].id) // empty')
+
+    if [ -z "$soundtracks_id" ] && [ -n "$singles_id" ]; then
+      soundtracks_id=$(printf '%s' "$profiles" \
+        | jq --argjson s "$singles_id" 'map(select(.id==$s))[0] | del(.id)
+              | .name="Singles, Albums and Soundtracks"
+              | .secondaryAlbumTypes |= map(if .albumType.name=="Soundtrack" then .allowed=true else . end)' \
+        | curl -sf -X POST -H "X-Api-Key: $LIDARR_KEY" -H "Content-Type: application/json" -d @- \
+            http://localhost:8686/api/v1/metadataprofile | jq -r '.id // empty')
+      [ -n "$soundtracks_id" ] && echo "reconcile: created 'Singles, Albums and Soundtracks' metadata profile"
+    fi
+
+    artists=""
+    pin_artists() {
+      pid=$1 label=$2
+      shift 2
+      [ -n "$pid" ] || return 0
+      if [ -z "$artists" ]; then
+        artists=$(curl -sf -H "X-Api-Key: $LIDARR_KEY" http://localhost:8686/api/v1/artist) || return 0
+      fi
+      for want in "$@"; do
         aid=$(printf '%s' "$artists" | jq -r --arg n "$want" '(map(select(.artistName==$n))[0].id) // empty')
         cur=$(printf '%s' "$artists" | jq -r --arg n "$want" '(map(select(.artistName==$n))[0].metadataProfileId) // empty')
         [ -n "$aid" ] || continue
-        [ "$cur" = "$singles_id" ] && continue
+        [ "$cur" = "$pid" ] && continue
 
         printf '%s' "$artists" \
-          | jq --arg n "$want" --argjson p "$singles_id" 'map(select(.artistName==$n))[0] | .metadataProfileId=$p' \
+          | jq --arg n "$want" --argjson p "$pid" 'map(select(.artistName==$n))[0] | .metadataProfileId=$p' \
           | curl -sf -X PUT -H "X-Api-Key: $LIDARR_KEY" -H "Content-Type: application/json" -d @- \
               "http://localhost:8686/api/v1/artist/$aid" >/dev/null || continue
 
@@ -615,9 +639,13 @@ let
         curl -sf -X POST -H "X-Api-Key: $LIDARR_KEY" -H "Content-Type: application/json" \
           -d "{\"name\":\"RefreshArtist\",\"artistId\":$aid}" \
           http://localhost:8686/api/v1/command >/dev/null
-        echo "reconcile: pinned $want to 'Singles and Albums'"
+        echo "reconcile: pinned $want to '$label'"
       done
-    fi
+      return 0
+    }
+
+    pin_artists "$singles_id" "Singles and Albums" ${lib.escapeShellArgs cfg.singlesArtists}
+    pin_artists "$soundtracks_id" "Singles, Albums and Soundtracks" ${lib.escapeShellArgs cfg.soundtrackArtists}
 
     # The Kodi consumer only writes the artist poster while reacting to a cover
     # download, so an artist whose covers Lidarr already cached never gets one
@@ -1694,6 +1722,17 @@ in
         Artists pinned to a metadata profile that allows Single and EP releases,
         matched on exact Lidarr artist name. Use for artists whose output is
         singles-led, where the stock profile would show almost nothing.
+      '';
+    };
+
+    soundtrackArtists = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ ];
+      description = ''
+        Artists pinned to a metadata profile that additionally allows the
+        secondary type Soundtrack, matched on exact Lidarr artist name. Use for
+        an artist whose wanted release is a film credit; every other profile
+        drops those.
       '';
     };
 

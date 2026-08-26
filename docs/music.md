@@ -223,6 +223,15 @@ reapplies them every 600s:
   nothing. Created by name (ids are not stable) and pinned to the artists in
   `kyan.music.singlesArtists`. Pinning is followed by a `RefreshArtist`;
   without it Lidarr never re-reads the newly allowed releases.
+- **Metadata profile `Singles, Albums and Soundtracks`** — a clone of the one
+  above that also allows the *secondary* type Soundtrack, pinned to
+  `kyan.music.soundtrackArtists`. Every profile descended from "Standard"
+  drops soundtrack releases, so a film credit stays invisible however the
+  primary types read: Diplo & Oliver Tree's `ULTRAMAN` (from *Ultraman:
+  Rising*) was missing for that reason alone. It is a separate profile rather
+  than a widening of the singles one because that would refresh all 135
+  artists sharing it at once, and the 53 still carrying `monitorNewItems=all`
+  would monitor whatever the refresh turned up.
 - **A service missing from the stack** — `docker compose start`, run first and
   ahead of the early exits, since a stopped Lidarr would otherwise abort the
   whole reconcile. `compose up` can race a container still shutting down from
