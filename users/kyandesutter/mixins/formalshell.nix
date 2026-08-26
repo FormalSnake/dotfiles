@@ -34,6 +34,16 @@ in
         # Syncthing-synced wallpaper folder (modules/nixos/mixins/syncthing.nix)
         # for the picker's wallpaper mode.
         picker.directory = "${config.home.homeDirectory}/Pictures/Wallpapers";
+        # Lock: qylock's sword screen, the same theme the SDDM greeter draws
+        # (programs.qylock in modules/nixos/mixins/hyprland.nix). Only the
+        # SUPER+SHIFT+Escape keybind reached it before; every trigger inside
+        # the shell (the lock hot corner, the screensaver's lockAfterSeconds
+        # chain, the launcher's Lock row, `lock lock` over IPC) raised the
+        # shell's own surface, so which lock screen you got depended on how
+        # you locked. Starting the unit instead of exec'ing the binary is what
+        # the keybind and lock-before-sleep already do: it is idempotent, and
+        # the lock outlives whatever raised it.
+        lock.command = [ "${pkgs.systemd}/bin/systemctl" "--user" "start" "qylock-lock.service" ];
         # Today's default right region plus the opt-in github (M12) and
         # AI-usage (M14) widgets: gh comes from mixins/gh.nix, usage reads
         # ~/.claude/.credentials.json and the codex CLI; all three degrade
