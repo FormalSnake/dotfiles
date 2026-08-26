@@ -43,9 +43,9 @@
     dates = "daily";
   };
 
-  # `sudo nixos-rebuild` evaluates as root, so the private flake inputs
-  # (CanaryOrchestrator, FormalShell) are fetched over SSH by root (which has
-  # an empty ~/.ssh and no way to answer a host-key prompt), so the fetch died
+  # `sudo nixos-rebuild` evaluates as root, so the private FormalShell flake
+  # input is fetched over SSH by root (which has an empty ~/.ssh and no way to
+  # answer a host-key prompt), so the fetch died
   # with "Host key verification failed" and took the whole rebuild with it.
   # System-wide known_hosts fixes it for every user, root included. The mac is
   # unaffected: darwin-rebuild evaluates as the invoking user.

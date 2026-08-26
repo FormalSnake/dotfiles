@@ -94,16 +94,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # CanaryOrchestrator: our remote-dev-session orchestrator (canaryd + canary
-    # CLI + the Linux `canary-desktop` launcher/XDG entry). Private repo, so
-    # `github:` 404s without an access token; git+ssh fetches with the user's
-    # own key, which every box already has authorized (pure, unlike the old
-    # `builtins.getFlake` local-checkout import this replaces (af8161e7)).
-    canary = {
-      url = "git+ssh://git@github.com/FormalSnake/CanaryOrchestrator";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     # claude-code, tracked at upstream release cadence (the flake's CI bumps it
     # hourly; nixpkgs lags by days). No `inputs.nixpkgs.follows`, its cachix
     # cache (claude-code.cachix.org) is keyed to its own nixpkgs pin, so
