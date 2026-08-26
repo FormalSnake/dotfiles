@@ -136,7 +136,7 @@
     # is keyed to the flake's own nixpkgs pin, and following ours would mean a
     # full Rust + Dioxus + v8 build on every host.
     kopuz = {
-      url = "github:Kopuz-org/kopuz/v0.16.0";
+      url = "github:Kopuz-org/kopuz/v0.16.1";
     };
 
     # NixOS (g815 gaming laptop) inputs
