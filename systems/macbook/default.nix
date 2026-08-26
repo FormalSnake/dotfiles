@@ -45,7 +45,6 @@
     "Asentrix"
     "Big Shaq"
     "DJ Unzensiert"
-    "Diplo"
     "Douvelle19"
     "HARDSTYLE CVNT"
     "High Beam"
@@ -119,6 +118,8 @@
     "prod. DTM"
     "wev"
   ];
+
+  kyan.music.soundtrackArtists = [ "Diplo" ];
 
   users.users.kyandesutter = {
     name = "kyandesutter";
