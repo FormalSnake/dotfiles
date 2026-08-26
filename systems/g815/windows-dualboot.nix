@@ -36,6 +36,49 @@ let
     '';
   };
 
+  # Windows C:, named by the mount below and by the dirty-flag clearer.
+  winUuid = "D0409F99409F84BE";
+  winDevice = "/dev/disk/by-uuid/${winUuid}";
+
+  # An unclean Windows shutdown parks the NTFS volume with its dirty flag set,
+  # and ntfs3 refuses a dirty volume outright rather than falling back to
+  # read-only, so /mnt/windows and the shared Modrinth profile below simply
+  # vanish until Windows has been booted and shut down again. This clears a
+  # stale flag before the mount instead.
+  #
+  # Deliberately narrow. It only ever clears the flag, and only once ntfsfix's
+  # read-only pass agrees the metadata is consistent, so a volume that really
+  # does need chkdsk keeps the flag and fails the mount, which is the state
+  # that should still send you to Windows. It is no help against Fast Startup
+  # or hibernation either: ntfsfix refuses a hibernated volume, and that
+  # sleeping Windows session is exactly what a read-write mount would eat.
+  clear-ntfs-dirty = pkgs.writeShellApplication {
+    name = "clear-ntfs-dirty";
+    runtimeInputs = [
+      pkgs.ntfs3g # ntfsinfo, ntfsfix
+      pkgs.gawk
+    ];
+    text = ''
+      dev="${winDevice}"
+      [ -b "$dev" ] || exit 0
+
+      # ntfsinfo refuses a volume held open by anything, the already-mounted
+      # case included, which is also the case with nothing to do.
+      flags=$(ntfsinfo -m "$dev" 2>/dev/null | awk '/Volume Flags:/ { print $3 }') || true
+      [ -n "$flags" ] || exit 0
+      # Bit 0 of the volume flags is VOLUME_IS_DIRTY.
+      [ $(( flags & 1 )) -eq 1 ] || exit 0
+
+      if ! ntfsfix -n "$dev" >/dev/null 2>&1; then
+        echo "$dev is dirty and the ntfsfix check pass failed: leaving it, boot Windows" >&2
+        exit 0
+      fi
+      echo "$dev carries a stale dirty flag, clearing it"
+      ntfsfix -d "$dev" || echo "ntfsfix -d failed, the mount will refuse the volume" >&2
+      exit 0
+    '';
+  };
+
   # One shared Modrinth instance across both OSes: the NixOS profile directory
   # IS the Windows one, symlinked whole. Mods, config, options, keybinds,
   # waypoints and caches are then a single set of files instead of two that
@@ -98,15 +141,15 @@ in
   # one set of files rather than two kept in step by hand.
   #
   # Read-write holds only while the NTFS volume is clean. ntfs3 refuses a dirty
-  # volume outright rather than falling back to read-only, so if Fast Startup
-  # or hibernation comes back on (either one parks the volume dirty on every
-  # Windows shutdown) this mount vanishes at boot and the profile symlink
-  # dangles. Both are off on the Windows side; keep them off. A dirty bit left
-  # by an unclean shutdown clears the same way, by booting Windows and shutting
-  # it down properly.
+  # volume outright rather than falling back to read-only. A dirty bit left by
+  # an unclean shutdown is cleared before the mount by clear-ntfs-dirty above;
+  # Fast Startup and hibernation are the cases that survive it, since either
+  # one parks a live Windows session on the volume and ntfsfix will not touch
+  # that. Both are off on the Windows side; keep them off, or this mount
+  # vanishes at boot and the profile symlink dangles.
   # nofail keeps a detached or unreadable volume from holding up boot.
   fileSystems."/mnt/windows" = {
-    device = "/dev/disk/by-uuid/D0409F99409F84BE";
+    device = winDevice;
     fsType = "ntfs3";
     options = [
       "rw"
@@ -117,6 +160,27 @@ in
       "noatime"
       "nofail"
     ];
+  };
+
+  # Ordered into the mount rather than run once at boot: Requires from the
+  # mount unit means it also runs ahead of a manual `systemctl start
+  # mnt-windows.mount`. DefaultDependencies=false keeps it out of the ordering
+  # cycle a normal service forms with a local-fs mount (services come after
+  # basic.target, which comes after local-fs.target, which waits on this
+  # mount); the shutdown pair is what that switch costs.
+  systemd.services.clear-ntfs-dirty = {
+    description = "Clear a stale NTFS dirty flag on the Windows volume";
+    before = [ "mnt-windows.mount" "shutdown.target" ];
+    requiredBy = [ "mnt-windows.mount" ];
+    conflicts = [ "shutdown.target" ];
+    # The by-uuid device unit, so the check cannot run before udev has settled
+    # on the partition. systemd-escape of ${winDevice}.
+    after = [ "dev-disk-by\\x2duuid-${winUuid}.device" ];
+    unitConfig.DefaultDependencies = false;
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "${clear-ntfs-dirty}/bin/clear-ntfs-dirty";
+    };
   };
 
   # Windows chainload. Host-specific (this laptop dual-boots the gaming Windows
