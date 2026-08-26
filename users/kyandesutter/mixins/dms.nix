@@ -457,6 +457,35 @@ in
     "matugen/config.toml".text = ''
       [config]
 
+      # An ANSI ramp for the templates that need one. Material has no green
+      # and no yellow, so a terminal template reading its slots off
+      # primary/secondary/tertiary paints green, yellow and magenta in the
+      # accent's own hue and the whole terminal comes out one colour. These
+      # sixteen give it eight real hues instead: `blend = false` keeps each
+      # hue and only tones it for the mode, so a wallpaper palette still
+      # drives the lightness. Seeds are Flexoki's 400 and 600 stops, and a
+      # wallpaper FormalShell pins to Flexoki (path carrying "flexoki")
+      # replaces them with the true Flexoki tones before matugen runs, so
+      # `<hue>` and `<hue>_alt` are ANSI 1-6 and 9-14 exactly as Flexoki's own
+      # terminal ports spend them.
+      [config.custom_colors]
+      red = { color = "#D14D41", blend = false }
+      orange = { color = "#DA702C", blend = false }
+      yellow = { color = "#D0A215", blend = false }
+      green = { color = "#879A39", blend = false }
+      cyan = { color = "#3AA99F", blend = false }
+      blue = { color = "#4385BE", blend = false }
+      purple = { color = "#8B7EC8", blend = false }
+      magenta = { color = "#CE5D97", blend = false }
+      red_alt = { color = "#AF3029", blend = false }
+      orange_alt = { color = "#BC5215", blend = false }
+      yellow_alt = { color = "#AD8301", blend = false }
+      green_alt = { color = "#66800B", blend = false }
+      cyan_alt = { color = "#24837B", blend = false }
+      blue_alt = { color = "#205EA6", blend = false }
+      purple_alt = { color = "#5E409D", blend = false }
+      magenta_alt = { color = "#A02F6F", blend = false }
+
       [templates]
 
       # ASUS Aura keyboard. Output file doubles as the "current accent" cache
