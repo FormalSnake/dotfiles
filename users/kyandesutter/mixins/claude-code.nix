@@ -28,7 +28,14 @@ in
     # Settings are read from the repo at build time. Trade-off: edits to settings.json
     # require a rebuild (no live-edit). The file is copied into the store at eval time,
     # required for pure-mode `darwin-rebuild switch`.
-    settings = builtins.fromJSON (builtins.readFile ../claude/settings.json);
+    settings = builtins.fromJSON (builtins.readFile ../claude/settings.json) // {
+      # The Bash tool never runs fish: claude-code rejects an unsupported $SHELL
+      # and falls back to zsh. The prompt's "Shell:" line still echoes $SHELL
+      # verbatim, so a fish login shell tells the model it is in fish and it
+      # writes fish syntax that zsh then rejects. Point $SHELL at the shell that
+      # actually runs; fish stays the login shell everywhere else.
+      env.SHELL = lib.getExe pkgs.zsh;
+    };
   };
 
   home.file = {
