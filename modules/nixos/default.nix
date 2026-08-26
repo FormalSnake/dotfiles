@@ -27,6 +27,7 @@
       ./mixins/steam.nix
       ./mixins/dualsense.nix
       ./mixins/minecraft.nix
+      ./mixins/roblox.nix
       ./mixins/comms.nix
       ./mixins/asus.nix
       ./mixins/tuned.nix

@@ -163,6 +163,11 @@
   # same mods, config and worlds instead of two copies that drift.
   kyan.minecraft.enable = true;
 
+  # Roblox via Sober (mixins/roblox.nix). Android-runtime client, needs
+  # Vulkan, so it stays on the dGPU host rather than the shared desktop
+  # profile.
+  kyan.roblox.enable = true;
+
   # ASUS laptop support: asusd, Aura keyboard RGB (Flexoki blue), 80%
   # battery charge limit.
   kyan.asus.enable = true;
