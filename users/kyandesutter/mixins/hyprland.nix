@@ -11,6 +11,9 @@ let
   useFormalshell = (((osConfig.kyan or { }).desktop or { }).shell or "dms") == "formalshell";
   fsBin = "${config.programs.formalshell.package}/bin/formalshell";
   fsIpc = args: "${fsBin} ipc --any-display call " + lib.concatStringsSep " " args;
+  # Window rounding follows the shell's own corner radius (settings.json
+  # theme.radius, 10 by default), so windows and shell cards share one curve.
+  fsRadius = toString ((config.programs.formalshell.settings.theme or { }).radius or 10);
 
   # Lock screen (qylock, sword theme), owned by neither shell. The unit
   # is declared in modules/nixos/mixins/hyprland.nix; starting it returns as
@@ -370,7 +373,7 @@ in
         },
       },
       decoration = {
-        rounding = 0,
+        rounding = ${fsRadius},
         -- Separates the quake console from the workspace it drops over. Only
         -- applies while a special workspace is on screen, so it costs the
         -- rest of the session nothing, and the console is the only special
