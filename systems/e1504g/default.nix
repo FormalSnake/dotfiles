@@ -280,6 +280,26 @@
   # spills the rest onto the swapfile below at NVMe speed instead of RAM speed.
   zramSwap.memoryPercent = 100;
 
+  # Measured 2026-08-26 with a browser and three chat clients open: the anon
+  # working set runs ~1 GB over RAM and the kernel spends a quarter of the
+  # time stalled on I/O, most of it re-reading evicted executables from NVMe.
+  # A page that comes back from zram costs a zstd decompress; one that comes
+  # back from disk costs a read and a stall. Push reclaim all the way toward
+  # anon (the cap) so the file cache keeps the binaries.
+  boot.kernel.sysctl."vm.swappiness" = 200;
+
+  # earlyoom kills only when BOTH free RAM and free swap are under their
+  # thresholds. The 16 GB swapfile below sits behind 7.4 GB of zram, so the
+  # shared 15% never comes within reach (free swap sat at 81% while the box
+  # thrashed) and nothing ever gets shed. 70% free of the 24 GB total is the
+  # point where zram is full and pages start landing on disk.
+  services.earlyoom.freeSwapThreshold = 70;
+
+  # Local fallback builds (g815 and the mac VM both unreachable): the default
+  # max-jobs=8 runs eight derivations at once, each with its own make -j,
+  # on 8 GB. Two keeps a fallback build off the swapfile.
+  nix.settings.max-jobs = 2;
+
   # 8 GB RAM (vs the g815's 32): halve the overflow swapfile to 2× RAM so a
   # spike has real spill room on a small machine. Zram above stays the first
   # (RAM-speed) tier.

@@ -78,6 +78,13 @@ let
   guard = lib.hiPrio (
     pkgs.writeShellScriptBin "helium" ''
       real=${helium}/bin/helium
+      # Chromium decodes video in software on Linux unless asked. This hands
+      # it to VA-API (iHD on the e1504g's iGPU, nvidia-vaapi-driver on the
+      # g815), where a 1080p stream costs a fraction of a core instead of most
+      # of an 8 W package. Repeated --enable-features flags do not merge (last
+      # one wins), so the package wrapper's WaylandWindowDecorations is
+      # carried along. Check chrome://gpu, "Video Decode".
+      heliumFeatures=--enable-features=WaylandWindowDecorations,AcceleratedVideoDecodeLinuxGL
       export PATH=${
         lib.makeBinPath [ pkgs.procps pkgs.coreutils pkgs.curl pkgs.jq pkgs.gnused pkgs.openssh ]
       }:$PATH
@@ -93,7 +100,7 @@ let
       }
 
       if [ -n "$(browser_pids)" ]; then
-        exec "$real" --password-store=basic "$@"
+        exec "$real" --password-store=basic "$heliumFeatures" "$@"
       fi
 
       # Remote side runs under /bin/sh (the login shell is fish, not POSIX)
@@ -161,7 +168,7 @@ let
           done
         fi
       fi
-      exec "$real" --password-store=basic "$@"
+      exec "$real" --password-store=basic "$heliumFeatures" "$@"
     ''
   );
 

@@ -85,7 +85,11 @@ in
       # companion CachyOS-Settings package (sysctl/udev/tmpfiles) is Arch-only
       # and NOT applied on NixOS, so replicate the load-bearing tweaks here.
       # Values verbatim from CachyOS-Settings 70-cachyos-settings.conf.
-      "vm.swappiness" = 100; # boot value (the zram udev rule below raises it to 150)
+      # CachyOS sets 100 at boot and 150 from a zram udev rule; zram is always
+      # on here, so the boot value never matters. 150 lets anon pages go to
+      # zram before page cache gets dropped (the cap is 200 since 5.8).
+      # mkDefault: the 8 GB e1504g pushes it to the cap.
+      "vm.swappiness" = lib.mkDefault 150;
       "vm.page-cluster" = 0; # zram: fault one page at a time (no swap readahead)
       "vm.vfs_cache_pressure" = 50; # retain dentry/inode cache longer
       "vm.dirty_writeback_centisecs" = 1500; # flush old dirty data less often
@@ -107,20 +111,21 @@ in
     # same RAM. CachyOS-Settings kills it from 30-zram.rules. Do it at boot
     # instead, before anything lands in the pool.
     "w! /sys/module/zswap/parameters/enabled - - - - N"
+
+    # intel_pstate HWP dynamic boost: raise the HWP minimum for a moment
+    # whenever a task that was waiting on I/O gets scheduled, so a process
+    # coming back from a page-in or a disk read does not also wait for the
+    # clock to ramp. Both hosts run intel_pstate in active mode with HWP.
+    "w! /sys/devices/system/cpu/intel_pstate/hwp_dynamic_boost - - - - 1"
   ];
 
   # I/O schedulers, matching CachyOS-Settings 60-ioschedulers.rules. NixOS
   # leaves NVMe on "none"; kyber adds light latency-aware ordering. mq-deadline
   # on external USB SSDs (sd*) curbs the writeback bursts that the
   # dirty_bytes cap above also targets.
-  #
-  # The zram rule is CachyOS-Settings 30-zram.rules: once zram0 is up, swapping
-  # anonymous pages into it beats reclaiming page cache, so swappiness goes past
-  # 100 (the cap is 200 since 5.8). The sysctl above stays the pre-zram value.
   services.udev.extraRules = ''
     ACTION=="add|change", KERNEL=="nvme[0-9]*", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="kyber"
     ACTION=="add|change", KERNEL=="sd[a-z]*", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="mq-deadline"
-    ACTION=="change", KERNEL=="zram0", ATTR{initstate}=="1", SYSCTL{vm.swappiness}="150"
   '';
 
   # zram swap: cheap responsiveness win on a 32 GB laptop. mkDefault so a
@@ -157,7 +162,9 @@ in
   services.earlyoom = {
     enable = true;
     freeMemThreshold = 10; # SIGTERM when free RAM drops under 10%, and
-    freeSwapThreshold = 15; # free swap under 15% (disk-swap thrash is painful)
+    # mkDefault: the threshold has to be read against the host's zram/swapfile
+    # split (the e1504g overrides it, see systems/e1504g/default.nix).
+    freeSwapThreshold = lib.mkDefault 15; # free swap under 15% (disk-swap thrash is painful)
     enableNotifications = true; # DMS toast when it kills something
     extraArgs = [
       # NEVER sacrifice the compositor or shell: losing these collapses the whole

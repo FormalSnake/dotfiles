@@ -38,6 +38,14 @@
   systemd.services.nix-gc.preStart = ''
     ${config.nix.package}/bin/nix-env --delete-generations +3 -p /nix/var/nix/profiles/system
   '';
+  # The timer is Persistent, so on a laptop that sleeps through midnight the
+  # collection fires right after the next boot, on top of the login (27 s of
+  # store walking measured on the e1504g). Keep it behind everything
+  # interactive.
+  systemd.services.nix-gc.serviceConfig = {
+    IOSchedulingClass = "idle";
+    Nice = 19;
+  };
   nix.gc = {
     automatic = true;
     dates = "daily";

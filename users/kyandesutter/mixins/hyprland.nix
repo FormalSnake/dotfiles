@@ -33,6 +33,13 @@ let
   # description instead. Both hl.monitor and hl.workspace_rule take `desc:`.
   panel = if hasNvidia then "desc:BOE NE180QDM-NZC" else "eDP-1";
 
+  # Per-window translucency. Anything under 1.0 makes Hyprland run the blur
+  # pass behind every window on every damaged frame. Fine on the RTX 5070;
+  # on the e1504g's 32-EU UHD it is the largest steady GPU cost of the
+  # session, so windows go opaque there and blur stays for the shell layers
+  # (bar, panel, menu, notifications) only.
+  windowOpacity = if hasNvidia then "0.96" else "1.0";
+
   # Workspace pill labels: role → Nerd Font glyph + short name, mirroring the
   # macOS aerospace workspace names (see mixins/aerospace.nix). Rendered into
   # each workspace's `default_name`, which is what Hyprland reports over IPC as
@@ -411,9 +418,10 @@ in
         -- workspace here.
         dim_special = 0.6,
         -- Ever-so-slight transparency on every window, active and inactive
-        -- alike, so the backdrop blur below has something to show through.
-        active_opacity = 0.96,
-        inactive_opacity = 0.96,
+        -- alike, so the backdrop blur below has something to show through
+        -- (dGPU hosts only, see windowOpacity).
+        active_opacity = ${windowOpacity},
+        inactive_opacity = ${windowOpacity},
         blur = {
           enabled = true,
           size = 8,
