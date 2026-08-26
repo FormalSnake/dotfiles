@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "model": "opus",
   "permissions": {
-    "defaultMode": "auto",
+    "defaultMode": "bypassPermissions",
     "deny": [
       "Bash(git config user.*)",
       "Bash(git config --global user.*)",
