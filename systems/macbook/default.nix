@@ -45,6 +45,7 @@
     "Asentrix"
     "Big Shaq"
     "DJ Unzensiert"
+    "Diplo"
     "Douvelle19"
     "HARDSTYLE CVNT"
     "High Beam"

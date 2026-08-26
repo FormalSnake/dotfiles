@@ -343,7 +343,7 @@ cover transitions. Matugen comes from nixpkgs.
 - Per-change: `qmllint` (also the flake check) + launching the shell in a
   **nested niri window** on the g815 — full isolation, instant iteration,
   QuickShell live-reloads on file save.
-- Scripted smoke tests through `qs ipc` (open menu, query lock status,
+- Scripted shakedown runs through `qs ipc` (open menu, query lock status,
   toggle DND) — QuickShell has no QML test harness, so IPC-driven checks +
   manual QA are the honest baseline.
 - Hyprland backend verified in a nested Hyprland session before the

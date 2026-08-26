@@ -103,7 +103,10 @@ queue() {
   freed_kb=$(( freed_kb + kb ))
   plan+=("$kb|$label|${path/#$HOME/~}")
   if (( APPLY )); then
-    rm -rf -- "$path" || log "failed to remove $path"
+    if ! rm -rf -- "$path" 2>/dev/null; then
+      chmod -R u+w -- "$path" 2>/dev/null || true
+      rm -rf -- "$path" 2>/dev/null || log "failed to remove $path"
+    fi
   fi
 }
 
@@ -112,8 +115,10 @@ queue() {
 run_cmd() {
   local label="$1" dir="$2"; shift 2
   command -v "$1" >/dev/null 2>&1 || return 0
-  local before=0 after=0
-  [[ -d "$dir" ]] && before=$(dir_kb "$dir")
+  [[ -d "$dir" ]] || return 0
+  local before after=0
+  before=$(dir_kb "$dir")
+  (( ${before:-0} >= 1024 )) || return 0
   if (( APPLY )); then
     "$@" >/dev/null 2>&1 || log "$label: $1 exited nonzero, continuing"
     [[ -d "$dir" ]] && after=$(dir_kb "$dir")
@@ -185,11 +190,14 @@ fi
 ### 3. Package manager caches
 
 run_cmd "homebrew" "$HOME/Library/Caches/Homebrew" brew cleanup -s --prune=all
-run_cmd "npm" "$HOME/.npm" npm cache clean --force
-run_cmd "pnpm" "$HOME/Library/pnpm/store" pnpm store prune
+run_cmd "npm" "$HOME/.npm/_cacache" npm cache clean --force
 run_cmd "yarn" "$HOME/.yarn/berry/cache" yarn cache clean --all
-run_cmd "bun" "$HOME/.bun/install/cache" bun pm cache rm
 run_cmd "uv" "$HOME/.cache/uv" uv cache prune
+
+# `npm cache clean` leaves _npx alone, and it is by far the larger of the two.
+queue "npx-cache" "$HOME/.npm/_npx"
+queue "pnpm-store" "$HOME/Library/pnpm/store"
+queue "bun-cache" "$HOME/.bun/install/cache"
 run_cmd "go-build" "$HOME/Library/Caches/go-build" go clean -cache
 if (( DEEP )); then run_cmd "go-modcache" "$HOME/go/pkg/mod" go clean -modcache; fi
 

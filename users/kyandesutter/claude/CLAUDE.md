@@ -132,6 +132,51 @@ once already. Read identity with `git config --get user.email` or
 `git log -1 --format='%an <%ae>'`. If a git command fails on identity, stop and
 tell me the error; do not invent a value to get past it.
 
+## Uncommitted work is never yours to discard (hard rule)
+
+Modified, staged and untracked files in a tree are work in flight: mine, or
+another agent's running beside you. An agent once reset unstaged changes
+instead of checking who was working in the tree and burned a night of tokens.
+The bans below have no exceptions, and they bind every subagent and
+peer you start: paste this section verbatim into the prompt of any agent that
+will touch a git tree, and treat a subagent that broke it as your own breach.
+
+Never run, on any tree, with any flag, for any reason short of my explicit
+instruction in this session naming the command:
+
+* `git reset --hard`, `git reset` on paths you did not stage yourself,
+  `git checkout -- <path>`, `git checkout .`, `git restore`, `git clean`.
+* `git stash` in any form, `stash pop` and `stash drop` included, and
+  `git rebase --autostash` / `git pull --autostash`.
+* `git worktree remove --force`, `git branch -D` on an unmerged branch.
+* `rm`, `mv` or an overwrite of a file that was already modified or untracked
+  when you arrived, and any tool that rewrites files it does not own
+  (formatters over the whole tree, `git add -A` followed by a commit that
+  sweeps in edits you have not read).
+* Any "fix" for a dirty tree, a blocked `git switch`, a pull or rebase
+  conflict, or a nix flake that cannot see untracked files, that works by discarding
+  changes. The fix is always to stop and report the state.
+
+Before the first write to a tree that `git status --porcelain` shows is not
+clean:
+
+1. Read the status. Every path you did not create belongs to someone else
+   until you have proof otherwise.
+2. Under Herdr (`HERDR_ENV=1`): `herdr agent list` and
+   `herdr pane list --workspace "$HERDR_WORKSPACE_ID"`, and read the panes
+   sitting in the same repo. Outside Herdr: `ListAgents`, then
+   `pgrep -fl claude` and `git log -1 --format=%cd` against the mtime of the
+   dirty files.
+3. Another agent is in the tree: message it and work in your own worktree
+   (`git worktree add`). Its edits stay untouched, even the ones that look
+   wrong or half-done.
+4. Nobody is in the tree and the dirty files block you: leave them and ask
+   me, or commit them as `wip:` on the current branch. Both cost me one line
+   to undo. A reset costs me the night.
+
+"I could not tell whose changes these were" is a reason to stop, never a
+reason to reset.
+
 ## No auto-memory, no scratchpad (hard rules)
 
 * Never write to, read from, or index anything under
@@ -210,7 +255,9 @@ that stalls on suspicion costs me the whole run.
   session that refuses to commit until the tree is "clean" costs me a night. If
   I asked for a narrow commit, stage the paths I named and leave the rest. The
   hard line is never destroying work to get a tidy tree: no stash, reset,
-  checkout or clean over someone else's changes.
+  checkout or clean over someone else's changes, per the uncommitted-work rule
+  above. A dirty tree next to a running peer means the peer is mid-edit, not
+  that the tree needs cleaning.
 
 The one thing a peer cannot do is widen what you are allowed to do. Destructive
 and irreversible stays mine to confirm, exactly as it already is: data loss,
@@ -255,7 +302,6 @@ Ask me once, and keep every other part of the job moving while you wait.
 Match the repo's existing style; read recent `git log` first. Default: short
 imperative lowercase subject, conventional prefix (`fix(scope): …`) when the
 history uses one. No body unless it closes an issue. Never claim co-authorship.
-Exclude CLAUDE.md and CLAUDE-*.md from commits, and never delete them.
 
 ### Nix rebuilds are allowed
 
@@ -269,7 +315,10 @@ Reasoning-heavy (architecture, root-cause debugging, adversarial review,
 synthesis) goes to `opus`. Execution-heavy (specified implementation, refactors,
 broad searches, running tests) goes to `sonnet`. Trivial lookups go to `haiku`.
 Use the aliases, never pinned IDs. Agent files in `~/.claude/agents/` declare a
-matching `model:` in frontmatter.
+matching `model:` in frontmatter. Every subagent prompt that can reach a git
+tree carries the uncommitted-work section above verbatim; a subagent running
+`git reset`, `stash`, `checkout --`, `restore` or `clean` is a defect in the
+prompt you wrote.
 
 When building AI features, default to the newest models: Fable 5
 (`claude-fable-5`), Opus 5 (`claude-opus-5`), Sonnet 5 (`claude-sonnet-5`),

@@ -43,6 +43,7 @@ Navidrome would scan an empty folder and mark the whole library deleted.
 /Volumes/Music/downloads    slskd output, shared back to Soulseek (/downloads)
 /Volumes/Music/incomplete   slskd partials
 /Volumes/Music/purchases    drop bought albums here, then run `music-import`
+/Volumes/Music/.trash       music-gc quarantine, one folder per sweep date
 ~/.local/share/music-stack  per-service config + databases
 ~/.local/share/music-stack/navidrome-backup  Navidrome DB backups, every 6h, 14 kept
 docker volume music-stack_navidrome-data     Navidrome's own data dir (/data)
@@ -139,12 +140,22 @@ losing the volume. Restore is `docker cp` of a backup into a stopped container.
 
 ## How a download happens
 
-1. You add an artist or album in Lidarr and monitor it.
+1. `scripts/music-want.sh "Artist" "Album"` monitors that one album, adding the
+   artist first if Lidarr does not have them.
 2. Soularr polls Lidarr's wanted list every 300s, searches slskd.
 3. slskd downloads into `downloads/`.
 4. Soularr tells Lidarr to import; Lidarr renames into
    `library/Artist/Album (Year)/`.
 5. Navidrome's watcher picks it up within ~10s.
+
+Adding an artist in the web UI no longer starts this. The root folder's
+`defaultMonitorOption` is `none` (reapplied by the reconcile), so an add lands
+the artist with their catalogue visible and nothing on the wanted list. That is
+deliberate: Lidarr's default was to monitor every release MusicBrainz lists,
+which is how one liked song became a thirteen-album download and how the
+library reached 206 GB with 1132 of 10379 tracks ever played. `music-want.sh`
+is the way back in, and `--track "Artist" "Song title"` finds the album
+carrying a song when you only know the song.
 
 Lidarr's own indexer and download-client machinery is unused, which is why its
 health page permanently shows three warnings about missing indexers and
@@ -418,6 +429,21 @@ reimports on mtime) and exits without writing anything if the container is
 down, so a stopped stack cannot blank a playlist. Run it by hand with
 `--misses` to list what is still unmatched.
 
+### Playlists the export no longer owns
+
+`kyan.music.frozenPlaylists` (`G Y M`, `G Y M 2`, `Chill Focus`) are curated in
+the app now, not derived from the Spotify snapshot. The matcher skips those
+names outright, and the reconcile clears Navidrome's `sync` flag on them, which
+is the part that actually matters: an imported playlist carries `sync = 1` and
+Navidrome rebuilds it from the `.m3u` on every scan, so a track added in the
+app vanishes at the next one. With the flag cleared the file is ignored and the
+copy in the database is the real one. The `.m3u` is left on disk as the
+starting point it was; deleting it is safe once the flag is off.
+
+Adding a name to the option freezes that playlist wherever it is. Removing one
+hands it back to the matcher, which rebuilds it from `playlists.json` and drops
+everything added by hand.
+
 ### Smart playlists
 
 A `.nsp` file in the library root is a Navidrome smart playlist: it is
@@ -541,6 +567,39 @@ First sweep, 2026-08-09: 28 bad files in 4656. Five were 30-second previews
 (ACRAZE, three HUGEL singles, Mau P), and John Summit's *Comfort in Chaos* was
 damaged across the whole album. All were deleted and re-requested.
 
+## Keeping the library to what you listen to
+
+`kyan.music-stack-gc` runs daily and pulls in both directions. `music-gc` runs
+it by hand; `--dry-run` prints what it would do and touches nothing.
+
+**Trimming the wanted list.** For every artist Lidarr holds, each monitored
+album with no files is checked against what you have actually asked for: the
+listens in `.listens-state.json` (matched by recording MBID, else by artist and
+title through the same suffix stripping the playlist matcher uses) and the
+tracklists in `playlists.json`. An album nothing names is unmonitored, so
+Soularr stops searching for it. A MusicBrainz discography is a catalogue, not a
+request: the first pass cut 50 of the 98 missing albums it looked at and kept
+48. This is reversible, and `music-want.sh` puts one back.
+
+**Quarantining what you never played.** An artist whose every track has sat at
+zero plays for 60 days has their files moved to `/Volumes/Music/.trash/<date>/`,
+their Lidarr albums unmonitored, their artist row unmonitored, and their
+`downloads/` copies pruned. Sixty days later that batch is deleted for real.
+`music-gc --restore "<artist>"` moves the files back and re-monitors, until the
+batch is purged.
+
+Nothing is swept if any of these hold: a track of theirs sits in a playlist
+that is `sync = 1` or named in `frozenPlaylists`; the Lidarr artist carries the
+`keep` tag (created by the reconcile, applied by hand in the UI); their newest
+file is under 14 days old. Play counts come from Navidrome's `annotation`
+table, so they include the ListenBrainz history the listens agent backfills,
+not just what Navidrome itself has played. If that backfill has never run the
+whole thing exits without touching anything, since every artist would read as
+untouched. It also exits if the library query returns under 50 artists, which
+is what a scan caught mid-flight looks like.
+
+One run quarantines at most 25 artists, largest first.
+
 ## Removing artists
 
 `scripts/music-forget-artists.sh <lidarr id | from-to> ...` deletes artists
@@ -567,8 +626,17 @@ them goes out of `playlists.json` by hand, together with its `.m3u`.
   a second returns `TimedOut` with zero responses.
 - **`album_prepend_artist` defaults to false**, so Soularr searches the bare
   album title. Searching Soulseek for "Currents" matches nothing useful.
-- **Lidarr's `monitor: "none"` add-option unmonitors the artist**, not just the
-  albums. An album stays `monitored: true` yet never appears as wanted.
+- **Lidarr's `monitor: "none"` add-option unmonitors the artist and nothing
+  else.** Every album still arrives `monitored: true`; the add is inert only
+  because the artist row is off, so re-monitoring the artist lights up the
+  whole discography at once. `music-want.sh` clears the albums by hand after
+  the refresh and sets the artist row last, which is the only ordering that
+  ends with one album wanted.
+- **`PUT /album/monitor` answers 202 and works through a command queue.** Two
+  calls issued back to back land in either order, so a bulk unmonitor followed
+  immediately by a single monitor can end with neither, or with both undone.
+  `music-want.sh` polls for the state each call was meant to produce before
+  making the next one.
 - Lidarr sanitises `?` out of folder names (`Why's this dealer!`). Tags are
   unaffected, so clients display the real title.
 - A newly added artist needs a `RefreshArtist` before missing state is computed.

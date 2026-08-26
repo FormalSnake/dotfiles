@@ -10,6 +10,9 @@ let
 
   stackDir = "${home}/.local/share/music-stack";
   incompleteDir = "/Volumes/Music/incomplete";
+  # Quarantine for the janitor. Beside the library rather than inside it, so
+  # Navidrome never scans what is on its way out.
+  trashDir = "/Volumes/Music/.trash";
 
   uid = "502";
   gid = "20";
@@ -526,6 +529,31 @@ let
         && echo "reconcile: enabled Lidarr track renaming"
     fi
 
+    # An add with the stock root-folder default monitors every release
+    # MusicBrainz lists for the artist, so one liked song queues a whole
+    # discography onto the wanted list. "none" leaves the add inert and
+    # `music-want.sh` turns on the one album that was actually wanted. It
+    # unmonitors the artist row too, which the script puts back; do not reach
+    # for it by hand.
+    root=$(curl -sf -H "X-Api-Key: $LIDARR_KEY" http://localhost:8686/api/v1/rootfolder \
+      | jq -c '.[0] // empty')
+    rootWant=$(printf '%s' "$root" | jq -c '.defaultMonitorOption = "none"
+      | .defaultNewItemMonitorOption = "none"')
+    if [ -n "$root" ] && [ "$rootWant" != "$root" ]; then
+      printf '%s' "$rootWant" \
+        | curl -sf -X PUT -H "X-Api-Key: $LIDARR_KEY" -H "Content-Type: application/json" -d @- \
+            "http://localhost:8686/api/v1/rootfolder/$(printf '%s' "$root" | jq -r .id)" >/dev/null \
+        && echo "reconcile: Lidarr adds now monitor nothing by default"
+    fi
+
+    # The janitor's opt-out. Tagging an artist `keep` in Lidarr exempts them
+    # from both the wanted-list trim and the quarantine; the tag has to exist
+    # before it can be applied in the UI.
+    curl -sf -H "X-Api-Key: $LIDARR_KEY" http://localhost:8686/api/v1/tag \
+      | jq -e 'map(select(.label == "keep")) | length > 0' >/dev/null \
+      || curl -sf -X POST -H "X-Api-Key: $LIDARR_KEY" -H "Content-Type: application/json" \
+           -d '{"label":"keep"}' http://localhost:8686/api/v1/tag >/dev/null
+
     # Nothing else in the stack puts cover art on disk: Navidrome only reads
     # art from the album folder or from the file's own tags, and a Soulseek
     # download carries embedded art only if whoever uploaded it bothered. The
@@ -625,6 +653,19 @@ let
         where name like '${p.match}';" 2>/dev/null
     '') cfg.playerProfiles}
 
+    # A playlist imported from an .m3u carries sync = 1, and Navidrome then
+    # rebuilds it from the file on every scan, so a track added in the app
+    # disappears at the next one. Clearing the flag hands the playlist to the
+    # app for good; the matcher already skips these names, so the file it
+    # leaves behind is only a starting point.
+    ${lib.optionalString (cfg.frozenPlaylists != [ ]) ''
+      docker exec navidrome sqlite3 /data/navidrome.db "
+        update playlist set sync = 0
+        where sync = 1 and name in (${
+          lib.concatMapStringsSep ", " (p: "'${lib.replaceStrings [ "'" ] [ "''" ] p}'") cfg.frozenPlaylists
+        });" 2>/dev/null
+    ''}
+
     # slskd only indexes shares at startup or on demand, so a freshly downloaded
     # album is not offered back to the network until something asks for a
     # rescan. Left alone the share count stays at whatever it was on boot, the
@@ -663,6 +704,36 @@ let
         -c "update cron set enabled = true where task_type = 'clustering' and not enabled;" \
         2>/dev/null | grep -q "UPDATE 1" \
         && echo "reconcile: re-enabled AudioMuse clustering"
+    fi
+
+    # Navidrome 0.63 gave every plugin an `enabled` flag and defaults a newly
+    # discovered one to off, so the launcher re-staging .ndp files is no longer
+    # enough to have them run. Every file staged above is one this config asked
+    # for, which makes "discovered but off" drift rather than a choice: with
+    # audiomuseai off, ND_AGENTS falls straight through to lastfm and a
+    # similar-songs lookup goes from 30ms to tens of seconds, which is invisible
+    # from the server side because the fallback still answers. Plugin ids match
+    # the staged filenames. The registry is only read at startup, so restart
+    # once, and only if something actually changed.
+    pluginsEnabled=0
+    for ndp in "${stackDir}/navidrome-plugins"/*.ndp; do
+      [ -e "$ndp" ] || continue
+      id=$(basename "$ndp" .ndp)
+      docker exec navidrome navidrome plugin list -f json -n 2>/dev/null \
+        | jq -e --arg id "$id" \
+            'map(select(.id == $id and .enabled == false)) | length > 0' >/dev/null \
+        || continue
+      # A plugin that touches libraries refuses to enable until it is told
+      # which ones; granting all of them matches the single-library setup.
+      docker exec navidrome navidrome plugin edit "$id" --all-libraries --write-access \
+        >/dev/null 2>&1 || true
+      docker exec navidrome navidrome plugin enable "$id" >/dev/null 2>&1 \
+        && pluginsEnabled=1 \
+        && echo "reconcile: enabled navidrome plugin $id"
+    done
+    if [ "$pluginsEnabled" = 1 ]; then
+      docker restart navidrome >/dev/null 2>&1 \
+        && echo "reconcile: restarted navidrome to load newly enabled plugins"
     fi
   '';
 
@@ -933,6 +1004,10 @@ let
 
     DATA = "${stackDir}/playlists.json"
     LIB = "${cfg.libraryDir}"
+    # Playlists that have outgrown the export. The matcher can only ever
+    # rebuild them from the Spotify snapshot, so once one is being curated in
+    # the app, rewriting its .m3u would throw away every track added since.
+    FROZEN = ${builtins.toJSON cfg.frozenPlaylists}
 
     # Suffixes Spotify puts on a title that the released file usually lacks.
     NOISE = re.compile(
@@ -988,6 +1063,8 @@ let
     playlists = json.load(open(DATA))
     report = {}
     for name, tracks in playlists.items():
+        if name in FROZEN:
+            continue
         lines, hits, misses = ["#EXTM3U", f"#PLAYLIST:{name}"], 0, []
         for t in tracks:
             want_artists = {norm(a) for a in t["artists"]}
@@ -1134,6 +1211,383 @@ let
         len(broken), len(files), REPORT))
   '';
 
+  # Lidarr adds an artist by copying their whole MusicBrainz discography onto
+  # the wanted list, which is how a library of one liked song becomes 206 GB of
+  # music nobody has played. This drives the wanted list from the listening
+  # history and the kept playlists instead: an album with no files and nothing
+  # asking for it is unmonitored, so Soularr stops searching for it.
+  #
+  # The second half is the other direction. An artist whose every track has sat
+  # unplayed for UNPLAYED_DAYS is moved to a dated folder under .trash, kept
+  # there for TRASH_DAYS, and only then deleted, so a wrong call costs a
+  # `music-gc --restore` rather than a re-download.
+  gc = pkgs.writeScript "music-stack-gc" ''
+    #!${pkgs.python3}/bin/python3
+    import json
+    import os
+    import re
+    import shutil
+    import subprocess
+    import sys
+    import time
+    import unicodedata
+    import urllib.error
+    import urllib.request
+
+    LIB = "${cfg.libraryDir}"
+    DOWNLOADS = "${cfg.downloadDir}"
+    TRASH = "${trashDir}"
+    STATE = "${stackDir}/.gc-state.json"
+    LISTENS_STATE = "${stackDir}/.listens-state.json"
+    PLAYLIST_DATA = "${stackDir}/playlists.json"
+    KEYS = "${stackDir}/.api-keys"
+    LIDARR = "http://localhost:8686/api/v1"
+    SLSKD = "http://localhost:5030/api/v0"
+    PINNED_PLAYLISTS = ${builtins.toJSON cfg.frozenPlaylists}
+
+    # An artist has to have been around this long before their wanted list is
+    # trimmed, so a discovery from last night finishes downloading first.
+    GRACE_DAYS = 14
+    # ... and their files unplayed this long before they are quarantined.
+    UNPLAYED_DAYS = 60
+    # Quarantined files are deleted for real this long after the move.
+    TRASH_DAYS = 60
+    # One run only ever quarantines this many artists, so a rule that goes wrong
+    # stays small enough to walk back by hand.
+    MAX_ARTISTS = 25
+
+    DRY = "--dry-run" in sys.argv
+
+    # Suffixes a streaming service puts on a title that the released file lacks.
+    # Same set the playlist matcher and the listens importer strip.
+    NOISE = re.compile(
+        r"\s*[-(\[]\s*(slowed|super slowed|sped up.*|hardstyle|hardtekk|edit|"
+        r"remix|vip|extended mix|radio edit|club mix|bassline club mix|"
+        r"slowed & reverb|slowed and reverb|slowed -pitch|the dark triad|"
+        r"viral version.*|feat\..*|ft\..*|mit .*|with .*)\s*[)\]]?\s*$",
+        re.I)
+
+
+    def norm(s):
+        s = unicodedata.normalize("NFKD", s or "")
+        s = "".join(c for c in s if not unicodedata.combining(c))
+        s = s.replace("’", "'").replace("&", "and")
+        return re.sub(r"[^a-z0-9]", "", s.lower())
+
+
+    def variants(title):
+        """Progressively stripped forms of a title, most specific first."""
+        out, t = [], title
+        for _ in range(4):
+            out.append(t)
+            stripped = NOISE.sub("", t).strip(" -–")
+            if stripped == t or not stripped:
+                break
+            t = stripped
+        out.append(re.sub(r"\s*\(.*?\)\s*", " ", title).strip())
+        return [v for v in dict.fromkeys(out) if v]
+
+
+    def sql(query):
+        # sqlite3 runs inside the container on purpose: reading navidrome.db from
+        # macOS across OrbStack's virtiofs boundary destroys it (see docs/music.md).
+        r = subprocess.run(["docker", "exec", "navidrome", "sqlite3",
+                            "-separator", "\x1f", "/data/navidrome.db", query],
+                           capture_output=True, text=True)
+        if r.returncode != 0:
+            sys.exit(0)
+        return [l.split("\x1f") for l in r.stdout.splitlines() if l]
+
+
+    def key(name):
+        try:
+            with open(KEYS) as fh:
+                m = re.search(name + r"=([a-f0-9]+)", fh.read())
+        except OSError:
+            return None
+        return m.group(1) if m else None
+
+
+    def api(base, path, hdr, method="GET", body=None):
+        head = dict(hdr)
+        if body is not None:
+            head["Content-Type"] = "application/json"
+        req = urllib.request.Request(
+            base + path, method=method, headers=head,
+            data=json.dumps(body).encode() if body is not None else None)
+        try:
+            with urllib.request.urlopen(req, timeout=60) as resp:
+                raw = resp.read()
+            return json.loads(raw) if raw else None
+        except (urllib.error.URLError, OSError, ValueError):
+            return None
+
+
+    def age_days(stamp):
+        """Days since a timestamp. Navidrome writes nine fractional digits, which
+        %z will not parse, and day granularity is all this needs."""
+        m = re.match(r"(\d{4})-(\d{2})-(\d{2})", stamp or "")
+        if not m:
+            return None
+        when = time.mktime((int(m.group(1)), int(m.group(2)), int(m.group(3)),
+                            12, 0, 0, 0, 0, -1))
+        return (time.time() - when) / 86400.0
+
+
+    def load_state():
+        try:
+            with open(STATE) as fh:
+                return json.load(fh)
+        except (OSError, ValueError):
+            return {"quarantined": []}
+
+
+    def save_state(state):
+        if not DRY:
+            with open(STATE, "w") as fh:
+                json.dump(state, fh, indent=1)
+
+
+    def prune_empty(path):
+        """Walk back up to LIB removing the directories a move emptied."""
+        path = os.path.dirname(path)
+        while path.startswith(LIB) and path != LIB:
+            try:
+                os.rmdir(path)
+            except OSError:
+                return
+            path = os.path.dirname(path)
+
+
+    def restore(name, hdr):
+        state = load_state()
+        kept, moved = [], 0
+        for entry in state["quarantined"]:
+            if entry["artist"].lower() != name.lower():
+                kept.append(entry)
+                continue
+            for rel in entry["files"]:
+                src = os.path.join(TRASH, entry["batch"], rel)
+                if not os.path.exists(src):
+                    continue
+                dst = os.path.join(LIB, rel)
+                os.makedirs(os.path.dirname(dst), exist_ok=True)
+                shutil.move(src, dst)
+                moved += 1
+            if entry.get("lidarr_id"):
+                artist = api(LIDARR, "/artist/%d" % entry["lidarr_id"], hdr)
+                if artist:
+                    artist["monitored"] = True
+                    api(LIDARR, "/artist/%d" % entry["lidarr_id"], hdr, "PUT", artist)
+                    api(LIDARR, "/command", hdr, "POST",
+                        {"name": "RefreshArtist", "artistId": entry["lidarr_id"]})
+        state["quarantined"] = kept
+        save_state(state)
+        print("gc: restored %d files for %s" % (moved, name))
+
+
+    def wants():
+        """Every song the history or a kept playlist asks for, as recording MBIDs
+        and as (artist, title) pairs. This is what the wanted list is allowed to
+        hold: a MusicBrainz discography is a catalogue, not a request."""
+        mbids, pairs = set(), set()
+        try:
+            with open(LISTENS_STATE) as fh:
+                plays = json.load(fh).get("plays", {})
+        except (OSError, ValueError):
+            plays = {}
+        for _count, _ts, mbid, title, artist in plays.values():
+            if mbid:
+                mbids.add(mbid.lower())
+            for v in variants(title):
+                pairs.add((norm(artist), norm(v)))
+        try:
+            with open(PLAYLIST_DATA) as fh:
+                for tracks in json.load(fh).values():
+                    for t in tracks:
+                        for artist in t["artists"]:
+                            for v in variants(t["title"]):
+                                pairs.add((norm(artist), norm(v)))
+        except (OSError, ValueError, KeyError):
+            pass
+        return mbids, pairs
+
+
+    lidarr_key = key("LIDARR_KEY")
+    if not lidarr_key:
+        sys.exit(0)
+    hdr = {"X-Api-Key": lidarr_key}
+
+    if "--restore" in sys.argv:
+        restore(sys.argv[sys.argv.index("--restore") + 1], hdr)
+        sys.exit(0)
+
+    if not os.path.isdir(LIB):
+        sys.exit(0)
+
+    want_mbids, want_pairs = wants()
+    # Play counts and wants are only trustworthy once the ListenBrainz backfill has
+    # run. Without it Navidrome knows a few hundred plays and every artist reads as
+    # untouched, which would trim and quarantine the whole library.
+    if not want_mbids:
+        sys.exit(0)
+
+    rows = sql("""
+        select mf.album_artist, sum(coalesce(a.play_count, 0)), max(mf.created_at),
+               count(*), sum(mf.size)
+        from media_file mf
+        left join annotation a on a.item_id = mf.id and a.item_type = 'media_file'
+        where mf.missing = 0 and mf.album_artist <> ${sqlEmpty}
+        group by mf.album_artist;
+    """)
+    # A scan caught mid-flight reports a library that is mostly missing, and every
+    # artist in it would read as unplayed.
+    if len(rows) < 50:
+        sys.exit(0)
+    library = {r[0]: {"plays": int(r[1] or 0), "newest": r[2],
+                      "files": int(r[3]), "bytes": int(r[4] or 0)} for r in rows}
+
+    # A track sitting in a playlist is a request, whether or not it has been
+    # played yet, so its artist is never swept.
+    pinned = {r[0] for r in sql("""
+        select distinct mf.album_artist
+        from playlist_tracks pt
+        join playlist p on p.id = pt.playlist_id
+        join media_file mf on mf.id = pt.media_file_id
+        where p.sync = 1 or p.name in (%s);
+    """ % ",".join("'%s'" % p.replace("'", "${sqlEmpty}") for p in PINNED_PLAYLISTS))}
+
+    artists = api(LIDARR, "/artist", hdr) or []
+    keep_tag = next((t["id"] for t in api(LIDARR, "/tag", hdr) or []
+                     if t["label"] == "keep"), None)
+
+    trimmed, kept_albums, doomed = 0, 0, []
+    for artist in artists:
+        name = artist["artistName"]
+        lib = library.get(name)
+        if keep_tag in (artist.get("tags") or []) or name in pinned:
+            continue
+        # Age from the newest file, or from the add for an artist still empty.
+        age = age_days(lib["newest"]) if lib else age_days(artist.get("added"))
+        if age is None or age < GRACE_DAYS:
+            continue
+
+        albums = api(LIDARR, "/album?artistId=%d" % artist["id"], hdr) or []
+        missing = [a for a in albums if a.get("monitored")
+                   and not (a.get("statistics") or {}).get("trackFileCount")]
+        cut = 0
+        for album in missing:
+            tracks = api(LIDARR, "/track?albumId=%d" % album["id"], hdr) or []
+            if any((t.get("foreignRecordingId") or "").lower() in want_mbids
+                   or (norm(name), norm(t.get("title"))) in want_pairs
+                   for t in tracks):
+                kept_albums += 1
+                continue
+            cut += 1
+            if not DRY:
+                api(LIDARR, "/album/monitor", hdr, "PUT",
+                    {"albumIds": [album["id"]], "monitored": False})
+        trimmed += cut
+        if cut:
+            print("gc: %s, %d of %d missing albums unmonitored, nothing asked for them"
+                  % (name, cut, len(missing)))
+
+        if lib and lib["plays"] == 0 and age >= UNPLAYED_DAYS:
+            doomed.append((name, artist, lib))
+
+    # An artist Lidarr never knew about (Explo downloads, hand-added folders) is
+    # swept on play count alone.
+    for name, lib in library.items():
+        if name in pinned or any(d[0] == name for d in doomed):
+            continue
+        if any(a["artistName"] == name for a in artists):
+            continue
+        age = age_days(lib["newest"])
+        if lib["plays"] == 0 and age is not None and age >= UNPLAYED_DAYS:
+            doomed.append((name, None, lib))
+
+    doomed.sort(key=lambda d: -d[2]["bytes"])
+    if len(doomed) > MAX_ARTISTS:
+        print("gc: %d artists qualify, taking the %d largest this run"
+              % (len(doomed), MAX_ARTISTS))
+        doomed = doomed[:MAX_ARTISTS]
+
+    state = load_state()
+    batch = time.strftime("%Y-%m-%d")
+    freed = 0
+    for name, artist, lib in doomed:
+        paths = [r[0] for r in sql(
+            "select path from media_file where missing = 0 and album_artist = '%s';"
+            % name.replace("'", "${sqlEmpty}"))]
+        print("gc: quarantining %s, %d files, %.1f GB"
+              % (name, len(paths), lib["bytes"] / 1e9))
+        freed += lib["bytes"]
+        if DRY:
+            continue
+
+        moved = []
+        for path in paths:
+            rel = path.replace("/music/", "", 1)
+            src = os.path.join(LIB, rel)
+            if not os.path.exists(src):
+                continue
+            dst = os.path.join(TRASH, batch, rel)
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            shutil.move(src, dst)
+            prune_empty(src)
+            moved.append(rel)
+
+        # Lidarr keeps the artist, unmonitored and empty, so a restore is a
+        # re-monitor rather than a re-add. music-forget-artists.sh removes it.
+        if artist:
+            albums = api(LIDARR, "/album?artistId=%d" % artist["id"], hdr) or []
+            if albums:
+                api(LIDARR, "/album/monitor", hdr, "PUT",
+                    {"albumIds": [a["id"] for a in albums], "monitored": False})
+            artist["monitored"] = False
+            api(LIDARR, "/artist/%d" % artist["id"], hdr, "PUT", artist)
+
+        # Soularr's downloads are a second copy, shared back to Soulseek, and
+        # Lidarr's own delete never touches them. Same prefix match as
+        # music-forget-artists.sh.
+        for base in (DOWNLOADS, os.path.join(DOWNLOADS, "failed_imports")):
+            for entry in os.listdir(base) if os.path.isdir(base) else []:
+                if entry.lower().startswith(name.lower() + " - "):
+                    shutil.rmtree(os.path.join(base, entry), ignore_errors=True)
+
+        state["quarantined"].append({
+            "artist": name, "batch": batch, "bytes": lib["bytes"],
+            "lidarr_id": artist["id"] if artist else None, "files": moved,
+        })
+    save_state(state)
+
+    # Anything that survived the trash window unmissed is gone for real.
+    purged = 0
+    if os.path.isdir(TRASH) and not DRY:
+        for entry in sorted(os.listdir(TRASH)):
+            old = age_days(entry)
+            if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", entry) or old is None \
+                    or old < TRASH_DAYS:
+                continue
+            shutil.rmtree(os.path.join(TRASH, entry), ignore_errors=True)
+            purged += 1
+        if purged:
+            state = load_state()
+            state["quarantined"] = [q for q in state["quarantined"]
+                                    if os.path.isdir(os.path.join(TRASH, q["batch"]))]
+            save_state(state)
+
+    if doomed and not DRY:
+        slskd_key = key("SLSKD_KEY")
+        if slskd_key:
+            # slskd advertises downloads/ to peers and only rescans on demand.
+            api(SLSKD, "/shares", {"X-API-Key": slskd_key}, "PUT", {})
+
+    print("gc: %d albums unmonitored, %d kept as requested, %d artists quarantined "
+          "(%.1f GB), %d trash batches purged"
+          % (trimmed, kept_albums, len(doomed), freed / 1e9, purged))
+  '';
+
   launcher = pkgs.writeShellScript "music-stack-launch" ''
     set -euo pipefail
 
@@ -1243,6 +1697,21 @@ in
       '';
     };
 
+    frozenPlaylists = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [
+        "G Y M"
+        "G Y M 2"
+        "Chill Focus"
+      ];
+      description = ''
+        Playlists the Spotify matcher stops rewriting, matched on exact name.
+        Their `.m3u` is left as it was and Navidrome's sync flag is cleared, so
+        the copy in the app becomes the real one and edits made there stick.
+        A track in one of these also pins its artist against the janitor.
+      '';
+    };
+
     playerProfiles = lib.mkOption {
       type = lib.types.listOf (
         lib.types.submodule {
@@ -1347,6 +1816,28 @@ in
         };
         RunAtLoad = true;
         StartInterval = 3600;
+        StandardOutPath = "${home}/Library/Logs/music-stack.log";
+        StandardErrorPath = "${home}/Library/Logs/music-stack.log";
+      };
+    };
+
+    # Reachable by hand because the interesting runs are the manual ones:
+    # `music-gc --dry-run` before trusting it, `music-gc --restore "<artist>"`
+    # to undo one.
+    environment.systemPackages = [
+      (pkgs.writeShellScriptBin "music-gc" ''exec ${gc} "$@"'')
+    ];
+
+    # Daily, and not at load: every window it applies is measured in weeks, so
+    # a run per rebuild would only be a way to hit a bad rule sooner.
+    launchd.user.agents.music-stack-gc = {
+      serviceConfig = {
+        Label = "kyan.music-stack-gc";
+        ProgramArguments = [ "${gc}" ];
+        EnvironmentVariables = {
+          PATH = "/usr/local/bin:/opt/homebrew/bin:/run/current-system/sw/bin:/usr/bin:/bin";
+        };
+        StartInterval = 86400;
         StandardOutPath = "${home}/Library/Logs/music-stack.log";
         StandardErrorPath = "${home}/Library/Logs/music-stack.log";
       };
