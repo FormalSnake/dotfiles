@@ -250,6 +250,30 @@ in
   # hl.env, hl.bind, hl.dsp.*, hl.window_rule, hl.layer_rule, hl.workspace_rule,
   # hl.gesture).
   xdg.configFile."hypr/hyprland.lua".text = ''
+    -- Window colours
+    -- FormalShell's ThemeEngine renders the live wallpaper palette to
+    -- ~/.config/hypr/formalshell-colors.lua on every wallpaper and mode change
+    -- and then calls `hyprctl reload`, which is what re-runs this file and
+    -- picks the new table up: a dofile'd file is not a source'd one, so
+    -- Hyprland never watches it. The literals below are the static Flexoki
+    -- fallback for the window before the shell's first render, and for a
+    -- session running the other shell. pcall because a missing or malformed
+    -- file would otherwise abort this whole config and leave the session
+    -- unusable.
+    local fsColors = {
+      primary = "rgb(${lib.removePrefix "#" flexoki.accents.blue.d})",
+      border = "rgb(${lib.removePrefix "#" flexoki.base.b700})",
+      destructive = "rgb(${lib.removePrefix "#" flexoki.accents.red.d})",
+    }
+    do
+      local ok, loaded = pcall(dofile, os.getenv("HOME") .. "/.config/hypr/formalshell-colors.lua")
+      if ok and type(loaded) == "table" then
+        for key in pairs(fsColors) do
+          if type(loaded[key]) == "string" then fsColors[key] = loaded[key] end
+        end
+      end
+    end
+
     -- Monitors
     ${monitors}
     -- Catch-all: any other external display at its highest refresh rate
@@ -329,19 +353,26 @@ in
         -- The scrolling tape (Hyprland 0.54+ has it in core, no plugin).
         layout = "scrolling",
         resize_on_border = true,
-        -- Static Flexoki fallback (blue active / base-700 inactive). The shell's
-        -- matugen hypr-border template overrides these with the live wallpaper
-        -- palette, both instantly via `hyprctl eval` (post_hook in mixins/dms.nix)
-        -- and persistently via the dofile at the bottom of this file. Without a
+        -- The live wallpaper palette, or the static Flexoki fallback when the
+        -- shell has not rendered one yet (see fsColors at the top). Without a
         -- value here Hyprland's built-in active border is white, which is what
         -- borders would revert to on every reload before the palette applies.
         col = {
-          active_border = "rgb(${lib.removePrefix "#" flexoki.accents.blue.d})",
-          inactive_border = "rgb(${lib.removePrefix "#" flexoki.base.b700})",
+          active_border = fsColors.primary,
+          inactive_border = fsColors.border,
         },
         -- Master switch for screen tearing. Does nothing on its own: a window
         -- must also carry the `immediate` rule (see the steam_app rule below).
         allow_tearing = true,
+      },
+      -- Grouped (tabbed) windows carry their own border set, so they follow
+      -- the same palette. Locked means the group refuses new members.
+      group = {
+        col = {
+          border_active = fsColors.primary,
+          border_inactive = fsColors.border,
+          border_locked_active = fsColors.destructive,
+        },
       },
       -- Scrolling tape behaviour. Deliberately close to niri's column model:
       -- half-width columns by default, the same four preset widths Mod+R cycles,
@@ -623,14 +654,22 @@ in
     -- Blur behind the shell's own layer surfaces: FormalShell paints its cards
     -- at theme.surfaceOpacity, so the blur under them is what shows through.
     -- ignore_alpha 0.2 keeps the fully transparent gaps in the bar unblurred.
-    hl.layer_rule({ match = { namespace = "^(formalshell:bar)$" }, blur = true, ignore_alpha = 0.2 })
-    hl.layer_rule({ match = { namespace = "^(formalshell:panel)$" }, blur = true, ignore_alpha = 0.2 })
-    hl.layer_rule({ match = { namespace = "^(formalshell:menu)$" }, blur = true, ignore_alpha = 0.2 })
-    hl.layer_rule({ match = { namespace = "^(formalshell:notifications-center)$" }, blur = true, ignore_alpha = 0.2 })
-    hl.layer_rule({ match = { namespace = "^(formalshell:tooltip)$" }, blur = true, ignore_alpha = 0.2 })
-
+    -- no_anim throughout: the shell animates its own surfaces (DESIGN.md §1
+    -- Motion), so a compositor animation on the layer runs a second one over
+    -- the top of it (the toast stack's resize against Hyprland's `layers`
+    -- spring).
+    hl.layer_rule({ match = { namespace = "^(formalshell:bar)$" }, blur = true, ignore_alpha = 0.2, no_anim = true })
+    hl.layer_rule({ match = { namespace = "^(formalshell:panel)$" }, blur = true, ignore_alpha = 0.2, no_anim = true })
+    hl.layer_rule({ match = { namespace = "^(formalshell:menu)$" }, blur = true, ignore_alpha = 0.2, no_anim = true })
+    hl.layer_rule({ match = { namespace = "^(formalshell:notifications-center)$" }, blur = true, ignore_alpha = 0.2, no_anim = true })
+    hl.layer_rule({ match = { namespace = "^(formalshell:tooltip)$" }, blur = true, ignore_alpha = 0.2, no_anim = true })
+    -- Opaque by design, so these take the animation rule alone.
+    hl.layer_rule({ match = { namespace = "^(formalshell:notifications)$" }, no_anim = true })
+    hl.layer_rule({ match = { namespace = "^(formalshell:osd)$" }, no_anim = true })
+    hl.layer_rule({ match = { namespace = "^(formalshell:polkit)$" }, no_anim = true })
+${lib.optionalString (!useFormalshell) ''
     -- Border colours: persist the last wallpaper palette across reloads
-    -- The shell renders the live wallpaper-derived border colours to
+    -- DMS renders the live wallpaper-derived border colours to
     -- ~/.cache/dank/hypr-border.lua on every palette change and also pushes them
     -- live via `hyprctl eval` (see the matugen template in mixins/dms.nix). That
     -- eval is runtime-only, so a `hyprctl reload` (or the startup race before the
@@ -639,7 +678,10 @@ in
     -- keeps the wallpaper colours instead. pcall: the file is absent before the
     -- first render: fall through to the fallback rather than erroring the whole
     -- config, which would leave the session unusable.
-    pcall(dofile, os.getenv("HOME") .. "/.cache/dank/hypr-border.lua")
+    --
+    -- The formalshell arm reads its own palette in fsColors at the top instead,
+    -- and this file runs last, so a stale dank cache would otherwise win.
+    pcall(dofile, os.getenv("HOME") .. "/.cache/dank/hypr-border.lua")''}
   '';
 
   # Session environment (uwsm)
