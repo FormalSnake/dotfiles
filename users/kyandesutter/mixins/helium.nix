@@ -215,7 +215,12 @@ in
   # Widevine hint (per-host store path), and 1Password's per-machine storage
   # (its chrome.storage.local and IndexedDB, keyed by the extension id; it
   # pairs with the local desktop app and re-pairing on every takeover is what
-  # the Zen setup had to avoid too). `*` never matches `/`, so `/*/…` is
+  # the Zen setup had to avoid too). `Service Worker` goes as a whole dir, not
+  # just its two caches: its Database holds the registrations, which name
+  # resource ids in the ScriptCache, so syncing one without the other leaves
+  # the receiving host with extensions registered but unloadable (1Password's
+  # popup then spins forever waiting for a background that can't start).
+  # `*` never matches `/`, so `/*/…` is
   # exactly the profile-dir level. Bare names (LOCK, LOG) match at any depth.
   # Safe to write while Helium runs: it is syncthing's file, not Helium's.
   home.activation.heliumStignore = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
@@ -245,8 +250,7 @@ in
     /*/GPUCache
     /*/DawnGraphiteCache
     /*/DawnWebGPUCache
-    /*/Service Worker/CacheStorage
-    /*/Service Worker/ScriptCache
+    /*/Service Worker
     /*/blob_storage
     /*/Shared Dictionary
     /*/optimization_guide_*
