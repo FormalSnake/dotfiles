@@ -2,11 +2,13 @@
 let
   cfg = config.kyan.roblox;
 
-  # Vulkan layer extensions are branch-pinned to the runtime they layer onto,
-  # so this has to track whatever org.freedesktop.Platform branch Sober's
-  # flatpak pulls (`flatpak info org.vinegarhq.Sober` shows it). A stale branch
-  # here installs an extension the sandbox never loads, and the overlay just
-  # silently fails to appear.
+  # Vulkan layer extensions are branch-pinned. Sober runs on org.gnome.Platform
+  # //50, which inherits the freedesktop VulkanLayer extension point from its
+  # base, so the branch to match is the freedesktop one, not the GNOME one that
+  # `flatpak info org.vinegarhq.Sober` prints. A stale branch installs an
+  # extension the sandbox never mounts and the overlay silently fails to
+  # appear; check with
+  #   flatpak run --command=sh org.vinegarhq.Sober -c 'ls /usr/lib/extensions/vulkan'
   runtimeBranch = "25.08";
 in
 {
