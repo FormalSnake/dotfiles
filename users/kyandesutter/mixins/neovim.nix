@@ -73,7 +73,6 @@ in
     treesitterParsers = with pkgs.vimPlugins.nvim-treesitter-parsers; [ swift ];
 
     extras = {
-      ai.supermaven.enable = true;
       util.mini-hipatterns.enable = true;
 
       # LazyVim uses blink.cmp for completion whether or not this extra is on,

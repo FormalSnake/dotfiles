@@ -657,7 +657,6 @@ in
       Description = "Pin the Flexoki custom theme for flexoki-named wallpapers";
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
-      ConditionEnvironment = "XDG_CURRENT_DESKTOP=Hyprland";
     };
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {

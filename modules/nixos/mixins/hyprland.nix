@@ -124,29 +124,11 @@ in
     services.displayManager.sddm = {
       enable = true;
       wayland.enable = true;
-      # Explicit: plasma6 (mixins/aero.nix) mkDefaults this to kwin, and the
-      # kwin value makes the sddm module hand the greeter
-      # QT_WAYLAND_SHELL_INTEGRATION=layer-shell, which weston's kiosk shell
-      # does not offer, so sddm-greeter-qt6 aborts and the greeter never shows.
-      wayland.compositor = "weston";
       wayland.compositorCommand = toString sddmGreeterCompositor;
-      # mkDefault: plasma6 (mixins/aero.nix) sets the same package outright.
-      package = lib.mkDefault pkgs.kdePackages.sddm;
+      package = pkgs.kdePackages.sddm;
       # On-screen keyboard. The Qt runtime sword's QML needs (svg,
       # multimedia, Qt5Compat) is contributed by the qylock module.
       extraPackages = [ pkgs.kdePackages.qtvirtualkeyboard ];
-      # The greeter runs as the sddm user with no XCURSOR_PATH, and
-      # libwayland-cursor's built-in search path has no /run/current-system
-      # entry, so without this it finds no theme and draws no pointer at all.
-      # Same cursor as the session (home.pointerCursor in
-      # users/kyandesutter/mixins/hyprland.nix).
-      settings = {
-        General.GreeterEnvironment = "XCURSOR_PATH=/run/current-system/sw/share/icons,XCURSOR_THEME=Bibata-Modern-Classic,XCURSOR_SIZE=24";
-        Theme = {
-          CursorTheme = "Bibata-Modern-Classic";
-          CursorSize = 24;
-        };
-      };
     };
 
     # qylock: one theme tree rendered by two frontends, the SDDM greeter and a
@@ -374,9 +356,6 @@ in
     networking.firewall.allowedUDPPorts = [ 53317 ];
 
     environment.systemPackages = with pkgs; [
-      # Greeter pointer (sddm settings above).
-      bibata-cursors
-
       # Night light backend for FormalShell (M16): the shell manages the
       # wlsunset process itself and only needs the binary on PATH.
       wlsunset
