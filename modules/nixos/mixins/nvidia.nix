@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, ... }:
 let
   cfg = config.kyan.nvidia;
 in
@@ -43,18 +43,26 @@ in
       # the session holds the GPU for its whole lifetime, so it would never
       # engage, and the machine is plugged in anyway.
       powerManagement.enable = true;
+
+      # nvidia-powerd. The GPU and the CPU share one chassis power budget;
+      # dynamic boost hands the headroom to whichever one is loaded instead of
+      # splitting it statically. Only useful because the machine is always on
+      # AC. If the firmware doesn't support it, nvidia-powerd exits and the
+      # rest of the stack is unaffected.
+      dynamicBoost.enable = true;
+
+      moduleParams.nvidia = {
+        # PowerMizer at maximum performance. PerfLevelSrc=0x2222 makes the
+        # driver honour the PowerMizerDefault* levels instead of its own
+        # heuristic; 0x1 is "maximum performance". The machine lives on the
+        # barrel charger, so the battery level is set to the same.
+        NVreg_RegistryDwords = ''"PowerMizerEnable=0x1; PerfLevelSrc=0x2222; PowerMizerDefaultAC=0x1; PowerMizerDefault=0x1"'';
+
+        # Where powerManagement.enable dumps VRAM across a suspend. The driver
+        # default is /tmp, which is a 16G tmpfs here, so the card's 8G would be
+        # written straight back into RAM. /var/tmp is on the disk.
+        NVreg_TemporaryFilePath = "/var/tmp";
+      };
     };
-
-    # VA-API on the dGPU for browsers and Electron (LIBVA_DRIVER_NAME=nvidia is
-    # exported per session in users/kyandesutter/mixins/hyprland.nix).
-    hardware.graphics.extraPackages = [ pkgs.nvidia-vaapi-driver ];
-
-    # PowerMizer at maximum performance. PerfLevelSrc=0x2222 makes the driver
-    # honour the PowerMizerDefault* levels instead of its own heuristic;
-    # 0x1 is "maximum performance". The machine lives on the barrel charger,
-    # so the battery level is set to the same.
-    boot.extraModprobeConfig = ''
-      options nvidia NVreg_RegistryDwords="PowerMizerEnable=0x1; PerfLevelSrc=0x2222; PowerMizerDefaultAC=0x1; PowerMizerDefault=0x1"
-    '';
   };
 }
