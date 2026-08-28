@@ -125,7 +125,8 @@ in
       enable = true;
       wayland.enable = true;
       wayland.compositorCommand = toString sddmGreeterCompositor;
-      package = pkgs.kdePackages.sddm;
+      # mkDefault: plasma6 (mixins/aero.nix) sets the same package outright.
+      package = lib.mkDefault pkgs.kdePackages.sddm;
       # On-screen keyboard. The Qt runtime sword's QML needs (svg,
       # multimedia, Qt5Compat) is contributed by the qylock module.
       extraPackages = [ pkgs.kdePackages.qtvirtualkeyboard ];
