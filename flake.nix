@@ -196,6 +196,15 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # AeroThemePlasma: the Windows 7 Plasma 6 rice, as a second SDDM session
+    # next to Hyprland (modules/nixos/mixins/aero.nix). Carries patched
+    # libplasma and plasma-workspace builds, so it has to follow our nixpkgs
+    # or it drags in a second KDE. `senpai` is the unstable branch.
+    aerothemeplasma-nix = {
+      url = "github:nyakase/aerothemeplasma-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # DMS plugin registry: a flake that packages every community plugin
     # (built daily) and ships a home-manager module exposing them as
     # `programs.dank-material-shell.plugins.<id>.enable`. We enable a handful in

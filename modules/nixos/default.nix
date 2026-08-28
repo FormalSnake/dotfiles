@@ -23,6 +23,7 @@
       ./mixins/bluetooth.nix
       ./mixins/mouse.nix
       ./mixins/hyprland.nix
+      ./mixins/aero.nix
       ./mixins/online-accounts.nix
       ./mixins/steam.nix
       ./mixins/dualsense.nix
