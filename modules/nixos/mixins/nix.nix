@@ -38,17 +38,23 @@
   systemd.services.nix-gc.preStart = ''
     ${config.nix.package}/bin/nix-env --delete-generations +3 -p /nix/var/nix/profiles/system
   '';
-  # The timer is Persistent, so on a laptop that sleeps through midnight the
-  # collection fires right after the next boot, on top of the login (27 s of
-  # store walking measured on the e1504g). Keep it behind everything
-  # interactive.
+  # A Persistent timer on a laptop that sleeps through midnight fires the
+  # collection right after the next boot, on top of the login: measured
+  # 2026-08-28 on the e1504g at 74 s wall, 1.1 GB read, 2 GB memory peak, which
+  # on 8 GB pushes the session into swap before anything is open. So: not
+  # persistent, and a boot run 30 minutes in instead, once the login storm is
+  # over. The idle I/O class and nice keep it behind the foreground; MemoryHigh
+  # keeps its store-walk page cache from evicting the desktop's binaries.
   systemd.services.nix-gc.serviceConfig = {
     IOSchedulingClass = "idle";
     Nice = 19;
+    MemoryHigh = "1G";
   };
+  systemd.timers.nix-gc.timerConfig.OnBootSec = "30min";
   nix.gc = {
     automatic = true;
     dates = "daily";
+    persistent = false;
   };
 
   # `sudo nixos-rebuild` evaluates as root, so the private FormalShell flake
