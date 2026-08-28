@@ -135,7 +135,20 @@ in
       # On-screen keyboard. The Qt runtime sword's QML needs (svg,
       # multimedia, Qt5Compat) is contributed by the qylock module.
       extraPackages = [ pkgs.kdePackages.qtvirtualkeyboard ];
+      # The greeter runs as the sddm user with no XCURSOR_PATH, and
+      # libwayland-cursor's built-in search path has no /run/current-system
+      # entry, so without this it finds no theme and draws no pointer at all.
+      # Same cursor as the session (home.pointerCursor in
+      # users/kyandesutter/mixins/hyprland.nix).
+      settings = {
+        General.GreeterEnvironment = "XCURSOR_PATH=/run/current-system/sw/share/icons,XCURSOR_THEME=Bibata-Modern-Classic,XCURSOR_SIZE=24";
+        Theme = {
+          CursorTheme = "Bibata-Modern-Classic";
+          CursorSize = 24;
+        };
+      };
     };
+    environment.systemPackages = [ pkgs.bibata-cursors ];
 
     # qylock: one theme tree rendered by two frontends, the SDDM greeter and a
     # Quickshell `ext-session-lock-v1` client. sword draws over a looping 43 MB

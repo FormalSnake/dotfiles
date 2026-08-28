@@ -352,6 +352,9 @@
       # then would cut rebuilds mid-flight. swayidle only fires once per idle
       # edge, so the timeout starts a transient wait-loop (suspends the moment
       # the last SSH connection closes), and local activity kills it.
+      # Hyprland only: KDE has its own idle handling (see formalshell.nix
+      # for the gate).
+      systemd.user.services.swayidle.Unit.ConditionEnvironment = "XDG_CURRENT_DESKTOP=Hyprland";
       services.swayidle = {
         enable = true;
         timeouts = [
@@ -389,6 +392,7 @@
           Description = "Punchier panel gamma via wl-gammarelay-rs";
           PartOf = [ "graphical-session.target" ];
           After = [ "graphical-session.target" ];
+          ConditionEnvironment = "XDG_CURRENT_DESKTOP=Hyprland";
         };
         Install.WantedBy = [ "graphical-session.target" ];
         Service = {

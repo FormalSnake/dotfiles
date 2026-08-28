@@ -145,6 +145,7 @@ in
       Description = "wl-clip-persist (keep regular clipboard alive)";
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
+      ConditionEnvironment = "XDG_CURRENT_DESKTOP=Hyprland";
       "X-SwitchMethod" = "keep-old";
     };
     Install.WantedBy = [ "graphical-session.target" ];
