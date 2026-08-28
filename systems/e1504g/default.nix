@@ -185,8 +185,14 @@
   # this chassis, pwm1_enable is auto-only) reacts to the resulting temps, so
   # the fan never spins down. Lower power is the only fan lever: cap RAPL per
   # PPD profile, on BOTH domains (the enforced limit is the lower of MSR and
-  # MMIO). Tiers: performance merely audible, balanced near-silent,
-  # power-saver minimal. Same profile-watching shape as power-saver-dim below,
+  # MMIO). Tiers: balanced near-silent, power-saver minimal. performance is
+  # the firmware's own 15/35 W, the same as Fedora's throughput-performance
+  # (which never touches RAPL): measured 2026-08-28, the package already sits
+  # at 7-11 W with the desktop idle (display engine, memory, compositor), so
+  # the old 12 W performance cap left single-core turbo at 2.7-3.0 GHz instead
+  # of 3.0-3.5, and all-core at 2.2 instead of 2.8 GHz. The sysfs values
+  # persist across profile switches, so performance has to write the firmware
+  # numbers back rather than skip. Same profile-watching shape as power-saver-dim below,
   # but a system service (sysfs writes need root), and wantedBy the backend
   # rather than multi-user.target: pinning it to multi-user.target closes an
   # ordering loop (multi-user → power-cap → tuned-ppd → multi-user) systemd
@@ -211,7 +217,7 @@
       ''
         apply() {
           case $1 in
-            performance) pl1=12 pl2=18 ;;
+            performance) pl1=15 pl2=35 ;;
             balanced)    pl1=8  pl2=14 ;;
             power-saver) pl1=5  pl2=8  ;;
             *) return 0 ;;
