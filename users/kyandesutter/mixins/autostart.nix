@@ -46,11 +46,11 @@ in
   # pass that starts every inactive unit an active target wants, and keep-old
   # has no say there (see bluebubbles below for the pair of options that closes it).
 
-  # Equibop (Discord), launched minimized to the tray. Window rule sends it to
-  # workspace 4 (communication, the internal panel).
-  systemd.user.services.equibop = {
+  # Discord (moonlight-patched), launched minimized to the tray. Window rule
+  # sends it to workspace 4 (communication, the internal panel).
+  systemd.user.services.discord = {
     Unit = {
-      Description = "Equibop (minimized to tray)";
+      Description = "Discord (minimized to tray)";
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
       "X-SwitchMethod" = "keep-old";
@@ -58,7 +58,7 @@ in
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {
       Type = "simple";
-      ExecStart = loginExec "equibop --start-minimized";
+      ExecStart = loginExec "Discord --start-minimized";
     };
   };
 

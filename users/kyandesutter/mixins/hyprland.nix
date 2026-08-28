@@ -592,7 +592,7 @@ in
     -- its assigned workspace. No terminal rule: ghostty opens where you are.
     hl.window_rule({ match = { class = "^([Hh]elium)$" }, workspace = "1" })
     hl.window_rule({ match = { class = "^([Cc]ode|[Zz]ed|dev.zed.Zed)$" }, workspace = "3" })
-    hl.window_rule({ match = { class = "^([Ss]lack|WhatsApp|[Ee]quibop|discord|[Bb]eeper|[Bb]lue[Bb]ubbles)$" }, workspace = "4" })
+    hl.window_rule({ match = { class = "^([Ss]lack|WhatsApp|discord|[Bb]eeper|[Bb]lue[Bb]ubbles)$" }, workspace = "4" })
     -- Beeper/BlueBubbles (Electron) map their main window floating, so they
     -- never tile. Force them back into the layout.
     hl.window_rule({ match = { class = "^([Bb]eeper)$" }, float = false })
