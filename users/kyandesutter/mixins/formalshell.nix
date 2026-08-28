@@ -65,20 +65,21 @@ in
         # you were looking at.
         #
         # The split is monitor-versus-consult. Charge, volume, connectivity
-        # and pending notifications are state you glance at; bluetooth,
+        # and pending notifications are state you glance at; dualsense,
         # tailscale, github, usage and the SNI tray are things you go
-        # and look at. `indicators` stays permanent because its cells already
-        # self-hide, so they cost nothing at rest and matter exactly when they
-        # appear (recording, DND, night light, a due reminder). airpods and
-        # dualsense (M29 builtins) self-hide the same way, so airpods earns
-        # the permanent tier next to audio (owner ask 2026-08-18) and
-        # dualsense keeps its old collapsible slot. Collapse state is per
-        # region in state.json and starts collapsed, so the bar boots at
-        # five cells rather than eleven.
+        # and look at. bluetooth sits in the permanent tier immediately after
+        # network (owner ask 2026-08-28), so the two radios read as one pair.
+        # `indicators` stays permanent because its cells already self-hide, so
+        # they cost nothing at rest and matter exactly when they appear
+        # (recording, DND, night light, a due reminder). airpods and dualsense
+        # (M29 builtins) self-hide the same way, so airpods earns the permanent
+        # tier next to audio (owner ask 2026-08-18) and dualsense keeps its old
+        # collapsible slot. Collapse state is per region in state.json and
+        # starts collapsed, so the bar boots at six cells rather than ten.
         # Weather rides the permanent tier (owner ask 2026-08-18, out of the
         # center group), leading it so the battery/audio/network cluster
         # stays contiguous against the screen edge.
-        bar.layout.right = [ "display" "bluetooth" "dualsense" "tailscale" "github" "usage" "tray" "chevron" "weather" "battery" "airpods" "audio" "network" "bell" "indicators" ];
+        bar.layout.right = [ "display" "dualsense" "tailscale" "github" "usage" "tray" "chevron" "weather" "battery" "airpods" "audio" "network" "bluetooth" "bell" "indicators" ];
         # Codex off: the usage panel polls and renders a section per provider,
         # and this machine only ever signs into Claude, so the CODEX section
         # was permanently reporting on a tool that never gets used.

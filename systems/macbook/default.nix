@@ -31,6 +31,7 @@
   # Lidarr's spelling, not MusicBrainz's or the scrobble export's.
   kyan.music.singlesArtists = [
     "Niko B"
+    "Elderbrook"
     "Artemas"
     "nicopatty"
     "nuphory"
