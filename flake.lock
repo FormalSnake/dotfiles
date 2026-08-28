@@ -1,5 +1,26 @@
 {
   "nodes": {
+    "aerothemeplasma-nix": {
+      "inputs": {
+        "flake-parts": "flake-parts",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1787467581,
+        "narHash": "sha256-smaVZftg2rSygF8lo4elWWpaw6tbp59vytzKNIjc9Wk=",
+        "owner": "nyakase",
+        "repo": "aerothemeplasma-nix",
+        "rev": "0c2356fb2ea0ef23a8a46d1d99197939f8073216",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nyakase",
+        "repo": "aerothemeplasma-nix",
+        "type": "github"
+      }
+    },
     "agenix": {
       "inputs": {
         "darwin": "darwin",
@@ -103,7 +124,7 @@
     },
     "cl-nix-lite": {
       "inputs": {
-        "flake-parts": "flake-parts_3",
+        "flake-parts": "flake-parts_4",
         "nixpkgs": "nixpkgs_6",
         "systems": "systems_5",
         "treefmt-nix": "treefmt-nix"
@@ -381,6 +402,24 @@
     },
     "flake-parts": {
       "inputs": {
+        "nixpkgs-lib": "nixpkgs-lib"
+      },
+      "locked": {
+        "lastModified": 1778716662,
+        "narHash": "sha256-m1Yf0wZ8j1OHjTc2UwHwyQRSnNeSgLJOd7q5Y45hzi4=",
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "rev": "f7c1a2d347e4c52d5fb8d10cb4d94b5884e546fb",
+        "type": "github"
+      },
+      "original": {
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "type": "github"
+      }
+    },
+    "flake-parts_2": {
+      "inputs": {
         "nixpkgs-lib": [
           "determinate",
           "nix",
@@ -400,7 +439,7 @@
         "url": "https://flakehub.com/f/hercules-ci/flake-parts/0.1"
       }
     },
-    "flake-parts_2": {
+    "flake-parts_3": {
       "inputs": {
         "nixpkgs-lib": [
           "nixpkgs"
@@ -420,9 +459,9 @@
         "type": "github"
       }
     },
-    "flake-parts_3": {
+    "flake-parts_4": {
       "inputs": {
-        "nixpkgs-lib": "nixpkgs-lib"
+        "nixpkgs-lib": "nixpkgs-lib_2"
       },
       "locked": {
         "lastModified": 1765835352,
@@ -438,7 +477,7 @@
         "type": "github"
       }
     },
-    "flake-parts_4": {
+    "flake-parts_5": {
       "inputs": {
         "nixpkgs-lib": [
           "nordvpn-flake",
@@ -614,7 +653,7 @@
     },
     "hercules-ci-effects": {
       "inputs": {
-        "flake-parts": "flake-parts_4",
+        "flake-parts": "flake-parts_5",
         "nixpkgs": "nixpkgs_12"
       },
       "locked": {
@@ -781,7 +820,7 @@
     },
     "nix": {
       "inputs": {
-        "flake-parts": "flake-parts",
+        "flake-parts": "flake-parts_2",
         "git-hooks-nix": "git-hooks-nix",
         "nixpkgs": "nixpkgs_3",
         "nixpkgs-23-11": "nixpkgs-23-11",
@@ -963,6 +1002,21 @@
       }
     },
     "nixpkgs-lib": {
+      "locked": {
+        "lastModified": 1777168982,
+        "narHash": "sha256-GOkGPcboWE9BmGCRMLX3worL4EMnsnG8MyKmXNeYuhQ=",
+        "owner": "nix-community",
+        "repo": "nixpkgs.lib",
+        "rev": "f5901329dade4a6ea039af1433fb087bd9c1fe14",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "nixpkgs.lib",
+        "type": "github"
+      }
+    },
+    "nixpkgs-lib_2": {
       "locked": {
         "lastModified": 1765674936,
         "narHash": "sha256-k00uTP4JNfmejrCLJOwdObYC9jHRrr/5M/a/8L2EIdo=",
@@ -1284,6 +1338,7 @@
     },
     "root": {
       "inputs": {
+        "aerothemeplasma-nix": "aerothemeplasma-nix",
         "agenix": "agenix",
         "areofyl-fetch": "areofyl-fetch",
         "brew-src": "brew-src",
@@ -1294,7 +1349,7 @@
         "dankcalendar": "dankcalendar",
         "determinate": "determinate",
         "dms-plugin-registry": "dms-plugin-registry",
-        "flake-parts": "flake-parts_2",
+        "flake-parts": "flake-parts_3",
         "formalshell": "formalshell",
         "helium": "helium",
         "herdr": "herdr",

@@ -55,6 +55,10 @@
   # the greeter either way.
   kyan.desktop.shell = "formalshell";
 
+  # AeroThemePlasma (Windows 7 on Plasma 6) as a second session in the SDDM
+  # list; Hyprland stays the default (modules/nixos/mixins/aero.nix).
+  kyan.desktop.aero.enable = true;
+
   # Syncthing mesh: wallpapers + Helium profile, macbook as hub
   # (modules/nixos/mixins/syncthing.nix; spec 2026-07-22).
   kyan.syncthing.enable = true;
