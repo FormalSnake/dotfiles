@@ -124,6 +124,11 @@ in
     services.displayManager.sddm = {
       enable = true;
       wayland.enable = true;
+      # Explicit: plasma6 (mixins/aero.nix) mkDefaults this to kwin, and the
+      # kwin value makes the sddm module hand the greeter
+      # QT_WAYLAND_SHELL_INTEGRATION=layer-shell, which weston's kiosk shell
+      # does not offer, so sddm-greeter-qt6 aborts and the greeter never shows.
+      wayland.compositor = "weston";
       wayland.compositorCommand = toString sddmGreeterCompositor;
       # mkDefault: plasma6 (mixins/aero.nix) sets the same package outright.
       package = lib.mkDefault pkgs.kdePackages.sddm;

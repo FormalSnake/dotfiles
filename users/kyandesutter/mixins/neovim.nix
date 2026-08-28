@@ -1,4 +1,10 @@
-{ inputs, pkgs, ... }:
+{
+  inputs,
+  lib,
+  config,
+  pkgs,
+  ...
+}:
 let
   # kepano/flexoki-neovim (the only actively-maintained Flexoki colorscheme, by
   # Flexoki's author). Not in nixpkgs and unknown to lazyvim-nix's plugin data,
@@ -35,19 +41,98 @@ in
   programs.lazyvim = {
     enable = true;
 
-    # LSPs that lazyvim-nix doesn't map to nixpkgs (lang.tailwind, lang.astro,
-    # and HTML/CSS/JSON/Emmet) need to be provided here so they land on nvim's PATH.
+    # Tools lazyvim-nix has no dependency mapping for, so `installDependencies`
+    # on the matching extra installs nothing. Everything listed here lands on
+    # nvim's PATH via the wrapper, not on the login shell's.
     extraPackages = with pkgs; [
+      # LazyVim core: lua_ls is configured in lazyvim.plugins.lsp, stylua is the
+      # core lua formatter. Neither has an extra to enable.
+      lua-language-server
+      stylua
+
+      # lang.tailwind / lang.astro / HTML / CSS / JSON / Emmet
       tailwindcss-language-server
       astro-language-server
       vscode-langservers-extracted   # html, cssls, jsonls, eslint
       emmet-language-server          # JSX/HTML emmet completions
+
+      # lang.nix
+      nil
+      nixfmt-rfc-style
+      statix
+
+      # lang.yaml / lang.markdown / lang.docker
+      yaml-language-server
+      marksman
+      dockerfile-language-server-nodejs
+      docker-compose-language-service
     ];
+
+    # sourcekit-lsp ships with Xcode and there is no LazyVim swift extra, so
+    # the parser has to be requested by hand.
+    treesitterParsers = with pkgs.vimPlugins.nvim-treesitter-parsers; [ swift ];
 
     extras = {
       ai.supermaven.enable = true;
-      editor.neo-tree.enable = true;
       util.mini-hipatterns.enable = true;
+
+      # LazyVim uses blink.cmp for completion whether or not this extra is on,
+      # but lazyvim-nix only pins the plugin when it is, and an unpinned
+      # blink.cmp is a runtime git clone whose prebuilt Rust matcher has to
+      # match the checkout. Enable it so completion comes from the store.
+      coding.blink.enable = true;
+
+      # Debug adapters come from the lang extras (delve via lang.go); dap.core
+      # on its own only supplies the UI and the <leader>d keymaps.
+      dap.core.enable = true;
+
+      editor.neo-tree.enable = true;
+      editor.illuminate.enable = true;
+      editor.inc-rename.enable = true;
+      editor.outline.enable = true;
+
+      ui.indent-blankline.enable = true;
+      ui.treesitter-context.enable = true;
+
+      formatting.prettier = {
+        enable = true;
+        installDependencies = true;
+        installRuntimeDependencies = true;
+      };
+      linting.eslint = {
+        enable = true;
+        installDependencies = true;
+      };
+
+      lang.docker = {
+        enable = true;
+        installDependencies = true;
+      };
+      lang.git.enable = true;
+      lang.go = {
+        enable = true;
+        installDependencies = true;
+        # go itself is already in the user profile.
+        installRuntimeDependencies = false;
+      };
+      lang.json = {
+        enable = true;
+        installDependencies = true;
+      };
+      lang.markdown = {
+        enable = true;
+        installDependencies = true;
+        installRuntimeDependencies = true;
+      };
+      lang.nix.enable = true;
+      # rust-analyzer, cargo and rustc come from rustup in ~/.cargo/bin; a
+      # second copy from nixpkgs would shadow the toolchain the projects use.
+      lang.rust.enable = true;
+      lang.toml = {
+        enable = true;
+        installDependencies = true;
+      };
+      lang.yaml.enable = true;
 
       lang.astro = {
         enable = true;
@@ -132,7 +217,8 @@ in
       # backstop below re-applies on every flip.
       auto-dark-mode = ''
         return {
-          "f-person/auto-dark-mode.nvim",
+          dir = "${pkgs.vimPlugins.auto-dark-mode-nvim}",
+          name = "auto-dark-mode.nvim",
           lazy = false,
           priority = 999,
           dependencies = { "flexoki" },
@@ -164,6 +250,59 @@ in
               vtsls.settings.vtsls.tsserver.globalPlugins = nil
             end
           end,
+        }
+      '';
+
+      # LazyVim has no swift extra. sourcekit-lsp ships inside the Xcode
+      # toolchain, so lspconfig's default cmd (`xcrun sourcekit-lsp`) resolves
+      # without anything on nvim's PATH.
+      sourcekit = ''
+        return {
+          "neovim/nvim-lspconfig",
+          opts = {
+            servers = {
+              sourcekit = {
+                filetypes = { "swift", "objc", "objcpp" },
+              },
+            },
+          },
+        }
+      '';
+
+      # nvim-dap-ui and lang.go's dap block pull these three in as bare
+      # dependencies, so lazyvim-nix's plugin data has no entry for them and
+      # lazy.nvim would clone each one at startup. Hand it the store paths.
+      dap-deps = ''
+        return {
+          { dir = "${pkgs.vimPlugins.nvim-nio}", name = "nvim-nio", lazy = true },
+          { dir = "${pkgs.vimPlugins.nvim-dap-virtual-text}", name = "nvim-dap-virtual-text", lazy = true },
+          { dir = "${pkgs.vimPlugins.nvim-dap-go}", name = "nvim-dap-go", lazy = true },
+        }
+      '';
+
+      # nil asks "Some flake inputs are not available. Fetch them now?" through
+      # a showMessageRequest the first time it evaluates a flake whose inputs
+      # are not all in the store, which is every cold open of this repo. false
+      # means never fetch and never ask.
+      nil-ls = ''
+        return {
+          "neovim/nvim-lspconfig",
+          opts = {
+            servers = {
+              nil_ls = {
+                settings = {
+                  ["nil"] = {
+                    nix = {
+                      flake = {
+                        autoArchive = false,
+                        autoEvalInputs = false,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
         }
       '';
 
@@ -269,4 +408,14 @@ in
       apply_transparency()
     '';
   };
+
+  # vim.loader validates its bytecode cache on (path, size, mtime). Every file
+  # under /nix/store carries mtime 1, and a plugin spec whose only change is the
+  # store hash keeps the same byte length, so the cache never invalidates: nvim
+  # goes on loading specs that point at store paths the last GC removed, and
+  # every plugin behind one of them silently fails to load. Drop the cache on
+  # activation, nvim recompiles it on the next start.
+  home.activation.clearNvimLuacCache = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    $DRY_RUN_CMD rm -rf $VERBOSE_ARG "${config.home.homeDirectory}/.cache/nvim/luac"
+  '';
 }
