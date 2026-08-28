@@ -353,8 +353,8 @@
       # edge, so the timeout starts a transient wait-loop (suspends the moment
       # the last SSH connection closes), and local activity kills it.
       # Hyprland only: KDE has its own idle handling (see formalshell.nix
-      # for the gate).
-      systemd.user.services.swayidle.Unit.ConditionEnvironment = "XDG_CURRENT_DESKTOP=Hyprland";
+      # for the gate). mkForce: the HM module sets the WAYLAND_DISPLAY one.
+      systemd.user.services.swayidle.Unit.ConditionEnvironment = lib.mkForce [ "WAYLAND_DISPLAY" "XDG_CURRENT_DESKTOP=Hyprland" ];
       services.swayidle = {
         enable = true;
         timeouts = [
