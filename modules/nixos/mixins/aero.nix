@@ -17,6 +17,13 @@ in
     # No kmail/kontact stack, plasma6 mkDefaults it on.
     programs.kde-pim.enable = false;
 
+    # Win7 boot splash on every boot, Hyprland ones included. `quiet` keeps the
+    # kernel log off the splash; the systemd initrd shows it from the first
+    # stage rather than only after the root mount.
+    boot.plymouth.enable = true;
+    boot.initrd.systemd.enable = true;
+    boot.kernelParams = [ "quiet" ];
+
     programs.aeroshell = {
       enable = true;
       fonts.segoe.enable = true;
@@ -26,8 +33,7 @@ in
         # The greeter stays qylock's sword (mixins/hyprland.nix): this sets
         # services.displayManager.sddm.theme too and the two would collide.
         sddm.enable = false;
-        # Global boot splash; a Win7 splash on Hyprland boots is not wanted.
-        plymouth.enable = false;
+        plymouth.enable = true;
       };
     };
   };
