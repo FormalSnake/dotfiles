@@ -439,7 +439,6 @@ in
     "matugen/templates/aura.tmpl".source = ../matugen-templates/aura.tmpl;
     "matugen/templates/ghostty.tmpl".source = ../matugen-templates/ghostty.tmpl;
     "matugen/templates/neovim.lua.tmpl".source = ../matugen-templates/neovim.lua.tmpl;
-    "matugen/templates/equibop.css.tmpl".source = ../matugen-templates/equibop.css.tmpl;
     "matugen/templates/obsidian.css.tmpl".source = ../matugen-templates/obsidian.css.tmpl;
     "matugen/templates/dualsense.tmpl".source = ../matugen-templates/dualsense.tmpl;
     "matugen/templates/hypr-border.lua.tmpl".source = ../matugen-templates/hypr-border.lua.tmpl;
@@ -521,12 +520,6 @@ in
       [templates.neovim]
       input_path = "~/.config/matugen/templates/neovim.lua.tmpl"
       output_path = "~/.config/nvim/lua/dank_base16.lua"
-
-      # Equibop (Discord): Equicord hot-reloads the themes folder, so no hook.
-      # One-time: enable the theme in Equibop -> Settings -> Themes.
-      [templates.equibop]
-      input_path = "~/.config/matugen/templates/equibop.css.tmpl"
-      output_path = "~/.config/equibop/themes/dank.theme.css"
 
       # Obsidian (Verso theme). Rendered into the vault's snippet dir,
       # Obsidian watches ~/Notes/.obsidian/snippets and hot-reloads on write,

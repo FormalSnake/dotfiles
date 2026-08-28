@@ -193,7 +193,7 @@ GTK (`~/.config/gtk-{3,4}.0/dank-colors.css`, imported via gtk.css) and Qt
 (`~/.config/qt{5,6}ct/colors/matugen.conf`), and it merges our user templates
 (`users/kyandesutter/matugen-templates/`, registered via the generated
 `~/.config/matugen/config.toml` in `mixins/dms.nix`: aura, ghostty, neovim,
-equibop, obsidian, hypr-border, btop, yazi) into the
+obsidian, hypr-border, btop, yazi) into the
 same matugen run, executing each template's post_hook. Hyprland's window borders
 are themed through the `hypr-border` template: it renders
 `~/.cache/dank/hypr-border.lua` (an `hl.config({ general = { col = … } })` call)
@@ -253,7 +253,7 @@ removed on 2026-08-24 (git has them). What remains:
 
 ## Autostart (g815)
 
-DE-agnostic login apps (Steam, Helium, Equibop, …) are home-manager
+DE-agnostic login apps (Steam, Helium, Discord, …) are home-manager
 `systemd.user.services` bound to `graphical-session.target` in
 `users/kyandesutter/mixins/autostart.nix` (uwsm ties the compositor to that
 target, so they follow the session). Nothing is compositor-hook-launched: there
