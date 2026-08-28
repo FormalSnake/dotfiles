@@ -148,7 +148,6 @@ in
         };
       };
     };
-    environment.systemPackages = [ pkgs.bibata-cursors ];
 
     # qylock: one theme tree rendered by two frontends, the SDDM greeter and a
     # Quickshell `ext-session-lock-v1` client. sword draws over a looping 43 MB
@@ -375,6 +374,9 @@ in
     networking.firewall.allowedUDPPorts = [ 53317 ];
 
     environment.systemPackages = with pkgs; [
+      # Greeter pointer (sddm settings above).
+      bibata-cursors
+
       # Night light backend for FormalShell (M16): the shell manages the
       # wlsunset process itself and only needs the binary on PATH.
       wlsunset
