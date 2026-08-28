@@ -120,6 +120,12 @@ in
     # should survive a shell restart.
     systemd.user.services.formalshell.Service.KillMode = "process";
 
+    # Plasma (mixins/aero.nix) reaches graphical-session.target too, so every
+    # unit wanted by it would start under KDE as well. The Hyprland-only ones
+    # gate on the desktop uwsm exports into the user manager; Plasma imports
+    # KDE there instead.
+    systemd.user.services.formalshell.Unit.ConditionEnvironment = "XDG_CURRENT_DESKTOP=Hyprland";
+
     # helium waits for the session notification daemon (see autostart.nix);
     # with dms.service gone that is formalshell.service.
     systemd.user.services.helium.Unit = {
