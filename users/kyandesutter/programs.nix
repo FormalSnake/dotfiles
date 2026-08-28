@@ -15,6 +15,7 @@
       coreutils
       deno
       dipc
+      fastlane
       ffmpeg
       file
       git-filter-repo
