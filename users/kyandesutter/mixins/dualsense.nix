@@ -434,7 +434,6 @@ in
       Description = "DualSense D-pad as a window and workspace remote";
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
-      ConditionEnvironment = "XDG_CURRENT_DESKTOP=Hyprland";
     };
     Service = {
       ExecStart = "${dualsensePad}/bin/dualsense-pad";
