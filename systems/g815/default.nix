@@ -49,6 +49,21 @@
   # Belt-and-suspenders: keep NetworkManager from re-enabling Wi-Fi powersave.
   networking.networkmanager.wifi.powersave = false;
 
+  # systemd-resolved, this host only for now (the e1504g follows once it has run
+  # here for a while). The point is per-link DNS with routing domains: tailscaled
+  # registers `~tailb24294.ts.net` against tailscale0 over resolved's D-Bus API
+  # instead of taking /etc/resolv.conf hostage. Without it tailscaled wins that
+  # fight outright (resolv.conf lists 100.100.100.100 and nothing else, so every
+  # lookup in the system goes through MagicDNS) right up until NordVPN connects
+  # and overwrites the file.
+  #
+  # The resolved module sets networking.networkmanager.dns = "systemd-resolved"
+  # and turns resolvconf off itself, so this line is the whole change. The
+  # /etc/hosts pin in modules/nixos/mixins/networking.nix stays: nordvpnd writes
+  # /etc/resolv.conf directly and knows nothing about resolved, so a connected
+  # NordVPN still shadows MagicDNS the same way it does today.
+  services.resolved.enable = true;
+
   # Automatic output routing by priority (device-specific: headphone MACs, this
   # chassis's PCI audio addresses), so it lives here rather than in the generic
   # audio mixin. WirePlumber always switches the default sink to the
