@@ -110,8 +110,8 @@ no behaviour change, no rename, no reformat. Scope first with
 `rg -n --stats '(^|\s)(//|#|/\*|\*|--)' <src dirs>` and tell me the file count
 and exclusions. Leave licence headers and tool directives (`eslint-disable`,
 `# noqa`, `# type: ignore`, `//go:embed`, pragmas, codegen markers) byte for
-byte. Fan the mechanical bulk out with `canaryclaude-cheap-subagent`, pasting
-the ban list into each worker verbatim, and keep the judgement calls yourself.
+byte. Fan the mechanical bulk out across parallel subagents, pasting the ban
+list into each worker verbatim, and keep the judgement calls yourself.
 Land it as one comment-only commit and report the counts.
 
 ## Git identity is already configured. Never touch it.
@@ -202,7 +202,6 @@ not on whether I named the skill.
 | Apple platforms | `Apple-Hig-Designer`, `swiftui-ui-patterns`, `serve-sim`; `apple-design` for an Apple feel on the web |
 | Cloudflare | `cloudflare`, `wrangler`, `workers-best-practices`, `durable-objects`, `agents-sdk` |
 | My own services | `canaryllm-api`, `gem0-api` |
-| A pile of mechanical edits | `canaryclaude-cheap-subagent`, fanned out in parallel |
 | Review and quality passes | `deep-review`, `react-doctor`, `web-perf`, `web-quality-audit` |
 | Prose shipping under my name | `humanizer` |
 | Any library, framework, SDK or CLI question | Context7 MCP first, never memory |

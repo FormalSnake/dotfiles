@@ -214,19 +214,6 @@ in
         '';
       };
 
-      canaryclaude = {
-        description = "Launch Claude Code routed through CanaryLLM";
-        body = ''
-          if not set -q CANARYLLM_API_KEY
-              echo "CANARYLLM_API_KEY is not set (agenix secret missing?)" >&2
-              return 1
-          end
-          ANTHROPIC_BASE_URL=https://canaryllm.canarycoders.es \
-          ANTHROPIC_AUTH_TOKEN=$CANARYLLM_API_KEY \
-          claude $argv
-        '';
-      };
-
       wgtunnel = {
         description = "WireGuard-over-wstunnel client (endpoint + path prefix from agenix)";
         body = ''
