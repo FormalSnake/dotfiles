@@ -9,9 +9,15 @@ let
   #      generic a2dp-sink profile (retried every tick, so a transport that only
   #      comes up on the third attempt still recovers);
   #   2. whenever a new *device-backed* sink appears (BT card, HDMI hotplug,
-  #      redocked USB DAC) it becomes the default. EasyEffects and every
-  #      untargeted stream follow the default automatically, so the whole chain
-  #      moves with one set-default and links are left untouched.
+  #      redocked USB DAC) it becomes the default, but only if it outranks the
+  #      current default's priority.session (the per-device order set in
+  #      systems/g815/default.nix: headphones > HDMI > built-in speakers).
+  #      Without that gate the loop just followed node creation order, and the
+  #      internal ALSA codec is enumerated after the GPU's HDMI audio, so every
+  #      boot ended on the built-in speakers no matter what was configured.
+  #      EasyEffects and every untargeted stream follow the default
+  #      automatically, so the whole chain moves with one set-default and links
+  #      are left untouched.
   # Virtual sinks (easyeffects_sink, null sinks) carry no device.id and are
   # skipped, so the EQ sink is never selected as an output. On disconnect
   # WirePlumber's own priority fallback picks the next sink (built-in speakers),
@@ -40,25 +46,46 @@ let
               | "\(.id) \($a2dp)"
         ')
 
-        # 2. Make any newly-appeared device-backed sink the default.
-        local newest_serial=-1 newest_id="" serial sid
+        # 2. Make a newly-appeared device-backed sink the default if it wins on
+        #    priority.
+        local newest_serial=-1 newest_id="" newest_prio=0 serial sid prio
         local -a current=()
-        while read -r serial sid; do
+        while read -r serial sid prio; do
           [ -n "$sid" ] || continue
           current+=("$sid")
           if [ -z "''${seen[$sid]:-}" ] && [ "$serial" -gt "$newest_serial" ]; then
             newest_serial=$serial
             newest_id=$sid
+            newest_prio=$prio
           fi
         done < <(printf '%s' "$dump" | jq -r '
           .[] | select(.type=="PipeWire:Interface:Node")
               | select(.info.props["media.class"]=="Audio/Sink")
               | select(.info.props["device.id"] != null)
               | select(.info.props["object.serial"] != null)
-              | "\(.info.props["object.serial"]) \(.id)"
+              | "\(.info.props["object.serial"]) \(.id) \(.info.props["priority.session"] // 0 | tonumber? // 0 | floor)"
         ')
 
-        [ "$primed" -eq 1 ] && [ -n "$newest_id" ] && wpctl set-default "$newest_id" 2>/dev/null || true
+        if [ "$primed" -eq 1 ] && [ -n "$newest_id" ]; then
+          local cur_name cur_prio
+          cur_name=$(printf '%s' "$dump" | jq -r '
+            [ .[] | select(.type=="PipeWire:Interface:Metadata")
+                  | select(.props["metadata.name"]=="default")
+                  | .metadata[]? | select(.key=="default.audio.sink") | .value.name
+            ] | first // ""
+          ')
+          cur_prio=$(printf '%s' "$dump" | jq -r --arg n "$cur_name" '
+            [ .[] | select(.type=="PipeWire:Interface:Node")
+                  | select(.info.props["node.name"]==$n)
+                  | (.info.props["priority.session"] // 0 | tonumber? // 0 | floor)
+            ] | first // 0
+          ')
+          # No default yet means WirePlumber is still settling at session start;
+          # let its own priority pick land instead of racing it.
+          if [ -n "$cur_name" ] && [ "$newest_prio" -gt "$cur_prio" ]; then
+            wpctl set-default "$newest_id" 2>/dev/null || true
+          fi
+        fi
 
         seen=()
         for sid in "''${current[@]}"; do seen[$sid]=1; done
