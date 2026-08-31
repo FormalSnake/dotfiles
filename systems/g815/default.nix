@@ -64,6 +64,18 @@
   # NordVPN still shadows MagicDNS the same way it does today.
   services.resolved.enable = true;
 
+  # NetworkManager's global-dns block (mixins/networking.nix) is inert under the
+  # systemd-resolved plugin: NM keeps it in NetworkManager.conf but never pushes
+  # it to resolved, so every link ends up with no DNS at all and lookups fall
+  # through to resolved's built-in FallbackDNS (1.1.1.1 first). Give resolved the
+  # servers directly: services.resolved.settings.Resolve.DNS defaults to
+  # networking.nameservers. Global scope, so tailscale0's routing domains still
+  # take `.ts.net` first.
+  networking.nameservers = [
+    "8.8.8.8"
+    "8.8.4.4"
+  ];
+
   # Automatic output routing by priority (device-specific: headphone MACs, this
   # chassis's PCI audio addresses), so it lives here rather than in the generic
   # audio mixin. WirePlumber always switches the default sink to the
