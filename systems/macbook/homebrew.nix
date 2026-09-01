@@ -61,6 +61,13 @@
       # Parsec has no Linux hosting support, so the laptops are clients.
       "parsec"
 
+      # (fonts)
+      # SF Pro Display Black, hardcoded as /Library/Fonts/SF-Pro-Display-Black.otf
+      # by the aso-appstore-screenshots skill's compose.py. Not in nixpkgs; the
+      # cask is a pkg artifact, so it lands system-wide rather than in
+      # ~/Library/Fonts where font casks normally go.
+      "font-sf-pro"
+
       # (tiling WM; mirrors the g815 niri setup)
       "omniwm"             # barutsrb/tap: niri-style tiler (tap trusted automatically, see modules/darwin/mixins/homebrew.nix)
       "karabiner-elements" # remaps Right Command → the OmniWM "Super" chord (Ctrl+Opt+Cmd)

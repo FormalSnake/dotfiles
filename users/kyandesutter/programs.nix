@@ -31,7 +31,9 @@
       pyenv
       # python3 on PATH for Claude Code's security-guidance plugin and the herdr
       # agent-state hook (both `exec python3`; without it they fail loudly).
-      python3
+      # Pillow rides along for the aso-appstore-screenshots skill, whose
+      # compose.py/showcase.py/generate_frame.py call `python3` directly.
+      (python3.withPackages (ps: [ ps.pillow ]))
       raylib
       # rclone 1.74.2 in nixpkgs unconditionally requires fuse3, which has no
       # working Darwin path (the postConfigure that patches fuse.h is gated on

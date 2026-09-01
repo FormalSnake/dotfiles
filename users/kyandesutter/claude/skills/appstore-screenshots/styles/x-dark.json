@@ -1,0 +1,27 @@
+{
+  "background": {
+    "type": "solid",
+    "color": "#000000"
+  },
+  "headline": {
+    "font": [
+      "/Library/Fonts/SF-Pro-Display-Black.otf",
+      "/Library/Fonts/SF-Pro-Display-Heavy.otf",
+      "/System/Library/Fonts/Supplemental/Arial Black.ttf"
+    ],
+    "color": "#FFFFFF",
+    "uppercase": true,
+    "tracking": 0.06,
+    "maxSize": 190,
+    "lineHeight": 1.05,
+    "y": 150
+  },
+  "device": {
+    "mode": "framed",
+    "widthFrac": 0.88,
+    "rotation": -8,
+    "y": 0.27,
+    "bezelColor": "#161616"
+  },
+  "enhancePrompt": "Restyle this App Store screenshot as a moody editorial image, in the style of the X (Twitter) App Store listing: pure black background with subtle film grain, a faint white glow and rim light around a photorealistic dark iPhone, tilted exactly as in the reference. Keep the headline text EXACTLY as written, same position, white, heavy and uppercase. Keep the app screenshot content pixel-faithful IN FULL COLOUR: preserve the app's own brand and accent colours exactly as in the reference, do not desaturate them, and do not invent or alter any UI. The status bar time must read 9:41."
+}
