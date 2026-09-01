@@ -1,7 +1,9 @@
-# Weekly flake.lock bump, replacing the on-device `nix flake update` that
-# scripts/nix-weekly-update.sh used to run. The lock lands on main only after
-# every host evals against it; the hosts then pull and rebuild on their own
-# schedule (the macbook's launchd job, manual rebuilds elsewhere).
+# The one CI job, weekly: bump flake.lock, eval every host against the
+# result, and push the lock to main only when all three pass. The eval jobs
+# run even when no input changed, so the week's pushes to main get checked
+# too. `nix build --dry-run` forces the full module eval without building the
+# closure; full builds would blow past the job clock (quickshell, herdr and
+# t3code build from source against our nixpkgs pin).
 #
 # Direct push instead of a PR: PRs opened with the workflow GITHUB_TOKEN never
 # trigger CI, so gating them on checks would need a PAT secret. The eval jobs
@@ -34,17 +36,16 @@ jobs:
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "flake.lock: weekly input update" -- flake.lock
           fi
-      - if: steps.bump.outputs.changed == 'true'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "flake.lock: weekly input update" -- flake.lock
+          # Always published, so the eval jobs check main itself on a
+          # no-change week.
           git push --force origin HEAD:auto/flake-lock
 
   eval-nixos:
     needs: update
-    if: needs.update.outputs.changed == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
@@ -60,7 +61,6 @@ jobs:
 
   eval-darwin:
     needs: update
-    if: needs.update.outputs.changed == 'true'
     runs-on: macos-latest
     timeout-minutes: 30
     steps:
