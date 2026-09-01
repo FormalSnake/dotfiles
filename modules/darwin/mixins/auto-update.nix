@@ -4,10 +4,12 @@ let
   flakeDir = "${home}/.config/nix";
 in
 {
-  # Weekly: update flake inputs, then prompt to rebuild.
+  # Weekly: pull the CI-validated flake.lock from origin/main (pushed by
+  # .github/workflows/update.yml), build-test, then prompt to rebuild.
   # The orchestrator script lives in the repo so it can be tweaked without a
-  # rebuild. Schedule: Saturdays at 10:00 local time. launchd will fire on the
-  # next wake if the machine was asleep.
+  # rebuild. Schedule: Saturdays at 10:00 local time, two hours after the
+  # 08:00 UTC CI update run. launchd will fire on the next wake if the
+  # machine was asleep.
   launchd.user.agents.kyan-nix-weekly-update = {
     serviceConfig = {
       Label = "kyan.nix-weekly-update";
