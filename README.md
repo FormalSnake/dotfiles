@@ -1,100 +1,80 @@
-# nix-config
+# dotfiles
 
-Declarative configuration for three machines from one flake:
+[![ci](https://github.com/FormalSnake/dotfiles/actions/workflows/ci.yml/badge.svg)](https://github.com/FormalSnake/dotfiles/actions/workflows/ci.yml)
+[![update](https://github.com/FormalSnake/dotfiles/actions/workflows/update.yml/badge.svg)](https://github.com/FormalSnake/dotfiles/actions/workflows/update.yml)
+[![nixpkgs](https://img.shields.io/badge/nixpkgs-unstable-5277C3?logo=nixos&logoColor=white)](https://github.com/NixOS/nixpkgs)
 
-- **`macbook`** — `aarch64-darwin`, nix-darwin + home-manager (primary dev host)
-- **`g815`**: `x86_64-linux`, NixOS + home-manager (ASUS ROG laptop, Hyprland +
-  FormalShell desktop, gaming, NVIDIA PRIME offload)
-- **`e1504g`**: `x86_64-linux`, NixOS + home-manager (ASUS Vivobook E1504G,
-  Intel-only iGPU laptop, Hyprland + FormalShell desktop)
+One flake, three machines. This is my personal computer network, not a
+framework: steal whatever looks useful, but hostnames and hardware quirks are
+baked in everywhere.
 
-Desktop shell on both NixOS hosts is
-[FormalShell](https://github.com/FormalSnake/FormalShell), pulled in as a
-flake input.
+| Host      | Hardware                    | OS         | Job                                    |
+| --------- | --------------------------- | ---------- | -------------------------------------- |
+| `macbook` | MacBook, Apple Silicon      | nix-darwin | the actual dev machine                 |
+| `g815`    | ASUS ROG laptop, RTX 5070   | NixOS      | thin client to the mac, build server   |
+| `e1504g`  | ASUS Vivobook, 8 GB RAM     | NixOS      | the little one                         |
 
-Inspired by [getchoo/borealis](https://github.com/getchoo/borealis).
+The Linux hosts run Hyprland with my own
+[FormalShell](https://github.com/FormalSnake/FormalShell) on top, configured in
+Lua because Hyprland 0.55 dropped the old config syntax. Colours come from the
+wallpaper (matugen via [DMS](https://github.com/AvengeMedia/DankMaterialShell)),
+with [Flexoki](https://stephango.com/flexoki) as the static fallback for tools
+that can't retheme at runtime. The Vivobook is too weak to build its own
+system, so it offloads builds to the g815 over Tailscale; the mac runs a
+Rosetta VM builder as the fallback for x86_64-linux.
 
 ## Layout
 
-- `flake.nix` — flake-parts entry point + inputs
-- `flake/` — flake-level outputs (dev shells, formatter)
-- `modules/` — reusable module sets
-  - `modules/shared/` — cross-platform (nix settings, home-manager glue, tailscale)
-  - `modules/darwin/` — macOS (homebrew, system defaults, dock, login items)
-  - `modules/nixos/` — NixOS (boot, graphics/nvidia, Hyprland, gaming, power, asus, …)
-  - each platform has `mixins/` (one concern per file) and `profiles/` (compose mixins)
-- `systems/` — per-host config (`macbook/`, `g815/`, `e1504g/`)
-- `users/` — per-user home-manager config (`kyandesutter/`)
-- `secrets/` — agenix-encrypted secrets
-
-See [`CLAUDE.md`](./CLAUDE.md) for repo conventions, the DMS/matugen theming
-model, and the power-management architecture.
-
-## ⚠️ Rebuild policy
-
-**Rebuilds are allowed**, including for AI assistants: `darwin-rebuild`,
-`nixos-rebuild`, `home-manager switch`, and the `just` build/switch/bootstrap
-recipes. Always `git add` new/changed files first — the flake only sees
-git-tracked files, so an unstaged file is invisible to the build.
-
-**Sudo caveat:** system switches need root and prompt for a password that
-can't be answered non-interactively. If a rebuild blocks on sudo (or `ssh`
-auth), stop and hand that step to the owner rather than working around it.
-Build-only variants (`nixos-rebuild build`, `just b`) need no root and are
-always safe.
-
-## Usage
-
-### macbook (darwin)
-
-```sh
-# First-time bootstrap (darwin-rebuild not yet on PATH)
-just bootstrap
-
-just r          # darwin-rebuild switch
-just b          # build only
-just c          # nix flake check
-just u          # update all inputs
-just ui nixpkgs # update one input
-just rollback   # previous generation
+```
+flake.nix        inputs + flake-parts entry
+flake/           dev shells, formatter
+modules/
+  shared/        both platforms: nix settings, tailscale, home-manager glue
+  darwin/        macOS: homebrew, system defaults, dock
+  nixos/         NixOS: boot, nvidia, hyprland, gaming, asus
+systems/         per-host wiring (macbook, g815, e1504g)
+users/           home-manager config, one concern per file
+secrets/         agenix-encrypted
 ```
 
-### g815 (NixOS)
+Mixins hold one concern each, profiles compose them into roles, and hosts pick
+profiles plus their hardware config. Anything togglable is a
+`kyan.<name>.enable` option.
+
+## Rebuilding
 
 ```sh
-# `rebuild` fish function (defined in users/kyandesutter/linux.nix); runs from any dir
-rebuild                 # sudo nixos-rebuild switch --flake ~/.config/nix#g815
-rebuild boot            # stage for next boot
-rebuild --show-trace    # extra flags pass through
+# macbook
+just bootstrap   # first time only, before darwin-rebuild is on PATH
+just r           # darwin-rebuild switch
+just b           # build without activating
+just rollback    # undo
+
+# NixOS hosts (fish function, runs from any directory)
+rebuild          # nixos-rebuild switch for this host
+rebuild boot     # stage for next boot instead
 ```
 
-## Updating
+New files must be `git add`ed first; the flake can't see untracked files and
+will build as if they don't exist. This costs me ten confused minutes roughly
+once a month.
 
-### Flake inputs
+Claude is allowed to run rebuilds here, on all three hosts. The ground rules
+for that (and the theming and power details) live in [`CLAUDE.md`](./CLAUDE.md).
 
-```sh
-nix flake update        # update every input (just u on the macbook)
-just ui nixpkgs         # update a single input
-```
+## Updates
 
-Then rebuild. Keep both machines in sync: rebuild the host you're on, push,
-pull on the other host, and rebuild there too.
+A GitHub Action bumps `flake.lock` every Saturday morning, evals all three
+host configs against the new lock, and only pushes to main if they all pass.
+The mac pulls and rebuilds itself two hours later via launchd; the laptops
+pick it up on their next rebuild.
 
-### Custom-pinned packages
+A few packages are pinned to a git rev with `fetchFromGitHub` instead of being
+flake inputs, so the weekly bump skips them: `fallout-limine-theme`, `clipssh`,
+`fast`, and `lumen`. To bump one, update the `rev` in its mixin, blank the
+hash, rebuild, and copy the real hash out of the mismatch error.
 
-A few packages are pinned to a git rev with `fetchFromGitHub` instead of coming
-from an input, so `nix flake update` does **not** touch them:
+---
 
-- `modules/nixos/mixins/boot.nix` — `fallout-limine-theme` (commit pin)
-- `users/kyandesutter/mixins/clipssh.nix` — `clipssh` (commit pin)
-- `users/kyandesutter/mixins/fast.nix` — `fast` (commit pin + `vendorHash`)
-- `users/kyandesutter/mixins/lumen.nix` — `lumen` (release tag + `cargoHash`)
-
-To bump one:
-
-1. Find the new rev/tag: `git ls-remote https://github.com/<owner>/<repo> HEAD`
-   (or `--tags` for lumen).
-2. Update `rev`/`tag` (and `version`) in the mixin, blank the `hash`
-   (`hash = "";`), rebuild, and copy the correct hash from the mismatch error.
-3. For `fast`/`lumen`, repeat for `vendorHash`/`cargoHash` if dependencies
-   changed.
+Structure originally inspired by
+[getchoo/borealis](https://github.com/getchoo/borealis).
