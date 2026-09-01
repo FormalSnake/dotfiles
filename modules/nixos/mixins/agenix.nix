@@ -9,6 +9,15 @@
   services.openssh = {
     enable = true;
     openFirewall = lib.mkDefault false;
+    # Key-only, matching the mac (modules/darwin/mixins/remote-access.nix).
+    # Every legitimate way in (host mesh, mosh bootstrap, the e1504g build
+    # offload, which connects as kyandesutter) already authenticates with the
+    # machine keys, so password auth and root login only serve bruteforce.
+    settings = {
+      PasswordAuthentication = false;
+      KbdInteractiveAuthentication = false;
+      PermitRootLogin = "no";
+    };
   };
 
   age = {

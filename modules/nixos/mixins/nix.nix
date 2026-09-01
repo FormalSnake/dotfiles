@@ -35,9 +35,24 @@
   # generations pile up, and would conversely reap 2 of the kept 3 whenever
   # the config sat stable for a few days), so trim the profile to the last 3
   # first and let the plain collection pass reap whatever that unpinned.
-  systemd.services.nix-gc.preStart = ''
-    ${config.nix.package}/bin/nix-env --delete-generations +3 -p /nix/var/nix/profiles/system
-  '';
+  # The plain collection pass deletes no generations by itself, so the user
+  # profiles need the same trim or home-manager and nix-env generations pin
+  # their closures forever.
+  systemd.services.nix-gc.preStart =
+    let
+      home = config.users.users.kyandesutter.home;
+    in
+    ''
+      for profile in \
+        /nix/var/nix/profiles/system \
+        ${home}/.local/state/nix/profiles/home-manager \
+        ${home}/.local/state/nix/profiles/profile \
+        /nix/var/nix/profiles/per-user/root/profile; do
+        if [ -e "$profile" ]; then
+          ${config.nix.package}/bin/nix-env --delete-generations +3 -p "$profile" || true
+        fi
+      done
+    '';
   # A Persistent timer on a laptop that sleeps through midnight fires the
   # collection right after the next boot, on top of the login: measured
   # 2026-08-28 on the e1504g at 74 s wall, 1.1 GB read, 2 GB memory peak, which
