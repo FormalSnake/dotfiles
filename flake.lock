@@ -60,26 +60,6 @@
         "type": "github"
       }
     },
-    "canarycode": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1784025917,
-        "narHash": "sha256-6GR22ClG6CHbws7OMwl6URpWL5nGB5zI9Kt4pZqWaIk=",
-        "owner": "CanaryCoders",
-        "repo": "CanaryCodeCli",
-        "rev": "2864edd8320762bb3015bed85a81e1d162309692",
-        "type": "github"
-      },
-      "original": {
-        "owner": "CanaryCoders",
-        "repo": "CanaryCodeCli",
-        "type": "github"
-      }
-    },
     "chaotic": {
       "inputs": {
         "flake-schemas": "flake-schemas",
@@ -555,11 +535,11 @@
         "quickshell": "quickshell"
       },
       "locked": {
-        "lastModified": 1787934867,
-        "narHash": "sha256-DRU4u5kR/XGDSzT39RTAr8cOkNcrbvT0OmFlD0Q2pM0=",
+        "lastModified": 1788185321,
+        "narHash": "sha256-1wlijlDbvlv1UxREuwQoYYG+EVcLqB5UFJCYlH0cGnQ=",
         "owner": "FormalSnake",
         "repo": "FormalShell",
-        "rev": "789d2631c0b206654e734ea7e1e654642f1def67",
+        "rev": "0d3ae65ffab63ec64728bee3af90a49a71b61217",
         "type": "github"
       },
       "original": {
@@ -1287,7 +1267,6 @@
         "agenix": "agenix",
         "areofyl-fetch": "areofyl-fetch",
         "brew-src": "brew-src",
-        "canarycode": "canarycode",
         "chaotic": "chaotic",
         "claude-code-nix": "claude-code-nix",
         "dank-material-shell": "dank-material-shell",

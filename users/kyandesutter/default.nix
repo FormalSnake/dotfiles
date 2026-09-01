@@ -12,7 +12,6 @@
     ./mixins/ssh.nix
     ./mixins/clipssh.nix
     ./mixins/claude-code.nix
-    ./mixins/canarycode.nix
     ./mixins/pi.nix
     ./mixins/ghostty.nix
     ./mixins/tmux.nix
@@ -25,6 +24,7 @@
     ./mixins/fast.nix
     ./mixins/nh.nix
     ./mixins/nix-index.nix
+    ./mixins/unfree.nix
     ./mixins/spice-edit.nix
     ./mixins/kopuz.nix
   ];

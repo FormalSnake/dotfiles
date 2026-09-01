@@ -14,6 +14,7 @@
       ./mixins/networking.nix
       ./mixins/agenix.nix
       ./mixins/boot.nix
+      ./mixins/firmware.nix
       ./mixins/systemd-tuning.nix
       ./mixins/scx.nix
       ./mixins/ananicy.nix
