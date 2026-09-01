@@ -463,10 +463,10 @@ in
       # sixteen give it eight real hues instead: `blend = false` keeps each
       # hue and only tones it for the mode, so a wallpaper palette still
       # drives the lightness. Seeds are Flexoki's 400 and 600 stops, and a
-      # wallpaper FormalShell pins to Flexoki (path carrying "flexoki")
-      # replaces them with the true Flexoki tones before matugen runs, so
-      # `<hue>` and `<hue>_alt` are ANSI 1-6 and 9-14 exactly as Flexoki's own
-      # terminal ports spend them.
+      # wallpaper FormalShell pins (path carrying a pinned palette's name:
+      # "flexoki", "zenbones") replaces them with that palette's own tones
+      # before matugen runs, so `<hue>` and `<hue>_alt` are ANSI 1-6 and 9-14
+      # exactly as the palette's own terminal ports spend them.
       [config.custom_colors]
       red = { color = "#D14D41", blend = false }
       orange = { color = "#DA702C", blend = false }

@@ -209,7 +209,11 @@ pre-palette colourscheme, Hyprland's pre-palette border colours (the static
 template (bat, fzf, lazygit, fish). Per-wallpaper Flexoki *pinning* lives on as
 `flexoki-pin.service` (`mixins/dms.nix`): it watches DMS's session.json and
 pins/unpins the Flexoki custom theme while a flexoki-named wallpaper is active
-(same substring match as the old Noctalia `flexoki-scheme` hook). The Flexoki palette is
+(same substring match as the old Noctalia `flexoki-scheme` hook). Under
+FormalShell that pinning lives in the shell itself (`shell/Theme/palette.js`
+PINNED table, same substring match), and since 2026-09-01 it carries Zenbones
+next to Flexoki: a zenbones-named wallpaper pins the Zenbones palette across
+theme.json and every matugen template. The Flexoki palette is
 pure Nix data in
 `users/kyandesutter/mixins/flexoki/palette.nix` (base tones + accents + ready
 `light`/`dark` terminal views), and `mixins/flexoki/` themes the CLI tools from
