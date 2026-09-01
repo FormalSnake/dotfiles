@@ -22,7 +22,6 @@
     ./mixins/nordvpn.nix
     ./mixins/godot.nix
     ./mixins/obsidian.nix
-    ./mixins/bambu-studio.nix
     ./mixins/parsec.nix
   ];
 
