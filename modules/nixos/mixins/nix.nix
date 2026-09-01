@@ -27,6 +27,10 @@
       "@wheel"
     ];
     auto-optimise-store = true;
+    # Builds default to the daemon's $TMPDIR, the 16G tmpfs /tmp, which big
+    # FODs overflow (modrinth's pnpm-deps pulls every platform's binaries and
+    # died at >16G). /var/tmp is disk-backed.
+    build-dir = "/var/tmp";
   };
 
   # Owner policy (2026-08-17): keep only the last 3 system generations, the
