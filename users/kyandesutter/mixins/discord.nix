@@ -30,6 +30,59 @@ let
       MOONLIGHT_VERSION = nightlyRev;
     };
   });
+
+  # The CSS extension (moonbase id `moonlight-css`), as the prebuilt asar
+  # moonbase would download, unpacked into the store. extensions-dist only
+  # publishes the current build at a fixed URL and has no versioned artefact or
+  # git tag to pin, so an upstream release breaks this hash; bump `version` and
+  # take the hash the build reports.
+  moonlightCss = pkgs.stdenvNoCC.mkDerivation {
+    pname = "moonlight-css";
+    version = "2.0.7";
+    src = pkgs.fetchurl {
+      url = "https://moonlight-mod.github.io/extensions-dist/moonlight-css.asar";
+      hash = "sha256-0OaOG2OY5ODA4LzCBHMqhxb7I414aAWsP3N6l9kv7HQ=";
+    };
+    dontUnpack = true;
+    nativeBuildInputs = [ pkgs.asar ];
+    installPhase = ''
+      runHook preInstall
+      asar extract $src $out
+      runHook postInstall
+    '';
+  };
+
+  # moonlight reads its config from Electron's appData dir, named after the
+  # client's release channel in resources/build_info.json (`stable` here).
+  moonlightConfigFile =
+    (if pkgs.stdenv.isDarwin then "Library/Application Support" else ".config")
+    + "/moonlight-mod/stable.json";
+
+  # moonlight rewrites this file on every launch and whenever moonbase changes a
+  # setting. Pointing it at the store makes those writes fail (moonlight logs
+  # "Failed to write config" and carries on with what it read), which is the
+  # trade: extensions and their settings are declared here, and the moonbase UI
+  # can no longer install or persist anything.
+  moonlightConfig = {
+    extensions = {
+      # moonlight's own defaults, which only apply while no config file exists.
+      moonbase = true;
+      disableSentry = true;
+      noTrack = true;
+      noHideToken = true;
+
+      "moonlight-css" = {
+        enabled = true;
+        config.paths = [
+          "https://allpurposemat.codeberg.page/Disblock-Origin/DisblockOrigin.theme.css"
+        ];
+      };
+    };
+    repositories = [ "https://moonlight-mod.github.io/extensions-dist/repo.json" ];
+    # Loaded as a developer extension: the normal extensions dir is moonbase's
+    # to write, this one is ours.
+    devSearchPaths = [ "${moonlightCss}" ];
+  };
 in
 {
   # Discord with moonlight (https://moonlight-mod.github.io), the client mod.
@@ -63,4 +116,8 @@ in
       }
     ))
   ];
+
+  home.file.${moonlightConfigFile}.source =
+    (pkgs.formats.json { }).generate "moonlight-stable.json"
+      moonlightConfig;
 }

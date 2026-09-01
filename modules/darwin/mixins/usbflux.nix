@@ -29,7 +29,7 @@ let
         else
           echo "off: local usbmuxd owns the socket"
         fi
-        xcrun xctrace list devices 2>/dev/null || true
+        sudo usbfluxctl list 2>/dev/null || true
         ;;
       *)
         echo "usage: usbflux [on|off|status]" >&2
@@ -90,6 +90,10 @@ in
 
     environment.systemPackages = [
       usbflux
+      # usbfluxctl add/del/list retargets a running usbfluxd at another host
+      # without a rebuild, which is the only way to reach a second exporter
+      # (usbfluxd itself takes a single -r).
+      pkgs.usbfluxd
       pkgs.libimobiledevice # idevice_id -l to confirm the phone arrived
     ];
   };
