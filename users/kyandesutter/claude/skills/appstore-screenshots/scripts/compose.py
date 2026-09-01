@@ -44,6 +44,7 @@ DEFAULTS = {
         "maxWidth": 0.88,
     },
     "subheadline": None,
+    "logo": None,
     "device": {
         "mode": "framed",
         "widthFrac": 0.80,
@@ -259,6 +260,19 @@ def main():
             y = y_cursor + 36
         canvas.alpha_composite(layer, (x, y))
         y_cursor = y + layer.height
+
+    logo = spec.get("logo")
+    if logo and logo.get("path"):
+        im = Image.open(Path(logo["path"]).expanduser()).convert("RGBA")
+        lw = round(logo.get("widthFrac", 0.30) * w)
+        im = im.resize((lw, round(im.height * lw / im.width)), Image.LANCZOS)
+        op = logo.get("opacity", 1.0)
+        if op < 1.0:
+            im.putalpha(im.split()[3].point(lambda a: round(a * op)))
+        canvas.alpha_composite(
+            im,
+            (round(logo.get("x", 0.5) * w - im.width / 2), round(logo.get("y", 0.92) * h - im.height / 2)),
+        )
 
     canvas.convert("RGB").save(args.out, "PNG")
     print(f"{args.out} ({w}x{h})")

@@ -1,5 +1,10 @@
 {
-  "background": { "type": "gradient", "from": "#57A7DE", "to": "#DDF0FB", "angle": 20 },
+  "background": {
+    "type": "gradient",
+    "from": "#57A7DE",
+    "to": "#DDF0FB",
+    "angle": 20
+  },
   "headline": {
     "font": [
       "/Library/Fonts/SF-Pro-Display-Semibold.otf",
@@ -12,6 +17,11 @@
     "lineHeight": 1.12,
     "y": 170
   },
-  "device": { "mode": "framed", "widthFrac": 0.72, "rotation": 0, "y": 0.28 },
-  "enhancePrompt": "Refine this App Store screenshot into a premium, airy health-app style. Replace the flat device bezel with a photorealistic titanium iPhone under soft studio light with a gentle glass reflection and a soft shadow. Keep the background gradient, keep the headline text EXACTLY as written in the same position and colour, and keep the app screenshot content pixel-faithful: do not invent or alter any UI. The status bar time must read 9:41. You may add small glassmorphic breakout cards that echo real elements of the visible UI, floating beside the device."
+  "device": {
+    "mode": "framed",
+    "widthFrac": 0.72,
+    "rotation": 0,
+    "y": 0.28
+  },
+  "enhancePrompt": "Refine this App Store screenshot into a premium, airy health-app style. Replace the flat device bezel with a photorealistic titanium iPhone under soft studio light with a gentle glass reflection and a soft shadow. Keep the background gradient, keep the headline text EXACTLY as written in the same position and colour, and keep the app screenshot content pixel-faithful: do not invent or alter any UI. The status bar time must read 9:41. You may add small glassmorphic breakout cards that echo real elements of the visible UI, floating beside the device. Keep the brand logo exactly as placed, unchanged."
 }

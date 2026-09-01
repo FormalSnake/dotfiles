@@ -23,5 +23,5 @@
     "y": 0.27,
     "bezelColor": "#161616"
   },
-  "enhancePrompt": "Restyle this App Store screenshot as a moody editorial image, in the style of the X (Twitter) App Store listing: pure black background with subtle film grain, a faint white glow and rim light around a photorealistic dark iPhone, tilted exactly as in the reference. Keep the headline text EXACTLY as written, same position, white, heavy and uppercase. Keep the app screenshot content pixel-faithful IN FULL COLOUR: preserve the app's own brand and accent colours exactly as in the reference, do not desaturate them, and do not invent or alter any UI. The status bar time must read 9:41."
+  "enhancePrompt": "Restyle this App Store screenshot as a moody dark editorial image, X (Twitter) App Store style in layout only: keep the reference's own background colour with subtle film grain, and add a soft glow and rim light around a photorealistic dark iPhone, tilted exactly as in the reference, with the glow tinted in the app's accent colour as seen in the UI. Keep the headline text EXACTLY as written, same position, colour and weight. Keep the brand logo exactly as placed, unchanged. Keep the app screenshot content pixel-faithful in full colour: preserve the app's brand and accent colours, do not invent or alter any UI. The status bar time must read 9:41."
 }

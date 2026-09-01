@@ -1,5 +1,8 @@
 {
-  "background": { "type": "solid", "color": "#2563EB" },
+  "background": {
+    "type": "solid",
+    "color": "#2563EB"
+  },
   "headline": {
     "font": [
       "/Library/Fonts/SF-Pro-Display-Bold.otf",
@@ -10,6 +13,11 @@
     "maxSize": 160,
     "y": 160
   },
-  "device": { "mode": "framed", "widthFrac": 0.80, "rotation": 0, "y": 0.30 },
-  "enhancePrompt": "Polish this App Store screenshot into a professional marketing image. Replace the flat device bezel with a photorealistic modern iPhone with a soft drop shadow. Keep the background colour, keep the headline text EXACTLY as written in the same position, size and colour, and keep the app screenshot content pixel-faithful: do not invent or alter any UI. The status bar time must read 9:41."
+  "device": {
+    "mode": "framed",
+    "widthFrac": 0.8,
+    "rotation": 0,
+    "y": 0.3
+  },
+  "enhancePrompt": "Polish this App Store screenshot into a professional marketing image. Replace the flat device bezel with a photorealistic modern iPhone with a soft drop shadow. Keep the background colour, keep the headline text EXACTLY as written in the same position, size and colour, and keep the app screenshot content pixel-faithful: do not invent or alter any UI. The status bar time must read 9:41. Keep the brand logo exactly as placed, unchanged."
 }

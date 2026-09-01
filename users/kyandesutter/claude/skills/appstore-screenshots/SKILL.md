@@ -39,7 +39,13 @@ Pick a preset from `styles/` with the user, or build a custom one:
 - `bevel.json`: light blue gradient, navy headline, airy premium look (Bevel-style).
 - `x-dark.json`: black background, heavy uppercase white type, tilted glowing device (X-style).
 
-Everything is overridable per panel: fonts (any font file path; SF Pro Display weights live in `/Library/Fonts/`), colors, gradients (`from`/`to`/`angle`), tracking, stretch, uppercase, device tilt/scale/position, `fullbleed` mode with no bezel. The preset's `enhancePrompt` is the base prompt for Phase 4; adapt it when the user asks for decorations (laurel badges, breakout cards, ratings). Ask about brand color and font before assuming. Save the chosen style and any overrides.
+Presets are layout templates, not finished looks. Brand adaptation is mandatory before generating:
+
+- Colors: pull the app's palette from its theme tokens (tailwind config, CSS variables, colors.ts) and override `background`, headline `color` and the glow/accent wording in the prompt. Never ship a preset's placeholder colors when the app has its own.
+- Fonts: use the project's own font files. Pillow needs ttf/otf; if the project only ships woff2, fetch the same family as ttf (Google Fonts) into `screenshots/fonts/`. SF Pro Display weights in `/Library/Fonts/` are the fallback, not the default.
+- Logo: find the brand mark (a `brand/` or assets dir) and place it in EVERY panel via the `logo` element (`path`, `widthFrac`, `x`/`y` as canvas fractions, `opacity`). Keep placement consistent across the set.
+
+Everything is overridable per panel: fonts (any font file path), colors, gradients (`from`/`to`/`angle`), tracking, stretch, uppercase, device tilt/scale/position, `fullbleed` mode with no bezel, logo position. The preset's `enhancePrompt` is the base prompt for Phase 4; adapt it to the brand colors and when the user asks for decorations (laurel badges, breakout cards, ratings). Ask about brand color and font only when the codebase gives no answer. Save the chosen style and any overrides.
 
 ## Phase 4: Generate
 
