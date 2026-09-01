@@ -280,6 +280,14 @@
   # single-user personal laptop, no untrusted code.
   boot.kernelParams = [ "mitigations=off" ];
 
+  # The root fs is ext4 and the generated hardware-configuration.nix leaves it
+  # at the kernel default (relatime), so every read still writes back an access
+  # timestamp once a day per inode. Nothing on this machine reads atime, and it
+  # spends a third of its time in iowait as it is (measured 2026-09-01: vmstat
+  # wa 31-37% with a browser and a chat client open). Merges with the fileSystems
+  # entry in hardware-configuration.nix rather than editing that generated file.
+  fileSystems."/".options = [ "noatime" ];
+
   # 8 GB RAM: hand zram all of it. Compressed pages only cost what they compress
   # to, and zstd gets ~3.7:1 on this workload (3.4 GB of swapped pages held in
   # 445 MB of RAM). The 50% default in mixins/boot.nix just fills up and
@@ -300,6 +308,13 @@
   # thrashed) and nothing ever gets shed. 70% free of the 24 GB total is the
   # point where zram is full and pages start landing on disk.
   services.earlyoom.freeSwapThreshold = 70;
+
+  # systemd-oomd on top of earlyoom (modules/nixos/mixins/oomd.nix). The
+  # threshold above is a workaround for earlyoom's own shape: it needs free RAM
+  # AND free swap to be low, and 23 GB of swap behind 7.4 GB of RAM means the
+  # swap half is effectively never satisfied. oomd measures the reclaim stall
+  # per cgroup instead, so it fires on the condition that actually hurts here.
+  kyan.oomd.enable = true;
 
   # Local fallback builds (g815 and the mac VM both unreachable): the default
   # max-jobs=8 runs eight derivations at once, each with its own make -j,
