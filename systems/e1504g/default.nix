@@ -199,6 +199,40 @@
   # can't break. The caps key off the PPD-facing profile
   # name, which is what tuned-ppd exposes, so the on-battery switch to
   # balanced-battery leaves the balanced caps in place: intended.
+  # The fan table is chosen by the platform profile, not by temperature, which
+  # is why the RAPL caps above never reached it: asus-wmi maps
+  # platform_profile=performance to throttle_thermal_policy=1, the EC's
+  # overboost table. Measured on this chassis 2026-09-01, balanced idles at
+  # 53°C / 1200 rpm while performance sits at 61°C / 4100 rpm (5200 rpm on a
+  # second sample at 56°C), so the tier was audible regardless of load.
+  #
+  # Keep everything the performance tier is actually wanted for (performance
+  # governor, EPP and energy_perf_bias performance, min_perf_pct=100, plus the
+  # firmware 15/35 W that power-cap writes for this profile name) and override
+  # only the platform profile, so the EC stays on the quiet table. An including
+  # profile's sections win over the included one, so the [acpi] block is the
+  # whole diff against stock throughput-performance.
+  #
+  # This leans on sysfs_acpi_monitor=false in modules/nixos/mixins/tuned.nix.
+  # With that mirror on, tuned-ppd would read platform_profile=balanced back
+  # out and flip the PPD profile to balanced, undoing the tier as soon as it
+  # was picked.
+  services.tuned.profiles.throughput-performance-quiet-fan = {
+    main = {
+      summary = "throughput-performance without the asus overboost fan table";
+      include = "throughput-performance";
+    };
+    acpi.platform_profile = "balanced";
+  };
+  # All three tiers spelled out: `profiles` is an attrsOf with a whole-attrset
+  # default, so naming only `performance` here would drop the balanced and
+  # power-saver mappings instead of merging with them.
+  services.tuned.ppdSettings.profiles = {
+    balanced = "balanced";
+    performance = "throughput-performance-quiet-fan";
+    power-saver = "powersave";
+  };
+
   systemd.services.power-cap = {
     description = "Per-profile RAPL package power caps (quiet fans)";
     after = [ "tuned-ppd.service" ];
