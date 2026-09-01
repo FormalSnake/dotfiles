@@ -34,7 +34,7 @@ let
         pnpm = pkgs.pnpm_11;
         fetcherVersion = 4;
         hash = {
-          aarch64-darwin = "sha256-92sXIntCkvzTYWpcjl7bte03xdE0QtToRn1Gg74t2Xw=";
+          aarch64-darwin = "sha256-noA7V1VuvsEpxw7rueLa2FcwlH2bC6FwyacUy8s+F5U=";
           x86_64-linux = "sha256-i/K5bj7CS7PGIX5hfayxAJ7ngNib92w3SDKGXTVWccA=";
         }.${pkgs.stdenv.hostPlatform.system};
       };
