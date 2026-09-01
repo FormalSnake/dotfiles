@@ -67,5 +67,31 @@
     systemd.services.tuned-ppd.restartTriggers = [
       config.environment.etc."tuned/ppd.conf".source
     ];
+
+    # Don't let `performance` outlive a boot. tuned-ppd persists the selected
+    # profile to /etc/tuned/ppd_base_profile and, at startup, that file beats
+    # ppd.conf's `default` outright: controller.initialize() resolves
+    # `_load_base_profile() or _get_recommend_profile() or default_profile`
+    # (tuned 2.27.0, tuned/ppd/controller.py:388). So one "let me try
+    # performance" from the shell's battery popout pinned the e1504g to the
+    # loud tier on every subsequent boot, with nothing in the UI saying why
+    # (found 2026-09-01: governor and platform_profile both `performance`,
+    # RAPL back at the firmware 15/35 W, defeating the quiet-fans caps in
+    # systems/e1504g/default.nix).
+    #
+    # Clear only that one value. balanced and power-saver still persist across
+    # reboots, so a deliberate quieter choice sticks; performance falls back to
+    # this host's declared default. On the g815 the default IS performance
+    # (always on the barrel charger), so there the reset is a no-op and the
+    # host keeps booting flat out.
+    systemd.services.tuned-ppd.serviceConfig.ExecStartPre = [
+      "${pkgs.writeShellScript "tuned-ppd-unpin-performance" ''
+        state=/etc/tuned/ppd_base_profile
+        default=${lib.escapeShellArg config.services.tuned.ppdSettings.main.default}
+        if [ -e "$state" ] && [ "$(cat "$state")" = performance ] && [ "$default" != performance ]; then
+          printf '%s\n' "$default" > "$state"
+        fi
+      ''}"
+    ];
   };
 }
