@@ -14,6 +14,7 @@
       ./mixins/storage-gc.nix
       ./mixins/agenix.nix
       ./mixins/remote-access.nix
+      ./mixins/usbflux.nix
       ./mixins/rosetta-builder.nix
       ./mixins/obsidian-scan-watcher.nix
       ./mixins/obsidian-note-watcher.nix

@@ -203,6 +203,11 @@
   # iPhone's screen in a window, share that window in meetings.
   kyan.airplay.enable = true;
 
+  # Export a USB-attached iPhone to the macbook over Tailscale, so Xcode there
+  # builds and debugs onto a phone cabled to this laptop
+  # (modules/nixos/mixins/usbflux.nix; `usbflux on` on the mac).
+  kyan.usbflux.enable = true;
+
   # NordVPN (privacy/geo exit). This host holds the account login.
   kyan.nordvpn.enable = true;
 

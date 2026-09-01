@@ -34,6 +34,7 @@
       ./mixins/asus.nix
       ./mixins/tuned.nix
       ./mixins/phone-integration.nix
+      ./mixins/usbflux.nix
       ./mixins/airplay.nix
       ./mixins/flatpak.nix
       ./mixins/nordvpn.nix
