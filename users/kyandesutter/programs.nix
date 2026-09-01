@@ -50,7 +50,7 @@
     ]
     # macOS-only dev toolchain (Swift/Xcode/CocoaPods, Mac App Store CLI).
     # These packages are Darwin-only in nixpkgs, so guard them off on Linux.
-    ++ lib.optionals stdenv.isDarwin [
+    ++ lib.optionals stdenv.hostPlatform.isDarwin [
       _1password-cli
       cocoapods
       mas
@@ -59,7 +59,7 @@
       xcbeautify
       xcodegen
     ]
-    ++ lib.optionals stdenv.isLinux [
+    ++ lib.optionals stdenv.hostPlatform.isLinux [
       # BlueBubbles desktop client (iMessage). Flutter app; Linux-only in
       # nixpkgs. The Mac runs the BlueBubbles *Server* instead (homebrew cask in
       # systems/macbook/homebrew.nix): the server is macOS-only.

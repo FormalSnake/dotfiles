@@ -55,7 +55,7 @@ let
   # moonlight reads its config from Electron's appData dir, named after the
   # client's release channel in resources/build_info.json (`stable` here).
   moonlightConfigFile =
-    (if pkgs.stdenv.isDarwin then "Library/Application Support" else ".config")
+    (if pkgs.stdenv.hostPlatform.isDarwin then "Library/Application Support" else ".config")
     + "/moonlight-mod/stable.json";
 
   # moonlight rewrites this file on every launch and whenever moonbase changes a
@@ -111,7 +111,7 @@ in
         withMoonlight = true;
         moonlight = moonlightNightly;
       }
-      // lib.optionalAttrs pkgs.stdenv.isLinux {
+      // lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
         commandLineArgs = "--disable-features=WebRtcAllowInputVolumeAdjustment";
       }
     ))

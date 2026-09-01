@@ -226,7 +226,7 @@ in
   # Only the macbook runs a herdr server. The Linux hosts reach it over SSH, so
   # a timer there would have no session to talk to. `herdr-reap --now` is on
   # PATH everywhere for a manual sweep.
-  launchd.agents = lib.optionalAttrs pkgs.stdenv.isDarwin {
+  launchd.agents = lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
     herdr-reap = {
       enable = true;
       config = {

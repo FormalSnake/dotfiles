@@ -33,8 +33,8 @@ let
       wrapProgram "$out/bin/clipssh" \
         --prefix PATH : ${lib.makeBinPath (
           [ pkgs.openssh pkgs.coreutils pkgs.gnugrep ]
-          ++ lib.optionals pkgs.stdenv.isDarwin [ pkgs.pngpaste ]
-          ++ lib.optionals pkgs.stdenv.isLinux [ pkgs.wl-clipboard pkgs.xclip ]
+          ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [ pkgs.pngpaste ]
+          ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [ pkgs.wl-clipboard pkgs.xclip ]
         )}
       runHook postInstall
     '';

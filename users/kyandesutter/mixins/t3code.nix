@@ -51,7 +51,7 @@ let
   t3code = pkgs.callPackage "${packaging}/package.nix" {
     t3code-unwrapped = unwrapped;
     enableClaude = true;
-    claude-code = inputs.claude-code-nix.packages.${pkgs.system}.default;
+    claude-code = inputs.claude-code-nix.packages.${pkgs.stdenv.hostPlatform.system}.default;
     enableOpencode = true;
     enableCodex = false;
   };
@@ -64,7 +64,7 @@ let
   # org.freedesktop.secrets on the Linux hosts
   # (modules/nixos/mixins/hyprland.nix), so name that backend explicitly.
   # macOS has a keychain and needs none of it.
-  desktop = if !pkgs.stdenv.isLinux then t3code else pkgs.symlinkJoin {
+  desktop = if !pkgs.stdenv.hostPlatform.isLinux then t3code else pkgs.symlinkJoin {
     name = "t3code-${t3code.version}";
     paths = [ t3code ];
     nativeBuildInputs = [ pkgs.makeBinaryWrapper ];
@@ -96,7 +96,7 @@ in
   # is Linux/systemd only, so drive it from launchd here. A user agent, not a
   # daemon (Claude Code reads its credentials from the login keychain, and the
   # provider sessions belong to this login session).
-  launchd.agents = lib.optionalAttrs pkgs.stdenv.isDarwin {
+  launchd.agents = lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
     t3code-serve = {
       enable = true;
       config = {

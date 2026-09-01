@@ -31,12 +31,12 @@
     #   • celluloid: GTK4/libadwaita mpv frontend, plays every common video
     #     format. GNOME Videos (totem) is the "native" app but has weak codec
     #     support; mpv handles everything, so this is the reliable GTK choice.
-    #   • libreoffice-fresh: the only real office suite here (GNOME has none).
+    #   • libreoffice-stable: the only real office suite here (GNOME has none).
     #     The -fresh build renders through the gtk3 VCL backend, so it follows
     #     the adw-gtk3-dark GTK theme (set by DMS; see the dark-mode block
     #     in hyprland.nix). Opens Word/Excel/PowerPoint + ODF.
     celluloid
-    libreoffice-fresh
+    libreoffice-stable
   ];
 
   # Default apps by MIME. enable writes ~/.config/mimeapps.list.

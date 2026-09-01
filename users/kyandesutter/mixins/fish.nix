@@ -5,7 +5,7 @@ let
   # glyph is unconditional: every terminal we use is a Nerd Font one
   # (GeistMono NF, see mixins/ghostty.nix), and it renders as tofu only on the
   # bare VT console.
-  osIcon = if pkgs.stdenv.isDarwin then "" else "";
+  osIcon = if pkgs.stdenv.hostPlatform.isDarwin then "" else "";
 in
 {
   programs.fish = {
@@ -239,7 +239,7 @@ in
           set -gx SNACKS_GHOSTTY true
       end
 
-      ${lib.optionalString pkgs.stdenv.isDarwin ''
+      ${lib.optionalString pkgs.stdenv.hostPlatform.isDarwin ''
       # Brew environment
       if test -f /opt/homebrew/bin/brew
           /opt/homebrew/bin/brew shellenv | source
@@ -264,7 +264,7 @@ in
       fish_add_path ~/.bun/bin
       fish_add_path ~/.local/bin
 
-      ${lib.optionalString pkgs.stdenv.isDarwin ''
+      ${lib.optionalString pkgs.stdenv.hostPlatform.isDarwin ''
       # OrbStack shell integration
       if test -f ~/.orbstack/shell/init2.fish
           source ~/.orbstack/shell/init2.fish
@@ -305,7 +305,7 @@ in
       set -gx OLLAMA_API_BASE "https://ollama.kaiiserni.com"
       set -gx AIDER_WEAK_MODEL "gemini/gemini-2.0-flash"
 
-      ${lib.optionalString pkgs.stdenv.isLinux ''
+      ${lib.optionalString pkgs.stdenv.hostPlatform.isLinux ''
       # OpenSSH 10.1+ creates forwarded-agent sockets under ~/.ssh/agent/ and
       # unlinks them when their ssh session ends. Mosh's bootstrap ssh does
       # exactly that right after spawning mosh-server, so every shell inside a

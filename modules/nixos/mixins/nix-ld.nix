@@ -37,13 +37,13 @@
       alsa-lib
       cups
       dbus
-      xorg.libX11
-      xorg.libXcomposite
-      xorg.libXdamage
-      xorg.libXfixes
-      xorg.libXrandr
-      xorg.libXext
-      xorg.libxcb
+      libx11
+      libxcomposite
+      libxdamage
+      libxfixes
+      libxrandr
+      libxext
+      libxcb
       # No webkitgtk here: the engine is dlopened, not linked, and its
       # gstreamer closure clashes with the one a dev shell brings along.
       # WebKit comes from the shell, CEF from its own distribution.

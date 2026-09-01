@@ -58,13 +58,13 @@ in
 
       # lang.nix
       nil
-      nixfmt-rfc-style
+      nixfmt
       statix
 
       # lang.yaml / lang.markdown / lang.docker
       yaml-language-server
       marksman
-      dockerfile-language-server-nodejs
+      dockerfile-language-server
       docker-compose-language-service
     ];
 

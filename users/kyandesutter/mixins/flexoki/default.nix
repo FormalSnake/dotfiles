@@ -1,6 +1,6 @@
 { config, lib, pkgs, ... }:
 let
-  isDarwin = pkgs.stdenv.isDarwin;
+  isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
   p = import ./palette.nix;
 
   # Render a bat/Sublime tmTheme from a Flexoki base16 view. bat has no upstream

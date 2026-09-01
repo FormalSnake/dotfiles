@@ -19,7 +19,7 @@ in
 
     # claude-code-nix instead of pkgs.claude-code (nixpkgs lags upstream by
     # days, and new models are gated on current CLI versions).
-    package = inputs.claude-code-nix.packages.${pkgs.system}.default;
+    package = inputs.claude-code-nix.packages.${pkgs.stdenv.hostPlatform.system}.default;
 
     # known_marketplaces.json is left imperative (the CLI's `claude /plugin
     # marketplace add ...` writes it directly, which conflicts with HM-owned

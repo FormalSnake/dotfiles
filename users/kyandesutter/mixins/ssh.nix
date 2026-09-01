@@ -20,7 +20,7 @@
         # keys. The Darwin path is 1Password's sandboxed group-container socket and
         # must stay quoted (it contains spaces).
         IdentityAgent =
-          if pkgs.stdenv.isDarwin
+          if pkgs.stdenv.hostPlatform.isDarwin
           then ''"~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"''
           else "~/.1password/agent.sock";
       };
@@ -142,7 +142,7 @@
       "github.com" = {
         AddKeysToAgent = "yes";
         IdentityFile = "~/.ssh/id_ed25519";
-      } // lib.optionalAttrs pkgs.stdenv.isDarwin {
+      } // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
         UseKeychain = "yes";
       };
 

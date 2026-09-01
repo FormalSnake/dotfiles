@@ -52,5 +52,5 @@ in
   # substituter is configured per platform in modules/{nixos/mixins/nix.nix,
   # darwin/mixins/determinate.nix}.
   home.packages =
-    if pkgs.stdenv.isDarwin then [ kopuz macApp ] else [ linuxApp ];
+    if pkgs.stdenv.hostPlatform.isDarwin then [ kopuz macApp ] else [ linuxApp ];
 }

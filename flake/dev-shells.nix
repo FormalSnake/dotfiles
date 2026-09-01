@@ -6,11 +6,11 @@
         packages = with pkgs; [
           git
           just
-          nixfmt-rfc-style
+          nixfmt
           nil
         ];
       };
 
-      formatter = pkgs.nixfmt-rfc-style;
+      formatter = pkgs.nixfmt;
     };
 }

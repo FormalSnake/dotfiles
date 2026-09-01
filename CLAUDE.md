@@ -181,7 +181,7 @@ Conventions:
   `config.home.homeDirectory` (home-manager) or
   `config.users.users.kyandesutter.home` (system).
 - **Platform-gating:** cross-platform mixins guard with
-  `lib.optionals/​optionalAttrs pkgs.stdenv.isDarwin/isLinux`; platform-only
+  `lib.optionals/​optionalAttrs pkgs.stdenv.hostPlatform.isDarwin/isLinux`; platform-only
   mixins are imported solely from `darwin.nix`/`linux.nix` and need no guard.
 
 ## Theming model (g815 desktop)
