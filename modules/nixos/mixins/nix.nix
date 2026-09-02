@@ -29,8 +29,11 @@
     auto-optimise-store = true;
     # Builds default to the daemon's $TMPDIR, the 16G tmpfs /tmp, which big
     # FODs overflow (modrinth's pnpm-deps pulls every platform's binaries and
-    # died at >16G). /var/tmp is disk-backed.
-    build-dir = "/var/tmp";
+    # died at >16G). /nix/var/nix/builds is disk-backed too, and root-owned:
+    # nix 2.34 refuses a world-writable build dir outright, which is what
+    # /var/tmp is ("Path /var/tmp is world-writable or a symlink", every
+    # rebuild, 2026-09-02).
+    build-dir = "/nix/var/nix/builds";
   };
 
   # Owner policy (2026-08-17): keep only the last 3 system generations, the
