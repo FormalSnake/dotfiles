@@ -25,7 +25,7 @@
 
   # Office Discord bot: watches the Minecraft server and answers /status. Runs
   # as a container on the local Docker, source pinned in the mixin.
-  kyan.officeDcBot.enable = true;
+  kyan.officeDcBot.enable = false;
 
   # Singles-led artists from the top of the scrobble history. Names must match
   # Lidarr's spelling, not MusicBrainz's or the scrobble export's.
