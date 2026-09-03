@@ -117,6 +117,17 @@ let
     grep -v dejavu-fonts-minimal ${pkgs.fontconfig.out}/etc/fonts/fonts.conf > $out/etc/fonts/fonts.conf
   '';
 
+  # Font Awesome's Free and Solid faces map 361 emoji codepoints to their own
+  # line art, and fontconfig sorts on charset coverage before family, so they
+  # answered for ❤ and the U+1F600 faces in every app that names its own
+  # family instead of a generic. Brands is the face that is actually wanted:
+  # the githubNotifier DankBar plugin draws the GitHub logo from it, and it
+  # claims no emoji codepoint.
+  fontAwesomeBrands = pkgs.runCommandLocal "font-awesome-brands" { } ''
+    mkdir -p $out/share/fonts/opentype
+    ln -s ${pkgs.font-awesome}/share/fonts/opentype/*Brands*.otf $out/share/fonts/opentype/
+  '';
+
   # noto-fonts minus "Noto Sans Symbols", which draws 64 emoji (☺ ☹ 😐 ♻ ⚓ ⛪
   # ⛵, the zodiac) as monochrome outlines and sits ahead of every emoji font
   # in cosmic-text's list. "Noto Sans Symbols 2" stays: cosmic-text spells it
@@ -356,9 +367,9 @@ in
       # and Geist cover the rest of what DejaVu did, bar ⌥ and ✗.
       appleColorEmoji
 
-      # Font Awesome 6 (Brands): the githubNotifier DankBar plugin renders the
-      # GitHub logo from this family (mixins/dms.nix).
-      font-awesome
+      # Font Awesome (Brands only, see the let block): the githubNotifier
+      # DankBar plugin renders the GitHub logo from this family (mixins/dms.nix).
+      fontAwesomeBrands
     ];
 
     # Geist / GeistMono are the default sans/monospace for the whole system
