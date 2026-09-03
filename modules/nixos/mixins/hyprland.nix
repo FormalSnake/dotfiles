@@ -57,18 +57,23 @@ let
   # Linux conversion of the .ttc Apple ships in /System/Library/Fonts: one TTF
   # in CBDT/CBLC, the same colour-bitmap format Noto Color Emoji uses.
   #
-  # The name table is rewritten for two reasons:
+  # The name table is rewritten for three reasons, all of them about the Rust
+  # text stack (fontdb + cosmic-text under GPUI), not about fontconfig:
   #
-  # 1. The release carries Macintosh-platform name records only. fontdb (what
-  #    cosmic-text reads instead of fontconfig, and with it every GPUI app)
-  #    only looks at Unicode/Windows records, finds no family name, and drops
-  #    the face, so the font would not exist for those toolkits at all.
+  # 1. The release carries Macintosh-platform name records only, and fontdb
+  #    reads family names from Unicode/Windows records. It finds none, so it
+  #    drops the face and the font does not exist for those toolkits at all.
   # 2. cosmic-text's Unix fallback list is hardcoded and names "Noto Color
   #    Emoji" as its only emoji family. A family it does not name is reached
   #    only after every other installed face, in directory scan order, where
   #    Font Awesome and the CJK fonts answer for hundreds of emoji codepoints
   #    first. The en-GB record aliases this file to the name it does look for.
   #    Nothing else provides that family: noto-fonts-color-emoji is gone below.
+  # 3. GPUI decides a glyph is emoji by comparing the PostScript name against
+  #    the literal "NotoColorEmoji", and rasterises anything else as an
+  #    outline. A colour-bitmap font has no outlines, so under its own name
+  #    this one drew blanks: "unable to render glyph via swash", is_emoji
+  #    false, nothing painted.
   appleColorEmojiRelease = "macos-26-20260722-484daf4e";
   appleColorEmoji = pkgs.runCommand "apple-color-emoji-${appleColorEmojiRelease}"
     {
@@ -87,10 +92,14 @@ let
 
       font = TTFont(sys.argv[1], lazy=True)
       names = font["name"]
-      for name_id, value in ((1, "Apple Color Emoji"), (2, "Regular"), (4, "Apple Color Emoji"), (6, "AppleColorEmoji")):
+      for name_id, value in ((1, "Apple Color Emoji"), (2, "Regular"), (4, "Apple Color Emoji")):
           names.setName(value, name_id, 3, 1, 0x409)
       for name_id, value in ((1, "Noto Color Emoji"), (2, "Regular"), (4, "Noto Color Emoji")):
           names.setName(value, name_id, 3, 1, 0x809)
+      # Both records: fontdb takes the first PostScript name in table order and
+      # accepts Mac Roman, so the Macintosh one it shipped with would win.
+      names.setName("NotoColorEmoji", 6, 1, 0, 0)
+      names.setName("NotoColorEmoji", 6, 3, 1, 0x409)
       font.save(sys.argv[2])
       PY
       install -Dm444 AppleColorEmoji.ttf $out/share/fonts/truetype/AppleColorEmoji.ttf
