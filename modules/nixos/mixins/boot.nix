@@ -90,7 +90,9 @@ in
       # zram before page cache gets dropped (the cap is 200 since 5.8).
       # mkDefault: the 8 GB e1504g pushes it to the cap.
       "vm.swappiness" = lib.mkDefault 150;
-      "vm.page-cluster" = 0; # zram: fault one page at a time (no swap readahead)
+      # zram: no readahead, one page per fault. mkDefault because that trade is
+      # only right for a single random refault; the g815 raises it.
+      "vm.page-cluster" = lib.mkDefault 0;
       "vm.vfs_cache_pressure" = 50; # retain dentry/inode cache longer
       "vm.dirty_writeback_centisecs" = 1500; # flush old dirty data less often
       "kernel.nmi_watchdog" = 0; # small perf + power win (one less timer)
@@ -136,21 +138,18 @@ in
     priority = 5; # used before the disk swapfile below (RAM-speed first)
   };
 
-  # Real overflow tier. zram is *compressed RAM*, not extra capacity: once the
-  # 32 GB fills, zram can't help because its compressed pages live in that same
-  # RAM. With no disk swap the kernel then OOM-kills processes (it took out
-  # Noctalia during a BeamNG-with-traffic session). This 32 GB swapfile on the
-  # ext4 root gives genuine spill space so a transient spike pages cold anon
-  # memory to NVMe instead of reaping the desktop. Priority 1 (< zram's 5) so
-  # it's only touched once zram is exhausted: the slow tier, used last.
-  # mkDefault: sized for the 32 GB g815. A smaller host can override wholesale.
-  swapDevices = lib.mkDefault [
-    {
-      device = "/swapfile";
-      size = 32 * 1024; # MiB → 32 GiB
-      priority = 1;
-    }
-  ];
+  # The overflow tier is declared per host, not here. zram is *compressed RAM*,
+  # not extra capacity: once RAM fills zram cannot help, because its compressed
+  # pages live in that same RAM, and the kernel either thrashes or OOM-kills
+  # (it took out Noctalia during a BeamNG-with-traffic session). Every host
+  # wants a disk swapfile below zram's priority 5, so genuinely cold anon pages
+  # land on NVMe instead of cycling through zram forever.
+  #
+  # It cannot be defaulted from here. The generated hardware-configuration.nix
+  # sets `swapDevices = [ ]` at normal priority and swapDevices is a listOf, so
+  # a mkDefault list loses outright rather than merging into it. That is how the
+  # g815 ran on zram as its only swap for months (found 2026-09-03). The real
+  # definitions live in systems/g815 and systems/e1504g.
 
   # earlyoom: userspace OOM guard. The kernel's own OOM-killer only fires at
   # ~0 bytes free and picks purely by oom_score, which is how a BeamNG-with-
