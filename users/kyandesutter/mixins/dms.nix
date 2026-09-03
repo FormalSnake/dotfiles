@@ -445,6 +445,7 @@ in
     "matugen/templates/btop.theme.tmpl".source = ../matugen-templates/btop.theme.tmpl;
     "matugen/templates/yazi-flavor.toml.tmpl".source = ../matugen-templates/yazi-flavor.toml.tmpl;
     "matugen/templates/kopuz.json.tmpl".source = ../matugen-templates/kopuz.json.tmpl;
+    "matugen/templates/messages.json.tmpl".source = ../matugen-templates/messages.json.tmpl;
 
     # DMS reads ~/.config/matugen/config.toml on every re-theme and splices its
     # [config] and [templates] sections verbatim into the matugen invocation it
@@ -568,6 +569,14 @@ in
       [templates.kopuz]
       input_path = "~/.config/matugen/templates/kopuz.json.tmpl"
       output_path = "~/.config/kopuz/matugen.json"
+
+      # Messages (~/Developer/messages, the iMessage client). Keys are the
+      # palette tokens in apps/desktop/src/ui/theme.ts; unknown keys are
+      # ignored and missing ones keep the Apple default. The app polls the
+      # output once a second, so no post_hook.
+      [templates.messages]
+      input_path = "~/.config/matugen/templates/messages.json.tmpl"
+      output_path = "~/.config/messages/theme.json"
     '';
   };
 
