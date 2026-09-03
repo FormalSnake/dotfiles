@@ -8,7 +8,6 @@
     # ./mixins/aerospace.nix
     ./mixins/android.nix
     ./mixins/beets.nix
-    ./mixins/blender.nix
     ./mixins/discord.nix
     ./mixins/hammerspoon.nix
     ./mixins/lynk-browser.nix
