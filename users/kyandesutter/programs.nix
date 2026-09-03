@@ -60,39 +60,43 @@
       xcodegen
     ]
     ++ lib.optionals stdenv.hostPlatform.isLinux [
-      # BlueBubbles desktop client (iMessage). Flutter app; Linux-only in
-      # nixpkgs. The Mac runs the BlueBubbles *Server* instead (homebrew cask in
-      # systems/macbook/homebrew.nix): the server is macOS-only.
-      # The nixpkgs wrapper misses glib-networking, so the Google-login webview
-      # (WebKitGTK/libsoup) has no TLS backend ("TLS support is not available").
-      # Re-wrap with its GIO module instead of rebuilding the Flutter app.
-      # Flutter apps have no single-instance lock (unlike Electron), so every
-      # launcher click spawns another copy, and the workspace-4 window rule
-      # hides that it's already running. Hold a flock for the app's lifetime
-      # (fd 9 survives the exec). Later launches focus the live window instead.
-      # Wrap the package's own entrypoint under a fresh name instead of
-      # wrapProgram-ing the symlinkJoin copy in place (the moved-aside file's
-      # basename becomes argv0; upstream's inner wrapper re-execs with -a "$0")
-      # and GTK derives the Wayland app-id from it. A ".bluebubbles-wrapped_"
-      # app-id breaks the Hyprland workspace-4/tiling rules and the focus
-      # fallback below, which all match ^[Bb]lue[Bb]ubbles$.
-      (symlinkJoin {
-        name = "bluebubbles-wrapped";
-        paths = [ bluebubbles ];
-        nativeBuildInputs = [ makeWrapper ];
-        postBuild = ''
-          rm $out/bin/bluebubbles
-          makeWrapper ${bluebubbles}/bin/bluebubbles $out/bin/bluebubbles \
-            --prefix GIO_EXTRA_MODULES : ${glib-networking}/lib/gio/modules \
-            --run ${lib.escapeShellArg ''
-              exec 9>"''${XDG_RUNTIME_DIR:-/tmp}/bluebubbles.lock"
-              if ! ${util-linux}/bin/flock -n 9; then
-                if command -v hyprctl >/dev/null 2>&1; then
-                  hyprctl dispatch 'hl.dsp.focus({ window = "class:^[Bb]lue[Bb]ubbles$" })' >/dev/null 2>&1 || true
-                fi
-                exit 0
-              fi
-            ''}
+      # Messages (~/Developer/messages), the gpuix iMessage client that replaced
+      # the BlueBubbles desktop app; the Mac still runs the BlueBubbles *Server*
+      # (homebrew cask in systems/macbook/homebrew.nix). It runs straight from
+      # the checkout so `git pull` is the whole upgrade, with `bun install` once
+      # when node_modules is missing. The prebuilt renderer dlopens wayland,
+      # vulkan and friends at runtime and nix's bun never reads
+      # NIX_LD_LIBRARY_PATH, so they go on LD_LIBRARY_PATH (same list as the
+      # repo's flake.nix dev shell). One window per session: a second launch
+      # focuses the live one. GPUI sets no Wayland app-id, so that fallback and
+      # the hyprland rules match the window title.
+      (writeShellApplication {
+        name = "messages";
+        runtimeInputs = [ bun util-linux ];
+        text = ''
+          repo="''${MESSAGES_REPO:-$HOME/Developer/messages}"
+          exec 9>"''${XDG_RUNTIME_DIR:-/tmp}/messages.lock"
+          if ! flock -n 9; then
+            if command -v hyprctl >/dev/null 2>&1; then
+              hyprctl dispatch 'hl.dsp.focus({ window = "title:^(Messages)$" })' >/dev/null 2>&1 || true
+            fi
+            exit 0
+          fi
+          [ -d "$repo/node_modules" ] || bun install --cwd "$repo"
+          export LD_LIBRARY_PATH="/run/opengl-driver/lib:${
+            lib.makeLibraryPath [
+              libxkbcommon
+              wayland
+              vulkan-loader
+              fontconfig.lib
+              freetype
+              libxcb
+              libx11
+              libglvnd
+            ]
+          }''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+          cd "$repo/apps/desktop"
+          exec bun app.tsx "$@"
         '';
       })
       # TUI for managing bluetooth (bluez), Linux-only.
