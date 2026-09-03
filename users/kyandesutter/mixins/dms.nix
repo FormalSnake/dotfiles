@@ -446,6 +446,7 @@ in
     "matugen/templates/yazi-flavor.toml.tmpl".source = ../matugen-templates/yazi-flavor.toml.tmpl;
     "matugen/templates/kopuz.json.tmpl".source = ../matugen-templates/kopuz.json.tmpl;
     "matugen/templates/messages.json.tmpl".source = ../matugen-templates/messages.json.tmpl;
+    "matugen/templates/discord.css.tmpl".source = ../matugen-templates/discord.css.tmpl;
 
     # DMS reads ~/.config/matugen/config.toml on every re-theme and splices its
     # [config] and [templates] sections verbatim into the matugen invocation it
@@ -577,6 +578,14 @@ in
       [templates.messages]
       input_path = "~/.config/matugen/templates/messages.json.tmpl"
       output_path = "~/.config/messages/theme.json"
+
+      # Discord (moonlight, via its moonlight-css extension). The extension
+      # watches every local path in its `paths` setting and re-injects on
+      # write, so no post_hook. Output feeds refact0r/midnight-discord's
+      # colors.css, which mixins/discord.nix pins and lists ahead of it.
+      [templates.discord]
+      input_path = "~/.config/matugen/templates/discord.css.tmpl"
+      output_path = "~/.config/moonlight-mod/matugen.css"
     '';
   };
 

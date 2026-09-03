@@ -1,4 +1,4 @@
-{ lib, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 let
   # moonlight on the nightly channel. Nightly is just the tip of the mod's main
   # branch: https://moonlight-mod.github.io/moonlight/ref is the ref moonbase
@@ -52,6 +52,28 @@ let
     '';
   };
 
+  # midnight-discord's colour module on its own. colors.css declares a
+  # --bg/--text/--accent ladder and maps every Discord design token onto it,
+  # which is the mapping layer a wallpaper palette needs; the rest of the theme
+  # (main.css: panel gaps, rounded borders, Figtree) stays out, so Discord keeps
+  # its stock layout. Pinned by rev because the module only exists in the repo,
+  # not in the built midnight.css the theme publishes.
+  #
+  # Listed in `paths` ahead of the matugen output: moonlight-css loads local
+  # files in the order given and appends one style element each, so the later
+  # file wins between two :root blocks. On its own colors.css is inert, since
+  # its token block sits behind `@container root style(--colors: on)` and the
+  # named container is declared in main.css; the matugen template sets it.
+  midnightColors = pkgs.fetchurl {
+    url = "https://raw.githubusercontent.com/refact0r/midnight-discord/85dd67148cbbbfa027cb091e41a479a16ab16a65/src/colors.css";
+    hash = "sha256-Q8mVcMCeAMv+6sDf5ZX7YVtA/YWdSFxwGZrCLSf5C1o=";
+  };
+
+  # Rendered by matugen's [templates.discord] block (mixins/dms.nix) on every
+  # wallpaper pick and light/dark flip. Linux only: there is no matugen on the
+  # mac, where Discord follows the system appearance on its own.
+  matugenCss = "${config.home.homeDirectory}/.config/moonlight-mod/matugen.css";
+
   # moonlight reads its config from Electron's appData dir, named after the
   # client's release channel in resources/build_info.json (`stable` here).
   moonlightConfigFile =
@@ -73,7 +95,13 @@ let
 
       "moonlight-css" = {
         enabled = true;
-        config.paths = [
+        # URLs are fetched in the node process (not @import'd in the renderer,
+        # so Discord's CSP never sees them) and always load after local files.
+        config.paths = lib.optionals pkgs.stdenv.hostPlatform.isLinux [
+          "${midnightColors}"
+          matugenCss
+        ]
+        ++ [
           "https://allpurposemat.codeberg.page/Disblock-Origin/DisblockOrigin.theme.css"
         ];
       };
@@ -120,4 +148,17 @@ in
   home.file.${moonlightConfigFile}.source =
     (pkgs.formats.json { }).generate "moonlight-stable.json"
       moonlightConfig;
+
+  # moonlight-css only watches paths that exist when it loads: one it cannot
+  # stat is logged and dropped, and nothing re-checks it until the config is
+  # saved again. matugen doesn't write the file until the first re-theme, so
+  # seed an empty one to close that window on a fresh install.
+  home.activation.moonlightMatugenCss =
+    lib.mkIf pkgs.stdenv.hostPlatform.isLinux
+      (lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        if [ ! -e "${matugenCss}" ]; then
+          mkdir -p "$(dirname "${matugenCss}")"
+          : > "${matugenCss}"
+        fi
+      '');
 }
