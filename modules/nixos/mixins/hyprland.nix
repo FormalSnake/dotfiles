@@ -96,6 +96,18 @@ let
       install -Dm444 AppleColorEmoji.ttf $out/share/fonts/truetype/AppleColorEmoji.ttf
     '';
 
+  # nixpkgs builds fontconfig with dejavu_fonts.minimal wired in as its own
+  # last-resort font directory, and that <dir> line sits in the package's
+  # fonts.conf, underneath everything the NixOS module generates. fontdb takes
+  # its directory list from that same file and has no notion of <rejectfont>,
+  # so DejaVu Sans walks back in for every GPUI app and goes on drawing the
+  # U+1F600 faces and ❤ in outline. This is that file minus the one line,
+  # first in confPackages so it wins the buildEnv merge behind /etc/fonts.
+  fontconfigNoDefaultDir = pkgs.runCommandLocal "fontconfig-no-default-dir" { } ''
+    mkdir -p $out/etc/fonts
+    grep -v dejavu-fonts-minimal ${pkgs.fontconfig.out}/etc/fonts/fonts.conf > $out/etc/fonts/fonts.conf
+  '';
+
   # noto-fonts minus "Noto Sans Symbols", which draws 64 emoji (☺ ☹ 😐 ♻ ⚓ ⛪
   # ⛵, the zodiac) as monochrome outlines and sits ahead of every emoji font
   # in cosmic-text's list. "Noto Sans Symbols 2" stays: cosmic-text spells it
@@ -347,6 +359,8 @@ in
     # serif, so Noto Serif fills that generic. "Apple Color Emoji" is appended
     # to every family so emoji render even in apps that don't consult
     # fontconfig's emoji generic directly.
+    fonts.fontconfig.confPackages = lib.mkBefore [ fontconfigNoDefaultDir ];
+
     fonts.fontconfig.defaultFonts = {
       sansSerif = [ "Geist" "Noto Sans" "Apple Color Emoji" ];
       serif = [ "Noto Serif" "Apple Color Emoji" ];
