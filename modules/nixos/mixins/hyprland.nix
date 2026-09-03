@@ -424,6 +424,18 @@ in
           <family>ui-monospace</family>
           <prefer><family>monospace</family></prefer>
         </alias>
+
+        <!-- The emoji font, appended to every pattern rather than only to the
+             generics above, so an app that names its own family still gets it.
+             Without this, a request for "Geist" that hits an emoji codepoint
+             is scored on coverage alone and Font Awesome answers for ❤ and
+             the U+1F600 faces. Weak binding: appended behind the app's own
+             families, so ©, ® and ™ keep their text glyphs. -->
+        <match target="pattern">
+          <edit name="family" mode="append" binding="weak">
+            <string>Apple Color Emoji</string>
+          </edit>
+        </match>
       </fontconfig>
     '';
 
