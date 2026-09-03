@@ -8,13 +8,13 @@ let
   cfg = config.kyan.officeDcBot;
   home = config.users.users.kyandesutter.home;
 
-  rev = "d8704e530137cac5ada89446d3ca9a00f9165759";
+  rev = "6aa2ce2c6f0d77d80e5676cb558c8f038c29dca1";
 
   src = pkgs.fetchFromGitHub {
     owner = "FormalSnake";
     repo = "office-dc-bot";
     inherit rev;
-    hash = "sha256-X8KYNeEFvRJrymBVABbAUz2c54EL+ZwHUBpqwiwqHKM=";
+    hash = "sha256-ihhlkgRQQgfPZFu0tOLkIa6x+Gtkh2AvrSTyMVEOA0A=";
   };
 
   # Tagged by revision so bumping `rev` above builds a new image instead of
@@ -43,6 +43,7 @@ let
     # decrypted is bind-mounted into the container or written to the store.
     exec docker run --rm --name office-dc-bot \
       --env-file ${config.age.secrets."office-dc-bot".path} \
+      -v office-dc-bot-data:/app/data \
       ${tag}
   '';
 in
