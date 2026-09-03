@@ -21,6 +21,7 @@
     ./mixins/lumen.nix
     ./mixins/nordvpn.nix
     ./mixins/godot.nix
+    ./mixins/blender.nix
     ./mixins/obsidian.nix
     ./mixins/parsec.nix
   ];

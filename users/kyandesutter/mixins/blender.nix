@@ -1,5 +1,10 @@
-{ lib, pkgs, ... }:
+{ lib, pkgs, osConfig ? { }, ... }:
 let
+  # Same gate as godot.nix: Blender is only worth its 1.2 GiB on the host with a
+  # real GPU, so the mixin drops out on the iGPU-only e1504g even though
+  # linux.nix imports it unconditionally.
+  hasNvidia = (osConfig.kyan or { }).nvidia.enable or false;
+
   # blender-mcp (ahujasid): an MCP server that drives Blender by talking to a
   # companion addon over a socket the addon opens on 127.0.0.1:9876. Not in
   # nixpkgs. The PyPI sdist carries both halves (the server, and the addon under
@@ -36,9 +41,12 @@ let
 
   # Blender reads user scripts from a per-version directory, so this path moves
   # with the packaged Blender rather than being pinned to a version by hand.
-  addonDir = "Library/Application Support/Blender/${lib.versions.majorMinor pkgs.blender.version}/scripts/addons";
+  addonDir = ".config/blender/${lib.versions.majorMinor pkgs.blender.version}/scripts/addons";
 in
-{
+lib.mkIf hasNvidia {
+  # Stock nixpkgs build: Cycles renders on the CPU. CUDA/OptiX needs
+  # `blender.override { cudaSupport = true; }`, which has no binary cache and
+  # compiles the whole thing from source.
   home.packages = [ pkgs.blender ];
 
   home.file."${addonDir}/blender_mcp.py".source = addonSource;
