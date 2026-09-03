@@ -52,6 +52,64 @@ let
   sddmGreeterCompositor = pkgs.writeShellScript "sddm-greeter-compositor" ''
     exec ${pkgs.weston}/bin/weston --shell=kiosk -c ${sddmWestonIni}
   '';
+
+  # Apple's emoji, the set every iMessage and iOS device draws, from upstream's
+  # Linux conversion of the .ttc Apple ships in /System/Library/Fonts: one TTF
+  # in CBDT/CBLC, the same colour-bitmap format Noto Color Emoji uses.
+  #
+  # The name table is rewritten for two reasons:
+  #
+  # 1. The release carries Macintosh-platform name records only. fontdb (what
+  #    cosmic-text reads instead of fontconfig, and with it every GPUI app)
+  #    only looks at Unicode/Windows records, finds no family name, and drops
+  #    the face, so the font would not exist for those toolkits at all.
+  # 2. cosmic-text's Unix fallback list is hardcoded and names "Noto Color
+  #    Emoji" as its only emoji family. A family it does not name is reached
+  #    only after every other installed face, in directory scan order, where
+  #    Font Awesome and the CJK fonts answer for hundreds of emoji codepoints
+  #    first. The en-GB record aliases this file to the name it does look for.
+  #    Nothing else provides that family: noto-fonts-color-emoji is gone below.
+  appleColorEmojiRelease = "macos-26-20260722-484daf4e";
+  appleColorEmoji = pkgs.runCommand "apple-color-emoji-${appleColorEmojiRelease}"
+    {
+      src = pkgs.fetchurl {
+        url = "https://github.com/samuelngs/apple-emoji-ttf/releases/download/${appleColorEmojiRelease}/AppleColorEmoji-Linux.ttf";
+        hash = "sha256-43x69iZaxKCvbVe8ZehhCad22ZZug0MzRVf2PaSCUW8=";
+      };
+      nativeBuildInputs = [ (pkgs.python3.withPackages (ps: [ ps.fonttools ])) ];
+    }
+    ''
+      # lazy=True leaves the 110 MB bitmap table packed; decompiling it needs
+      # more memory than the e1504g has to spare.
+      python3 - "$src" AppleColorEmoji.ttf <<'PY'
+      import sys
+      from fontTools.ttLib import TTFont
+
+      font = TTFont(sys.argv[1], lazy=True)
+      names = font["name"]
+      for name_id, value in ((1, "Apple Color Emoji"), (2, "Regular"), (4, "Apple Color Emoji"), (6, "AppleColorEmoji")):
+          names.setName(value, name_id, 3, 1, 0x409)
+      for name_id, value in ((1, "Noto Color Emoji"), (2, "Regular"), (4, "Noto Color Emoji")):
+          names.setName(value, name_id, 3, 1, 0x809)
+      font.save(sys.argv[2])
+      PY
+      install -Dm444 AppleColorEmoji.ttf $out/share/fonts/truetype/AppleColorEmoji.ttf
+    '';
+
+  # noto-fonts minus "Noto Sans Symbols", which draws 64 emoji (☺ ☹ 😐 ♻ ⚓ ⛪
+  # ⛵, the zodiac) as monochrome outlines and sits ahead of every emoji font
+  # in cosmic-text's list. "Noto Sans Symbols 2" stays: cosmic-text spells it
+  # without the space and so never reaches it, and ghostty maps U+23FA to it
+  # (users/kyandesutter/mixins/ghostty.nix).
+  notoFonts = pkgs.runCommandLocal "noto-fonts-no-symbols" { } ''
+    mkdir -p $out/share/fonts/noto
+    for font in ${pkgs.noto-fonts}/share/fonts/noto/*; do
+      case "$(basename "$font")" in
+        NotoSansSymbols.ttf) ;;
+        *) ln -s "$font" $out/share/fonts/noto/ ;;
+      esac
+    done
+  '';
 in
 {
   # Imported unconditionally. Everything in it is inert until
@@ -245,6 +303,14 @@ in
     # glyphs (terminal mono + powerline icons). The rest are general coverage
     # fonts so apps don't fall back to Geist (which carries no emoji, CJK, or
     # serif glyphs) for anything outside basic Latin.
+    #
+    # The NixOS default set is off: it adds dejavu_fonts, freefont_ttf and
+    # noto-fonts-color-emoji, and the first two are exactly what has to stay
+    # out of the way (see the emoji note below). Its other members are either
+    # listed here (liberation, the CJK pair) or not wanted: gyre-fonts is
+    # PostScript substitutes for printing, unifont a last-resort bitmap face.
+    fonts.enableDefaultPackages = false;
+
     fonts.packages = with pkgs; [
       material-symbols
       geist-font # "Geist" (sans) + "Geist Mono"
@@ -252,17 +318,22 @@ in
 
       # Broad Latin/symbol coverage + metric-compatible Arial/Times/Courier
       # replacements (lots of web/office content references these by name).
-      noto-fonts # "Noto Sans" / "Noto Serif": huge Unicode coverage
+      notoFonts # "Noto Sans" / "Noto Serif": huge Unicode coverage
       liberation_ttf # "Liberation Sans/Serif/Mono" (Arial/Times/Courier metrics)
-      dejavu_fonts # "DejaVu Sans/Serif/Sans Mono": last-resort wide coverage
 
       # CJK (Chinese/Japanese/Korean) so those scripts render instead of tofu.
       noto-fonts-cjk-sans
       noto-fonts-cjk-serif
 
-      # Emoji.
-      noto-fonts-color-emoji # "Noto Color Emoji": color glyphs
-      noto-fonts-monochrome-emoji # "Noto Emoji": monochrome fallback
+      # Emoji, Apple's. DejaVu ("last-resort wide coverage") used to sit above
+      # and both Noto emoji fonts here; they are gone, along with the default
+      # set's FreeSans/FreeMono, because cosmic-text asks all of those and
+      # "Noto Sans Symbols" before any emoji font. Between them they answered
+      # for 192 of the 1456 emoji codepoints in monochrome, the whole U+1F600
+      # face block, ❤, ☺ and ✈ included. What still reaches a text font is
+      # ©®™‼⁉ℹ↔↕▪▫▶◀◻◼◽◾, which wants a text glyph anyway. Noto, Liberation
+      # and Geist cover the rest of what DejaVu did, bar ⌥ and ✗.
+      appleColorEmoji
 
       # Font Awesome 6 (Brands): the githubNotifier DankBar plugin renders the
       # GitHub logo from this family (mixins/dms.nix).
@@ -273,14 +344,14 @@ in
     # (GTK apps, anything resolving the generic sans-serif/monospace families).
     # GeistMono is the Nerd Font patch, so TUI frames, powerline segments and
     # the fish prompt's OS logo resolve without dropping to tofu. Geist has no
-    # serif, so Noto Serif fills that generic. "Noto Color Emoji" is appended to
-    # every family so emoji render even in apps that don't consult fontconfig's
-    # emoji generic directly.
+    # serif, so Noto Serif fills that generic. "Apple Color Emoji" is appended
+    # to every family so emoji render even in apps that don't consult
+    # fontconfig's emoji generic directly.
     fonts.fontconfig.defaultFonts = {
-      sansSerif = [ "Geist" "Noto Sans" "Noto Color Emoji" ];
-      serif = [ "Noto Serif" "Noto Color Emoji" ];
-      monospace = [ "GeistMono Nerd Font" "Noto Sans Mono" "Noto Color Emoji" ];
-      emoji = [ "Noto Color Emoji" ];
+      sansSerif = [ "Geist" "Noto Sans" "Apple Color Emoji" ];
+      serif = [ "Noto Serif" "Apple Color Emoji" ];
+      monospace = [ "GeistMono Nerd Font" "Noto Sans Mono" "Apple Color Emoji" ];
+      emoji = [ "Apple Color Emoji" ];
     };
 
     # The CSS system-font keywords, which Chromium and Electron hand to
