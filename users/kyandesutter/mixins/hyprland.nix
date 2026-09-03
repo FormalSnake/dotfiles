@@ -596,11 +596,12 @@ in
     -- its assigned workspace. No terminal rule: ghostty opens where you are.
     hl.window_rule({ match = { class = "^([Hh]elium)$" }, workspace = "1" })
     hl.window_rule({ match = { class = "^([Cc]ode|[Zz]ed|dev.zed.Zed)$" }, workspace = "3" })
-    hl.window_rule({ match = { class = "^([Ss]lack|WhatsApp|discord|[Bb]eeper|[Bb]lue[Bb]ubbles)$" }, workspace = "4" })
-    -- Beeper/BlueBubbles (Electron) map their main window floating, so they
-    -- never tile. Force them back into the layout.
+    hl.window_rule({ match = { class = "^([Ss]lack|WhatsApp|discord|[Bb]eeper)$" }, workspace = "4" })
+    -- Messages (GPUI) sets no Wayland app-id, so its rule matches the title.
+    hl.window_rule({ match = { title = "^(Messages)$" }, workspace = "4" })
+    -- Beeper (Electron) maps its main window floating, so it never tiles.
+    -- Force it back into the layout.
     hl.window_rule({ match = { class = "^([Bb]eeper)$" }, float = false })
-    hl.window_rule({ match = { class = "^([Bb]lue[Bb]ubbles)$" }, float = false })
     -- The quake console maps straight onto its own special workspace,
     -- floating, without ever touching the layout you are looking at. The
     -- shell sizes and reveals it afterwards either way, but without this
