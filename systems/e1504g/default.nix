@@ -59,6 +59,13 @@
   # (modules/nixos/mixins/syncthing.nix; spec 2026-07-22).
   kyan.syncthing.enable = true;
 
+  # Export a USB-attached iPhone to the macbook over Tailscale, so Xcode there
+  # builds and debugs onto a phone cabled to this laptop
+  # (modules/nixos/mixins/usbflux.nix). The mac's kyan.usbflux.remote still
+  # defaults to the g815, so point it here with
+  # `usbfluxctl add 100.109.196.64 5000` after `usbflux on`.
+  kyan.usbflux.enable = true;
+
   # This machine is NixOS-only: no Windows dual-boot, no Steam, no NordVPN
   # (kyan.nordvpn, the account login lives on the g815). Flatpak comes in
   # via the desktop profile (shared base).
