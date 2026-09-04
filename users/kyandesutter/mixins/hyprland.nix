@@ -120,7 +120,10 @@ let
   # e1504g's 15.6" 1080p panel would otherwise land on a fractional scale).
   monitors =
     if hasNvidia then ''
-      hl.monitor({ output = "HDMI-A-1", mode = "2560x1440@144", position = "0x0", scale = 1.0, vrr = 1 })
+      -- vrr = 1 on HDMI-A-1 comes up black at boot: the link trains, EDID and
+      -- ELD read fine, the CRTC goes active at 144, and no picture ever lands.
+      -- 3 holds VRR off until a fullscreen game or video asks for it.
+      hl.monitor({ output = "HDMI-A-1", mode = "2560x1440@144", position = "0x0", scale = 1.0, vrr = 3 })
       hl.monitor({ output = "${panel}", mode = "2560x1600@240", position = "2560x0", scale = 1.25, vrr = 1 })
     '' else ''
       hl.monitor({ output = "${panel}", mode = "preferred", position = "auto", scale = 1.0 })
@@ -596,11 +599,12 @@ in
     -- its assigned workspace. No terminal rule: ghostty opens where you are.
     hl.window_rule({ match = { class = "^([Hh]elium)$" }, workspace = "1" })
     hl.window_rule({ match = { class = "^([Cc]ode|[Zz]ed|dev.zed.Zed)$" }, workspace = "3" })
-    hl.window_rule({ match = { class = "^([Ss]lack|WhatsApp|discord|[Bb]eeper|[Bb]lue[Bb]ubbles)$" }, workspace = "4" })
-    -- Beeper/BlueBubbles (Electron) map their main window floating, so they
-    -- never tile. Force them back into the layout.
+    hl.window_rule({ match = { class = "^([Ss]lack|WhatsApp|discord|[Bb]eeper)$" }, workspace = "4" })
+    -- Messages (GPUI) sets no Wayland app-id, so its rule matches the title.
+    hl.window_rule({ match = { title = "^(Messages)$" }, workspace = "4" })
+    -- Beeper (Electron) maps its main window floating, so it never tiles.
+    -- Force it back into the layout.
     hl.window_rule({ match = { class = "^([Bb]eeper)$" }, float = false })
-    hl.window_rule({ match = { class = "^([Bb]lue[Bb]ubbles)$" }, float = false })
     -- The quake console maps straight onto its own special workspace,
     -- floating, without ever touching the layout you are looking at. The
     -- shell sizes and reveals it afterwards either way, but without this

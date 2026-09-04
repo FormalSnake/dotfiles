@@ -44,7 +44,7 @@ in
   #
   # It does NOT stop a *closed* app from coming back: sd-switch has a second
   # pass that starts every inactive unit an active target wants, and keep-old
-  # has no say there (see bluebubbles below for the pair of options that closes it).
+  # has no say there (see messages below for the pair of options that closes it).
 
   # Discord (moonlight-patched), launched minimized to the tray. Window rule
   # sends it to workspace 4 (communication, the internal panel).
@@ -105,10 +105,11 @@ in
     };
   };
 
-  # BlueBubbles messaging client. Window rule pins it to workspace 4.
+  # Messages (the iMessage client in programs.nix). Window rule pins it to
+  # workspace 4.
   #
   # RefuseManualStart/Stop instead of X-SwitchMethod, so a rebuild leaves a
-  # deliberately closed BlueBubbles closed. No `X-SwitchMethod` here:
+  # deliberately closed Messages closed. No `X-SwitchMethod` here:
   # RefuseManualStart takes precedence over it in sd-switch and gives the
   # behaviour keep-old only half provided. Every switch used to relaunch an app
   # that had been closed on purpose (sd-switch starts inactive units wanted by
@@ -119,10 +120,10 @@ in
   # which is what keep-old did. systemd refuses only *explicit* start/stop
   # requests, so graphical-session.target still pulls the app in at login and
   # still stops it at logout. The one real cost is that
-  # `systemctl --user start bluebubbles` is refused now (launch the app itself).
-  systemd.user.services.bluebubbles = {
+  # `systemctl --user start messages` is refused now (launch the app itself).
+  systemd.user.services.messages = {
     Unit = {
-      Description = "BlueBubbles";
+      Description = "Messages";
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
       RefuseManualStart = true;
@@ -131,8 +132,18 @@ in
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {
       Type = "simple";
-      ExecStart = loginExec "bluebubbles";
+      ExecStart = loginExec "messages";
     };
+  };
+
+  # Launcher entry for it; the package itself has none (it is a script).
+  xdg.desktopEntries.messages = {
+    name = "Messages";
+    comment = "iMessage";
+    exec = "messages";
+    icon = "/home/kyandesutter/Developer/messages/apps/desktop/assets/icon.svg";
+    terminal = false;
+    categories = [ "Network" "InstantMessaging" ];
   };
 
   # Clipboard: the shell's clipboard manager records history by polling the
