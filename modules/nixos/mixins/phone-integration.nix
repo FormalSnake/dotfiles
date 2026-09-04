@@ -30,6 +30,7 @@ lib.mkIf config.kyan.desktop.enable {
     libimobiledevice # idevice{info,pair,backup2,screenshot,syslog,…} CLI stack
     ifuse # FUSE-mount the iPhone camera roll (DCIM) as a filesystem
     ideviceinstaller # list, install, remove apps (.ipa sideloading)
+    usbutils # lsusb: confirm the phone enumerated before blaming lockdown
   ];
 
   # Backup path: trust the whole Tailscale interface so LocalSend reaches the
