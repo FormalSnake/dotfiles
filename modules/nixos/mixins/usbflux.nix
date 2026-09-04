@@ -48,10 +48,13 @@ in
       requires = [ "usbmuxd.service" ];
       after = [ "usbmuxd.service" ];
       serviceConfig = {
-        # --exit-idle-time keeps this from lingering after the mac disconnects;
-        # the socket unit re-listens and starts a fresh proxy on the next
-        # connection.
-        ExecStart = "${config.systemd.package}/lib/systemd/systemd-socket-proxyd --exit-idle-time=5min /run/usbmuxd";
+        # No --exit-idle-time. Letting the proxy go away tears down the TCP
+        # connection usbfluxd is holding, and usbfluxd only ever re-dials the
+        # single remote it was given with -r: one added later with
+        # `usbfluxctl add` is logged as "no longer available" and never
+        # retried, so the phone silently vanishes from the mac a few minutes
+        # after the last command. Measured 2026-09-04.
+        ExecStart = "${config.systemd.package}/lib/systemd/systemd-socket-proxyd /run/usbmuxd";
         # Runs as usbmuxd's own service account: it needs nothing but the
         # listening fd systemd passes it and access to that one socket.
         User = config.services.usbmuxd.user;
