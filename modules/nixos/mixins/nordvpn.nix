@@ -148,12 +148,12 @@ in
       echo "$settings" | grep -qi 'LAN Discovery: enabled' \
         || ${nordvpn} set lan-discovery enable
 
-      # Auto-connect dials the fastest exit as soon as the daemon is up (once
-      # logged in), so NordVPN comes back after every boot like Tailscale does.
-      # Without it the daemon runs but leaves the tunnel Disconnected until a
-      # manual `nordvpn connect`.
-      echo "$settings" | grep -qi 'Auto-connect: enabled' \
-        || ${nordvpn} set autoconnect enable
+      # Off by default (owner ask, 2026-09-04): this is a hide-at-home exit,
+      # not a permanent one, and having it dial on every boot is what put the
+      # host behind a tunnel it did not need. The daemon still starts; the
+      # tunnel waits for `nordvpn connect`.
+      echo "$settings" | grep -qi 'Auto-connect: disabled' \
+        || ${nordvpn} set autoconnect disable
     '';
   };
 }
