@@ -234,6 +234,46 @@
   # otherwise only reachable via the trusted tailscale0 interface.
   services.openssh.openFirewall = true;
 
+  # Memory tiering. 32 GB RAM, zram at 50% (modules/nixos/mixins/boot.nix), and
+  # until 2026-09-03 no disk swap at all: hardware-configuration.nix's
+  # `swapDevices = [ ]` outranks the mixin's mkDefault list, so the overflow
+  # tier it thought it was providing never existed. A Minecraft plus Helium
+  # plus Discord session then had nowhere to put cold pages and cycled them
+  # through zram instead: 91 GB paged out and 67 GB paged back in over one 5 h
+  # session, with 13 GB of RAM still free, and I/O pressure sitting at 45-71%
+  # in the session cgroups (zram is a block device, so a refault stall is
+  # counted as I/O, not memory, which is also why neither earlyoom nor
+  # systemd-oomd ever noticed). Alt-tabbing to Discord meant refaulting its
+  # whole working set out of zram, hence the full freeze.
+  #
+  # 16 GiB rather than the 2x RAM the mixin used to ask for: root has 56 GB
+  # free, and a cold tier only has to absorb the spill, not mirror RAM.
+  swapDevices = [
+    {
+      device = "/swapfile";
+      size = 16 * 1024; # MiB → 16 GiB
+      priority = 1; # below zram's 5: the slow tier, used last
+    }
+  ];
+
+  boot.kernel.sysctl = {
+    # CachyOS ships 150 with zram, which assumes the anon pages being evicted
+    # are cold. On this host they are a browser, three Electron apps and a JVM
+    # heap, so they come straight back: Helium's cgroup measured 2.05 M anon
+    # refaults against 1.05 M file refaults. 100 weights anon and file reclaim
+    # equally, so game assets get dropped from the page cache before the
+    # desktop gets paged out.
+    "vm.swappiness" = 100;
+
+    # 0 means one fault per 4 KB page with no readahead, which is the right
+    # trade for a single random refault and the wrong one for the case that
+    # actually hurts: an app whose entire working set is in zram, where a
+    # 900 MB Discord is ~225 k faults before it can draw. 1 pulls 2 pages per
+    # fault, which is still well short of the 8-page default that made
+    # page-cluster worth turning off for zram in the first place.
+    "vm.page-cluster" = 1;
+  };
+
   home-manager.users.kyandesutter = {
     imports = [
       self.homeModules.kyandesutter
