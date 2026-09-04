@@ -39,7 +39,28 @@
     # `tuned-adm` arrives with the daemon, but powerprofilesctl left PATH along
     # with the PPD service that used to put it there. Keep the client: it's the
     # muscle memory, and it drives tuned-ppd exactly as it drove PPD.
-    environment.systemPackages = [ pkgs.power-profiles-daemon ];
+    #
+    # The binary only. The full package also ships the D-Bus activation files
+    # for net.hadess.PowerProfiles and org.freedesktop.UPower.PowerProfiles,
+    # and both name `SystemdService=power-profiles-daemon.service` — a unit
+    # that no longer exists here, since enabling TuneD is what turns PPD off.
+    # TuneD ships its own copies of those two files pointing at
+    # tuned-ppd.service, but the system path merges with ignoreCollisions, so
+    # whichever package sorts first wins and PPD's dead pair had been winning.
+    # Anything that reaches for the power-profile API before tuned-ppd owns
+    # the name then fails to activate it: quickshell asks at shell start, and
+    # on a failed activation it gives up for the life of the process, so the
+    # shell's profile buttons silently do nothing until it restarts. That is
+    # a coin flip on every `nixos-rebuild switch`, which restarts the shell
+    # and tuned-ppd with no ordering between them (caught on the e1504g
+    # 2026-09-04: shell up at 11:30:00, tuned-ppd at 11:30:04, buttons dead
+    # for two days).
+    environment.systemPackages = [
+      (pkgs.runCommandLocal "powerprofilesctl" { } ''
+        mkdir -p $out/bin
+        ln -s ${lib.getExe' pkgs.power-profiles-daemon "powerprofilesctl"} $out/bin/powerprofilesctl
+      '')
+    ];
 
     # tuned-ppd mirrors /sys/firmware/acpi/platform_profile back into its own
     # active profile: upstream's Fn-key integration, written for ThinkPads.
