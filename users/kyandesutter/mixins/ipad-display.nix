@@ -1,13 +1,20 @@
 { pkgs, ... }:
 let
-  # The iPad Pro 11" (3rd gen) panel is 2388x1668, so serving the output at
-  # exactly that size lets the viewer draw one framebuffer pixel per device
-  # pixel. scale 1.5 leaves a 1592x1112 logical desktop: 2.0 is Apple's own
-  # factor but it is sized for a tablet held at reading distance, and a second
-  # monitor parked next to a laptop wants more room than that.
+  # wayvnc advertises an output's LOGICAL size, so a mode of 2388x1668 at scale
+  # 1.5 means Hyprland renders 2388 wide and something resamples it down to
+  # 1592 before it ever leaves the machine. Declaring the logical size as the
+  # mode instead skips that round trip: the compositor renders 1592x1112 once,
+  # at 1x, and that is what goes on the wire.
+  #
+  # 1592x1112 is the iPad Pro 11" (3rd gen) panel, 2388x1668, taken down by the
+  # 1.5 that the scale used to supply. Safari puts it back over the full panel,
+  # so the content is sized as if the iPad were a 1592x1112 screen. Raising this
+  # toward 2388 buys sharpness and shrinks everything; 2.0's 1194x834 is Apple's
+  # own factor, sized for a tablet held at reading distance rather than a second
+  # monitor parked next to a laptop.
   output = "ipad";
-  mode = "2388x1668@60";
-  scale = "1.5";
+  mode = "1592x1112@60";
+  scale = "1.0";
   vncPort = 5900;
   webPort = 5901;
 
@@ -16,8 +23,9 @@ let
   # only exists at runtime and systemd does not expand command substitution in
   # ExecStart, hence the wrappers.
   #
-  # -w serves the VNC stream as a websocket on the same port, which is what
-  # noVNC below talks; the raw VNC port still works for a native client.
+  # -w makes the port speak websocket, which is what noVNC below talks. It is a
+  # swap, not an addition: a raw RFB client gets a connection that accepts and
+  # then hangs, so the native-client path costs a restart without -w.
   # --max-fps=30: the e1504g encodes in software on a 15W Intel part, and the
   # frame budget is better spent on the physical panel.
   serve = pkgs.writeShellApplication {
@@ -63,8 +71,9 @@ let
         systemctl --user --quiet is-active ipad-display.service
       }
 
-      # resize=scale hands noVNC's 2388-wide canvas to a 1194pt-wide Safari
-      # viewport, which on the iPad's 2x screen lands back on 1:1 device pixels.
+      # resize=scale stretches the framebuffer over the whole Safari viewport
+      # rather than clipping it, which is the only reason this reads as a
+      # monitor and not a porthole.
       url() {
         ip="$(tailscale ip -4 | head -n1)"
         printf 'http://%s:%s/vnc.html?host=%s&port=%s&autoconnect=1&reconnect=1&resize=scale' \
