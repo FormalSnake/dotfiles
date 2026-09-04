@@ -20,4 +20,5 @@ in
   "couchdb-admin.age".publicKeys        = [ kyan ];
   "livesync-passphrase.age".publicKeys  = [ kyan ];
   "office-dc-bot.age".publicKeys        = [ kyan ];
+  "lastfm-api-key.age".publicKeys       = [ kyan ];
 }

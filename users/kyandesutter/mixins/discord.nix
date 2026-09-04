@@ -52,6 +52,25 @@ let
     '';
   };
 
+  # Last.fm rich presence (moonbase id `lastFmRpc`), fetched and unpacked the
+  # same way as moonlight-css above and for the same reason, and with the same
+  # hash caveat: extensions-dist only publishes the current build.
+  lastFmRpc = pkgs.stdenvNoCC.mkDerivation {
+    pname = "moonlight-lastfmrpc";
+    version = "1.0.1";
+    src = pkgs.fetchurl {
+      url = "https://moonlight-mod.github.io/extensions-dist/lastFmRpc.asar";
+      hash = "sha256-LlloHDzx3vXOmGZQTnEye0zWBHjM3owoQutEu5VUUow=";
+    };
+    dontUnpack = true;
+    nativeBuildInputs = [ pkgs.asar ];
+    installPhase = ''
+      runHook preInstall
+      asar extract $src $out
+      runHook postInstall
+    '';
+  };
+
   # midnight-discord's colour module on its own. colors.css declares a
   # --bg/--text/--accent ladder and maps every Discord design token onto it,
   # which is the mapping layer a wallpaper palette needs; the rest of the theme
@@ -81,7 +100,7 @@ let
     + "/moonlight-mod/stable.json";
 
   # moonlight rewrites this file on every launch and whenever moonbase changes a
-  # setting. Pointing it at the store makes those writes fail (moonlight logs
+  # setting. Activation lands it 0400, so those writes fail (moonlight logs
   # "Failed to write config" and carries on with what it read), which is the
   # trade: extensions and their settings are declared here, and the moonbase UI
   # can no longer install or persist anything.
@@ -105,12 +124,34 @@ let
           "https://allpurposemat.codeberg.page/Disblock-Origin/DisblockOrigin.theme.css"
         ];
       };
+
+      # Reads the now-playing track from the Last.fm API and dispatches it as a
+      # local activity, so it shows up next to Discord's own Spotify presence.
+      # Unset settings fall back to the manifest defaults, which already hide
+      # the presence while Spotify is playing.
+      lastFmRpc = {
+        enabled = true;
+        config = {
+          username = "FormalSnake";
+          # Substituted at activation from the agenix secret; see below.
+          apiKey = "@lastfmApiKey@";
+          # The default is the literal string "some music".
+          nameFormat = "artist-first";
+        };
+      };
     };
     repositories = [ "https://moonlight-mod.github.io/extensions-dist/repo.json" ];
     # Loaded as a developer extension: the normal extensions dir is moonbase's
     # to write, this one is ours.
-    devSearchPaths = [ "${moonlightCss}" ];
+    devSearchPaths = [
+      "${moonlightCss}"
+      "${lastFmRpc}"
+    ];
   };
+
+  moonlightConfigTemplate =
+    (pkgs.formats.json { }).generate "moonlight-stable.json"
+      moonlightConfig;
 in
 {
   # Discord with moonlight (https://moonlight-mod.github.io), the client mod.
@@ -145,9 +186,31 @@ in
     ))
   ];
 
-  home.file.${moonlightConfigFile}.source =
-    (pkgs.formats.json { }).generate "moonlight-stable.json"
-      moonlightConfig;
+  # Not a home.file: the Last.fm API key is agenix-encrypted, and a home.file
+  # would bake it into a world-readable store path. Activation substitutes it
+  # into the generated template instead, then drops write permission so the
+  # config stays as read-only to moonlight as the old store symlink was.
+  #
+  # agenix mounts /run/agenix from a launchd daemon on darwin rather than during
+  # activation, so the switch that first adds a secret can get here before it
+  # exists. That renders an empty key and the next switch fixes it, which is why
+  # the missing case warns instead of failing the activation.
+  home.activation.moonlightConfig = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+    key=""
+    if [ -r /run/agenix/lastfm-api-key ]; then
+      key=$(tr -d '\n' < /run/agenix/lastfm-api-key)
+    else
+      warnEcho "moonlight: /run/agenix/lastfm-api-key is missing, Last.fm presence will not authenticate"
+    fi
+    conf="${config.home.homeDirectory}/${moonlightConfigFile}"
+    mkdir -p "$(dirname "$conf")"
+    rm -f "$conf"
+    (
+      umask 077
+      ${lib.getExe pkgs.gnused} "s|@lastfmApiKey@|$key|" ${moonlightConfigTemplate} > "$conf"
+    )
+    chmod 400 "$conf"
+  '';
 
   # moonlight-css only watches paths that exist when it loads: one it cannot
   # stat is logged and dropped, and nothing re-checks it until the config is
