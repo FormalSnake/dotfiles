@@ -23,7 +23,6 @@
     ./mixins/godot.nix
     ./mixins/obsidian.nix
     ./mixins/parsec.nix
-    ./mixins/ipad-display.nix
   ];
 
   # NixOS rebuild shortcut (linux-only, so it lives here rather than the shared
