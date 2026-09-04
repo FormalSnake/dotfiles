@@ -95,6 +95,13 @@ in
       # (usbfluxd itself takes a single -r).
       pkgs.usbfluxd
       pkgs.libimobiledevice # idevice_id -l to confirm the phone arrived
+
+      # Installing a signed .ipa onto the remote phone. Xcode itself can't:
+      # since iOS 17 CoreDevice drives devices over a RemoteXPC tunnel on the
+      # phone's own NCM interface, which usbfluxd does not carry, so devicectl
+      # reports tunnelState unavailable. installation_proxy runs over plain
+      # lockdown, which does cross the proxy.
+      pkgs.ideviceinstaller
     ];
   };
 }
