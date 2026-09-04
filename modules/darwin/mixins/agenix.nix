@@ -28,6 +28,7 @@
         couchdb-admin        = mkSecret "couchdb-admin";
         livesync-passphrase  = mkSecret "livesync-passphrase";
         office-dc-bot        = mkSecret "office-dc-bot";
+        lastfm-api-key       = mkSecret "lastfm-api-key";
       };
   };
 }

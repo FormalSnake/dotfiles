@@ -46,6 +46,7 @@
         wstunnel-path-prefix = mkSecret "wstunnel-path-prefix";
         wstunnel-endpoint    = mkSecret "wstunnel-endpoint";
         couchdb-admin        = mkSecret "couchdb-admin";
+        lastfm-api-key       = mkSecret "lastfm-api-key";
       };
   };
 }
