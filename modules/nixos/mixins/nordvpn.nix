@@ -42,6 +42,68 @@ in
     users = [ "kyandesutter" ];
   };
 
+  # Allowlisting the CGNAT range keeps Tailscale's *overlay* off the tunnel,
+  # but says nothing about its underlay: the control-plane, DERP and STUN
+  # dials all go to public addresses. Tailscale marks those packets fwmark
+  # 0x80000 and installs ip rules 5210/5230/5250 to send them to `main`, then
+  # `default`, then unreachable, so they can't loop back through tailscale0.
+  # NordVPN leaves `main` holding the LAN default and moves the real one into
+  # table 205 (`default dev nordlynx`), so the marked packets leave outside
+  # the tunnel, where nordvpnd's firewall drops them. Everything still looks
+  # up: the daemon runs, the interface exists, `curl` reaches the internet,
+  # and the node is simply never registered — control dials fail, netcheck
+  # reports UDP blocked, and `tailscale status` says offline. Found on the
+  # g815 2026-09-04, off the tailnet since boot, which is also why the
+  # e1504g's builds had quietly stopped offloading to it.
+  #
+  # Send the marked traffic through the tunnel instead, at priorities ahead
+  # of tailscaled's own three. Private destinations stay on `main` so a
+  # direct WireGuard path to a same-subnet peer (the macbook) still works,
+  # exactly as lan-discovery intends; everything else takes table 205, which
+  # means Tailscale rides the privacy exit rather than bypassing it.
+  #
+  # Table 205 is NordVPN's, but the rules are ours: tailscaled recreates
+  # 5210-5250 on restart without touching lower priorities, and a NordVPN
+  # reconnect rewrites table 205's contents, not the rule that points at it.
+  # `ip rule add` has no replace, so drop our priorities first (in a loop:
+  # a crashed run can leave duplicates).
+  config.systemd.services.tailscale-nordvpn-routing = lib.mkIf cfg.enable {
+    description = "Route Tailscale's marked underlay through the NordVPN tunnel";
+    after = [
+      "nordvpn.service"
+      "tailscaled.service"
+    ];
+    wants = [ "tailscaled.service" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+    };
+    script =
+      let
+        ip = "${pkgs.iproute2}/bin/ip";
+        mark = "fwmark 0x80000/0xff0000";
+        # Mirrors the private ranges tailscaled itself excepts at 32759-32763.
+        direct = {
+          "5190" = "169.254.0.0/16";
+          "5191" = "192.168.0.0/16";
+          "5192" = "172.16.0.0/12";
+          "5193" = "10.0.0.0/8";
+        };
+      in
+      ''
+        ${lib.concatStringsSep "\n" (
+          lib.mapAttrsToList (prio: net: ''
+            while ${ip} rule del priority ${prio} 2>/dev/null; do :; done
+            ${ip} rule add priority ${prio} ${mark} to ${net} lookup main
+          '') direct
+        )}
+
+        while ${ip} rule del priority 5200 2>/dev/null; do :; done
+        ${ip} rule add priority 5200 ${mark} lookup 205
+      '';
+  };
+
   # The upstream module only exposes `enable`/`users`. Everything else
   # (`allowlist`, `lan-discovery`, …) lives in NordVPN's own vault under
   # /var/lib/nordvpn and is settable only through the `nordvpn` CLI at runtime,
