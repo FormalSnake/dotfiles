@@ -120,7 +120,10 @@ let
   # e1504g's 15.6" 1080p panel would otherwise land on a fractional scale).
   monitors =
     if hasNvidia then ''
-      hl.monitor({ output = "HDMI-A-1", mode = "2560x1440@144", position = "0x0", scale = 1.0, vrr = 1 })
+      -- vrr = 1 on HDMI-A-1 comes up black at boot: the link trains, EDID and
+      -- ELD read fine, the CRTC goes active at 144, and no picture ever lands.
+      -- 3 holds VRR off until a fullscreen game or video asks for it.
+      hl.monitor({ output = "HDMI-A-1", mode = "2560x1440@144", position = "0x0", scale = 1.0, vrr = 3 })
       hl.monitor({ output = "${panel}", mode = "2560x1600@240", position = "2560x0", scale = 1.25, vrr = 1 })
     '' else ''
       hl.monitor({ output = "${panel}", mode = "preferred", position = "auto", scale = 1.0 })
