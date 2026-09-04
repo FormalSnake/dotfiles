@@ -48,12 +48,14 @@
       tinyxxd # provides the `xxd` binary (no standalone `xxd` package in nixpkgs)
       zig
     ]
-    # macOS-only dev toolchain (Swift/Xcode/CocoaPods, Mac App Store CLI).
-    # These packages are Darwin-only in nixpkgs, so guard them off on Linux.
+    # Dev toolchain that only earns its place on the mac: the Swift/Xcode and
+    # CocoaPods bits are Darwin-only in nixpkgs, the rest is here because the
+    # mac is the development host.
     ++ lib.optionals stdenv.hostPlatform.isDarwin [
       _1password-cli
       cocoapods
       mas
+      stripe-cli
       swiftformat
       swiftlint
       xcbeautify
