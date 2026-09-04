@@ -676,10 +676,14 @@ in
     hl.layer_rule({ match = { namespace = "^(formalshell:menu)$" }, blur = true, ignore_alpha = 0.2, no_anim = true })
     hl.layer_rule({ match = { namespace = "^(formalshell:notifications-center)$" }, blur = true, ignore_alpha = 0.2, no_anim = true })
     hl.layer_rule({ match = { namespace = "^(formalshell:tooltip)$" }, blur = true, ignore_alpha = 0.2, no_anim = true })
+    -- The polkit consent card is drawn at the same surfaceOpacity, so it takes
+    -- the same blur. Its layer covers the whole output and its modal scrim
+    -- sits well above ignore_alpha, so the desktop behind the request blurs
+    -- too, exactly like the launcher.
+    hl.layer_rule({ match = { namespace = "^(formalshell:polkit)$" }, blur = true, ignore_alpha = 0.2, no_anim = true })
     -- Opaque by design, so these take the animation rule alone.
     hl.layer_rule({ match = { namespace = "^(formalshell:notifications)$" }, no_anim = true })
     hl.layer_rule({ match = { namespace = "^(formalshell:osd)$" }, no_anim = true })
-    hl.layer_rule({ match = { namespace = "^(formalshell:polkit)$" }, no_anim = true })
 ${lib.optionalString (!useFormalshell) ''
     -- Border colours: persist the last wallpaper palette across reloads
     -- DMS renders the live wallpaper-derived border colours to
