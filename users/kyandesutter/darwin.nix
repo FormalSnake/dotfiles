@@ -7,7 +7,6 @@
     # aerospace tiling. Configs are kept; just not imported.
     # ./mixins/aerospace.nix
     ./mixins/android.nix
-    ./mixins/beets.nix
     ./mixins/discord.nix
     ./mixins/hammerspoon.nix
     ./mixins/lynk-browser.nix
