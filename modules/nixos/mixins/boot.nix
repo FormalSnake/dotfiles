@@ -77,6 +77,16 @@ in
     # whole system stalls in bursts. A small absolute cap keeps any single slow
     # device from building a multi-gigabyte backlog. (dirty_bytes overrides
     # dirty_ratio when nonzero.)
+    # tcp_bbr and sch_cake back the two net sysctls below. Both are modules on
+    # the cachyos kernel, and a congestion control that is not loaded is not in
+    # tcp_available_congestion_control, so the sysctl write would be rejected.
+    # systemd-sysctl.service is After=systemd-modules-load.service, so loading
+    # them here is enough to order it.
+    kernelModules = [
+      "tcp_bbr"
+      "sch_cake"
+    ];
+
     kernel.sysctl = {
       "vm.dirty_bytes" = 268435456; # 256 MB
       "vm.dirty_background_bytes" = 67108864; # 64 MB: start flushing early
@@ -97,6 +107,18 @@ in
       "vm.dirty_writeback_centisecs" = 1500; # flush old dirty data less often
       "kernel.nmi_watchdog" = 0; # small perf + power win (one less timer)
       "net.core.netdev_max_backlog" = 4096; # deeper RX queue (fewer dropped packets)
+
+      # Bufferbloat. cubic keeps pushing until the bottleneck buffer (the AP,
+      # the ISP uplink) overflows, which is when it finally backs off, so one
+      # background upload puts hundreds of ms of queueing delay on everything
+      # sharing the link. These are thin clients: the day is spent on mosh,
+      # SSH and remote desktop to the macbook, so that delay is the whole
+      # experience. bbr paces off measured bandwidth and RTT instead of loss,
+      # and cake keeps a big transfer in its own queue instead of ahead of the
+      # interactive traffic. default_qdisc applies to interfaces brought up
+      # after it is set, tailscale0 included.
+      "net.ipv4.tcp_congestion_control" = "bbr";
+      "net.core.default_qdisc" = "cake";
       "fs.file-max" = 2097152; # raise the global file-handle ceiling
     };
   };
