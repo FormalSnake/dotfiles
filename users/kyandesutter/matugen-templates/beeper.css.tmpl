@@ -2,115 +2,116 @@
  * matugen -> Beeper (Beeper Desktop v4), rendered into
  * ~/.config/BeeperTexts/custom.css, the file Beeper's
  * Settings > Appearance > Custom CSS opens. Beeper does not watch it: it reads
- * the file at launch and on the "Reload CSS" button, so a wallpaper change
+ * the file at launch and on its "Reload CSS" button, so a wallpaper change
  * reaches Beeper at its next start. That is why this template has no post_hook
- * (restarting a chat client on every palette change costs more than it gives).
+ * (bouncing a chat client on every palette change costs more than it gives).
  *
  * Beeper's stylesheet is two layers: a base ladder (--color-base-gray-NN,
- * --color-base-system-blue-NN, --color-bg/fg/primary) and semantic tokens
- * built out of it (--color-background-app, --color-background-message-bubble-*,
- * --color-text-primary, and about a hundred more). Only the base layer is set
- * here and every semantic token follows, which is also how the community
- * themes are written. Reference copy of both layers, and the source for the
- * mappings below: github.com/beeper/themes, current-v4/variables.css.
+ * --color-base-system-blue-NN, --color-bg/fg/primary) and semantic tokens built
+ * out of it (--color-background-app, --color-background-message-bubble-*,
+ * --color-text-primary, and about a hundred more). Setting the base layer
+ * carries almost all of them. Reference copy of both layers, and the source for
+ * the mappings here: github.com/beeper/themes, current-v4/variables.css.
  *
- * The ladder runs background at the low numbers to foreground at the high ones
- * in both modes (light 20 near white through 120 near black, dark 10 near
- * black through 120 near white), so one role assignment serves both and only
- * the accent needs splitting.
+ * One :root block, no @media (prefers-color-scheme). Beeper drives that query
+ * from its own Appearance setting rather than from the desktop, so a template
+ * split across it follows Beeper's idea of light and dark and can land inverted
+ * against the shell (found 2026-09-07: e1504g in light, portal reporting light,
+ * Beeper rendering the dark half). matugen has already resolved the shell's
+ * mode by the time this file is written, so `.default` is the mode, and one
+ * block that overrides both of Beeper's is immune to what Beeper thinks. Beeper
+ * still styles its own non-token surfaces (images, embedded web views) off that
+ * setting, so leaving its Appearance on "match system" is still worth doing.
  *
- * Light and dark are separate blocks off `.light`/`.dark` rather than one
- * block off `.default` because of that accent. Beeper hardcodes white text on
- * accent backgrounds in both modes (--color-text-on-accent: white), and M3's
- * dark `primary` is a tone-80 pastel that white text is unreadable on, so dark
- * takes its accent surfaces from primary_container and keeps `primary` for
- * --color-primary, which is links and focus rings rather than a background.
- * Beeper's own media query is what flips between the two blocks, and it reads
- * prefers-color-scheme, which the portal already tracks with the shell.
+ * Two consequences of dropping the query, both handled below rather than left
+ * to Beeper:
  *
- * --color-base-black/white and the --color-base-gray-dark-* trio keep Beeper's
- * values on purpose: they back the rgba() overlays (hover, translucent
- * buttons, tooltips), where a tinted "white" would tint every hover state in
- * the app.
+ * - Text and icons on an accent background are hardcoded white in Beeper's
+ *   sheet, which fails on M3's dark `primary` (a tone-80 pastel). They are
+ *   repointed at on_primary, the role that pairs with whatever `primary` is in
+ *   the resolved mode.
+ * - Every translucent surface is rgba(black) in Beeper's light half and
+ *   rgba(white) in its dark half, so under a wrong-mode Beeper the hovers and
+ *   borders wash out. They are rebuilt at the same alphas off --color-fg, which
+ *   is dark on a light palette and light on a dark one by construction.
  *
- * Nothing here sets Beeper's parallel `--*-rgb` triplets, and none of them may
- * be added back from the red/green/blue channel fields: under a pinned palette
+ * Nothing here sets Beeper's parallel `--*-rgb` triplets, and none may be added
+ * back from the red/green/blue channel fields: under a pinned palette
  * (FormalShell's Zenbones and Flexoki wallpapers, shell/Theme/palette.js) the
  * hex fields carry the pinned colour while the channel fields still carry the
  * wallpaper-derived one, so a token and its triplet come out as two different
- * colours. The handful of Beeper tokens that consume a triplet through rgba()
- * are redefined below with color-mix off the hex instead.
+ * colours. Everything that consumed a triplet is redefined here off hex.
+ *
+ * --color-base-black/white keep Beeper's values: with every consumer of theirs
+ * overridden below, they are left only as the scrim behind modals.
  */
 :root {
-  --color-bg: {{colors.surface.light.hex}};
-  --color-fg: {{colors.on_surface.light.hex}};
-
-  --color-primary: {{colors.primary.light.hex}};
+  --color-bg: {{colors.surface.default.hex}};
+  --color-fg: {{colors.on_surface.default.hex}};
+  --color-primary: {{colors.primary.default.hex}};
 
   /* 10-60 are the surface ladder (app background, panels, elevated menus,
-     received message bubbles at 40), 70-90 the borders and disabled fills,
-     100-120 the text and icon tones. */
-  --color-base-gray-10: {{colors.surface_container_lowest.light.hex}};
-  --color-base-gray-20: {{colors.surface.light.hex}};
-  --color-base-gray-30: {{colors.surface_container_low.light.hex}};
-  --color-base-gray-40: {{colors.surface_container.light.hex}};
-  --color-base-gray-50: {{colors.surface_container_high.light.hex}};
-  --color-base-gray-60: {{colors.surface_container_highest.light.hex}};
-  --color-base-gray-70: {{colors.outline_variant.light.hex}};
-  --color-base-gray-80: {{colors.outline_variant.light.hex}};
-  --color-base-gray-85: {{colors.outline.light.hex}};
-  --color-base-gray-90: {{colors.outline.light.hex}};
-  --color-base-gray-100: {{colors.on_surface_variant.light.hex}};
-  --color-base-gray-110: {{colors.on_surface_variant.light.hex}};
-  --color-base-gray-120: {{colors.on_surface.light.hex}};
+     received message bubbles at 40), 70-90 borders and disabled fills, 100-120
+     text and icons. The ladder runs background to foreground in both of
+     Beeper's modes, so the roles below suit either one. */
+  --color-base-gray-10: {{colors.surface_container_lowest.default.hex}};
+  --color-base-gray-20: {{colors.surface.default.hex}};
+  --color-base-gray-30: {{colors.surface_container_low.default.hex}};
+  --color-base-gray-40: {{colors.surface_container.default.hex}};
+  --color-base-gray-50: {{colors.surface_container_high.default.hex}};
+  --color-base-gray-60: {{colors.surface_container_highest.default.hex}};
+  --color-base-gray-70: {{colors.outline_variant.default.hex}};
+  --color-base-gray-80: {{colors.outline_variant.default.hex}};
+  --color-base-gray-85: {{colors.outline.default.hex}};
+  --color-base-gray-90: {{colors.outline.default.hex}};
+  --color-base-gray-100: {{colors.on_surface_variant.default.hex}};
+  --color-base-gray-110: {{colors.on_surface_variant.default.hex}};
+  --color-base-gray-120: {{colors.on_surface.default.hex}};
 
   /* Accent. 90 is the resting accent surface (sent bubbles, selected thread,
      primary button), 100 and 110 its pressed steps, 80 the disabled fill.
-     Material hands over one role per slot, not a tone ramp, so the steps are
-     mixed off 90 in the direction Beeper's own light palette moves: darker
-     when pressed, lighter when disabled. The -rgb pairs stay on the resting
-     accent; nothing in Beeper reads them through rgba(). */
-  --color-base-system-blue-80: color-mix(in oklab, {{colors.primary.light.hex}}, white 25%);
-  --color-base-system-blue-90: {{colors.primary.light.hex}};
-  --color-base-system-blue-100: color-mix(in oklab, {{colors.primary.light.hex}}, black 10%);
-  --color-base-system-blue-110: color-mix(in oklab, {{colors.primary.light.hex}}, black 18%);
+     Material hands over one role per slot rather than a tone ramp, so the steps
+     are mixed: pressed moves toward --color-fg and disabled toward --color-bg,
+     which darkens on a light palette and lightens on a dark one, the direction
+     Beeper's own two palettes move. */
+  --color-base-system-blue-90: {{colors.primary.default.hex}};
+  --color-base-system-blue-100: color-mix(in oklab, {{colors.primary.default.hex}}, {{colors.on_surface.default.hex}} 12%);
+  --color-base-system-blue-110: color-mix(in oklab, {{colors.primary.default.hex}}, {{colors.on_surface.default.hex}} 20%);
+  --color-base-system-blue-80: color-mix(in oklab, {{colors.primary.default.hex}}, {{colors.surface.default.hex}} 30%);
 
-  /* The translucent surfaces, rebuilt off the ladder above because Beeper
-     builds them from rgba() triplets. Same alphas it ships. */
-  --color-background-sidebar: color-mix(in srgb, var(--color-base-gray-10) 75%, transparent);
+  /* On the accent: on_primary rather than Beeper's hardcoded white. */
+  --color-text-on-accent: {{colors.on_primary.default.hex}};
+  --color-text-on-accent-weak: color-mix(in srgb, {{colors.on_primary.default.hex}} 70%, transparent);
+  --color-icon-on-accent: color-mix(in srgb, {{colors.on_primary.default.hex}} 75%, transparent);
+  --color-icon-on-accent-strong: color-mix(in srgb, {{colors.on_primary.default.hex}} 90%, transparent);
+  --color-icon-on-accent-weak: color-mix(in srgb, {{colors.on_primary.default.hex}} 40%, transparent);
+
+  /* The translucent layer, at Beeper's own alphas. */
+  --color-background-button-translucent: color-mix(in srgb, var(--color-fg) 10%, transparent);
+  --color-background-button-translucent-active: color-mix(in srgb, var(--color-fg) 15%, transparent);
+  --color-background-button-translucent-disabled: color-mix(in srgb, var(--color-fg) 5%, transparent);
+  --color-background-sidebar-thread-focus: color-mix(in srgb, var(--color-fg) 10%, transparent);
+  --color-background-sidebar-thread-selected-unfocused: color-mix(in srgb, var(--color-fg) 15%, transparent);
+  --color-background-selected-secondary: color-mix(in srgb, var(--color-fg) 10%, transparent);
+  --color-background-kbd: color-mix(in srgb, var(--color-fg) 15%, transparent);
+  --color-background-scrollbar: color-mix(in srgb, var(--color-fg) 30%, transparent);
+  --color-background-scrollbar-hover: color-mix(in srgb, var(--color-fg) 50%, transparent);
+  --color-background-tag: color-mix(in srgb, var(--color-fg) 10%, transparent);
+  --color-border-translucent: color-mix(in srgb, var(--color-fg) 10%, transparent);
+  --color-border-translucent-strong: color-mix(in srgb, var(--color-fg) 15%, transparent);
+  --color-border-translucent-strongest: color-mix(in srgb, var(--color-fg) 50%, transparent);
+  --color-border-translucent-weak: color-mix(in srgb, var(--color-fg) 5%, transparent);
+  --color-text-translucent: color-mix(in srgb, var(--color-fg) 90%, transparent);
+  --color-text-translucent-subtle: color-mix(in srgb, var(--color-fg) 50%, transparent);
+  --color-text-translucent-weak: color-mix(in srgb, var(--color-fg) 70%, transparent);
+  --color-icon-translucent: color-mix(in srgb, var(--color-fg) 60%, transparent);
+  --color-icon-translucent-strong: color-mix(in srgb, var(--color-fg) 90%, transparent);
+  --color-icon-translucent-subtle: color-mix(in srgb, var(--color-fg) 30%, transparent);
+  --color-icon-translucent-weak: color-mix(in srgb, var(--color-fg) 40%, transparent);
+
+  /* The three surfaces Beeper builds from a ladder entry plus alpha. */
+  --color-background-sidebar: color-mix(in srgb, var(--color-base-gray-20) 80%, transparent);
+  --color-background-header-right: color-mix(in srgb, var(--color-base-gray-30) 90%, transparent);
+  --color-background-menu: color-mix(in srgb, var(--color-base-gray-30) 90%, transparent);
   --right-pane-bg: var(--color-bg);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg: {{colors.surface.dark.hex}};
-    --color-fg: {{colors.on_surface.dark.hex}};
-
-    --color-primary: {{colors.primary.dark.hex}};
-
-    --color-base-gray-10: {{colors.surface_container_lowest.dark.hex}};
-    --color-base-gray-20: {{colors.surface.dark.hex}};
-    --color-base-gray-30: {{colors.surface_container_low.dark.hex}};
-    --color-base-gray-40: {{colors.surface_container.dark.hex}};
-    --color-base-gray-50: {{colors.surface_container_high.dark.hex}};
-    --color-base-gray-60: {{colors.surface_container_highest.dark.hex}};
-    --color-base-gray-70: {{colors.outline_variant.dark.hex}};
-    --color-base-gray-80: {{colors.outline_variant.dark.hex}};
-    --color-base-gray-85: {{colors.outline.dark.hex}};
-    --color-base-gray-90: {{colors.outline.dark.hex}};
-    --color-base-gray-100: {{colors.on_surface_variant.dark.hex}};
-    --color-base-gray-110: {{colors.on_surface_variant.dark.hex}};
-    --color-base-gray-120: {{colors.on_surface.dark.hex}};
-
-    /* primary_container, not primary: see the header. Dark moves the pressed
-       steps lighter and the disabled fill darker, the opposite of light. */
-    --color-base-system-blue-80: color-mix(in oklab, {{colors.primary_container.dark.hex}}, black 20%);
-    --color-base-system-blue-90: {{colors.primary_container.dark.hex}};
-    --color-base-system-blue-100: color-mix(in oklab, {{colors.primary_container.dark.hex}}, white 10%);
-    --color-base-system-blue-110: color-mix(in oklab, {{colors.primary_container.dark.hex}}, white 18%);
-
-    --color-background-sidebar: color-mix(in srgb, var(--color-base-gray-40) 60%, transparent);
-    --color-background-header-right: color-mix(in srgb, var(--color-base-gray-30) 90%, transparent);
-    --color-background-menu: color-mix(in srgb, var(--color-base-gray-30) 90%, transparent);
-  }
 }
