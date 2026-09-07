@@ -151,8 +151,11 @@
   --color-background-commandbar-opaque: {{colors.surface_container_high.default.hex}};
   --color-background-preferences-option-selected: {{colors.surface_container_highest.default.hex}};
   --color-surface: {{colors.surface.default.hex}};
-  --color-secondary-container: {{colors.secondary_container.default.hex}};
-  --color-tertiary-container: {{colors.tertiary_container.default.hex}};
+  /* Reaction chips and their kin. Neutral containers on purpose: Material's
+     secondary and tertiary are contrasting hues by design, which showed up as
+     pink chips against a palette whose accent is nowhere near it. */
+  --color-secondary-container: {{colors.surface_container_highest.default.hex}};
+  --color-tertiary-container: {{colors.surface_container_high.default.hex}};
 
   --color-background-button-primary: var(--color-base-system-blue-90);
   --color-background-button-primary-active: var(--color-base-system-blue-100);
