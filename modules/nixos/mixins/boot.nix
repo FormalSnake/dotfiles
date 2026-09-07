@@ -209,6 +209,12 @@ in
   # /var/lib/systemd/coredump.
   systemd.coredump.settings.Coredump.MaxUse = "256M";
 
+  # Same ceiling problem for the journal, which defaults to 10% of /var (tens
+  # of GB on these disks) and only starts dropping records once it gets there.
+  # The g815 had accumulated 590 MB by 2026-09-07. 500M is still several weeks
+  # of boots on a desktop that logs this much.
+  services.journald.settings.Journal.SystemMaxUse = "500M";
+
   # Passwordless one-click for the "BIOS" session button, scoped to the active
   # local wheel session: `systemctl reboot --firmware-setup` sets the
   # boot-to-firmware-UI EFI indication via logind (auth_admin by default). The
