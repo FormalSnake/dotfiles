@@ -1,0 +1,144 @@
+/*
+ * matugen -> Beeper (Beeper Desktop v4), rendered into
+ * ~/.config/BeeperTexts/custom.css, the file Beeper's
+ * Settings > Appearance > Custom CSS opens. Beeper does not watch it: it reads
+ * the file at launch and on the "Reload CSS" button, so a wallpaper change
+ * reaches Beeper at its next start. That is why this template has no post_hook
+ * (restarting a chat client on every palette change costs more than it gives).
+ *
+ * Beeper's stylesheet is two layers: a base ladder (--color-base-gray-NN,
+ * --color-base-system-blue-NN, --color-bg/fg/primary) and semantic tokens
+ * built out of it (--color-background-app, --color-background-message-bubble-*,
+ * --color-text-primary, and about a hundred more). Only the base layer is set
+ * here and every semantic token follows, which is also how the community
+ * themes are written. Reference copy of both layers, and the source for the
+ * mappings below: github.com/beeper/themes, current-v4/variables.css.
+ *
+ * The ladder runs background at the low numbers to foreground at the high ones
+ * in both modes (light 20 near white through 120 near black, dark 10 near
+ * black through 120 near white), so one role assignment serves both and only
+ * the accent needs splitting.
+ *
+ * Light and dark are separate blocks off `.light`/`.dark` rather than one
+ * block off `.default` because of that accent. Beeper hardcodes white text on
+ * accent backgrounds in both modes (--color-text-on-accent: white), and M3's
+ * dark `primary` is a tone-80 pastel that white text is unreadable on, so dark
+ * takes its accent surfaces from primary_container and keeps `primary` for
+ * --color-primary, which is links and focus rings rather than a background.
+ * Beeper's own media query is what flips between the two blocks, and it reads
+ * prefers-color-scheme, which the portal already tracks with the shell.
+ *
+ * --color-base-black/white and the --color-base-gray-dark-* trio keep Beeper's
+ * values on purpose: they back the rgba() overlays (hover, translucent
+ * buttons, tooltips), where a tinted "white" would tint every hover state in
+ * the app.
+ */
+:root {
+  --color-bg: {{colors.surface.light.hex}};
+  --color-bg-rgb: {{colors.surface.light.red}}, {{colors.surface.light.green}}, {{colors.surface.light.blue}};
+  --color-fg: {{colors.on_surface.light.hex}};
+  --color-fg-rgb: {{colors.on_surface.light.red}}, {{colors.on_surface.light.green}}, {{colors.on_surface.light.blue}};
+
+  --color-primary: {{colors.primary.light.hex}};
+  --color-primary-rgb: {{colors.primary.light.red}}, {{colors.primary.light.green}}, {{colors.primary.light.blue}};
+
+  /* The neutral rgba() base, used for muted separators. */
+  --color-gray-rgb: {{colors.outline.light.red}}, {{colors.outline.light.green}}, {{colors.outline.light.blue}};
+
+  /* 10-60 are the surface ladder (app background, panels, elevated menus,
+     received message bubbles at 40), 70-90 the borders and disabled fills,
+     100-120 the text and icon tones. */
+  --color-base-gray-10: {{colors.surface_container_lowest.light.hex}};
+  --color-base-gray-10-rgb: {{colors.surface_container_lowest.light.red}}, {{colors.surface_container_lowest.light.green}}, {{colors.surface_container_lowest.light.blue}};
+  --color-base-gray-20: {{colors.surface.light.hex}};
+  --color-base-gray-20-rgb: {{colors.surface.light.red}}, {{colors.surface.light.green}}, {{colors.surface.light.blue}};
+  --color-base-gray-30: {{colors.surface_container_low.light.hex}};
+  --color-base-gray-30-rgb: {{colors.surface_container_low.light.red}}, {{colors.surface_container_low.light.green}}, {{colors.surface_container_low.light.blue}};
+  --color-base-gray-40: {{colors.surface_container.light.hex}};
+  --color-base-gray-40-rgb: {{colors.surface_container.light.red}}, {{colors.surface_container.light.green}}, {{colors.surface_container.light.blue}};
+  --color-base-gray-50: {{colors.surface_container_high.light.hex}};
+  --color-base-gray-50-rgb: {{colors.surface_container_high.light.red}}, {{colors.surface_container_high.light.green}}, {{colors.surface_container_high.light.blue}};
+  --color-base-gray-60: {{colors.surface_container_highest.light.hex}};
+  --color-base-gray-60-rgb: {{colors.surface_container_highest.light.red}}, {{colors.surface_container_highest.light.green}}, {{colors.surface_container_highest.light.blue}};
+  --color-base-gray-70: {{colors.outline_variant.light.hex}};
+  --color-base-gray-70-rgb: {{colors.outline_variant.light.red}}, {{colors.outline_variant.light.green}}, {{colors.outline_variant.light.blue}};
+  --color-base-gray-80: {{colors.outline_variant.light.hex}};
+  --color-base-gray-80-rgb: {{colors.outline_variant.light.red}}, {{colors.outline_variant.light.green}}, {{colors.outline_variant.light.blue}};
+  --color-base-gray-85: {{colors.outline.light.hex}};
+  --color-base-gray-85-rgb: {{colors.outline.light.red}}, {{colors.outline.light.green}}, {{colors.outline.light.blue}};
+  --color-base-gray-90: {{colors.outline.light.hex}};
+  --color-base-gray-90-rgb: {{colors.outline.light.red}}, {{colors.outline.light.green}}, {{colors.outline.light.blue}};
+  --color-base-gray-100: {{colors.on_surface_variant.light.hex}};
+  --color-base-gray-100-rgb: {{colors.on_surface_variant.light.red}}, {{colors.on_surface_variant.light.green}}, {{colors.on_surface_variant.light.blue}};
+  --color-base-gray-110: {{colors.on_surface_variant.light.hex}};
+  --color-base-gray-110-rgb: {{colors.on_surface_variant.light.red}}, {{colors.on_surface_variant.light.green}}, {{colors.on_surface_variant.light.blue}};
+  --color-base-gray-120: {{colors.on_surface.light.hex}};
+  --color-base-gray-120-rgb: {{colors.on_surface.light.red}}, {{colors.on_surface.light.green}}, {{colors.on_surface.light.blue}};
+
+  /* Accent. 90 is the resting accent surface (sent bubbles, selected thread,
+     primary button), 100 and 110 its pressed steps, 80 the disabled fill.
+     Material hands over one role per slot, not a tone ramp, so the steps are
+     mixed off 90 in the direction Beeper's own light palette moves: darker
+     when pressed, lighter when disabled. The -rgb pairs stay on the resting
+     accent; nothing in Beeper reads them through rgba(). */
+  --color-base-system-blue-80: color-mix(in oklab, {{colors.primary.light.hex}}, white 25%);
+  --color-base-system-blue-80-rgb: {{colors.primary.light.red}}, {{colors.primary.light.green}}, {{colors.primary.light.blue}};
+  --color-base-system-blue-90: {{colors.primary.light.hex}};
+  --color-base-system-blue-90-rgb: {{colors.primary.light.red}}, {{colors.primary.light.green}}, {{colors.primary.light.blue}};
+  --color-base-system-blue-100: color-mix(in oklab, {{colors.primary.light.hex}}, black 10%);
+  --color-base-system-blue-100-rgb: {{colors.primary.light.red}}, {{colors.primary.light.green}}, {{colors.primary.light.blue}};
+  --color-base-system-blue-110: color-mix(in oklab, {{colors.primary.light.hex}}, black 18%);
+  --color-base-system-blue-110-rgb: {{colors.primary.light.red}}, {{colors.primary.light.green}}, {{colors.primary.light.blue}};
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: {{colors.surface.dark.hex}};
+    --color-bg-rgb: {{colors.surface.dark.red}}, {{colors.surface.dark.green}}, {{colors.surface.dark.blue}};
+    --color-fg: {{colors.on_surface.dark.hex}};
+    --color-fg-rgb: {{colors.on_surface.dark.red}}, {{colors.on_surface.dark.green}}, {{colors.on_surface.dark.blue}};
+
+    --color-primary: {{colors.primary.dark.hex}};
+    --color-primary-rgb: {{colors.primary.dark.red}}, {{colors.primary.dark.green}}, {{colors.primary.dark.blue}};
+
+    --color-gray-rgb: {{colors.outline.dark.red}}, {{colors.outline.dark.green}}, {{colors.outline.dark.blue}};
+
+    --color-base-gray-10: {{colors.surface_container_lowest.dark.hex}};
+    --color-base-gray-10-rgb: {{colors.surface_container_lowest.dark.red}}, {{colors.surface_container_lowest.dark.green}}, {{colors.surface_container_lowest.dark.blue}};
+    --color-base-gray-20: {{colors.surface.dark.hex}};
+    --color-base-gray-20-rgb: {{colors.surface.dark.red}}, {{colors.surface.dark.green}}, {{colors.surface.dark.blue}};
+    --color-base-gray-30: {{colors.surface_container_low.dark.hex}};
+    --color-base-gray-30-rgb: {{colors.surface_container_low.dark.red}}, {{colors.surface_container_low.dark.green}}, {{colors.surface_container_low.dark.blue}};
+    --color-base-gray-40: {{colors.surface_container.dark.hex}};
+    --color-base-gray-40-rgb: {{colors.surface_container.dark.red}}, {{colors.surface_container.dark.green}}, {{colors.surface_container.dark.blue}};
+    --color-base-gray-50: {{colors.surface_container_high.dark.hex}};
+    --color-base-gray-50-rgb: {{colors.surface_container_high.dark.red}}, {{colors.surface_container_high.dark.green}}, {{colors.surface_container_high.dark.blue}};
+    --color-base-gray-60: {{colors.surface_container_highest.dark.hex}};
+    --color-base-gray-60-rgb: {{colors.surface_container_highest.dark.red}}, {{colors.surface_container_highest.dark.green}}, {{colors.surface_container_highest.dark.blue}};
+    --color-base-gray-70: {{colors.outline_variant.dark.hex}};
+    --color-base-gray-70-rgb: {{colors.outline_variant.dark.red}}, {{colors.outline_variant.dark.green}}, {{colors.outline_variant.dark.blue}};
+    --color-base-gray-80: {{colors.outline_variant.dark.hex}};
+    --color-base-gray-80-rgb: {{colors.outline_variant.dark.red}}, {{colors.outline_variant.dark.green}}, {{colors.outline_variant.dark.blue}};
+    --color-base-gray-85: {{colors.outline.dark.hex}};
+    --color-base-gray-85-rgb: {{colors.outline.dark.red}}, {{colors.outline.dark.green}}, {{colors.outline.dark.blue}};
+    --color-base-gray-90: {{colors.outline.dark.hex}};
+    --color-base-gray-90-rgb: {{colors.outline.dark.red}}, {{colors.outline.dark.green}}, {{colors.outline.dark.blue}};
+    --color-base-gray-100: {{colors.on_surface_variant.dark.hex}};
+    --color-base-gray-100-rgb: {{colors.on_surface_variant.dark.red}}, {{colors.on_surface_variant.dark.green}}, {{colors.on_surface_variant.dark.blue}};
+    --color-base-gray-110: {{colors.on_surface_variant.dark.hex}};
+    --color-base-gray-110-rgb: {{colors.on_surface_variant.dark.red}}, {{colors.on_surface_variant.dark.green}}, {{colors.on_surface_variant.dark.blue}};
+    --color-base-gray-120: {{colors.on_surface.dark.hex}};
+    --color-base-gray-120-rgb: {{colors.on_surface.dark.red}}, {{colors.on_surface.dark.green}}, {{colors.on_surface.dark.blue}};
+
+    /* primary_container, not primary: see the header. Dark moves the pressed
+       steps lighter and the disabled fill darker, the opposite of light. */
+    --color-base-system-blue-80: color-mix(in oklab, {{colors.primary_container.dark.hex}}, black 20%);
+    --color-base-system-blue-80-rgb: {{colors.primary_container.dark.red}}, {{colors.primary_container.dark.green}}, {{colors.primary_container.dark.blue}};
+    --color-base-system-blue-90: {{colors.primary_container.dark.hex}};
+    --color-base-system-blue-90-rgb: {{colors.primary_container.dark.red}}, {{colors.primary_container.dark.green}}, {{colors.primary_container.dark.blue}};
+    --color-base-system-blue-100: color-mix(in oklab, {{colors.primary_container.dark.hex}}, white 10%);
+    --color-base-system-blue-100-rgb: {{colors.primary_container.dark.red}}, {{colors.primary_container.dark.green}}, {{colors.primary_container.dark.blue}};
+    --color-base-system-blue-110: color-mix(in oklab, {{colors.primary_container.dark.hex}}, white 18%);
+    --color-base-system-blue-110-rgb: {{colors.primary_container.dark.red}}, {{colors.primary_container.dark.green}}, {{colors.primary_container.dark.blue}};
+  }
+}
