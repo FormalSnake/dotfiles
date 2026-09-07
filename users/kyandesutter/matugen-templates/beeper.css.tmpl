@@ -50,14 +50,23 @@
   --color-fg: {{colors.on_surface.default.hex}};
   --color-primary: {{colors.primary.default.hex}};
 
+  /* The raw poles. Beeper's light half paints real surfaces with base-white
+     (the settings cards, the elevated menus, secondary buttons), so leaving it
+     literal is what put white cards under light-on-dark text when its settings
+     window resolved light while its main window resolved dark. Every other
+     consumer of these two (text on accent, the rgba() overlays) is redefined
+     below, so repointing them at the palette is safe. */
+  --color-base-white: {{colors.surface.default.hex}};
+  --color-base-black: {{colors.on_surface.default.hex}};
+
   /* 10-60 are the surface ladder (app background, panels, elevated menus,
      received message bubbles at 40), 70-90 borders and disabled fills, 100-120
      text and icons. The ladder runs background to foreground in both of
      Beeper's modes, so the roles below suit either one. */
-  --color-base-gray-10: {{colors.surface_container_lowest.default.hex}};
-  --color-base-gray-20: {{colors.surface.default.hex}};
-  --color-base-gray-30: {{colors.surface_container_low.default.hex}};
-  --color-base-gray-40: {{colors.surface_container.default.hex}};
+  --color-base-gray-10: {{colors.surface.default.hex}};
+  --color-base-gray-20: {{colors.surface_container_low.default.hex}};
+  --color-base-gray-30: {{colors.surface_container.default.hex}};
+  --color-base-gray-40: {{colors.surface_container_high.default.hex}};
   --color-base-gray-50: {{colors.surface_container_high.default.hex}};
   --color-base-gray-60: {{colors.surface_container_highest.default.hex}};
   --color-base-gray-70: {{colors.outline_variant.default.hex}};
@@ -109,9 +118,53 @@
   --color-icon-translucent-subtle: color-mix(in srgb, var(--color-fg) 30%, transparent);
   --color-icon-translucent-weak: color-mix(in srgb, var(--color-fg) 40%, transparent);
 
+  /* The semantic layer, stated outright rather than derived. Beeper picks its
+     light or dark derivation per window (its settings window and its main
+     window disagreed on 2026-09-07), and only these names reach the pixels, so
+     pinning them here is what makes the result independent of that. */
+  --color-background-app: {{colors.surface.default.hex}};
+  --color-background-app-weak: {{colors.surface_container_low.default.hex}};
+  --color-background-elevated: {{colors.surface_container.default.hex}};
+  --color-background-elevated-hover: {{colors.surface_container_high.default.hex}};
+  --color-background-grouped: {{colors.surface_container.default.hex}};
+  --color-background-grouped-weak: {{colors.surface_container_low.default.hex}};
+  --color-background-object: {{colors.surface_container_high.default.hex}};
+  --color-background-input: {{colors.surface_container_high.default.hex}};
+  --color-background-message-active: {{colors.surface_container_high.default.hex}};
+  --color-background-message-bubble-received: {{colors.surface_container_high.default.hex}};
+  --color-background-message-bubble-linked: {{colors.surface.default.hex}};
+  --color-background-button-secondary: {{colors.surface_container_high.default.hex}};
+  --color-background-button-secondary-active: {{colors.surface_container_highest.default.hex}};
+  --color-background-button-secondary-disabled: {{colors.surface_container.default.hex}};
+  --color-background-menu-opaque: {{colors.surface_container_high.default.hex}};
+  --color-background-header-right-opaque: {{colors.surface_container.default.hex}};
+  --color-background-sidebar-opaque: {{colors.surface_container_low.default.hex}};
+
+  --color-background-button-primary: var(--color-base-system-blue-90);
+  --color-background-button-primary-active: var(--color-base-system-blue-100);
+  --color-background-button-primary-disabled: var(--color-base-system-blue-80);
+  --color-background-message-bubble-sent: var(--color-base-system-blue-90);
+  --color-background-selected-primary: var(--color-base-system-blue-90);
+  --color-background-menu-option-hover: var(--color-base-system-blue-90);
+
+  --color-border-neutrals: {{colors.outline_variant.default.hex}};
+  --color-border-neutrals-strong: {{colors.outline.default.hex}};
+  --color-border-neutrals-weak: {{colors.surface_container_highest.default.hex}};
+  --color-border-input: {{colors.outline_variant.default.hex}};
+  --color-border-input-active: {{colors.outline.default.hex}};
+
+  --color-text-neutrals: {{colors.on_surface.default.hex}};
+  --color-text-neutrals-subtle: {{colors.on_surface_variant.default.hex}};
+  --color-text-neutrals-weak: {{colors.on_surface_variant.default.hex}};
+  --color-icon-neutrals: {{colors.on_surface_variant.default.hex}};
+  --color-icon-neutrals-strong: {{colors.on_surface.default.hex}};
+  --color-icon-neutrals-subtle: {{colors.outline.default.hex}};
+  --color-icon-neutrals-weak: {{colors.on_surface_variant.default.hex}};
+  --color-key-bottom-bg: {{colors.outline_variant.default.hex}};
+
   /* The three surfaces Beeper builds from a ladder entry plus alpha. */
-  --color-background-sidebar: color-mix(in srgb, var(--color-base-gray-20) 80%, transparent);
-  --color-background-header-right: color-mix(in srgb, var(--color-base-gray-30) 90%, transparent);
-  --color-background-menu: color-mix(in srgb, var(--color-base-gray-30) 90%, transparent);
+  --color-background-sidebar: color-mix(in srgb, {{colors.surface_container_low.default.hex}} 80%, transparent);
+  --color-background-header-right: color-mix(in srgb, {{colors.surface_container.default.hex}} 90%, transparent);
+  --color-background-menu: color-mix(in srgb, {{colors.surface_container_high.default.hex}} 90%, transparent);
   --right-pane-bg: var(--color-bg);
 }
