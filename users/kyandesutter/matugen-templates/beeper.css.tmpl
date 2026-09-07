@@ -42,8 +42,9 @@
  * wallpaper-derived one, so a token and its triplet come out as two different
  * colours. Everything that consumed a triplet is redefined here off hex.
  *
- * --color-base-black/white keep Beeper's values: with every consumer of theirs
- * overridden below, they are left only as the scrim behind modals.
+ * The token names come from the community themes in that repo, which reach
+ * further into the v4 UI (the preferences and command bar surfaces) than its
+ * variables.css excerpt does.
  */
 :root {
   --color-bg: {{colors.surface.default.hex}};
@@ -58,6 +59,14 @@
      below, so repointing them at the palette is safe. */
   --color-base-white: {{colors.surface.default.hex}};
   --color-base-black: {{colors.on_surface.default.hex}};
+
+  /* The same trap one layer down: this trio is a fixed dark grey, and Beeper's
+     light half writes secondary text with it. On a themed surface that is dark
+     ink on a dark card, which is what was still washing out the settings
+     window after the poles were fixed. They are ink, so they take ink roles. */
+  --color-base-gray-dark-50: {{colors.on_surface.default.hex}};
+  --color-base-gray-dark-70: {{colors.on_surface.default.hex}};
+  --color-base-gray-dark-80: {{colors.on_surface_variant.default.hex}};
 
   /* 10-60 are the surface ladder (app background, panels, elevated menus,
      received message bubbles at 40), 70-90 borders and disabled fills, 100-120
@@ -139,6 +148,11 @@
   --color-background-menu-opaque: {{colors.surface_container_high.default.hex}};
   --color-background-header-right-opaque: {{colors.surface_container.default.hex}};
   --color-background-sidebar-opaque: {{colors.surface_container_low.default.hex}};
+  --color-background-commandbar-opaque: {{colors.surface_container_high.default.hex}};
+  --color-background-preferences-option-selected: {{colors.surface_container_highest.default.hex}};
+  --color-surface: {{colors.surface.default.hex}};
+  --color-secondary-container: {{colors.secondary_container.default.hex}};
+  --color-tertiary-container: {{colors.tertiary_container.default.hex}};
 
   --color-background-button-primary: var(--color-base-system-blue-90);
   --color-background-button-primary-active: var(--color-base-system-blue-100);
@@ -146,6 +160,9 @@
   --color-background-message-bubble-sent: var(--color-base-system-blue-90);
   --color-background-selected-primary: var(--color-base-system-blue-90);
   --color-background-menu-option-hover: var(--color-base-system-blue-90);
+  --color-background-selected: var(--color-base-system-blue-90);
+  --color-background-sidebar-thread-selected: var(--color-base-system-blue-90);
+  --color-background-commandbar-command-highlighted: var(--color-base-system-blue-90);
 
   --color-border-neutrals: {{colors.outline_variant.default.hex}};
   --color-border-neutrals-strong: {{colors.outline.default.hex}};
