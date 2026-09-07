@@ -447,6 +447,7 @@ in
     "matugen/templates/kopuz.json.tmpl".source = ../matugen-templates/kopuz.json.tmpl;
     "matugen/templates/messages.json.tmpl".source = ../matugen-templates/messages.json.tmpl;
     "matugen/templates/discord.css.tmpl".source = ../matugen-templates/discord.css.tmpl;
+    "matugen/templates/beeper.css.tmpl".source = ../matugen-templates/beeper.css.tmpl;
 
     # DMS reads ~/.config/matugen/config.toml on every re-theme and splices its
     # [config] and [templates] sections verbatim into the matugen invocation it
@@ -586,6 +587,15 @@ in
       [templates.discord]
       input_path = "~/.config/matugen/templates/discord.css.tmpl"
       output_path = "~/.config/moonlight-mod/matugen.css"
+
+      # Beeper (Beeper Desktop v4). This path is the file Settings > Appearance
+      # > "Open CSS file in editor" opens. No post_hook: Beeper reads custom.css
+      # at launch and when its own "Reload CSS" button is pressed, it does not
+      # watch the file, and bouncing a chat client on every wallpaper change
+      # costs more than the colours arriving at the next start.
+      [templates.beeper]
+      input_path = "~/.config/matugen/templates/beeper.css.tmpl"
+      output_path = "~/.config/BeeperTexts/custom.css"
     '';
   };
 
