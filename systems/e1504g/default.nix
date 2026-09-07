@@ -315,11 +315,23 @@
   #     saves nothing.
   # The usual powertop --auto-tune sweep therefore has nothing left to win.
 
-  # Disable CPU speculative-execution mitigations, matching the g815 (see
-  # systems/g815/default.nix: ~5-15% on syscall-heavy work, and this 8 GB
-  # Intel machine feels it most). Same SECURITY TRADE-OFF, same verdict:
-  # single-user personal laptop, no untrusted code.
-  boot.kernelParams = [ "mitigations=off" ];
+  boot.kernelParams = [
+    # Disable CPU speculative-execution mitigations, matching the g815 (see
+    # systems/g815/default.nix: ~5-15% on syscall-heavy work, and this 8 GB
+    # Intel machine feels it most). Same SECURITY TRADE-OFF, same verdict:
+    # single-user personal laptop, no untrusted code.
+    "mitigations=off"
+
+    # VT-d is on in the firmware (the ACPI DMAR table is present and both DRHDs
+    # are described) but the kernel never binds it: /sys/class/iommu stays empty
+    # and fwupd reports "IOMMU: Not found". The g815 needs no such param because
+    # its firmware sets the DMA-protection opt-in bit, which the kernel honours
+    # on its own ("Intel-IOMMU force enabled due to platform opt in"); this
+    # firmware doesn't set it. Costs a little DMA-map overhead on a machine with
+    # no Thunderbolt to protect against, so it is here for the IOMMU itself
+    # (device isolation, VFIO if it is ever wanted), not for a measured win.
+    "intel_iommu=on"
+  ];
 
   # The root fs is ext4 and the generated hardware-configuration.nix leaves it
   # at the kernel default (relatime), so every read still writes back an access
