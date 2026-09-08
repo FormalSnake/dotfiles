@@ -260,3 +260,74 @@ Example link field: `{ "name": "author", "primitive": "link", "primitive_link": 
 4. **Verify** with `tables.{name}.all` and report the `_uid`s created.
 
 When anything fails, print the full JSON error envelope to the user — Gem0 error messages (`Document not valid…`, `No permission`, `Invalid scheme`) state the exact cause.
+
+---
+
+## 6. Hosted backend, verified 2026-09-08 (magicfamara setup)
+
+Everything below was exercised end to end against `https://apist.gem0.dev` and
+`https://sdk.gem0.dev` while creating a project from scratch over HTTP.
+
+- **Data plane URL is `https://sdk.gem0.dev`** (not `api.gem0.dev`). Use it as `GEM_URL`.
+- **`X-KANGA-KEY` on the hosted backend is `A7yXY6RvAk7apc`.** It is the public key
+  shipped in the admin UI bundle (`GemClient/src/components/lib/auth.ts`). Every
+  admin call needs it *and* the user session headers; the KANGA key alone gets
+  `not_authenticated` on pillow routes in production.
+- **Session headers** come from the admin UI login: `Auth-Token: <token>` and
+  `Auth-Email: <email>`. Ask the user for both.
+- **Admin plane routes are addressed by project subdomain, not id:**
+  `POST /en/<subdomain>/pillow/scheme/{fetch_all,save,remove}`.
+  `override_subdomain` is only for self-hosted setups.
+
+### Generic object API (companies, projects, api tokens)
+
+`POST /en/v3/objects/{fetch_all,save,remove}` with body `{"object": "<type>", ...}`.
+`object` accepts `company`, `project`, `api_token` (plus `user`, `permission`).
+
+```bash
+H=(-H "Auth-Token: $AUTH_TOKEN" -H "Auth-Email: $AUTH_EMAIL" -H "X-KANGA-KEY: A7yXY6RvAk7apc" -H "Content-Type: application/json")
+
+# list companies / projects (fields is a whitelist of columns to return)
+curl -s -X POST https://apist.gem0.dev/en/v3/objects/fetch_all "${H[@]}" \
+  -d '{"object":"company","fields":["id","name","subdomain"]}'
+curl -s -X POST https://apist.gem0.dev/en/v3/objects/fetch_all "${H[@]}" \
+  -d '{"object":"project","fields":["id","name","subdomain","company_id"]}'
+
+# create a project: subdomain becomes "<company subdomain>_<name lowercased, non-alnum stripped>"
+curl -s -X POST https://apist.gem0.dev/en/v3/objects/save "${H[@]}" \
+  -d '{"object":"project","ob":{"name":"MagicFamara","company_id":4,"type":"Project::Website"},"fields":["id","subdomain"]}'
+# -> {"success":true,"data":{"id":42,"subdomain":"canarycoders_magicfamara"}}
+
+# create the data-plane Bearer key (plaintext comes back in api_key)
+curl -s -X POST https://apist.gem0.dev/en/v3/objects/save "${H[@]}" \
+  -d '{"object":"api_token","ob":{"name":"website build","project_id":42,"enabled_until":"9999-12-31T00:00:00Z"},"fields":["id","api_key"]}'
+```
+
+CanaryCoders company id is `4`, subdomain `canarycoders`.
+
+### Creating a table and opening posix (the part that bites)
+
+`save` with `id: null` creates the scheme but **drops any `posix` you pass**. Fix it
+with a second save that sends the *whole fetched document* as `ob` with `posix`
+added; the hosted backend merges that document, unlike the repo checkout:
+
+```bash
+S=https://apist.gem0.dev/en/canarycoders_magicfamara/pillow/scheme
+curl -s -X POST $S/save "${H[@]}" -d '{"scheme":"scheme","id":null,"rev":null,"scheme_name":"posts","ob":[{"name":"title","primitive":"string","primary":true,"modifiers":["required"]}]}'
+DOC=$(curl -s -X POST $S/fetch_all "${H[@]}" -d '{"scheme":"scheme","id":"schema:posts"}' | jq -c '.data')
+curl -s -X POST $S/save "${H[@]}" -d "$(jq -cn --argjson d "$DOC" '{scheme:"scheme",id:$d._id,rev:$d._rev,scheme_name:$d.collection,ob:($d+{posix:"rwx"})}')"
+```
+
+Until that second save, `tables.posts.all` on the data plane answers
+`{"error":{"message":"Read not allowed"}}`. `fetch_all` with `{"scheme":"scheme"}`
+lists every scheme; add `"id":"schema:<name>"` for one.
+
+### Row shapes seen in practice
+
+- `arrayOf` string fields round-trip as plain JSON arrays.
+- Rows created through the data plane get `_uid`, `_ver`, `_created`, `_updated`.
+- `all` with `limit: 100` returned all rows and no `cursor` for small tables.
+- Field names with underscores (`booking_url`, `rotating_words`) work fine.
+
+A complete, re-runnable example of this flow (create tables, set posix, insert
+rows from JSON) lives at `~/Developer/magicfamara/scripts/gem0-seed.ts`.
