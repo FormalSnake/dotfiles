@@ -331,3 +331,20 @@ lists every scheme; add `"id":"schema:<name>"` for one.
 
 A complete, re-runnable example of this flow (create tables, set posix, insert
 rows from JSON) lives at `~/Developer/magicfamara/scripts/gem0-seed.ts`.
+
+### Publish hook (verified)
+
+Projects carry `publish_hook` (a URL) and `can_publish`. Set it through the object
+API and the admin UI shows a Publish button that POSTs to that URL; pair it with a
+Cloudflare Pages deploy hook (`POST /accounts/<id>/pages/projects/<name>/deploy_hooks`
+with `{"name":"gem0-publish","branch":"main"}`, then use
+`https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/<hook_id>`):
+
+```bash
+curl -s -X POST https://apist.gem0.dev/en/v3/objects/save "${H[@]}" \
+  -d '{"object":"project","ob":{"id":42,"publish_hook":"https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/<hook_id>"},"fields":["id","publish_hook","can_publish"]}'
+```
+
+Table fields verified beyond the list in section 4: `boolean` with `prefill: "true"`
+works, and a `string` primary field can hold a file name or a URL (magicfamara uses
+that for photo rows: `image`, `alt`, `order`, `enabled`).
