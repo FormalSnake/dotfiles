@@ -108,13 +108,12 @@ let
   # 1440p144) has a 60Hz EDID-preferred timing, so the 144Hz mode is pinned
   # explicitly. Placed at the ORIGIN (0x0) so it is the *primary* display:
   # fullscreen games with no monitor selector target the monitor at (0,0) and
-  # enumerate only its modes. vrr = 1: adaptive sync always on, on both
-  # outputs. nvidia-drm exposes vrr_capable on HDMI-A-1 and eDP-1 alike and
-  # its atomic KMS flips VRR per CRTC, so the two don't compete for it. If the
-  # desk monitor flickers on an idle desktop again (its brightness tracks the
-  # refresh rate as it sinks to the VRR floor; seen June 2026) drop it to
-  # vrr = 2, fullscreen only. The internal 18" WQXGA 240Hz panel sits to its
-  # RIGHT at x = 2560, scale 1.25.
+  # enumerate only its modes. vrr = 3 on both outputs: adaptive sync only
+  # while a fullscreen game or video asks for it. Always-on VRR (vrr = 1)
+  # makes both panels flicker on an idle desktop, brightness tracking the
+  # refresh rate as it sinks to the VRR floor: the desk monitor in June 2026,
+  # the internal BOE panel in September 2026. The internal 18" WQXGA 240Hz
+  # panel sits to its RIGHT at x = 2560, scale 1.25.
   #
   # Everywhere else: the internal panel at its preferred mode, native 1x (the
   # e1504g's 15.6" 1080p panel would otherwise land on a fractional scale).
@@ -124,7 +123,7 @@ let
       -- ELD read fine, the CRTC goes active at 144, and no picture ever lands.
       -- 3 holds VRR off until a fullscreen game or video asks for it.
       hl.monitor({ output = "HDMI-A-1", mode = "2560x1440@144", position = "0x0", scale = 1.0, vrr = 3 })
-      hl.monitor({ output = "${panel}", mode = "2560x1600@240", position = "2560x0", scale = 1.25, vrr = 1 })
+      hl.monitor({ output = "${panel}", mode = "2560x1600@240", position = "2560x0", scale = 1.25, vrr = 3 })
     '' else ''
       hl.monitor({ output = "${panel}", mode = "preferred", position = "auto", scale = 1.0 })
     '';
