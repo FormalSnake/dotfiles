@@ -39,8 +39,9 @@ in
         blink = "no";
       };
       mouse.hide-when-typing = "yes";
-      # shift+enter as a plain ESC CR, the same helper ghostty binds.
-      text-bindings."\\x1b\\r" = "Shift+Return";
+      # shift+enter as a plain ESC CR, the same helper ghostty binds. Foot only
+      # takes \xNN escapes here, not \r.
+      text-bindings."\\x1b\\x0d" = "Shift+Return";
     };
   };
 
