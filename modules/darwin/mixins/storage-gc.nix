@@ -4,10 +4,11 @@ let
   flakeDir = "${home}/.config/nix";
 in
 {
-  # Weekly disk reclaim: stale build artifacts, package-manager caches, Xcode
-  # derived data, nix generations older than two weeks. Sundays at 11:00, a day
-  # after the flake update agent so the two never overlap. launchd fires on the
-  # next wake if the machine was asleep.
+  # Daily disk reclaim: stale build artifacts, package-manager caches, Xcode
+  # derived data, nix generations older than two weeks. 12:00, two hours after
+  # the Saturday flake update agent so the two never overlap. Weekly was not
+  # enough: agent worktrees can regrow 90 GB of cargo output between runs.
+  # launchd fires on the next wake if the machine was asleep.
   #
   # The script lives in the repo rather than the store so the cutoffs and the
   # scan roots can be tuned without a rebuild, same as auto-update.nix. It is a
@@ -29,10 +30,10 @@ in
         HOME = home;
       };
       StartCalendarInterval = [
-        { Weekday = 0; Hour = 11; Minute = 0; }
+        { Hour = 12; Minute = 0; }
       ];
       RunAtLoad = false;
-      # Truncated by the next run's redirect, so it stays one week of output.
+      # Truncated by the next run's redirect, so it stays one day of output.
       StandardOutPath = "${home}/Library/Logs/kyan-storage-gc.log";
       StandardErrorPath = "${home}/Library/Logs/kyan-storage-gc.log";
     };
