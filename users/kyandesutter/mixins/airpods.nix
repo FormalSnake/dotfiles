@@ -23,6 +23,13 @@ let
     };
 
     sourceRoot = "${finalAttrs.src.name}/daemon";
+    # Upstream scans BLE continuously (timeout 0, restart on finish) so the
+    # case battery and the open-lid popup are instant. In an office with ~50
+    # advertisers that is 70-90 RSSI PropertiesChanged/s from bluetoothd, and
+    # wireplumber, upowerd and NetworkManager each wake for every one: a
+    # steady 10-15% of a core on the e1504g. 5 s of scan per 30 s keeps the
+    # features and drops the wakeups to a sixth.
+    patches = [ ./librepods-ble-duty-cycle.patch ];
 
     buildInputs = [
       pkgs.libpulseaudio

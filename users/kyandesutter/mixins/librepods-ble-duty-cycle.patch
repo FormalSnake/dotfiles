@@ -1,0 +1,87 @@
+diff --git a/ble/blemanager.cpp b/ble/blemanager.cpp
+index 493d0f2..0c3dd84 100644
+--- a/ble/blemanager.cpp
++++ b/ble/blemanager.cpp
+@@ -85,7 +85,13 @@ QString getConnectionStateName(BleInfo::ConnectionState state)
+ BleManager::BleManager(QObject *parent) : QObject(parent)
+ {
+     discoveryAgent = new QBluetoothDeviceDiscoveryAgent(this);
+-    discoveryAgent->setLowEnergyDiscoveryTimeout(0); // Continuous scanning
++    discoveryAgent->setLowEnergyDiscoveryTimeout(scanWindowMs);
++    restartTimer.setSingleShot(true);
++    restartTimer.setInterval(scanPauseMs);
++    connect(&restartTimer, &QTimer::timeout, this, [this]() {
++        if (scanWanted && !discoveryAgent->isActive())
++            discoveryAgent->start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
++    });
+ 
+     connect(discoveryAgent, &QBluetoothDeviceDiscoveryAgent::deviceDiscovered,
+             this, &BleManager::onDeviceDiscovered);
+@@ -107,18 +113,23 @@ BleManager::~BleManager()
+ void BleManager::startScan()
+ {
+     LOG_DEBUG("Starting BLE scan...");
+-    discoveryAgent->start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
++    scanWanted = true;
++    restartTimer.stop();
++    if (!discoveryAgent->isActive())
++        discoveryAgent->start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
+ }
+ 
+ void BleManager::stopScan()
+ {
+     LOG_DEBUG("Stopping BLE scan...");
++    scanWanted = false;
++    restartTimer.stop();
+     discoveryAgent->stop();
+ }
+ 
+ bool BleManager::isScanning() const
+ {
+-    return discoveryAgent->isActive();
++    return scanWanted;
+ }
+ 
+ void BleManager::onDeviceDiscovered(const QBluetoothDeviceInfo &info)
+@@ -221,10 +232,8 @@ void BleManager::onDeviceDiscovered(const QBluetoothDeviceInfo &info)
+ 
+ void BleManager::onScanFinished()
+ {
+-    if (discoveryAgent->isActive())
+-    {
+-        discoveryAgent->start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
+-    }
++    if (scanWanted)
++        restartTimer.start();
+ }
+ 
+ void BleManager::onErrorOccurred(QBluetoothDeviceDiscoveryAgent::Error error)
+diff --git a/ble/blemanager.h b/ble/blemanager.h
+index 53a9ece..2c780be 100644
+--- a/ble/blemanager.h
++++ b/ble/blemanager.h
+@@ -3,6 +3,7 @@
+ 
+ #include <QObject>
+ #include <QBluetoothDeviceDiscoveryAgent>
++#include <QTimer>
+ #include <QMap>
+ #include <QString>
+ #include <QDateTime>
+@@ -88,6 +89,15 @@ private:
+     // that start/stop/isScan would dereference. Real assignment
+     // happens in BleManager::BleManager() via parented `new`.
+     QBluetoothDeviceDiscoveryAgent *discoveryAgent = nullptr;
++    // Duty cycle: the agent scans for scanWindowMs, then rests for
++    // scanPauseMs before the next window. A continuous LE scan makes
++    // bluetoothd emit an RSSI PropertiesChanged for every advertisement
++    // in range, several tens per second in an office, and every D-Bus
++    // client that watches BlueZ wakes for each one.
++    static constexpr int scanWindowMs = 5000;
++    static constexpr int scanPauseMs = 25000;
++    QTimer restartTimer;
++    bool scanWanted = false;
+ };
+ 
+ #endif // BLEMANAGER_H
+\ No newline at end of file
