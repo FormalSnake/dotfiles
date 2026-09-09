@@ -250,6 +250,11 @@
     after = [ "tuned-ppd.service" ];
     wants = [ "tuned-ppd.service" ];
     wantedBy = [ "tuned-ppd.service" ];
+    # A restarted tuned-ppd (ppd.conf change, rebuild) comes up in its default
+    # profile without a PropertiesChanged signal, so the monitor loop below
+    # never sees it and the caps stay at the previous tier's values. Restart
+    # alongside it so the initial read picks the new profile up.
+    partOf = [ "tuned-ppd.service" ];
     serviceConfig = {
       Type = "simple";
       Restart = "always";
