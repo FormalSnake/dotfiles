@@ -18,7 +18,8 @@
 # Plus staleness: nothing is removed unless its newest depth-1 entry is older
 # than --age days, so an in-flight build is never pulled out from under itself.
 #
-# Env: ROOTS (space-separated scan roots), AGE_DAYS, INSTALL_AGE_DAYS, NIX_KEEP.
+# Env: ROOTS (space-separated scan roots), AGE_DAYS, TARGET_AGE_DAYS,
+# WORKTREE_AGE_DAYS, INSTALL_AGE_DAYS, NIX_KEEP.
 # Designed to be callable from a launchd user agent; logs to stdout/stderr.
 
 set -euo pipefail
@@ -27,6 +28,13 @@ AGE_DAYS="${AGE_DAYS:-30}"
 # node_modules and Pods are the slow ones to rebuild (a full install, often over
 # a metered link), so they wait considerably longer than compiler output does.
 INSTALL_AGE_DAYS="${INSTALL_AGE_DAYS:-180}"
+# Cargo output is the fast one to regrow and the fast one to rebuild: one debug
+# target/ of the Rust monorepo passes 50 GB in a week, so it goes sooner.
+TARGET_AGE_DAYS="${TARGET_AGE_DAYS:-7}"
+# Agent worktrees (Claude, Herdr) each carry a full copy of that target/ and
+# are abandoned within days of being created. Sep 2026: seven of them filled
+# 90 GB between two weekly runs.
+WORKTREE_AGE_DAYS="${WORKTREE_AGE_DAYS:-3}"
 NIX_KEEP="${NIX_KEEP:-14d}"
 APPLY=0
 DEEP=0
@@ -50,6 +58,7 @@ done
 # node_modules and target/ copies. Scanning them reclaims that without touching
 # the worktrees themselves, which may hold another agent's uncommitted work.
 read -r -a SCAN_ROOTS <<<"${ROOTS:-$HOME/Developer $HOME/.herdr/worktrees $HOME/.claude-worktrees}"
+WORKTREE_PATH='/\.claude/worktrees/|/\.herdr/worktrees/|/\.claude-worktrees/'
 
 # Regenerable regardless of git status. `target` additionally requires a sibling
 # Cargo.toml; `build` is deliberately absent because plenty of projects commit
@@ -132,7 +141,7 @@ run_cmd() {
 }
 
 echo
-echo "mac-storage-gc — $( ((APPLY)) && echo APPLY || echo 'dry run, pass --apply to delete') | stale after ${AGE_DAYS}d, installs after ${INSTALL_AGE_DAYS}d"
+echo "mac-storage-gc — $( ((APPLY)) && echo APPLY || echo 'dry run, pass --apply to delete') | stale after ${AGE_DAYS}d, target ${TARGET_AGE_DAYS}d, worktrees ${WORKTREE_AGE_DAYS}d, installs ${INSTALL_AGE_DAYS}d"
 df -h / | tail -1 | awk '{printf "before: %s used of %s, %s free\n", $3, $2, $4}'
 echo
 
@@ -157,6 +166,8 @@ for root in "${SCAN_ROOTS[@]}"; do
 
     cutoff=$AGE_DAYS
     [[ "$name" == node_modules || "$name" == Pods ]] && cutoff=$INSTALL_AGE_DAYS
+    [[ "$name" == target ]] && cutoff=$TARGET_AGE_DAYS
+    [[ "$dir" =~ $WORKTREE_PATH ]] && cutoff=$WORKTREE_AGE_DAYS
     (( $(newest_age_days "$dir") >= cutoff )) || continue
     queue "$name" "$dir"
   done < <(
@@ -187,7 +198,19 @@ if (( DEEP )) && [[ -d "$HOME/Library/Developer/Xcode/iOS DeviceSupport" ]]; the
   done < <(/bin/ls -dt "$HOME/Library/Developer/Xcode/iOS DeviceSupport"/* 2>/dev/null | tail -n +3)
 fi
 
-### 3. Package manager caches
+### 3. Nix VM scratch
+
+# nixos-rebuild's linux-builder and the FormalShell test VM each unpack a
+# store image into $TMPDIR/nix-vm.XXXX and only remove it on a clean exit. A
+# killed VM leaves 8 GB behind. Anything no running qemu still names is dead.
+for d in "${TMPDIR:-/tmp}"/nix-vm.*; do
+  [[ -d "$d" ]] || continue
+  pgrep -qf "$(basename "$d")" && continue
+  (( $(newest_age_days "$d") >= 1 )) || continue
+  queue "nix-vm-scratch" "$d"
+done
+
+### 4. Package manager caches
 
 run_cmd "homebrew" "$HOME/Library/Caches/Homebrew" brew cleanup -s --prune=all
 run_cmd "npm" "$HOME/.npm/_cacache" npm cache clean --force
@@ -208,7 +231,7 @@ queue "electron-cache" "$HOME/Library/Caches/electron"
 queue "electron-builder" "$HOME/Library/Caches/electron-builder"
 queue "dotslash-cache" "$HOME/Library/Caches/dotslash"
 
-### 4. Nix
+### 5. Nix
 
 # --delete-older-than, never -d: -d drops every rollback generation, and losing
 # the ability to boot the previous system is not worth a few GB.
