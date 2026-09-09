@@ -438,6 +438,7 @@ in
 
     "matugen/templates/aura.tmpl".source = ../matugen-templates/aura.tmpl;
     "matugen/templates/ghostty.tmpl".source = ../matugen-templates/ghostty.tmpl;
+    "matugen/templates/foot.ini.tmpl".source = ../matugen-templates/foot.ini.tmpl;
     "matugen/templates/neovim.lua.tmpl".source = ../matugen-templates/neovim.lua.tmpl;
     "matugen/templates/obsidian.css.tmpl".source = ../matugen-templates/obsidian.css.tmpl;
     "matugen/templates/dualsense.tmpl".source = ../matugen-templates/dualsense.tmpl;
@@ -517,6 +518,14 @@ in
       input_path = "~/.config/matugen/templates/ghostty.tmpl"
       output_path = "~/.config/ghostty/themes/Matugen"
       post_hook = "pkill -SIGUSR2 ghostty || true"
+
+      # Foot, included from ~/.config/foot/foot.ini (see mixins/foot.nix).
+      # Foot has no config reload, so no post_hook: new windows pick the
+      # colours up. mixins/foot.nix seeds the output with Flexoki dark before
+      # the first render, since a missing include stops foot from starting.
+      [templates.foot]
+      input_path = "~/.config/matugen/templates/foot.ini.tmpl"
+      output_path = "~/.config/foot/matugen.ini"
 
       # Neovim (base16 lua module consumed by dynamic-base16.nvim, watch =
       # true); no hook needed, the plugin watches the file. See neovim.nix.
