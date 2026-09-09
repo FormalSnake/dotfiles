@@ -3,7 +3,9 @@ let
   p = import ./flexoki/palette.nix;
   strip = lib.removePrefix "#";
   # Static Flexoki dark: the pre-palette fallback, same role as Hyprland's
-  # `general.col`. Foot wants RRGGBB without the hash. `cursor` takes two
+  # `general.col`. Foot 1.28 only knows [colors-dark]/[colors-light] and starts
+  # in dark; the rendered palette lands in the dark section too, since its
+  # `.default` tokens already follow the mode. RRGGBB, no hash. `cursor` takes two
   # values, text colour then cursor colour.
   flexokiColors = {
     background = strip p.dark.bg;
@@ -27,11 +29,11 @@ in
         font = "GeistMono Nerd Font:size=10:weight=medium";
         shell = "${config.programs.fish.package}/bin/fish";
         # Wallpaper palette, rendered by matugen (see mixins/dms.nix). Parsed
-        # after the static [colors] below, so its [colors] wins. A missing
+        # after the static [colors-dark] below, so its section wins. A missing
         # include is a config error, hence the seed in home.activation.
         include = matugenIni;
       };
-      colors = flexokiColors;
+      colors-dark = flexokiColors;
       cursor = {
         style = "block";
         blink = "no";
@@ -47,7 +49,7 @@ in
   # Flexoki fallback and let the next matugen run overwrite it.
   home.activation.footMatugenSeed = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     if [ ! -e "${matugenIni}" ]; then
-      run cp ${pkgs.writeText "foot-matugen-seed.ini" (lib.generators.toINI { } { colors = flexokiColors; })} "${matugenIni}"
+      run cp ${pkgs.writeText "foot-matugen-seed.ini" (lib.generators.toINI { } { colors-dark = flexokiColors; })} "${matugenIni}"
       run chmod 644 "${matugenIni}"
     fi
   '';
