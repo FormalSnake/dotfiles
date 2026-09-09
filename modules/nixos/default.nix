@@ -14,11 +14,13 @@
       ./mixins/networking.nix
       ./mixins/agenix.nix
       ./mixins/boot.nix
+      ./mixins/plymouth.nix
       ./mixins/oomd.nix
       ./mixins/firmware.nix
       ./mixins/systemd-tuning.nix
       ./mixins/scx.nix
       ./mixins/ananicy.nix
+      ./mixins/irqbalance.nix
       ./mixins/graphics.nix
       ./mixins/nvidia.nix
       ./mixins/audio.nix
@@ -36,6 +38,7 @@
       ./mixins/phone-integration.nix
       ./mixins/usbflux.nix
       ./mixins/airplay.nix
+      ./mixins/printing.nix
       ./mixins/flatpak.nix
       ./mixins/nordvpn.nix
       ./mixins/onepassword.nix

@@ -13,6 +13,15 @@
     # tuning (power_save=0, power_scheme=1, NetworkManager wifi.powersave=false)
     # is host-specific and handled in systems/g815/default.nix.
 
+    # iwd instead of wpa_supplicant behind NetworkManager: faster roaming and
+    # reconnects, and a smaller resident footprint, which the 8 GB e1504g
+    # feels. Existing NM profiles carry over; NM hands the PSK to iwd on the
+    # first connect and iwd keeps its own copy under /var/lib/iwd. Both hosts
+    # are iwlwifi, which iwd drives without quirks. NM's wifi.powersave knob
+    # does not reach iwd, so the g815's iwlwifi power_save=0 module option is
+    # what keeps powersave off there.
+    wifi.backend = "iwd";
+
     # Force Google DNS (8.8.8.8 / 8.8.4.4) for every connection, overriding the
     # DNS servers handed out by DHCP. NetworkManager global-dns applies to all
     # connections (incl. Wi-Fi) regardless of the active profile.

@@ -36,6 +36,14 @@
     build-dir = "/nix/var/nix/builds";
   };
 
+  # Rebuilds, and the e1504g's remote builds, run on the g815 while its
+  # desktop is in use. batch scheduling and a low best-effort I/O priority keep
+  # Hyprland responsive while the daemon saturates the cores. ananicy's
+  # CachyOS rule set has no entry for nix-daemon, so nothing else demotes it.
+  nix.daemonCPUSchedPolicy = "batch";
+  nix.daemonIOSchedClass = "best-effort";
+  nix.daemonIOSchedPriority = 7;
+
   # Owner policy (2026-08-17): keep only the last 3 system generations, the
   # same window the limine boot menu shows. nix-collect-garbage can only
   # delete generations by age (the old --delete-older-than 2d let 14 same-day
