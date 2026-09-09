@@ -239,6 +239,11 @@
     performance = "throughput-performance-quiet-fan";
     power-saver = "powersave";
   };
+  # Boot into that tier (owner ask, 2026-09-09): the balanced 8 W cap left no
+  # headroom above the 7-11 W idle floor, so even a browser tab felt slow.
+  # The quiet-fan variant keeps the EC on the balanced fan table, so this is
+  # the 15/35 W firmware budget without the overboost fan curve.
+  services.tuned.ppdSettings.main.default = "performance";
 
   systemd.services.power-cap = {
     description = "Per-profile RAPL package power caps (quiet fans)";
