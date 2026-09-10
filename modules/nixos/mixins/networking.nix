@@ -30,6 +30,14 @@
     settings."global-dns-domain-*".servers = "8.8.8.8,8.8.4.4";
   };
 
+  # iwd sends EAPoL frames over nl80211 by default. iwlwifi drops them, so
+  # every PSK join dies in the 4-way handshake with "Operation failed" and the
+  # card never associates (g815, 2026-09-10; same symptom that pushed the
+  # e1504g back to wpa_supplicant the day before). Falling back to sending the
+  # frames over the network interface fixes it. Inert on hosts that override
+  # wifi.backend, since the iwd module only writes main.conf when it is enabled.
+  networking.wireless.iwd.settings.General.ControlPortOverNL80211 = false;
+
   # Hostname is set per-host in systems/g815/default.nix.
 
   # Reach the macbook over Tailscale by name on a DNS-hostile host. Tailscale
