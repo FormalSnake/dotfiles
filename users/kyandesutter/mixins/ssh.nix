@@ -150,6 +150,13 @@
         HostName = "212.64.180.162";
         User = "kdesutter";
       };
+
+      # CanaryCoders production VM (libvirt NAT on superintelligence, not routable from outside).
+      "vm-canarycoders" = {
+        HostName = "192.168.122.185";
+        User = "kdesutter";
+        ProxyJump = "superintelligence";
+      };
     };
   };
 }
