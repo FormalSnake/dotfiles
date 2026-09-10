@@ -6,6 +6,15 @@ let
 
   link = sub: config.lib.file.mkOutOfStoreSymlink "${claudeSrc}/${sub}";
 
+  # Second claude.ai subscription. CLAUDE_CONFIG_DIR keys the on-disk config
+  # AND the macOS keychain entry, so the two logins never see each other; the
+  # shared config below is symlinked back at the primary profile so both
+  # accounts get the same CLAUDE.md, agents, commands, hooks, rules and skills.
+  # Plugins are deliberately not shared (claude-code rewrites that metadata with
+  # `mv`, which would break the symlink).
+  pulseDir = ".claude-pulse";
+  fromPrimary = sub: config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.claude/${sub}";
+
   # The flake host name: the label ssh aliases, rebuild targets and CLAUDE.md
   # itself use. nix-darwin leaves networking.hostName null (the mac's scutil
   # name is "MacBook-Pro-2", which isn't the name anything else calls it), so
@@ -38,7 +47,24 @@ in
     };
   };
 
+  programs.fish.functions.claudepulse = {
+    description = "Claude Code signed in to the second claude.ai account";
+    body = ''
+      CLAUDE_CONFIG_DIR="$HOME/${pulseDir}" claude $argv
+    '';
+  };
+
   home.file = {
+    # Second-account profile: shared config, separate login.
+    "${pulseDir}/CLAUDE.md".source     = fromPrimary "CLAUDE.md";
+    "${pulseDir}/AGENTS.md".source     = fromPrimary "AGENTS.md";
+    "${pulseDir}/settings.json".source = fromPrimary "settings.json";
+    "${pulseDir}/agents".source        = fromPrimary "agents";
+    "${pulseDir}/commands".source      = fromPrimary "commands";
+    "${pulseDir}/hooks".source         = fromPrimary "hooks";
+    "${pulseDir}/rules".source         = fromPrimary "rules";
+    "${pulseDir}/skills".source        = fromPrimary "skills";
+
     # Memory-bank docs
     ".claude/CLAUDE.md".source                 = link "CLAUDE.md";
     ".claude/AGENTS.md".source                 = link "AGENTS.md";
