@@ -23,7 +23,8 @@ let
   # Idle time is tracked here rather than read from herdr: the API reports
   # state_change_seq, a counter, not a timestamp. Same status and same seq
   # across two runs means the agent has not moved, so its stamp carries over.
-  # The focused pane is never reaped.
+  # The focused pane is never reaped. Claude sessions paused by a usage limit
+  # are kept alive and prompted to continue on each timer tick.
   reap = pkgs.writeShellApplication {
     name = "herdr-reap";
     runtimeInputs = [ herdr pkgs.jq pkgs.coreutils pkgs.gawk ];
@@ -106,7 +107,9 @@ let
       state=$(jq --argjson agents "$agents" --argjson now "$now" '
         . as $prev
         | [ $agents.result.agents[]
-            | select(.agent_status == "idle" and (.focused | not))
+            | select((.agent_status == "idle" or
+                      (.agent == "claude" and .agent_status == "done"))
+                     and (.focused | not))
             | { key: .pane_id
               , value: { seq: .state_change_seq
                        , since: (if ($prev[.pane_id].seq // -1) == .state_change_seq
@@ -154,11 +157,80 @@ let
           }'
       }
 
-      jq -r --argjson now "$now" --argjson max "$max_idle" \
-        'to_entries[] | select($now - .value.since >= $max) | .key' <<<"$state" |
+      # Inspect the last response, not any limit notice left in scrollback.
+      # An empty prompt leaves the response intact; a draft protects the pane
+      # too, but must not receive an automatic continuation appended to it.
+      claude_limit_state() {
+        awk '
+          /^[[:space:]]*⏺/ { limited = 0 }
+          /^[[:space:]]*❯/ {
+            prompt = $0
+            sub(/^[[:space:]]*❯[[:space:] ]*/, "", prompt)
+            draft = (prompt != "")
+            if (draft) limited = 0
+          }
+          /^[[:space:]]*(⎿|⏺)[[:space:] ]*(You.ve hit your (session|weekly|usage) limit|You.ve hit your limit|Usage limit reached)/ {
+            limited = 1
+          }
+          END {
+            if (draft) print "draft"
+            else if (limited) print "limited"
+            else print "clear"
+          }'
+      }
+
+      jq -r 'keys[]' <<<"$state" |
       while read -r pane; do
         title=$(jq -r --arg p "$pane" \
           '.result.agents[] | select(.pane_id == $p) | .terminal_title_stripped' <<<"$agents")
+
+        if jq -e --arg p "$pane" \
+          '.result.agents[] | select(.pane_id == $p) | .agent == "claude"' \
+          <<<"$agents" >/dev/null; then
+          if ! screen=$(herdr pane read "$pane" --source recent-unwrapped --lines 80); then
+            echo "could not inspect $pane ($title); leaving it" >&2
+            continue
+          fi
+          limit_state=$(claude_limit_state <<<"$screen")
+          if [ "$limit_state" = draft ] || [ -z "$screen" ]; then continue; fi
+          if [ "$limit_state" = limited ]; then
+            # Reset the idle clock even if submission fails or the allowance
+            # has not reset yet. Never fall through to the exit keys.
+            jq --arg p "$pane" --argjson now "$now" '.[$p].since = $now' \
+              "$state_file" > "$state_file.new"
+            mv "$state_file.new" "$state_file"
+            if [ "$dry_run" = 1 ]; then
+              echo "would resume $pane ($title): Claude usage limit; keeping it alive"
+              continue
+            fi
+            # Recheck focus and activity immediately before sending input.
+            current=$(herdr agent list) || continue
+            if ! jq -e --arg p "$pane" --argjson original "$agents" '
+              ($original.result.agents[] | select(.pane_id == $p)) as $before
+              | .result.agents[] | select(.pane_id == $p)
+              | .agent == "claude" and (.focused | not)
+                and (.agent_status == "idle" or .agent_status == "done")
+                and .state_change_seq == $before.state_change_seq
+                and .terminal_id == $before.terminal_id' <<<"$current" >/dev/null; then
+              continue
+            fi
+            if herdr agent prompt "$pane" \
+              "Continue the task that was interrupted by the usage limit from where you left off." >/dev/null; then
+              echo "prompted $pane ($title) to resume after Claude usage limit"
+            else
+              echo "could not resume $pane ($title); keeping it alive" >&2
+            fi
+            continue
+          fi
+        fi
+
+        # Limit retries happen every sweep; ordinary cleanup still requires
+        # ninety minutes idle and leaves unseen completed turns alone.
+        if ! jq -e --arg p "$pane" --argjson now "$now" --argjson max "$max_idle" \
+          '.[$p] | $now - .since >= $max' <<<"$state" >/dev/null; then continue; fi
+        if ! jq -e --arg p "$pane" \
+          '.result.agents[] | select(.pane_id == $p) | .agent_status == "idle"' \
+          <<<"$agents" >/dev/null; then continue; fi
 
         if pane_busy "$pane"; then
           echo "skipping $pane ($title): a background command is still running"
