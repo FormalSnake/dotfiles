@@ -31,6 +31,7 @@ in
       top = "btop";
 
       # Tool shortcuts
+      codex = "codex --dangerously-bypass-approvals-and-sandbox";
       lg = "lazygit";
       ld = "lazydocker";
       y = "yazi";

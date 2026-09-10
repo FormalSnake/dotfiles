@@ -53,6 +53,11 @@
         "inode/directory" = [ "org.gnome.Nautilus.desktop" ];
         "application/pdf" = [ "org.gnome.Papers.desktop" ];
         "text/plain" = [ "org.gnome.TextEditor.desktop" ];
+        # DMS Notepad's desktop file (com.danklinux.dms.notepad.desktop) also
+        # declares text/markdown; without an explicit default here xdg-mime
+        # falls back to that association since it's the only registered
+        # handler.
+        "text/markdown" = [ "org.gnome.TextEditor.desktop" ];
       }
       // lib.genAttrs [
         "image/png"

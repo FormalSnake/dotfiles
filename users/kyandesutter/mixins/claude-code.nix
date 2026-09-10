@@ -6,6 +6,16 @@ let
 
   link = sub: config.lib.file.mkOutOfStoreSymlink "${claudeSrc}/${sub}";
 
+  # Second claude.ai subscription. CLAUDE_CONFIG_DIR keys the on-disk config
+  # AND the macOS keychain entry, so the two logins never see each other; the
+  # shared config below is symlinked back at the primary profile so both
+  # accounts get the same CLAUDE.md, agents, commands, hooks, rules and skills.
+  # plugins/ is shared as a whole directory: claude-code rewrites the metadata
+  # files inside it with `mv`, which a directory symlink survives (a per-file
+  # symlink would not), so both profiles see the same installed plugins.
+  pulseDir = ".claude-pulse";
+  fromPrimary = sub: config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.claude/${sub}";
+
   # The flake host name: the label ssh aliases, rebuild targets and CLAUDE.md
   # itself use. nix-darwin leaves networking.hostName null (the mac's scutil
   # name is "MacBook-Pro-2", which isn't the name anything else calls it), so
@@ -38,7 +48,50 @@ in
     };
   };
 
+  programs.fish.functions.claudepulse = {
+    description = "Claude Code signed in to the second claude.ai account";
+    body = ''
+      CLAUDE_CONFIG_DIR="$HOME/${pulseDir}" claude $argv
+    '';
+  };
+
+  # .claude.json is the one piece that cannot be symlinked: it carries
+  # oauthAccount (per-login) and claude-code rewrites it on nearly every turn.
+  # Copy across the two parts that would otherwise be missing from the second
+  # profile, user-scope MCP servers and the per-repo trust flags, and leave the
+  # rest of the file alone. Runs at rebuild, so a server added to the primary
+  # reaches the second account on the next switch.
+  home.activation.claudePulseConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    primary="${config.home.homeDirectory}/.claude.json"
+    pulse="${config.home.homeDirectory}/${pulseDir}/.claude.json"
+    if [ -r "$primary" ]; then
+      [ -f "$pulse" ] || run install -m 600 /dev/null "$pulse"
+      [ -s "$pulse" ] || echo '{}' > "$pulse"
+      run ${lib.getExe pkgs.jq} -s '
+        .[0] * {
+          mcpServers: (.[1].mcpServers // {}),
+          projects: ((.[0].projects // {}) * ((.[1].projects // {})
+            | with_entries(select(.value.hasTrustDialogAccepted == true))
+            | map_values({ hasTrustDialogAccepted: true })))
+        }
+      ' "$pulse" "$primary" > "$pulse.hm-tmp"
+      run mv "$pulse.hm-tmp" "$pulse"
+      run chmod 600 "$pulse"
+    fi
+  '';
+
   home.file = {
+    # Second-account profile: shared config, separate login.
+    "${pulseDir}/CLAUDE.md".source     = fromPrimary "CLAUDE.md";
+    "${pulseDir}/AGENTS.md".source     = fromPrimary "AGENTS.md";
+    "${pulseDir}/settings.json".source = fromPrimary "settings.json";
+    "${pulseDir}/agents".source        = fromPrimary "agents";
+    "${pulseDir}/commands".source      = fromPrimary "commands";
+    "${pulseDir}/hooks".source         = fromPrimary "hooks";
+    "${pulseDir}/rules".source         = fromPrimary "rules";
+    "${pulseDir}/skills".source        = fromPrimary "skills";
+    "${pulseDir}/plugins".source       = fromPrimary "plugins";
+
     # Memory-bank docs
     ".claude/CLAUDE.md".source                 = link "CLAUDE.md";
     ".claude/AGENTS.md".source                 = link "AGENTS.md";

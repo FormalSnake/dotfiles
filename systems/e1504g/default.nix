@@ -33,6 +33,10 @@
   # hardware.enableRedistributableFirmware in mixins/graphics.nix).
   hardware.cpu.intel.updateMicrocode = true;
 
+  # iwd cannot complete a PSK join on this card (iwctl: "Operation failed",
+  # same SSID and passphrase work on the g815), so stay on wpa_supplicant.
+  networking.networkmanager.wifi.backend = "wpa_supplicant";
+
   # FormalShell's power panel samples CPU package watts from RAPL (M20). The
   # kernel ships energy_uj root-only (PLATYPUS side-channel mitigation);
   # relax the package-0 zone to world-readable for the user shell. The shell
