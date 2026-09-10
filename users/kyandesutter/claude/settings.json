@@ -105,6 +105,16 @@
             "timeout": 10
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh ~/.claude/hooks/no-ai-attribution.sh",
+            "timeout": 10
+          }
+        ]
       }
     ],
     "SessionEnd": [
