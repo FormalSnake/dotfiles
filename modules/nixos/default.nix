@@ -46,6 +46,7 @@
       ./mixins/geolocation.nix
       ./mixins/nix-ld.nix
       ./mixins/macos-vm.nix
+      ./mixins/waydroid.nix
       ./profiles
     ];
   };
