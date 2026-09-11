@@ -24,7 +24,6 @@
     ./mixins/godot.nix
     ./mixins/obsidian.nix
     ./mixins/parsec.nix
-    ./mixins/rakuten.nix
   ];
 
   # NixOS rebuild shortcut (linux-only, so it lives here rather than the shared

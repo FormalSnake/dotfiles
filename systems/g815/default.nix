@@ -195,11 +195,6 @@
   # profile.
   kyan.roblox.enable = true;
 
-  # Waydroid (mixins/waydroid.nix), for streaming apps whose Widevine licence
-  # servers refuse a desktop-Linux CDM. Images are runtime state, see the mixin
-  # for the init command.
-  kyan.waydroid.enable = true;
-
   # ASUS laptop support: asusd, Aura keyboard RGB (Flexoki blue), 80%
   # battery charge limit.
   kyan.asus.enable = true;
