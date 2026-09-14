@@ -64,10 +64,14 @@ in
           # renders the .stignore (locks, caches, crash state, 1Password). The
           # mac holds a hub copy under ~/Sync/helium-profile; its own Helium
           # is not part of this.
+          # The 10 s default resent the 12 MB History database ~40 times an
+          # hour while browsing, rewritten whole on every other device. The
+          # takeover guard forces its own rescan, so handoffs don't wait on this.
           helium-profile = {
             id = "helium-profile";
             path = "${home}/.config/net.imput.helium";
             devices = peers;
+            fsWatcherDelayS = 120;
           };
         };
       };

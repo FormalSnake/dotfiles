@@ -227,6 +227,9 @@ in
   # resource ids in the ScriptCache, so syncing one without the other leaves
   # the receiving host with extensions registered but unloadable (1Password's
   # popup then spins forever waiting for a background that can't start).
+  # `Extension State` holds the listener registrations for those same service
+  # workers, so it stays per-host with them. It and the two network-prediction
+  # stores were also the bulk of the sync churn (~2 GB written in 4.5 h).
   # `*` never matches `/`, so `/*/…` is
   # exactly the profile-dir level. Bare names (LOCK, LOG) match at any depth.
   # Safe to write while Helium runs: it is syncthing's file, not Helium's.
@@ -258,6 +261,9 @@ in
     /*/DawnGraphiteCache
     /*/DawnWebGPUCache
     /*/Service Worker
+    /*/Extension State
+    /*/Network Action Predictor*
+    /*/Network Persistent State
     /*/blob_storage
     /*/Shared Dictionary
     /*/optimization_guide_*
