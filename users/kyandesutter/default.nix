@@ -13,7 +13,6 @@
     ./mixins/clipssh.nix
     ./mixins/claude-code.nix
     ./mixins/pi.nix
-    ./mixins/ghostty.nix
     ./mixins/tmux.nix
     ./mixins/neovim.nix
     ./mixins/flexoki

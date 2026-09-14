@@ -437,7 +437,6 @@ in
     "DankMaterialShell/flexoki-theme.json".text = builtins.toJSON flexokiTheme;
 
     "matugen/templates/aura.tmpl".source = ../matugen-templates/aura.tmpl;
-    "matugen/templates/ghostty.tmpl".source = ../matugen-templates/ghostty.tmpl;
     "matugen/templates/foot.ini.tmpl".source = ../matugen-templates/foot.ini.tmpl;
     "matugen/templates/neovim.lua.tmpl".source = ../matugen-templates/neovim.lua.tmpl;
     "matugen/templates/obsidian.css.tmpl".source = ../matugen-templates/obsidian.css.tmpl;
@@ -508,16 +507,6 @@ in
       input_path = "~/.config/matugen/templates/dualsense.tmpl"
       output_path = "~/.cache/dank/dualsense-color"
       post_hook = "${config.home.profileDirectory}/bin/dualsense-sync || true"
-
-      # Ghostty, written into ghostty's themes dir; config references it with
-      # `theme = "Matugen"` (see mixins/ghostty.nix). SIGUSR2 live-reloads it
-      # (ghostty >= 1.2) without a restart. DMS's own builtin ghostty template
-      # writes a separate `themes/dankcolors` file we don't reference, so the
-      # two don't conflict.
-      [templates.ghostty]
-      input_path = "~/.config/matugen/templates/ghostty.tmpl"
-      output_path = "~/.config/ghostty/themes/Matugen"
-      post_hook = "pkill -SIGUSR2 ghostty || true"
 
       # Foot, included from ~/.config/foot/foot.ini (see mixins/foot.nix).
       # Foot has no config reload, so no post_hook: new windows pick the

@@ -22,10 +22,15 @@ in
 {
   programs.foot = {
     enable = true;
+    # Windows come from `footclient` (the Hyprland binds in mixins/hyprland.nix),
+    # which skips loading fonts and config per window. The trade: every client
+    # window lives in this one process and goes down with it.
+    server.enable = true;
     settings = {
       main = {
-        # Same face, size and cut as ghostty (mixins/ghostty.nix); fontconfig
-        # pattern syntax, and the Nerd Font family keeps its wide icons.
+        # The plain Nerd Font family, where the icons keep their drawn 1.5-2
+        # cell width; fontconfig pattern syntax. Medium because Regular reads
+        # thin at this size.
         font = "GeistMono Nerd Font:size=10:weight=medium";
         shell = "${config.programs.fish.package}/bin/fish";
         # Wallpaper palette, rendered by matugen (see mixins/dms.nix). Parsed
@@ -39,8 +44,10 @@ in
         blink = "no";
       };
       mouse.hide-when-typing = "yes";
-      # shift+enter as a plain ESC CR, the same helper ghostty binds. Foot only
-      # takes \xNN escapes here, not \r.
+      # The default 1000 lines loses most of an agent session's history.
+      scrollback.lines = 10000;
+      # Shift+Return as a plain ESC CR, which agent TUIs read as a newline
+      # rather than submit. Foot only takes \xNN escapes here, not \r.
       text-bindings."\\x1b\\x0d" = "Shift+Return";
     };
   };
