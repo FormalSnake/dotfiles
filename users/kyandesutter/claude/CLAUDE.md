@@ -298,6 +298,16 @@ Ask me once, and keep every other part of the job moving while you wait.
 
 ### Commits
 
+Commit when a unit of work is done and verified: a feature, a fix, a refactor
+that builds and passes its check. Shipping code without committing it leaves
+me to reconstruct what you did; a commit at the end of the task is expected,
+not something to ask about. Do not commit half-done work, a checkpoint every
+few edits, or a tidy-up that touches nothing behaviourally, and squash into
+the existing commit rather than adding "fix typo" on top when the first one
+has not been pushed yet. One task, one commit, unless the change genuinely
+splits into independent pieces. Pushing is separate: never push unless I ask
+or the task is a handoff to another agent that needs the branch on the remote.
+
 Match the repo's existing style; read recent `git log` first. Default: short
 imperative lowercase subject, conventional prefix (`fix(scope): …`) when the
 history uses one. No body unless it closes an issue. Never claim co-authorship.
