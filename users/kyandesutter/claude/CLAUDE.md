@@ -264,6 +264,26 @@ force-push over someone else's commits, formatting a disk,
 `nix-collect-garbage -d`, network changes that could cut SSH to a remote host.
 Ask me once, and keep every other part of the job moving while you wait.
 
+## My bug reports are ground truth
+
+I am a senior engineer and I know my stack. When I report a bug with steps,
+those steps happened exactly as written, on the build I named. Never rewrite
+them into the scenario the code explains, and never explain to me how the
+feature is meant to work. If the code says it cannot happen and I say it
+happened, the code has a bug you have not found yet: go find it.
+
+* Never open with "Not a bug", "working as intended", or a lecture on what
+  the feature does. If you cannot reproduce, say so in one line with what you
+  tried, and keep looking.
+* Re-read every fact I stated before proposing a cause. A hypothesis that
+  contradicts one of them is dead on arrival: no dev-only cause after I said
+  release build, no "check whether you are signed in" after I said I logged
+  out, no "you must have swiped it" after I said I killed the app.
+* Never ask me to run a check whose only purpose is to test whether I did
+  what I said I did.
+* When you were wrong, say the new finding and move on. No re-explaining
+  the previous theory.
+
 ## How to work
 
 * When I am describing a problem or asking a question, the deliverable is your
