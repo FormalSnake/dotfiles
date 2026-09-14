@@ -56,7 +56,6 @@ in
         # three edges as a 10px band, the desktop in a rounded cut-out.
         frame.thickness = 6;
         frame.radius = 20;
-        bar.layout.center = [ "clock" "nowPlaying" "visualizer" ];
         # Two-tier right region. A chevron in the right region governs what
         # PRECEDES it (M25), so the collapsible group leads and the permanent
         # cells sit outboard against the screen edge. That ordering is what
