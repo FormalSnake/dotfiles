@@ -32,8 +32,7 @@ let
           *pci-0000_02_00.1*)                 echo bass-boost ;;     # GB206 HDMI speakers (g815)
           *pci-0000_80_1f.3*)                 echo laptop-neutral ;; # ALC294 built-in speakers (g815)
           *skl_hda_dsp_generic.HiFi__Speaker__sink) echo vivobook-bass ;; # e1504g built-in speakers
-          bluez_output.14_14_7D_E7_8C_E3.*)   echo airpods-bass ;;   # AirPods Pro 2
-          bluez_output.*)                     echo flat ;;           # other bluetooth (CMF Headphone Pro)
+          bluez_output.*)                     echo flat ;;           # bluetooth: the AirPods carry their own EQ on-device
           *)                                  echo flat ;;           # anything else: pass-through, no EQ
         esac
       }
@@ -99,24 +98,9 @@ let
     band9 = mkBand 16000.0 2.5; # air
   };
 
-  # Audiophile (Harman-neutral) correction for the AirPods Pro 2:
-  #
-  # These bands are the AutoEq parametric result for the AirPods Pro 2, measured
-  # by HypetheSonics on a standardized GRAS RA0045 in-ear coupler
-  # (github.com/jaakkopasanen/AutoEq → results/HypetheSonics/GRAS RA0045 in-ear/).
-  # It corrects the stock response toward the Harman IE target: i.e. what makes
-  # them sound "flat/reference". The bass BOOST is a separate low-shelf stacked on
-  # top in filter#0 below (same pattern as the Pebble HDMI preset). So this EQ
-  # makes them neutral, the shelf makes them thump.
-  #
   # `mode = "APO (DR)"` is the LSP "digital biquad" band mode: it reproduces the
-  # EqualizerAPO/AutoEq filter math exactly, so these land as measured (RLC (BT),
-  # used for the Pebbles' hand-tuned voicing, would drift slightly from AutoEq's
-  # numbers). AutoEq's own preamp of -3.1 dB is folded into filter#0's input-gain
-  # together with the bass-boost headroom. Type map: LSC→Lo-shelf, PK→Bell,
-  # HSC→Hi-shelf. Alternative measurement (Harpo) exists in the same repo if you
-  # want to A/B; regenerate from AutoEq if you ever re-measure. Tune live in the
-  # EasyEffects window (changes save back to the airpods-bass output preset).
+  # EqualizerAPO filter math exactly, where RLC (BT), used for the Pebbles'
+  # hand-tuned voicing, is the gentler analog-style variant.
   mkApoBand = type: frequency: gain: q: {
     inherit type frequency gain q;
     mode = "APO (DR)";
@@ -148,19 +132,6 @@ let
     band7 = mkApoBand "Bell" 5500.0 (-3.5) 2.50; # sharp sibilant peak
     band8 = mkApoBand "Bell" 8000.0 (-2.0) 2.00; # de-sibilance
     band9 = mkApoBand "Hi-shelf" 12000.0 1.5 0.70; # restore rolled-off air
-  };
-
-  airpodsCorrectionBands = {
-    band0 = mkApoBand "Lo-shelf" 105.0 (-1.2) 0.70;
-    band1 = mkApoBand "Bell" 302.0 (-1.7) 0.51;
-    band2 = mkApoBand "Bell" 2374.0 3.1 2.32;
-    band3 = mkApoBand "Bell" 75.0 3.3 1.05;
-    band4 = mkApoBand "Bell" 5218.0 2.5 2.96;
-    band5 = mkApoBand "Hi-shelf" 10000.0 (-0.2) 0.70;
-    band6 = mkApoBand "Bell" 6854.0 (-0.6) 6.00;
-    band7 = mkApoBand "Bell" 428.0 (-0.6) 4.23;
-    band8 = mkApoBand "Bell" 314.0 0.4 3.61;
-    band9 = mkApoBand "Bell" 978.0 0.4 4.91;
   };
 in
 {
@@ -208,7 +179,7 @@ in
     # Flat / pass-through preset for devices that should get NO processing:
     #
     # Loaded by ee-preset-sync (above) whenever the default sink is the bluetooth
-    # headphones (CMF Headphone Pro) or any unmapped device. Empty plugins_order =
+    # headphones or any unmapped device. Empty plugins_order =
     # an empty chain, so the signal passes through EasyEffects untouched.
     extraPresets.flat = {
       output = {
@@ -263,7 +234,7 @@ in
         # +12 dB below ~105 Hz. The bass band nets ≈ 0 dB, the rest ≈ -12 dB, so
         # the low end sits ~12 dB hotter than the rest and nothing clips. (The EQ
         # after this adds nothing below 250 Hz, so the preamp can match the shelf
-        # exactly, unlike airpods-bass, where it has to run 2 dB deeper.)
+        # exactly.)
         #
         # The 105 Hz corner is the important half of "more oomph": a shelf's
         # skirt puts roughly half its gain at the corner, so the old 75 Hz one
@@ -310,7 +281,7 @@ in
 
     # e1504g (Vivobook Go 15) built-in speakers: neutral correction + bass boost:
     #
-    # Same two-stage recipe as airpods-bass (neutral EQ + a shelf on top), plus a
+    # Same two-stage recipe as bass-boost (a shelf, then a correction EQ), plus a
     # high-pass because these micro-drivers have nothing below ~200 Hz: feeding
     # them sub-bass only buys excursion, rattle and IMD, never output. The "bass
     # boost" therefore aims at the 200-400 Hz warmth band (the lowest region
@@ -360,67 +331,6 @@ in
           "split-channels" = false;
           left = vivobookCorrectionBands;
           right = vivobookCorrectionBands;
-        };
-      };
-    };
-
-    # AirPods Pro 2: audiophile correction + bass boost on top:
-    #
-    # Same two-stage recipe as the Pebble `bass-boost` preset, but the voicing EQ
-    # is a real measured AutoEq correction (see `airpodsCorrectionBands` above)
-    # instead of a hand-tuned smile, since we have actual coupler measurements for
-    # these. Loaded whenever the AirPods are the default sink, via ee-preset-sync's
-    # `bluez_output.14_14_7D_E7_8C_E3.*` → airpods-bass mapping.
-    #
-    #   1. filter#0 Low-shelf: the bass BOOST plus the headroom for the WHOLE
-    #      chain. input-gain -12 dB pulls everything down, then +10 dB below
-    #      ~100 Hz brings the low end back. The preamp is 2 dB deeper than the
-    #      shelf on purpose: equalizer#0 runs AFTER this and adds ~+2 dB more in
-    #      the bass on its own (band3's +3.3 dB bell at 75 Hz, less band0's
-    #      -1.2 dB shelf), so cancelling the shelf alone would push the sub band
-    #      past 0 dBFS and clip at the float→int conversion feeding the bluetooth
-    #      encoder. Net: bass peaks ≈ -1 dB, everything else ≈ -12 dB → the low
-    #      end sits ~11 dB out front and still never clips. The AirPods have real
-    #      sub-bass extension (unlike the 2" Pebbles), and the 100 Hz corner buys
-    #      kick weight as well as sub. If it ever turns boomy or thickens vocals,
-    #      pull `frequency` back to 90. Want more thump? Raise `gain` AND drop
-    #      `input-gain` by the same amount. Too quiet overall? Turn the volume up
-    #      (that's the headroom working). Want them neutral again? Bypass filter#0
-    #      and you're left with just the flat AutoEq correction.
-    #   2. equalizer#0: the AutoEq Harman-neutral correction (10 bands).
-    extraPresets.airpods-bass = {
-      output = {
-        blocklist = [ ];
-        plugins_order = [
-          "filter#0"
-          "equalizer#0"
-        ];
-
-        "filter#0" = {
-          bypass = false;
-          "input-gain" = -12.0; # headroom for the shelf AND equalizer#0's own bass gain
-          "output-gain" = 0.0;
-          type = "Low-shelf";
-          mode = "RLC (BT)";
-          "equal-mode" = "IIR";
-          slope = "x1";
-          decramp = "Off";
-          frequency = 100.0;
-          width = 4.0;
-          quality = 0.0;
-          gain = 10.0; # low-end lift below ~100 Hz: raise for more thump (with input-gain to match)
-          balance = 0.0;
-        };
-
-        "equalizer#0" = {
-          bypass = false;
-          "input-gain" = 0.0;
-          "output-gain" = 0.0;
-          mode = "IIR";
-          "num-bands" = 10;
-          "split-channels" = false;
-          left = airpodsCorrectionBands;
-          right = airpodsCorrectionBands;
         };
       };
     };
