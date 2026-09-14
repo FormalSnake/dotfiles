@@ -216,6 +216,12 @@ in
     };
   };
 
+  # Windows reads the RTC as local time and Linux defaults to UTC, so in
+  # Canary summer time (UTC+1) Windows booted an hour behind. Keeping the RTC
+  # in local time on this side fixes it without touching the Windows registry.
+  # The chrony module drops `rtconutc` to match, so RTC trimming keeps working.
+  time.hardwareClockInLocalTime = true;
+
   # Passwordless one-click for the "Windows" session button, scoped to the
   # active local wheel session (systemd manage-units defaults to a password
   # prompt, waived only for this one unit). The "BIOS" button's
