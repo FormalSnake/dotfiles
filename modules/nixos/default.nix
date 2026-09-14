@@ -17,6 +17,7 @@
       ./mixins/plymouth.nix
       ./mixins/oomd.nix
       ./mixins/firmware.nix
+      ./mixins/smartd.nix
       ./mixins/systemd-tuning.nix
       ./mixins/scx.nix
       ./mixins/ananicy.nix

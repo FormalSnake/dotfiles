@@ -49,4 +49,14 @@
       # WebKit comes from the shell, CEF from its own distribution.
     ];
   };
+
+  # Downloaded AppImages run directly instead of needing `appimage-run`.
+  programs.appimage = {
+    enable = true;
+    binfmt = true;
+  };
+
+  # FUSE-backed /bin and /usr/bin that resolve against the caller's PATH, so
+  # foreign scripts with `#!/bin/bash` or `#!/usr/bin/python3` shebangs run.
+  services.envfs.enable = true;
 }
