@@ -4,6 +4,7 @@
     # exactly the Brewfile's `trusted:` entries on every run, so a manual
     # `brew trust` never survives an activation. Trust must be declared here.
     taps = [
+      { name = "abue-ammar/tinycast"; trusted = true; }
       { name = "barutsrb/tap"; trusted = true; }
       { name = "felixkratz/formulae"; trusted = true; } # sketchybar
       { name = "jnsahaj/lumen"; trusted = true; }
@@ -71,6 +72,12 @@
       # (tiling WM; mirrors the g815 niri setup)
       "omniwm"             # barutsrb/tap: niri-style tiler (tap trusted automatically, see modules/darwin/mixins/homebrew.nix)
       "karabiner-elements" # remaps Right Command → the OmniWM "Super" chord (Ctrl+Opt+Cmd)
+
+      # (launcher)
+      # Replaced Raycast Beta, which was a manual /Applications install. The
+      # arm64 cask needs macOS 26+; it strips the quarantine flag itself since
+      # the app is self-signed. Started at login by modules/darwin/mixins/login-items.nix.
+      "tinycast"           # abue-ammar/tinycast
     ];
 
     # Mac App Store auto-install disabled: `mas install` is broken at the OS level (https://github.com/orgs/Homebrew/discussions/6550). Apps remain installed manually.

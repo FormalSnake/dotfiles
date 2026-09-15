@@ -20,6 +20,7 @@
     ./mixins/fetch.nix
     ./mixins/herdr.nix
     ./mixins/fast.nix
+    ./mixins/fut.nix
     ./mixins/nh.nix
     ./mixins/nix-index.nix
     ./mixins/unfree.nix

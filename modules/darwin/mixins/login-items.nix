@@ -12,7 +12,7 @@ let
     # aerospace is launched via programs.aerospace.launchd (currently disabled, see users/kyandesutter/mixins/aerospace.nix)
     { id = "omniwm";        path = "/Applications/OmniWM.app"; }
     { id = "nordvpn";       path = "/Applications/NordVPN.app"; }
-    { id = "raycast-beta";  path = "/Applications/Raycast Beta.app"; }
+    { id = "tinycast";      path = "/Applications/Tinycast.app"; }
     { id = "aldente";       path = "/Applications/AlDente.app"; }
     { id = "orbstack";      path = "/Applications/OrbStack.app"; }
     { id = "betterdisplay"; path = "/Applications/BetterDisplay.app"; }
