@@ -1,12 +1,4 @@
 { lib, pkgs, ... }:
-let
-  # Nerd Font logo for the OS this config is built for (nf-linux-apple /
-  # nf-linux-nixos): both Linux hosts are NixOS, so no generic-Tux case. The
-  # glyph is unconditional: every terminal we use is a Nerd Font one
-  # (GeistMono NF, see mixins/ghostty.nix), and it renders as tofu only on the
-  # bare VT console.
-  osIcon = if pkgs.stdenv.hostPlatform.isDarwin then "" else "";
-in
 {
   programs.fish = {
     enable = true;
@@ -44,61 +36,24 @@ in
     ];
 
     functions = {
-      # PrismLinux's pure-fish prompt (prismlinux-themes-fish), plus a host
-      # segment: three machines reached over ssh/mosh means the prompt has to
-      # say which one you're on. Colours are ANSI names, not hex, so they ride
-      # the terminal palette (matugen-derived on Linux, Flexoki on macOS).
-      # Line one degrades by $COLUMNS so it still fits a phone ssh client.
+      # One line, Pure-shaped: `dir branch* →`. Colours are ANSI names, not
+      # hex, so they ride the terminal palette (matugen-derived on Linux,
+      # Flexoki on macOS). Three machines are reached over ssh/mosh, so the
+      # host is prefixed on remote sessions only; locally it is always known.
       fish_prompt = {
-        description = "Two-line prompt: os user@host in path on branch, then └─>>";
+        description = "One-line prompt: [host] dir branch* →";
         body = ''
           set -l last_status $status
           set -l normal (set_color normal)
-          set -l cols $COLUMNS
-          test -z "$cols"; and set cols 80
 
-          set -l os_icon "${osIcon}"
-          set -l host (string lower (string replace -r '\..*$' "" -- $hostname))
-          set -l host_color normal
-          switch $host
-              case 'macbook*'
-                  set host macbook
-                  set host_color magenta
-              case g815
-                  set host_color blue
-              case e1504g
-                  set host_color green
-          end
+          set -l dir (basename -- $PWD)
+          test "$PWD" = "$HOME"; and set dir "~"
+          test "$PWD" = /; and set dir /
 
-          # Phone/tablet ssh clients hand out ~40 columns. Shed the parts that
-          # carry least information first: the username never varies, and on a
-          # 40-column client every session is remote, so host, path tail and
-          # git state are the last things to go.
-          set -l user_txt "$USER@"
-          test $cols -lt 60; and set user_txt ""
-
-          set -l ssh_txt ""
-          if set -q SSH_CONNECTION; or set -q SSH_TTY; or set -q SSH_CLIENT
-              set ssh_txt " ssh"
-              test $cols -lt 40; and set ssh_txt ""
-          end
-
-          set -l depth 3
-          test $cols -lt 60; and set depth 2
-          test $cols -lt 40; and set depth 1
-          set -l dir (string replace -r '^'(string escape --style=regex -- $HOME) '~' -- $PWD)
-          set -l parts (string split / $dir)
-          if test (count $parts) -gt $depth
-              set dir …/(string join / $parts[(math 0 - $depth)..-1])
-          end
-
-          set -l lock ""
-          not test -w $PWD; and set lock " 🔒"
-
-          # One `git status --porcelain=v2 --branch` feeds branch, dirty flags
-          # and ahead/behind (a git call per field makes the prompt lag).
+          # One `git status --porcelain=v2 --branch` feeds branch, dirty and
+          # ahead/behind (a git call per field makes the prompt lag).
           set -l branch ""
-          set -l flags ""
+          set -l dirty ""
           set -l ab_txt ""
           set -l git_lines (command git status --porcelain=v2 --branch 2>/dev/null)
           and set branch (string replace -f '# branch.head ' "" -- $git_lines)
@@ -106,56 +61,35 @@ in
               if test "$branch" = "(detached)"
                   set branch (string sub -l7 -- (string replace -f '# branch.oid ' "" -- $git_lines))
               end
-              test $cols -lt 50; and set branch (string shorten -m12 -- $branch)
-
-              # porcelain v2 changed entries are `1|2 <XY> …` (X staged, Y unstaged).
-              set -l xy (string replace -rf '^[12] (\S\S) .*' '$1' -- $git_lines)
-              set -l f
-              string match -rq '^u ' -- $git_lines; and set f $f "="
-              string match -rq '^[^.]' -- $xy; and set f $f "+"
-              string match -rq '^.[^.]' -- $xy; and set f $f "!"
-              string match -rq '^\? ' -- $git_lines; and set f $f "?"
-              test (count $f) -gt 0; and set flags " ["(string join "" $f)"]"
+              string match -rq '^[12u?] ' -- $git_lines; and set dirty "*"
 
               set -l ab (string replace -f '# branch.ab ' "" -- $git_lines)
               if test -n "$ab"
                   set -l p (string split " " -- $ab)
                   set -l ahead (string sub -s2 -- $p[1])
                   set -l behind (string sub -s2 -- $p[2])
-                  test $ahead != 0; and set ab_txt "$ab_txt ⇡$ahead"
-                  test $behind != 0; and set ab_txt "$ab_txt ⇣$behind"
+                  test $ahead != 0; and set ab_txt "$ab_txt⇡"
+                  test $behind != 0; and set ab_txt "$ab_txt⇣"
               end
           end
 
-          # Last resort once the tiers above are exhausted: eat into the path
-          # from the left, because a wrapped first line breaks the └─> layout.
-          set -l branch_txt ""
-          test -n "$branch"; and set branch_txt " on $branch"
-          set -l over (math (string length -- "$os_icon $user_txt$host$ssh_txt in $dir$lock$branch_txt$flags$ab_txt") - $cols + 1)
-          if test $over -gt 0; and test (string length -- $dir) -gt (math $over + 3)
-              set dir …(string sub -s (math $over + 1) -- $dir)
+          if set -q SSH_CONNECTION; or set -q SSH_TTY; or set -q SSH_CLIENT
+              set -l host (string lower (string replace -r '\..*$' "" -- $hostname))
+              string match -q 'macbook*' -- $host; and set host macbook
+              echo -n (set_color brblack)$host" "$normal
           end
 
-          echo -n (set_color -o $host_color)$os_icon" "$normal
-          test -n "$user_txt"; and echo -n (set_color -o cyan)$USER$normal(set_color brblack)@$normal
-          echo -n (set_color -o $host_color)$host$normal
-          test -n "$ssh_txt"; and echo -n (set_color brblack)$ssh_txt$normal
-          echo -n (set_color brblack)" in "$normal(set_color -o yellow)$dir$normal
-          test -n "$lock"; and echo -n (set_color red)$lock$normal
+          echo -n (set_color blue)$dir$normal
           if test -n "$branch"
-              echo -n (set_color brblack)" on "$normal(set_color -o magenta)$branch$normal
-              test -n "$flags"; and echo -n (set_color -o red)$flags$normal
-              test -n "$ab_txt"; and echo -n (set_color cyan)$ab_txt$normal
+              echo -n " "(set_color yellow)$branch$dirty$normal
+              test -n "$ab_txt"; and echo -n " "(set_color cyan)$ab_txt$normal
           end
 
-          echo
-          echo -n (set_color -o green)"└─>"$normal
           if test $last_status -eq 0
-              echo -n (set_color -o green)">"$normal
+              echo -n " "(set_color green)"→"$normal" "
           else
-              echo -n (set_color -o red)">"$normal
+              echo -n " "(set_color red)"→"$normal" "
           end
-          echo -n " "
         '';
       };
 
