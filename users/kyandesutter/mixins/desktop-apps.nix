@@ -6,56 +6,58 @@
   # keeps GPU acceleration and dodges the ANV bug (verified clean on Calendar).
   home.sessionVariables.GSK_RENDERER = "gl";
 
-  # GNOME/GTK desktop apps + their MIME defaults. Not Hyprland-specific: these
-  # round out the desktop so double-clicking files in Nautilus opens something
-  # sensible. Nautilus is the GUI file manager, plus the GNOME companions that
-  # make it feel complete: file-roller (extract/create archives from the
-  # right-click menu), sushi (Spacebar quick-preview), and loupe (the GNOME image
-  # viewer).
+  # Desktop apps + their MIME defaults. Not Hyprland-specific: these round out
+  # the desktop so double-clicking files opens something sensible. elementary's
+  # own apps where they keep every feature of the GNOME app they replace (they
+  # carry the elementary stylesheet natively, see mixins/elementary), GNOME's
+  # where elementary has no equal:
+  #   • Files: native quick preview, archive extract/compress through
+  #     contractor + file-roller-contract (contractor is D-Bus activated), the
+  #     same gvfs, tumbler thumbnails and gtk-3.0/bookmarks as Nautilus.
+  #   • Loupe stays: Photos' viewer declares no BMP, ICO, HEIF, AVIF or SVG.
   home.packages = with pkgs; [
-    nautilus
+    pantheon.elementary-files
+    pantheon.contractor
+    pantheon.file-roller-contract
     file-roller
-    sushi
     loupe
 
-    # GNOME/GTK apps that round out the desktop.
     papers # PDF / document viewer (default for application/pdf)
-    gnome-text-editor # plain-text editor (default for text/plain)
+    pantheon.elementary-code # plain-text editor (default for text/plain)
     # texliveMedium (PDF export only) drags in asymptote, whose pyqt5 fails to
     # build on python 3.14; texliveBasic still has pdflatex.
     (apostrophe.override { texliveMedium = texliveBasic; }) # Markdown editor, default for .md
-    gnome-calendar
+    pantheon.elementary-calendar # reads GOA accounts through evolution-data-server
     gnome-clocks
     gnome-maps
-    snapshot # camera
+    pantheon.elementary-camera
     epiphany # web browser
 
-    # Media + office, so double-clicking these files in Nautilus opens something.
+    # Media + office.
     #   • celluloid: GTK4/libadwaita mpv frontend, plays every common video
     #     format. GNOME Videos (totem) is the "native" app but has weak codec
     #     support; mpv handles everything, so this is the reliable GTK choice.
     #   • libreoffice-stable: the only real office suite here (GNOME has none).
-    #     The -fresh build renders through the gtk3 VCL backend, so it follows
-    #     the adw-gtk3-dark GTK theme (set by DMS; see the dark-mode block
-    #     in hyprland.nix). Opens Word/Excel/PowerPoint + ODF.
+    #     It renders through the gtk3 VCL backend, so it follows the GTK theme
+    #     the shell sets (mixins/elementary). Opens Word/Excel/PowerPoint + ODF.
     celluloid
     libreoffice-stable
   ];
 
   # Default apps by MIME. enable writes ~/.config/mimeapps.list.
-  #   • Folders → Nautilus (xdg-open, file pickers, "open containing folder",
-  #     DMS, etc. all launch it).
-  #   • Images → Loupe, so double-clicking an image in Nautilus opens it.
-  #   • PDFs → Papers; plain text → GNOME Text Editor; Markdown → Apostrophe.
+  #   • Folders → Files (xdg-open, "open containing folder", the shell, etc.
+  #     all launch it).
+  #   • Images → Loupe.
+  #   • PDFs → Papers; plain text → Code; Markdown → Apostrophe.
   #   • Video → Celluloid.
   #   • Office docs → the matching LibreOffice component (Writer/Calc/Impress).
   xdg.mimeApps = {
     enable = true;
     defaultApplications =
       {
-        "inode/directory" = [ "org.gnome.Nautilus.desktop" ];
+        "inode/directory" = [ "io.elementary.files.desktop" ];
         "application/pdf" = [ "org.gnome.Papers.desktop" ];
-        "text/plain" = [ "org.gnome.TextEditor.desktop" ];
+        "text/plain" = [ "io.elementary.code.desktop" ];
         # DMS Notepad's desktop file (com.danklinux.dms.notepad.desktop) also
         # declares text/markdown, and Apostrophe only declares text/x-markdown,
         # so both aliases need an explicit default.

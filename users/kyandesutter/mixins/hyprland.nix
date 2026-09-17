@@ -671,11 +671,6 @@ in
     hl.window_rule({ match = { class = "^$", title = "^$" },
       float = true, pin = true,
       move = { "(monitor_w-window_w-16)", "16" } })
-    -- GNOME spacebar quick-preview (Sushi / NautilusPreviewer) → float + center
-    -- so it pops up like macOS Quick Look instead of tiling into the layout. It
-    -- sizes itself to the previewed content, so no size rule.
-    hl.window_rule({ match = { class = "^(org.gnome.NautilusPreviewer)$" },
-      float = true, center = true })
 
     -- Blur behind the shell's own layer surfaces: FormalShell paints its cards
     -- at theme.surfaceOpacity, so the blur under them is what shows through.

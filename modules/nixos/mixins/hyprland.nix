@@ -293,21 +293,25 @@ in
     };
 
     # GNOME/GTK desktop plumbing the apps and file manager rely on:
-    #   • gvfs + wsdd: Nautilus trash, removable-drive / network mounting, MTP,
+    #   • gvfs + wsdd: Files trash, removable-drive / network mounting, MTP,
     #     and Windows-network discovery. gvfsd-network starts `wsdd` on its first
     #     activation. Without it, Files waits for the failed automount and logs
     #     "Failed to spawn the wsdd daemon".
-    #   • tumbler (+ ffmpegthumbnailer): thumbnails, including video, in Nautilus.
+    #   • tumbler (+ ffmpegthumbnailer): thumbnails, including video, in Files.
     #   • dconf: the settings backend every GTK/GNOME app reads and writes.
     services.gvfs.enable = true;
     services.tumbler.enable = true;
     programs.dconf.enable = true;
 
-    # Nautilus is installed via home-manager (home.packages), so it isn't wrapped
+    # elementary Files' extract/compress actions are contractor .contract files
+    # under share/contractor, which per-user profiles do not link by default.
+    environment.pathsToLink = [ "/share/contractor" ];
+
+    # Files is installed via home-manager (home.packages), so it isn't wrapped
     # with the GNOME GIO module environment the NixOS gnome session would provide.
     # Without gvfs's client module (libgvfsdbus.so) on GIO_EXTRA_MODULES, GIO only
-    # knows local backends, so `trash://` is unavailable and Nautilus reports
-    # "Trash locations are not supported" when you open Trash. Put gvfs's gio
+    # knows local backends, so `trash://` is unavailable and the file manager
+    # reports "Trash locations are not supported" when you open Trash. Put gvfs's gio
     # modules on the session search path (this list merges with dconf's, which is
     # already there), so the trash backend (gvfsd-trash) loads and D-Bus-activates.
     environment.sessionVariables.GIO_EXTRA_MODULES = [ "${pkgs.gvfs}/lib/gio/modules" ];
@@ -490,8 +494,8 @@ in
       # them for the actual capture.
       grim
       slurp
-      ffmpegthumbnailer # video thumbnails for tumbler/Nautilus
-      wsdd # GVFS's Windows-network discovery helper; prevents first-launch delay in Nautilus
+      ffmpegthumbnailer # video thumbnails for tumbler/Files
+      wsdd # GVFS's Windows-network discovery helper; prevents first-launch delay in Files
     ]
     # GOA sign-in UI (see the services.gnome block above, the only way to add
     # an online account outside GNOME proper).
