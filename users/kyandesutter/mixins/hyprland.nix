@@ -15,7 +15,7 @@ let
   # theme.radius, 10 by default), so windows and shell cards share one curve.
   fsRadius = toString ((config.programs.formalshell.settings.theme or { }).radius or 10);
 
-  # Lock screen (qylock, sword theme), owned by neither shell. The unit
+  # Lock screen (qylock, man-bicycle theme), owned by neither shell. The unit
   # is declared in modules/nixos/mixins/hyprland.nix; starting it returns as
   # soon as the lock surface is up, so `&& systemctl suspend` behind it
   # suspends onto the locked screen rather than after the unlock.

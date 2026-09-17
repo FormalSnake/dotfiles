@@ -34,7 +34,7 @@ in
         # Syncthing-synced wallpaper folder (modules/nixos/mixins/syncthing.nix)
         # for the picker's wallpaper mode.
         picker.directory = "${config.home.homeDirectory}/Pictures/Wallpapers";
-        # Lock: qylock's sword screen, the same theme the SDDM greeter draws
+        # Lock: qylock's man-bicycle screen, the same theme the SDDM greeter draws
         # (programs.qylock in modules/nixos/mixins/hyprland.nix). Only the
         # SUPER+SHIFT+Escape keybind reached it before; every trigger inside
         # the shell (the lock hot corner, the screensaver's lockAfterSeconds
