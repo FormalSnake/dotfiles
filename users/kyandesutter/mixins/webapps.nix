@@ -33,17 +33,22 @@ let
     let
       s = if builtins.isString raw then { url = raw; } else raw;
       name = s.name or (deriveName s.url);
+      id = s.id or (lib.toLower (builtins.replaceStrings [ " " ] [ "-" ] name));
     in {
       inherit (s) url;
-      inherit name;
-      id = s.id or (lib.toLower (builtins.replaceStrings [ " " ] [ "-" ] name));
+      inherit name id;
       width = s.width or 1200;
       height = s.height or 800;
       # A Helium profile directory ("Default" is Personal) to reuse its
-      # logins, or null for an isolated user-data dir. A shared-profile window
-      # joins the running browser process, which ignores --class, so it
-      # carries Helium's app_id rather than its own.
+      # logins, or null for an isolated user-data dir.
       profile = s.profile or null;
+      # A shared-profile window joins the running browser process, which
+      # ignores --class and names the window chrome-<host>_<path>-<profile>,
+      # slashes as underscores (music.youtube.com -> chrome-music.youtube.com__-Default).
+      wmClass =
+        let path = lib.removePrefix (domainOf s.url) (lib.last (lib.splitString "//" s.url));
+        in if (s.profile or null) == null then "webapp-${id}"
+        else "chrome-${domainOf s.url}_${builtins.replaceStrings [ "/" ] [ "_" ] (if path == "" then "/" else path)}-${s.profile}";
       icon = s.icon or null;
       domain = domainOf s.url;
     };
@@ -71,7 +76,7 @@ let
         desktopName = site.name;
         exec = "${launcher}/bin/${identifier} %U";
         icon = if site.icon != null then "${site.icon}" else "${iconDir}/${site.id}.png";
-        startupWMClass = identifier;
+        startupWMClass = site.wmClass;
         categories = [ "Network" ];
       };
     in
