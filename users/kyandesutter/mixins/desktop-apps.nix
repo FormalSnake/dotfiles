@@ -21,6 +21,9 @@
     # GNOME/GTK apps that round out the desktop.
     papers # PDF / document viewer (default for application/pdf)
     gnome-text-editor # plain-text editor (default for text/plain)
+    # texliveMedium (PDF export only) drags in asymptote, whose pyqt5 fails to
+    # build on python 3.14; texliveBasic still has pdflatex.
+    (apostrophe.override { texliveMedium = texliveBasic; }) # Markdown editor, default for .md
     gnome-calendar
     gnome-clocks
     gnome-maps
@@ -43,7 +46,7 @@
   #   • Folders → Nautilus (xdg-open, file pickers, "open containing folder",
   #     DMS, etc. all launch it).
   #   • Images → Loupe, so double-clicking an image in Nautilus opens it.
-  #   • PDFs → Papers; plain text → GNOME Text Editor.
+  #   • PDFs → Papers; plain text → GNOME Text Editor; Markdown → Apostrophe.
   #   • Video → Celluloid.
   #   • Office docs → the matching LibreOffice component (Writer/Calc/Impress).
   xdg.mimeApps = {
@@ -54,10 +57,10 @@
         "application/pdf" = [ "org.gnome.Papers.desktop" ];
         "text/plain" = [ "org.gnome.TextEditor.desktop" ];
         # DMS Notepad's desktop file (com.danklinux.dms.notepad.desktop) also
-        # declares text/markdown; without an explicit default here xdg-mime
-        # falls back to that association since it's the only registered
-        # handler.
-        "text/markdown" = [ "org.gnome.TextEditor.desktop" ];
+        # declares text/markdown, and Apostrophe only declares text/x-markdown,
+        # so both aliases need an explicit default.
+        "text/markdown" = [ "org.gnome.gitlab.somas.Apostrophe.desktop" ];
+        "text/x-markdown" = [ "org.gnome.gitlab.somas.Apostrophe.desktop" ];
       }
       // lib.genAttrs [
         "image/png"
