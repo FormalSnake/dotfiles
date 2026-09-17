@@ -89,6 +89,9 @@ in
         usage.codex = false;
         # Apple Music animated album covers in the media panel (off upstream).
         media.appleMusicArt = true;
+        # The launcher's app results as a grid of icons over their names
+        # (off upstream).
+        menu.appGrid = true;
         # Toast corner (M34). Matches the shipped default on purpose: the
         # choice is the owner's, so it is written down rather than inherited.
         notifications.position = "bottom-right";
