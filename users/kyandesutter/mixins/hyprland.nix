@@ -21,22 +21,8 @@ let
   # suspends onto the locked screen rather than after the unlock.
   lockCmd = "${pkgs.systemd}/bin/systemctl --user start qylock-lock.service";
 
-  # Desktop-wide icon theme: elementary's icons under a new name whose
-  # index.theme inherits Colloid-Dark, then Adwaita. Upstream elementary
-  # inherits Adwaita only, so without the rename anything elementary lacks
-  # would skip Colloid. Every other entry is a symlink into the upstream theme.
-  iconThemeName = "elementary-colloid";
-  iconTheme = pkgs.runCommand "elementary-colloid-icon-theme" { } ''
-    src=${pkgs.pantheon.elementary-icon-theme}/share/icons/elementary
-    dst=$out/share/icons/${iconThemeName}
-    mkdir -p $dst
-    ln -s $src/* $dst/
-    rm $dst/index.theme
-    sed -e 's/^Name=elementary$/Name=${iconThemeName}/' \
-        -e 's/^Inherits=Adwaita$/Inherits=Colloid-Dark,Adwaita,hicolor/' \
-        $src/index.theme > $dst/index.theme
-    grep -qx 'Inherits=Colloid-Dark,Adwaita,hicolor' $dst/index.theme
-  '';
+  iconTheme = pkgs.callPackage ./elementary/icon-theme.nix { };
+  iconThemeName = iconTheme.themeName;
 
   # NVIDIA dGPU flag from the host (same gate as dms.nix/godot.nix). The g815
   # specifics below (the AQ_DRM_DEVICES pick, the nvidia env, the two-monitor
