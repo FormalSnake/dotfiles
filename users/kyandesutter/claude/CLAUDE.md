@@ -224,7 +224,9 @@ colour ramps freehand when a skill already defines them.
 Check once per session whether `HERDR_ENV` is `1`. If so, load the `herdr` skill
 rather than guessing flags, and put long builds, watchers, dev servers and
 parallel agent work in their own pane or tab (a worktree when they would collide
-on files), reading output back with the CLI. Outside Herdr, fall back to the
+on files), reading output back with the CLI. Panes run fish: write fish syntax,
+and never call a pane command started or done until its sentinel came back
+(the skill has the pattern). Outside Herdr, fall back to the
 Agent tool or backgrounded Bash, and never drive a Herdr session from outside
 one.
 

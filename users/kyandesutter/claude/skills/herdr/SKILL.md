@@ -164,10 +164,22 @@ herdr pane split --current --direction right --cwd "$PWD" --no-focus
 Read the new pane ID from `.result.pane.pane_id`, then run and inspect the command:
 
 ```bash
-herdr pane run <returned-pane-id> "just test"
-herdr pane wait-output <returned-pane-id> --match "test result" --timeout 120000
+n=$RANDOM
+herdr pane run <returned-pane-id> "just test; echo \"__herdr_done_$n:\$status\""
+herdr pane wait-output <returned-pane-id> --regex "__herdr_done_$n:[0-9]+" --timeout 120000
 herdr pane read <returned-pane-id> --source recent-unwrapped --lines 120
 ```
+
+### Panes run fish, and a sent command is not a run command
+
+Every Herdr pane on these machines runs fish, not bash or zsh. Your own Bash tool is a different shell; do not carry its syntax into `pane run`. Fish never errors on a lot of bash syntax, it waits for more input: `for ...; do ...; done`, `if ...; then ... fi`, a heredoc, or an unbalanced quote leaves the pane at a continuation prompt with the text typed and nothing executing. `herdr pane run` still returns success, so the command looks sent and silently never runs.
+
+Rules for every `pane run` and `pane send-text`:
+
+- Write fish: `$status` not `$?` (fish rejects `$?`), `for x in a b; ...; end`, `if test ...; ...; end`, `set -x VAR value` or `VAR=value cmd`, no heredocs. For anything longer than one line, write a script file and run `bash script.sh`.
+- End the command with a sentinel carrying a fresh nonce and the exit status, as above, and wait on the regex. The nonce is required: an old sentinel still on screen matches instantly and reports a run that never happened. The `[0-9]+` keeps the echoed command line (which shows a literal `$status`) from matching.
+- Treat a `wait-output` timeout as "did not run" until proven otherwise. Check `herdr pane process-info --pane <id>`: if the only foreground process is `fish`, nothing is running. Read the pane; a continuation prompt or a fish syntax error means send `ctrl+c` with `herdr pane send-keys <id> ctrl+c`, fix the syntax, and run again.
+- Never report a command as started, running, or finished from `pane run` alone. Report it only after the sentinel matched (finished, with its status) or `process-info` shows it in the foreground (running).
 
 `pane run` atomically sends command text and Enter. `pane wait-output` searches the selected snapshot immediately, so output that already exists can match. Use `--match <text>` for a literal substring or `--regex <pattern>` for a Rust regular expression. Omitting `--timeout` allows an indefinite wait.
 
