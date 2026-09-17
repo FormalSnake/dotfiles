@@ -115,6 +115,17 @@
         ForwardAgent = "yes";
       };
 
+      # Windows desktop (desktop-vjmk52d) over its Tailscale IP. The account
+      # there is `kyan`, and it is an administrator, so sshd reads
+      # C:\ProgramData\ssh\administrators_authorized_keys rather than the
+      # profile's authorized_keys. No agent forwarding: nothing on that end
+      # uses it.
+      "windows" = {
+        HostName = "100.121.238.76";
+        User = "kyan";
+        IdentityAgent = "SSH_AUTH_SOCK"; # see the macbook entry
+      };
+
       "superserver.local" = {
         HostName = "192.168.86.2";
         Port = 22;
