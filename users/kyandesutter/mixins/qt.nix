@@ -29,7 +29,7 @@
     style=Fusion
     custom_palette=true
     color_scheme_path=${config.home.homeDirectory}/.config/qt6ct/colors/matugen.conf
-    icon_theme=Colloid-Dark
+    icon_theme=elementary-colloid
     standard_dialogs=default
 
     [Fonts]
@@ -41,7 +41,7 @@
     style=Fusion
     custom_palette=true
     color_scheme_path=${config.home.homeDirectory}/.config/qt5ct/colors/matugen.conf
-    icon_theme=Colloid-Dark
+    icon_theme=elementary-colloid
     standard_dialogs=default
 
     [Fonts]

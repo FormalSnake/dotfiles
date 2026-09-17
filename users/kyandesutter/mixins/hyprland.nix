@@ -21,6 +21,23 @@ let
   # suspends onto the locked screen rather than after the unlock.
   lockCmd = "${pkgs.systemd}/bin/systemctl --user start qylock-lock.service";
 
+  # Desktop-wide icon theme: elementary's icons under a new name whose
+  # index.theme inherits Colloid-Dark, then Adwaita. Upstream elementary
+  # inherits Adwaita only, so without the rename anything elementary lacks
+  # would skip Colloid. Every other entry is a symlink into the upstream theme.
+  iconThemeName = "elementary-colloid";
+  iconTheme = pkgs.runCommand "elementary-colloid-icon-theme" { } ''
+    src=${pkgs.pantheon.elementary-icon-theme}/share/icons/elementary
+    dst=$out/share/icons/${iconThemeName}
+    mkdir -p $dst
+    ln -s $src/* $dst/
+    rm $dst/index.theme
+    sed -e 's/^Name=elementary$/Name=${iconThemeName}/' \
+        -e 's/^Inherits=Adwaita$/Inherits=Colloid-Dark,Adwaita,hicolor/' \
+        $src/index.theme > $dst/index.theme
+    grep -qx 'Inherits=Colloid-Dark,Adwaita,hicolor' $dst/index.theme
+  '';
+
   # NVIDIA dGPU flag from the host (same gate as dms.nix/godot.nix). The g815
   # specifics below (the AQ_DRM_DEVICES pick, the nvidia env, the two-monitor
   # layout) are gated on it, so iGPU-only hosts (e1504g) get a plain Hyprland
@@ -321,7 +338,7 @@ in
     -- icon override kept for Qt tooling. Also exported from uwsm/env below, so
     -- systemd user services (which do NOT inherit Hyprland's environment) get
     -- them too.
-    hl.env("QS_ICON_THEME", "Colloid-Dark")
+    hl.env("QS_ICON_THEME", "${iconThemeName}")
     hl.env("QT_QPA_PLATFORMTHEME", "qt6ct")
     ${lib.optionalString hasNvidia ''
     -- NVIDIA + Wayland (explicit-sync is automatic on recent drivers). The
@@ -720,7 +737,7 @@ ${lib.optionalString (!useFormalshell) ''
   # anything the *autostarted user services* also need: they do not inherit
   # Hyprland's own `hl.env` block.
   xdg.configFile."uwsm/env".text = ''
-    export QS_ICON_THEME="Colloid-Dark"
+    export QS_ICON_THEME="${iconThemeName}"
     export QT_QPA_PLATFORMTHEME="qt6ct"
   '';
 
@@ -759,10 +776,11 @@ ${lib.optionalString (!useFormalshell) ''
     # selects it (see the dark-mode block below).
     adw-gtk3
 
-    # Icon themes. Colloid-Dark is the desktop-wide icon set (set via gtk.iconTheme
-    # below, plus qt{5,6}ct.conf + QS_ICON_THEME above for Qt). adwaita is kept
-    # as the complete freedesktop fallback so any icon Colloid lacks resolves
-    # to a real glyph instead of the broken-image placeholder.
+    # Icon themes. elementary-colloid (iconTheme above) is the desktop-wide set
+    # (gtk.iconTheme below, plus qt{5,6}ct.conf + QS_ICON_THEME for Qt), and
+    # these two are its fallback chain: Colloid-Dark first, then adwaita as the
+    # complete freedesktop set so a missing icon resolves to a real glyph
+    # instead of the broken-image placeholder.
     colloid-icon-theme
     adwaita-icon-theme
 
@@ -800,7 +818,7 @@ ${lib.optionalString (!useFormalshell) ''
   # own would drift.
   #
   # We keep this module for the things the shell does NOT do:
-  #   • gtk.iconTheme: sets Colloid-Dark as the icon theme. Neither shell
+  #   • gtk.iconTheme: sets elementary-colloid as the icon theme. Neither shell
   #     touches the icon theme; without this GTK falls back to hicolor and
   #     renders every app/mime icon as the broken-image placeholder.
   #   • gtk-application-prefer-dark-theme in settings.ini: the X11/XWayland
@@ -828,8 +846,8 @@ ${lib.optionalString (!useFormalshell) ''
   gtk = {
     enable = true;
     iconTheme = {
-      name = "Colloid-Dark";
-      package = pkgs.colloid-icon-theme;
+      name = iconThemeName;
+      package = iconTheme;
     };
     font = {
       name = "Geist";
