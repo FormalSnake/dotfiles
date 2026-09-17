@@ -1,0 +1,32 @@
+/* Appended to both GTK4 variants. elementary's stylesheet is written for
+ * Granite apps; libadwaita apps get it on top of libadwaita's own sheet, and
+ * these rules settle where the two disagree. */
+
+/* libadwaita already spaces header children for its 46px bar. elementary's
+ * .csd headerbar padding and the box padding on top of that pushed a Nautilus
+ * content header to 72px next to a 60px sidebar header. */
+toolbarview revealer.top-bar headerbar,
+.csd toolbarview revealer.top-bar headerbar {
+  padding-top: 0;
+  padding-bottom: 0; }
+
+toolbarview revealer.top-bar headerbar > windowhandle > box,
+toolbarview revealer.top-bar headerbar > windowhandle > box > *,
+toolbarview revealer.top-bar headerbar > windowhandle > box > * > * {
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-top: 0;
+  padding-bottom: 0; }
+
+/* libadwaita draws the split view divider as an inset shadow on .sidebar-pane.
+ * elementary paints the sidebar list opaque, which hides that shadow below
+ * the header and leaves a stub the height of the header, next to
+ * elementary's own darker border. */
+.sidebar-pane list,
+.sidebar-pane .view {
+  background-color: transparent; }
+
+.sidebar-pane:dir(ltr),
+.sidebar-pane:dir(rtl) {
+  border-left: none;
+  border-right: none; }

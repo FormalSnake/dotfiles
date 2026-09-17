@@ -826,7 +826,8 @@ ${lib.optionalString (!useFormalshell) ''
   # FormalShell hosts get the same treatment with FormalShell's names: its
   # ThemeEngine renders formalshell-colors.css (gtk template) + the qt{5,6}ct
   # matugen.conf, and asserts color-scheme/gtk-theme via dconf on every
-  # retheme, flipping adw-gtk3 ↔ adw-gtk3-dark with the mode. The static
+  # retheme, flipping between the gtk.theme / gtk.themeDark names that
+  # mixins/elementary sets (adw-gtk3 stays installed for the DMS arm). The static
   # settings.ini prefer-dark hint is DMS-only: FormalShell has a real light
   # mode, and the hint would keep X11/XWayland GTK3 fallback apps dark in it.
   gtk = {
