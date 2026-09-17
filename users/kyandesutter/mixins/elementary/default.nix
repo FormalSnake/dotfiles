@@ -61,4 +61,8 @@ lib.mkIf useFormalshell {
     theme = theme.themeName "light";
     themeDark = theme.themeName "dark";
   };
+
+  # The shell's own chrome follows the desktop: elementary's relief on every
+  # control and a shadow under every card (FormalShell's pantheon preset).
+  programs.formalshell.settings.theme.preset = "pantheon";
 }
