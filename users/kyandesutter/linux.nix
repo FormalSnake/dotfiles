@@ -24,6 +24,15 @@
     ./mixins/godot.nix
     ./mixins/obsidian.nix
     ./mixins/parsec.nix
+    ./mixins/webapps.nix
+  ];
+
+  kyan.webapps.sites = [
+    {
+      url = "https://music.youtube.com";
+      name = "YouTube Music";
+      profile = "Default";
+    }
   ];
 
   # NixOS rebuild shortcut (linux-only, so it lives here rather than the shared
