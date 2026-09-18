@@ -50,6 +50,10 @@ Commands.registerCommand({
   inputType: InputType.BUILT_IN_TEXT,
   id: "gifroulette",
   description: "Sends a random favorited GIF",
+  // options must be an explicit empty array, not omitted: Discord's own
+  // command-submit handling treats a command with options: undefined as
+  // unconfirmed and falls back to sending the typed text literally.
+  options: [],
   // Returning nothing (rather than { content: ... }) means no message is
   // sent when this fails, instead of pasting an error into the channel.
   execute: () => {

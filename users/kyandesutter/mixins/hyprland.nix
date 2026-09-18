@@ -300,6 +300,8 @@ in
     local fsChrome = {
       rounding = ${fsRadius},
       blur = true,
+      gapsIn = 4,
+      gapsOut = 8,
       borderColor = "primary",
       shadow = false,
       shadowRange = 4,
@@ -395,9 +397,11 @@ in
       general = {
         -- gaps_in is applied per window side, so it doubles between two tiled
         -- windows, while gaps_out lands once at the screen edge. 4/8 is what
-        -- reads as a uniform 8px everywhere, the niri `gaps 8` geometry.
-        gaps_in = 4,
-        gaps_out = 8,
+        -- reads as a uniform 8px everywhere, the niri `gaps 8` geometry, and
+        -- what metamorphosis publishes. Pantheon wears no screen frame and
+        -- closes the outer gap to 6.
+        gaps_in = fsChrome.gapsIn,
+        gaps_out = fsChrome.gapsOut,
         border_size = 2,
         -- The scrolling tape (Hyprland 0.54+ has it in core, no plugin).
         layout = "scrolling",
