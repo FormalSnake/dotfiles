@@ -149,6 +149,10 @@ let
       };
 
       gifRoulette.enabled = true;
+
+      # window.spacepack, so a failed lookup in a dev extension (gifRoulette
+      # above) can be poked at from Discord's own DevTools console.
+      spacepack.config.addToGlobalScope = true;
     };
     repositories = [ "https://moonlight-mod.github.io/extensions-dist/repo.json" ];
     # Loaded as a developer extension: the normal extensions dir is moonbase's
