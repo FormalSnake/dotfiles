@@ -2,36 +2,30 @@ import Commands from "@moonlight-mod/wp/commands_commands";
 import { CommandType, InputType } from "@moonlight-mod/types/coreExtensions/commands";
 import spacepack from "@moonlight-mod/wp/spacepack_spacepack";
 
-// Named exports survive Discord's minifier (only local variable names get
-// mangled), so scanning the already-required module cache for this exact key
-// is more reliable than matching against minified source via findByCode.
-//
-// A plain `!= null` check on the property isn't enough: several webpack
-// modules (i18n string catalogs) export catch-all Proxies that return a
-// truthy value for *any* key, including this one, so every candidate has to
-// be validated by shape (a real getCurrentValue() call that resolves to a
-// favoriteGifs.gifs map) before being accepted.
-function extractFavoriteGifs(candidate: any): Record<string, unknown> | null {
-  if (typeof candidate?.getCurrentValue !== "function") return null;
-
-  try {
-    const gifs = candidate.getCurrentValue()?.favoriteGifs?.gifs;
-    return gifs != null && typeof gifs === "object" ? gifs : null;
-  } catch {
-    return null;
-  }
-}
-
+// Discord's minifier renames every export key (the FrecencyUserSettings
+// action creators export showed up as plain "bW", not anything readable), so
+// there's no stable name to look up. Instead this scans every already-loaded
+// module's exports for anything shaped like a Flux-style action creator
+// (a .getCurrentValue() function) whose resolved value actually has
+// favoriteGifs.gifs, which is self-describing and survives minification.
 function findFavoriteGifs(): Record<string, unknown> | null {
   const cache = spacepack.cache;
   for (const id in cache) {
     const exports = cache[id]?.exports;
     if (exports == null) continue;
 
-    const gifs =
-      extractFavoriteGifs(exports.FrecencyUserSettingsActionCreators) ??
-      extractFavoriteGifs(exports.default?.FrecencyUserSettingsActionCreators);
-    if (gifs != null) return gifs;
+    for (const key of Object.keys(exports)) {
+      const candidate = exports[key];
+      if (typeof candidate?.getCurrentValue !== "function") continue;
+
+      try {
+        const gifs = candidate.getCurrentValue()?.favoriteGifs?.gifs;
+        if (gifs != null && typeof gifs === "object") return gifs;
+      } catch {
+        // Some action creators (i18n message lookups) throw without their
+        // normal call context; irrelevant here, keep scanning.
+      }
+    }
   }
   return null;
 }
@@ -43,7 +37,7 @@ function findFavoriteGifs(): Record<string, unknown> | null {
 function getRandomFavoriteGifUrl(): string | null {
   const gifs = findFavoriteGifs();
   if (gifs == null) {
-    console.error("[gifRoulette] could not find a validated FrecencyUserSettingsActionCreators.getCurrentValue().favoriteGifs.gifs in the webpack cache");
+    console.error("[gifRoulette] could not find a getCurrentValue().favoriteGifs.gifs in the webpack cache");
     return null;
   }
 
