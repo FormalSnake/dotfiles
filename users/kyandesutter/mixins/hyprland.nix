@@ -618,12 +618,20 @@ in
     hl.bind(mod .. " + Tab", hl.dsp.focus({ workspace = "previous" }))
 
     -- Alt-Tab. Hyprland has no most-recently-used hold-and-cycle switcher
-    -- (niri's `recent-windows`), so this is a plain stack cycle: each press
-    -- steps one window, SHIFT reverses. Alt+grave (cycle windows of the same
-    -- app) has no equivalent and is dropped.
+    -- (niri's `recent-windows`). Under FormalShell the shell draws one
+    -- (Gala's, under the pantheon preset; the IPC refuses under any other
+    -- theme and the keys then do nothing): each press steps the card,
+    -- SHIFT reverses, releasing Alt commits. Under DMS this is a plain stack
+    -- cycle. Alt+grave (cycle windows of the same app) has no equivalent
+    -- and is dropped.
+${if useFormalshell then ''
+    hl.bind("ALT + Tab", hl.dsp.exec_cmd("${fsIpc [ "switcher" "next" ]}"))
+    hl.bind("ALT + SHIFT + Tab", hl.dsp.exec_cmd("${fsIpc [ "switcher" "prev" ]}"))
+    hl.bind("ALT + Alt_L", hl.dsp.exec_cmd("${fsIpc [ "switcher" "commit" ]}"), { release = true })
+'' else ''
     hl.bind("ALT + Tab", hl.dsp.window.cycle_next())
     hl.bind("ALT + SHIFT + Tab", hl.dsp.window.cycle_next({ next = false }))
-
+''}
     -- MX Master 3S, usable without the keyboard. Its three thumb buttons are
     -- remapped to keys in modules/nixos/mixins/mouse.nix: the gesture button is
     -- Mod, so thumb + main wheel walks workspaces, and back/forward arrive as
