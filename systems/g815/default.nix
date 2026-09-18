@@ -181,10 +181,6 @@
   # leaves this off.
   kyan.nvidia.enable = true;
 
-  # Bare Steam client, workshop downloads only (gaming lives on Windows,
-  # see mixins/steam.nix).
-  kyan.steam.enable = true;
-
   # Modrinth App. The instance directory is the Windows one, symlinked by
   # link-minecraft-to-windows (./windows-dualboot.nix), so both OSes launch the
   # same mods, config and worlds instead of two copies that drift.

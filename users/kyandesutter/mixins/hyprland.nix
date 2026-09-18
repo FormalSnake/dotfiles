@@ -410,9 +410,6 @@ in
           active_border = fsColor(fsChrome.borderColor),
           inactive_border = fsColors.border,
         },
-        -- Master switch for screen tearing. Does nothing on its own: a window
-        -- must also carry the `immediate` rule (see the steam_app rule below).
-        allow_tearing = true,
       },
       -- Grouped (tabbed) windows carry their own border set, so they follow
       -- the same palette. Locked means the group refuses new members.
@@ -681,12 +678,6 @@ ${if useFormalshell then ''
     -- YouTube Music web app (mixins/webapps.nix). Chromium names a shared-profile
     -- --app window after its URL and profile, not the launcher's --class.
     hl.window_rule({ match = { class = "^(chrome-music.youtube.com__-Default)$" }, workspace = "8" })
-    hl.window_rule({ match = { class = "^([Ss]team|steam)$" }, workspace = "9" })
-    -- Allow tearing for Steam games (any steam_app_<id> window). Pairs with
-    -- general.allow_tearing to present frames immediately instead of on the
-    -- vblank. Tearing only actually happens when the game itself presents
-    -- without vsync, so launch games with vsync OFF.
-    hl.window_rule({ match = { class = "^(steam_app_.*)$" }, immediate = true })
     -- Minecraft locks the pointer with an X11 grab plus a recentering warp,
     -- which Hyprland does not hold the way it holds a Wayland pointer
     -- constraint: the cursor drifts out of the window, and the warp back on

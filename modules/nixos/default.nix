@@ -29,7 +29,6 @@
       ./mixins/mouse.nix
       ./mixins/hyprland.nix
       ./mixins/online-accounts.nix
-      ./mixins/steam.nix
       ./mixins/dualsense.nix
       ./mixins/minecraft.nix
       ./mixins/roblox.nix

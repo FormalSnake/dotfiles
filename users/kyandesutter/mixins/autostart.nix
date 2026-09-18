@@ -6,7 +6,7 @@ let
   # PATH, which PAM fixes when `systemd --user` first starts: long before uwsm
   # imports the rich session PATH into the user manager. That
   # early PATH lacks /run/current-system/sw/bin and the per-user profile, so a
-  # bare `ExecStart=steam` (or even `sh`) fails at login with status=203/EXEC and
+  # bare `ExecStart=helium` (or even `sh`) fails at login with status=203/EXEC and
   # the app silently never starts (dms/easyeffects dodge this only because
   # their units use absolute /nix/store paths).
   #

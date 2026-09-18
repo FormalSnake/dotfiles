@@ -257,7 +257,7 @@ removed on 2026-08-24 (git has them). What remains:
 
 ## Autostart (g815)
 
-DE-agnostic login apps (Steam, Helium, Discord, …) are home-manager
+DE-agnostic login apps (Helium, Discord, …) are home-manager
 `systemd.user.services` bound to `graphical-session.target` in
 `users/kyandesutter/mixins/autostart.nix` (uwsm ties the compositor to that
 target, so they follow the session). Nothing is compositor-hook-launched: there
