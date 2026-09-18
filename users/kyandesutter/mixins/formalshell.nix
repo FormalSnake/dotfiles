@@ -49,9 +49,10 @@ in
         # ~/.claude/.credentials.json and the codex CLI; all three degrade
         # honestly without auth. Left/center regions absent on purpose, they
         # fall back to defaults (which include the M13b bell).
-        # The bar stands on the left edge (2026-08-26): the regions run top
-        # to bottom and every cell turns its label along the strip.
-        bar.position = "left";
+        # The bar stands on the top edge (2026-09-18, with the pantheon
+        # preset: wingpanel is a top panel). It stood on the left from
+        # 2026-08-26 until then.
+        bar.position = "top";
         # The screen frame (2026-08-26): the bar's fill carried round the other
         # three edges as a 10px band, the desktop in a rounded cut-out.
         frame.thickness = 6;
