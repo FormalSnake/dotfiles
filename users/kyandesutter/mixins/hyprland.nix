@@ -733,6 +733,9 @@ ${if useFormalshell then ''
     hl.layer_rule({ match = { namespace = "^(formalshell:notifications-center)$" }, blur = true, ignore_alpha = 0.2, no_anim = true })
     hl.layer_rule({ match = { namespace = "^(formalshell:tooltip)$" }, blur = true, ignore_alpha = 0.2, no_anim = true })
     hl.layer_rule({ match = { namespace = "^(formalshell:osd)$" }, blur = true, ignore_alpha = 0.2, no_anim = true })
+    -- The window switcher draws its card at 0.6, so without the blur under
+    -- it the card reads as see-through rather than as frosted.
+    hl.layer_rule({ match = { namespace = "^(formalshell:switcher)$" }, blur = true, ignore_alpha = 0.2, no_anim = true })
     -- The modal layers cover the whole output with a 0.5 scrim. ignore_alpha
     -- 0.6 leaves the scrim under the blur, so it only darkens the desktop, and
     -- keeps the card over it (theme.surfaceOpacity, 0.85) blurred.
