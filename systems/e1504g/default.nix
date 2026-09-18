@@ -107,28 +107,12 @@
       (g815 "100.114.32.78") # Tailscale (works away from home)
       (g815 "192.168.86.95") # home-LAN fallback when tailscale is down
 
-      # Second builder for when the g815 is off: the Rosetta Linux VM on the
-      # macbook (modules/darwin/mixins/rosetta-builder.nix). The macbook itself
-      # is aarch64-darwin and can't build for this host at all. The VM is what
-      # answers, so this points at the ssh alias below, not at the Mac.
-      # speedFactor 4 vs 3 keeps the g815 preferred whenever it is up.
-      #
-      # No kvm/nixos-test: x86_64 there is Rosetta on an aarch64 guest, so
-      # nested VMs can't run, and advertising them would only draw in builds
-      # that then fail.
-      {
-        hostName = "macbook-rosetta";
-        system = "x86_64-linux";
-        protocol = "ssh-ng";
-        sshUser = "builder";
-        sshKey = "/root/.ssh/nix-builder";
-        maxJobs = 6;
-        speedFactor = 3;
-        supportedFeatures = [
-          "big-parallel"
-          "benchmark"
-        ];
-      }
+      # The macbook's Rosetta VM (modules/darwin/mixins/rosetta-builder.nix) is
+      # deliberately absent. Nix schedules on currentJobs / speedFactor, so an
+      # idle VM takes the next derivation as soon as the g815 has one job
+      # running, whatever the speed factors say. It stays reachable through
+      # the `macbook-rosetta` ssh alias below and is used only when pinned by
+      # hand with `--option builders` (command in CLAUDE.md).
     ];
   # Pin the g815's host key so root's first builder connection doesn't stall
   # on an unverifiable host.

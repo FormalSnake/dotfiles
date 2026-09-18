@@ -134,12 +134,14 @@ Which shell owns the session is `kyan.desktop.shell` (enum `dms` |
 stays installed but dormant on both, so rollback is deleting the host's one
 line. The theming section below still describes the DMS path.
 
-The g815 is back online (2026-08-10) and is the e1504g's build host again. If it
-ever goes down for a stretch, remember that `/etc/nix/machines` lists it twice
-(Tailscale, then LAN) ahead of the macbook's rosetta builder and nix walks that
+The g815 is the e1504g's only listed build host (since 2026-09-18): the
+macbook's rosetta builder was dropped from `/etc/nix/machines` because nix
+schedules on currentJobs / speedFactor, so the idle VM kept taking derivations
+whenever the g815 was busy. If the g815 goes down for a stretch, remember that
+`/etc/nix/machines` lists it twice (Tailscale, then LAN) and nix walks that
 list per derivation, so every e1504g build pays two SSH connect timeouts
 (measured 2026-08-04: 4m35s per derivation) before falling back to local. Pin
-the mac as the only builder to skip that:
+the mac as the only builder by hand to skip that:
 
 ```
 ssh e1504g 'cd ~/.config/nix && sudo -n /run/current-system/sw/bin/nixos-rebuild switch --flake .#e1504g \
