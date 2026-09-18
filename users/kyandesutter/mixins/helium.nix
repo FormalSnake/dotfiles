@@ -86,7 +86,7 @@ let
       # carried along. Check chrome://gpu, "Video Decode".
       heliumFeatures=--enable-features=WaylandWindowDecorations,AcceleratedVideoDecodeLinuxGL
       export PATH=${
-        lib.makeBinPath [ pkgs.procps pkgs.coreutils pkgs.curl pkgs.jq pkgs.gnused pkgs.openssh ]
+        lib.makeBinPath [ pkgs.procps pkgs.coreutils pkgs.curl pkgs.jq pkgs.gnused pkgs.openssh pkgs.libnotify ]
       }:$PATH
 
       browser_pids() {
@@ -111,7 +111,7 @@ let
       # sync, the authoritative "everything I had has reached you" signal.
       # Prints "took" iff it actually quit something, so an idle/offline peer
       # costs only the ssh probe.
-      took=$(ssh -o BatchMode=yes -o ConnectTimeout=2 ${peer} /bin/sh -s ${myDeviceId} <<'REMOTE' 2>/dev/null
+      remote_script=$(cat <<'REMOTE'
       myid="$1"
       P=/run/current-system/sw/bin
       browser_pids() {
@@ -130,6 +130,21 @@ let
       while [ -n "$(browser_pids)" ] && [ "$i" -lt 120 ]; do
         $P/sleep 0.25; i=$((i+1))
       done
+      # A SIGTERM that never lands (a lingering GPU process, a big IndexedDB
+      # flush) used to fall through here and go straight to the rescan below
+      # with Helium still alive and still writing: the launching side would
+      # then see the folder settle, open the profile, and race the peer's own
+      # writes, which is how Preferences and Local State ended up with
+      # sync-conflict copies (and a just-installed extension gone from
+      # whichever copy lost). Force it dead before calling the profile quiet.
+      remaining=$(browser_pids)
+      if [ -n "$remaining" ]; then
+        kill -KILL $remaining 2>/dev/null || true
+        i=0
+        while [ -n "$(browser_pids)" ] && [ "$i" -lt 20 ]; do
+          $P/sleep 0.25; i=$((i+1))
+        done
+      fi
       echo took
       key=$($P/sed -n 's/.*<apikey>\(.*\)<\/apikey>.*/\1/p' "$HOME/.config/syncthing/config.xml" | $P/head -n1)
       [ -n "$key" ] && [ -n "$myid" ] || exit 0
@@ -145,7 +160,33 @@ let
       done
       exit 0
       REMOTE
-      ) || took=""
+      )
+
+      # The old probe used ConnectTimeout=2 with a single try: indistinguishable
+      # from "the peer is genuinely off" (the common daily case, no reason to
+      # slow that down), except it also fires on a plain Tailscale hiccup
+      # (this host waking from sleep, for one), and that case is the dangerous
+      # one: the peer's Helium can still be running and about to write the
+      # same profile this launch is about to open. A second try at a slightly
+      # longer timeout turns most of those hiccups back into a real
+      # quit-and-wait, at a bounded extra cost when the peer really is off.
+      # reachable=0 iff ssh itself completed (peer answered), independent of
+      # whether it had anything to quit, so we only warn when the peer's
+      # state is genuinely unknown.
+      reachable=1
+      took=""
+      for attempt in 1 2; do
+        if took=$(ssh -o BatchMode=yes -o ConnectTimeout=4 ${peer} /bin/sh -s ${myDeviceId} <<<"$remote_script" 2>/dev/null); then
+          reachable=0
+          break
+        fi
+      done
+      if [ "$reachable" -ne 0 ]; then
+        took=""
+        notify-send -u critical "Helium" \
+          "Could not confirm ${peer}'s browser is closed, launching anyway. If it was running, check for a lost extension or history change." \
+          2>/dev/null || true
+      fi
 
       # After a takeover, settle locally too: the folder must have nothing
       # left to pull for two consecutive polls (right after the peer's rescan
