@@ -627,7 +627,12 @@ in
 ${if useFormalshell then ''
     hl.bind("ALT + Tab", hl.dsp.exec_cmd("${fsIpc [ "switcher" "next" ]}"))
     hl.bind("ALT + SHIFT + Tab", hl.dsp.exec_cmd("${fsIpc [ "switcher" "prev" ]}"))
-    hl.bind("ALT + Alt_L", hl.dsp.exec_cmd("${fsIpc [ "switcher" "commit" ]}"), { release = true })
+    -- `transparent`: Hyprland shadows a bind whose key is still held when
+    -- another bind consumes a press (KeybindManager.cpp, shadowKeybinds), so
+    -- a plain release bind on Alt never fires after an Alt+Tab; a
+    -- transparent one is skipped by the shadowing.
+    hl.bind("ALT + Alt_L", hl.dsp.exec_cmd("${fsIpc [ "switcher" "commit" ]}"), { release = true, transparent = true })
+    hl.bind("ALT + Alt_R", hl.dsp.exec_cmd("${fsIpc [ "switcher" "commit" ]}"), { release = true, transparent = true })
 '' else ''
     hl.bind("ALT + Tab", hl.dsp.window.cycle_next())
     hl.bind("ALT + SHIFT + Tab", hl.dsp.window.cycle_next({ next = false }))
