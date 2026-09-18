@@ -6,6 +6,10 @@ result-*
 # matugen / build scratch artifacts
 *.tmp
 
+# moonlight extension build tooling; dist/ (the actual devSearchPaths input)
+# stays committed
+users/kyandesutter/moonlight-extensions/node_modules/
+
 # home-manager's claude-code module owns this under ~/.claude/skills; it must
 # never be tracked in the repo (it's regenerated per-rebuild and pointed store)
 users/kyandesutter/claude/skills/claude-code-home-manager/

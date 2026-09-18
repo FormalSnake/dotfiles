@@ -1,0 +1,13 @@
+{
+  "$schema": "https://moonlight-mod.github.io/manifest.schema.json",
+  "id": "gifRoulette",
+  "version": "1.0.0",
+  "apiLevel": 2,
+  "meta": {
+    "name": "GIF Roulette",
+    "tagline": "Adds /gifroulette, which sends a random favorited GIF",
+    "authors": ["FormalSnake"],
+    "tags": ["fun", "chat"]
+  },
+  "dependencies": ["commands", "spacepack"]
+}

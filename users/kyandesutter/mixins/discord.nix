@@ -71,6 +71,14 @@ let
     '';
   };
 
+  # Our own extension: adds a client-side `/gifroulette` command that sends a
+  # random favorited GIF. Source and build tooling live in
+  # ../moonlight-extensions (TS + esbuild, same @moonlight-mod/esbuild-config
+  # setup the extensions above ship with); `dist/gifRoulette` is the committed
+  # build output, laid out identically to the unpacked asars above so it can
+  # go straight into devSearchPaths.
+  gifRoulette = ../moonlight-extensions/dist/gifRoulette;
+
   # midnight-discord's colour module on its own. colors.css declares a
   # --bg/--text/--accent ladder and maps every Discord design token onto it,
   # which is the mapping layer a wallpaper palette needs; the rest of the theme
@@ -139,6 +147,8 @@ let
           nameFormat = "artist-first";
         };
       };
+
+      gifRoulette.enabled = true;
     };
     repositories = [ "https://moonlight-mod.github.io/extensions-dist/repo.json" ];
     # Loaded as a developer extension: the normal extensions dir is moonbase's
@@ -146,6 +156,7 @@ let
     devSearchPaths = [
       "${moonlightCss}"
       "${lastFmRpc}"
+      "${gifRoulette}"
     ];
   };
 
