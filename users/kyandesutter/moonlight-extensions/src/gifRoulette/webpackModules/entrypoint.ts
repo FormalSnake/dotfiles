@@ -5,16 +5,33 @@ import spacepack from "@moonlight-mod/wp/spacepack_spacepack";
 // Named exports survive Discord's minifier (only local variable names get
 // mangled), so scanning the already-required module cache for this exact key
 // is more reliable than matching against minified source via findByCode.
-function findFrecencyActionCreators(): any {
+//
+// A plain `!= null` check on the property isn't enough: several webpack
+// modules (i18n string catalogs) export catch-all Proxies that return a
+// truthy value for *any* key, including this one, so every candidate has to
+// be validated by shape (a real getCurrentValue() call that resolves to a
+// favoriteGifs.gifs map) before being accepted.
+function extractFavoriteGifs(candidate: any): Record<string, unknown> | null {
+  if (typeof candidate?.getCurrentValue !== "function") return null;
+
+  try {
+    const gifs = candidate.getCurrentValue()?.favoriteGifs?.gifs;
+    return gifs != null && typeof gifs === "object" ? gifs : null;
+  } catch {
+    return null;
+  }
+}
+
+function findFavoriteGifs(): Record<string, unknown> | null {
   const cache = spacepack.cache;
   for (const id in cache) {
     const exports = cache[id]?.exports;
-    if (exports?.FrecencyUserSettingsActionCreators != null) {
-      return exports.FrecencyUserSettingsActionCreators;
-    }
-    if (exports?.default?.FrecencyUserSettingsActionCreators != null) {
-      return exports.default.FrecencyUserSettingsActionCreators;
-    }
+    if (exports == null) continue;
+
+    const gifs =
+      extractFavoriteGifs(exports.FrecencyUserSettingsActionCreators) ??
+      extractFavoriteGifs(exports.default?.FrecencyUserSettingsActionCreators);
+    if (gifs != null) return gifs;
   }
   return null;
 }
@@ -24,15 +41,9 @@ function findFrecencyActionCreators(): any {
 // with no pagination: Object.keys() once, then one O(1) random index, however
 // many thousand GIFs are favorited.
 function getRandomFavoriteGifUrl(): string | null {
-  const actionCreators = findFrecencyActionCreators();
-  if (actionCreators == null) {
-    console.error("[gifRoulette] could not find FrecencyUserSettingsActionCreators in the webpack cache");
-    return null;
-  }
-
-  const gifs = actionCreators.getCurrentValue?.()?.favoriteGifs?.gifs;
+  const gifs = findFavoriteGifs();
   if (gifs == null) {
-    console.error("[gifRoulette] FrecencyUserSettings has no favoriteGifs.gifs", actionCreators.getCurrentValue?.());
+    console.error("[gifRoulette] could not find a validated FrecencyUserSettingsActionCreators.getCurrentValue().favoriteGifs.gifs in the webpack cache");
     return null;
   }
 
