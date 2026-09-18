@@ -289,6 +289,35 @@ in
       end
     end
 
+    -- Window chrome
+    -- The shell's theme table decides the rounding, the blur, the frame colour
+    -- and the window shadow (elementary's under the pantheon preset, none under
+    -- metamorphosis) and publishes them to
+    -- ~/.config/hypr/formalshell-chrome.lua beside the colours, same dofile,
+    -- same reload. The literals are the metamorphosis defaults for a session
+    -- before the shell's first render. A colour is either an rgba literal or
+    -- the name of a role in fsColors.
+    local fsChrome = {
+      rounding = ${fsRadius},
+      blur = true,
+      borderColor = "primary",
+      shadow = false,
+      shadowRange = 4,
+      shadowPower = 3,
+      shadowOffset = { 0, 0 },
+      shadowColor = "rgba(000000ed)",
+      shadowInactiveColor = "rgba(000000ed)",
+    }
+    do
+      local ok, loaded = pcall(dofile, os.getenv("HOME") .. "/.config/hypr/formalshell-chrome.lua")
+      if ok and type(loaded) == "table" then
+        for key in pairs(fsChrome) do
+          if loaded[key] ~= nil and type(loaded[key]) == type(fsChrome[key]) then fsChrome[key] = loaded[key] end
+        end
+      end
+    end
+    local function fsColor(c) return fsColors[c] or c end
+
     -- Monitors
     ${monitors}
     -- Catch-all: any other external display at its highest refresh rate
@@ -378,7 +407,7 @@ in
         -- value here Hyprland's built-in active border is white, which is what
         -- borders would revert to on every reload before the palette applies.
         col = {
-          active_border = fsColors.primary,
+          active_border = fsColor(fsChrome.borderColor),
           inactive_border = fsColors.border,
         },
         -- Master switch for screen tearing. Does nothing on its own: a window
@@ -424,7 +453,18 @@ in
         },
       },
       decoration = {
-        rounding = ${fsRadius},
+        rounding = fsChrome.rounding,
+        -- The window shadow the shell's theme asks for (fsChrome above):
+        -- elementary's cast under pantheon, off under metamorphosis, which
+        -- also turns off the shadow Hyprland enables by default.
+        shadow = {
+          enabled = fsChrome.shadow,
+          range = fsChrome.shadowRange,
+          render_power = fsChrome.shadowPower,
+          offset = fsChrome.shadowOffset,
+          color = fsColor(fsChrome.shadowColor),
+          color_inactive = fsColor(fsChrome.shadowInactiveColor),
+        },
         -- Separates the quake console from the workspace it drops over. Only
         -- applies while a special workspace is on screen, so it costs the
         -- rest of the session nothing, and the console is the only special
@@ -436,7 +476,7 @@ in
         active_opacity = ${windowOpacity},
         inactive_opacity = ${windowOpacity},
         blur = {
-          enabled = true,
+          enabled = fsChrome.blur,
           size = 8,
           passes = 2,
           new_optimizations = true,
