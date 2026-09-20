@@ -84,6 +84,11 @@ lib.mkIf useFormalshell {
     themeDark = theme.themeName "dark";
   };
 
+  # Pantheon's headerbar: close on the left, maximize on the right. Hyprland
+  # sends every toplevel all four tiled states whether it floats or not, so
+  # GTK cannot tell the two apart and the layout applies to both.
+  dconf.settings."org/gnome/desktop/wm/preferences".button-layout = "close:maximize";
+
   # The shell's own chrome follows the desktop: elementary's relief on every
   # control and a shadow under every card (FormalShell's pantheon preset).
   programs.formalshell.settings.theme.preset = "pantheon";
