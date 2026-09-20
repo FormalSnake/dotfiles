@@ -218,6 +218,13 @@ in
       # On-screen keyboard. The Qt runtime the theme QML needs (svg,
       # multimedia, Qt5Compat) is contributed by the qylock module.
       extraPackages = [ pkgs.kdePackages.qtvirtualkeyboard ];
+      # The greeter's XCURSOR_PATH ends at the system profile, and the user's
+      # Bibata lives in the home-manager profile, which the sddm user cannot
+      # see. With no theme to load, the greeter draws no pointer at all.
+      settings.Theme = {
+        CursorTheme = "Bibata-Modern-Classic";
+        CursorSize = 24;
+      };
     };
 
     # qylock: one theme tree rendered by two frontends, the SDDM greeter and a
@@ -474,6 +481,9 @@ in
     networking.firewall.allowedUDPPorts = [ 53317 ];
 
     environment.systemPackages = with pkgs; [
+      # Pointer theme for the SDDM greeter (Theme.CursorTheme above).
+      bibata-cursors
+
       # Night light backend for FormalShell (M16): the shell manages the
       # wlsunset process itself and only needs the binary on PATH.
       wlsunset
