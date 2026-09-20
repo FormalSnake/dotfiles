@@ -268,6 +268,48 @@ own in-shell polkit agent. Alt-Tab is `hl.dsp.window.cycle_next()`; Hyprland has
 most-recently-used hold-and-cycle switcher, so niri's `recent-windows` and its
 Alt+grave same-app cycle have no equivalent here.
 
+## Messages on the g815's Windows side
+
+The g815 dual-boots Windows (`ssh windows` from the macbook, user `kyan`), and
+Messages (`~/Developer/messages`, the same repo the Linux package runs) is set
+up there too (2026-09-20). None of it is nix-managed:
+
+- Checkout: `C:\Users\Kyan\Developer\messages`, cloned over https (the repo is
+  public, Windows holds no GitHub key, so it pulls but never pushes).
+- Config: `C:\Users\Kyan\.config\messages\config.json`, a copy of the
+  macbook's with `agent.url` pointed at the mac's Tailscale name instead of
+  `127.0.0.1`. Cache lands in `C:\Users\Kyan\.cache\messages`.
+- Launch: `Messages.lnk` in the Start Menu and in the Startup folder (icon at
+  `%LOCALAPPDATA%\messages\icon.ico`). It runs
+  `conhost --headless cmd /c "bun install --cwd ..\.. & bun app.tsx"` from
+  `apps\desktop`, so a changed `bun.lock` is installed at the next launch and
+  there is no console window. git, bun and ffmpeg came from winget
+  (`Git.Git`, `Oven-sh.Bun`, `Gyan.FFmpeg`).
+- The win32 code paths (clipboard, toasts, links, file picker) shell out to
+  Windows PowerShell through `packages/core/src/windows.ts`.
+
+**Updating it from NixOS.** Windows cannot read the ext4 root, but NixOS
+mounts `C:` read-write at `/mnt/windows` (ntfs3, uid 1000, in the g815's
+fstab), so the Windows checkout is reachable from Linux:
+
+```
+git -C /mnt/windows/Users/Kyan/Developer/messages pull --ff-only
+```
+
+That is the whole upgrade: the shortcut runs `bun install` on the Windows
+side at the next launch. Never run `bun install` in that tree from Linux, it
+would fetch the linux native renderer into the Windows `node_modules`. The
+clone has `core.autocrlf=true` and `core.filemode=false` in its own
+`.git/config`, which Linux git reads too, so the CRLF working tree shows clean
+from both systems; do not unset either. To change the server or agent URL,
+edit `/mnt/windows/Users/Kyan/.config/messages/config.json`.
+
+Writing to `/mnt/windows` is only safe while Windows was fully shut down.
+Fast Startup is off (`HiberbootEnabled=0`, checked 2026-09-20); if Windows was
+hibernated, or a Windows update turns Fast Startup back on, ntfs3 sees a dirty
+volume, so check `findmnt /mnt/windows` still says `rw` before writing and
+leave the volume alone if it does not.
+
 ## Tooling
 
 Prefer `fd` (find), `rg` (grep). For broad code analysis, delegate to the
