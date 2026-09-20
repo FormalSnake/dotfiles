@@ -186,6 +186,10 @@
   # same mods, config and worlds instead of two copies that drift.
   kyan.minecraft.enable = true;
 
+  # Second SDDM session: Minecraft with the waylandcraft compositor mod as the
+  # desktop, no Hyprland underneath (mixins/waylandcraft.nix).
+  kyan.waylandcraft.enable = true;
+
   # Roblox via Sober (mixins/roblox.nix). Android-runtime client, needs
   # Vulkan, so it stays on the dGPU host rather than the shared desktop
   # profile.

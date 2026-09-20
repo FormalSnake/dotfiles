@@ -31,6 +31,7 @@
       ./mixins/online-accounts.nix
       ./mixins/dualsense.nix
       ./mixins/minecraft.nix
+      ./mixins/waylandcraft.nix
       ./mixins/roblox.nix
       ./mixins/comms.nix
       ./mixins/asus.nix
