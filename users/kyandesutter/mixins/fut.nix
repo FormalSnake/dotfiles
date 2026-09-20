@@ -49,4 +49,19 @@ let
 in
 {
   home.packages = [ fut ];
+
+  # The defaults put copy mode, the right sidebar and split-right on `[`, `]`
+  # and `|`, which are AltGr/Option combos on the Spanish ISO layout and never
+  # reach fut as those characters. Every key here is unshifted on that layout.
+  xdg.configFile."fut/config.toml".text = ''
+    #:schema https://fut.sh/schemas/config.json
+
+    [ui.bindings]
+    open_command_bar = "space"
+    enter_copy_mode = "y"
+    open_right_sidebar = "e"
+    split_pane_right = "v"
+    split_pane_down = "-"
+    focus_previous_pane = ","
+  '';
 }
