@@ -821,6 +821,10 @@ ${lib.optionalString (!useFormalshell) ''
     # generated colour scheme via the qt{6,5}ct.conf written in mixins/qt.nix.
     kdePackages.qt6ct
     libsForQt5.qt5ct
+
+    # Disk usage as a treemap. Qt6 widgets, so it also shows what the Qt theme
+    # above looks like on a real app.
+    qdirstat
   ];
 
   # Cursor theme: Bibata Modern Classic, the black variant. Sets it for GTK,
