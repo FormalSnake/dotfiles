@@ -1,4 +1,16 @@
-{ config, ... }:
+{ config, osConfig ? { }, ... }:
+let
+  useFormalshell = (((osConfig.kyan or { }).desktop or { }).shell or "dms") == "formalshell";
+  # Under FormalShell the widgets come from Kvantum, whose theme carries the
+  # palette itself (mixins/elementary); a qtct palette on top would fight it.
+  appearance =
+    if useFormalshell then ''
+      style=kvantum
+      custom_palette=false''
+    else ''
+      style=Fusion
+      custom_palette=true'';
+in
 {
   # qt6ct / qt5ct config: select the Fusion style and the shell's generated
   # colour scheme. The colors/matugen.conf files are written at runtime by the
@@ -14,10 +26,9 @@
   # templates (AvengeMedia/DankMaterialShell core/internal/matugen/matugen.go
   # templateRegistry, no user template needed) write
   # ~/.config/qt{5,6}ct/colors/matugen.conf whenever qt{5,6}ct is detected on
-  # PATH, and the qt{5,6}ct.conf below point at it. Qt6 takes Darkly (installed
-  # in hyprland.nix), which draws from the custom palette; nixpkgs dropped
-  # darkly-qt5, so Qt5 stays on Fusion. Qt apps pick up the colours at launch:
-  # no live recolour (Qt has no palette hot-reload).
+  # PATH, and the qt{5,6}ct.conf below point at it with a Fusion style (Fusion
+  # honours the custom palette). Qt apps pick up the colours at launch: no
+  # live recolour (Qt has no palette hot-reload).
   # [Fonts] pins Geist/GeistMono so Qt apps match the GTK side instead of taking
   # whatever QGuiApplication::font() resolves to. Both qt5ct and qt6ct read
   # these through QFont::fromString on a plain string, so the value is the
@@ -27,8 +38,7 @@
   # comma-separated value into a QStringList and .toString() on that is empty.
   xdg.configFile."qt6ct/qt6ct.conf".text = ''
     [Appearance]
-    style=Darkly
-    custom_palette=true
+    ${appearance}
     color_scheme_path=${config.home.homeDirectory}/.config/qt6ct/colors/matugen.conf
     icon_theme=elementary-colloid
     standard_dialogs=default
@@ -39,8 +49,7 @@
   '';
   xdg.configFile."qt5ct/qt5ct.conf".text = ''
     [Appearance]
-    style=Fusion
-    custom_palette=true
+    ${appearance}
     color_scheme_path=${config.home.homeDirectory}/.config/qt5ct/colors/matugen.conf
     icon_theme=elementary-colloid
     standard_dialogs=default

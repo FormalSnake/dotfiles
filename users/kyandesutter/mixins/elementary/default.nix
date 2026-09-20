@@ -3,6 +3,8 @@ let
   useFormalshell = (((osConfig.kyan or { }).desktop or { }).shell or "dms") == "formalshell";
 
   theme = pkgs.callPackage ./gtk-theme.nix { };
+  kvantum = pkgs.callPackage ./kvantum-theme.nix { };
+  kvantumDir = "${config.xdg.configHome}/Kvantum/${kvantum.themeName}";
 
   # Every role recolor.py maps a literal to, in either mode. Both modes are
   # rendered into the same file with matugen's .light/.dark views, because
@@ -40,7 +42,11 @@ let
     ${defines}'';
 in
 lib.mkIf useFormalshell {
-  home.packages = [ theme ];
+  home.packages = [
+    theme
+    pkgs.kdePackages.qtstyleplugin-kvantum
+    pkgs.libsForQt5.qtstyleplugin-kvantum
+  ];
 
   # Merged into FormalShell's own matugen run on every wallpaper and mode change.
   xdg.configFile."formalshell/matugen.d/elementary-gtk.toml".text = ''
@@ -51,6 +57,22 @@ lib.mkIf useFormalshell {
     [templates.elementary-gtk4]
     input_path = "${gtk4Template}"
     output_path = "${config.xdg.configHome}/gtk-4.0/elementary-colors.css"
+  '';
+
+  # Qt apps draw the same material through Kvantum (mixins/qt.nix selects the
+  # style). Qt reads the theme at launch, so a running app keeps its colours.
+  xdg.configFile."formalshell/matugen.d/elementary-kvantum.toml".text = ''
+    [templates.elementary-kvantum-svg]
+    input_path = "${kvantum}/theme.svg.tmpl"
+    output_path = "${kvantumDir}/${kvantum.themeName}.svg"
+
+    [templates.elementary-kvantum-config]
+    input_path = "${kvantum}/theme.kvconfig.tmpl"
+    output_path = "${kvantumDir}/${kvantum.themeName}.kvconfig"
+  '';
+  xdg.configFile."Kvantum/kvantum.kvconfig".text = ''
+    [General]
+    theme=${kvantum.themeName}
   '';
 
   # After formalshell-colors.css, so these definitions win where both name a colour.
