@@ -36,6 +36,12 @@ in
     PermitRootLogin no
     PasswordAuthentication no
     KbdInteractiveAuthentication no
+    # sshd-session's PAM session setup (macOS 26.5.1, OpenSSH 10.2p1) stalls
+    # ~15s after pam_sm_open_session with no WindowServer session to hand off
+    # to, which reads as a timeout/auth failure to mobile SSH clients. PAM
+    # here only covers password/krb5/ntlm accounting, already disabled or
+    # no-ops for pubkey auth, so skip it.
+    UsePAM no
   '';
 
   # Authorized keys for SSH into this Mac over Tailscale. nix-darwin delivers
