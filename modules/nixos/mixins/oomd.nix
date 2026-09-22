@@ -22,22 +22,16 @@ in
     # does not trip). oomd keys off per-cgroup memory PSI, which measures the
     # stall itself, so the size of the swap tier is irrelevant to it.
     #
-    # Kill scope is the user session only: ManagedOOMMemoryPressure=kill on
-    # user.slice plus a drop-in on the user manager's own slice, so every app
-    # cgroup under the session is in scope and no system service is.
+    # Kill scope is the user manager's app.slice only. uwsm runs Hyprland in
+    # session.slice and launched apps in app.slice, so scoping pressure-kill
+    # to app.slice keeps the compositor out of reach. Fedora's user.slice-wide
+    # policy lets oomd pick session.slice, i.e. the whole desktop.
     #
-    # Written out rather than using nixpkgs' `enableUserSlices`, which sets the
-    # same two units but at an 80% pressure limit. 80% PSI sustained for 20 s is
-    # a session that has already stopped responding; Fedora ships 50%
-    # (10-oomd-user-service-defaults.conf) and that is the number this is meant
-    # to match. The nixpkgs value is a plain mkDefault on the system slice but
-    # hardcoded in the user-manager unit text, so overriding it piecemeal would
-    # leave the two halves disagreeing.
-    systemd.slices.user.sliceConfig = {
-      ManagedOOMMemoryPressure = "kill";
-      ManagedOOMMemoryPressureLimit = "50%";
-    };
-    systemd.user.units."slice" = {
+    # Written out rather than using nixpkgs' `enableUserSlices`, which scopes
+    # to user.slice at an 80% pressure limit. 80% PSI sustained for 20 s is a
+    # session that has already stopped responding; Fedora ships 50%
+    # (10-oomd-user-service-defaults.conf) and that is the number this matches.
+    systemd.user.units."app.slice" = {
       text = ''
         [Slice]
         ManagedOOMMemoryPressure=kill

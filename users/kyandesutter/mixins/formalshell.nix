@@ -127,6 +127,11 @@ in
     # should survive a shell restart.
     systemd.user.services.formalshell.Service.KillMode = "process";
 
+    # session.slice, next to the compositor: systemd-oomd pressure-kills in
+    # app.slice (modules/nixos/mixins/oomd.nix) and would take the bar down
+    # together with every app launched from its menu.
+    systemd.user.services.formalshell.Service.Slice = "session.slice";
+
     # helium waits for the session notification daemon (see autostart.nix);
     # with dms.service gone that is formalshell.service.
     systemd.user.services.helium.Unit = {

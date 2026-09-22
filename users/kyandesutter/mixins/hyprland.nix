@@ -367,6 +367,8 @@ in
         kb_layout = "es",
         -- caps:escape: Caps Lock acts as Escape (no Caps Lock function).
         kb_options = "caps:escape",
+        repeat_rate = 40,
+        repeat_delay = 250,
         -- 2 = keyboard focus only changes on click (focus-follows-mouse off), but
         -- the hovered window still receives pointer events: so you can scroll an
         -- unfocused window under the cursor without it stealing keyboard focus.
@@ -487,6 +489,7 @@ in
         -- (anti-focus-steal), so the link would open with the browser left in
         -- the background. Honour the request instead.
         focus_on_activate = true,
+        anr_missed_pings = 3,
         -- Default off for outputs without a rule; the g815 pair pins vrr = 1
         -- in its monitor rules above.
         vrr = 0,
@@ -785,6 +788,15 @@ ${lib.optionalString (!useFormalshell) ''
       export __GLX_VENDOR_LIBRARY_NAME=nvidia
     '';
   };
+
+  # xdph keeps hyprlang syntax; Hyprland's Lua config does not reach it.
+  # Pre-ticking "Allow restore token" lets Discord/Meet reuse the last share
+  # target instead of reopening the picker every call.
+  xdg.configFile."hypr/xdph.conf".text = ''
+    screencopy {
+      allow_token_by_default = true
+    }
+  '';
 
   # polkit auth agent: FormalShell registers its own in-shell agent (M16,
   # 2026-08-03), so there is no standalone agent service here. Two agents would

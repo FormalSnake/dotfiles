@@ -4,9 +4,9 @@
   # The default is 90s, so any single service that fails to stop cleanly
   # makes a reboot hang on the "A stop job is running for ... (1min 30s)"
   # spinner. This box reboots constantly for Windows dual-boot, so cap the
-  # worst case at 10s for both the system manager and per-user managers.
-  systemd.settings.Manager.DefaultTimeoutStopSec = lib.mkDefault "10s";
-  systemd.user.settings.Manager.DefaultTimeoutStopSec = lib.mkDefault "10s";
+  # worst case at 5s for both the system manager and per-user managers.
+  systemd.settings.Manager.DefaultTimeoutStopSec = lib.mkDefault "5s";
+  systemd.user.settings.Manager.DefaultTimeoutStopSec = lib.mkDefault "5s";
 
   # Same reasoning on the way up, and the same 15s CachyOS-Settings uses: a unit
   # that hasn't started in 15s is wedged, not slow, and blocking boot on the
