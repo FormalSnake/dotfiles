@@ -88,20 +88,32 @@ Safe, non-building checks you MAY run:
   forces all module imports to resolve without building the system. (Avoid
   evaluating `home-manager.users.*` config paths: they can trigger IFD.)
 
-## Keep both machines in sync
+## Keep all three hosts in sync
 
-The two hosts must stay in sync: a change applied on one is expected to land on
-the other. When working from the **g815 (nixos laptop)**, the full flow is:
+All three hosts (macbook, g815, e1504g) must stay on the same commit with a
+clean tree: a change applied on one is expected to land on the other two, and
+none of them should carry local commits or uncommitted diffs the others
+don't have. When working from the **g815 (nixos laptop)**, the full flow is:
 
 1. Rebuild on g815 (`nixos-rebuild` / the `just` recipe).
 2. `git push`.
 3. `ssh macbook`, `cd ~/.config/nix`, `git pull`.
 4. Rebuild on the macbook (`darwin-rebuild` / the `just` recipe).
 
-Claude can drive all four steps non-interactively (see the sudo mesh above) —
-steps 3+4 collapse to the one-shot macbook command in the rebuild policy
+Claude can drive all four steps non-interactively (see the sudo mesh above),
+so steps 3+4 collapse to the one-shot macbook command in the rebuild policy
 section. The e1504g follows the same flow, also in one shot. Only if sudo
 unexpectedly prompts (broken agent chain) does a step go back to the owner.
+
+**Before starting any task in this repo**, check all three hosts for drift:
+`git log -1 --oneline` and `git status --porcelain` locally and over
+`ssh g815`/`ssh e1504g`. A host behind `origin/main` needs a pull; a host with
+local commits not on origin needs a push (rebase first if another host also
+pushed in the meantime); a host with an uncommitted diff needs the
+uncommitted-work check above, never a discard. If the same diff shows up on
+another host too (e.g. a `flake.lock` bump from an unrelated `nix flake
+update`), it is safe to commit it as its own small commit and merge, not wipe
+it.
 
 ## Overview
 
