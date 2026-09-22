@@ -21,7 +21,8 @@
       "wireguard-tools"
       {
         # Obsidian LiveSync backend. Binds 127.0.0.1:5984 (CouchDB default);
-        # exposed to the tailnet via `tailscale serve` only. Config/init:
+        # exposed to the tailnet on 443 by modules/darwin/mixins/
+        # obsidian-livesync-serve.nix. Config/init:
         # scripts/couchdb-livesync-init.sh (one-time).
         name = "couchdb";
         start_service = true;
