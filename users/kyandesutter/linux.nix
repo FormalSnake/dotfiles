@@ -34,6 +34,7 @@
       url = "https://music.youtube.com";
       name = "YouTube Music";
       profile = "Default";
+      icon = ./mixins/webapps-icons/youtube-music.png;
     }
   ];
 

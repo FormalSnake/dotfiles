@@ -9,7 +9,7 @@
 # so a chain would reach hicolor's mixed upstream icons before the next pack.
 # Only their apps/ folders are taken; urutau is an elementary 5 fork whose
 # places and mimes would otherwise show through wherever elementary 8 has a gap.
-{ runCommand, fetchFromGitHub, pantheon }:
+{ runCommand, fetchFromGitHub, pantheon, imagemagick }:
 let
   themeName = "elementary-colloid";
 
@@ -39,6 +39,16 @@ runCommand "${themeName}-icon-theme" { passthru = { inherit themeName; }; } ''
     done
   done
   find $theme -xtype l -delete
+
+  # Icons drawn for apps whose own icon clashes with the set (Gemini renders
+  # fitted to elementary's 128px keyline, see icons/). 512px masters, named
+  # after the desktop entry's Icon=, scaled to every apps size so the theme
+  # resolves them before hicolor.
+  for src in ${./icons}/*.png; do
+    for size in 16 24 32 48 64 128; do
+      ${imagemagick}/bin/magick "$src" -resize ''${size}x''${size} "$theme/apps/$size/$(basename "$src")"
+    done
+  done
 
   # The upstream cache indexes elementary's files only; without a cache GTK
   # and Qt scan the directories instead.
