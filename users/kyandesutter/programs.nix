@@ -4,6 +4,7 @@
   home.packages =
     with pkgs;
     [
+      cliamp
       just
       zulu21
 
