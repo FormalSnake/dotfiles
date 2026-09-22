@@ -48,11 +48,49 @@ in
     };
   };
 
-  programs.fish.functions.claudepulse = {
-    description = "Claude Code signed in to the second claude.ai account";
-    body = ''
-      CLAUDE_CONFIG_DIR="$HOME/${pulseDir}" claude $argv
-    '';
+  programs.fish.functions = {
+    claudepulse = {
+      description = "Claude Code signed in to the second claude.ai account";
+      body = ''
+        CLAUDE_CONFIG_DIR="$HOME/${pulseDir}" claude $argv
+      '';
+    };
+
+    # Herdr restores an agent pane by typing `claude --resume <id>` into a
+    # fresh fish shell, with no CLAUDE_CONFIG_DIR. A session that lives in the
+    # second profile's transcript dir then fails with "no conversation found"
+    # and would come back under the primary account if it did load. Session
+    # ids are UUIDs, so the transcript's location settles which profile owns
+    # it. The same applies to the `claude --resume` line herdr-reap leaves in
+    # a reaped pane.
+    claude = {
+      wraps = "claude";
+      body = ''
+        if not set -q CLAUDE_CONFIG_DIR
+          set -l id
+          set -l argc (count $argv)
+          for i in (seq $argc)
+            switch $argv[$i]
+              case --resume -r
+                if test $i -lt $argc
+                  set id $argv[(math $i + 1)]
+                end
+              case '--resume=*'
+                set id (string replace -- '--resume=' "" $argv[$i])
+            end
+          end
+          if test -n "$id"
+            set -l pulse "$HOME/${pulseDir}"
+            set -l owned $pulse/projects/*/$id.jsonl
+            if test (count $owned) -gt 0
+              CLAUDE_CONFIG_DIR=$pulse command claude $argv
+              return
+            end
+          end
+        end
+        command claude $argv
+      '';
+    };
   };
 
   # .claude.json is the one piece that cannot be symlinked: it carries
