@@ -12,6 +12,7 @@
     ./mixins/ghostty.nix
     ./mixins/hammerspoon.nix
     ./mixins/lynk-browser.nix
+    ./mixins/ollama.nix
     ./mixins/omniwm.nix
     ./mixins/sketchybar.nix
   ];

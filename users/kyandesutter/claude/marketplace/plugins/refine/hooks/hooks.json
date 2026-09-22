@@ -1,0 +1,17 @@
+{
+  "description": "Rewrite tagged (or, in auto mode, all) prompts with a local model",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ \"$(uname)\" = Darwin ] && command -v uv >/dev/null || exit 0; uv run --quiet --script ${CLAUDE_PLUGIN_ROOT}/bin/refine.py",
+            "timeout": 90
+          }
+        ]
+      }
+    ]
+  }
+}

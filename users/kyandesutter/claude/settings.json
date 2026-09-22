@@ -253,7 +253,8 @@
     "superpowers@claude-plugins-official": true,
     "swift-lsp@claude-plugins-official": true,
     "tmux-agent-notifications@claude-plugin-tmux-notifications": true,
-    "typescript-lsp@claude-plugins-official": true
+    "typescript-lsp@claude-plugins-official": true,
+    "refine@kyan": true
   },
   "extraKnownMarketplaces": {
     "expo-plugins": {

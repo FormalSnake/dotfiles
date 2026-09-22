@@ -1,0 +1,14 @@
+{
+  "name": "kyan",
+  "description": "Plugins vendored in ~/.config/nix, loaded in place",
+  "owner": { "name": "kyandesutter" },
+  "plugins": [
+    {
+      "name": "refine",
+      "description": "Rewrite a prompt with a local Ollama model before Claude sees it; long prompts are LLMLingua-2 compressed first",
+      "source": "./plugins/refine",
+      "version": "0.1.0",
+      "category": "productivity"
+    }
+  ]
+}
