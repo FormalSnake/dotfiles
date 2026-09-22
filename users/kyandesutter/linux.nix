@@ -25,6 +25,7 @@
     ./mixins/godot.nix
     ./mixins/obsidian.nix
     ./mixins/parsec.nix
+    ./mixins/geekbench.nix
     ./mixins/webapps.nix
   ];
 
