@@ -36,7 +36,15 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    mac-app-util.url = "github:hraban/mac-app-util";
+    # Its own nixpkgs pin (nixos-26.05) carries an SBCL that cannot map its
+    # heap on macOS 27 ("failed to allocate ... at 0x300100000"), which kills
+    # the sync-trampolines step at the end of every switch. Our nixpkgs has
+    # SBCL >= 2.6.6, the first release that runs there.
+    # https://github.com/hraban/mac-app-util/issues/45
+    mac-app-util = {
+      url = "github:hraban/mac-app-util";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # No `inputs.nixpkgs.follows`: nix-homebrew is a pure nix-darwin module with
     # no nixpkgs input of its own to override, so pinning it would be a no-op.
