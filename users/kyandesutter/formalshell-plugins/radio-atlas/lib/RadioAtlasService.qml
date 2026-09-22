@@ -66,14 +66,65 @@ Singleton {
     property string lastRandomUuid: ""
     property bool randomBusy: false
 
+    // mpv falls back to the stream's file name when the station sends no
+    // title of its own, which is not a track.
     readonly property string trackTitle: {
         var t = root.title.trim();
         var name = root.station ? String(root.station.name || "").trim() : "";
-        return t !== "" && name !== "" && t.toLowerCase() !== name.toLowerCase() ? t : "";
+        var url = root.station ? String(root.station.url || "") : "";
+        var file = url.replace(/[?#].*$/, "").replace(/\/+$/, "");
+        file = file.slice(file.lastIndexOf("/") + 1);
+        try {
+            file = decodeURIComponent(file);
+        } catch (e) {}
+        return t !== "" && name !== "" && t.toLowerCase() !== name.toLowerCase()
+            && t !== file && t !== url ? t : "";
     }
+
+    // What the bar cell reads beside its icon: the stream's own track title
+    // when it sends one, the station's name otherwise, nothing while idle.
+    readonly property string label: !root.station ? ""
+        : (root.trackTitle || String(root.station.name || "")).replace(/[\u0000-\u001f\u007f]+/g, " ").trim()
 
     signal randomTuned(var stations)
     signal randomFailed(string message)
+
+    // `qs ipc call radio-atlas status|toggle|random|stop`, for keybinds and
+    // for reading the player from outside the shell.
+    IpcHandler {
+        target: "radio-atlas"
+
+        function status(): string {
+            return JSON.stringify({
+                running: root.running,
+                paused: root.paused,
+                loaded: root.loaded,
+                station: root.station ? root.station.name : "",
+                title: root.title,
+                label: root.label,
+                volume: root.volume,
+                muted: root.muted,
+                output: root.output,
+                error: root.error,
+                playerError: root.playerError,
+                queue: root.queue.length,
+                favorites: root.favorites.length,
+                recent: root.recent.length
+            });
+        }
+
+        function toggle(): void {
+            root.toggle();
+        }
+
+        function random(): void {
+            root.tuneRandom();
+        }
+
+        function stop(): void {
+            root.stop();
+        }
+    }
 
     function isFavorite(uuid) {
         return !!uuid && root._favoriteSet["$" + uuid] === true;

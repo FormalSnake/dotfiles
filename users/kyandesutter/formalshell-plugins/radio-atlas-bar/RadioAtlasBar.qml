@@ -20,6 +20,22 @@ Item {
         return item;
     }
 
+    // The host's own PLUGIN ERROR caption. The host cell sizes itself off
+    // every child it holds, hidden or not, so that caption would leave an
+    // empty label's width beside the icon; this entry loaded, so it is
+    // emptied.
+    readonly property Item _errorLabel: {
+        var box = root.parent ? root.parent.parent : null;
+        if (!root.cell || !box)
+            return null;
+        for (var i = 0; i < box.children.length; i++) {
+            var child = box.children[i];
+            if (child !== root.parent && child.meta !== undefined)
+                return child;
+        }
+        return null;
+    }
+
     readonly property var overlay: PluginService.surfaces["plugin:radio-atlas"] || null
     readonly property bool playing: RadioAtlasService.running && !RadioAtlasService.paused
 
@@ -38,14 +54,39 @@ Item {
             + " · " + (RadioAtlasService.muted ? "muted" : RadioAtlasService.volume + "%")
         : "Open Radio Atlas"
 
-    implicitWidth: icon.width
-    implicitHeight: icon.implicitHeight
+    readonly property color _ink: root.cell ? root.cell.foreground : Theme.color.foreground
+    readonly property color _dimInk: root.cell ? root.cell.dimForeground : Theme.color.mutedForeground
 
-    Icon {
-        id: icon
-        anchors.centerIn: parent
-        name: "globe"
-        color: root.playing ? Theme.color.primary : (root.cell ? root.cell.foreground : Theme.color.foreground)
+    // A hidden label takes no room in the lockup (a positioner skips it),
+    // so idle is an icon-only cell like every builtin beside it.
+    implicitWidth: lockup.implicitWidth
+    implicitHeight: lockup.implicitHeight
+
+    CellRow {
+        id: lockup
+        spacing: Theme.space.xs
+
+        Icon {
+            name: "globe"
+            color: root.playing ? Theme.color.primary : root._ink
+        }
+
+        // The builtin now-playing cell's title: sans, marquee past 220 and
+        // still otherwise. Paused or failed, it stays and dims. A vertical
+        // bar leaves it to the tooltip.
+        MarqueeText {
+            visible: RadioAtlasService.label !== "" && !(root.cell && root.cell.vertical)
+            text: RadioAtlasService.label
+            color: root.playing ? root._ink : root._dimInk
+            maxWidth: 220
+        }
+    }
+
+    Binding {
+        when: root._errorLabel !== null
+        target: root._errorLabel
+        property: "text"
+        value: ""
     }
 
     Binding {

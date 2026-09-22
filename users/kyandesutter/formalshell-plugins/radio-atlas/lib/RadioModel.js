@@ -149,17 +149,83 @@ function project(latitude, longitude, centreLatitude, centreLongitude) {
     }
 }
 
-function unproject(x, y, centreLatitude, centreLongitude) {
-    var rho2 = x * x + y * y
-    if (rho2 > 1) return null
+// The near-side perspective the globe is drawn in: a camera `distance`
+// globe radii from the centre, looking at (centreLatitude, centreLongitude).
+// `project` above is the unit vector in the view frame, z toward the camera;
+// a point is on the near side when z (the cosine of its angular distance from
+// the view centre) is at least 1 / distance, and lands on screen at
+// (x, y) * perspectiveScale(z, distance), in units of the view radius.
+var startDistance = 3.2
+var minimumDistance = 1.05
+var viewFill = 0.44
 
-    var z = Math.sqrt(Math.max(0, 1 - rho2))
+function viewDistance(scale) {
+    var zoom = Number(scale)
+    if (!isFinite(zoom) || zoom <= 0) zoom = 1
+    return Math.max(minimumDistance, 1 + (startDistance - 1) / zoom)
+}
+
+function horizonRatio(distance) {
+    return Math.sqrt((distance - 1) / (distance + 1))
+}
+
+// Pixels per unit on the tangent plane. Sized so that at scale 1 the horizon
+// disc fills the pane's share the orthographic disc did, and growing with
+// scale as the camera closes in.
+function viewRadius(width, height, scale) {
+    return Math.min(width, height) * viewFill * scale / horizonRatio(startDistance)
+}
+
+function horizonRadius(width, height, scale) {
+    return viewRadius(width, height, scale) * horizonRatio(viewDistance(scale))
+}
+
+function visibleDepth(depth, distance) {
+    return depth >= 1 / distance
+}
+
+function perspectiveScale(depth, distance) {
+    return (distance - 1) / (distance - depth)
+}
+
+// 0 at the horizon, 1 at the view centre: what dots are sized and faded by.
+function horizonDepth(depth, distance) {
+    var horizon = 1 / distance
+    return clamp((depth - horizon) / (1 - horizon), 0, 1)
+}
+
+function projectPerspective(latitude, longitude, centreLatitude, centreLongitude, distance) {
+    var point = project(latitude, longitude, centreLatitude, centreLongitude)
+    var k = perspectiveScale(point.z, distance)
+    return {
+        x: point.x * k,
+        y: point.y * k,
+        z: point.z,
+        visible: visibleDepth(point.z, distance)
+    }
+}
+
+// The exact inverse of projectPerspective: the ray from the camera through
+// the tangent-plane point (x, y) hits the sphere at its nearer root, or
+// misses it and there is nothing under that pixel.
+function unproject(x, y, centreLatitude, centreLongitude, distance) {
+    var d = Number(distance)
+    var a = x * x + y * y + (d - 1) * (d - 1)
+    var discriminant = d * d * (d - 1) * (d - 1) - a * (d * d - 1)
+    if (!isFinite(discriminant) || discriminant < 0) return null
+
+    var t = (d * (d - 1) - Math.sqrt(discriminant)) / a
+    var px = t * x
+    var py = t * y
+    var pz = d - t * (d - 1)
+    if (pz < 1 / d - 1e-9) return null
+
     var phi0 = Number(centreLatitude) * radians
     var cosPhi0 = Math.cos(phi0)
     var sinPhi0 = Math.sin(phi0)
-    var latitude = Math.asin(y * cosPhi0 + z * sinPhi0)
+    var latitude = Math.asin(clamp(py * cosPhi0 + pz * sinPhi0, -1, 1))
     var longitude = Number(centreLongitude) * radians
-        + Math.atan2(x, z * cosPhi0 - y * sinPhi0)
+        + Math.atan2(px, pz * cosPhi0 - py * sinPhi0)
 
     return {
         latitude: latitude * degrees,
@@ -363,9 +429,11 @@ function estimatedCountryLocation(features, code, key) {
 
 function stationPosition(station, width, height, scale, centreLatitude, centreLongitude) {
     if (!station || station.latitude === null || station.longitude === null) return null
-    var point = project(station.latitude, station.longitude, centreLatitude, centreLongitude)
-    if (point.z < 0) return null
-    var radius = Math.min(width, height) * 0.44 * scale
+    var distance = viewDistance(scale)
+    var point = projectPerspective(station.latitude, station.longitude,
+        centreLatitude, centreLongitude, distance)
+    if (!point.visible) return null
+    var radius = viewRadius(width, height, scale)
     return {
         x: width / 2 + point.x * radius,
         y: height / 2 - point.y * radius,
@@ -374,7 +442,7 @@ function stationPosition(station, width, height, scale, centreLatitude, centreLo
 }
 
 function nearestVisibleStation(stations, centreLatitude, centreLongitude, excludedUuid,
-                                                              width, height, scale) {
+                               width, height, scale) {
     var rows = Array.isArray(stations) ? stations : []
     var excluded = String(excludedUuid || "")
     var viewportWidth = Number(width)
@@ -383,8 +451,9 @@ function nearestVisibleStation(stations, centreLatitude, centreLongitude, exclud
     var constrainToViewport = isFinite(viewportWidth) && viewportWidth > 0
         && isFinite(viewportHeight) && viewportHeight > 0
         && isFinite(viewportScale) && viewportScale > 0
+    var distance = viewDistance(constrainToViewport ? viewportScale : 1)
     var viewportRadius = constrainToViewport
-        ? Math.min(viewportWidth, viewportHeight) * 0.44 * viewportScale : 0
+        ? viewRadius(viewportWidth, viewportHeight, viewportScale) : 0
     var nearest = null
     var nearestDepth = -Infinity
     var preferred = null
@@ -396,8 +465,8 @@ function nearestVisibleStation(stations, centreLatitude, centreLongitude, exclud
         var latitude = Number(station.latitude)
         var longitude = Number(station.longitude)
         if (!isFinite(latitude) || !isFinite(longitude)) continue
-        var point = project(latitude, longitude, centreLatitude, centreLongitude)
-        if (!isFinite(point.z) || point.z < 0) continue
+        var point = projectPerspective(latitude, longitude, centreLatitude, centreLongitude, distance)
+        if (!isFinite(point.z) || !point.visible) continue
         if (constrainToViewport) {
             var screenX = viewportWidth / 2 + point.x * viewportRadius
             var screenY = viewportHeight / 2 - point.y * viewportRadius

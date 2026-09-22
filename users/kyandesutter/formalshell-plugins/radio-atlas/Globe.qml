@@ -4,10 +4,11 @@ import qs.Core
 import qs.Components
 import "lib/RadioModel.js" as RadioModel
 
-// The orthographic globe: countries off Natural Earth, stations as dots
-// sized and faded by depth, drag to spin with a kinetic coast, wheel to
-// zoom. Drawn on one Canvas, so every colour arrives as a property and a
-// palette change repaints.
+// The globe in near-side perspective: countries off Natural Earth, lit
+// from the upper left, stations as dots sized and faded by depth, drag to
+// spin with a kinetic coast, wheel to fly in. Drawn on one Canvas, so every
+// colour arrives as a property and a palette change repaints. The shading
+// gradients are the map's own content, not chrome, at the owner's request.
 Item {
     id: root
 
@@ -23,8 +24,11 @@ Item {
     property real globeScale: 1
     property real minimumScale: 0.72
     property real maximumScale: 24
-    property real longitudeSensitivity: 0.22
-    property real latitudeSensitivity: 0.18
+    // Near-side perspective (lib/RadioModel.js): zooming moves the camera in
+    // as well as scaling, and a drag turns the globe by exactly the angle the
+    // ground under the pointer covers, so it tracks the hand at any zoom.
+    readonly property real viewDistance: RadioModel.viewDistance(globeScale)
+    readonly property real degreesPerPixel: 180 / Math.PI / Math.max(1, radius())
     readonly property real kineticLaunchSpeed: 120
     readonly property real kineticMaximumSpeed: 2400
     readonly property real kineticDeceleration: 1800
@@ -63,11 +67,38 @@ Item {
     Accessible.role: Accessible.Pane
 
     function radius() {
-        return Math.min(width, height) * 0.44 * globeScale
+        return RadioModel.viewRadius(width, height, globeScale)
+    }
+
+    function horizonRadius() {
+        return RadioModel.horizonRadius(width, height, globeScale)
+    }
+
+    function longitudeSensitivity() {
+        return degreesPerPixel / Math.max(0.2, Math.cos(centreLatitude * Math.PI / 180))
     }
 
     function withAlpha(color, alpha) {
         return Qt.rgba(color.r, color.g, color.b, alpha)
+    }
+
+    function mixColor(from, to, amount, alpha) {
+        var t = RadioModel.clamp(amount, 0, 1)
+        return Qt.rgba(from.r + (to.r - from.r) * t, from.g + (to.g - from.g) * t,
+            from.b + (to.b - from.b) * t, alpha)
+    }
+
+    // Camera-space light, x right, y up, z toward the viewer: upper left and
+    // a little in front, so the lit side faces the reader and the terminator
+    // falls down the right.
+    readonly property var light: {
+        var x = -0.55, y = 0.6, z = 0.58
+        var length = Math.sqrt(x * x + y * y + z * z)
+        return [x / length, y / length, z / length]
+    }
+
+    function lambert(x, y, z) {
+        return Math.max(0, x * light[0] + y * light[1] + z * light[2])
     }
 
     function clearLandingHighlight() {
@@ -111,9 +142,9 @@ Item {
 
     function rotateByPointerDelta(deltaX, deltaY) {
         centreLongitude = RadioModel.wrapLongitude(
-            centreLongitude - deltaX * longitudeSensitivity / globeScale)
+            centreLongitude - deltaX * longitudeSensitivity())
         centreLatitude = RadioModel.clamp(
-            centreLatitude + deltaY * latitudeSensitivity / globeScale, -78, 78)
+            centreLatitude + deltaY * degreesPerPixel, -78, 78)
     }
 
     function stationByUuid(uuid) {
@@ -191,7 +222,19 @@ Item {
             for (var p = 0; p < polygons.length; p++) {
                 var ring = polygons[p] && polygons[p][0]
                 var prepared = prepareCoordinates(ring, false)
-                if (prepared.length >= 9) rings.push({ world: prepared, projected: new Array(prepared.length) })
+                if (prepared.length < 9) continue
+                var cx = 0, cy = 0, cz = 0
+                for (var c = 0; c < prepared.length; c += 3) {
+                    cx += prepared[c]
+                    cy += prepared[c + 1]
+                    cz += prepared[c + 2]
+                }
+                var length = Math.sqrt(cx * cx + cy * cy + cz * cz) || 1
+                rings.push({
+                    world: prepared,
+                    projected: new Array(prepared.length),
+                    centroid: [cx / length, cy / length, cz / length]
+                })
             }
             if (rings.length === 0) continue
             output.push({
@@ -243,29 +286,46 @@ Item {
     }
 
     function paintCurve(ctx, coordinates, centreX, centreY, globeRadius,
-                                            sinLatitude, cosLatitude, sinLongitude, cosLongitude) {
+                        sinLatitude, cosLatitude, sinLongitude, cosLongitude) {
+        var distance = viewDistance
+        var horizon = 1 / distance
+        var baseWidth = ctx.lineWidth
         var drawing = false
-        ctx.beginPath()
+        var lastX = 0
+        var lastY = 0
         for (var i = 0; i < coordinates.length; i += 3) {
             var horizontal = coordinates[i] * cosLongitude + coordinates[i + 1] * sinLongitude
             var xProjection = coordinates[i + 1] * cosLongitude - coordinates[i] * sinLongitude
             var yProjection = cosLatitude * coordinates[i + 2] - sinLatitude * horizontal
             var depth = sinLatitude * coordinates[i + 2] + cosLatitude * horizontal
-            if (depth < 0) {
+            if (depth < horizon) {
                 drawing = false
                 continue
             }
-            var x = centreX + xProjection * globeRadius
-            var y = centreY - yProjection * globeRadius
-            if (!drawing) ctx.moveTo(x, y)
-            else ctx.lineTo(x, y)
+            var k = globeRadius * (distance - 1) / (distance - depth)
+            var x = centreX + xProjection * k
+            var y = centreY - yProjection * k
+            if (drawing) {
+                // Each segment on its own stroke: lines thin and fade toward
+                // the limb with the depth of the point they reach.
+                var near = RadioModel.horizonDepth(depth, distance)
+                ctx.globalAlpha = 0.25 + near * 0.75
+                ctx.lineWidth = baseWidth * (0.45 + near * 0.55)
+                ctx.beginPath()
+                ctx.moveTo(lastX, lastY)
+                ctx.lineTo(x, y)
+                ctx.stroke()
+            }
+            lastX = x
+            lastY = y
             drawing = true
         }
-        ctx.stroke()
+        ctx.globalAlpha = 1
+        ctx.lineWidth = baseWidth
     }
 
     function paintGrid(ctx, centreX, centreY, globeRadius) {
-        ctx.strokeStyle = withAlpha(gridColor, 0.18)
+        ctx.strokeStyle = withAlpha(gridColor, 0.3)
         ctx.lineWidth = Math.min(1.5, Math.max(0.7, globeRadius / 500))
         var latitude = centreLatitude * Math.PI / 180
         var longitude = centreLongitude * Math.PI / 180
@@ -287,15 +347,40 @@ Item {
         var sinLongitude = Math.sin(longitude)
         var cosLongitude = Math.cos(longitude)
         var activeCode = activeCountryCode.toUpperCase()
+        var distance = viewDistance
+        var horizon = 1 / distance
+        var horizonScreen = globeRadius * RadioModel.horizonRatio(distance)
+        // Tangent-plane coordinates to screen: a point's own perspective
+        // scale, and the horizon circle for a crossing.
+        function screenX(x, depth) {
+            return centreX + x * globeRadius * (distance - 1) / (distance - depth)
+        }
+        function screenY(y, depth) {
+            return centreY - y * globeRadius * (distance - 1) / (distance - depth)
+        }
         for (var i = 0; i < rows.length; i++) {
             var country = rows[i]
             var active = country.code === activeCode
-            ctx.fillStyle = active ? withAlpha(accentColor, 0.38) : withAlpha(landColor, 0.9)
-            ctx.strokeStyle = active ? withAlpha(accentColor, 0.95) : withAlpha(outlineColor, 0.34)
-            ctx.lineWidth = active ? 1.5 : 0.7
 
             for (var ringIndex = 0; ringIndex < country.rings.length; ringIndex++) {
                 var geometry = country.rings[ringIndex]
+                // The ring's centroid stands in for its surface normal (on a
+                // unit sphere the point is the normal): Lambert shading for
+                // the fill, and its depth for how strong the outline is.
+                var centroid = geometry.centroid
+                var centroidHorizontal = centroid[0] * cosLongitude + centroid[1] * sinLongitude
+                var normalX = centroid[1] * cosLongitude - centroid[0] * sinLongitude
+                var normalY = cosLatitude * centroid[2] - sinLatitude * centroidHorizontal
+                var normalZ = sinLatitude * centroid[2] + cosLatitude * centroidHorizontal
+                var lit = lambert(normalX, normalY, normalZ)
+                var near = RadioModel.horizonDepth(normalZ, distance)
+                ctx.fillStyle = active
+                    ? mixColor(sphereColor, accentColor, 0.25 + lit * 0.35, 0.9)
+                    : mixColor(Qt.darker(sphereColor, 1.6), Qt.lighter(landColor, 1.5), 0.12 + lit * 0.88, 0.97)
+                ctx.strokeStyle = active
+                    ? withAlpha(accentColor, 0.95)
+                    : withAlpha(outlineColor, 0.12 + near * 0.3)
+                ctx.lineWidth = active ? 1.5 : 0.35 + near * 0.55
                 var ring = geometry.world
                 var projected = geometry.projected
                 var points = Math.floor(ring.length / 3)
@@ -310,7 +395,7 @@ Item {
                         - sinLatitude * hiddenHorizontal
                     projected[hiddenOffset + 2] = sinLatitude * ring[hiddenOffset + 2]
                         + cosLatitude * hiddenHorizontal
-                    if (projected[hiddenOffset + 2] < 0 && hiddenIndex < 0) {
+                    if (projected[hiddenOffset + 2] < horizon && hiddenIndex < 0) {
                         hiddenIndex = pointIndex
                     }
                 }
@@ -319,12 +404,11 @@ Item {
                     ctx.beginPath()
                     for (var visibleIndex = 0; visibleIndex < points; visibleIndex++) {
                         var visibleOffset = visibleIndex * 3
-                        var visibleX = projected[visibleOffset]
-                        var visibleY = projected[visibleOffset + 1]
-                        var screenX = centreX + visibleX * globeRadius
-                        var screenY = centreY - visibleY * globeRadius
-                        if (visibleIndex === 0) ctx.moveTo(screenX, screenY)
-                        else ctx.lineTo(screenX, screenY)
+                        var visibleDepth = projected[visibleOffset + 2]
+                        var visibleX = screenX(projected[visibleOffset], visibleDepth)
+                        var visibleY = screenY(projected[visibleOffset + 1], visibleDepth)
+                        if (visibleIndex === 0) ctx.moveTo(visibleX, visibleY)
+                        else ctx.lineTo(visibleX, visibleY)
                     }
                     ctx.closePath()
                     ctx.fill()
@@ -345,11 +429,11 @@ Item {
                     var currentX = projected[currentOffset]
                     var currentY = projected[currentOffset + 1]
                     var currentDepth = projected[currentOffset + 2]
-                    var previousVisible = previousDepth >= 0
-                    var currentVisible = currentDepth >= 0
+                    var previousVisible = previousDepth >= horizon
+                    var currentVisible = currentDepth >= horizon
 
                     if (!previousVisible && currentVisible) {
-                        var enteringRatio = previousDepth / (previousDepth - currentDepth)
+                        var enteringRatio = (previousDepth - horizon) / (previousDepth - currentDepth)
                         var enteringX = previousX + (currentX - previousX) * enteringRatio
                         var enteringY = previousY + (currentY - previousY) * enteringRatio
                         var enteringLength = Math.sqrt(enteringX * enteringX + enteringY * enteringY) || 1
@@ -357,13 +441,13 @@ Item {
                         enteringY /= enteringLength
                         startAngle = Math.atan2(-enteringY, enteringX)
                         ctx.beginPath()
-                        ctx.moveTo(centreX + enteringX * globeRadius, centreY - enteringY * globeRadius)
-                        ctx.lineTo(centreX + currentX * globeRadius, centreY - currentY * globeRadius)
+                        ctx.moveTo(centreX + enteringX * horizonScreen, centreY - enteringY * horizonScreen)
+                        ctx.lineTo(screenX(currentX, currentDepth), screenY(currentY, currentDepth))
                         drawing = true
                     } else if (previousVisible && currentVisible && drawing) {
-                        ctx.lineTo(centreX + currentX * globeRadius, centreY - currentY * globeRadius)
+                        ctx.lineTo(screenX(currentX, currentDepth), screenY(currentY, currentDepth))
                     } else if (previousVisible && !currentVisible && drawing) {
-                        var leavingRatio = previousDepth / (previousDepth - currentDepth)
+                        var leavingRatio = (previousDepth - horizon) / (previousDepth - currentDepth)
                         var leavingX = previousX + (currentX - previousX) * leavingRatio
                         var leavingY = previousY + (currentY - previousY) * leavingRatio
                         var leavingLength = Math.sqrt(leavingX * leavingX + leavingY * leavingY) || 1
@@ -371,9 +455,9 @@ Item {
                         leavingY /= leavingLength
                         var endAngle = Math.atan2(-leavingY, leavingX)
                         var clockwiseArc = (startAngle - endAngle + Math.PI * 2) % (Math.PI * 2)
-                        ctx.lineTo(centreX + leavingX * globeRadius, centreY - leavingY * globeRadius)
+                        ctx.lineTo(centreX + leavingX * horizonScreen, centreY - leavingY * horizonScreen)
                         ctx.stroke()
-                        ctx.arc(centreX, centreY, globeRadius, endAngle, startAngle, clockwiseArc > Math.PI)
+                        ctx.arc(centreX, centreY, horizonScreen, endAngle, startAngle, clockwiseArc > Math.PI)
                         ctx.closePath()
                         ctx.fill()
                         drawing = false
@@ -396,6 +480,8 @@ Item {
         var sinLongitude = Math.sin(longitude)
         var cosLongitude = Math.cos(longitude)
         var globeRadius = radius()
+        var distance = viewDistance
+        var horizon = 1 / distance
         // Read QML properties and convert colors once, not for every station.
         var canvasWidth = globeCanvas.width
         var canvasHeight = globeCanvas.height
@@ -413,11 +499,13 @@ Item {
             var horizontal = row.worldX * cosLongitude + row.worldY * sinLongitude
             var xProjection = row.worldY * cosLongitude - row.worldX * sinLongitude
             var yProjection = cosLatitude * row.worldZ - sinLatitude * horizontal
-            var depth = sinLatitude * row.worldZ + cosLatitude * horizontal
-            row.visible = depth >= 0
+            var cosine = sinLatitude * row.worldZ + cosLatitude * horizontal
+            row.visible = cosine >= horizon
             if (!row.visible) continue
-            row.screenX = centreX + xProjection * globeRadius
-            row.screenY = centreY - yProjection * globeRadius
+            var k = globeRadius * (distance - 1) / (distance - cosine)
+            row.screenX = centreX + xProjection * k
+            row.screenY = centreY - yProjection * k
+            var depth = RadioModel.horizonDepth(cosine, distance)
             row.depth = depth
             row.visible = row.screenX >= -hitRadius
                 && row.screenX <= canvasWidth + hitRadius
@@ -427,11 +515,12 @@ Item {
 
             var selected = selection && row.station.uuid === selection.uuid
             var highlighted = highlight && row.station.uuid === highlight.uuid && !selected
-            var markerRadius = selected ? 4.2 : (highlighted ? 3.7 : 1.7 + depth * 1.25)
+            var perspective = (distance - 1) / (distance - cosine)
+            var markerRadius = selected ? 4.2 : (highlighted ? 3.7 : (1.2 + depth * 1.6) * perspective)
             ctx.beginPath()
             ctx.arc(row.screenX, row.screenY, markerRadius, 0, Math.PI * 2)
             ctx.fillStyle = selected || highlighted ? activeColor : markerColor
-            ctx.globalAlpha = selected || highlighted ? 1 : 0.42 + depth * 0.48
+            ctx.globalAlpha = selected || highlighted ? 1 : 0.25 + depth * 0.7
             ctx.fill()
 
             if (selected || highlighted) {
@@ -450,32 +539,65 @@ Item {
         var centreX = globeCanvas.width / 2
         var centreY = globeCanvas.height / 2
         var globeRadius = radius()
+        var disc = horizonRadius()
         if (!isFinite(globeRadius) || globeRadius <= 0) return
+        var distance = viewDistance
 
         ctx.reset()
         ctx.fillStyle = backgroundColor
         ctx.fillRect(0, 0, globeCanvas.width, globeCanvas.height)
 
-        // Flat rather than the original's radial shading: the shell draws no
-        // gradients (docs/DESIGN.md §5).
+        // The ocean, lit from the point facing the light: bright there and
+        // falling off toward the terminator rather than round the disc's
+        // own centre.
+        var litK = globeRadius * (distance - 1) / (distance - light[2])
+        var litX = centreX + light[0] * litK
+        var litY = centreY - light[1] * litK
+        var ocean = ctx.createRadialGradient(litX, litY, disc * 0.05, litX, litY, disc * 2.1)
+        ocean.addColorStop(0, mixColor(sphereColor, outlineColor, 0.34, 1))
+        ocean.addColorStop(0.3, mixColor(sphereColor, outlineColor, 0.16, 1))
+        ocean.addColorStop(0.65, sphereColor)
+        ocean.addColorStop(1, Qt.darker(sphereColor, 2.5))
         ctx.beginPath()
-        ctx.arc(centreX, centreY, globeRadius, 0, Math.PI * 2)
-        ctx.fillStyle = sphereColor
+        ctx.arc(centreX, centreY, disc, 0, Math.PI * 2)
+        ctx.fillStyle = ocean
         ctx.fill()
 
         ctx.save()
         ctx.beginPath()
-        ctx.arc(centreX, centreY, globeRadius - 0.5, 0, Math.PI * 2)
+        ctx.arc(centreX, centreY, disc - 0.5, 0, Math.PI * 2)
         ctx.clip()
         paintGrid(ctx, centreX, centreY, globeRadius)
         paintCountries(ctx, centreX, centreY, globeRadius)
+
+        // Limb darkening over the last stretch before the horizon.
+        var shade = Qt.darker(sphereColor, 3)
+        var limb = ctx.createRadialGradient(centreX, centreY, 0, centreX, centreY, disc)
+        limb.addColorStop(0, withAlpha(shade, 0))
+        limb.addColorStop(0.85, withAlpha(shade, 0))
+        limb.addColorStop(1, withAlpha(shade, 0.55))
+        ctx.fillStyle = limb
+        ctx.fillRect(centreX - disc, centreY - disc, disc * 2, disc * 2)
+
         paintSignals(ctx)
         ctx.restore()
 
+        // The atmosphere: a thin rim of the accent just outside the horizon,
+        // stroked as a band so nothing of it falls inside the disc.
+        var rimWidth = globeRadius * 0.04
+        var rim = ctx.createRadialGradient(centreX, centreY, disc, centreX, centreY, disc + rimWidth)
+        rim.addColorStop(0, withAlpha(accentColor, 0.35))
+        rim.addColorStop(1, withAlpha(accentColor, 0))
         ctx.beginPath()
-        ctx.arc(centreX, centreY, globeRadius, 0, Math.PI * 2)
-        ctx.strokeStyle = withAlpha(outlineColor, 0.52)
-        ctx.lineWidth = 1.1
+        ctx.arc(centreX, centreY, disc + rimWidth / 2, 0, Math.PI * 2)
+        ctx.strokeStyle = rim
+        ctx.lineWidth = rimWidth
+        ctx.stroke()
+
+        ctx.beginPath()
+        ctx.arc(centreX, centreY, disc, 0, Math.PI * 2)
+        ctx.strokeStyle = withAlpha(outlineColor, 0.3)
+        ctx.lineWidth = 1
         ctx.stroke()
     }
 
@@ -507,7 +629,7 @@ Item {
         var normalizedX = (x - width / 2) / globeRadius
         var normalizedY = -(y - height / 2) / globeRadius
         var coordinate = RadioModel.unproject(
-            normalizedX, normalizedY, centreLatitude, centreLongitude)
+            normalizedX, normalizedY, centreLatitude, centreLongitude, viewDistance)
         if (!coordinate) return
         var country = RadioModel.countryAt(
             countries, coordinate.latitude, coordinate.longitude)
@@ -545,6 +667,7 @@ Item {
         updateHighlightPosition()
         globeCanvas.requestPaint()
     }
+    onViewDistanceChanged: globeCanvas.requestPaint()
     onGlobeScaleChanged: {
         updateHighlightPosition()
         globeCanvas.requestPaint()
@@ -769,9 +892,9 @@ Item {
                 velocityY: root.kineticVelocityY
             }, frameTime, {
                 deceleration: root.kineticDeceleration,
-                scale: root.globeScale,
-                longitudeSensitivity: root.longitudeSensitivity,
-                latitudeSensitivity: root.latitudeSensitivity,
+                scale: 1,
+                longitudeSensitivity: root.longitudeSensitivity(),
+                latitudeSensitivity: root.degreesPerPixel,
                 minimumLatitude: -78,
                 maximumLatitude: 78
             })

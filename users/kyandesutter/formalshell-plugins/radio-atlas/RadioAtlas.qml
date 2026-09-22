@@ -89,7 +89,7 @@ Item {
     // The host hands keyboard focus to its own backdrop on every open, and a
     // key only travels up from the focused item, never down into this one.
     readonly property Item _activeFocus: root.Window.activeFocusItem
-    on_ActiveFocusChanged: root._claimFocus()
+    on_ActiveFocusChanged: Qt.callLater(root._claimFocus)
 
     function _inside(item) {
         for (var it = item; it; it = it.parent)
@@ -1129,6 +1129,7 @@ Item {
     // --- Controls ------------------------------------------------------------
 
     Row {
+        id: controlsRow
         anchors.top: headerRule.bottom
         anchors.topMargin: Theme.space.sectionGap
         anchors.horizontalCenter: parent.horizontalCenter
@@ -1144,7 +1145,7 @@ Item {
 
                 required property var modelData
 
-                width: (parent.width - parent.spacing) / 2
+                width: (controlsRow.width - controlsRow.spacing) / 2
                 spacing: Theme.space.rowGap
 
                 SectionLabel {
