@@ -44,6 +44,7 @@
       "nordvpn"
       "orbstack"
       "stats"
+      "terminal-browser" # zenbu-labs: chromium in the terminal over the kitty graphics protocol; the Linux hosts take the release tarball (users/kyandesutter/mixins/terminal-browser.nix)
       "thaw"
       "the-unarchiver"
 
