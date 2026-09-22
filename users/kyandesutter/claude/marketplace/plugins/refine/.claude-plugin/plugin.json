@@ -1,8 +1,0 @@
-{
-  "name": "refine",
-  "version": "0.1.0",
-  "description": "Local-model prompt rewrite (Ollama) with LLMLingua-2 compression of long prompts",
-  "author": { "name": "kyandesutter" },
-  "license": "MIT",
-  "keywords": ["prompt-engineering", "ollama", "llmlingua"]
-}
