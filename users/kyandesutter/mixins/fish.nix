@@ -12,7 +12,6 @@
       commitai = ''set commit_message (lumen draft); and git commit -avm "$commit_message"'';
 
       # System utilities
-      ls = "ls -A --color";
       vim = "nvim";
       cd = "z";
 

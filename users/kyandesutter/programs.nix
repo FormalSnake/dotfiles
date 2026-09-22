@@ -123,9 +123,9 @@
       enable = true;
       nix-direnv.enable = true;
     };
-    eza = {
+    lsd = {
       enable = true;
-      icons = "auto";
+      settings.display = "almost-all";
     };
     fastfetch.enable = true;
     fd.enable = true;
