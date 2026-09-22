@@ -103,15 +103,12 @@ in
         # the monitor panel, the launcher's monitor view and the display
         # panel all name it.
         display.outputPriority = [ "HDMI" "internal" ];
-        # Standalone foot, not footclient: the console is spawned once and
-        # kept, and a client window would go down with the foot server.
-        console.command = [ "foot" "--app-id=dev.formalshell.console" ];
       };
     };
 
     # DMS goes dormant, not away: mixins/dms.nix stays imported because its
     # generated ~/.config/matugen/config.toml and templates are what
-    # FormalShell's ThemeEngine merges into its own matugen run (foot,
+    # FormalShell's ThemeEngine merges into its own matugen run (ghostty,
     # neovim, obsidian, btop, yazi, hypr-border all keep re-theming), and
     # rollback is one kyan.desktop.shell flip. Only the
     # running daemons yield the session. dcal serves nothing here: FormalShell

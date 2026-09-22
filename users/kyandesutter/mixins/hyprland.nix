@@ -172,7 +172,7 @@ let
       hl.bind(mod .. " + period", hl.dsp.exec_cmd("${fsIpc [ "menu" "summon" "emoji" ]}"))
       -- ñ is a dedicated key on the es layout; its XKB keysym is `ntilde`.
       hl.bind(mod .. " + ntilde", hl.dsp.exec_cmd("${fsIpc [ "menu" "summon" "clipboard" ]}"))
-      -- Quake console (FormalShell M37): one foot that drops over whatever
+      -- Quake console (FormalShell M37): one ghostty that drops over whatever
       -- workspace you are on and parks on Hyprland's special:formalshell-console
       -- when toggled off, session intact. The shell spawns it from
       -- console.command; nothing here needs a window rule, since it places the
@@ -329,12 +329,7 @@ in
 
     -- Variables
     local mod = "SUPER"        -- primary modifier (the physical Cmd-position key)
-    -- footclient opens a window on the foot server (mixins/foot.nix).
-    -- --no-wait returns once the window exists, so the standalone foot after
-    -- || only runs when the server is down.
-    local function terminal(args)
-      return "footclient --no-wait " .. args .. " || foot " .. args
-    end
+    local terminal = "ghostty"
 
     -- Workspaces
     -- Nine named workspaces mirroring the macOS/aerospace assignment. The name
@@ -570,11 +565,11 @@ in
     -- Keybinds (mirror the macOS/aerospace muscle memory, SUPER as mod)
     ${shellBinds}
 
-    hl.bind(mod .. " + Return", hl.dsp.exec_cmd(terminal("")))
+    hl.bind(mod .. " + Return", hl.dsp.exec_cmd(terminal))
     -- Reclaim the laptop's Copilot key: it launches Claude, not Copilot.
     -- Microsoft's spec (which ASUS honours) has the key emit Meta+Shift+F23;
-    -- this drops a fresh local terminal into `claude`, cwd'd at the nix config.
-    hl.bind(mod .. " + SHIFT + F23", hl.dsp.exec_cmd(terminal("--working-directory=${config.home.homeDirectory}/.config/nix claude")))
+    -- this drops a fresh local ghostty into `claude`, cwd'd at the nix config.
+    hl.bind(mod .. " + SHIFT + F23", hl.dsp.exec_cmd("ghostty --working-directory=${config.home.homeDirectory}/.config/nix -e claude"))
     hl.bind(mod .. " + Q", hl.dsp.window.close())
     hl.bind(mod .. " + SHIFT + F", hl.dsp.window.fullscreen({ action = "toggle", mode = "fullscreen" }))
     hl.bind(mod .. " + V", hl.dsp.window.float({ action = "toggle" }))
@@ -657,7 +652,7 @@ ${if useFormalshell then ''
 
     -- Window → workspace rules (Linux app classes; Hyprland matches `class`)
     -- No `silent`: when one of these apps opens, Hyprland follows the window to
-    -- its assigned workspace. No terminal rule: foot opens where you are.
+    -- its assigned workspace. No terminal rule: ghostty opens where you are.
     hl.window_rule({ match = { class = "^([Hh]elium)$" }, workspace = "1" })
     hl.window_rule({ match = { class = "^([Cc]ode|[Zz]ed|dev.zed.Zed)$" }, workspace = "3" })
     hl.window_rule({ match = { class = "^([Ss]lack|WhatsApp|discord|[Bb]eeper)$" }, workspace = "4" })

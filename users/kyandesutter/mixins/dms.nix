@@ -437,7 +437,7 @@ in
     "DankMaterialShell/flexoki-theme.json".text = builtins.toJSON flexokiTheme;
 
     "matugen/templates/aura.tmpl".source = ../matugen-templates/aura.tmpl;
-    "matugen/templates/foot.ini.tmpl".source = ../matugen-templates/foot.ini.tmpl;
+    "matugen/templates/ghostty.tmpl".source = ../matugen-templates/ghostty.tmpl;
     "matugen/templates/neovim.lua.tmpl".source = ../matugen-templates/neovim.lua.tmpl;
     "matugen/templates/obsidian.css.tmpl".source = ../matugen-templates/obsidian.css.tmpl;
     "matugen/templates/dualsense.tmpl".source = ../matugen-templates/dualsense.tmpl;
@@ -508,15 +508,15 @@ in
       output_path = "~/.cache/dank/dualsense-color"
       post_hook = "${config.home.profileDirectory}/bin/dualsense-sync || true"
 
-      # Foot, included from ~/.config/foot/foot.ini (see mixins/foot.nix).
-      # Foot has no config reload and footclient windows use the server's
-      # config, so the hook restarts the server and reopens its windows.
-      # mixins/foot.nix seeds the output with Flexoki dark before the first
-      # render, since a missing include stops foot from starting.
-      [templates.foot]
-      input_path = "~/.config/matugen/templates/foot.ini.tmpl"
-      output_path = "~/.config/foot/matugen.ini"
-      post_hook = "${config.home.profileDirectory}/bin/foot-reload || true"
+      # Ghostty, written into its themes dir; the config references it with
+      # `theme = "Matugen"` (see mixins/ghostty.nix). SIGUSR2 live-reloads it
+      # without a restart. DMS's own builtin ghostty template writes a
+      # separate `themes/dankcolors` file nothing references, so the two
+      # don't conflict.
+      [templates.ghostty]
+      input_path = "~/.config/matugen/templates/ghostty.tmpl"
+      output_path = "~/.config/ghostty/themes/Matugen"
+      post_hook = "pkill -SIGUSR2 ghostty || true"
 
       # Neovim (base16 lua module consumed by dynamic-base16.nvim, watch =
       # true); no hook needed, the plugin watches the file. See neovim.nix.

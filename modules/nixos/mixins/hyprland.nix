@@ -131,7 +131,8 @@ let
   # noto-fonts minus "Noto Sans Symbols", which draws 64 emoji (☺ ☹ 😐 ♻ ⚓ ⛪
   # ⛵, the zodiac) as monochrome outlines and sits ahead of every emoji font
   # in cosmic-text's list. "Noto Sans Symbols 2" stays: cosmic-text spells it
-  # without the space and so never reaches it.
+  # without the space and so never reaches it, and ghostty maps U+23FA to it
+  # (users/kyandesutter/mixins/ghostty.nix).
   notoFonts = pkgs.runCommandLocal "noto-fonts-no-symbols" { } ''
     mkdir -p $out/share/fonts/noto
     for font in ${pkgs.noto-fonts}/share/fonts/noto/*; do

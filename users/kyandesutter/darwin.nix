@@ -8,8 +8,6 @@
     # ./mixins/aerospace.nix
     ./mixins/android.nix
     ./mixins/discord.nix
-    ./mixins/foot-terminfo.nix
-    ./mixins/ghostty.nix
     ./mixins/hammerspoon.nix
     ./mixins/lynk-browser.nix
     ./mixins/omniwm.nix
