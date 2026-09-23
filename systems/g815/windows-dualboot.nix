@@ -141,9 +141,10 @@ let
 
   # One adapter, two OSes, but each pairing mints a new link key and the device
   # only remembers the last one, so a pairing on either side broke the other.
-  # Windows is the source of truth: this copies its BR/EDR link keys out of the
-  # SYSTEM hive (opened read-only) into BlueZ before bluetoothd starts. Pair on
-  # NixOS first, then on Windows, and the next NixOS boot picks the key up.
+  # This copies Windows' BR/EDR link keys out of the SYSTEM hive (opened
+  # read-only) into BlueZ before bluetoothd starts, but only for devices BlueZ
+  # holds no key for. To share a device, pair it on Windows and, if NixOS
+  # already knows it, remove it here; the next NixOS boot picks the key up.
   # LE-only devices (mice, some controllers) keep separate pairings: their
   # keys need byte-order conversions nobody has verified here.
   windows-bluetooth-keys = pkgs.writeShellApplication {
@@ -177,14 +178,11 @@ let
           info="$adir/$mac/info"
 
           if [ -f "$info" ]; then
-            cur=$(sed -n '/^\[LinkKey\]/,/^\[/ s/^Key=//p' "$info")
-            [ "$cur" = "$key" ] && continue
-            if grep -q '^\[LinkKey\]' "$info"; then
-              sed -i "/^\[LinkKey\]/,/^\[/ s/^Key=.*/Key=$key/" "$info"
-            else
-              printf '\n[LinkKey]\nKey=%s\nType=4\nPINLength=0\n' "$key" >> "$info"
-            fi
-            echo "$mac: link key updated from Windows"
+            # A key BlueZ already holds is never replaced: Windows keeps stale
+            # keys for devices that have since re-paired here.
+            grep -q '^\[LinkKey\]' "$info" && continue
+            printf '\n[LinkKey]\nKey=%s\nType=4\nPINLength=0\n' "$key" >> "$info"
+            echo "$mac: link key added from Windows"
           else
             name=$(hivexget "$hive" "$params\\Devices\\$wm" Name 2>/dev/null | tr -d '\0') || true
             install -d -m 700 "$adir/$mac"
