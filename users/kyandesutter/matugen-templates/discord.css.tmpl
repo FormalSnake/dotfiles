@@ -64,3 +64,146 @@
   --border-hover: {{colors.outline.default.hex}};
   --button-border: {{colors.outline_variant.default.hex}};
 }
+
+/*
+ * Tokens colors.css misses at the pinned rev, in its own selector so they win
+ * the same specificity fight its block does. Three kinds: Discord renamed
+ * control-connect-* to control-connected-* (the voice join button); tokens
+ * Discord added that colors.css never mapped, which fall through to stock
+ * blurple and grey; and tokens colors.css parks on debug colours (yellow,
+ * lime, magenta) as unused, which Discord's CSS still reads. Diffed against
+ * discord.com/app's stylesheets on 2026-09-23.
+ */
+@container root style(--colors: on) {
+  body,
+  .theme-dark:not(.custom-user-profile-theme),
+  .theme-light:not(.custom-user-profile-theme) {
+    --control-connected-background-default: var(--accent-4);
+    --control-connected-background-hover: var(--accent-3);
+    --control-connected-background-active: var(--accent-5);
+    --control-connected-border-default: var(--button-border);
+    --control-connected-border-hover: var(--button-border);
+    --control-connected-border-active: var(--button-border);
+    --control-connected-icon-default: var(--text-0);
+    --control-connected-icon-hover: var(--text-0);
+    --control-connected-icon-active: var(--text-0);
+    --control-connected-text-default: var(--text-0);
+    --control-connected-text-hover: var(--text-0);
+    --control-connected-text-active: var(--text-0);
+
+    --interactive-background-default: var(--bg-2);
+    --interactive-accent-background-default: color-mix(in hsl, var(--accent-2), transparent 85%);
+    --interactive-accent-background-hover: var(--accent-3);
+    --interactive-accent-background-selected: var(--accent-3);
+    --interactive-accent-background-active: var(--accent-5);
+
+    --togglebutton-background-selected: color-mix(in hsl, var(--accent-2), transparent 85%);
+    --togglebutton-background-selected-hover: color-mix(in hsl, var(--accent-2), transparent 75%);
+    --togglebutton-background-selected-active: var(--active);
+    --togglebutton-border-selected: var(--accent-2);
+    --togglebutton-border-active: var(--accent-3);
+    --togglebutton-icon-default: var(--text-4);
+    --togglebutton-icon-hover: var(--text-3);
+    --togglebutton-icon-active: var(--text-3);
+    --togglebutton-icon-selected: var(--text-2);
+    --togglebutton-icon-selected-hover: var(--text-2);
+    --togglebutton-icon-only-icon-default: var(--text-4);
+    --togglebutton-icon-only-icon-hover: var(--text-3);
+    --togglebutton-icon-only-icon-active: var(--text-3);
+    --togglebutton-icon-only-icon-selected: var(--text-2);
+    --togglebutton-icon-only-icon-selected-hover: var(--text-2);
+    --togglebutton-critical-background-selected: color-mix(in hsl, var(--red-2), transparent 85%);
+    --togglebutton-critical-background-selected-hover: color-mix(in hsl, var(--red-2), transparent 75%);
+    --togglebutton-critical-border-active: var(--red-3);
+    --togglebutton-critical-icon-default: var(--text-4);
+    --togglebutton-critical-icon-hover: var(--text-3);
+    --togglebutton-critical-icon-active: var(--red-1);
+    --togglebutton-critical-icon-selected: var(--red-1);
+    --togglebutton-critical-icon-selected-hover: var(--red-1);
+
+    --tabs-indicator-default: var(--accent-2);
+    --tabs-indicator-overlay: var(--text-2);
+    --datepicker-range-background-default: color-mix(in hsl, var(--accent-2), transparent 60%);
+    --datepicker-range-background-hover: color-mix(in hsl, var(--accent-2), transparent 40%);
+    --keyword-highlight-background: color-mix(in hsl, var(--accent-2), transparent 80%);
+    --icon-brand: var(--accent-2);
+
+    --channel-background-default: var(--bg-3);
+    --card-border-default: var(--border);
+    --card-primary-pressed-bg: var(--bg-1);
+    --guild-profile-banner-background-default: var(--bg-2);
+
+    --text-voice-connected: var(--green-1);
+    --text-voice-speaking: var(--green-1);
+    --text-voice-disconnected: var(--red-1);
+    --icon-voice-connected: var(--green-1);
+    --icon-voice-speaking: var(--green-1);
+    --icon-voice-disconnected: var(--red-1);
+    --background-voice-muted: color-mix(in hsl, var(--red-2), transparent 85%);
+    --border-voice-muted: color-mix(in hsl, var(--red-2), transparent 85%);
+
+    --icon-feedback-notification: var(--red-2);
+    --border-feedback-info: var(--blue-2);
+    --border-feedback-positive: var(--green-2);
+    --border-feedback-warning: var(--yellow-2);
+    --inlinenotice-border-critical: color-mix(in hsl, var(--red-2), transparent 50%);
+    --inlinenotice-border-info: color-mix(in hsl, var(--blue-2), transparent 50%);
+    --inlinenotice-border-positive: color-mix(in hsl, var(--green-2), transparent 50%);
+    --inlinenotice-border-warning: color-mix(in hsl, var(--yellow-2), transparent 50%);
+    --toast-critical-background: color-mix(in hsl, var(--red-2), transparent 85%);
+    --toast-critical-border: var(--red-3);
+    --toast-success-background: color-mix(in hsl, var(--green-2), transparent 85%);
+    --toast-success-border: var(--green-3);
+    --status-positive-text: var(--text-0);
+    --status-warning-background: var(--yellow-2);
+    --status-warning-text: var(--bg-4);
+
+    --button-outline-brand-background-hover: var(--accent-3);
+    --button-outline-brand-border-active: var(--accent-5);
+    --control-brand-foreground-new: var(--accent-1);
+    --input-border-readonly: var(--border-light);
+    --scrollbar-auto-scrollbar-color-thumb: var(--bg-1);
+    --scrollbar-auto-scrollbar-color-track: transparent;
+    --spoiler-hidden-background: var(--bg-1);
+    --spoiler-hidden-background-hover: var(--active);
+    --text-overlay-dark: var(--bg-4);
+
+    /* Nitro and profile flourishes, still read by 36 rules. */
+    --expressive-gradient-blue-start: color-mix(in hsl, var(--blue-2), transparent 55%);
+    --expressive-gradient-green-start: color-mix(in hsl, var(--green-2), transparent 55%);
+    --expressive-gradient-green-end: color-mix(in hsl, var(--green-4), transparent 55%);
+    --expressive-gradient-pink-start: color-mix(in hsl, var(--accent-2), transparent 55%);
+    --expressive-gradient-pink-end: color-mix(in hsl, var(--purple-4), transparent 55%);
+    --expressive-gradient-purple-start: color-mix(in hsl, var(--purple-2), transparent 55%);
+    --expressive-gradient-purple-end: color-mix(in hsl, var(--purple-4), transparent 55%);
+    --expressive-gradient-nitro-green-start: color-mix(in hsl, var(--green-2), transparent 50%);
+    --expressive-gradient-nitro-green-end: color-mix(in hsl, var(--blue-3), transparent 50%);
+    --expressive-gradient-nitro-pink-start: color-mix(in hsl, var(--accent-2), transparent 50%);
+    --expressive-gradient-nitro-pink-end: color-mix(in hsl, var(--purple-3), transparent 50%);
+
+    /* Code block syntax highlighting. */
+    --text-code: var(--text-2);
+    --text-code-comment: var(--text-5);
+    --text-code-variable: var(--text-2);
+    --text-code-keyword: var(--red-1);
+    --text-code-operator: var(--red-1);
+    --text-code-section: var(--red-1);
+    --text-code-deletion: var(--red-1);
+    --text-code-error: var(--red-1);
+    --text-code-string: var(--green-1);
+    --text-code-regexp: var(--green-1);
+    --text-code-addition: var(--green-1);
+    --text-code-title: var(--blue-1);
+    --text-code-bullet: var(--blue-1);
+    --text-code-attribute: var(--blue-1);
+    --text-code-namespace: var(--blue-1);
+    --text-code-property: var(--blue-2);
+    --text-code-link: var(--accent-1);
+    --text-code-builtin: var(--yellow-1);
+    --text-code-decorator: var(--yellow-1);
+    --text-code-number: var(--yellow-2);
+    --text-code-tag: var(--purple-1);
+    --text-code-type: var(--purple-1);
+    --text-code-escape: var(--purple-1);
+  }
+}
