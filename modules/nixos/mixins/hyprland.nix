@@ -362,10 +362,10 @@ in
     services.accounts-daemon.enable = true;
 
     # Fonts the shell expects (Material Symbols, a Nerd Font, emoji).
-    # System UI font is Geist; monospace is GeistMono patched with Nerd Font
-    # glyphs (terminal mono + powerline icons). The rest are general coverage
-    # fonts so apps don't fall back to Geist (which carries no emoji, CJK, or
-    # serif glyphs) for anything outside basic Latin.
+    # System UI font is Adwaita Sans; monospace is GeistMono patched with Nerd
+    # Font glyphs (terminal mono + powerline icons). The rest are general
+    # coverage fonts so apps don't fall back to Adwaita Sans (which carries no
+    # emoji, CJK, or serif glyphs) for anything outside basic Latin.
     #
     # The NixOS default set is off: it adds dejavu_fonts, freefont_ttf and
     # noto-fonts-color-emoji, and the first two are exactly what has to stay
@@ -376,7 +376,7 @@ in
 
     fonts.packages = with pkgs; [
       material-symbols
-      geist-font # "Geist" (sans) + "Geist Mono"
+      adwaita-fonts # "Adwaita Sans", GNOME's UI face
       nerd-fonts.geist-mono # "GeistMono Nerd Font"
 
       # Broad Latin/symbol coverage + metric-compatible Arial/Times/Courier
@@ -395,7 +395,7 @@ in
       # for 192 of the 1456 emoji codepoints in monochrome, the whole U+1F600
       # face block, ❤, ☺ and ✈ included. What still reaches a text font is
       # ©®™‼⁉ℹ↔↕▪▫▶◀◻◼◽◾, which wants a text glyph anyway. Noto, Liberation
-      # and Geist cover the rest of what DejaVu did, bar ⌥ and ✗.
+      # and Adwaita Sans cover the rest of what DejaVu did, bar ⌥ and ✗.
       appleColorEmoji
 
       # Font Awesome (Brands only, see the let block): the githubNotifier
@@ -403,17 +403,17 @@ in
       fontAwesomeBrands
     ];
 
-    # Geist / GeistMono are the default sans/monospace for the whole system
-    # (GTK apps, anything resolving the generic sans-serif/monospace families).
-    # GeistMono is the Nerd Font patch, so TUI frames, powerline segments and
-    # the fish prompt's OS logo resolve without dropping to tofu. Geist has no
-    # serif, so Noto Serif fills that generic. "Apple Color Emoji" is appended
-    # to every family so emoji render even in apps that don't consult
-    # fontconfig's emoji generic directly.
+    # Adwaita Sans / GeistMono are the default sans/monospace for the whole
+    # system (GTK apps, anything resolving the generic sans-serif/monospace
+    # families). GeistMono is the Nerd Font patch, so TUI frames, powerline
+    # segments and the fish prompt's OS logo resolve without dropping to tofu.
+    # Adwaita Sans has no serif, so Noto Serif fills that generic. "Apple Color
+    # Emoji" is appended to every family so emoji render even in apps that
+    # don't consult fontconfig's emoji generic directly.
     fonts.fontconfig.confPackages = lib.mkBefore [ fontconfigNoDefaultDir ];
 
     fonts.fontconfig.defaultFonts = {
-      sansSerif = [ "Geist" "Noto Sans" "Apple Color Emoji" ];
+      sansSerif = [ "Adwaita Sans" "Noto Sans" "Apple Color Emoji" ];
       serif = [ "Noto Serif" "Apple Color Emoji" ];
       monospace = [ "GeistMono Nerd Font" "Noto Sans Mono" "Apple Color Emoji" ];
       emoji = [ "Apple Color Emoji" ];
@@ -469,7 +469,7 @@ in
 
         <!-- The emoji font, appended to every pattern rather than only to the
              generics above, so an app that names its own family still gets it.
-             Without this, a request for "Geist" that hits an emoji codepoint
+             Without this, a request for "Adwaita Sans" that hits an emoji codepoint
              is scored on coverage alone and Font Awesome answers for ❤ and
              the U+1F600 faces. Weak binding: appended behind the app's own
              families, so ©, ® and ™ keep their text glyphs. -->

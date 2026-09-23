@@ -895,7 +895,7 @@ ${lib.optionalString (!useFormalshell) ''
       package = iconTheme;
     };
     font = {
-      name = "Geist";
+      name = "Adwaita Sans";
       size = 11;
     };
     gtk3.extraConfig = lib.optionalAttrs (!useFormalshell) { gtk-application-prefer-dark-theme = 1; };
@@ -930,8 +930,8 @@ ${lib.optionalString (!useFormalshell) ''
   # writes gtk-theme and color-scheme into this same schema at runtime; these
   # keys are disjoint from those, so neither side clobbers the other.
   dconf.settings."org/gnome/desktop/interface" = {
-    font-name = "Geist 11";
+    font-name = "Adwaita Sans 11";
     monospace-font-name = "GeistMono Nerd Font 11";
-    document-font-name = "Geist 11";
+    document-font-name = "Adwaita Sans 12";
   };
 }

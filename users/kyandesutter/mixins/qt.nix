@@ -29,7 +29,7 @@ in
   # PATH, and the qt{5,6}ct.conf below point at it with a Fusion style (Fusion
   # honours the custom palette). Qt apps pick up the colours at launch: no
   # live recolour (Qt has no palette hot-reload).
-  # [Fonts] pins Geist/GeistMono so Qt apps match the GTK side instead of taking
+  # [Fonts] pins Adwaita Sans/GeistMono so Qt apps match the GTK side instead of taking
   # whatever QGuiApplication::font() resolves to. Both qt5ct and qt6ct read
   # these through QFont::fromString on a plain string, so the value is the
   # Qt5-style 10-field spec (family,pointSize,pixelSize,styleHint,weight,style,
@@ -44,7 +44,7 @@ in
     standard_dialogs=default
 
     [Fonts]
-    general="Geist,11,-1,5,50,0,0,0,0,0"
+    general="Adwaita Sans,11,-1,5,50,0,0,0,0,0"
     fixed="GeistMono Nerd Font,11,-1,5,50,0,0,0,0,0"
   '';
   xdg.configFile."qt5ct/qt5ct.conf".text = ''
@@ -55,7 +55,7 @@ in
     standard_dialogs=default
 
     [Fonts]
-    general="Geist,11,-1,5,50,0,0,0,0,0"
+    general="Adwaita Sans,11,-1,5,50,0,0,0,0,0"
     fixed="GeistMono Nerd Font,11,-1,5,50,0,0,0,0,0"
   '';
 }

@@ -85,11 +85,11 @@ let
   dmsFonts = {
     # The system faces, so the shell matches GTK and Qt rather than DMS's own
     # "Inter Variable"/"Fira Code" defaults.
-    fontFamily = "Geist";
+    fontFamily = "Adwaita Sans";
     monoFontFamily = "GeistMono Nerd Font";
-    # Geist renders at DMS's own pixel sizes without correction; the 1.2 here
-    # existed only to make up MEK's short 600/1000em cap height. Each bar keeps
-    # its own fontScale, which this multiplies with.
+    # Adwaita Sans renders at DMS's own pixel sizes without correction; the
+    # 1.2 here existed only to make up MEK's short 600/1000em cap height. Each
+    # bar keeps its own fontScale, which this multiplies with.
     fontScale = 1.0;
   };
 
