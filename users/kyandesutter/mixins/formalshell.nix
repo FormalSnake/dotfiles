@@ -83,9 +83,7 @@ in
         # Its cell is one dots toggle now, the icons themselves living in the
         # tray's own second bar, so parking it behind the chevron hid the tray
         # twice over: a collapsed bar left nothing at all to open.
-        # Radio Atlas (formalshell-plugins/, below) is consulted, not
-        # monitored, so it joins the collapsible group.
-        bar.layout.right = [ "display" "dualsense" "tailscale" "github" "usage" "plugin:radio-atlas-bar" "chevron" "tray" "weather" "battery" "airpods" "audio" "network" "bluetooth" "bell" "indicators" ];
+        bar.layout.right = [ "display" "dualsense" "tailscale" "github" "usage" "chevron" "tray" "weather" "battery" "airpods" "audio" "network" "bluetooth" "bell" "indicators" ];
         # Codex off: the usage panel polls and renders a section per provider,
         # and this machine only ever signs into Claude, so the CODEX section
         # was permanently reporting on a tool that never gets used.
@@ -107,16 +105,6 @@ in
         display.outputPriority = [ "HDMI" "internal" ];
       };
     };
-
-    # Drop-in shell plugins (docs/USAGE.md "Plugins" in FormalShell). Linked
-    # file by file so the mpris script below can sit beside them: mpv loads
-    # it from the plugin directory to show up as an MPRIS player.
-    xdg.configFile."formalshell/plugins" = {
-      source = ../formalshell-plugins;
-      recursive = true;
-    };
-    xdg.configFile."formalshell/plugins/radio-atlas/mpris.so".source =
-      "${pkgs.mpvScripts.mpris}/share/mpv/scripts/mpris.so";
 
     # DMS goes dormant, not away: mixins/dms.nix stays imported because its
     # generated ~/.config/matugen/config.toml and templates are what
