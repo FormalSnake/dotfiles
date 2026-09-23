@@ -90,6 +90,8 @@ in
         usage.codex = false;
         # Apple Music animated album covers in the media panel (off upstream).
         media.appleMusicArt = true;
+        # Winamp's falling peak caps for the media panel spectrum (bars upstream).
+        media.visualizerStyle = "peaks";
         # The launcher's app results as a grid of icons over their names
         # (off upstream).
         menu.appGrid = true;
