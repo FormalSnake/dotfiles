@@ -14,6 +14,20 @@ let
     themeOptions = qylockThemeOptions;
   };
 
+  # qylock's SDDM theme tree, with Tab in man-bicycle's password field cycling
+  # the session. Upstream only cycles it on a click, and the greeter has no
+  # working pointer, so without this the last-used session is the only one
+  # reachable.
+  qylockSddm = (inputs.qylock.legacyPackages.${pkgs.stdenv.hostPlatform.system}.mkSddmThemes {
+    themeOptions = qylockThemeOptions;
+  }).overrideAttrs (old: {
+    postPatch = (old.postPatch or "") + ''
+      substituteInPlace themes/man-bicycle/Main.qml --replace-fail \
+        'onAccepted: doLogin()' \
+        'onAccepted: doLogin(); Keys.onTabPressed: if (typeof sessionModel !== "undefined") root.sessionIndex = (root.sessionIndex + 1) % sessionModel.rowCount()'
+    '';
+  });
+
   # Lock the session before the machine suspends. Runs as kyandesutter and
   # starts qylock-lock.service through the user manager, reached over
   # $XDG_RUNTIME_DIR/bus (systemctl --user derives the bus address from
@@ -209,16 +223,22 @@ in
 
     # SDDM (Qt6, Wayland). SDDM lists the Hyprland uwsm session
     # (hyprland-uwsm.desktop, installed by programs.hyprland) from
-    # /run/current-system/sw/share/wayland-sessions. The theme itself is set by
-    # programs.qylock below, not here.
+    # /run/current-system/sw/share/wayland-sessions.
     services.displayManager.sddm = {
       enable = true;
       wayland.enable = true;
       wayland.compositorCommand = toString sddmGreeterCompositor;
       package = pkgs.kdePackages.sddm;
-      # On-screen keyboard. The Qt runtime the theme QML needs (svg,
-      # multimedia, Qt5Compat) is contributed by the qylock module.
-      extraPackages = [ pkgs.kdePackages.qtvirtualkeyboard ];
+      theme = qylockTheme;
+      # On-screen keyboard, the patched qylock themes, and the Qt runtime
+      # their QML imports (the same list qylock's own sddm half installs).
+      extraPackages = [
+        pkgs.kdePackages.qtvirtualkeyboard
+        qylockSddm
+        pkgs.qt6.qt5compat
+        pkgs.qt6.qtmultimedia
+        pkgs.qt6.qtsvg
+      ];
       # The greeter's XCURSOR_PATH ends at the system profile, and the user's
       # Bibata lives in the home-manager profile, which the sddm user cannot
       # see. With no theme to load, the greeter draws no pointer at all.
@@ -241,6 +261,8 @@ in
       enable = true;
       theme = qylockTheme;
       themeOptions = qylockThemeOptions;
+      # The greeter half is wired by hand above, to carry the session keybind.
+      sddm.enable = false;
     };
 
     # The lock screen, as a user unit. qylock-lock runs for as long as the
@@ -482,6 +504,7 @@ in
     networking.firewall.allowedUDPPorts = [ 53317 ];
 
     environment.systemPackages = with pkgs; [
+      qylockSddm
       # Pointer theme for the SDDM greeter (Theme.CursorTheme above).
       bibata-cursors
 
