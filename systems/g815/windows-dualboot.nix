@@ -150,7 +150,8 @@ let
   windows-bluetooth-keys = pkgs.writeShellApplication {
     name = "windows-bluetooth-keys";
     runtimeInputs = [
-      pkgs.hivex # hivexget, hivexregedit
+      pkgs.hivex # hivexsh, hivexregedit
+      pkgs.bash
       pkgs.unixtools.xxd
       pkgs.gawk
       pkgs.gnused
@@ -158,9 +159,12 @@ let
       pkgs.coreutils
     ];
     text = ''
+      # hivexget is a #!/bin/bash script, and NixOS has no /bin/bash.
+      hget() { bash ${pkgs.hivex}/bin/hivexget "$@"; }
+
       hive=/mnt/windows/Windows/System32/config/SYSTEM
       [ -r "$hive" ] || exit 0
-      cs=$(printf 'ControlSet%03d' "$(hivexget "$hive" '\Select' Current)")
+      cs=$(printf 'ControlSet%03d' "$(hget "$hive" '\Select' Current)")
       params="\\$cs\\Services\\BTHPORT\\Parameters"
 
       for adir in /var/lib/bluetooth/??:??:??:??:??:??; do
@@ -172,7 +176,7 @@ let
           awk '/^\[/ { if (seen++) exit; next } match($0, /^"[0-9a-f]{12}"=hex\(3\):/) { print substr($0, 2, 12) }') || true
 
         for wm in $devices; do
-          key=$(hivexget "$hive" "$params\\Keys\\$wa" "$wm" | xxd -p -c 64 | tr a-f A-F)
+          key=$(hget "$hive" "$params\\Keys\\$wa" "$wm" | xxd -p -c 64 | tr a-f A-F)
           [ ''${#key} -eq 32 ] || continue
           mac=$(echo "$wm" | tr a-f A-F | sed 's/../&:/g; s/:$//')
           info="$adir/$mac/info"
@@ -184,7 +188,7 @@ let
             printf '\n[LinkKey]\nKey=%s\nType=4\nPINLength=0\n' "$key" >> "$info"
             echo "$mac: link key added from Windows"
           else
-            name=$(hivexget "$hive" "$params\\Devices\\$wm" Name 2>/dev/null | tr -d '\0') || true
+            name=$(hget "$hive" "$params\\Devices\\$wm" Name 2>/dev/null | tr -d '\0') || true
             install -d -m 700 "$adir/$mac"
             {
               printf '[General]\n'
