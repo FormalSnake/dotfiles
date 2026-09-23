@@ -427,8 +427,10 @@ in
   # Profile picture: DMS reads the avatar from AccountsService
   # (PortalService.getUserIconFile → HeaderPane), and AccountsService falls back
   # to ~/.face when no icon is set, so seeding it here themes the DMS control
-  # centre and the SDDM greeter from one source.
-  home.file.".face".source = ../assets/profile.jpeg;
+  # centre and the SDDM greeter from one source. The image itself is kept out
+  # of this repo: each host carries it at ~/.local/share/profile.png.
+  home.file.".face".source =
+    config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.local/share/profile.png";
 
   xdg.configFile = {
     # DMS custom theme (flexokiTheme above): a plain declarative file, unlike
