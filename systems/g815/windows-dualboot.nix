@@ -138,9 +138,85 @@ let
       echo "linked $lin -> $win"
     '';
   };
+
+  # One adapter, two OSes, but each pairing mints a new link key and the device
+  # only remembers the last one, so a pairing on either side broke the other.
+  # Windows is the source of truth: this copies its BR/EDR link keys out of the
+  # SYSTEM hive (opened read-only) into BlueZ before bluetoothd starts. Pair on
+  # NixOS first, then on Windows, and the next NixOS boot picks the key up.
+  # LE-only devices (mice, some controllers) keep separate pairings: their
+  # keys need byte-order conversions nobody has verified here.
+  windows-bluetooth-keys = pkgs.writeShellApplication {
+    name = "windows-bluetooth-keys";
+    runtimeInputs = [
+      pkgs.hivex # hivexget, hivexregedit
+      pkgs.unixtools.xxd
+      pkgs.gawk
+      pkgs.gnused
+      pkgs.gnugrep
+      pkgs.coreutils
+    ];
+    text = ''
+      hive=/mnt/windows/Windows/System32/config/SYSTEM
+      [ -r "$hive" ] || exit 0
+      cs=$(printf 'ControlSet%03d' "$(hivexget "$hive" '\Select' Current)")
+      params="\\$cs\\Services\\BTHPORT\\Parameters"
+
+      for adir in /var/lib/bluetooth/??:??:??:??:??:??; do
+        [ -d "$adir" ] || continue
+        wa=$(basename "$adir" | tr -d : | tr A-F a-f)
+        # Device keys are the 12-hex values of the adapter key itself; LE
+        # devices live in subkeys and are skipped by stopping at the next header.
+        devices=$(hivexregedit --export "$hive" "$params\\Keys\\$wa" 2>/dev/null |
+          awk '/^\[/ { if (seen++) exit; next } match($0, /^"[0-9a-f]{12}"=hex\(3\):/) { print substr($0, 2, 12) }') || true
+
+        for wm in $devices; do
+          key=$(hivexget "$hive" "$params\\Keys\\$wa" "$wm" | xxd -p -c 64 | tr a-f A-F)
+          [ ''${#key} -eq 32 ] || continue
+          mac=$(echo "$wm" | tr a-f A-F | sed 's/../&:/g; s/:$//')
+          info="$adir/$mac/info"
+
+          if [ -f "$info" ]; then
+            cur=$(sed -n '/^\[LinkKey\]/,/^\[/ s/^Key=//p' "$info")
+            [ "$cur" = "$key" ] && continue
+            if grep -q '^\[LinkKey\]' "$info"; then
+              sed -i "/^\[LinkKey\]/,/^\[/ s/^Key=.*/Key=$key/" "$info"
+            else
+              printf '\n[LinkKey]\nKey=%s\nType=4\nPINLength=0\n' "$key" >> "$info"
+            fi
+            echo "$mac: link key updated from Windows"
+          else
+            name=$(hivexget "$hive" "$params\\Devices\\$wm" Name 2>/dev/null | tr -d '\0') || true
+            install -d -m 700 "$adir/$mac"
+            {
+              printf '[General]\n'
+              [ -n "$name" ] && printf 'Name=%s\n' "$name"
+              printf 'SupportedTechnologies=BR/EDR;\nTrusted=true\nBlocked=false\n\n'
+              printf '[LinkKey]\nKey=%s\nType=4\nPINLength=0\n' "$key"
+            } > "$info"
+            chmod 600 "$info"
+            echo "$mac: added from Windows''${name:+ ($name)}"
+          fi
+        done
+      done
+    '';
+  };
 in
 {
   environment.systemPackages = [ link-minecraft-to-windows ];
+
+  # Runs ahead of every bluetoothd start, so `systemctl restart bluetooth`
+  # also re-syncs. A missing Windows mount fails this unit, not bluetooth.
+  systemd.services.windows-bluetooth-keys = {
+    description = "Copy Windows Bluetooth link keys into BlueZ";
+    wantedBy = [ "bluetooth.service" ];
+    before = [ "bluetooth.service" ];
+    unitConfig.RequiresMountsFor = "/mnt/windows";
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "${windows-bluetooth-keys}/bin/windows-bluetooth-keys";
+    };
+  };
 
   # Windows C:, mounted read-write so the shared Modrinth profile above can be
   # one set of files rather than two kept in step by hand.
