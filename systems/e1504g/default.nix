@@ -413,6 +413,10 @@
       # then would cut rebuilds mid-flight. swayidle only fires once per idle
       # edge, so the timeout starts a transient wait-loop (suspends the moment
       # the last SSH connection closes), and local activity kills it.
+      # The shell's screensaver at 10 minutes idle, ahead of the lock and
+      # suspend below at 15.
+      programs.formalshell.settings.screensaver.timeoutSeconds = 600;
+
       services.swayidle = {
         enable = true;
         timeouts = [
