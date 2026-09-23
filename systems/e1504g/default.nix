@@ -424,7 +424,7 @@
             timeout = 900;
             command = toString (pkgs.writeShellScript "idle-suspend" ''
               ${config.programs.formalshell.package}/bin/formalshell ipc --any-display call lock lock >/dev/null 2>&1 || true
-              exec systemd-run --user --unit=idle-suspend-pending --collect \
+              exec ${pkgs.systemd}/bin/systemd-run --user --unit=idle-suspend-pending --collect \
                 ${pkgs.writeShellScript "idle-suspend-wait" ''
                   while ${pkgs.iproute2}/bin/ss -Htn state established sport = :22 \
                       | ${pkgs.gnugrep}/bin/grep -q .; do
@@ -433,7 +433,7 @@
                   /run/current-system/sw/bin/systemctl suspend
                 ''}
             '');
-            resumeCommand = "systemctl --user stop idle-suspend-pending.service";
+            resumeCommand = "${pkgs.systemd}/bin/systemctl --user stop idle-suspend-pending.service";
           }
         ];
       };
