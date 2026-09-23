@@ -2,17 +2,10 @@
 let
   cfg = config.kyan.desktop;
 
-  # qylock's Quickshell lock screen. Same builder call the programs.qylock
-  # module makes below, with the same arguments, so both references resolve to
-  # one derivation rather than two builds of the same 650 MB theme tree.
   qylockTheme = "man-bicycle";
-  # man-bicycle takes none of the per-theme conf edits qylock's module can apply
-  # (only terraria, Genshin, clockwork and osu have any).
+  # man-bicycle takes none of the per-theme conf edits qylock can apply (only
+  # terraria, Genshin, clockwork and osu have any).
   qylockThemeOptions = { };
-  qylockLock = inputs.qylock.legacyPackages.${pkgs.stdenv.hostPlatform.system}.mkQuickshell {
-    defaultTheme = qylockTheme;
-    themeOptions = qylockThemeOptions;
-  };
 
   # qylock's SDDM theme tree, with Tab in man-bicycle's password field cycling
   # the session. Upstream only cycles it on a click, and the greeter has no
@@ -28,19 +21,21 @@ let
     '';
   });
 
-  # Lock the session before the machine suspends. Runs as kyandesutter and
-  # starts qylock-lock.service through the user manager, reached over
-  # $XDG_RUNTIME_DIR/bus (systemctl --user derives the bus address from
-  # XDG_RUNTIME_DIR when DBUS_SESSION_BUS_ADDRESS is unset, which it is in a
-  # system unit). Starting an already-running unit is a no-op, so the paths
-  # where the keybind locked first cost nothing. The suspend itself is driven
-  # by systemd-suspend.service, ordered after this via sleep.target. Always
-  # exit 0: a lock failure (no session, no user manager) must never block the
-  # suspend.
+  # Lock the session before the machine suspends: raises FormalShell's own lock
+  # surface over its IPC, then waits (up to 2s) for the shell to report it
+  # locked, so a suspend queued right behind cannot beat the surface to the
+  # screen. The suspend itself is driven by systemd-suspend.service, ordered
+  # after this via sleep.target. Always exit 0: a lock failure (no session, no
+  # shell running) must never block the suspend.
+  fsBin = "${config.home-manager.users.kyandesutter.programs.formalshell.package}/bin/formalshell";
   lockBeforeSleep = pkgs.writeShellScript "lock-before-sleep" ''
     export XDG_RUNTIME_DIR="/run/user/$(${pkgs.coreutils}/bin/id -u)"
-    ${pkgs.coreutils}/bin/timeout 10 \
-      ${pkgs.systemd}/bin/systemctl --user start qylock-lock.service || true
+    ipc() { ${pkgs.coreutils}/bin/timeout 3 ${fsBin} ipc --any-display call lock "$1" 2>/dev/null; }
+    ipc lock >/dev/null || exit 0
+    for _ in $(${pkgs.coreutils}/bin/seq 20); do
+      [ "$(ipc isLocked)" = true ] && break
+      ${pkgs.coreutils}/bin/sleep 0.1
+    done
     exit 0
   '';
 
@@ -160,12 +155,8 @@ in
 {
   # Imported unconditionally. Everything in it is inert until
   # services.formalshell.enable flips on below.
-  #
-  # qylock declares programs.qylock, which owns both the SDDM theme and the
-  # qylock-lock wrapper (configured in the programs.qylock block below).
   imports = [
     inputs.formalshell.nixosModules.formalshell
-    inputs.qylock.nixosModules.default
   ];
 
   options.kyan.desktop = {
@@ -173,7 +164,7 @@ in
     shell = lib.mkOption {
       type = lib.types.enum [ "dms" "formalshell" ];
       default = "dms";
-      description = "Which desktop shell owns the session (bar, notification daemon). Gates the shell-facing binds and user services in users/kyandesutter/mixins/{hyprland,formalshell}.nix. Not the lock screen: qylock owns that on both shells.";
+      description = "Which desktop shell owns the session (bar, notification daemon). Gates the shell-facing binds and user services in users/kyandesutter/mixins/{hyprland,formalshell}.nix. The lock screen and lock-before-sleep are FormalShell's only.";
     };
   };
 
@@ -248,56 +239,6 @@ in
       };
     };
 
-    # qylock: one theme tree rendered by two frontends, the SDDM greeter and a
-    # Quickshell `ext-session-lock-v1` client. man-bicycle draws over a static
-    # bg.png and loads its own bundled font.
-    #
-    # This replaces both the sddm-astronaut cyberdeck greeter and the shell's
-    # own lock screen, so the greeter and the lock screen finally match. It
-    # stays outside the matugen/Flexoki theming model for the same reason the
-    # cyberdeck greeter did: the greeter runs before any user session exists,
-    # so there is no wallpaper to derive colours from.
-    programs.qylock = {
-      enable = true;
-      theme = qylockTheme;
-      themeOptions = qylockThemeOptions;
-      # The greeter half is wired by hand above, to carry the session keybind.
-      sddm.enable = false;
-    };
-
-    # The lock screen, as a user unit. qylock-lock runs for as long as the
-    # session is locked, so it has to outlive whatever raised it: the keybind
-    # in users/kyandesutter/mixins/hyprland.nix and lockBeforeSleep above both
-    # start this unit instead of exec'ing the binary. PartOf, not WantedBy: it
-    # is only ever started on demand, but it must not survive the compositor.
-    systemd.user.services.qylock-lock = {
-      description = "qylock lock screen";
-      partOf = [ "graphical-session.target" ];
-      after = [ "graphical-session.target" ];
-      # bash: qylock-lock is a makeWrapper script around a lock.sh carrying a
-      # `#!/usr/bin/env bash` shebang, and the wrapper's own PATH prefix
-      # (quickshell, psmisc, systemd, coreutils) has no shell in it. A unit
-      # PATH is the systemd default, not the session's, so without this the
-      # lock dies at exec with `env: bash: No such file or directory`.
-      # hyprctl: the lock client sets misc:allow_session_lock_restore through
-      # it on a successful unlock.
-      path = [ pkgs.bash config.programs.hyprland.package ];
-      # qylock's wrapper puts Qt Multimedia's QML on the import path but not
-      # its multimedia backend plugin, which lives in a store path of its own
-      # and so is invisible to quickshell's Qt. Without it a video theme's
-      # MediaPlayer has no backend and the background stays black. quickshell's own
-      # wrapper prefixes this, so the platform plugins still win.
-      environment.QT_PLUGIN_PATH = "${pkgs.qt6.qtmultimedia}/lib/qt-6/plugins";
-      serviceConfig = {
-        Type = "exec";
-        ExecStart = "${qylockLock}/bin/qylock-lock";
-        # The lock surface is only handed to the compositor a beat after the
-        # process starts. Hold the start job over that gap so a suspend queued
-        # right behind it cannot race the screen going black.
-        ExecStartPost = "${pkgs.coreutils}/bin/sleep 1";
-      };
-    };
-
     # polkit agent + secrets/keyring so GUI auth prompts and saved logins work.
     security.polkit.enable = true;
     services.gnome.gnome-keyring.enable = true;
@@ -308,7 +249,7 @@ in
     # sleep.target, so every suspend path (lid close, idle, and the
     # SUPER+SHIFT+Escape keybind) resumes on the lock screen. The keybind
     # still locks on its own too. This makes the lid path match.
-    systemd.services.lock-before-sleep = {
+    systemd.services.lock-before-sleep = lib.mkIf (cfg.shell == "formalshell") {
       description = "Lock the session before sleep";
       before = [ "sleep.target" ];
       wantedBy = [ "sleep.target" ];

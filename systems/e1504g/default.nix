@@ -383,7 +383,7 @@
   ];
 
   home-manager.users.kyandesutter =
-    { pkgs, lib, ... }:
+    { config, pkgs, lib, ... }:
     {
       imports = [
         self.homeModules.kyandesutter
@@ -403,12 +403,12 @@
         messages.Install.WantedBy = lib.mkForce [ ];
       };
 
-      # Suspend after 10 minutes idle (lid close already suspends via logind's
-      # default HandleLidSwitch; DMS's own idle timeouts stay 0, see the seed
-      # in mixins/dms.nix). swayidle listens on Hyprland's ext-idle-notify. The
-      # lock-before-sleep hook (modules/nixos/mixins/hyprland.nix) locks on the way
-      # down. Deferred while an SSH connection is established: this machine is
-      # administered remotely (Claude on the g815), and "no local input for 10
+      # Lock and suspend after 15 minutes idle (lid close already suspends via
+      # logind's default HandleLidSwitch). swayidle listens on Hyprland's
+      # ext-idle-notify. The lock is raised at the timeout itself, so the
+      # screen locks even while the suspend below is deferred. The suspend is
+      # deferred while an SSH connection is established: this machine is
+      # administered remotely (Claude on the g815), and "no local input for 15
       # minutes" is the NORMAL state of a remote-driven session. Suspending
       # then would cut rebuilds mid-flight. swayidle only fires once per idle
       # edge, so the timeout starts a transient wait-loop (suspends the moment
@@ -417,8 +417,9 @@
         enable = true;
         timeouts = [
           {
-            timeout = 600;
+            timeout = 900;
             command = toString (pkgs.writeShellScript "idle-suspend" ''
+              ${config.programs.formalshell.package}/bin/formalshell ipc --any-display call lock lock >/dev/null 2>&1 || true
               exec systemd-run --user --unit=idle-suspend-pending --collect \
                 ${pkgs.writeShellScript "idle-suspend-wait" ''
                   while ${pkgs.iproute2}/bin/ss -Htn state established sport = :22 \

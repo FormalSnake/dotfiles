@@ -16,11 +16,6 @@ let
   # theme.radius, 10 by default), so windows and shell cards share one curve.
   fsRadius = toString ((config.programs.formalshell.settings.theme or { }).radius or 10);
 
-  # Lock screen (qylock, man-bicycle theme), owned by neither shell. The unit
-  # is declared in modules/nixos/mixins/hyprland.nix; starting it returns as
-  # soon as the lock surface is up, so `&& systemctl suspend` behind it
-  # suspends onto the locked screen rather than after the unlock.
-  lockCmd = "${pkgs.systemd}/bin/systemctl --user start qylock-lock.service";
 
   iconTheme = pkgs.callPackage ./elementary/icon-theme.nix { };
   iconThemeName = iconTheme.themeName;
@@ -182,7 +177,7 @@ let
       hl.bind(mod .. " + SHIFT + T", hl.dsp.exec_cmd("${fsBin} theme mode toggle"))
       -- Sleep: lock then suspend on demand, so resume lands on the lock screen
       -- (exec_cmd runs through sh -c).
-      hl.bind(mod .. " + SHIFT + Escape", hl.dsp.exec_cmd("${lockCmd} && systemctl suspend"))
+      hl.bind(mod .. " + SHIFT + Escape", hl.dsp.exec_cmd("${fsIpc [ "lock" "lock" ]} && systemctl suspend"))
 
       -- Screenshots via the shell (M12 screenshot IPC target: grim/slurp on the
       -- wrapper PATH, saves to screenshot.directory and wl-copy's the image,
@@ -223,7 +218,7 @@ let
       hl.bind(mod .. " + ntilde", hl.dsp.exec_cmd("${dmsBin} ipc call clipboard toggle"))
       hl.bind(mod .. " + SHIFT + T", hl.dsp.exec_cmd("${dmsBin} ipc call theme toggle"))
       -- Sleep: lock then suspend on demand, so resume lands on the lock screen.
-      hl.bind(mod .. " + SHIFT + Escape", hl.dsp.exec_cmd("${lockCmd} && systemctl suspend"))
+      hl.bind(mod .. " + SHIFT + Escape", hl.dsp.exec_cmd("${dmsBin} ipc call lock lock && systemctl suspend"))
 
       -- Screenshots via DMS (owner rule: the shell owns it, so the binds
       -- survive compositor changes). `dms screenshot` is a top-level
