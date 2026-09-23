@@ -275,6 +275,10 @@
   };
 
   home-manager.users.kyandesutter = {
+    # The shell's screensaver at 10 minutes idle. Nothing on this machine
+    # locks on idle: no swayidle, and screensaver.lockAfterSeconds stays 0.
+    programs.formalshell.settings.screensaver.timeoutSeconds = 600;
+
     imports = [
       self.homeModules.kyandesutter
       self.homeModules.kyandesutter-linux
