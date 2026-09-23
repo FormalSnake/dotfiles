@@ -129,6 +129,9 @@
     --icon-brand: var(--accent-2);
 
     --channel-background-default: var(--bg-3);
+    /* Discord declares this on :root, so its var() resolves above the
+       elements colors.css themes and the member list comes out black. */
+    --custom-channel-members-bg: var(--background-base-lower);
     --card-border-default: var(--border);
     --card-primary-pressed-bg: var(--bg-1);
     --guild-profile-banner-background-default: var(--bg-2);
