@@ -28,6 +28,7 @@
       ./mixins/bluetooth.nix
       ./mixins/mouse.nix
       ./mixins/hyprland.nix
+      ./mixins/gnome.nix
       ./mixins/online-accounts.nix
       ./mixins/dualsense.nix
       ./mixins/minecraft.nix

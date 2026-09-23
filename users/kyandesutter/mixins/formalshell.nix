@@ -129,6 +129,11 @@ in
     # should survive a shell restart.
     systemd.user.services.formalshell.Service.KillMode = "process";
 
+    # The shell and its watchdog belong to the Hyprland session only;
+    # graphical-session.target is reached under GNOME too (mixins/gnome.nix).
+    systemd.user.services.formalshell.Unit.ConditionEnvironment = "XDG_CURRENT_DESKTOP=Hyprland";
+    systemd.user.timers.formalshell-watchdog.Unit.ConditionEnvironment = "XDG_CURRENT_DESKTOP=Hyprland";
+
     # session.slice, next to the compositor: systemd-oomd pressure-kills in
     # app.slice (modules/nixos/mixins/oomd.nix). Apps launched from the menu
     # go through `uwsm app` into scopes of their own, so they stay in reach.

@@ -10,6 +10,10 @@ in
     # ../mixins/hyprland.nix; this flag gates them on per-host.
     kyan.desktop.enable = true;
 
+    # Stock GNOME next to Hyprland, for checking apps against default Adwaita
+    # (../mixins/gnome.nix).
+    kyan.desktop.gnome.enable = lib.mkDefault true;
+
     # Shared Flatpak base (mixins/flatpak.nix): every desktop host gets the
     # flatpak service + flathub remote, so user-level Flatpaks work everywhere.
     # GPU-bound Flatpaks don't belong in shared config, declare those per-host.

@@ -76,8 +76,8 @@ lib.mkIf useFormalshell {
   '';
 
   # After formalshell-colors.css, so these definitions win where both name a colour.
-  gtk.gtk3.extraCss = lib.mkAfter ''@import url("elementary-colors.css");'';
-  gtk.gtk4.extraCss = lib.mkAfter ''@import url("elementary-colors.css");'';
+  xdg.configFile."gtk-3.0/hyprland.css".text = lib.mkAfter ''@import url("elementary-colors.css");'';
+  xdg.configFile."gtk-4.0/hyprland.css".text = lib.mkAfter ''@import url("elementary-colors.css");'';
 
   programs.formalshell.settings.gtk = {
     theme = theme.themeName "light";

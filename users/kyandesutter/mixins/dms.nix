@@ -683,6 +683,7 @@ in
   systemd.user.services.flexoki-pin = {
     Unit = {
       Description = "Pin the Flexoki custom theme for flexoki-named wallpapers";
+      ConditionEnvironment = "XDG_CURRENT_DESKTOP=Hyprland";
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
     };

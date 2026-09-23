@@ -9,6 +9,7 @@ let
   # references stay lazy: only the active arm's option is ever forced, so the
   # inactive shell's package option can be unset without breaking eval.
   useFormalshell = (((osConfig.kyan or { }).desktop or { }).shell or "dms") == "formalshell";
+  shellColors = if useFormalshell then "formalshell-colors.css" else "dank-colors.css";
   fsBin = "${config.programs.formalshell.package}/bin/formalshell";
   fsIpc = args: "${fsBin} ipc --any-display call " + lib.concatStringsSep " " args;
   # Window rounding follows the shell's own corner radius (settings.json
@@ -873,7 +874,7 @@ ${lib.optionalString (!useFormalshell) ''
   #     dconf below. Without both, half the GTK apps stay on the fontconfig
   #     sans-serif default and the desktop looks mixed.
   #   • gtk{3,4}.extraCss: own gtk.css declaratively so it holds ONLY the
-  #     palette import. The shell writes the colour file but never gtk.css, so
+  #     session.css import (see gtk-session-css below). The shell writes the colour file but never gtk.css, so
   #     an unmanaged gtk.css silently accumulates cruft: stale @define-color
   #     blocks from old theming tools end up ABOVE the import, and GTK
   #     requires @import before any other rule: so it drops the import, the
@@ -899,8 +900,30 @@ ${lib.optionalString (!useFormalshell) ''
     };
     gtk3.extraConfig = lib.optionalAttrs (!useFormalshell) { gtk-application-prefer-dark-theme = 1; };
     gtk4.extraConfig = lib.optionalAttrs (!useFormalshell) { gtk-application-prefer-dark-theme = 1; };
-    gtk3.extraCss = ''@import url("${if useFormalshell then "formalshell-colors.css" else "dank-colors.css"}");'';
-    gtk4.extraCss = ''@import url("${if useFormalshell then "formalshell-colors.css" else "dank-colors.css"}");'';
+    gtk3.extraCss = ''@import url("session.css");'';
+    gtk4.extraCss = ''@import url("session.css");'';
+  };
+
+  # gtk.css is read in every session, so it only imports session.css, which
+  # the session picks at startup: this unit points it at hyprland.css (the
+  # shell's palette imports), and the GNOME session empties it
+  # (mixins/gnome.nix) so apps there draw stock Adwaita.
+  xdg.configFile."gtk-3.0/hyprland.css".text = ''@import url("${shellColors}");'';
+  xdg.configFile."gtk-4.0/hyprland.css".text = ''@import url("${shellColors}");'';
+  systemd.user.services.gtk-session-css = {
+    Unit = {
+      Description = "Point GTK's session.css at the Hyprland theme";
+      Before = [ "wayland-session-pre@hyprland.desktop.target" ];
+    };
+    Install.WantedBy = [ "wayland-session-pre@hyprland.desktop.target" ];
+    Service = {
+      Type = "oneshot";
+      ExecStart = toString (pkgs.writeShellScript "gtk-session-css" ''
+        for dir in "${config.xdg.configHome}"/gtk-3.0 "${config.xdg.configHome}"/gtk-4.0; do
+          ${pkgs.coreutils}/bin/ln -sfn hyprland.css "$dir/session.css"
+        done
+      '');
+    };
   };
 
   # The GSettings half of the GTK font (see the gtk block above). The shell
