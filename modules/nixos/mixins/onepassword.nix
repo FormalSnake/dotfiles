@@ -28,10 +28,14 @@
   # Trust Helium (a Chromium fork) for the browser-unlock native-messaging
   # integration. 1Password only talks to browsers whose binary name is in its
   # built-in allowlist or this file. Helium's Nix wrapper execs
-  # .../opt/helium/helium, so its process name is "helium".
+  # .../opt/helium/helium, so its process name is "helium". The NativeDesktop
+  # CEF host (the nativebrowser app on g815 runs as zig-out/bin/nd-hello) is
+  # also a Chromium browser, and 1Password rejected it with
+  # BrowserSignatureInvalid until it was listed here too.
   environment.etc."1password/custom_allowed_browsers" = {
     text = ''
       helium
+      nd-hello
     '';
     mode = "0755";
   };
