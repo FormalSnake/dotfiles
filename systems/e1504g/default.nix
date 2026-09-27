@@ -410,6 +410,10 @@
       # machine is unattended here. It must never suspend on its own.
       # The shell's screensaver fires at 10 minutes, ahead of the lock at 15.
       programs.formalshell.settings.screensaver.timeoutSeconds = 600;
+      # Caffeinated from login: the shell holds an idle inhibitor, so neither
+      # the screensaver nor the swayidle lock below fires until someone runs
+      # `formalshell ipc call caffeinate disable`.
+      programs.formalshell.settings.caffeinate.onStartup = true;
 
       services.swayidle = {
         enable = true;
