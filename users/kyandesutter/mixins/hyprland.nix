@@ -714,6 +714,16 @@ ${if useFormalshell then ''
       float = true, pin = true,
       move = { "(monitor_w-window_w-16)", "16" } })
 
+    -- NativeDesktop browser popovers (nd-hello) leave a transparent margin
+    -- around the shadow, rounded corners, and arrow. Hyprland blurs into that
+    -- margin, which shows as a frosted box. Popups are floating XWayland
+    -- windows with class and title "nd-hello"; the main window shares the
+    -- class but tiles with the page title, so xwayland+float excludes it.
+    hl.window_rule({
+      match = { class = "^(nd-hello)$", title = "^(nd-hello)$", xwayland = true, float = true },
+      no_blur = true,
+    })
+
     -- Blur behind the shell's own layer surfaces: FormalShell paints its cards
     -- at theme.surfaceOpacity, so the blur under them is what shows through.
     -- ignore_alpha 0.2 keeps the fully transparent gaps in the bar unblurred.
