@@ -403,18 +403,12 @@
         messages.Install.WantedBy = lib.mkForce [ ];
       };
 
-      # Lock and suspend after 15 minutes idle (lid close already suspends via
-      # logind's default HandleLidSwitch). swayidle listens on Hyprland's
-      # ext-idle-notify. The lock is raised at the timeout itself, so the
-      # screen locks even while the suspend below is deferred. The suspend is
-      # deferred while an SSH connection is established: this machine is
-      # administered remotely (Claude on the g815), and "no local input for 15
-      # minutes" is the NORMAL state of a remote-driven session. Suspending
-      # then would cut rebuilds mid-flight. swayidle only fires once per idle
-      # edge, so the timeout starts a transient wait-loop (suspends the moment
-      # the last SSH connection closes), and local activity kills it.
-      # The shell's screensaver at 10 minutes idle, ahead of the lock and
-      # suspend below at 15.
+      # Lock after 15 minutes idle (lid close still suspends via logind's
+      # default HandleLidSwitch). This machine runs unattended test jobs for
+      # agents that connect over short SSH calls and leave detached work
+      # running, then drop the session between polls, so idle never means the
+      # machine is unattended here. It must never suspend on its own.
+      # The shell's screensaver fires at 10 minutes, ahead of the lock at 15.
       programs.formalshell.settings.screensaver.timeoutSeconds = 600;
 
       services.swayidle = {
@@ -422,18 +416,9 @@
         timeouts = [
           {
             timeout = 900;
-            command = toString (pkgs.writeShellScript "idle-suspend" ''
+            command = toString (pkgs.writeShellScript "idle-lock" ''
               ${config.programs.formalshell.package}/bin/formalshell ipc --any-display call lock lock >/dev/null 2>&1 || true
-              exec ${pkgs.systemd}/bin/systemd-run --user --unit=idle-suspend-pending --collect \
-                ${pkgs.writeShellScript "idle-suspend-wait" ''
-                  while ${pkgs.iproute2}/bin/ss -Htn state established sport = :22 \
-                      | ${pkgs.gnugrep}/bin/grep -q .; do
-                    ${pkgs.coreutils}/bin/sleep 60
-                  done
-                  /run/current-system/sw/bin/systemctl suspend
-                ''}
             '');
-            resumeCommand = "${pkgs.systemd}/bin/systemctl --user stop idle-suspend-pending.service";
           }
         ];
       };
