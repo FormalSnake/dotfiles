@@ -39,7 +39,6 @@
       ./mixins/tuned.nix
       ./mixins/phone-integration.nix
       ./mixins/usbflux.nix
-      ./mixins/airplay.nix
       ./mixins/printing.nix
       ./mixins/flatpak.nix
       ./mixins/nordvpn.nix

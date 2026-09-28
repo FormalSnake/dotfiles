@@ -8,8 +8,8 @@
 # Tailscale is the backup path for when the phone and laptop are apart: broadcast
 # does NOT cross the tailnet, so `tailscale0` is trusted here (the traffic is
 # already authenticated end-to-end), and the phone pairs by the g815's stable
-# Tailscale IP / MagicDNS name. The user services that run the daemons live in
-# ../../../users/kyandesutter/mixins/autostart.nix.
+# Tailscale IP / MagicDNS name. FormalShell runs the receiver itself
+# (localsend.receive in users/kyandesutter/mixins/formalshell.nix).
 #
 # Wired USB (libimobiledevice stack): usbmuxd multiplexes lockdown connections
 # over the cable. pair with `idevicepair pair` (tap Trust on the phone), then
@@ -21,7 +21,8 @@
 # Gated on the desktop profile (no-op on a headless NixOS host), mirroring the
 # import-unconditionally / gate-internally pattern of ./hyprland.nix.
 lib.mkIf config.kyan.desktop.enable {
-  programs.localsend.enable = true; # opens TCP+UDP 53317
+  # FormalShell's own LocalSend receiver (opens TCP+UDP 53317).
+  services.formalshell.localsend.enable = true;
 
   # Wired path: the USB multiplexer daemon every idevice* tool talks through.
   services.usbmuxd.enable = true;

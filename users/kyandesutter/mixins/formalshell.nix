@@ -4,6 +4,11 @@ let
   # modules/nixos/mixins/hyprland.nix, default "dms").
   useFormalshell = (((osConfig.kyan or { }).desktop or { }).shell or "dms") == "formalshell";
 
+  # The shell's iPhone, AirPlay and LocalSend features follow the host's
+  # services.formalshell.<name>.enable (the system side: daemons, avahi,
+  # firewall), so turning one on per host is one line in systems/<host>.
+  fsSystem = name: (((osConfig.services or { }).formalshell or { }).${name} or { }).enable or false;
+
   # FormalShell's flake builds its own pkgs, so the curl-cffi overlay in
   # modules/shared/mixins/nix.nix does not reach the mpv it wraps and the
   # broken yt-dlp test suite fails the whole shell. Feed it ours instead.
@@ -73,7 +78,11 @@ in
         # Its cell is one dots toggle now, the icons themselves living in the
         # tray's own second bar, so parking it behind the chevron hid the tray
         # twice over: a collapsed bar left nothing at all to open.
-        bar.layout.right = [ "display" "dualsense" "tailscale" "github" "usage" "chevron" "tray" "weather" "battery" "airpods" "audio" "network" "bluetooth" "bell" "indicators" ];
+        bar.layout.right = [ "display" "dualsense" "tailscale" "github" "usage" "chevron" "tray" "weather" "battery" "airpods" ]
+          ++ lib.optional (fsSystem "iphone") "iphone"
+          ++ [ "audio" "network" "bluetooth" "bell" "indicators" ];
+        airplay.enable = fsSystem "airplay";
+        localsend.receive = fsSystem "localsend";
         # Codex off: the usage panel polls and renders a section per provider,
         # and this machine only ever signs into Claude, so the CODEX section
         # was permanently reporting on a tool that never gets used.

@@ -158,45 +158,6 @@ in
     };
   };
 
-  # LocalSend receiver (AirDrop-style file/link sharing). Kept running so files
-  # can arrive without manually opening the app. --hidden starts it in the tray
-  # instead of opening its window (matters on every rebuild that restarts the
-  # unit). System-level programs.localsend.enable provides the binary
-  # (`localsend_app`) and firewall port.
-  systemd.user.services.localsend = {
-    Unit = {
-      Description = "LocalSend (file sharing receiver)";
-      PartOf = [ "graphical-session.target" ];
-      After = [ "graphical-session.target" ];
-      "X-SwitchMethod" = "keep-old";
-    };
-    Install.WantedBy = [ "graphical-session.target" ];
-    Service = {
-      Type = "simple";
-      ExecStart = loginExec "localsend_app --hidden";
-    };
-  };
-
-  # UxPlay AirPlay screen-mirroring receiver. Kept running so an iPhone can start
-  # mirroring at any time (it opens no window until a phone connects). `-p` pins
-  # its ports to the fixed legacy set that the firewall opens: bare `uxplay`
-  # picks random ports the firewall drops, so the phone connects but the stream
-  # never establishes. System-level package, avahi publishing, and firewall ports
-  # live in ../../../modules/nixos/mixins/airplay.nix.
-  systemd.user.services.uxplay = {
-    Unit = {
-      Description = "UxPlay (AirPlay mirroring receiver)";
-      PartOf = [ "graphical-session.target" ];
-      After = [ "graphical-session.target" ];
-      "X-SwitchMethod" = "keep-old";
-    };
-    Install.WantedBy = [ "graphical-session.target" ];
-    Service = {
-      Type = "simple";
-      ExecStart = loginExec "uxplay -p";
-    };
-  };
-
   # Helium (Chromium browser). Window rule pins it to workspace 1 (web).
   #
   # Helium picks its notification backend ONCE at startup: it probes the

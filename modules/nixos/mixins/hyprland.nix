@@ -440,10 +440,6 @@ in
     # applied by tailscaled at service start.
     services.tailscale.extraSetFlags = [ "--operator=kyandesutter" ];
 
-    # LocalSend discovery and transfers (FormalShell menu SHARE route).
-    networking.firewall.allowedTCPPorts = [ 53317 ];
-    networking.firewall.allowedUDPPorts = [ 53317 ];
-
     environment.systemPackages = with pkgs; [
       qylockSddm
       # Pointer theme for the SDDM greeter (Theme.CursorTheme above).
@@ -456,9 +452,6 @@ in
       # ASCII audio visualizer backend (FormalShell M17 era): the shell
       # runs cava itself, gated on playback; binary on PATH is enough.
       cava
-
-      # LocalSend, driven by the shell menu SHARE route (port below).
-      localsend
 
       brightnessctl
       ddcutil # external-monitor brightness over DDC/CI (the shell's brightness backend; drives the slider + the XF86MonBrightness keybinds)

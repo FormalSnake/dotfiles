@@ -199,9 +199,12 @@
   # battery charge limit.
   kyan.asus.enable = true;
 
-  # AirPlay screen-mirroring receiver (UxPlay). Run `uxplay -p` to show an
-  # iPhone's screen in a window, share that window in meetings.
-  kyan.airplay.enable = true;
+  # iPhone integration through FormalShell: notifications and now-playing over
+  # BLE (ancs4linux; pair from the shell's iPhone panel), and the shell's own
+  # UxPlay AirPlay receiver (mirroring window kept, shared in meetings).
+  services.formalshell.iphone.enable = true;
+  services.formalshell.airplay.enable = true;
+  users.users.kyandesutter.extraGroups = [ "ancs4linux" ];
 
   # Export a USB-attached iPhone to the macbook over Tailscale, so Xcode there
   # builds and debugs onto a phone cabled to this laptop
