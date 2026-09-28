@@ -136,16 +136,6 @@ in
     };
   };
 
-  # Launcher entry for it; the package itself has none (it is a script).
-  xdg.desktopEntries.messages = {
-    name = "Messages";
-    comment = "iMessage";
-    exec = "messages";
-    icon = "/home/kyandesutter/Developer/messages/apps/desktop/assets/icon.svg";
-    terminal = false;
-    categories = [ "Network" "InstantMessaging" ];
-  };
-
   # Clipboard: the shell's clipboard manager records history by polling the
   # Wayland selection itself (browse it with SUPER+ñ). wl-clip-persist takes
   # ownership of the regular clipboard so its contents survive the source app
