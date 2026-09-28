@@ -29,7 +29,10 @@ let
     # wireplumber, upowerd and NetworkManager each wake for every one: a
     # steady 10-15% of a core on the e1504g. 5 s of scan per 30 s keeps the
     # features and drops the wakeups to a sixth.
-    patches = [ ./librepods-ble-duty-cycle.patch ];
+    patches = [
+      ./librepods-ble-duty-cycle.patch
+      ./librepods-keep-route-on-ear-out.patch
+    ];
 
     buildInputs = [
       pkgs.libpulseaudio

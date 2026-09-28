@@ -1,0 +1,33 @@
+diff --git media/mediacontroller.cpp media/mediacontroller.cpp
+index 5899515..9b2b87c 100644
+--- a/media/mediacontroller.cpp
++++ b/media/mediacontroller.cpp
+@@ -68,11 +68,14 @@ void MediaController::handleEarDetection(EarDetection *earDetection)
+     }
+   }
+ 
+-  // Then handle device profile switching
++  // Both pods out keeps the AirPods as the output, as Apple devices do: the
++  // pause above and the resume below are the whole reaction. Turning the card
++  // profile off moves the default sink to another output at its own volume.
+   if (primaryInEar || secondaryInEar)
+   {
+     LOG_DEBUG("At least one AirPod is in ear");
+-    activateA2dpProfile();
++    if (getActiveProfile() != getPreferredA2dpProfile())
++      activateA2dpProfile();
+ 
+     // Resume if conditions are met and we previously paused
+     if (shouldResume && !pausedByAppServices.isEmpty() && isActiveOutputDeviceAirPods())
+@@ -80,11 +83,6 @@ void MediaController::handleEarDetection(EarDetection *earDetection)
+       play();
+     }
+   }
+-  else
+-  {
+-    LOG_DEBUG("Both AirPods are out of ear");
+-    removeAudioOutputDevice();
+-  }
+ }
+ 
+ void MediaController::setEarDetectionBehavior(EarDetectionBehavior behavior)
