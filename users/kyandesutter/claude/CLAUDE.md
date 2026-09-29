@@ -195,11 +195,11 @@ not on whether I named the skill.
 
 | About to work on | Load first |
 | --- | --- |
-| Any UI or visual work | `frontend-design` for direction, then every `better-*` skill the change touches, then `shadcn`, `dataviz` (any chart), `emil-design-eng`, `baseline-ui`. `pick-ui-library` before pulling in a component library, `prototype` for a throwaway exploration, `ask-sonner` for toasts |
+| Any UI or visual work | `frontend-design` for direction, then every `better-*` skill the change touches, then `shadcn`, `dataviz` (any chart), `emil-design-eng`, `baseline-ui`. `pick-ui-library` before pulling in a component library, `prototype` for a throwaway exploration, `ask-sonner` for toasts, `mobile-native` for a web app used on a phone |
 | Animation or motion | `animate` (web) or `animate-expo` (React Native) to build it, plus `transitions-dev`. `review-animations` on a diff, `improve-animations` to audit a whole codebase, `find-animation-opportunities` for motion that is missing, `animation-vocabulary` to name an effect |
 | A screen or flow reviewed end to end | `better-interface` (user-invoked only); `improve-ui` for design-system drift |
 | Expo / React Native, anything at all | the `expo:*` skills. Never write Expo/EAS config or native UI from memory. |
-| Apple platforms | `Apple-Hig-Designer`, `swiftui-ui-patterns`, `serve-sim`; `apple-design` for an Apple feel on the web |
+| Apple platforms | `Apple-Hig-Designer`, `swiftui-ui-patterns`, `serve-sim`; `write-swift` for any Swift code; `apple-design` for an Apple feel on the web |
 | Cloudflare | `cloudflare`, `wrangler`, `workers-best-practices`, `durable-objects`, `agents-sdk` |
 | My own services | `canaryllm-api`, `gem0-api` |
 | Review and quality passes | `deep-review`, `react-doctor`, `web-perf`, `web-quality-audit` |
@@ -307,6 +307,11 @@ happened, the code has a bug you have not found yet: go find it.
 * Build the simplest thing that meets the requirement. No speculative
   abstraction, no config knob with one caller. Decide architecture for the long
   term; the person replacing your stopgap is me, six months on, with no context.
+* No temporary hacks or patches left standing. A workaround used to unblock or
+  test an idea is fine; once it is confirmed working, turn it into the
+  permanent fix in the same task: in the repo, declarative, at the real cause,
+  with the hack removed. A live-applied tweak, a hand-edited generated file or
+  a manual step that only lives on one machine is not done.
 * Use what the project already depends on before adding a package. Don't
   hand-roll date maths, auth, parsing, or retries.
 * Write code that reads like the surrounding code. Delete what you replace.
