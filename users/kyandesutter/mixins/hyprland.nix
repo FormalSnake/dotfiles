@@ -620,8 +620,8 @@ in
     -- cycle. Alt+grave (cycle windows of the same app) has no equivalent
     -- and is dropped.
 ${if useFormalshell then ''
-    hl.bind("ALT + Tab", hl.dsp.exec_cmd("${fsIpc [ "switcher" "next" ]}"))
-    hl.bind("ALT + SHIFT + Tab", hl.dsp.exec_cmd("${fsIpc [ "switcher" "prev" ]}"))
+    hl.bind("ALT + Tab", hl.dsp.exec_cmd("${fsIpc [ "switcher" "next" ]}"), { repeating = true })
+    hl.bind("ALT + SHIFT + Tab", hl.dsp.exec_cmd("${fsIpc [ "switcher" "prev" ]}"), { repeating = true })
     -- `transparent`: Hyprland shadows a bind whose key is still held when
     -- another bind consumes a press (KeybindManager.cpp, shadowKeybinds), so
     -- a plain release bind on Alt never fires after an Alt+Tab; a
