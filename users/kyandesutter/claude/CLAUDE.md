@@ -357,7 +357,8 @@ Haiku 4.5 (`claude-haiku-4-5-20251001`).
 
 ## Tooling
 
-`fd` instead of `find`, `rg` instead of `grep`, `jq` for JSON. `tree` is not
+`fd` instead of `find`, `rg` instead of `grep`, `jq` for JSON, `bunx` instead
+of `npx` for one-off package binaries. `tree` is not
 installed. `ls -la` is fine for a single directory. Search with the most
 distinctive token you know rather than several vague queries.
 
