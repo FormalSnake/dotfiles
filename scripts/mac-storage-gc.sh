@@ -184,7 +184,7 @@ done
 
 ### 2. Xcode and iOS tooling
 
-queue "xcode-derived" "$HOME/Library/Developer/Xcode/DerivedData"
+queue "xcode-derived" "/Volumes/Kyan Drive/DerivedData"
 queue "xcode-modcache" "$HOME/Library/Developer/Xcode/ModuleCache.noindex"
 queue "simulator-cache" "$HOME/Library/Developer/CoreSimulator/Caches"
 queue "swiftpm-cache" "$HOME/Library/Caches/org.swift.swiftpm"

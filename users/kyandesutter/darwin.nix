@@ -9,6 +9,7 @@
     ./mixins/android.nix
     ./mixins/discord.nix
     ./mixins/hammerspoon.nix
+    ./mixins/kyan-drive.nix
     ./mixins/lynk-browser.nix
     ./mixins/omniwm.nix
     ./mixins/sketchybar.nix
