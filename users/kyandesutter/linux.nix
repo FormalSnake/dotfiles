@@ -18,6 +18,7 @@
     ./mixins/gnome.nix
     ./mixins/discord.nix
     ./mixins/beeper.nix
+    ./mixins/messages.nix
     ./mixins/helium.nix
     ./mixins/dillo.nix
     ./mixins/lumen.nix

@@ -778,6 +778,26 @@
         "type": "github"
       }
     },
+    "messages": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1790764883,
+        "narHash": "sha256-mLrOjbs6uiw+LUpeMrJnse0LizS/vwqQtCDtlBtok1s=",
+        "owner": "FormalSnake",
+        "repo": "messages",
+        "rev": "ee9cd1df9daf0c0cd4c57072556be412edb4b099",
+        "type": "github"
+      },
+      "original": {
+        "owner": "FormalSnake",
+        "repo": "messages",
+        "type": "github"
+      }
+    },
     "nix": {
       "inputs": {
         "flake-parts": "flake-parts",
@@ -1264,6 +1284,7 @@
         "kopuz": "kopuz",
         "lazyvim": "lazyvim",
         "mac-app-util": "mac-app-util",
+        "messages": "messages",
         "nix-darwin": "nix-darwin",
         "nix-flatpak": "nix-flatpak",
         "nix-homebrew": "nix-homebrew",

@@ -105,7 +105,7 @@ in
     };
   };
 
-  # Messages (the iMessage client in programs.nix). Window rule pins it to
+  # Messages (the iMessage client in mixins/messages.nix). Window rule pins it to
   # workspace 4.
   #
   # RefuseManualStart/Stop instead of X-SwitchMethod, so a rebuild leaves a

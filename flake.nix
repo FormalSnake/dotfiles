@@ -204,6 +204,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Messages, the iMessage client: package + home-manager module
+    # (homeModules.default), wired in users/kyandesutter/mixins/messages.nix.
+    messages = {
+      url = "github:FormalSnake/messages";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Helium browser (Chromium fork): exposes overlays.default -> pkgs.helium.
     helium = {
       url = "github:schembriaiden/helium-browser-nix-flake";

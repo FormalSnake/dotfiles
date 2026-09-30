@@ -63,45 +63,6 @@
       xcodegen
     ]
     ++ lib.optionals stdenv.hostPlatform.isLinux [
-      # Messages (~/Developer/messages), the gpuix iMessage client that replaced
-      # the BlueBubbles desktop app; the Mac still runs the BlueBubbles *Server*
-      # (homebrew cask in systems/macbook/homebrew.nix). It runs straight from
-      # the checkout so `git pull` is the whole upgrade, with `bun install` once
-      # when node_modules is missing. The prebuilt renderer dlopens wayland,
-      # vulkan and friends at runtime and nix's bun never reads
-      # NIX_LD_LIBRARY_PATH, so they go on LD_LIBRARY_PATH (same list as the
-      # repo's flake.nix dev shell). One window per session: a second launch
-      # focuses the live one. GPUI sets no Wayland app-id, so that fallback and
-      # the hyprland rules match the window title.
-      (writeShellApplication {
-        name = "messages";
-        runtimeInputs = [ bun util-linux ];
-        text = ''
-          repo="''${MESSAGES_REPO:-$HOME/Developer/messages}"
-          exec 9>"''${XDG_RUNTIME_DIR:-/tmp}/messages.lock"
-          if ! flock -n 9; then
-            if command -v hyprctl >/dev/null 2>&1; then
-              hyprctl dispatch 'hl.dsp.focus({ window = "title:^(Messages)$" })' >/dev/null 2>&1 || true
-            fi
-            exit 0
-          fi
-          [ -d "$repo/node_modules" ] || bun install --cwd "$repo"
-          export LD_LIBRARY_PATH="/run/opengl-driver/lib:${
-            lib.makeLibraryPath [
-              libxkbcommon
-              wayland
-              vulkan-loader
-              fontconfig.lib
-              freetype
-              libxcb
-              libx11
-              libglvnd
-            ]
-          }''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-          cd "$repo/apps/desktop"
-          exec bun app.tsx "$@"
-        '';
-      })
       # TUI for managing bluetooth (bluez), Linux-only.
       bluetui
       # ifconfig/route/netstat. Linux-only because macOS ships them in /sbin.
