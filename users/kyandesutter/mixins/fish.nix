@@ -221,7 +221,6 @@
       # instead of the Max plan).
       __load_agenix_secret GEMINI_API_KEY     gemini
       __load_agenix_secret DEEPSEEK_API_KEY   deepseek
-      __load_agenix_secret CANARYLLM_API_KEY  canaryllm
       __load_agenix_secret NUCLEO_LICENSE_KEY nucleo-license
       __load_agenix_secret NPM_GITHUB_TOKEN   npm-github-token
       __load_agenix_secret NPM_REGISTRY_TOKEN npm-registry-token

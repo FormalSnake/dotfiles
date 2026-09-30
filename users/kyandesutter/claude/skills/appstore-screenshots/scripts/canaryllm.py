@@ -28,7 +28,6 @@ DEFAULT_MODEL = "gemini-3-pro-image"
 
 
 def api_key():
-    # KEY_FILE first: the fish-env CANARYLLM_API_KEY is a different gateway key
     key = (KEY_FILE.read_text().strip() if KEY_FILE.exists() else "") or os.environ.get(
         "CANARYLLM_API_KEY", ""
     )

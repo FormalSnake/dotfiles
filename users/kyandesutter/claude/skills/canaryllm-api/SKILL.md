@@ -45,15 +45,17 @@ text is the #1 mistake — that endpoint is queued by design.
 - **Base URL:** `https://canaryllm.canarycoders.es` (override with
   `$CANARYLLM_BASE_URL` if the user runs a local instance, e.g.
   `http://localhost:3000`).
-- **Auth:** Bearer token in the `Authorization` header. Read the key from the
-  `$CANARYLLM_API_KEY` environment variable — do **not** hardcode it or print it.
+- **Auth:** Bearer token in the `Authorization` header. The key lives in
+  `~/.claude/secrets/canaryllm-api-key`; load it with
+  `CANARYLLM_API_KEY=$(cat ~/.claude/secrets/canaryllm-api-key)` and do **not**
+  hardcode it or print it. The shell no longer exports it.
   ```
   Authorization: Bearer $CANARYLLM_API_KEY
   ```
 - **No-auth endpoints:** `/api/llm/health` and everything under `/api/public/*`
   (model & voice catalogues, the spec itself) need no token.
 
-If `$CANARYLLM_API_KEY` is unset and the endpoint needs auth, say so and ask the
+If that file is missing and the endpoint needs auth, say so and ask the
 user for the key rather than guessing — don't invent one.
 
 ## The async queue workflow (native endpoints)
