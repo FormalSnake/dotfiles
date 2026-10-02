@@ -124,8 +124,9 @@ Declarative config for three machines via one flake (flake-parts):
 - **`e1504g`** — `x86_64-linux`, NixOS + home-manager. ASUS Vivobook (8 GB,
   Intel-only); same Hyprland + FormalShell desktop, none of the dGPU/asus
   machinery. Its
-  nix builds offload to the g815 over Tailscale (LAN fallback) and fall back
-  to local building when the g815 is unreachable.
+  nix builds all run on the g815 over Tailscale (LAN fallback). `max-jobs` is
+  0 (since 2026-10-02), so a build fails when the g815 is unreachable instead
+  of building locally.
 
 The macbook is the real development host; the g815 is used as a thin client that
 reaches the mac over SSH/MOSH and remote desktop to work remotely, rather than
@@ -152,8 +153,9 @@ schedules on currentJobs / speedFactor, so the idle VM kept taking derivations
 whenever the g815 was busy. If the g815 goes down for a stretch, remember that
 `/etc/nix/machines` lists it twice (Tailscale, then LAN) and nix walks that
 list per derivation, so every e1504g build pays two SSH connect timeouts
-(measured 2026-08-04: 4m35s per derivation) before falling back to local. Pin
-the mac as the only builder by hand to skip that:
+(measured 2026-08-04: 4m35s per derivation) and then fails, since `max-jobs`
+is 0 and nothing builds locally. Pin the mac as the only builder by hand
+instead (or add `--max-jobs 2` to build on the e1504g itself):
 
 ```
 ssh e1504g 'cd ~/.config/nix && sudo -n /run/current-system/sw/bin/nixos-rebuild switch --flake .#e1504g \

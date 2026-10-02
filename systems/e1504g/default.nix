@@ -80,8 +80,8 @@
   # (systems/g815/default.nix). Reached via the g815's stable Tailscale IP:
   # same /etc/hosts-over-MagicDNS reasoning as the macbook pin in
   # modules/nixos/mixins/networking.nix, minus the need for a name at all.
-  # When the g815 is off/asleep the connection fails and nix falls back to
-  # building locally, so this degrades gracefully.
+  # max-jobs is 0 below, so nothing builds on this machine: when the g815 is
+  # off/asleep a build fails instead of falling back to local.
   nix.distributedBuilds = true;
   nix.settings.builders-use-substitutes = true; # builders pull caches themselves
   nix.buildMachines =
@@ -366,10 +366,10 @@
   # per cgroup instead, so it fires on the condition that actually hurts here.
   kyan.oomd.enable = true;
 
-  # Local fallback builds (g815 and the mac VM both unreachable): the default
-  # max-jobs=8 runs eight derivations at once, each with its own make -j,
-  # on 8 GB. Two keeps a fallback build off the swapfile.
-  nix.settings.max-jobs = 2;
+  # No local builds: every derivation goes to the g815 (nix.buildMachines
+  # above). With the g815 down, pass `--max-jobs 2` by hand to build here;
+  # more than two at once pushes 8 GB onto the swapfile.
+  nix.settings.max-jobs = 0;
 
   # 8 GB RAM (vs the g815's 32): halve the overflow swapfile to 2× RAM so a
   # spike has real spill room on a small machine. Zram above stays the first
