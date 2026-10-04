@@ -25,8 +25,13 @@
     papers # PDF / document viewer (default for application/pdf)
     pantheon.elementary-code # plain-text editor (default for text/plain)
     # texliveMedium (PDF export only) drags in asymptote, whose pyqt5 fails to
-    # build on python 3.14; texliveBasic still has pdflatex.
-    (apostrophe.override { texliveMedium = texliveBasic; }) # Markdown editor, default for .md
+    # build on python 3.14; texliveBasic still has pdflatex. nixpkgs pins
+    # apostrophe to python312, which is uncached and whose anyio tests fail
+    # (2026-10-04); it builds fine on the default python.
+    (apostrophe.override {
+      texliveMedium = texliveBasic;
+      python312Packages = python3Packages;
+    }) # Markdown editor, default for .md
     pantheon.elementary-calendar # reads GOA accounts through evolution-data-server
     gnome-clocks
     gnome-maps
