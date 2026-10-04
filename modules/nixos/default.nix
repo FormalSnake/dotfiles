@@ -43,6 +43,7 @@
       ./mixins/flatpak.nix
       ./mixins/nordvpn.nix
       ./mixins/onepassword.nix
+      ./mixins/nativebrowser.nix
       ./mixins/syncthing.nix
       ./mixins/geolocation.nix
       ./mixins/nix-ld.nix
