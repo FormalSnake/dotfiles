@@ -60,17 +60,17 @@
     "brew-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1785432107,
-        "narHash": "sha256-IcPbDh3LDn3JWXftDSz7jmjQKR0ygpH61IbX3laf/AA=",
+        "lastModified": 1789661079,
+        "narHash": "sha256-geVTQ51PGZ1mLULM5k7wO7qt/6xenOR/YG8X7Q3eCaI=",
         "owner": "Homebrew",
         "repo": "brew",
-        "rev": "e8cf16d0901fcdaafb531b22664fdef4d7ceca98",
+        "rev": "edb70f031e4170c780799633a1226ff73e1077f4",
         "type": "github"
       },
       "original": {
         "owner": "Homebrew",
+        "ref": "7.0.4",
         "repo": "brew",
-        "rev": "e8cf16d0901fcdaafb531b22664fdef4d7ceca98",
         "type": "github"
       }
     },
@@ -850,9 +850,7 @@
     },
     "nix-homebrew": {
       "inputs": {
-        "brew-src": [
-          "brew-src"
-        ]
+        "brew-src": "brew-src"
       },
       "locked": {
         "lastModified": 1789928041,
@@ -1263,7 +1261,6 @@
       "inputs": {
         "agenix": "agenix",
         "areofyl-fetch": "areofyl-fetch",
-        "brew-src": "brew-src",
         "chaotic": "chaotic",
         "claude-code-nix": "claude-code-nix",
         "dank-material-shell": "dank-material-shell",

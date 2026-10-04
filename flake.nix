@@ -46,25 +46,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # No `inputs.nixpkgs.follows`: nix-homebrew is a pure nix-darwin module with
-    # no nixpkgs input of its own to override, so pinning it would be a no-op.
-    # `brew-src` is its only real input, overridden below.
-    nix-homebrew = {
-      url = "github:zhaofengli/nix-homebrew";
-      inputs.brew-src.follows = "brew-src";
-    };
-
-    # Homebrew itself. nix-homebrew defaults this to the 6.0.11 tag, but the
-    # cask tap keeps auto-updating against brew's main, so casks land stanzas
-    # the pinned brew has never heard of: betterdisplay's `command_wrapper` is
-    # in no release up to 6.0.13, and `brew bundle` aborted every switch with
-    # "undefined method 'command_wrapper'". Tracking main is what the taps
-    # actually target; the rev keeps it reproducible. Move this back to a tag
-    # once one carries the stanza.
-    brew-src = {
-      url = "github:Homebrew/brew/e8cf16d0901fcdaafb531b22664fdef4d7ceca98";
-      flake = false;
-    };
+    # Don't override `brew-src`: nix-homebrew builds bin/brew from its own copy
+    # of upstream's wrapper, which only matches the brew it pins. A separate
+    # pin ran a July main brew under the 7.0.4 wrapper, which no longer exports
+    # HOMEBREW_ORIGINAL_BREW_FILE, and every switch died with a KeyError in
+    # startup/config.rb.
+    nix-homebrew.url = "github:zhaofengli/nix-homebrew";
 
     # No `inputs.nixpkgs.follows`: the pinned FlakeHub release ships prebuilt
     # binaries and declares no nixpkgs input of its own to override.
