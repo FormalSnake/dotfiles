@@ -16,14 +16,14 @@ let
   # Updating in-app is not an option to preserve: moonbase writes an update into
   # its own dist dir, which here is the read-only store path. That is why
   # nixpkgs strips the updater, and the patch still applies at this rev.
-  nightlyRev = "51d7751ea05ebc2e9e20ec8b52d5132fa30a8bf2";
+  nightlyRev = "c7d0a1ddbb1873f62dcfea75b38ebdac044ecfd8";
   moonlightNightly = pkgs.moonlight.overrideAttrs (old: {
-    version = "0-unstable-2026-08-27";
+    version = "0-unstable-2026-10-01";
     src = pkgs.fetchFromGitHub {
       owner = "moonlight-mod";
       repo = "moonlight";
       rev = nightlyRev;
-      hash = "sha256-ATxEm+29fBs4Ek7qo1hGhhzdPyJL7ELOIVA/FqjZA2M=";
+      hash = "sha256-ZOoDMYxlRfEtG8D97CI5gMp1uEnCRqWo6XD0QdRsyaw=";
     };
     env = old.env // {
       MOONLIGHT_BRANCH = "nightly";

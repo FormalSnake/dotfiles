@@ -21,24 +21,6 @@ let
     '';
   });
 
-  # Lock the session before the machine suspends: raises FormalShell's own lock
-  # surface over its IPC, then waits (up to 2s) for the shell to report it
-  # locked, so a suspend queued right behind cannot beat the surface to the
-  # screen. The suspend itself is driven by systemd-suspend.service, ordered
-  # after this via sleep.target. Always exit 0: a lock failure (no session, no
-  # shell running) must never block the suspend.
-  fsBin = "${config.home-manager.users.kyandesutter.programs.formalshell.package}/bin/formalshell";
-  lockBeforeSleep = pkgs.writeShellScript "lock-before-sleep" ''
-    export XDG_RUNTIME_DIR="/run/user/$(${pkgs.coreutils}/bin/id -u)"
-    ipc() { ${pkgs.coreutils}/bin/timeout 3 ${fsBin} ipc --any-display call lock "$1" 2>/dev/null; }
-    ipc lock >/dev/null || exit 0
-    for _ in $(${pkgs.coreutils}/bin/seq 20); do
-      [ "$(ipc isLocked)" = true ] && break
-      ${pkgs.coreutils}/bin/sleep 0.1
-    done
-    exit 0
-  '';
-
   # weston.ini for the SDDM Wayland greeter compositor. Mirrors what the NixOS
   # sddm module generates by default (keyboard from the xkb config, the module's
   # libinput defaults), so behaviour is unchanged except that we hand weston a
@@ -242,26 +224,6 @@ in
     # polkit agent + secrets/keyring so GUI auth prompts and saved logins work.
     security.polkit.enable = true;
     services.gnome.gnome-keyring.enable = true;
-
-    # Lock on suspend. logind's default HandleLidSwitch=suspend goes straight to
-    # s2idle with no lock, so closing the lid used to resume into an unlocked
-    # session. This oneshot raises the shell's lock screen and is ordered Before
-    # sleep.target, so every suspend path (lid close, idle, and the
-    # SUPER+SHIFT+Escape keybind) resumes on the lock screen. The keybind
-    # still locks on its own too. This makes the lid path match.
-    systemd.services.lock-before-sleep = lib.mkIf (cfg.shell == "formalshell") {
-      description = "Lock the session before sleep";
-      before = [ "sleep.target" ];
-      wantedBy = [ "sleep.target" ];
-      serviceConfig = {
-        Type = "oneshot";
-        User = config.users.users.kyandesutter.name;
-        ExecStart = toString lockBeforeSleep;
-        # Belt-and-braces: the script already exits 0 and times out its IPC call,
-        # but suspend waits on this oneshot. Cap it so sleep is never held up.
-        TimeoutStartSec = 15;
-      };
-    };
 
     # GNOME/GTK desktop plumbing the apps and file manager rely on:
     #   • gvfs + wsdd: Files trash, removable-drive / network mounting, MTP,

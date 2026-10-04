@@ -50,7 +50,7 @@
   kyan.profiles.desktop.enable = true;
 
   # FormalShell daily-drive trial (the spec's own gate: e1504g first, g815
-  # follows). Swaps the session shell, lock-before-sleep hook, and the
+  # follows). Swaps the session shell and the
   # shell-facing Hyprland binds. DMS stays installed but dormant, and rollback is
   # deleting this one line. M12/M13 closed the launch trade-offs (GOA/EDS
   # calendar after a one-time `XDG_CURRENT_DESKTOP=GNOME gnome-control-center

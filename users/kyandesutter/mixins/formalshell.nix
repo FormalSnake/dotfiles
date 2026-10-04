@@ -31,10 +31,6 @@ in
     programs.formalshell = {
       enable = true;
       package = fsPkg;
-      # The system-side unit (modules/nixos/mixins/hyprland.nix lockBeforeSleep)
-      # owns lock-on-suspend; the hm module's own user unit would hang off a
-      # user-manager sleep.target that never fires under our setup.
-      systemd.lockBeforeSleep = false;
       settings = {
         # Syncthing-synced wallpaper folder (modules/nixos/mixins/syncthing.nix)
         # for the picker's wallpaper mode.
