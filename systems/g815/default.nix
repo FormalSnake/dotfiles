@@ -275,7 +275,37 @@
     # fault, which is still well short of the 8-page default that made
     # page-cluster worth turning off for zram in the first place.
     "vm.page-cluster" = 1;
+
+    # A hung kernel reboots instead of sitting frozen until someone
+    # power-cycles it. On 2026-10-03 the nvidia driver oopsed and then
+    # deadlocked on a spinlock after resume; with panic = 0 the machine stayed
+    # dead for a day with nobody home.
+    "kernel.panic" = 10;
+    "kernel.panic_on_oops" = 1;
+    "kernel.softlockup_panic" = 1;
   };
+
+  # This machine runs unattended test rigs for agents on other hosts, so it
+  # never sleeps. The nvidia driver does not survive a resume here: the
+  # 2026-10-03 freeze started with nv_restore_user_channels failing on the way
+  # back from hybrid-sleep. UPower's default critical action is that same
+  # hybrid-sleep, so a power cut that empties the battery shuts down cleanly
+  # instead.
+  systemd.sleep.settings.Sleep = {
+    AllowSuspend = false;
+    AllowHibernation = false;
+    AllowHybridSleep = false;
+    AllowSuspendThenHibernate = false;
+  };
+  services.upower.criticalPowerAction = "PowerOff";
+  services.logind.settings.Login = {
+    HandleLidSwitch = "ignore";
+    HandleLidSwitchExternalPower = "ignore";
+  };
+
+  # The iTCO hardware watchdog reboots the machine when PID 1 stops petting
+  # it, which covers a hard lockup that never reaches a panic.
+  systemd.settings.Manager.RuntimeWatchdogSec = "60s";
 
   home-manager.users.kyandesutter = {
     # The shell's screensaver at 10 minutes idle. Nothing on this machine
