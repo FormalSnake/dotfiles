@@ -29,7 +29,12 @@
   # 3. If it sleeps anyway (lid close, manual sleep), answer Wake-on-LAN and
   #    Bonjour wake-on-demand so it can be woken remotely. pmset persists this
   #    across reboots; no dedicated nix-darwin option exists for womp.
+  #
+  # 4. Screen Sharing restores the screen's state on disconnect, so a session
+  #    that unlocked a locked screen locks it again when it ends, leaving the
+  #    machine at the lock screen with nobody home to unlock it.
   system.activationScripts.postActivation.text = ''
     /usr/bin/pmset -a womp 1
+    /usr/bin/defaults write /Library/Preferences/com.apple.RemoteManagement RestoreMachineState -bool NO
   '';
 }
