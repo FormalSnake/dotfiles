@@ -1,16 +1,31 @@
-{ lib, ... }:
+{ lib, pkgs, ... }:
 {
-  # Timezone follows our location: automatic-timezoned watches geoclue2 (already
-  # on for the desktop, mixins/geolocation.nix) and hands the zone to
-  # systemd-timedated. Both laptops travel, so a pinned zone means a wrong clock
-  # every trip. The clock itself is chrony's job, below.
+  # Timezone follows our location: tzupdate geolocates the public IP and hands
+  # the zone to systemd-timedated. Both laptops travel, so a pinned zone means a
+  # wrong clock every trip. The clock itself is chrony's job, below.
   #
-  # The service sets `time.timeZone = null` at normal priority, which beats the
+  # Not automatic-timezoned: it goes through geoclue and beaconDB, which knows
+  # few access points outside Europe and then answers from DB-IP Lite. In
+  # Marrakesh (2026-10-04) that put a Maroc Telecom IP near Heathrow, so the
+  # zone flipped between Europe/London and Africa/Casablanca on every reconnect.
+  #
+  # The module sets `time.timeZone = null` at normal priority, which beats the
   # mkDefault below, so the Canary Islands value is only the fallback for when
-  # automatic-timezoned is turned off. Raising its priority again aborts the
-  # build rather than silently pinning the zone.
-  services.automatic-timezoned.enable = true;
+  # tzupdate is turned off.
+  services.tzupdate.enable = true;
   time.timeZone = lib.mkDefault "Atlantic/Canary";
+
+  # The module only runs at boot and hourly; re-check as soon as a network comes
+  # up, which is when a new country first shows.
+  networking.networkmanager.dispatcherScripts = [
+    {
+      source = pkgs.writeShellScript "tzupdate-on-connect" ''
+        case "$2" in
+          up|connectivity-change) systemctl start --no-block tzupdate.service ;;
+        esac
+      '';
+    }
+  ];
 
   # chrony rather than the default systemd-timesyncd. timesyncd is an SNTP
   # client: one server at a time, no source selection, and it only slews, so a
