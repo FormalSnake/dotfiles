@@ -23,6 +23,9 @@
       # Without libGL.so.1 CEF's GPU process exits on every launch and
       # Chromium falls back to software rasterisation.
       libglvnd
+      # Chromium dlopens libva.so.2 for hardware video decode; without it
+      # every stream decodes in software.
+      libva
       # libcef.so's runtime floor (the chromium engine is dlopened from the
       # CEF distribution; these are its own link-time needs).
       nss
