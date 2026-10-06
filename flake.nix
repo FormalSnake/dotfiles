@@ -198,6 +198,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # FormalMusic, the YouTube Music client: package (app plus formalmusicd)
+    # and home-manager module, wired in users/kyandesutter/mixins/formalmusic.nix.
+    formalmusic = {
+      url = "github:FormalSnake/formalmusic";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Helium browser (Chromium fork): exposes overlays.default -> pkgs.helium.
     helium = {
       url = "github:schembriaiden/helium-browser-nix-flake";

@@ -536,6 +536,27 @@
         "type": "github"
       }
     },
+    "formalmusic": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "yt-dlp": "yt-dlp"
+      },
+      "locked": {
+        "lastModified": 1791289973,
+        "narHash": "sha256-lQJJICi5waeT9nuubJEO1GzbGpA6ibCxYyN5Z3p32p4=",
+        "owner": "FormalSnake",
+        "repo": "formalmusic",
+        "rev": "11fff8d903bcc9d8b1409dbbcea1bb7c9f3c0699",
+        "type": "github"
+      },
+      "original": {
+        "owner": "FormalSnake",
+        "repo": "formalmusic",
+        "type": "github"
+      }
+    },
     "formalshell": {
       "inputs": {
         "home-manager": "home-manager_2",
@@ -1268,6 +1289,7 @@
         "determinate": "determinate",
         "dms-plugin-registry": "dms-plugin-registry",
         "flake-parts": "flake-parts_2",
+        "formalmusic": "formalmusic",
         "formalshell": "formalshell",
         "helium": "helium",
         "herdr": "herdr",
@@ -1485,6 +1507,23 @@
       "original": {
         "owner": "numtide",
         "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "yt-dlp": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1787182285,
+        "narHash": "sha256-BM5ZeGTmHq+1xH6G/zsuCtjLgYgfRA11ya0zIHK5p4g=",
+        "owner": "yt-dlp",
+        "repo": "yt-dlp",
+        "rev": "3a08beaf031ab68f966401ead017ac81fe8486cf",
+        "type": "github"
+      },
+      "original": {
+        "owner": "yt-dlp",
+        "ref": "2026.08.19",
+        "repo": "yt-dlp",
         "type": "github"
       }
     }

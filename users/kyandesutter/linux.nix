@@ -19,6 +19,7 @@
     ./mixins/discord.nix
     ./mixins/beeper.nix
     ./mixins/messages.nix
+    ./mixins/formalmusic.nix
     ./mixins/helium.nix
     ./mixins/dillo.nix
     ./mixins/lumen.nix
