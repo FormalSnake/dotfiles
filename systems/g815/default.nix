@@ -1,4 +1,4 @@
-{ inputs, self, lib, ... }:
+{ inputs, self, ... }:
 {
   imports = [
     # Generated on first boot with `nixos-generate-config` (placeholder for now).
@@ -311,15 +311,6 @@
     # The shell's screensaver at 10 minutes idle. Nothing on this machine
     # locks on idle: no swayidle, and screensaver.lockAfterSeconds stays 0.
     programs.formalshell.settings.screensaver.timeoutSeconds = 600;
-
-    # Chat clients stay off the login set while this machine sits unattended
-    # and the e1504g is the one in use. Delete this block to bring them back;
-    # `systemctl --user start discord` still works meanwhile.
-    systemd.user.services = {
-      discord.Install.WantedBy = lib.mkForce [ ];
-      beeper.Install.WantedBy = lib.mkForce [ ];
-      messages.Install.WantedBy = lib.mkForce [ ];
-    };
 
     imports = [
       self.homeModules.kyandesutter
