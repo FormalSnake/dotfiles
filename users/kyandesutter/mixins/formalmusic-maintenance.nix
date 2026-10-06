@@ -102,7 +102,7 @@ let
     runtimeInputs = [ ];
     text = ''
       if [ ! -d ${clone}/.git ]; then
-        git clone git@github.com:FormalSnake/formalmusic.git ${clone}
+        git clone https://github.com/FormalSnake/formalmusic.git ${clone}
       fi
       cd ${clone}
       git fetch --quiet origin
