@@ -312,9 +312,9 @@
     # locks on idle: no swayidle, and screensaver.lockAfterSeconds stays 0.
     programs.formalshell.settings.screensaver.timeoutSeconds = 600;
 
-    # Kyan is abroad and the g815 sits at home, so its chat clients stay off
-    # the login set; one logged-in client per account is enough. Delete this
-    # block to bring them back. `systemctl --user start discord` still works.
+    # Chat clients stay off the login set while this machine sits unattended
+    # and the e1504g is the one in use. Delete this block to bring them back;
+    # `systemctl --user start discord` still works meanwhile.
     systemd.user.services = {
       discord.Install.WantedBy = lib.mkForce [ ];
       beeper.Install.WantedBy = lib.mkForce [ ];
