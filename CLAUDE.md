@@ -26,7 +26,8 @@ blanket `NOPASSWD: ALL` in sudoers, so ANY process running as that user sudos
 without a prompt, forwarded key or not. So Claude can rebuild ALL hosts
 without owner hand-off:
 - g815 (local): `sudo -n nixos-rebuild switch --flake .#g815`
-- e1504g: `ssh e1504g 'cd ~/.config/nix && git pull && sudo -n nixos-rebuild switch --flake .#e1504g'`
+- e1504g: never built on e1504g itself (far too slow). Built on g815 and
+  pushed: `ssh -A g815 'cd ~/.config/nix && git pull && nixos-rebuild switch --flake .#e1504g --target-host e1504g --sudo'`
 - macbook: `ssh macbook 'cd ~/.config/nix && git pull && sudo -n /run/current-system/sw/bin/darwin-rebuild switch --flake .#macbook'`
   (absolute path: non-interactive fish on the mac has a minimal PATH).
 
