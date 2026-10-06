@@ -164,6 +164,11 @@
   # on holding an authorized SSH key or the local login password.
   security.sudo.wheelNeedsPassword = false;
 
+  # The Vulkan loader opens every installed Mesa ICD, and lavapipe and radv
+  # drag in libLLVM (about 30 MB per Vulkan app). The Intel iGPU is the only
+  # GPU here, so load just its driver.
+  environment.sessionVariables.VK_LOADER_DRIVERS_SELECT = "*intel*";
+
   # The profile backend is tuned-ppd (modules/nixos/mixins/tuned.nix), shared
   # with the g815. It displaces TLP the same way PPD did: nixos-hardware's
   # common-pc-laptop enables TLP only when power-profiles-daemon is off, and the
