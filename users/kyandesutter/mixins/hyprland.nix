@@ -673,6 +673,7 @@ ${if useFormalshell then ''
     hl.window_rule({ match = { class = "^([Oo]bsidian)$" }, workspace = "5" })
     hl.window_rule({ match = { class = "^([Cc]laude)$" }, workspace = "7" })
     hl.window_rule({ match = { class = "^([Kk]opuz)$" }, workspace = "8" })
+    hl.window_rule({ match = { class = "^(es.canarycoders.formalmusic)$" }, workspace = "8" })
     -- YouTube Music web app (mixins/webapps.nix). Chromium names a shared-profile
     -- --app window after its URL and profile, not the launcher's --class.
     hl.window_rule({ match = { class = "^(chrome-music.youtube.com__-Default)$" }, workspace = "8" })
