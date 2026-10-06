@@ -315,6 +315,9 @@
     imports = [
       self.homeModules.kyandesutter
       self.homeModules.kyandesutter-linux
+      # Weekly FormalMusic maintenance. The g815 alone: it is always on the
+      # charger and the host that builds and deploys the e1504g.
+      ../../users/kyandesutter/mixins/formalmusic-maintenance.nix
     ];
   };
 
