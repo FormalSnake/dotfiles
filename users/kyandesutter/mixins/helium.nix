@@ -103,6 +103,16 @@ let
         exec "$real" --password-store=basic "$heliumFeatures" "$@"
       fi
 
+      # A launch with its own --user-data-dir (FormalMusic's and Kopuz's
+      # sign-in windows, test harnesses) never opens the synced profile, so it
+      # must not quit the peer's browser over it.
+      for arg in "$@"; do
+        case "$arg" in
+          --user-data-dir=${userDataDir} | --user-data-dir=${userDataDir}/) ;;
+          --user-data-dir=* | --user-data-dir) exec "$real" "$heliumFeatures" "$@" ;;
+        esac
+      done
+
       # Remote side runs under /bin/sh (the login shell is fish, not POSIX)
       # with absolute tool paths (non-interactive PATH is minimal). It quits
       # the peer's browser process (SIGTERM is a clean Chromium shutdown:
