@@ -26,7 +26,12 @@ in
     # notify-send, for testing and scripting against the shell's own
     # notification daemon (2026-08-19: neither host had it installed, which
     # read as "toasts are broken" when they were merely never fired).
-    home.packages = [ pkgs.libnotify ];
+    home.packages = [
+      pkgs.libnotify
+      # nothingctl for checking a Nothing or CMF device from a terminal; the
+      # shell carries its own copy on the wrapper PATH.
+      inputs.formalshell.packages.${pkgs.stdenv.hostPlatform.system}.nothingctl
+    ];
 
     programs.formalshell = {
       enable = true;
@@ -62,8 +67,8 @@ in
         # network (owner ask 2026-08-28), so the two radios read as one pair.
         # `indicators` stays permanent because its cells already self-hide, so
         # they cost nothing at rest and matter exactly when they appear
-        # (recording, DND, night light, a due reminder). airpods and dualsense
-        # (M29 builtins) self-hide the same way, so airpods earns the permanent
+        # (recording, DND, night light, a due reminder). earbuds and dualsense
+        # (M29 builtins) self-hide the same way, so earbuds earns the permanent
         # tier next to audio (owner ask 2026-08-18) and dualsense keeps its old
         # collapsible slot. Collapse state is per region in state.json and
         # starts collapsed, so the bar boots at six cells rather than ten.
@@ -74,7 +79,7 @@ in
         # Its cell is one dots toggle now, the icons themselves living in the
         # tray's own second bar, so parking it behind the chevron hid the tray
         # twice over: a collapsed bar left nothing at all to open.
-        bar.layout.right = [ "display" "dualsense" "tailscale" "github" "usage" "chevron" "tray" "weather" "battery" "airpods" ]
+        bar.layout.right = [ "display" "dualsense" "tailscale" "github" "usage" "chevron" "tray" "weather" "battery" "earbuds" ]
           ++ lib.optional (fsSystem "iphone") "iphone"
           ++ [ "audio" "network" "bluetooth" "bell" "indicators" ];
         airplay.enable = fsSystem "airplay";
