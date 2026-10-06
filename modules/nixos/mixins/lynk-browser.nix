@@ -1,24 +1,24 @@
 { pkgs, lib, ... }:
 let
-  # NativeBrowser (the CEF browser on NativeDesktop) installed from the image
+  # Lynk Browser (the CEF browser on NativeDesktop) installed from the image
   # `nd package linux` writes. 1Password's browser integration only answers a
   # browser whose binary is root-owned and not writable by the user, so a copy
   # under ~ (AppRun, an extracted AppImage, zig-out) fails with
   # BrowserProcessVerification(BinaryPermissions). From /nix/store it passes.
   #
-  # There is no release to fetch: scripts/nativebrowser-update.sh adds a new
-  # image to the store and rewrites nativebrowser.json.
-  source = lib.importJSON ./nativebrowser.json;
+  # There is no release to fetch: scripts/lynk-browser-update.sh adds a new
+  # image to the store and rewrites lynk-browser.json.
+  source = lib.importJSON ./lynk-browser.json;
 
-  nativebrowser = pkgs.stdenvNoCC.mkDerivation {
-    pname = "nativebrowser";
+  lynk-browser = pkgs.stdenvNoCC.mkDerivation {
+    pname = "lynk-browser";
     inherit (source) version;
 
     src = pkgs.requireFile {
       inherit (source) name hash;
       message = ''
         ${source.name} is not in the store. Copy the image from `nd package linux`
-        to this host and run scripts/nativebrowser-update.sh <image>.
+        to this host and run scripts/lynk-browser-update.sh <image>.
       '';
     };
 
@@ -50,29 +50,29 @@ let
     installPhase = ''
       runHook preInstall
       mkdir -p $out/opt $out/bin $out/share/applications
-      cp -a AppDir $out/opt/nativebrowser
+      cp -a AppDir $out/opt/lynk-browser
       patchelf --set-interpreter "$(cat ${pkgs.stdenv.cc}/nix-support/dynamic-linker)" \
-        $out/opt/nativebrowser/usr/bin/bun
-      ln -s $out/opt/nativebrowser/AppRun $out/bin/nativebrowser
-      sed "s|^Exec=.*|Exec=$out/bin/nativebrowser|" \
-        $out/opt/nativebrowser/nativebrowser.desktop > $out/share/applications/nativebrowser.desktop
-      if [ -d $out/opt/nativebrowser/usr/share/icons ]; then
-        cp -a $out/opt/nativebrowser/usr/share/icons $out/share/icons
+        $out/opt/lynk-browser/usr/bin/bun
+      ln -s $out/opt/lynk-browser/AppRun $out/bin/lynk-browser
+      sed "s|^Exec=.*|Exec=$out/bin/lynk-browser|" \
+        $out/opt/lynk-browser/lynk-browser.desktop > $out/share/applications/lynk-browser.desktop
+      if [ -d $out/opt/lynk-browser/usr/share/icons ]; then
+        cp -a $out/opt/lynk-browser/usr/share/icons $out/share/icons
       fi
       runHook postInstall
     '';
 
     meta = {
       description = "Chromium browser on NativeDesktop";
-      mainProgram = "nativebrowser";
+      mainProgram = "lynk-browser";
       platforms = [ "x86_64-linux" ];
     };
   };
 in
 {
-  environment.systemPackages = [ nativebrowser ];
+  environment.systemPackages = [ lynk-browser ];
 
   # 1Password matches the browser process by binary name; the packaged host
   # binary is usr/bin/<slug>.
-  environment.etc."1password/custom_allowed_browsers".text = lib.mkAfter "nativebrowser\n";
+  environment.etc."1password/custom_allowed_browsers".text = lib.mkAfter "lynk-browser\n";
 }

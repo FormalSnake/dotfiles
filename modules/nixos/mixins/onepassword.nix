@@ -29,7 +29,7 @@
   # integration. 1Password only talks to browsers whose binary name is in its
   # built-in allowlist or this file. Helium's Nix wrapper execs
   # .../opt/helium/helium, so its process name is "helium". Other modules add
-  # their own browsers (nativebrowser.nix); the lines merge.
+  # their own browsers (lynk-browser.nix); the lines merge.
   environment.etc."1password/custom_allowed_browsers" = {
     text = "helium";
     mode = "0755";
