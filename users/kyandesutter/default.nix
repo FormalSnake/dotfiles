@@ -17,7 +17,7 @@
     ./mixins/tmux.nix
     ./mixins/neovim.nix
     ./mixins/flexoki
-    ./mixins/fastfetch.nix
+    ./mixins/fastfetch
     ./mixins/fetch.nix
     ./mixins/herdr.nix
     ./mixins/fast.nix
