@@ -20,6 +20,7 @@
     ./mixins/fastfetch
     ./mixins/fetch.nix
     ./mixins/herdr.nix
+    ./mixins/t3code.nix
     ./mixins/fast.nix
     ./mixins/fut.nix
     ./mixins/nh.nix

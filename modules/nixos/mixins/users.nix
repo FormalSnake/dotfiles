@@ -25,6 +25,8 @@
     isNormalUser = true;
     description = "Kyan";
     shell = pkgs.fish;
+    # User services (the t3code server) run from boot, not from first login.
+    linger = true;
     # The personal 1Password SSH key (same one authorized on the macbook in
     # modules/darwin/mixins/remote-access.nix), so any of the machines can SSH
     # into the Linux hosts over Tailscale without password auth, plus the
