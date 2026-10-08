@@ -189,7 +189,7 @@ let
       -- Tab and the arrows to cycle windows, Return to commit. `screenshot
       -- region` is the older bare-slurp route with no toolbar and no
       -- recording at all, so it is deliberately not bound here.
-      hl.bind("Print", hl.dsp.exec_cmd("${fsIpc [ "screenshot" "full" ]}"))
+      hl.bind("Print", hl.dsp.exec_cmd("${fsIpc [ "screenshot" "full" "default" ]}"))
       hl.bind(mod .. " + SHIFT + S", hl.dsp.exec_cmd("${fsIpc [ "screenshot" "pick" "smart" "default" ]}"))
 
       -- Volume via wpctl: FormalShell's AudioService tracks PipeWire directly

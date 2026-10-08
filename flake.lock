@@ -137,6 +137,21 @@
     },
     "crane": {
       "locked": {
+        "lastModified": 1790899423,
+        "narHash": "sha256-THGtz65UGJU+sonZidRboyCMk+9DclpMF7pwL4uDV4M=",
+        "owner": "ipetkov",
+        "repo": "crane",
+        "rev": "47b6b27ed9a3a9181415e4367d0c30ab2a0e0250",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ipetkov",
+        "repo": "crane",
+        "type": "github"
+      }
+    },
+    "crane_2": {
+      "locked": {
         "lastModified": 1783203018,
         "narHash": "sha256-G6R9IT/xwFuu+CYBWDUAok6AdC4ERC4ZfPPFtEpxnZE=",
         "owner": "ipetkov",
@@ -559,18 +574,18 @@
     },
     "formalshell": {
       "inputs": {
+        "crane": "crane",
         "home-manager": "home-manager_2",
         "nixpkgs": [
           "nixpkgs"
-        ],
-        "quickshell": "quickshell"
+        ]
       },
       "locked": {
-        "lastModified": 1791283440,
-        "narHash": "sha256-lJ6GCPY1PeuUpWtuO+1l4wdWPY0Jj9mLqKzoAVmXBvE=",
+        "lastModified": 1791426305,
+        "narHash": "sha256-hsnnLF7ImNJq+fyAh6D3RkzokdHf6XXKxp7B6bdy4NE=",
         "owner": "FormalSnake",
         "repo": "FormalShell",
-        "rev": "68a7966ddde25feba00a1a77c5b53411e735a477",
+        "rev": "5d5ee0764eb8c662376c78a2cb66527f330cd511",
         "type": "github"
       },
       "original": {
@@ -727,7 +742,7 @@
     },
     "kopuz": {
       "inputs": {
-        "crane": "crane",
+        "crane": "crane_2",
         "nixpkgs": "nixpkgs_5",
         "rust-overlay": "rust-overlay_2"
       },
@@ -1231,28 +1246,6 @@
       "original": {
         "owner": "connerohnesorge",
         "repo": "nordvpn-flake",
-        "type": "github"
-      }
-    },
-    "quickshell": {
-      "inputs": {
-        "nixpkgs": [
-          "formalshell",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1785134238,
-        "narHash": "sha256-bv5gar+ZAXZCJH7UOv0eRFILKt5RKA/3px/XbVR98Cg=",
-        "owner": "quickshell-mirror",
-        "repo": "quickshell",
-        "rev": "43d4fa9e883cb03239b3d578c9c57070f4fbd281",
-        "type": "github"
-      },
-      "original": {
-        "owner": "quickshell-mirror",
-        "repo": "quickshell",
-        "rev": "43d4fa9e883cb03239b3d578c9c57070f4fbd281",
         "type": "github"
       }
     },
