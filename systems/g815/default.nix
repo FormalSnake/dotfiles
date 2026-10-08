@@ -7,6 +7,9 @@
     # Windows 11 dual-boot (chainload entry, reboot-to-windows one-shot).
     ./windows-dualboot.nix
 
+    # The same Windows install as a KVM guest over a throwaway overlay.
+    ./windows-vm.nix
+
     # nixos-hardware: no profile exists for the G815 chassis, so compose generics.
     inputs.nixos-hardware.nixosModules.common-cpu-intel
     inputs.nixos-hardware.nixosModules.common-pc-laptop
