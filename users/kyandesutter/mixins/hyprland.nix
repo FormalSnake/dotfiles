@@ -747,6 +747,7 @@ ${if useFormalshell then ''
     hl.layer_rule({ match = { namespace = "^(formalshell:menu)$" }, blur = true, ignore_alpha = 0.6, no_anim = true })
     hl.layer_rule({ match = { namespace = "^(formalshell:polkit)$" }, blur = true, ignore_alpha = 0.6, no_anim = true })
     hl.layer_rule({ match = { namespace = "^(formalshell:plugin-overlay)$" }, blur = true, ignore_alpha = 0.6, no_anim = true })
+    hl.layer_rule({ match = { namespace = "^(formalshell:radio)$" }, blur = true, ignore_alpha = 0.6, no_anim = true })
     -- Opaque by design, so it takes the animation rule alone.
     hl.layer_rule({ match = { namespace = "^(formalshell:notifications)$" }, no_anim = true })
 ${lib.optionalString (!useFormalshell) ''
