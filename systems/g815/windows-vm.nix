@@ -163,9 +163,13 @@ let
   # a 67G game download into D:) write gigabytes into the overlay that nothing
   # keeps, so the guest drops the pagefile, turns automatic updates off by
   # policy (wuauserv refuses Set-Service), empties its HKCU Run key, and
-  # reboots once. A fresh overlay's first boot reboots by itself too, hence
-  # the try around Restart-Computer, and the reboot can cut the ssh session
-  # before it returns (exit 255).
+  # reboots once. GUI runs need a desktop session, and the owner's PIN is
+  # bound to the laptop's TPM, so the reboot autologs into a local admin
+  # `ndvm` with a fresh random password; it lives in the overlay only, and
+  # ssh reaches it with the same key (administrators_authorized_keys). A
+  # fresh overlay's first boot reboots by itself too, hence the try around
+  # Restart-Computer, and the reboot can cut the ssh session before it
+  # returns (exit 255).
   prep = pkgs.writeShellApplication {
     name = "windows-vm-prep";
     runtimeInputs = with pkgs; [
@@ -191,6 +195,13 @@ let
         Stop-Service wuauserv,UsoSvc,BITS -Force -ErrorAction SilentlyContinue; \
         Remove-Item HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Run; \
         New-Item HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Run | Out-Null; \
+        \$pw = [guid]::NewGuid().ToString('N') + 'Aa1!'; \
+        if (Get-LocalUser ndvm -ErrorAction SilentlyContinue) { Set-LocalUser ndvm -Password (ConvertTo-SecureString \$pw -AsPlainText -Force) } \
+        else { New-LocalUser ndvm -Password (ConvertTo-SecureString \$pw -AsPlainText -Force) -PasswordNeverExpires | Out-Null; \
+          Add-LocalGroupMember Administrators ndvm }; \
+        \$wl = 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon'; \
+        Set-ItemProperty \$wl AutoAdminLogon '1'; Set-ItemProperty \$wl DefaultUserName 'ndvm'; \
+        Set-ItemProperty \$wl DefaultDomainName '.'; Set-ItemProperty \$wl DefaultPassword \$pw; \
         try { Restart-Computer -Force -ErrorAction Stop } catch { }" || [ $? = 255 ]
       # Wait for sshd to go down with the old boot before waiting for it back.
       for _ in $(seq 60); do guest exit 2>/dev/null || break; sleep 2; done
