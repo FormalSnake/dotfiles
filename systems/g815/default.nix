@@ -311,6 +311,9 @@
     # The shell's screensaver at 10 minutes idle. Nothing on this machine
     # locks on idle: no swayidle, and screensaver.lockAfterSeconds stays 0.
     programs.formalshell.settings.screensaver.timeoutSeconds = 600;
+    # Caffeinated from login: the shell holds an idle inhibitor, so idle
+    # never reaches the screensaver or the monitors' DPMS while rigs run.
+    programs.formalshell.settings.caffeinate.onStartup = true;
 
     imports = [
       self.homeModules.kyandesutter
