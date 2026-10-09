@@ -208,12 +208,15 @@ in
   environment.systemPackages = [ link-minecraft-to-windows ];
 
   # Runs ahead of every bluetoothd start, so `systemctl restart bluetooth`
-  # also re-syncs. A missing Windows mount fails this unit, not bluetooth.
+  # also re-syncs. It only reads an existing mount and never pulls one in:
+  # windows-vm.service conflicts with the mount, so a bluetooth restart that
+  # mounted C: would kill a running guest.
   systemd.services.windows-bluetooth-keys = {
     description = "Copy Windows Bluetooth link keys into BlueZ";
     wantedBy = [ "bluetooth.service" ];
     before = [ "bluetooth.service" ];
-    unitConfig.RequiresMountsFor = "/mnt/windows";
+    after = [ "mnt-windows.mount" ];
+    unitConfig.ConditionPathIsMountPoint = "/mnt/windows";
     serviceConfig = {
       Type = "oneshot";
       ExecStart = "${windows-bluetooth-keys}/bin/windows-bluetooth-keys";
