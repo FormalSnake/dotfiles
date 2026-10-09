@@ -158,8 +158,9 @@ let
   # a 67G game download into D:) write gigabytes into the overlay that nothing
   # keeps, so the guest drops the pagefile, turns automatic updates off by
   # policy (wuauserv refuses Set-Service), empties its HKCU Run key, and
-  # reboots once. A fresh overlay's
-  # first boot reboots by itself too, hence the try around Restart-Computer.
+  # reboots once. A fresh overlay's first boot reboots by itself too, hence
+  # the try around Restart-Computer, and the reboot can cut the ssh session
+  # before it returns (exit 255).
   prep = pkgs.writeShellApplication {
     name = "windows-vm-prep";
     runtimeInputs = with pkgs; [
@@ -185,7 +186,7 @@ let
         Stop-Service wuauserv,UsoSvc,BITS -Force -ErrorAction SilentlyContinue; \
         Remove-Item HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Run; \
         New-Item HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Run | Out-Null; \
-        try { Restart-Computer -Force -ErrorAction Stop } catch { }"
+        try { Restart-Computer -Force -ErrorAction Stop } catch { }" || [ $? = 255 ]
       # Wait for sshd to go down with the old boot before waiting for it back.
       for _ in $(seq 60); do guest exit 2>/dev/null || break; sleep 2; done
       wait_ssh
