@@ -1,4 +1,4 @@
-{ inputs, self, ... }:
+{ inputs, self, pkgs, ... }:
 {
   imports = [
     # Generated on first boot with `nixos-generate-config` (placeholder for now).
@@ -48,6 +48,29 @@
 
   # Belt-and-suspenders: keep NetworkManager from re-enabling Wi-Fi powersave.
   networking.networkmanager.wifi.powersave = false;
+
+  # A deactivation NetworkManager counts as deliberate blocks autoconnect until
+  # someone reconnects by hand, and this machine is driven remotely: on
+  # 2026-10-09 one dropped it off the tailnet for 50 minutes. Reconnect wlan0
+  # whenever it sits disconnected with Wi-Fi switched on.
+  systemd.services.wifi-reconnect = {
+    description = "Reconnect wlan0 when NetworkManager left it disconnected";
+    after = [ "NetworkManager.service" ];
+    serviceConfig.Type = "oneshot";
+    path = [ pkgs.networkmanager ];
+    script = ''
+      [ "$(nmcli -t -f WIFI general)" = enabled ] || exit 0
+      [ "$(nmcli -g GENERAL.STATE device show wlan0)" = "30 (disconnected)" ] || exit 0
+      nmcli device connect wlan0
+    '';
+  };
+  systemd.timers.wifi-reconnect = {
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnBootSec = "2min";
+      OnUnitActiveSec = "2min";
+    };
+  };
 
   # systemd-resolved, this host only for now (the e1504g follows once it has run
   # here for a while). The point is per-link DNS with routing domains: tailscaled
