@@ -13,6 +13,7 @@ let
   # Host mounts of partitions on that disk that Windows owns. / and /boot sit
   # on it too and stay mounted: the guest only ever sees its own overlay copy.
   windowsMounts = [ "mnt-windows.mount" ];
+  runFlag = "/run/windows-vm.running";
 
   # Root free space the overlay may never take. The launcher wants 5G on top
   # of this to start at all.
@@ -128,6 +129,10 @@ let
         -device e1000e,netdev=net0,mac=52:54:00:57:31:01
         -device qemu-xhci
         -device usb-tablet
+        # A silent output endpoint: audio apps refuse to start without one.
+        -audiodev none,id=snd0
+        -device ich9-intel-hda
+        -device hda-output,audiodev=snd0
         -vga std
         -display vnc=127.0.0.1:1
         -monitor unix:"$state/monitor.sock",server,nowait
@@ -218,12 +223,21 @@ in
     # A switch must never kill a guest someone is working in; a changed unit
     # applies on the next start.
     restartIfChanged = false;
-    # Stopped, never masked: they come back when the guest exits.
-    conflicts = windowsMounts;
+    # Stopped, never masked: they come back when the guest exits. Not a
+    # Conflicts=: a switch restarts sysinit-reactivation.target, which starts
+    # the mounts, which would stop the guest. The run flag makes those starts
+    # skip instead (see the mount drop-in below).
     after = windowsMounts;
     serviceConfig = {
+      ExecStartPre = [
+        "${pkgs.coreutils}/bin/touch ${runFlag}"
+        "${pkgs.systemd}/bin/systemctl stop ${lib.concatStringsSep " " windowsMounts}"
+      ];
       ExecStart = lib.getExe launcher;
-      ExecStopPost = "-${pkgs.systemd}/bin/systemctl start --no-block ${lib.concatStringsSep " " windowsMounts}";
+      ExecStopPost = [
+        "${pkgs.coreutils}/bin/rm -f ${runFlag}"
+        "-${pkgs.systemd}/bin/systemctl start --no-block ${lib.concatStringsSep " " windowsMounts}"
+      ];
       KillSignal = "SIGINT";
       # SIGINT is QEMU's quit, but the space guard is a background subshell,
       # which ignores it; mixed sends it to QEMU alone and SIGKILLs the rest.
@@ -231,4 +245,12 @@ in
       TimeoutStopSec = 30;
     };
   };
+
+  systemd.units = lib.genAttrs windowsMounts (_: {
+    overrideStrategy = "asDropin";
+    text = ''
+      [Unit]
+      ConditionPathExists=!${runFlag}
+    '';
+  });
 }
