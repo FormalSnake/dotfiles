@@ -4,7 +4,25 @@ let
 
   # claude comes from programs.claude-code (claude-code-nix), so the wrapper's
   # bundled codex is dropped rather than shadowing nothing useful.
-  t3code = pkgs.t3code.override { enableCodex = false; };
+  #
+  # nixpkgs ships node-pty's linux prebuild without an RPATH to libstdc++.
+  # `t3 serve` runs on node, which already has it loaded, but the desktop app
+  # runs its backend under Electron, which does not, so the backend dies on
+  # start and the app never opens a window.
+  t3code = pkgs.t3code.override {
+    enableCodex = false;
+    t3code-unwrapped = pkgs.t3code.unwrapped.overrideAttrs (
+      old:
+      lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
+        postFixup = (old.postFixup or "") + ''
+          for pty in $out/libexec/t3code/node_modules/.pnpm/node-pty@*/node_modules/node-pty/prebuilds/linux-*/pty.node; do
+            chmod u+w "$pty"
+            patchelf --add-rpath ${lib.getLib pkgs.stdenv.cc.cc}/lib "$pty"
+          done
+        '';
+      }
+    );
+  };
 
   port = 3773;
   httpsPort = 8773;
