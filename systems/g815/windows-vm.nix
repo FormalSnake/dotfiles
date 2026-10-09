@@ -189,7 +189,7 @@ let
         echo "guest ssh never came up" >&2
         exit 1
       }
-      wait_ssh
+      setup() {
       guest "Get-CimInstance Win32_ComputerSystem | Set-CimInstance -Property @{AutomaticManagedPagefile=\$false}; \
         Get-CimInstance Win32_PageFileSetting | Remove-CimInstance; \
         New-Item -Force HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU | \
@@ -213,6 +213,23 @@ let
       # Wait for sshd to go down with the old boot before waiting for it back.
       for _ in $(seq 60); do guest exit 2>/dev/null || break; sleep 2; done
       wait_ssh
+      }
+      logged_in() {
+        for _ in $(seq 24); do
+          guest "query user" 2>/dev/null | grep -qiE 'ndvm .*active' && return 0
+          sleep 5
+        done
+        return 1
+      }
+      # A fresh overlay's own first-boot reboot can land mid-setup and cut it
+      # off before ndvm exists, so setup repeats until ndvm holds the console.
+      wait_ssh
+      ok=0
+      for _ in 1 2 3; do
+        setup
+        if logged_in; then ok=1; break; fi
+      done
+      if [ "$ok" = 0 ]; then echo "ndvm never logged in" >&2; exit 1; fi
       guest "if (Test-Path C:\\pagefile.sys) { 'pagefile still present' } else { 'pagefile off' }"
     '';
   };
