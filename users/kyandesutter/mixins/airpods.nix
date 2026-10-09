@@ -29,9 +29,14 @@ let
     # wireplumber, upowerd and NetworkManager each wake for every one: a
     # steady 10-15% of a core on the e1504g. 5 s of scan per 30 s keeps the
     # features and drops the wakeups to a sixth.
+    #
+    # The PulseAudio query callbacks only woke their waiter on eol > 0, so a
+    # query for a card that is gone (eol < 0, right after a reconnect) hung
+    # the main thread for good and every socket command after it.
     patches = [
       ./librepods-ble-duty-cycle.patch
       ./librepods-keep-route-on-ear-out.patch
+      ./librepods-pa-error-wakes.patch
     ];
 
     buildInputs = [

@@ -1,0 +1,40 @@
+diff --git a/media/pulseaudiocontroller.cpp b/media/pulseaudiocontroller.cpp
+index 75faadf..e3c14f5 100644
+--- a/media/pulseaudiocontroller.cpp
++++ b/media/pulseaudiocontroller.cpp
+@@ -157,7 +157,7 @@ int PulseAudioController::getSinkVolume(const QString &sinkName)
+ 
+     auto callback = [](pa_context *c, const pa_sink_info *info, int eol, void *userdata) {
+         CallbackData *d = static_cast<CallbackData*>(userdata);
+-        if (eol > 0)
++        if (eol != 0)
+         {
+             pa_threaded_mainloop_signal(d->mainloop, 0);
+             return;
+@@ -343,7 +343,7 @@ QString PulseAudioController::getCardNameForDevice(const QString &macAddress)
+ 
+     auto callback = [](pa_context *c, const pa_card_info *info, int eol, void *userdata) {
+         CallbackData *d = static_cast<CallbackData*>(userdata);
+-        if (eol > 0)
++        if (eol != 0)
+         {
+             pa_threaded_mainloop_signal(d->mainloop, 0);
+             return;
+@@ -387,7 +387,7 @@ bool PulseAudioController::isProfileAvailable(const QString &cardName, const QSt
+ 
+     auto callback = [](pa_context *c, const pa_card_info *info, int eol, void *userdata) {
+         CallbackData *d = static_cast<CallbackData*>(userdata);
+-        if (eol > 0)
++        if (eol != 0)
+         {
+             pa_threaded_mainloop_signal(d->mainloop, 0);
+             return;
+@@ -432,7 +432,7 @@ QString PulseAudioController::getActiveCardProfile(const QString &cardName)
+ 
+     auto callback = [](pa_context *, const pa_card_info *info, int eol, void *userdata) {
+         CallbackData *d = static_cast<CallbackData*>(userdata);
+-        if (eol > 0) {
++        if (eol != 0) {
+             pa_threaded_mainloop_signal(d->mainloop, 0);
+             return;
+         }
