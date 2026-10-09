@@ -114,5 +114,22 @@
     (final: prev: {
       buildFHSEnvChroot = prev.buildFHSEnv;
     })
+
+    # Hyprland 0.56.2 hands an X11 app's clipboard to Wayland and then mirrors
+    # it back into X as the new owner, so every other copy from a GTK4 app on
+    # XWayland (Lynk, zenity) reads empty in Wayland apps for one of the text
+    # types. Fixed upstream after 0.56.2; drop this once nixpkgs ships it.
+    (final: prev: {
+      hyprland = prev.hyprland.overrideAttrs (old: {
+        patches = (old.patches or [ ]) ++ [
+          (prev.fetchpatch {
+            name = "xwm-dont-reflect-imported-clipboards.patch";
+            url = "https://github.com/hyprwm/Hyprland/commit/aed4830e.patch";
+            includes = [ "src/xwayland/XWM.cpp" ];
+            hash = "sha256-vDsroVdyYqurZ6f1x/DXeB28+0YnKDrorER4pV49g/U=";
+          })
+        ];
+      });
+    })
   ];
 }
