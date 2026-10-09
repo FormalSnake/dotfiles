@@ -55,7 +55,7 @@ let
   wsLua = lib.concatMapStringsSep ", " (i: ''"${wsName.${toString i}}"'') (lib.range 1 9);
 
   # Focused-output-aware brightness keys (dms arm only; the formalshell arm
-  # drives brightnessctl + an OSD call directly).
+  # calls the shell's `display brightnessStep`, which picks the device itself).
   #
   # DMS's own `brightness increment/decrement` with an empty device selector
   # resolves to its "preferred device", and its default picks the internal
@@ -194,15 +194,16 @@ let
 
       -- Volume via wpctl: FormalShell's AudioService tracks PipeWire directly
       -- and auto-shows the volume OSD on any external change, so the keys don't
-      -- need to route through the shell. Brightness has no such watcher, the
-      -- documented pattern is brightnessctl plus an explicit OSD show. Media
-      -- routes through the shell's active MPRIS player.
+      -- need to route through the shell. Brightness does: the shell steps the
+      -- focused output (backlight or DDC) through one writer per device and
+      -- shows the OSD itself. Media routes through the shell's active MPRIS
+      -- player.
       hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("${pkgs.wireplumber}/bin/wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 3%+"), { locked = true, repeating = true })
       hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("${pkgs.wireplumber}/bin/wpctl set-volume @DEFAULT_AUDIO_SINK@ 3%-"), { locked = true, repeating = true })
       hl.bind("XF86AudioMute", hl.dsp.exec_cmd("${pkgs.wireplumber}/bin/wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"))
       hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd("${pkgs.wireplumber}/bin/wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"))
-      hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("${pkgs.brightnessctl}/bin/brightnessctl set 5%+ && ${fsIpc [ "osd" "brightness" ]}"), { locked = true, repeating = true })
-      hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("${pkgs.brightnessctl}/bin/brightnessctl set 5%- && ${fsIpc [ "osd" "brightness" ]}"), { locked = true, repeating = true })
+      hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("${fsIpc [ "display" "brightnessStep" "5" ]}"), { locked = true, repeating = true })
+      hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("${fsIpc [ "display" "brightnessStep" "-5" ]}"), { locked = true, repeating = true })
       hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("${fsIpc [ "media" "playPause" ]}"))
       hl.bind("XF86AudioPause", hl.dsp.exec_cmd("${fsIpc [ "media" "playPause" ]}"))
       hl.bind("XF86AudioNext", hl.dsp.exec_cmd("${fsIpc [ "media" "next" ]}"))
