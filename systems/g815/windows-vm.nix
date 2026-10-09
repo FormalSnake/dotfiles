@@ -216,7 +216,8 @@ let
       }
       logged_in() {
         for _ in $(seq 24); do
-          guest "query user" 2>/dev/null | grep -qiE 'ndvm .*active' && return 0
+          # query exits 1 even when it lists sessions.
+          { guest "query user" 2>/dev/null || true; } | grep -qiE 'ndvm .*active' && return 0
           sleep 5
         done
         return 1
