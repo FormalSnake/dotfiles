@@ -26,6 +26,9 @@
       # Chromium dlopens libva.so.2 for hardware video decode; without it
       # every stream decodes in software.
       libva
+      # Chromium dlopens libpipewire-0.3.so.0 for portal screen capture;
+      # without it getDisplayMedia fails under Wayland.
+      pipewire
       # libcef.so's runtime floor (the chromium engine is dlopened from the
       # CEF distribution; these are its own link-time needs).
       nss
