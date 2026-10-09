@@ -154,9 +154,11 @@ let
   };
 
   # Run once per start, as the user whose key the guest's sshd trusts. A
-  # pagefile and Windows Update write gigabytes into the overlay that nothing
+  # pagefile, Windows Update and the user's autostart launchers (Steam resumed
+  # a 67G game download into D:) write gigabytes into the overlay that nothing
   # keeps, so the guest drops the pagefile, turns automatic updates off by
-  # policy (wuauserv refuses Set-Service), and reboots once. A fresh overlay's
+  # policy (wuauserv refuses Set-Service), empties its HKCU Run key, and
+  # reboots once. A fresh overlay's
   # first boot reboots by itself too, hence the try around Restart-Computer.
   prep = pkgs.writeShellApplication {
     name = "windows-vm-prep";
@@ -181,6 +183,8 @@ let
         New-Item -Force HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU | \
           New-ItemProperty -Name NoAutoUpdate -Value 1 -PropertyType DWord -Force | Out-Null; \
         Stop-Service wuauserv,UsoSvc,BITS -Force -ErrorAction SilentlyContinue; \
+        Remove-Item HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Run; \
+        New-Item HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Run | Out-Null; \
         try { Restart-Computer -Force -ErrorAction Stop } catch { }"
       # Wait for sshd to go down with the old boot before waiting for it back.
       for _ in $(seq 60); do guest exit 2>/dev/null || break; sleep 2; done
@@ -191,6 +195,18 @@ let
 in
 {
   environment.systemPackages = [ prep ];
+
+  systemd.services.windows-vm-prep = {
+    description = "Prepare a fresh Windows guest overlay";
+    after = [ "windows-vm.service" ];
+    bindsTo = [ "windows-vm.service" ];
+    wantedBy = [ "windows-vm.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      User = "kyandesutter";
+      ExecStart = lib.getExe prep;
+    };
+  };
 
   # sudo systemctl start windows-vm, then `ssh -p 2222 kyan@127.0.0.1` here
   # (from the macbook, ProxyCommand through g815); VNC on 127.0.0.1:5901.
