@@ -116,8 +116,10 @@ let
         -device ide-hd,bus=ide.0,drive=esp,bootindex=0
         # Read-only is the backing node's own flag, not just qcow2's default.
         -blockdev driver=host_device,node-name=base,filename="$disk",read-only=on,cache.direct=on,aio=native
-        -blockdev driver=file,node-name=ovl,filename="$state/overlay.qcow2"
-        -blockdev driver=qcow2,node-name=win,file=ovl,backing=base
+        # Guest TRIM frees overlay clusters on the host, so a deleted build
+        # tree gives its space back instead of pinning it until the next start.
+        -blockdev driver=file,node-name=ovl,filename="$state/overlay.qcow2",discard=unmap
+        -blockdev driver=qcow2,node-name=win,file=ovl,backing=base,discard=unmap,detect-zeroes=unmap
         # Emulated NVMe binds Windows' inbox stornvme, the driver it already
         # boots from on bare metal (no VMD on this laptop).
         -device nvme,drive=win,serial="$serial",bootindex=1
