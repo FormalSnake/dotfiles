@@ -201,6 +201,8 @@ in
     after = [ "windows-vm.service" ];
     bindsTo = [ "windows-vm.service" ];
     wantedBy = [ "windows-vm.service" ];
+    # The guest trusts the user's key, which only the gcr agent holds unlocked.
+    environment.SSH_AUTH_SOCK = "/run/user/1000/gcr/ssh";
     serviceConfig = {
       Type = "oneshot";
       User = "kyandesutter";
@@ -212,6 +214,9 @@ in
   # (from the macbook, ProxyCommand through g815); VNC on 127.0.0.1:5901.
   systemd.services.windows-vm = {
     description = "Bare-metal Windows 11 as a KVM guest over a throwaway overlay";
+    # A switch must never kill a guest someone is working in; a changed unit
+    # applies on the next start.
+    restartIfChanged = false;
     # Stopped, never masked: they come back when the guest exits.
     conflicts = windowsMounts;
     after = windowsMounts;
