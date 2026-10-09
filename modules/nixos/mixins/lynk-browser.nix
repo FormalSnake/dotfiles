@@ -26,6 +26,7 @@ let
       pkgs.squashfsTools
       pkgs.binutils
       pkgs.patchelf
+      pkgs.makeWrapper
     ];
 
     # The packager falls back to a bare squashfs when appimagetool is missing;
@@ -53,7 +54,11 @@ let
       cp -a AppDir $out/opt/lynk-browser
       patchelf --set-interpreter "$(cat ${pkgs.stdenv.cc}/nix-support/dynamic-linker)" \
         $out/opt/lynk-browser/usr/bin/bun
-      ln -s $out/opt/lynk-browser/AppRun $out/bin/lynk-browser
+      # GTK's file chooser aborts without its GSettings schemas, and NixOS
+      # keeps them out of share/glib-2.0/schemas. These belong to the gtk4
+      # nix-ld serves the host.
+      makeWrapper $out/opt/lynk-browser/AppRun $out/bin/lynk-browser \
+        --prefix XDG_DATA_DIRS : ${pkgs.gtk4}/share/gsettings-schemas/${pkgs.gtk4.name}
       sed "s|^Exec=.*|Exec=$out/bin/lynk-browser|" \
         $out/opt/lynk-browser/lynk-browser.desktop > $out/share/applications/lynk-browser.desktop
       if [ -d $out/opt/lynk-browser/usr/share/icons ]; then
