@@ -166,7 +166,9 @@ let
   # reboots once. GUI runs need a desktop session, and the owner's PIN is
   # bound to the laptop's TPM, so the reboot autologs into a local admin
   # `ndvm` with a fresh random password; it lives in the overlay only, and
-  # ssh reaches it with the same key (administrators_authorized_keys). A
+  # ssh reaches it with the same key (administrators_authorized_keys). It may
+  # run the owner's toolchains (bun, cargo, .nd-tools), and work trees go
+  # under C:\nd: granting it all of C:\Users\Kyan\Developer takes ~9 min. A
   # fresh overlay's first boot reboots by itself too, hence the try around
   # Restart-Computer, and the reboot can cut the ssh session before it
   # returns (exit 255).
@@ -202,6 +204,11 @@ let
         \$wl = 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon'; \
         Set-ItemProperty \$wl AutoAdminLogon '1'; Set-ItemProperty \$wl DefaultUserName 'ndvm'; \
         Set-ItemProperty \$wl DefaultDomainName '.'; Set-ItemProperty \$wl DefaultPassword \$pw; \
+        \$k = 'C:\\Users\\Kyan'; \
+        foreach (\$d in \$k, \"\$k\\AppData\", \"\$k\\AppData\\Local\", \"\$k\\AppData\\Local\\Microsoft\") { icacls \$d /grant 'ndvm:(RX)' /Q | Out-Null }; \
+        foreach (\$d in \"\$k\\AppData\\Local\\Microsoft\\WinGet\", \"\$k\\.nd-tools\", \"\$k\\.cargo\", \"\$k\\.rustup\", \"\$k\\.dotnet\") { \
+          if (Test-Path \$d) { icacls \$d /grant 'ndvm:(OI)(CI)(RX)' /T /C /Q | Out-Null } }; \
+        New-Item -ItemType Directory -Force C:\\nd | Out-Null; icacls C:\\nd /grant 'ndvm:(OI)(CI)(M)' /Q | Out-Null; \
         try { Restart-Computer -Force -ErrorAction Stop } catch { }" || [ $? = 255 ]
       # Wait for sshd to go down with the old boot before waiting for it back.
       for _ in $(seq 60); do guest exit 2>/dev/null || break; sleep 2; done
