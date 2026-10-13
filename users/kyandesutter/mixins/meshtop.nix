@@ -25,5 +25,19 @@
     ];
     # Messages on the Linux hosts talks to BlueBubbles on the mac.
     ports."1234" = "bluebubbles";
+    # Plan usage, read on whichever host runs the TUI. The second Claude
+    # subscription lives in ~/.claude-pulse (see claude-code.nix).
+    usage = [
+      {
+        kind = "claude";
+        name = "claude";
+      }
+      {
+        kind = "claude";
+        name = "pulse";
+        dir = "~/.claude-pulse";
+      }
+      { kind = "codex"; }
+    ];
   };
 }
