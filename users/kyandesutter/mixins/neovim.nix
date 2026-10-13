@@ -21,10 +21,27 @@
       render-markdown-nvim
       nvim-lspconfig
       nvim-treesitter.withAllGrammars
-      vim-tmux-navigator
     ];
 
-    initLua = builtins.readFile ../config/nvim/init.lua;
+    # astro-ls needs a TypeScript SDK and a project without node_modules has
+    # none. TypeScript 7 dropped tsserverlibrary.js, so the fallback is 5.x.
+    initLua = ''
+      vim.g.tsdk = "${pkgs.typescript_5}/lib/node_modules/typescript/lib"
+    '' + builtins.readFile ../config/nvim/init.lua;
+
+    # extraPackages land at the end of PATH, behind ~/.cargo/bin, whose
+    # rust-analyzer is a rustup proxy with no component installed. Put the
+    # nixpkgs one first, and give it std sources since the toolchain has no
+    # rust-src either.
+    extraWrapperArgs = [
+      "--prefix"
+      "PATH"
+      ":"
+      "${pkgs.rust-analyzer}/bin"
+      "--set-default"
+      "RUST_SRC_PATH"
+      "${pkgs.rustPlatform.rustLibSrc}"
+    ];
 
     extraPackages = with pkgs; [
       # snacks: picker, image conversion, lazygit integration

@@ -4,6 +4,14 @@
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 
+vim.filetype.add({
+  pattern = {
+    [".*/docker%-compose[^/]*%.ya?ml"] = "yaml.docker-compose",
+    [".*/compose[^/]*%.ya?ml"] = "yaml.docker-compose",
+  },
+})
+vim.treesitter.language.register("yaml", "yaml.docker-compose")
+
 -- Options ---------------------------------------------------------------------
 
 local o = vim.opt
@@ -267,10 +275,16 @@ vim.lsp.config("tailwindcss", {
   end, vim.lsp.config.tailwindcss.filetypes),
 })
 
+vim.lsp.config("astro", {
+  before_init = function(_, config)
+    local tsdk = require("lspconfig.util").get_typescript_server_path(config.root_dir)
+    config.init_options.typescript.tsdk = tsdk ~= "" and tsdk or vim.g.tsdk
+  end,
+})
+
 vim.lsp.config("sourcekit", { filetypes = { "swift", "objc", "objcpp" } })
 
--- rust-analyzer comes from rustup and sourcekit-lsp from Xcode, so they are
--- only enabled where those exist.
+-- sourcekit-lsp comes from Xcode, so it is only enabled where that exists.
 local servers = {
   "lua_ls",
   "nil_ls",
@@ -287,10 +301,8 @@ local servers = {
   "dockerls",
   "docker_compose_language_service",
   "gopls",
+  "rust_analyzer",
 }
-if vim.fn.executable("rust-analyzer") == 1 then
-  servers[#servers + 1] = "rust_analyzer"
-end
 if vim.fn.executable("xcrun") == 1 then
   servers[#servers + 1] = "sourcekit"
 end
@@ -357,6 +369,29 @@ map("n", "<leader>bd", function() Snacks.bufdelete() end, { desc = "Delete buffe
 map("n", "<leader>bo", function() Snacks.bufdelete.other() end, { desc = "Delete other buffers" })
 map("n", "<S-h>", "<cmd>bprevious<cr>", { desc = "Previous buffer" })
 map("n", "<S-l>", "<cmd>bnext<cr>", { desc = "Next buffer" })
+-- Ctrl-h/j/k/l walk nvim splits and continue into the neighbouring tmux or
+-- herdr pane at the edge. tmux.conf sends the keys back to nvim when it is
+-- the foreground process; herdr has no such hook, so its own pane focus stays
+-- on its prefix bindings.
+local function navigate(wincmd, tmux, herdr)
+  return function()
+    local win = vim.api.nvim_get_current_win()
+    vim.cmd.wincmd(wincmd)
+    if vim.api.nvim_get_current_win() ~= win then
+      return
+    end
+    if vim.env.TMUX then
+      vim.system({ "tmux", "select-pane", "-" .. tmux })
+    elseif vim.env.HERDR_ENV == "1" then
+      vim.system({ "herdr", "pane", "focus", "--direction", herdr, "--current" })
+    end
+  end
+end
+map("n", "<C-h>", navigate("h", "L", "left"), { desc = "Window left" })
+map("n", "<C-j>", navigate("j", "D", "down"), { desc = "Window down" })
+map("n", "<C-k>", navigate("k", "U", "up"), { desc = "Window up" })
+map("n", "<C-l>", navigate("l", "R", "right"), { desc = "Window right" })
+
 map("n", "<esc>", "<cmd>nohlsearch<cr><esc>")
 
 map("n", "<leader>qs", function() require("persistence").load() end, { desc = "Restore session" })
