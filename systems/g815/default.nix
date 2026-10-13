@@ -202,7 +202,6 @@
   # `XDG_CURRENT_DESKTOP=GNOME gnome-control-center online-accounts` sign-in per
   # machine, and SDDM stays the greeter.
   kyan.desktop.shell = "formalshell";
-  kyan.desktop.compositor = "mango";
 
   # NVIDIA dGPU stack. This chassis has the RTX 5070; an Intel-only host
   # leaves this off.

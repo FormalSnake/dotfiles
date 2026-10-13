@@ -39,8 +39,19 @@ let
   # (bar, panel, menu, notifications) only.
   windowOpacity = if hasNvidia then "0.96" else "1.0";
 
-  workspaces = import ./wm-workspaces.nix;
-  wsName = workspaces.names;
+  # Workspace pill labels: role → Nerd Font glyph + short name, mirroring the
+  # macOS aerospace workspace names (see mixins/aerospace.nix). Rendered into
+  # each workspace's `default_name`, which is what Hyprland reports over IPC as
+  # `name` and what FormalShell's HyprlandBackend puts on the bar pills
+  # (shell/Compositor/hyprland/HyprlandBackend.qml maps `w.name` straight
+  # through).
+  # Glyph and name are joined by an EM SPACE ( ), not an ASCII space:
+  # the bar widget collapses ASCII/nbsp whitespace in the label but preserves
+  # it. Written as JSON \u escapes so the private-use glyphs survive editing,
+  # glyphs verified present in GeistMono Nerd Font 3.4.0.
+  wsName = builtins.fromJSON ''
+    {"1": " web", "2": " term", "3": " dev", "4": " chat", "5": " prod", "6": " print", "7": "󰚩 ai", "8": " media", "9": " game"}
+  '';
   wsLua = lib.concatMapStringsSep ", " (i: ''"${wsName.${toString i}}"'') (lib.range 1 9);
 
   # Focused-output-aware brightness keys (dms arm only; the formalshell arm
@@ -124,7 +135,7 @@ let
   # take the names and nothing else.
   workspaceRules =
     if hasNvidia then ''
-      local internalWorkspaces = { ${lib.concatMapStringsSep ", " (i: "[${toString i}] = true") workspaces.internal} }
+      local internalWorkspaces = { [4] = true, [8] = true }
       for i = 1, 9 do
         hl.workspace_rule({
           workspace = tostring(i),
@@ -639,9 +650,15 @@ ${if useFormalshell then ''
     hl.bind(mod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
     hl.bind(mod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 
-    -- Window → workspace rules (mixins/wm-workspaces.nix). No `silent`: when
-    -- one of these apps opens, Hyprland follows the window to its workspace.
-${lib.concatMapStrings (a: "    hl.window_rule({ match = { ${if a ? class then ''class = "${a.class}"'' else ''title = "${a.title}"''} }, workspace = \"${toString a.workspace}\" })\n") workspaces.apps}    -- Beeper (Electron) maps its main window floating, so it never tiles.
+    -- Window → workspace rules (Linux app classes; Hyprland matches `class`)
+    -- No `silent`: when one of these apps opens, Hyprland follows the window to
+    -- its assigned workspace. No terminal rule: ghostty opens where you are.
+    hl.window_rule({ match = { class = "^([Hh]elium)$" }, workspace = "1" })
+    hl.window_rule({ match = { class = "^([Cc]ode|[Zz]ed|dev.zed.Zed)$" }, workspace = "3" })
+    hl.window_rule({ match = { class = "^([Ss]lack|WhatsApp|discord|[Bb]eeper)$" }, workspace = "4" })
+    -- Messages (GPUI) sets no Wayland app-id, so its rule matches the title.
+    hl.window_rule({ match = { title = "^(Messages)$" }, workspace = "4" })
+    -- Beeper (Electron) maps its main window floating, so it never tiles.
     -- Force it back into the layout.
     hl.window_rule({ match = { class = "^([Bb]eeper)$" }, float = false })
     -- The quake console maps straight onto its own special workspace,
@@ -654,6 +671,13 @@ ${lib.concatMapStrings (a: "    hl.window_rule({ match = { ${if a ? class then '
       workspace = "special:formalshell-console silent",
       float = true,
     })
+    hl.window_rule({ match = { class = "^([Oo]bsidian)$" }, workspace = "5" })
+    hl.window_rule({ match = { class = "^([Cc]laude)$" }, workspace = "7" })
+    hl.window_rule({ match = { class = "^([Kk]opuz)$" }, workspace = "8" })
+    hl.window_rule({ match = { class = "^(es.canarycoders.formalmusic)$" }, workspace = "8" })
+    -- YouTube Music web app (mixins/webapps.nix). Chromium names a shared-profile
+    -- --app window after its URL and profile, not the launcher's --class.
+    hl.window_rule({ match = { class = "^(chrome-music.youtube.com__-Default)$" }, workspace = "8" })
     -- Minecraft locks the pointer with an X11 grab plus a recentering warp,
     -- which Hyprland does not hold the way it holds a Wayland pointer
     -- constraint: the cursor drifts out of the window, and the warp back on
@@ -890,21 +914,16 @@ ${lib.optionalString (!useFormalshell) ''
 
   # gtk.css is read in every session, so it only imports session.css, which
   # the session picks at startup: this unit points it at hyprland.css (the
-  # shell's palette imports) in both the Hyprland and the mango session, and
-  # the GNOME session empties it (mixins/gnome.nix) so apps there draw stock
-  # Adwaita.
+  # shell's palette imports), and the GNOME session empties it
+  # (mixins/gnome.nix) so apps there draw stock Adwaita.
   xdg.configFile."gtk-3.0/hyprland.css".text = ''@import url("${shellColors}");'';
   xdg.configFile."gtk-4.0/hyprland.css".text = ''@import url("${shellColors}");'';
-  # uwsm names a desktop-entry session after the entry (hyprland.desktop) and
-  # a binPath one after the executable (mango, modules/nixos/mixins/hyprland.nix).
-  systemd.user.services.gtk-session-css = let
-    sessionPreTargets = [ "wayland-session-pre@hyprland.desktop.target" "wayland-session-pre@mango.target" ];
-  in {
+  systemd.user.services.gtk-session-css = {
     Unit = {
       Description = "Point GTK's session.css at the Hyprland theme";
-      Before = sessionPreTargets;
+      Before = [ "wayland-session-pre@hyprland.desktop.target" ];
     };
-    Install.WantedBy = sessionPreTargets;
+    Install.WantedBy = [ "wayland-session-pre@hyprland.desktop.target" ];
     Service = {
       Type = "oneshot";
       ExecStart = toString (pkgs.writeShellScript "gtk-session-css" ''

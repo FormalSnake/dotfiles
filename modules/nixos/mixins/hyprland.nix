@@ -139,7 +139,6 @@ in
   # services.formalshell.enable flips on below.
   imports = [
     inputs.formalshell.nixosModules.formalshell
-    inputs.mango.nixosModules.mango
   ];
 
   options.kyan.desktop = {
@@ -148,11 +147,6 @@ in
       type = lib.types.enum [ "dms" "formalshell" ];
       default = "dms";
       description = "Which desktop shell owns the session (bar, notification daemon). Gates the shell-facing binds and user services in users/kyandesutter/mixins/{hyprland,formalshell}.nix. The lock screen and lock-before-sleep are FormalShell's only.";
-    };
-    compositor = lib.mkOption {
-      type = lib.types.enum [ "hyprland" "mango" ];
-      default = "hyprland";
-      description = "The default session (services.displayManager.defaultSession). SDDM itself preselects the last session used, so on an existing install pick it once with Tab in the greeter. Both sessions are always installed and configured (users/kyandesutter/mixins/{hyprland,mango}.nix).";
     };
   };
 
@@ -186,24 +180,6 @@ in
       withUWSM = true;
       xwayland.enable = true;
     };
-
-    # mango session, run by uwsm exactly like Hyprland's, so the same
-    # graphical-session.target units and ~/.config/uwsm/env{,-mango} apply.
-    # The module's own non-uwsm mango.desktop is dropped (addLoginEntry), so
-    # the greeter lists one mango session. Its portal config (wlr for
-    # screencast and screenshots, gtk for the rest) is keyed on
-    # XDG_CURRENT_DESKTOP=mango, which leaves the Hyprland pick below alone.
-    programs.mango = {
-      enable = true;
-      addLoginEntry = false;
-    };
-    programs.uwsm.waylandCompositors.mango = {
-      prettyName = "Mango";
-      comment = "mango (dwl, scenefx) managed by UWSM";
-      binPath = "/run/current-system/sw/bin/mango";
-    };
-    services.displayManager.defaultSession =
-      if cfg.compositor == "mango" then "mango-uwsm" else "hyprland-uwsm";
 
     # xdg portals: hyprland's own portal for screencast/screenshot, gtk for the
     # rest (file pickers). gnome-keyring's Secret portal is gated `UseIn=gnome`

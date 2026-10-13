@@ -221,7 +221,6 @@ let
       flakeIgnore = [ "E501" ];
     } ''
     import math
-    import os
     import select
     import subprocess
     import time
@@ -233,7 +232,6 @@ let
     # names extend this one.
     PAD = "DualSense Wireless Controller"
     HYPRCTL = "${pkgs.hyprland}/bin/hyprctl"
-    MMSG = "${osConfig.programs.mango.package}/bin/mmsg"
     WPCTL = "${pkgs.wireplumber}/bin/wpctl"
 
     TICK = 1.0 / 60
@@ -249,27 +247,25 @@ let
     VOLUME_INTERVAL = 0.12
 
 
-    def dispatch(lua, mango):
-        if os.environ.get("MANGO_INSTANCE_SIGNATURE"):
-            return [MMSG, "dispatch", mango]
+    def dispatch(lua):
         return [HYPRCTL, "dispatch", lua]
 
 
     BUTTONS = {
-        e.BTN_TL: dispatch('hl.dsp.layout("focus l")', "focusdir,left"),
-        e.BTN_TR: dispatch('hl.dsp.layout("focus r")', "focusdir,right"),
+        e.BTN_TL: dispatch('hl.dsp.layout("focus l")'),
+        e.BTN_TR: dispatch('hl.dsp.layout("focus r")'),
         e.BTN_SOUTH: [${lib.concatMapStringsSep ", " builtins.toJSON (lib.splitString " " launcher)}],
-        e.BTN_EAST: dispatch('hl.dsp.window.close()', "killclient"),
-        e.BTN_NORTH: dispatch('hl.dsp.window.fullscreen({ action = "toggle", mode = "fullscreen" })', "togglefullscreen"),
-        e.BTN_WEST: dispatch('hl.dsp.window.fullscreen({ action = "toggle", mode = "maximized" })', "togglemaximizescreen"),
+        e.BTN_EAST: dispatch('hl.dsp.window.close()'),
+        e.BTN_NORTH: dispatch('hl.dsp.window.fullscreen({ action = "toggle", mode = "fullscreen" })'),
+        e.BTN_WEST: dispatch('hl.dsp.window.fullscreen({ action = "toggle", mode = "maximized" })'),
         e.BTN_MODE: ["${dualsenseOsk}/bin/dualsense-osk"],
     }
 
     HATS = {
-        (e.ABS_HAT0X, -1): dispatch('hl.dsp.layout("focus l")', "focusdir,left"),
-        (e.ABS_HAT0X, 1): dispatch('hl.dsp.layout("focus r")', "focusdir,right"),
-        (e.ABS_HAT0Y, -1): dispatch('hl.dsp.focus({ workspace = "e-1" })', "viewtoleft_have_client"),
-        (e.ABS_HAT0Y, 1): dispatch('hl.dsp.focus({ workspace = "e+1" })', "viewtoright_have_client"),
+        (e.ABS_HAT0X, -1): dispatch('hl.dsp.layout("focus l")'),
+        (e.ABS_HAT0X, 1): dispatch('hl.dsp.layout("focus r")'),
+        (e.ABS_HAT0Y, -1): dispatch('hl.dsp.focus({ workspace = "e-1" })'),
+        (e.ABS_HAT0Y, 1): dispatch('hl.dsp.focus({ workspace = "e+1" })'),
     }
 
     CLICKS = {e.BTN_THUMBR: e.BTN_LEFT, e.BTN_THUMBL: e.BTN_RIGHT}
