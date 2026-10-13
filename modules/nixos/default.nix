@@ -8,6 +8,7 @@
       inputs.nix-flatpak.nixosModules.nix-flatpak
       ../shared
       ./mixins/nix.nix
+      ./mixins/storage-gc.nix
       ./mixins/users.nix
       ./mixins/home-manager.nix
       ./mixins/locale.nix

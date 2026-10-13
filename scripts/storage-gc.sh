@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
-# Reclaim disk on the macbook by deleting only things one command regenerates:
-# stale build artifacts, package-manager caches, Xcode derived data, and old nix
-# generations. Nothing here touches source, media, or app data.
+# Reclaim disk on the macbook and the NixOS hosts by deleting only things one
+# command regenerates: stale build artifacts, package-manager caches, Xcode
+# derived data (mac), and old nix generations (mac; NixOS runs nix.gc itself).
+# Nothing here touches source, media, or app data.
 #
 # Dry run by default. Pass --apply to delete.
 #
-#   mac-storage-gc.sh                  what would go, plus the manual-review list
-#   mac-storage-gc.sh --apply          delete it
-#   mac-storage-gc.sh --apply --age 7  more aggressive staleness cutoff
-#   mac-storage-gc.sh --apply --deep   also Go modcache and old iOS DeviceSupport
+#   storage-gc.sh                      what would go, plus the manual-review list
+#   storage-gc.sh --apply              delete it
+#   storage-gc.sh --apply --age 7      more aggressive staleness cutoff
+#   storage-gc.sh --apply --deep       also Go modcache and old iOS DeviceSupport
 #
 # Two safety rules gate every directory delete:
 #   1. Inside a git work tree, the directory must be git-ignored. Anything
@@ -18,9 +19,13 @@
 # Plus staleness: nothing is removed unless its newest depth-1 entry is older
 # than --age days, so an in-flight build is never pulled out from under itself.
 #
+# Low-free-space mode: when / has less than LOW_FREE_GB free (default 30), every
+# cutoff is divided by 4 (minimum 1 day) so a full disk is cleared in one pass.
+#
 # Env: ROOTS (space-separated scan roots), AGE_DAYS, TARGET_AGE_DAYS,
-# WORKTREE_AGE_DAYS, INSTALL_AGE_DAYS, NIX_KEEP.
-# Designed to be callable from a launchd user agent; logs to stdout/stderr.
+# WORKTREE_AGE_DAYS, INSTALL_AGE_DAYS, NIX_KEEP, LOW_FREE_GB.
+# Callable from a launchd user agent (mac) or a systemd service (NixOS); logs
+# to stdout/stderr.
 
 set -euo pipefail
 
@@ -36,6 +41,8 @@ TARGET_AGE_DAYS="${TARGET_AGE_DAYS:-7}"
 # 90 GB between two weekly runs.
 WORKTREE_AGE_DAYS="${WORKTREE_AGE_DAYS:-3}"
 NIX_KEEP="${NIX_KEEP:-14d}"
+LOW_FREE_GB="${LOW_FREE_GB:-30}"
+OS=$(uname -s)
 APPLY=0
 DEEP=0
 VERBOSE=0
@@ -47,11 +54,21 @@ while [[ $# -gt 0 ]]; do
     -v|--verbose) VERBOSE=1 ;;
     --age) AGE_DAYS="$2"; shift ;;
     --age=*) AGE_DAYS="${1#*=}" ;;
-    -h|--help) sed -n '2,26p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,30p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "unknown flag: $1" >&2; exit 2 ;;
   esac
   shift
 done
+
+LOW_FREE=0
+free_gb=$(df -Pk / | awk 'NR==2 {printf "%d", $4/1048576}')
+if (( free_gb < LOW_FREE_GB )); then
+  LOW_FREE=1
+  for v in AGE_DAYS INSTALL_AGE_DAYS TARGET_AGE_DAYS WORKTREE_AGE_DAYS; do
+    n=$(( ${!v} / 4 )); (( n >= 1 )) || n=1
+    printf -v "$v" '%s' "$n"
+  done
+fi
 
 # ~/Developer is the real project tree; the two worktree dirs are where Herdr
 # and Claude check out throwaway branches, and they accumulate their own
@@ -63,13 +80,24 @@ WORKTREE_PATH='/\.claude/worktrees/|/\.herdr/worktrees/|/\.claude-worktrees/'
 # Regenerable regardless of git status. `target` additionally requires a sibling
 # Cargo.toml; `build` is deliberately absent because plenty of projects commit
 # into one, so it only qualifies via the git-ignored path.
-ALWAYS_SAFE='node_modules|target|.next|.turbo|.expo|Pods|DerivedData|.gradle|.venv|__pycache__|.parcel-cache|.dart_tool|.cxx'
+# `.build` (SwiftPM) needs a sibling Package.swift, `.zig-cache` and `zig-out`
+# a sibling build.zig, same as `target` and Cargo.toml.
+ALWAYS_SAFE='node_modules|target|.next|.turbo|.expo|Pods|DerivedData|.gradle|.venv|__pycache__|.parcel-cache|.dart_tool|.cxx|.build|.zig-cache|zig-out'
 
-# Pinned to the system tools: PATH here may put GNU coreutils and bfs ahead of
-# /usr/bin, and their stat format flags and find semantics differ from BSD's.
-FIND=/usr/bin/find
-STAT=/usr/bin/stat
-DU=/usr/bin/du
+# On the mac, pinned to the system tools: PATH there may put GNU coreutils and
+# bfs ahead of /usr/bin, and their stat format flags and find semantics differ
+# from BSD's. On Linux the GNU tools are the system tools.
+if [[ "$OS" == Darwin ]]; then
+  FIND=/usr/bin/find
+  STAT=/usr/bin/stat
+  DU=/usr/bin/du
+  STAT_MTIME=(-f '%m')
+else
+  FIND=find
+  STAT=stat
+  DU=du
+  STAT_MTIME=(-c '%Y')
+fi
 
 NOW=$(date +%s)
 freed_kb=0
@@ -92,7 +120,7 @@ dir_kb() { "$DU" -sxk "$1" 2>/dev/null | awk '{print $1}'; }
 # can sit unchanged for months, so the parent alone is not a usable signal.
 newest_age_days() {
   local newest
-  newest=$("$FIND" "$1" -maxdepth 1 -exec "$STAT" -f '%m' {} + 2>/dev/null | sort -rn | head -1)
+  newest=$("$FIND" "$1" -maxdepth 1 -exec "$STAT" "${STAT_MTIME[@]}" {} + 2>/dev/null | sort -rn | head -1)
   [[ "$newest" =~ ^[0-9]+$ ]] || { echo 99999; return; }
   echo $(( (NOW - newest) / 86400 ))
 }
@@ -141,7 +169,7 @@ run_cmd() {
 }
 
 echo
-echo "mac-storage-gc — $( ((APPLY)) && echo APPLY || echo 'dry run, pass --apply to delete') | stale after ${AGE_DAYS}d, target ${TARGET_AGE_DAYS}d, worktrees ${WORKTREE_AGE_DAYS}d, installs ${INSTALL_AGE_DAYS}d"
+echo "storage-gc ($OS) — $( ((APPLY)) && echo APPLY || echo 'dry run, pass --apply to delete')$( ((LOW_FREE)) && echo " | LOW FREE (${free_gb} GB < ${LOW_FREE_GB} GB), cutoffs cut to a quarter") | stale after ${AGE_DAYS}d, target ${TARGET_AGE_DAYS}d, worktrees ${WORKTREE_AGE_DAYS}d, installs ${INSTALL_AGE_DAYS}d"
 df -h / | tail -1 | awk '{printf "before: %s used of %s, %s free\n", $3, $2, $4}'
 echo
 
@@ -159,14 +187,18 @@ for root in "${SCAN_ROOTS[@]}"; do
       2) [[ "$name" =~ ^(${ALWAYS_SAFE})$ ]] || continue ;;
     esac
 
-    # A bare `target` outside Cargo is somebody else's output directory.
-    if [[ "$name" == target && ! -f "$(dirname "$dir")/Cargo.toml" ]]; then
-      continue
-    fi
+    # A bare `target`, `.build` or `zig-out` outside its build system is
+    # somebody else's output directory.
+    parent=$(dirname "$dir")
+    case "$name" in
+      target) [[ -f "$parent/Cargo.toml" ]] || continue ;;
+      .build) [[ -f "$parent/Package.swift" ]] || continue ;;
+      .zig-cache|zig-out) [[ -f "$parent/build.zig" ]] || continue ;;
+    esac
 
     cutoff=$AGE_DAYS
     [[ "$name" == node_modules || "$name" == Pods ]] && cutoff=$INSTALL_AGE_DAYS
-    [[ "$name" == target ]] && cutoff=$TARGET_AGE_DAYS
+    [[ "$name" == target || "$name" == .build || "$name" == .zig-cache || "$name" == zig-out ]] && cutoff=$TARGET_AGE_DAYS
     [[ "$dir" =~ $WORKTREE_PATH ]] && cutoff=$WORKTREE_AGE_DAYS
     (( $(newest_age_days "$dir") >= cutoff )) || continue
     queue "$name" "$dir"
@@ -177,25 +209,28 @@ for root in "${SCAN_ROOTS[@]}"; do
                  -o -name .next -o -name .turbo -o -name .expo -o -name Pods \
                  -o -name DerivedData -o -name .gradle -o -name .venv \
                  -o -name __pycache__ -o -name .parcel-cache -o -name .dart_tool \
-                 -o -name .cxx \
+                 -o -name .cxx -o -name .build -o -name .zig-cache \
+                 -o -name zig-out \
               \) -prune -print0 2>/dev/null
   )
 done
 
 ### 2. Xcode and iOS tooling
 
-queue "xcode-derived" "/Volumes/Kyan Drive/DerivedData"
-queue "xcode-modcache" "$HOME/Library/Developer/Xcode/ModuleCache.noindex"
-queue "simulator-cache" "$HOME/Library/Developer/CoreSimulator/Caches"
-queue "swiftpm-cache" "$HOME/Library/Caches/org.swift.swiftpm"
-queue "cocoapods-cache" "$HOME/Library/Caches/CocoaPods"
+if [[ "$OS" == Darwin ]]; then
+  queue "xcode-derived" "/Volumes/Kyan Drive/DerivedData"
+  queue "xcode-modcache" "$HOME/Library/Developer/Xcode/ModuleCache.noindex"
+  queue "simulator-cache" "$HOME/Library/Developer/CoreSimulator/Caches"
+  queue "swiftpm-cache" "$HOME/Library/Caches/org.swift.swiftpm"
+  queue "cocoapods-cache" "$HOME/Library/Caches/CocoaPods"
 
-# DeviceSupport is re-created the next time each device is plugged in, but that
-# costs a slow first connect, so it only goes in --deep. Newest two are kept.
-if (( DEEP )) && [[ -d "$HOME/Library/Developer/Xcode/iOS DeviceSupport" ]]; then
-  while IFS= read -r d; do
-    queue "ios-devicesupport" "$d"
-  done < <(/bin/ls -dt "$HOME/Library/Developer/Xcode/iOS DeviceSupport"/* 2>/dev/null | tail -n +3)
+  # DeviceSupport is re-created the next time each device is plugged in, but that
+  # costs a slow first connect, so it only goes in --deep. Newest two are kept.
+  if (( DEEP )) && [[ -d "$HOME/Library/Developer/Xcode/iOS DeviceSupport" ]]; then
+    while IFS= read -r d; do
+      queue "ios-devicesupport" "$d"
+    done < <(/bin/ls -dt "$HOME/Library/Developer/Xcode/iOS DeviceSupport"/* 2>/dev/null | tail -n +3)
+  fi
 fi
 
 ### 3. Nix VM scratch
@@ -205,37 +240,63 @@ fi
 # killed VM leaves 8 GB behind. Anything no running qemu still names is dead.
 for d in "${TMPDIR:-/tmp}"/nix-vm.*; do
   [[ -d "$d" ]] || continue
-  pgrep -qf "$(basename "$d")" && continue
+  pgrep -f "$(basename "$d")" >/dev/null 2>&1 && continue
   (( $(newest_age_days "$d") >= 1 )) || continue
   queue "nix-vm-scratch" "$d"
 done
 
 ### 4. Package manager caches
 
-run_cmd "homebrew" "$HOME/Library/Caches/Homebrew" brew cleanup -s --prune=all
+[[ "$OS" == Darwin ]] && run_cmd "homebrew" "$HOME/Library/Caches/Homebrew" brew cleanup -s --prune=all
 run_cmd "npm" "$HOME/.npm/_cacache" npm cache clean --force
 run_cmd "yarn" "$HOME/.yarn/berry/cache" yarn cache clean --all
 run_cmd "uv" "$HOME/.cache/uv" uv cache prune
 
 # `npm cache clean` leaves _npx alone, and it is by far the larger of the two.
 queue "npx-cache" "$HOME/.npm/_npx"
-queue "pnpm-store" "$HOME/Library/pnpm/store"
 queue "bun-cache" "$HOME/.bun/install/cache"
-run_cmd "go-build" "$HOME/Library/Caches/go-build" go clean -cache
+if [[ "$OS" == Darwin ]]; then
+  queue "pnpm-store" "$HOME/Library/pnpm/store"
+  run_cmd "go-build" "$HOME/Library/Caches/go-build" go clean -cache
+else
+  queue "pnpm-store" "${XDG_DATA_HOME:-$HOME/.local/share}/pnpm/store"
+  queue "bun-cache" "${XDG_CACHE_HOME:-$HOME/.cache}/bun/install/cache"
+  run_cmd "go-build" "${XDG_CACHE_HOME:-$HOME/.cache}/go-build" go clean -cache
+fi
 if (( DEEP )); then run_cmd "go-modcache" "$HOME/go/pkg/mod" go clean -modcache; fi
 
-queue "cargo-registry" "$HOME/.cargo/registry/cache"
-queue "cargo-src" "$HOME/.cargo/registry/src"
+# cargo-cache prunes the registry by itself when installed; otherwise the
+# documented dirs go, same as on the mac.
+if [[ "$OS" != Darwin ]] && command -v cargo-cache >/dev/null 2>&1; then
+  run_cmd "cargo-cache" "$HOME/.cargo/registry" cargo-cache --autoclean
+else
+  queue "cargo-registry" "$HOME/.cargo/registry/cache"
+  queue "cargo-src" "$HOME/.cargo/registry/src"
+fi
 queue "cargo-git" "$HOME/.cargo/git/checkouts"
-queue "electron-cache" "$HOME/Library/Caches/electron"
-queue "electron-builder" "$HOME/Library/Caches/electron-builder"
-queue "dotslash-cache" "$HOME/Library/Caches/dotslash"
+
+if [[ "$OS" == Darwin ]]; then
+  queue "electron-cache" "$HOME/Library/Caches/electron"
+  queue "electron-builder" "$HOME/Library/Caches/electron-builder"
+  queue "dotslash-cache" "$HOME/Library/Caches/dotslash"
+else
+  # The native-desktop CLI builds its host crates here; same regrowth as any
+  # cargo target/, so it follows the target cutoff.
+  nd_target="${XDG_CACHE_HOME:-$HOME/.cache}/nd-build/target"
+  if [[ -d "$nd_target" ]] && (( $(newest_age_days "$nd_target") >= TARGET_AGE_DAYS )); then
+    queue "nd-build-target" "$nd_target"
+  fi
+  queue "electron-cache" "${XDG_CACHE_HOME:-$HOME/.cache}/electron"
+  queue "electron-builder" "${XDG_CACHE_HOME:-$HOME/.cache}/electron-builder"
+fi
 
 ### 5. Nix
 
 # --delete-older-than, never -d: -d drops every rollback generation, and losing
 # the ability to boot the previous system is not worth a few GB.
-if command -v nix-collect-garbage >/dev/null 2>&1; then
+# NixOS hosts run nix.gc daily and keep three generations (nixos/mixins/nix.nix),
+# so this pass is mac-only.
+if [[ "$OS" == Darwin ]] && command -v nix-collect-garbage >/dev/null 2>&1; then
   nix_before=$(df -k /nix | tail -1 | awk '{print $3}')
   if (( APPLY )); then
     log "nix gc: user profiles older than $NIX_KEEP"
@@ -287,19 +348,30 @@ df -h / | tail -1 | awk '{printf "after:  %s used of %s, %s free\n", $3, $2, $4}
 
 echo
 echo "not touched, decide by hand:"
-for p in \
-  "$HOME/Library/Developer/CoreSimulator/Devices" \
-  "$HOME/Library/Android" \
-  "$HOME/.android/avd" \
-  "$HOME/Movies" \
-  "$HOME/Library/Messages" \
-  "$HOME/Library/Application Support/Spotify" \
-  "$HOME/Library/Application Support/Claude"
+if [[ "$OS" == Darwin ]]; then
+  review=(
+    "$HOME/Library/Developer/CoreSimulator/Devices"
+    "$HOME/Library/Android"
+    "$HOME/.android/avd"
+    "$HOME/Movies"
+    "$HOME/Library/Messages"
+    "$HOME/Library/Application Support/Spotify"
+    "$HOME/Library/Application Support/Claude"
+  )
+else
+  review=(
+    "$HOME/.local/share/Steam"
+    "$HOME/.local/share/flatpak"
+    "$HOME/.android/avd"
+    "$HOME/Videos"
+  )
+fi
+for p in "${review[@]}"
 do
   [[ -e "$p" ]] || continue
   printf '%10s  %s\n' "$(human "$(dir_kb "$p")")" "${p/#$HOME/~}"
 done
 
-if (( APPLY )); then
+if (( APPLY )) && [[ "$OS" == Darwin ]]; then
   /usr/bin/osascript -e "display notification \"Reclaimed $(human "$freed_kb")\" with title \"Storage cleanup\"" >/dev/null 2>&1 || true
 fi

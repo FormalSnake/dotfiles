@@ -16,7 +16,7 @@ in
   };
 
   # A symlinked DerivedData would turn into a dangling link the first time
-  # mac-storage-gc.sh deletes its target, so Xcode gets the path directly and
+  # storage-gc.sh deletes its target, so Xcode gets the path directly and
   # recreates the dir itself.
   targets.darwin.defaults."com.apple.dt.Xcode".IDECustomDerivedDataLocation =
     "${drive}/DerivedData";
