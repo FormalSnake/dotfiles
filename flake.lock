@@ -807,6 +807,26 @@
         "type": "github"
       }
     },
+    "meshtop": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791886413,
+        "narHash": "sha256-8uLA2zNYbuSiorxBM7xCUrMgiyfIxsFYcrKG+QYCp38=",
+        "owner": "FormalSnake",
+        "repo": "meshtop",
+        "rev": "f4dd287be47b1da0d244abb26a7a8f3db2dc7c1d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "FormalSnake",
+        "repo": "meshtop",
+        "type": "github"
+      }
+    },
     "messages": {
       "inputs": {
         "nixpkgs": [
@@ -1290,6 +1310,7 @@
         "kopuz": "kopuz",
         "lazyvim": "lazyvim",
         "mac-app-util": "mac-app-util",
+        "meshtop": "meshtop",
         "messages": "messages",
         "nix-darwin": "nix-darwin",
         "nix-flatpak": "nix-flatpak",

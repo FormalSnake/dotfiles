@@ -205,6 +205,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # meshtop, the live view of all three hosts, the links between them and
+    # their coding agents: package and home-manager module, wired in
+    # users/kyandesutter/mixins/meshtop.nix.
+    meshtop = {
+      url = "github:FormalSnake/meshtop";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Helium browser (Chromium fork): exposes overlays.default -> pkgs.helium.
     helium = {
       url = "github:schembriaiden/helium-browser-nix-flake";
