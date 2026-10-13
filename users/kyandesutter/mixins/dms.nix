@@ -440,7 +440,6 @@ in
 
     "matugen/templates/aura.tmpl".source = ../matugen-templates/aura.tmpl;
     "matugen/templates/ghostty.tmpl".source = ../matugen-templates/ghostty.tmpl;
-    "matugen/templates/neovim.lua.tmpl".source = ../matugen-templates/neovim.lua.tmpl;
     "matugen/templates/obsidian.css.tmpl".source = ../matugen-templates/obsidian.css.tmpl;
     "matugen/templates/dualsense.tmpl".source = ../matugen-templates/dualsense.tmpl;
     "matugen/templates/hypr-border.lua.tmpl".source = ../matugen-templates/hypr-border.lua.tmpl;
@@ -520,12 +519,6 @@ in
       input_path = "~/.config/matugen/templates/ghostty.tmpl"
       output_path = "~/.config/ghostty/themes/Matugen"
       post_hook = "pkill -SIGUSR2 ghostty || true"
-
-      # Neovim (base16 lua module consumed by dynamic-base16.nvim, watch =
-      # true); no hook needed, the plugin watches the file. See neovim.nix.
-      [templates.neovim]
-      input_path = "~/.config/matugen/templates/neovim.lua.tmpl"
-      output_path = "~/.config/nvim/lua/dank_base16.lua"
 
       # Obsidian (Verso theme). Rendered into the vault's snippet dir,
       # Obsidian watches ~/Notes/.obsidian/snippets and hot-reloads on write,

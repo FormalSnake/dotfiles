@@ -209,7 +209,7 @@ matugen on every wallpaper pick / light-dark flip: its built-in templates theme
 GTK (`~/.config/gtk-{3,4}.0/dank-colors.css`, imported via gtk.css) and Qt
 (`~/.config/qt{5,6}ct/colors/matugen.conf`), and it merges our user templates
 (`users/kyandesutter/matugen-templates/`, registered via the generated
-`~/.config/matugen/config.toml` in `mixins/dms.nix`: aura, ghostty, neovim,
+`~/.config/matugen/config.toml` in `mixins/dms.nix`: aura, ghostty,
 obsidian, hypr-border, btop, yazi) into the
 same matugen run, executing each template's post_hook. Hyprland's window borders
 are themed through the `hypr-border` template: it renders
@@ -220,10 +220,13 @@ later `hyprctl reload` keeps the wallpaper colours instead of snapping back to
 the static Flexoki `general.col`. DMS's `settings.json` is runtime-mutable
 (NOT home-manager-managed): `mixins/dms.nix` seeds it once if absent — idle
 blanking must stay disabled there (eDP-1 wake-modeset bug). **Flexoki is only a
-static fallback** for consumers that genuinely can't be dynamic: Neovim's
-pre-palette colourscheme, Hyprland's pre-palette border colours (the static
+static fallback** for consumers that genuinely can't be dynamic: Hyprland's
+pre-palette border colours (the static
 `general.col` in `mixins/hyprland.nix`), and CLI tools with no matugen
-template (bat, fzf, lazygit, fish). Per-wallpaper Flexoki *pinning* lives on as
+template (bat, fzf, lazygit, fish). Neovim has no template of its own: its
+`terminal` colourscheme (`users/kyandesutter/config/nvim/colors/`) paints with
+ANSI indices only (`termguicolors` off), so whichever Ghostty is outermost
+resolves them, matugen on the g815 even over SSH/herdr to the macbook. Per-wallpaper Flexoki *pinning* lives on as
 `flexoki-pin.service` (`mixins/dms.nix`): it watches DMS's session.json and
 pins/unpins the Flexoki custom theme while a flexoki-named wallpaper is active
 (same substring match as the old Noctalia `flexoki-scheme` hook). Under
