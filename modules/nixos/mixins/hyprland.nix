@@ -152,7 +152,7 @@ in
     compositor = lib.mkOption {
       type = lib.types.enum [ "hyprland" "mango" ];
       default = "hyprland";
-      description = "Which compositor SDDM preselects. Both sessions are always installed and configured (users/kyandesutter/mixins/{hyprland,mango}.nix), so the other one stays a Tab away in the greeter.";
+      description = "The default session (services.displayManager.defaultSession). SDDM itself preselects the last session used, so on an existing install pick it once with Tab in the greeter. Both sessions are always installed and configured (users/kyandesutter/mixins/{hyprland,mango}.nix).";
     };
   };
 
