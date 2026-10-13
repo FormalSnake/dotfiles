@@ -70,11 +70,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    lazyvim = {
-      url = "github:pfassina/lazyvim-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     herdr = {
       url = "github:herdrdev/herdr";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -158,6 +153,16 @@
     # source, no cachix substituter.
     formalshell = {
       url = "github:FormalSnake/FormalShell";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # mango (mangowm): the dwl/scenefx compositor next to Hyprland
+    # (kyan.desktop.compositor in modules/nixos/mixins/hyprland.nix). Upstream
+    # flake rather than nixpkgs' `mango`: nixpkgs sits on 0.17, and 0.18
+    # renamed every config key (windowrule -> window_rule, appid -> app_id).
+    # Its scenefx input follows our nixpkgs too, so both build from source.
+    mango = {
+      url = "github:mangowm/mango";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

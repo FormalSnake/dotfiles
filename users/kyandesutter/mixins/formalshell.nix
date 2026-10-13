@@ -16,6 +16,8 @@ let
   fsPkg = inputs.formalshell.packages.${pkgs.stdenv.hostPlatform.system}.default.override {
     inherit (pkgs) mpv;
   };
+
+  sessionDesktops = [ "|XDG_CURRENT_DESKTOP=Hyprland" "|XDG_CURRENT_DESKTOP=mango" ];
 in
 {
   # Imported unconditionally so programs.formalshell is declared on every
@@ -129,10 +131,11 @@ in
     # should survive a shell restart.
     systemd.user.services.formalshell.Service.KillMode = "process";
 
-    # The shell and its watchdog belong to the Hyprland session only;
-    # graphical-session.target is reached under GNOME too (mixins/gnome.nix).
-    systemd.user.services.formalshell.Unit.ConditionEnvironment = "XDG_CURRENT_DESKTOP=Hyprland";
-    systemd.user.timers.formalshell-watchdog.Unit.ConditionEnvironment = "XDG_CURRENT_DESKTOP=Hyprland";
+    # The shell and its watchdog belong to the Hyprland and mango sessions
+    # only; graphical-session.target is reached under GNOME too
+    # (mixins/gnome.nix). `|` makes the two an OR.
+    systemd.user.services.formalshell.Unit.ConditionEnvironment = sessionDesktops;
+    systemd.user.timers.formalshell-watchdog.Unit.ConditionEnvironment = sessionDesktops;
 
     # session.slice, next to the compositor: systemd-oomd pressure-kills in
     # app.slice (modules/nixos/mixins/oomd.nix). Apps launched from the menu

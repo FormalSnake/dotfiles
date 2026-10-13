@@ -144,9 +144,9 @@ in
   systemd.user.services.wl-clip-persist = {
     Unit = {
       Description = "wl-clip-persist (keep regular clipboard alive)";
-      # Hyprland only: graphical-session.target is reached in the GNOME
-      # session too (mixins/gnome.nix).
-      ConditionEnvironment = "XDG_CURRENT_DESKTOP=Hyprland";
+      # Hyprland and mango only: graphical-session.target is reached in the
+      # GNOME session too (mixins/gnome.nix). `|` makes the two an OR.
+      ConditionEnvironment = [ "|XDG_CURRENT_DESKTOP=Hyprland" "|XDG_CURRENT_DESKTOP=mango" ];
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
       "X-SwitchMethod" = "keep-old";
