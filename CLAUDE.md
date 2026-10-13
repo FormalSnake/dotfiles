@@ -332,3 +332,8 @@ leave the volume alone if it does not.
 
 Prefer `fd` (find), `rg` (grep). For broad code analysis, delegate to the
 code-searcher subagent. Never proactively create docs/*.md unless asked.
+
+On the macbook, direnv's `use flake`/`use nix` drop the darwin stdenv's nix
+SDK, clang, cctools and xcrun and put rustup ahead of a nix rustc
+(`users/kyandesutter/mixins/direnv-apple-toolchain.nix`); a project that needs
+the nix toolchain puts `export DIRENV_NIX_TOOLCHAIN=1` above `use flake`.
