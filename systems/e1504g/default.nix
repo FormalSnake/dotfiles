@@ -57,6 +57,7 @@
   # online-accounts` sign-in, emoji picker, shell screenshots). SDDM stays
   # the greeter either way.
   kyan.desktop.shell = "formalshell";
+  kyan.desktop.compositor = "mango";
 
   # Syncthing mesh: wallpapers + Helium profile, macbook as hub
   # (modules/nixos/mixins/syncthing.nix; spec 2026-07-22).

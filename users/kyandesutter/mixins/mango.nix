@@ -382,6 +382,9 @@ lib.mkIf useFormalshell {
 
     # Window rules. Workspaces from mixins/wm-workspaces.nix, opened with focus.
     ${lib.concatMapStringsSep "\n" appRule workspaces.apps}
+    # The quake console floats from its first frame, so the layout never
+    # reflows under it before the shell places and parks it.
+    window_rule=is_floating:1,app_id:^dev\.formalshell\.console$
     # Beeper (Electron) maps its main window floating; tile it.
     window_rule=is_floating:0,app_id:^([Bb]eeper)$
     # Minecraft's X11 grab drifts out of the window without a hard confine.
