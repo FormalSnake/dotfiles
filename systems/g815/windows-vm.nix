@@ -1,4 +1,9 @@
-{ pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 let
   # The bare-metal Windows 11 install, booted as a KVM guest without ever
   # writing to it. QEMU opens the whole NVMe disk read-only as the backing file
@@ -18,6 +23,116 @@ let
   # Root free space the overlay may never take. The launcher wants 5G on top
   # of this to start at all.
   minFreeGiB = 10;
+
+  igd = config.kyan.windowsVm.igdPassthrough.enable;
+  igdAddr = "0000:00:02.0";
+
+  # Upstream OVMF never installs the IGD OpRegion, and Windows' Intel driver
+  # will not start without the VBT in it. IgdAssignmentDxe, loaded as the
+  # device's option ROM, copies QEMU's etc/igd-opregion fw_cfg file into guest
+  # memory and points ASLS at it. Arrow Lake (0x7D67) reaches stolen memory
+  # through its LMEMBAR, so there is no BDSM to set up, and no GOP driver is
+  # needed: the guest firmware keeps drawing on the emulated VGA.
+  igdRom = pkgs.edk2.mkDerivation "VfioIgdPkg/VfioIgdPkg.dsc" {
+    pname = "vfio-igd-rom";
+    version = "0-unstable-2026-05-27";
+    nativeBuildInputs = [ pkgs.nasm ];
+    vfioIgdPkg = pkgs.fetchFromGitHub {
+      owner = "tomitamoeko";
+      repo = "VfioIgdPkg";
+      rev = "067328df2554c865cc0078cb922357301c4c36c6";
+      hash = "sha256-/Eifaa6NFpxFvM4ELbeJqwXWLYQEAHKG7SrxiWom23M=";
+    };
+    postPatch = ''
+      cp -r "$vfioIgdPkg" VfioIgdPkg
+      chmod -R u+w VfioIgdPkg
+    '';
+    installPhase = ''
+      mkdir -p $out
+      EfiRom -f 0x8086 -i 0x7d67 -e Build/VfioIgdPkg/RELEASE_GCC/X64/IgdAssignmentDxe.efi -o $out/igd.rom
+    '';
+  };
+
+  # With the iGPU's outputs wired to nothing (the MUX gives the panel to the
+  # NVIDIA card), Windows has no monitor on it to compose for. The owner's
+  # install already carries Parsec's IddCx virtual display adapter, which
+  # plugs a monitor per ADD ioctl and drops it again unless pinged every
+  # 100 ms, so this holds one plugged for as long as it runs. Protocol from
+  # nomi-san/parsec-vdd core/parsec-vdd.h. Buffers live in unmanaged memory
+  # because the driver completes the ioctls asynchronously.
+  vddScript = pkgs.writeText "nd-vdd.ps1" ''
+    Add-Type -Language CSharp -TypeDefinition @'
+    using System;
+    using System.Runtime.InteropServices;
+    using System.Threading;
+    using Microsoft.Win32.SafeHandles;
+
+    public static class NdVdd {
+      [StructLayout(LayoutKind.Sequential)]
+      struct IfaceData { public int cbSize; public Guid Class; public int Flags; public IntPtr Reserved; }
+
+      [DllImport("setupapi.dll", SetLastError = true)]
+      static extern IntPtr SetupDiGetClassDevsW(ref Guid g, IntPtr e, IntPtr h, int flags);
+      [DllImport("setupapi.dll", SetLastError = true)]
+      static extern bool SetupDiEnumDeviceInterfaces(IntPtr set, IntPtr dev, ref Guid g, int i, ref IfaceData d);
+      [DllImport("setupapi.dll", SetLastError = true)]
+      static extern bool SetupDiGetDeviceInterfaceDetailW(IntPtr set, ref IfaceData d, IntPtr detail, int size, out int req, IntPtr dev);
+      [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+      static extern SafeFileHandle CreateFileW(string p, uint access, uint share, IntPtr sa, uint disp, uint flags, IntPtr t);
+      [DllImport("kernel32.dll", SetLastError = true)]
+      static extern IntPtr CreateEventW(IntPtr sa, bool manual, bool initial, IntPtr name);
+      [DllImport("kernel32.dll", SetLastError = true)]
+      static extern bool DeviceIoControl(SafeFileHandle h, uint code, IntPtr inb, int ins, IntPtr outb, int outs, IntPtr ret, IntPtr ov);
+      [DllImport("kernel32.dll", SetLastError = true)]
+      static extern bool GetOverlappedResultEx(SafeFileHandle h, IntPtr ov, out int n, int ms, bool alertable);
+
+      static readonly IntPtr inb = Marshal.AllocHGlobal(32);
+      static readonly IntPtr outb = Marshal.AllocHGlobal(4);
+      static readonly IntPtr ov = Marshal.AllocHGlobal(32);
+      static readonly IntPtr ev = CreateEventW(IntPtr.Zero, true, false, IntPtr.Zero);
+
+      static int Ioctl(SafeFileHandle h, uint code) {
+        for (int i = 0; i < 32; i++) { Marshal.WriteByte(inb, i, 0); Marshal.WriteByte(ov, i, 0); }
+        Marshal.WriteInt32(outb, 0);
+        Marshal.WriteIntPtr(ov, 24, ev); // OVERLAPPED.hEvent on x64
+        DeviceIoControl(h, code, inb, 32, outb, 4, IntPtr.Zero, ov);
+        int n;
+        if (!GetOverlappedResultEx(h, ov, out n, 5000, false)) {
+          // The ioctl may still own the buffers; exit rather than reuse them.
+          Console.Error.WriteLine("ioctl " + code.ToString("x") + " failed: " + Marshal.GetLastWin32Error());
+          Environment.Exit(1);
+        }
+        return Marshal.ReadInt32(outb);
+      }
+
+      static SafeFileHandle Open() {
+        Guid g = new Guid("00b41627-04c4-429e-a26e-0265cf50c8fa");
+        IntPtr set = SetupDiGetClassDevsW(ref g, IntPtr.Zero, IntPtr.Zero, 0x12); // PRESENT | DEVICEINTERFACE
+        IfaceData d = new IfaceData();
+        d.cbSize = Marshal.SizeOf(typeof(IfaceData));
+        for (int i = 0; SetupDiEnumDeviceInterfaces(set, IntPtr.Zero, ref g, i, ref d); i++) {
+          int req;
+          SetupDiGetDeviceInterfaceDetailW(set, ref d, IntPtr.Zero, 0, out req, IntPtr.Zero);
+          IntPtr detail = Marshal.AllocHGlobal(req);
+          Marshal.WriteInt32(detail, 8); // cbSize of SP_DEVICE_INTERFACE_DETAIL_DATA_W on x64
+          if (SetupDiGetDeviceInterfaceDetailW(set, ref d, detail, req, out req, IntPtr.Zero)) {
+            string path = Marshal.PtrToStringUni(new IntPtr(detail.ToInt64() + 4));
+            SafeFileHandle h = CreateFileW(path, 0xC0000000, 3, IntPtr.Zero, 3, 0xE0000080, IntPtr.Zero);
+            if (!h.IsInvalid) return h;
+          }
+        }
+        throw new Exception("Parsec Virtual Display Adapter not found");
+      }
+
+      public static void Run() {
+        SafeFileHandle h = Open();
+        Console.WriteLine("display " + Ioctl(h, 0x0022e004) + " added");
+        for (;;) { Ioctl(h, 0x0022a00c); Thread.Sleep(50); }
+      }
+    }
+    '@
+    [NdVdd]::Run()
+  '';
 
   launcher = pkgs.writeShellApplication {
     name = "windows-vm-run";
@@ -92,6 +207,13 @@ let
       for _ in $(seq 50); do [ -S "$state/swtpm.sock" ] && break; sleep 0.1; done
 
       serial=$(cat /sys/block/"$(basename "$disk")"/device/serial)
+      ${lib.optionalString igd ''
+        drv=$(basename "$(readlink /sys/bus/pci/devices/${igdAddr}/driver 2>/dev/null)" 2>/dev/null || true)
+        if [ "$drv" != vfio-pci ]; then
+          echo "${igdAddr} is bound to ''${drv:-nothing}, not vfio-pci; reboot into a generation with igdPassthrough on" >&2
+          exit 1
+        fi
+      ''}
 
       # shellcheck disable=SC2054  # QEMU flags carry their own commas
       args=(
@@ -113,6 +235,12 @@ let
         -tpmdev emulator,id=tpm0,chardev=tpm
         -device tpm-tis,tpmdev=tpm0
 
+        ${lib.optionalString igd ''
+          # Before the disks: IgdAssignmentDxe only claims a device at guest
+          # 00:02.0, the first slot QEMU would otherwise hand out. The VGA
+          # stays on 00:01.0 so firmware and boot still show up on VNC.
+          -device vfio-pci,host=${igdAddr},addr=0x2,x-igd-opregion=on,romfile=${igdRom}/igd.rom
+        ''}
         -drive id=esp,if=none,format=raw,file="$state/esp.img"
         -device ide-hd,bus=ide.0,drive=esp,bootindex=0
         # Read-only is the backing node's own flag, not just qcow2's default.
@@ -231,62 +359,98 @@ let
         if logged_in; then ok=1; break; fi
       done
       if [ "$ok" = 0 ]; then echo "ndvm never logged in" >&2; exit 1; fi
+      ${lib.optionalString igd ''
+        # SYSTEM, so the display outlives ssh sessions and ndvm logoffs; the
+        # task lives in the overlay like everything else here.
+        scp -q -P 2222 -o BatchMode=yes -o ConnectTimeout=5 -o LogLevel=ERROR \
+          -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+          ${vddScript} kyan@127.0.0.1:C:/nd/vdd.ps1
+        guest "Register-ScheduledTask nd-vdd -Force \
+            -Action (New-ScheduledTaskAction -Execute powershell.exe -Argument '-NoProfile -ExecutionPolicy Bypass -File C:\\nd\\vdd.ps1') \
+            -Trigger (New-ScheduledTaskTrigger -AtStartup) \
+            -Principal (New-ScheduledTaskPrincipal -UserId SYSTEM -LogonType ServiceAccount -RunLevel Highest) \
+            -Settings (New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -ExecutionTimeLimit 0 -RestartCount 99 -RestartInterval (New-TimeSpan -Minutes 1)) | Out-Null; \
+          Start-ScheduledTask nd-vdd"
+      ''}
       guest "if (Test-Path C:\\pagefile.sys) { 'pagefile still present' } else { 'pagefile off' }"
     '';
   };
 in
 {
-  environment.systemPackages = [ prep ];
+  # The Arrow Lake iGPU goes to the guest whole. It drives no output while the
+  # MUX gives both displays to the NVIDIA card (gpu-mux-dgpu in ./default.nix),
+  # so the host loses nothing but a render node that apps fall back from to
+  # the NVIDIA one. In hybrid (Optimus) mode the internal panel hangs off the
+  # iGPU and would stay dark: set this to false before switching the MUX.
+  options.kyan.windowsVm.igdPassthrough.enable =
+    lib.mkEnableOption "binding the iGPU to vfio-pci at boot and handing it to the Windows guest";
 
-  systemd.services.windows-vm-prep = {
-    description = "Prepare a fresh Windows guest overlay";
-    after = [ "windows-vm.service" ];
-    bindsTo = [ "windows-vm.service" ];
-    wantedBy = [ "windows-vm.service" ];
-    # The guest trusts the user's key, which only the gcr agent holds unlocked.
-    environment.SSH_AUTH_SOCK = "/run/user/1000/gcr/ssh";
-    serviceConfig = {
-      Type = "oneshot";
-      User = "kyandesutter";
-      ExecStart = lib.getExe prep;
-    };
-  };
-
-  # sudo systemctl start windows-vm, then `ssh -p 2222 kyan@127.0.0.1` here
-  # (from the macbook, ProxyCommand through g815); VNC on 127.0.0.1:5901.
-  systemd.services.windows-vm = {
-    description = "Bare-metal Windows 11 as a KVM guest over a throwaway overlay";
-    # A switch must never kill a guest someone is working in; a changed unit
-    # applies on the next start.
-    restartIfChanged = false;
-    # Stopped, never masked: they come back when the guest exits. Not a
-    # Conflicts=: a switch restarts sysinit-reactivation.target, which starts
-    # the mounts, which would stop the guest. The run flag makes those starts
-    # skip instead (see the mount drop-in below).
-    after = windowsMounts;
-    serviceConfig = {
-      ExecStartPre = [
-        "${pkgs.coreutils}/bin/touch ${runFlag}"
-        "${pkgs.systemd}/bin/systemctl stop ${lib.concatStringsSep " " windowsMounts}"
+  config = lib.mkMerge [
+    (lib.mkIf igd {
+      # Claimed in the initrd, before i915 can bind. vfio-pci.ids matches by
+      # vendor:device, and 8086:7d67 is this one device.
+      boot.initrd.kernelModules = [
+        "vfio_pci"
+        "vfio"
+        "vfio_iommu_type1"
       ];
-      ExecStart = lib.getExe launcher;
-      ExecStopPost = [
-        "${pkgs.coreutils}/bin/rm -f ${runFlag}"
-        "-${pkgs.systemd}/bin/systemctl start --no-block ${lib.concatStringsSep " " windowsMounts}"
-      ];
-      KillSignal = "SIGINT";
-      # SIGINT is QEMU's quit, but the space guard is a background subshell,
-      # which ignores it; mixed sends it to QEMU alone and SIGKILLs the rest.
-      KillMode = "mixed";
-      TimeoutStopSec = 30;
-    };
-  };
+      boot.kernelParams = [ "vfio-pci.ids=8086:7d67" ];
+      hardware.intelgpu.loadInInitrd = false;
+    })
+    {
+      environment.systemPackages = [ prep ];
 
-  systemd.units = lib.genAttrs windowsMounts (_: {
-    overrideStrategy = "asDropin";
-    text = ''
-      [Unit]
-      ConditionPathExists=!${runFlag}
-    '';
-  });
+      systemd.services.windows-vm-prep = {
+        description = "Prepare a fresh Windows guest overlay";
+        after = [ "windows-vm.service" ];
+        bindsTo = [ "windows-vm.service" ];
+        wantedBy = [ "windows-vm.service" ];
+        # The guest trusts the user's key, which only the gcr agent holds unlocked.
+        environment.SSH_AUTH_SOCK = "/run/user/1000/gcr/ssh";
+        serviceConfig = {
+          Type = "oneshot";
+          User = "kyandesutter";
+          ExecStart = lib.getExe prep;
+        };
+      };
+
+      # sudo systemctl start windows-vm, then `ssh -p 2222 kyan@127.0.0.1` here
+      # (from the macbook, ProxyCommand through g815); VNC on 127.0.0.1:5901.
+      systemd.services.windows-vm = {
+        description = "Bare-metal Windows 11 as a KVM guest over a throwaway overlay";
+        # A switch must never kill a guest someone is working in; a changed unit
+        # applies on the next start.
+        restartIfChanged = false;
+        # Stopped, never masked: they come back when the guest exits. Not a
+        # Conflicts=: a switch restarts sysinit-reactivation.target, which starts
+        # the mounts, which would stop the guest. The run flag makes those starts
+        # skip instead (see the mount drop-in below).
+        after = windowsMounts;
+        serviceConfig = {
+          ExecStartPre = [
+            "${pkgs.coreutils}/bin/touch ${runFlag}"
+            "${pkgs.systemd}/bin/systemctl stop ${lib.concatStringsSep " " windowsMounts}"
+          ];
+          ExecStart = lib.getExe launcher;
+          ExecStopPost = [
+            "${pkgs.coreutils}/bin/rm -f ${runFlag}"
+            "-${pkgs.systemd}/bin/systemctl start --no-block ${lib.concatStringsSep " " windowsMounts}"
+          ];
+          KillSignal = "SIGINT";
+          # SIGINT is QEMU's quit, but the space guard is a background subshell,
+          # which ignores it; mixed sends it to QEMU alone and SIGKILLs the rest.
+          KillMode = "mixed";
+          TimeoutStopSec = 30;
+        };
+      };
+
+      systemd.units = lib.genAttrs windowsMounts (_: {
+        overrideStrategy = "asDropin";
+        text = ''
+          [Unit]
+          ConditionPathExists=!${runFlag}
+        '';
+      });
+    }
+  ];
 }

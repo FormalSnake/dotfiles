@@ -266,6 +266,10 @@ removed on 2026-08-24 (git has them). What remains:
   5070; the iGPU is idle and not named in
   `AQ_DRM_DEVICES` (`~/.config/uwsm/env-hyprland`,
   `users/kyandesutter/mixins/hyprland.nix`).
+- The iGPU (00:02.0) is bound to vfio-pci at boot and passed to the Windows
+  VM (`kyan.windowsVm.igdPassthrough.enable`, `systems/g815/windows-vm.nix`).
+  Before ever switching the MUX to hybrid, set that option to false and
+  rebuild with `boot`: in hybrid mode the internal panel hangs off the iGPU.
 - `modules/nixos/mixins/nvidia.nix`: open driver, `powerManagement.enable`
   (nvidia-suspend/resume services + VRAM preservation), PowerMizer max, VA-API
   on nvidia. PRIME and the per-app GPU wrappers are gone.

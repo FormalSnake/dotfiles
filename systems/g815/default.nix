@@ -207,6 +207,10 @@
   # leaves this off.
   kyan.nvidia.enable = true;
 
+  # The idle iGPU belongs to the Windows guest (./windows-vm.nix). Turn this
+  # off before ever switching the MUX to hybrid, where the panel needs it.
+  kyan.windowsVm.igdPassthrough.enable = true;
+
   # Modrinth App. The instance directory is the Windows one, symlinked by
   # link-minecraft-to-windows (./windows-dualboot.nix), so both OSes launch the
   # same mods, config and worlds instead of two copies that drift.
