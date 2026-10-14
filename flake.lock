@@ -541,11 +541,11 @@
         "yt-dlp": "yt-dlp"
       },
       "locked": {
-        "lastModified": 1791879408,
-        "narHash": "sha256-yll/NCj7oa+6pqbwP30yAxJi8dz9OGzHoOKvyXn6O+M=",
+        "lastModified": 1791978815,
+        "narHash": "sha256-saCs+9zG6BMqmmwsXWZFKxMvM1PZvWNr/rW9wJsMNZs=",
         "owner": "FormalSnake",
         "repo": "formalmusic",
-        "rev": "ac920ae1498b9d99d8fcbfb68c7996adfe5efe88",
+        "rev": "533b7e6cdbb2dfd3ed41d761ddbc43f58072e787",
         "type": "github"
       },
       "original": {
