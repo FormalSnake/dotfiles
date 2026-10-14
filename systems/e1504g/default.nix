@@ -58,8 +58,10 @@
   # the greeter either way.
   kyan.desktop.shell = "formalshell";
 
-  # iPhone notifications and now-playing over BLE (ancs4linux), as on g815.
+  # iPhone notifications and now-playing over BLE (ancs4linux) and the
+  # AirPlay receiver for screen mirroring, as on g815.
   services.formalshell.iphone.enable = true;
+  services.formalshell.airplay.enable = true;
   users.users.kyandesutter.extraGroups = [ "ancs4linux" ];
 
   # Syncthing mesh: wallpapers + Helium profile, macbook as hub
