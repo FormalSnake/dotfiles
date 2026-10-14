@@ -286,6 +286,11 @@ else
   if [[ -d "$nd_target" ]] && (( $(newest_age_days "$nd_target") >= TARGET_AGE_DAYS )); then
     queue "nd-build-target" "$nd_target"
   fi
+  # The CEF runtime nativedesktop downloads on first launch, 1.5 GB per copy.
+  nd_cef="${XDG_CACHE_HOME:-$HOME/.cache}/nativedesktop/cef"
+  if [[ -d "$nd_cef" ]] && (( $(newest_age_days "$nd_cef") >= AGE_DAYS )); then
+    queue "nativedesktop-cef" "$nd_cef"
+  fi
   queue "electron-cache" "${XDG_CACHE_HOME:-$HOME/.cache}/electron"
   queue "electron-builder" "${XDG_CACHE_HOME:-$HOME/.cache}/electron-builder"
 fi
