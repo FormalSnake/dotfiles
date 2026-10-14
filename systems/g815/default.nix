@@ -10,6 +10,9 @@
     # The same Windows install as a KVM guest over a throwaway overlay.
     ./windows-vm.nix
 
+    # Temporary autologin for the passthrough reboot cycle.
+    ./temp-autologin.nix
+
     # nixos-hardware: no profile exists for the G815 chassis, so compose generics.
     inputs.nixos-hardware.nixosModules.common-cpu-intel
     inputs.nixos-hardware.nixosModules.common-pc-laptop
@@ -210,6 +213,9 @@
   # The idle iGPU belongs to the Windows guest (./windows-vm.nix). Turn this
   # off before ever switching the MUX to hybrid, where the panel needs it.
   kyan.windowsVm.igdPassthrough.enable = true;
+
+  # Temporary: turn off after the passthrough reboot cycle.
+  kyan.tempAutologin.enable = true;
 
   # Modrinth App. The instance directory is the Windows one, symlinked by
   # link-minecraft-to-windows (./windows-dualboot.nix), so both OSes launch the
