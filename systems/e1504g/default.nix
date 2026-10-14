@@ -58,6 +58,10 @@
   # the greeter either way.
   kyan.desktop.shell = "formalshell";
 
+  # iPhone notifications and now-playing over BLE (ancs4linux), as on g815.
+  services.formalshell.iphone.enable = true;
+  users.users.kyandesutter.extraGroups = [ "ancs4linux" ];
+
   # Syncthing mesh: wallpapers + Helium profile, macbook as hub
   # (modules/nixos/mixins/syncthing.nix; spec 2026-07-22).
   kyan.syncthing.enable = true;
