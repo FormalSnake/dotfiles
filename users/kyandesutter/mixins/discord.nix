@@ -164,6 +164,17 @@ let
     ];
   };
 
+  # nixpkgs lags Discord's own releases, and the Linux client refuses to start
+  # once its host is older than the one the API asks for. Drop this once
+  # `pkgs.discord.version` catches up.
+  discordSrc = {
+    version = "1.0.162";
+    src = pkgs.fetchurl {
+      url = "https://stable.dl2.discordapp.net/apps/linux/1.0.162/discord-1.0.162.tar.gz";
+      hash = "sha256-20WViZaF11WjLtn5vFVuJIwT1A7/etn4r923MsUrIps=";
+    };
+  };
+
   moonlightConfigTemplate =
     (pkgs.formats.json { }).generate "moonlight-stable.json"
       moonlightConfig;
@@ -190,7 +201,7 @@ in
   #
   # Discord is unfree; allowUnfree is global in modules/shared/mixins/nix.nix.
   home.packages = [
-    (pkgs.discord.override (
+    ((pkgs.discord.override (
       {
         withMoonlight = true;
         moonlight = moonlightNightly;
@@ -198,7 +209,7 @@ in
       // lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
         commandLineArgs = "--disable-features=WebRtcAllowInputVolumeAdjustment";
       }
-    ))
+    )).overrideAttrs (lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux discordSrc))
   ];
 
   # Not a home.file: the Last.fm API key is agenix-encrypted, and a home.file
