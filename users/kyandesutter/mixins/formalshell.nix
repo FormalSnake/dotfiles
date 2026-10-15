@@ -1,21 +1,13 @@
-{ config, lib, pkgs, inputs, osConfig ? { }, ... }:
+{ config, lib, pkgs, inputs, osConfig, ... }:
 let
   # Shell selector from the host (kyan.desktop.shell in
-  # modules/nixos/mixins/hyprland.nix, default "dms").
-  useFormalshell = (((osConfig.kyan or { }).desktop or { }).shell or "dms") == "formalshell";
+  # modules/nixos/mixins/hyprland.nix, default "formalshell").
+  useFormalshell = osConfig.kyan.desktop.shell == "formalshell";
 
   # The shell's iPhone, AirPlay and LocalSend features follow the host's
   # services.formalshell.<name>.enable (the system side: daemons, avahi,
   # firewall), so turning one on per host is one line in systems/<host>.
-  fsSystem = name: (((osConfig.services or { }).formalshell or { }).${name} or { }).enable or false;
-
-  # FormalShell's flake builds its own pkgs, so the curl-cffi overlay in
-  # modules/shared/mixins/nix.nix does not reach the mpv it wraps and the
-  # broken yt-dlp test suite fails the whole shell. Feed it ours instead.
-  # Drop this override together with that overlay.
-  fsPkg = inputs.formalshell.packages.${pkgs.stdenv.hostPlatform.system}.default.override {
-    inherit (pkgs) mpv;
-  };
+  fsSystem = name: osConfig.services.formalshell.${name}.enable;
 in
 {
   # Imported unconditionally so programs.formalshell is declared on every
@@ -35,7 +27,6 @@ in
 
     programs.formalshell = {
       enable = true;
-      package = fsPkg;
       settings = {
         # Syncthing-synced wallpaper folder (modules/nixos/mixins/syncthing.nix)
         # for the picker's wallpaper mode.

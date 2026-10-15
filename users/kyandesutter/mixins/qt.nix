@@ -1,6 +1,6 @@
-{ config, osConfig ? { }, ... }:
+{ config, osConfig, ... }:
 let
-  useFormalshell = (((osConfig.kyan or { }).desktop or { }).shell or "dms") == "formalshell";
+  useFormalshell = osConfig.kyan.desktop.shell == "formalshell";
   # Under FormalShell the widgets come from Kvantum, whose theme carries the
   # palette itself (mixins/elementary); a qtct palette on top would fight it.
   appearance =

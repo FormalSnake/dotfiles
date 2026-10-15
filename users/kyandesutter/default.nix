@@ -33,7 +33,6 @@
 
   home = {
     username = "kyandesutter";
-    homeDirectory = if pkgs.stdenv.hostPlatform.isDarwin then "/Users/kyandesutter" else "/home/kyandesutter";
     stateVersion = "26.05";
     # nixpkgs tracks unstable; home-manager master still reports 26.05.
     # The mismatch is transient: silence until HM master bumps to 26.11.

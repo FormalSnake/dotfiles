@@ -405,14 +405,9 @@
       # hold ~1.06 GB resident between them (measured on this host: the Discord client
       # 563 MB, beeper 385 MB, plus messages), which is most of what drives
       # this machine into swap while it does nothing but terminals and a browser.
-      # Drop them from the login set. The units themselves stay, so
-      # `systemctl --user start beeper` still works when they're actually wanted
-      # (the g815 with 32 GB keeps launching all three automatically).
-      systemd.user.services = {
-        discord.Install.WantedBy = lib.mkForce [ ];
-        beeper.Install.WantedBy = lib.mkForce [ ];
-        messages.Install.WantedBy = lib.mkForce [ ];
-      };
+      # Drop them from the login set (the g815 with 32 GB keeps launching all
+      # three automatically).
+      kyan.autostart.chatClients.enable = false;
 
       # Lock after 15 minutes idle (lid close still suspends via logind's
       # default HandleLidSwitch). This machine runs unattended test jobs for

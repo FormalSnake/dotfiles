@@ -1,6 +1,6 @@
-{ config, lib, pkgs, osConfig ? { }, ... }:
+{ config, lib, pkgs, osConfig, ... }:
 let
-  enabled = ((((osConfig.kyan or { }).desktop or { }).gnome or { }).enable or false);
+  enabled = osConfig.kyan.desktop.gnome.enable;
   systemctl = "${pkgs.systemd}/bin/systemctl";
 in
 lib.mkIf enabled {

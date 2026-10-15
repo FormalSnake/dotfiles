@@ -145,7 +145,7 @@ in
     enable = lib.mkEnableOption "Hyprland desktop (system side)";
     shell = lib.mkOption {
       type = lib.types.enum [ "dms" "formalshell" ];
-      default = "dms";
+      default = "formalshell";
       description = "Which desktop shell owns the session (bar, notification daemon). Gates the shell-facing binds and user services in users/kyandesutter/mixins/{hyprland,formalshell}.nix. The lock screen and lock-before-sleep are FormalShell's only.";
     };
   };

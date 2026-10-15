@@ -1,6 +1,6 @@
-{ config, lib, pkgs, osConfig ? { }, ... }:
+{ config, lib, pkgs, osConfig, ... }:
 let
-  useFormalshell = (((osConfig.kyan or { }).desktop or { }).shell or "dms") == "formalshell";
+  useFormalshell = osConfig.kyan.desktop.shell == "formalshell";
 
   theme = pkgs.callPackage ./gtk-theme.nix { };
   kvantum = pkgs.callPackage ./kvantum-theme.nix { };

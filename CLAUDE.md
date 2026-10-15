@@ -144,9 +144,9 @@ itself rather than using the HM module. The tiling layout is Hyprland's built-in
 
 Which shell owns the session is `kyan.desktop.shell` (enum `dms` |
 `formalshell`, defined in `modules/nixos/mixins/hyprland.nix`). Both Linux hosts run
-`formalshell` now: the e1504g as the trial, the g815 promoted 2026-08-10. DMS
-stays installed but dormant on both, so rollback is deleting the host's one
-line. The theming section below still describes the DMS path.
+`formalshell`, the default since 2026-10-15 (the e1504g trialled it, the g815
+followed 2026-08-10). DMS stays installed but dormant on both, so rollback is
+flipping the host's `kyan.desktop.shell` line to `"dms"`. The theming section below still describes the DMS path.
 
 The g815 is the e1504g's only listed build host (since 2026-09-18): the
 macbook's rosetta builder was dropped from `/etc/nix/machines` because nix

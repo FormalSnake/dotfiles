@@ -1,4 +1,4 @@
-{ config, lib, pkgs, osConfig ? { }, ... }:
+{ config, lib, pkgs, osConfig, ... }:
 let
   flexoki = import ./flexoki/palette.nix;
   inherit (flexoki) accents base;
@@ -6,7 +6,7 @@ let
 
   # Same shell selector as mixins/hyprland.nix, so the launcher button opens
   # whichever shell owns the session rather than a second one.
-  useFormalshell = (((osConfig.kyan or { }).desktop or { }).shell or "dms") == "formalshell";
+  useFormalshell = osConfig.kyan.desktop.shell == "formalshell";
   launcher =
     if useFormalshell then
       "${config.programs.formalshell.package}/bin/formalshell ipc --any-display call menu toggle"

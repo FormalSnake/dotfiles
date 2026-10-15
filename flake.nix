@@ -6,8 +6,6 @@
     inputs.flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [
         "aarch64-darwin"
-        "x86_64-darwin"
-        "aarch64-linux"
         "x86_64-linux"
       ];
 
@@ -111,7 +109,10 @@
 
     # NixOS (g815 gaming laptop) inputs
 
-    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+    nixos-hardware = {
+      url = "github:NixOS/nixos-hardware/master";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # NordVPN: laptop VPN exit only (the device mesh is Tailscale). No
     # first-party nixpkgs module exists; this community flake provides the
@@ -129,7 +130,12 @@
     };
 
     # CachyOS kernel + scx schedulers. nyxpkgs-unstable tracks nixpkgs-unstable.
-    chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
+    # Keeps its own nixpkgs: the CachyOS kernel comes from chaotic's cache,
+    # keyed to that pin.
+    chaotic = {
+      url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
+      inputs.home-manager.follows = "home-manager";
+    };
 
     # Declarative Flatpak management (used for Sober, the Roblox client, which
     # is only distributed as a Flatpak, not packaged in nixpkgs). No
@@ -154,6 +160,7 @@
     formalshell = {
       url = "github:FormalSnake/FormalShell";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
     };
 
     # qylock: SDDM greeter themes plus a Quickshell lock screen that renders the
@@ -212,6 +219,7 @@
     helium = {
       url = "github:schembriaiden/helium-browser-nix-flake";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs-darwin.follows = "nixpkgs";
     };
   };
 }

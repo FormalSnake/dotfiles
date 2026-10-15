@@ -29,29 +29,42 @@ let
       primary = if n >= 2 then lib.elemAt labels (n - 2) else lib.head labels;
     in lib.toUpper (lib.substring 0 1 primary) + lib.substring 1 (builtins.stringLength primary) primary;
 
-  normalizeSite = raw:
-    let
-      s = if builtins.isString raw then { url = raw; } else raw;
-      name = s.name or (deriveName s.url);
-      id = s.id or (lib.toLower (builtins.replaceStrings [ " " ] [ "-" ] name));
-    in {
-      inherit (s) url;
-      inherit name id;
-      width = s.width or 1200;
-      height = s.height or 800;
-      # A Helium profile directory ("Default" is Personal) to reuse its
-      # logins, or null for an isolated user-data dir.
-      profile = s.profile or null;
-      # A shared-profile window joins the running browser process, which
-      # ignores --class and names the window chrome-<host>_<path>-<profile>,
-      # slashes as underscores (music.youtube.com -> chrome-music.youtube.com__-Default).
-      wmClass =
-        let path = lib.removePrefix (domainOf s.url) (lib.last (lib.splitString "//" s.url));
-        in if (s.profile or null) == null then "webapp-${id}"
-        else "chrome-${domainOf s.url}_${builtins.replaceStrings [ "/" ] [ "_" ] (if path == "" then "/" else path)}-${s.profile}";
-      icon = s.icon or null;
-      domain = domainOf s.url;
+  siteType = lib.types.submodule ({ config, ... }: {
+    options = {
+      url = lib.mkOption { type = lib.types.str; };
+      name = lib.mkOption {
+        type = lib.types.str;
+        default = deriveName config.url;
+        defaultText = lib.literalMD "the capitalised domain, `claude.ai` -> `Claude`";
+      };
+      id = lib.mkOption {
+        type = lib.types.str;
+        default = lib.toLower (builtins.replaceStrings [ " " ] [ "-" ] config.name);
+        defaultText = lib.literalMD "`name`, lowercased, spaces as dashes";
+        description = "The launcher is `webapp-<id>`.";
+      };
+      width = lib.mkOption { type = lib.types.int; default = 1200; };
+      height = lib.mkOption { type = lib.types.int; default = 800; };
+      profile = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = null;
+        description = ''A Helium profile directory ("Default" is Personal) to reuse its logins, or null for an isolated user-data dir.'';
+      };
+      icon = lib.mkOption {
+        type = lib.types.nullOr lib.types.path;
+        default = null;
+        description = "Fetched from the site's favicon at activation when null.";
+      };
     };
+  });
+
+  # A shared-profile window joins the running browser process, which ignores
+  # --class and names the window chrome-<host>_<path>-<profile>, slashes as
+  # underscores (music.youtube.com -> chrome-music.youtube.com__-Default).
+  wmClassOf = site:
+    let path = lib.removePrefix (domainOf site.url) (lib.last (lib.splitString "//" site.url));
+    in if site.profile == null then "webapp-${site.id}"
+    else "chrome-${domainOf site.url}_${builtins.replaceStrings [ "/" ] [ "_" ] (if path == "" then "/" else path)}-${site.profile}";
 
   buildWebApp = site:
     let
@@ -76,22 +89,21 @@ let
         desktopName = site.name;
         exec = "${launcher}/bin/${identifier} %U";
         icon = if site.icon != null then "${site.icon}" else "${iconDir}/${site.id}.png";
-        startupWMClass = site.wmClass;
+        startupWMClass = wmClassOf site;
         categories = [ "Network" ];
       };
     in
     [ launcher desktopItem ];
 
-  sites = map normalizeSite cfg.sites;
+  sites = cfg.sites;
 in
 {
   options.kyan.webapps.sites = lib.mkOption {
-    type = with lib.types; listOf (either str attrs);
+    type = with lib.types; listOf (coercedTo str (url: { inherit url; }) siteType);
     default = [ ];
     description = ''
       Sites packaged as desktop web apps (Helium --app windows). A bare URL
-      string, or { url; name?; id?; icon?; width?; height?; profile?; }.
-      The launcher command is `webapp-<id>`.
+      string, or a site set.
     '';
   };
 
@@ -106,8 +118,8 @@ in
         dst="${iconDir}/${s.id}.png"
         if [ ! -s "$dst" ]; then
           tmp="$(mktemp)"
-          if ${pkgs.curl}/bin/curl -fsSL --max-time 10 "https://icon.horse/icon/${s.domain}" -o "$tmp" \
-            || ${pkgs.curl}/bin/curl -fsSL --max-time 10 "https://www.google.com/s2/favicons?domain=${s.domain}&sz=128" -o "$tmp"; then
+          if ${pkgs.curl}/bin/curl -fsSL --max-time 10 "https://icon.horse/icon/${domainOf s.url}" -o "$tmp" \
+            || ${pkgs.curl}/bin/curl -fsSL --max-time 10 "https://www.google.com/s2/favicons?domain=${domainOf s.url}&sz=128" -o "$tmp"; then
             ${pkgs.imagemagick}/bin/magick "$tmp[0]" -resize 256x256 "$dst" 2>/dev/null || run cp ${genericIcon} "$dst"
           else
             run cp ${genericIcon} "$dst"

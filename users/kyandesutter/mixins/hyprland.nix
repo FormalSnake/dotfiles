@@ -1,14 +1,14 @@
-{ pkgs, config, lib, osConfig ? { }, ... }:
+{ pkgs, config, lib, osConfig, ... }:
 let
   flexoki = import ./flexoki/palette.nix;
 
   dmsBin = "${config.programs.dank-material-shell.package}/bin/dms";
 
-  # Shell selector from the host (kyan.desktop.shell, default "dms") picks
+  # Shell selector from the host (kyan.desktop.shell, default "formalshell") picks
   # which shell the shell-facing binds below spawn into. Both package
   # references stay lazy: only the active arm's option is ever forced, so the
   # inactive shell's package option can be unset without breaking eval.
-  useFormalshell = (((osConfig.kyan or { }).desktop or { }).shell or "dms") == "formalshell";
+  useFormalshell = osConfig.kyan.desktop.shell == "formalshell";
   shellColors = if useFormalshell then "formalshell-colors.css" else "dank-colors.css";
   fsBin = "${config.programs.formalshell.package}/bin/formalshell";
   fsIpc = args: "${fsBin} ipc --any-display call " + lib.concatStringsSep " " args;

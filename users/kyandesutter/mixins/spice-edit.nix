@@ -2,14 +2,14 @@
 let
   # spice-edit: mouse-first terminal code editor for SSH/tmux workflows
   # (spice-edit.com). Not in nixpkgs; single static Go binary.
-  spice-edit = pkgs.buildGoModule rec {
+  spice-edit = pkgs.buildGoModule (finalAttrs: {
     pname = "spice-edit";
     version = "0.0.41";
 
     src = pkgs.fetchFromGitHub {
       owner = "cloudmanic";
       repo = "spice-edit";
-      rev = "v${version}";
+      rev = "v${finalAttrs.version}";
       hash = "sha256-PdsvS11tHMeYXbPD6kM6210p7aKWYJrRhhE6DJBLoJg=";
     };
 
@@ -29,7 +29,7 @@ let
       license = lib.licenses.mit;
       mainProgram = "spiceedit";
     };
-  };
+  });
 in
 {
   home.packages = [ spice-edit ];
