@@ -51,6 +51,8 @@ in
   systemd.user.services.discord = {
     Unit = {
       Description = "Discord (minimized to tray)";
+      # The KDE session opens it unminimized instead (mixins/kde.nix).
+      ConditionEnvironment = "XDG_CURRENT_DESKTOP=Hyprland";
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
       "X-SwitchMethod" = "keep-old";
@@ -144,8 +146,8 @@ in
   systemd.user.services.wl-clip-persist = {
     Unit = {
       Description = "wl-clip-persist (keep regular clipboard alive)";
-      # Hyprland only: graphical-session.target is reached in the GNOME
-      # session too (mixins/gnome.nix).
+      # Hyprland only: graphical-session.target is reached in the KDE
+      # session too (mixins/kde.nix).
       ConditionEnvironment = "XDG_CURRENT_DESKTOP=Hyprland";
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];

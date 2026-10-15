@@ -121,7 +121,7 @@ in
     systemd.user.services.formalshell.Service.KillMode = "process";
 
     # The shell and its watchdog belong to the Hyprland session only;
-    # graphical-session.target is reached under GNOME too (mixins/gnome.nix).
+    # graphical-session.target is reached under KDE too (mixins/kde.nix).
     systemd.user.services.formalshell.Unit.ConditionEnvironment = "XDG_CURRENT_DESKTOP=Hyprland";
     systemd.user.timers.formalshell-watchdog.Unit.ConditionEnvironment = "XDG_CURRENT_DESKTOP=Hyprland";
 

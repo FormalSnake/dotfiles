@@ -914,8 +914,7 @@ ${lib.optionalString (!useFormalshell) ''
 
   # gtk.css is read in every session, so it only imports session.css, which
   # the session picks at startup: this unit points it at hyprland.css (the
-  # shell's palette imports), and the GNOME session empties it
-  # (mixins/gnome.nix) so apps there draw stock Adwaita.
+  # shell's palette imports) at every Hyprland login.
   xdg.configFile."gtk-3.0/hyprland.css".text = ''@import url("${shellColors}");'';
   xdg.configFile."gtk-4.0/hyprland.css".text = ''@import url("${shellColors}");'';
   systemd.user.services.gtk-session-css = {

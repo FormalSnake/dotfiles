@@ -201,7 +201,7 @@ in
       enable = true;
       wayland.enable = true;
       wayland.compositorCommand = toString sddmGreeterCompositor;
-      package = pkgs.kdePackages.sddm;
+      package = lib.mkDefault pkgs.kdePackages.sddm;
       theme = qylockTheme;
       # On-screen keyboard, the patched qylock themes, and the Qt runtime
       # their QML imports (the same list qylock's own sddm half installs).

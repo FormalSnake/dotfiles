@@ -1,4 +1,4 @@
-{ inputs, self, lib, pkgs, ... }:
+{ inputs, self, pkgs, ... }:
 {
   imports = [
     # Generated on first boot with `nixos-generate-config` (placeholder for now).
@@ -224,6 +224,10 @@
   # Steam and Heroic for the Epic library (mixins/gaming.nix).
   kyan.gaming.enable = true;
 
+  # KDE Plasma next to Hyprland as the gaming desktop, with SteamOS-style
+  # switch shortcuts between the two (mixins/kde.nix).
+  kyan.desktop.kde.enable = true;
+
   # ASUS laptop support: asusd, Aura keyboard RGB (Flexoki blue), 80%
   # battery charge limit.
   kyan.asus.enable = true;
@@ -326,7 +330,7 @@
     AllowHybridSleep = false;
     AllowSuspendThenHibernate = false;
   };
-  services.upower.criticalPowerAction = lib.mkForce "PowerOff"; # over Jovian's "Ignore"
+  services.upower.criticalPowerAction = "PowerOff";
   services.logind.settings.Login = {
     HandleLidSwitch = "ignore";
     HandleLidSwitchExternalPower = "ignore";

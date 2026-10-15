@@ -15,7 +15,7 @@
     ./mixins/dankcal.nix
     ./mixins/formalshell.nix
     ./mixins/elementary
-    ./mixins/gnome.nix
+    ./mixins/kde.nix
     ./mixins/discord.nix
     ./mixins/beeper.nix
     ./mixins/messages.nix
