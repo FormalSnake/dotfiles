@@ -2,11 +2,10 @@
 let
   cfg = config.kyan.gaming;
 
-  # Epic's own Linux launcher (preview). Pin the version its self-updater
-  # reports as latest ("Latest: x" in the update dialog), not whatever the
-  # download button serves: on 2026-10-15 the button gave 0.96.0 while the
-  # updater still called 0.95.2 latest, and any mismatch opens a forced
-  # "Update failed" dialog since the store path is read-only.
+  # Epic's own Linux launcher (preview). It updates itself by replacing the
+  # AppImage file it was started from ($APPIMAGE), so, like Steam, it runs
+  # from a writable copy in $HOME. The pinned build only seeds that copy on
+  # first launch; after that the launcher keeps it current.
   eglVersion = "0.95.2+gfa9ad49";
   eglSrc = pkgs.fetchurl {
     url = "https://content-download-egs.distro.on.epicgames.com/Builds/EGLv2/${lib.escapeURL eglVersion}/Linux/EpicGamesLauncher-x86_64.AppImage";
@@ -19,14 +18,24 @@ let
   };
   # A Tauri app on WebKitGTK, so it hits the same NVIDIA DMA-BUF renderer
   # crash as Modrinth (see ./minecraft.nix).
-  epic-games-launcher = pkgs.appimageTools.wrapType2 {
-    pname = "epic-games-launcher";
-    version = eglVersion;
-    src = eglSrc;
-    nativeBuildInputs = [ pkgs.makeWrapper ];
-    extraInstallCommands = ''
-      wrapProgram $out/bin/epic-games-launcher \
-        --set WEBKIT_DISABLE_DMABUF_RENDERER 1
+  eglLauncher = pkgs.writeShellApplication {
+    name = "epic-games-launcher";
+    runtimeInputs = [ pkgs.coreutils pkgs.appimage-run ];
+    text = ''
+      dir="''${XDG_DATA_HOME:-$HOME/.local/share}/epic-games-launcher"
+      img="$dir/EpicGamesLauncher-x86_64.AppImage"
+      if [ ! -e "$img" ]; then
+        mkdir -p "$dir"
+        install -m 755 ${eglSrc} "$img"
+      fi
+      export WEBKIT_DISABLE_DMABUF_RENDERER=1
+      exec appimage-run "$img" "$@"
+    '';
+  };
+  epic-games-launcher = pkgs.symlinkJoin {
+    name = "epic-games-launcher";
+    paths = [ eglLauncher ];
+    postBuild = ''
       install -Dm444 ${eglExtracted}/usr/share/applications/epic-games-launcher.desktop \
         $out/share/applications/epic-games-launcher.desktop
       substituteInPlace $out/share/applications/epic-games-launcher.desktop \
