@@ -221,11 +221,11 @@
   # profile.
   kyan.roblox.enable = true;
 
-  # Steam and Heroic for the Epic library (mixins/gaming.nix).
+  # Steam and Heroic for the Epic library (mixins/gaming).
   kyan.gaming.enable = true;
 
   # KDE Plasma next to Hyprland as the gaming desktop, with SteamOS-style
-  # switch shortcuts between the two (mixins/kde.nix).
+  # switch shortcuts between the two (mixins/kde).
   kyan.desktop.kde.enable = true;
 
   # ASUS laptop support: asusd, Aura keyboard RGB (Flexoki blue), 80%

@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ lib, pkgs, osConfig, ... }:
 let
   # How these services find their executables:
   #
@@ -51,7 +51,7 @@ in
   systemd.user.services.discord = {
     Unit = {
       Description = "Discord (minimized to tray)";
-      # The KDE session opens it unminimized instead (mixins/kde.nix).
+      # The KDE session opens its own, unminimized (discord-kde below).
       ConditionEnvironment = "XDG_CURRENT_DESKTOP=Hyprland";
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
@@ -61,6 +61,38 @@ in
     Service = {
       Type = "simple";
       ExecStart = loginExec "Discord --start-minimized";
+    };
+  };
+
+  # The KDE session (modules/nixos/mixins/kde) is the gaming desktop: Steam,
+  # and Discord open rather than in the tray. A KWin rule (mixins/kde.nix)
+  # puts Discord on the internal panel.
+  systemd.user.services.discord-kde = lib.mkIf osConfig.kyan.desktop.kde.enable {
+    Unit = {
+      Description = "Discord";
+      ConditionEnvironment = "XDG_CURRENT_DESKTOP=KDE";
+      PartOf = [ "graphical-session.target" ];
+      After = [ "graphical-session.target" ];
+      "X-SwitchMethod" = "keep-old";
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
+    Service = {
+      Type = "simple";
+      ExecStart = loginExec "Discord";
+    };
+  };
+  systemd.user.services.steam = lib.mkIf (osConfig.kyan.desktop.kde.enable && osConfig.kyan.gaming.enable) {
+    Unit = {
+      Description = "Steam";
+      ConditionEnvironment = "XDG_CURRENT_DESKTOP=KDE";
+      PartOf = [ "graphical-session.target" ];
+      After = [ "graphical-session.target" ];
+      "X-SwitchMethod" = "keep-old";
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
+    Service = {
+      Type = "simple";
+      ExecStart = loginExec "steam";
     };
   };
 

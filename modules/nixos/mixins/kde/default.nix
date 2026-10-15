@@ -28,41 +28,11 @@ let
     '';
   };
 
-  # The 2003 Steam / GoldSrc VGUI look: colour scheme, Plasma style, Aurorae
-  # window decoration and the bitmap Tahoma, as one global theme. Applied in
-  # the session by users/kyandesutter/mixins/kde.nix.
-  steamed = pkgs.stdenvNoCC.mkDerivation {
-    pname = "steamed-kde-theme";
-    version = "0-unstable-2026-01-24";
-    src = pkgs.fetchFromGitHub {
-      owner = "UNATCO-JCDenton";
-      repo = "Steamed";
-      rev = "14e8a1c0db188870ab3ac2059dbf941fad9c3065";
-      hash = "sha256-DonoMblcHEZ0oYdWdq78HeZTctf/O7pT6TU7Ce+7osM=";
-    };
-    installPhase = ''
-      mkdir -p $out/share/fonts/truetype
-      cp -r color-schemes aurorae plasma $out/share/
-      cp fonts/WineTahomaBit.ttf $out/share/fonts/truetype/
-    '';
-  };
+  # Applied in the session by users/kyandesutter/mixins/kde.nix.
+  steamed = pkgs.callPackage ./steamed-theme.nix { };
+  steamClassicWallpaper = pkgs.callPackage ./steam-classic-wallpaper.nix { };
 
-  # Valve's own Steam cog wallpaper (from the SteamOS 1.0 archive), recoloured
-  # from Steam blue to the VGUI olive of the theme above.
-  steamClassicWallpaper = pkgs.runCommand "steam-classic-wallpaper" {
-    nativeBuildInputs = [ pkgs.dpkg pkgs.imagemagick ];
-    src = pkgs.fetchurl {
-      url = "https://repo.steampowered.com/steamos/pool/main/v/valve-wallpapers/valve-wallpapers_0.7%2Bbsos2_all.deb";
-      hash = "sha256-D8riXwbAfDAEkXZEs085OD6Wln5WVTPvn3CxCL2o6qM=";
-    };
-  } ''
-    dpkg-deb -x $src deb
-    mkdir -p $out/share/wallpapers
-    magick deb/usr/share/backgrounds/cog.png -colorspace Gray -auto-level \
-      +level-colors "#1f2419","#5a6a50" $out/share/wallpapers/steam-classic.png
-  '';
-
-  desktopItems =lib.mapAttrsToList (session: label: pkgs.makeDesktopItem {
+  desktopItems = lib.mapAttrsToList (session: label: pkgs.makeDesktopItem {
     name = "session-switch-${session}";
     desktopName = label;
     exec = "${lib.getExe session-switch} ${session}";
@@ -77,10 +47,10 @@ in
   config = lib.mkIf cfg.enable {
     # SDDM stays the greeter and lists Plasma next to Hyprland.
     services.desktopManager.plasma6.enable = true;
-    environment.plasma6.excludePackages = with pkgs.kdePackages; [
-      elisa
-      khelpcenter
-      krdp
+    environment.plasma6.excludePackages = [
+      pkgs.kdePackages.elisa
+      pkgs.kdePackages.khelpcenter
+      pkgs.kdePackages.krdp
     ];
 
     systemd.services."session-switch@" = {

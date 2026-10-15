@@ -29,13 +29,13 @@
       ./mixins/bluetooth.nix
       ./mixins/mouse.nix
       ./mixins/hyprland.nix
-      ./mixins/kde.nix
+      ./mixins/kde
       ./mixins/online-accounts.nix
       ./mixins/dualsense.nix
       ./mixins/minecraft.nix
       ./mixins/waylandcraft.nix
       ./mixins/roblox.nix
-      ./mixins/gaming.nix
+      ./mixins/gaming
       ./mixins/comms.nix
       ./mixins/asus.nix
       ./mixins/tuned.nix
