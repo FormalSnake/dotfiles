@@ -32,6 +32,12 @@
 # VM disks a dev script boots (dev/.linux-builder, dev/.testvm) go once no
 # qemu names them and they sat idle for the stale cutoff.
 #
+# `result` links left by nix build and the justfile's build recipe are GC
+# roots: one forgotten ~/.config/nix/result pinned a 42 GB system closure on
+# the g815 (Oct 2026). Links older than the target cutoff are unlinked so the
+# next collection can reap what they held; the build output is one command
+# away.
+#
 # Low-free-space mode: when / has less than LOW_FREE_GB free (default 30), every
 # cutoff is divided by 4 (minimum 1 day) so a full disk is cleared in one pass.
 #
@@ -400,6 +406,22 @@ else
 fi
 
 ### 5. Nix
+
+# Stale nix build result links, under the project trees and the flake repo.
+# Only the symlink goes; whether the store paths follow is up to the next
+# collection (below on the mac, nix-gc.service on NixOS), so no size is
+# claimed here.
+result_links=0
+for root in "${SCAN_ROOTS[@]}" "$HOME/.config/nix"; do
+  [[ -d "$root" ]] || continue
+  while IFS= read -r -d '' link; do
+    [[ "$(readlink "$link")" == /nix/store/* ]] || continue
+    (( $(( (NOW - $("$STAT" "${STAT_MTIME[@]}" "$link")) / 86400 )) >= TARGET_AGE_DAYS )) || continue
+    (( APPLY )) && rm -f -- "$link"
+    result_links=$(( result_links + 1 ))
+  done < <("$FIND" "$root" -maxdepth 4 -type d -name .git -prune -o -type l \( -name result -o -name 'result-*' \) -print0 2>/dev/null)
+done
+(( result_links > 0 )) && plan+=("0|nix-result-link|$result_links stale build result links unpinned")
 
 # --delete-older-than, never -d: -d drops every rollback generation, and losing
 # the ability to boot the previous system is not worth a few GB.
