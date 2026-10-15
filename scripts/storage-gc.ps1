@@ -13,10 +13,10 @@
 #                                  -Deep or for C: under LowFreeGB
 #   storage-gc.ps1 -Verbose        list every item, not just the totals
 #
-# Game state is never touched: this is the gaming partition. No shader
-# caches (NVIDIA DXCache, Steam shadercache, D3DSCache), no Fortnite content
-# cache or replays, no Minecraft instances. Only a game's own temp and old
-# auto-update leftovers go.
+# Game state is never touched, not even sized: this is the gaming partition.
+# No shader caches (NVIDIA DXCache, Steam shadercache, D3DSCache), no
+# Fortnite content cache or replays, no Minecraft instances. Only a game's
+# own temp and old auto-update leftovers go.
 #
 # Staleness: a directory goes only when its newest depth-1 entry is older
 # than the cutoff, so an in-flight build is never pulled out from under
@@ -259,8 +259,6 @@ foreach ($p in @(
   (Join-Path $roaming 'ModrinthApp'),
   (Join-Path $roaming 'PrismLauncher'),
   (Join-Path $local 'FortniteGame\Saved\Demos'),
-  (Join-Path $local 'NVIDIA\DXCache'),
-  'D:\SteamLibrary\steamapps\shadercache',
   'F:\Movies',
   'F:\minecraft-backups',
   'Z:\Epic',
