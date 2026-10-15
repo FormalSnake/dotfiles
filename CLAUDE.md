@@ -306,6 +306,16 @@ up there too (2026-09-20). None of it is nix-managed:
 - The win32 code paths (clipboard, toasts, links, file picker) shell out to
   Windows PowerShell through `packages/core/src/windows.ts`.
 
+**Storage sweep on the Windows side.** `scripts/storage-gc.ps1` is the
+Windows twin of `storage-gc.sh`: stale cargo targets (CACHEDIR.TAG), old
+Roblox builds, BeamNG temp, temp dirs, driver installer leftovers, and with
+`-Deep` the DISM component store. It never touches shader caches, Fortnite's
+content cache or replays, or Minecraft instances: Windows is the gaming
+partition. The copy at `C:\Users\Kyan\.local\bin\storage-gc.ps1` runs
+daily at 12:00 from the `kyan-storage-gc` scheduled task (log in
+`C:\Users\Kyan\.local\state\storage-gc.log`). After editing the source,
+re-copy it: `scp scripts/storage-gc.ps1 'windows:C:/Users/Kyan/.local/bin/storage-gc.ps1'`.
+
 **Updating it from NixOS.** Windows cannot read the ext4 root, but NixOS
 mounts `C:` read-write at `/mnt/windows` (ntfs3, uid 1000, in the g815's
 fstab), so the Windows checkout is reachable from Linux:
