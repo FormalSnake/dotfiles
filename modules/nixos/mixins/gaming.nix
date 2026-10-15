@@ -2,13 +2,15 @@
 let
   cfg = config.kyan.gaming;
 
-  # Epic's own Linux launcher (preview). The download link on
-  # launcher.epicgames.com redirects to this versioned build URL; bump both
-  # when Epic ships a new one.
-  eglVersion = "0.96.0+g2fade97";
+  # Epic's own Linux launcher (preview). Pin the version its self-updater
+  # reports as latest ("Latest: x" in the update dialog), not whatever the
+  # download button serves: on 2026-10-15 the button gave 0.96.0 while the
+  # updater still called 0.95.2 latest, and any mismatch opens a forced
+  # "Update failed" dialog since the store path is read-only.
+  eglVersion = "0.95.2+gfa9ad49";
   eglSrc = pkgs.fetchurl {
     url = "https://content-download-egs.distro.on.epicgames.com/Builds/EGLv2/${lib.escapeURL eglVersion}/Linux/EpicGamesLauncher-x86_64.AppImage";
-    hash = "sha256-bFzEbu+MgLAXWcx2FUtpogZFsBt5UmRCqFUAkNtdJR4=";
+    hash = "sha256-cGYVnsmHr83CcGnwcLRWvbmoBb1fAhFKp62G5VWcv9U=";
   };
   eglExtracted = pkgs.appimageTools.extractType2 {
     pname = "epic-games-launcher";
