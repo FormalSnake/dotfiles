@@ -309,6 +309,11 @@
     # page-cluster worth turning off for zram in the first place.
     "vm.page-cluster" = 1;
 
+    # kswapd wakes at 0.1% of RAM free by default, so a game allocating fast
+    # outruns it and reclaims inline: 1556 direct-reclaim stalls over one
+    # Forza session. 1.25% (~400 MB) keeps background reclaim ahead of it.
+    "vm.watermark_scale_factor" = 125;
+
     # A hung kernel reboots instead of sitting frozen until someone
     # power-cycles it. On 2026-10-03 the nvidia driver oopsed and then
     # deadlocked on a spinlock after resume; with panic = 0 the machine stayed
