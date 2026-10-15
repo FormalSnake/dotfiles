@@ -16,11 +16,15 @@ let
     version = eglVersion;
     src = eglSrc;
   };
-  # A Tauri app on WebKitGTK, so it hits the same NVIDIA DMA-BUF renderer
-  # crash as Modrinth (see ./minecraft.nix).
+  # Executed as a real AppImage, not through appimage-run: Tauri only treats
+  # itself as an AppImage (and so only self-updates) when it runs from the
+  # runtime's /tmp/.mount_* FUSE mount, which appimage-run's extraction skips.
+  # The runtime is static and the bundle carries its own libraries; nix-ld
+  # (./nix-ld.nix) supplies the loader. A Tauri app on WebKitGTK, so it hits
+  # the same NVIDIA DMA-BUF renderer crash as Modrinth (see ./minecraft.nix).
   eglLauncher = pkgs.writeShellApplication {
     name = "epic-games-launcher";
-    runtimeInputs = [ pkgs.coreutils pkgs.appimage-run ];
+    runtimeInputs = [ pkgs.coreutils ];
     text = ''
       dir="''${XDG_DATA_HOME:-$HOME/.local/share}/epic-games-launcher"
       img="$dir/EpicGamesLauncher-x86_64.AppImage"
@@ -29,7 +33,7 @@ let
         install -m 755 ${eglSrc} "$img"
       fi
       export WEBKIT_DISABLE_DMABUF_RENDERER=1
-      exec appimage-run "$img" "$@"
+      exec "$img" "$@"
     '';
   };
   epic-games-launcher = pkgs.symlinkJoin {
