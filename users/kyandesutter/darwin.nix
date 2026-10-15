@@ -6,7 +6,6 @@
     # Disabled for a lighter dev host: using Apple's Stage Manager instead of
     # aerospace tiling. Configs are kept; just not imported.
     # ./mixins/aerospace.nix
-    ./mixins/android.nix
     ./mixins/direnv-apple-toolchain.nix
     ./mixins/discord.nix
     ./mixins/hammerspoon.nix

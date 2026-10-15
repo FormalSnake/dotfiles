@@ -1,8 +1,11 @@
 { config, ... }:
 let
-  # External APFS SSD that stays plugged into the macbook. It holds the bulky,
-  # regenerable dirs and media that used to fill the internal SSD. Every link
-  # below dangles while the drive is unmounted.
+  # External APFS SSD that stays plugged into the macbook. Its role is local,
+  # personal data (media, archives): the internal disk is the dev server's.
+  # CoreSimulator, DerivedData and gradle still sit on it only because the
+  # internal disk has no room for them yet; they move back once the stale
+  # build output under ~/Developer is gone. Every link below dangles while the drive is
+  # unmounted.
   drive = "/Volumes/Kyan Drive";
   link = sub: config.lib.file.mkOutOfStoreSymlink "${drive}/${sub}";
 in

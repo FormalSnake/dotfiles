@@ -10,20 +10,34 @@
 #   storage-gc.sh --apply              delete it
 #   storage-gc.sh --apply --age 7      more aggressive staleness cutoff
 #   storage-gc.sh --apply --deep       also Go modcache and old iOS DeviceSupport
+#   storage-gc.sh --apply --prune-worktrees
+#                                      also remove clean, untouched agent worktrees
 #
 # Two safety rules gate every directory delete:
 #   1. Inside a git work tree, the directory must be git-ignored. Anything
 #      tracked or untracked-but-not-ignored is left alone, which is what keeps a
 #      committed build/ or vendored Pods/ safe.
 #   2. Outside a repo, the name must be on the always-regenerable list below.
+#   3. A directory carrying a CACHEDIR.TAG (cargo, sccache, zed) is a cache
+#      whatever its name and wherever it sits, so a target/ that an agent
+#      renamed or pointed elsewhere still counts.
 # Plus staleness: nothing is removed unless its newest depth-1 entry is older
 # than --age days, so an in-flight build is never pulled out from under itself.
+#
+# Agent worktrees (.claude/worktrees, .herdr/worktrees, .claude-worktrees) are
+# only emptied of build output by default. --prune-worktrees also removes the
+# worktree itself when `git status` is clean and nothing in it was touched for
+# WORKTREE_PRUNE_AGE_DAYS; the branch stays. A dirty worktree is never touched.
+#
+# VM disks a dev script boots (dev/.linux-builder, dev/.testvm) go once no
+# qemu names them and they sat idle for the stale cutoff.
 #
 # Low-free-space mode: when / has less than LOW_FREE_GB free (default 30), every
 # cutoff is divided by 4 (minimum 1 day) so a full disk is cleared in one pass.
 #
 # Env: ROOTS (space-separated scan roots), AGE_DAYS, TARGET_AGE_DAYS,
-# WORKTREE_AGE_DAYS, INSTALL_AGE_DAYS, NIX_KEEP, LOW_FREE_GB.
+# WORKTREE_AGE_DAYS, WORKTREE_PRUNE_AGE_DAYS, INSTALL_AGE_DAYS, NIX_KEEP,
+# LOW_FREE_GB.
 # Callable from a launchd user agent (mac) or a systemd service (NixOS); logs
 # to stdout/stderr.
 
@@ -40,17 +54,22 @@ TARGET_AGE_DAYS="${TARGET_AGE_DAYS:-7}"
 # are abandoned within days of being created. Sep 2026: seven of them filled
 # 90 GB between two weekly runs.
 WORKTREE_AGE_DAYS="${WORKTREE_AGE_DAYS:-3}"
+# A clean worktree nobody opened in two weeks is finished work; its branch
+# keeps the commits. Oct 2026: 83 of them under one repo's .claude/worktrees.
+WORKTREE_PRUNE_AGE_DAYS="${WORKTREE_PRUNE_AGE_DAYS:-14}"
 NIX_KEEP="${NIX_KEEP:-14d}"
 LOW_FREE_GB="${LOW_FREE_GB:-30}"
 OS=$(uname -s)
 APPLY=0
 DEEP=0
+PRUNE_WORKTREES=0
 VERBOSE=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --apply) APPLY=1 ;;
     --deep) DEEP=1 ;;
+    --prune-worktrees) PRUNE_WORKTREES=1 ;;
     -v|--verbose) VERBOSE=1 ;;
     --age) AGE_DAYS="$2"; shift ;;
     --age=*) AGE_DAYS="${1#*=}" ;;
@@ -64,7 +83,7 @@ LOW_FREE=0
 free_gb=$(df -Pk / | awk 'NR==2 {printf "%d", $4/1048576}')
 if (( free_gb < LOW_FREE_GB )); then
   LOW_FREE=1
-  for v in AGE_DAYS INSTALL_AGE_DAYS TARGET_AGE_DAYS WORKTREE_AGE_DAYS; do
+  for v in AGE_DAYS INSTALL_AGE_DAYS TARGET_AGE_DAYS WORKTREE_AGE_DAYS WORKTREE_PRUNE_AGE_DAYS; do
     n=$(( ${!v} / 4 )); (( n >= 1 )) || n=1
     printf -v "$v" '%s' "$n"
   done
@@ -74,7 +93,16 @@ fi
 # and Claude check out throwaway branches, and they accumulate their own
 # node_modules and target/ copies. Scanning them reclaims that without touching
 # the worktrees themselves, which may hold another agent's uncommitted work.
-read -r -a SCAN_ROOTS <<<"${ROOTS:-$HOME/Developer $HOME/.herdr/worktrees $HOME/.claude-worktrees}"
+# dev-cache.noindex on the external SSD is where the nativedesktop worktrees
+# point their cargo target dirs (per-worktree .cargo/config.toml), next to the
+# CEF downloads, sccache and zed caches; it is dev overflow on a drive meant
+# for personal data, so it is swept as hard as ~/Developer.
+if [[ -n "${ROOTS:-}" ]]; then
+  read -r -a SCAN_ROOTS <<<"$ROOTS"
+else
+  SCAN_ROOTS=("$HOME/Developer" "$HOME/.herdr/worktrees" "$HOME/.claude-worktrees")
+  [[ "$OS" == Darwin ]] && SCAN_ROOTS+=("/Volumes/Kyan Drive/dev-cache.noindex")
+fi
 WORKTREE_PATH='/\.claude/worktrees/|/\.herdr/worktrees/|/\.claude-worktrees/'
 
 # Regenerable regardless of git status. `target` additionally requires a sibling
@@ -196,6 +224,11 @@ for root in "${SCAN_ROOTS[@]}"; do
       .zig-cache|zig-out) [[ -f "$parent/build.zig" ]] || continue ;;
     esac
 
+    # A VM disk still attached to a qemu is in use whatever its mtime says.
+    case "$name" in
+      .linux-builder|.testvm) pgrep -f "$dir" >/dev/null 2>&1 && continue ;;
+    esac
+
     cutoff=$AGE_DAYS
     [[ "$name" == node_modules || "$name" == Pods ]] && cutoff=$INSTALL_AGE_DAYS
     [[ "$name" == target || "$name" == .build || "$name" == .zig-cache || "$name" == zig-out ]] && cutoff=$TARGET_AGE_DAYS
@@ -210,10 +243,62 @@ for root in "${SCAN_ROOTS[@]}"; do
                  -o -name DerivedData -o -name .gradle -o -name .venv \
                  -o -name __pycache__ -o -name .parcel-cache -o -name .dart_tool \
                  -o -name .cxx -o -name .build -o -name .zig-cache \
-                 -o -name zig-out \
+                 -o -name zig-out -o -name .linux-builder -o -name .testvm \
               \) -prune -print0 2>/dev/null
   )
+
+  # Rule 3: anything tagged as a cache dir, whatever it is called. cargo
+  # writes the tag into every target dir, so a `clean-a-target` next to a
+  # worktree, or a target dir relocated by CARGO_TARGET_DIR, is caught here.
+  # The named dirs above are pruned from this walk so nothing queues twice.
+  while IFS= read -r -d '' tag; do
+    dir=$(dirname "$tag")
+    head -c 43 "$tag" 2>/dev/null | grep -q '^Signature: 8a477f597d28d172789f06886806bc55' || continue
+    rc=0; git_ignored "$dir" || rc=$?
+    (( rc == 1 )) && continue
+    (( $(newest_age_days "$dir") >= TARGET_AGE_DAYS )) || continue
+    queue "cachedir-tag" "$dir"
+  done < <(
+    "$FIND" "$root" \
+      -type d \( -name .git -o -name node_modules -o -name target -o -name build \
+                 -o -name .next -o -name .turbo -o -name .expo -o -name Pods \
+                 -o -name DerivedData -o -name .gradle -o -name .venv \
+                 -o -name __pycache__ -o -name .parcel-cache -o -name .dart_tool \
+                 -o -name .cxx -o -name .build -o -name .zig-cache \
+                 -o -name zig-out -o -name .linux-builder -o -name .testvm \
+              \) -prune -o \
+      -type f -name CACHEDIR.TAG -print0 2>/dev/null
+  )
 done
+
+### 1b. Agent worktrees that are finished
+
+# Only the dirs agents create for themselves. Worktrees the owner checked out
+# directly under ~/Developer are never candidates. `git worktree remove`
+# without --force is the second guard: it refuses anything with modified or
+# untracked files, so a dirty tree survives even if the status check raced.
+if (( PRUNE_WORKTREES )); then
+  for root in "${SCAN_ROOTS[@]}"; do
+    [[ -d "$root" ]] || continue
+    while IFS= read -r -d '' wt; do
+      [[ "$wt" =~ $WORKTREE_PATH ]] || continue
+      [[ -f "$wt/.git" ]] || continue
+      [[ -z "$(git -C "$wt" status --porcelain 2>/dev/null)" ]] || continue
+      git -C "$wt" rev-parse --is-inside-work-tree >/dev/null 2>&1 || continue
+      (( $(newest_age_days "$wt") >= WORKTREE_PRUNE_AGE_DAYS )) || continue
+      kb=$(dir_kb "$wt"); [[ -z "$kb" ]] && continue
+      main=$(git -C "$wt" rev-parse --git-common-dir 2>/dev/null)
+      if (( APPLY )); then
+        git -C "$main" worktree remove "$wt" >/dev/null 2>&1 || { log "kept $wt: git refused to remove it"; continue; }
+        git -C "$main" worktree prune >/dev/null 2>&1 || true
+      fi
+      freed_kb=$(( freed_kb + kb ))
+      plan+=("$kb|stale-worktree|${wt/#$HOME/~}")
+    done < <(
+      "$FIND" "$root" -mindepth 1 -maxdepth 6 -type d \( -path '*/.claude/worktrees/*' -o -path '*/.herdr/worktrees/*' -o -path '*/.claude-worktrees/*' \) -prune -print0 2>/dev/null
+    )
+  done
+fi
 
 ### 2. Xcode and iOS tooling
 
@@ -221,6 +306,23 @@ if [[ "$OS" == Darwin ]]; then
   queue "xcode-derived" "/Volumes/Kyan Drive/DerivedData"
   queue "xcode-modcache" "$HOME/Library/Developer/Xcode/ModuleCache.noindex"
   queue "simulator-cache" "$HOME/Library/Developer/CoreSimulator/Caches"
+  # Devices whose runtime is gone keep their disk image until deleted. Each
+  # one goes through simctl rather than rm so CoreSimulator's device list
+  # stays consistent.
+  if command -v xcrun >/dev/null 2>&1; then
+    while IFS= read -r udid; do
+      [[ -n "$udid" ]] || continue
+      dev="$HOME/Library/Developer/CoreSimulator/Devices/$udid"
+      [[ -d "$dev" ]] || continue
+      kb=$(dir_kb "$dev"); [[ -z "$kb" || "$kb" -lt 1024 ]] && continue
+      if (( APPLY )); then
+        xcrun simctl delete "$udid" >/dev/null 2>&1 || { log "simctl could not delete $udid"; continue; }
+      fi
+      freed_kb=$(( freed_kb + kb ))
+      plan+=("$kb|simulator-unavail|${dev/#$HOME/~}")
+    done < <(xcrun simctl list devices unavailable -j 2>/dev/null \
+      | awk -F'"' '/"udid"/ {print $4}')
+  fi
   queue "swiftpm-cache" "$HOME/Library/Caches/org.swift.swiftpm"
   queue "cocoapods-cache" "$HOME/Library/Caches/CocoaPods"
 
@@ -276,6 +378,8 @@ fi
 queue "cargo-git" "$HOME/.cargo/git/checkouts"
 
 if [[ "$OS" == Darwin ]]; then
+  # Streamed audio only; Spotify refills it as tracks play. 8.7 GB in Oct 2026.
+  queue "spotify-cache" "$HOME/Library/Application Support/Spotify/PersistentCache"
   queue "electron-cache" "$HOME/Library/Caches/electron"
   queue "electron-builder" "$HOME/Library/Caches/electron-builder"
   queue "dotslash-cache" "$HOME/Library/Caches/dotslash"
@@ -360,8 +464,7 @@ if [[ "$OS" == Darwin ]]; then
     "$HOME/.android/avd"
     "$HOME/Movies"
     "$HOME/Library/Messages"
-    "$HOME/Library/Application Support/Spotify"
-    "$HOME/Library/Application Support/Claude"
+    "$HOME/Library/Application Support/Claude/vm_bundles"
   )
 else
   review=(

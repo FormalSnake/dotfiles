@@ -33,7 +33,7 @@ in
     serviceConfig = {
       Type = "oneshot";
       User = "kyandesutter";
-      ExecStart = "${pkgs.bash}/bin/bash ${home}/.config/nix/scripts/storage-gc.sh --apply";
+      ExecStart = "${pkgs.bash}/bin/bash ${home}/.config/nix/scripts/storage-gc.sh --apply --prune-worktrees";
       IOSchedulingClass = "idle";
       CPUSchedulingPolicy = "idle";
       Nice = 19;

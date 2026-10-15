@@ -33,12 +33,9 @@
     casks = [
       # (previously-declared casks)
       "alcove"
-      "balenaetcher"
       "betterdisplay"
       "bluebubbles" # BlueBubbles Server (iMessage bridge): macOS-only, this Mac is the host
       "clop"
-      "docker-desktop"
-      "firefox"
       "ghostty"
       "gstreamer-runtime"
       "nordvpn"
@@ -52,7 +49,6 @@
       "1password"
       "aldente"
       "android-studio"
-      "codex"
       "google-chrome"
       "jump-desktop-connect"
       "markdown-preview"  # pluk-inc/tap

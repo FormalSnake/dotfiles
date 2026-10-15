@@ -50,6 +50,7 @@
       ./mixins/geolocation.nix
       ./mixins/nix-ld.nix
       ./mixins/macos-vm.nix
+      ./mixins/docker.nix
       ./profiles
     ];
   };

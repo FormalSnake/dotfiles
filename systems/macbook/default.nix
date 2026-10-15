@@ -18,10 +18,6 @@
   # faster than Determinate's single-job aarch64 builder.
   kyan.rosettaBuilder.enable = true;
 
-  # Office Discord bot: watches the Minecraft server and answers /status. Runs
-  # as a container on the local Docker, source pinned in the mixin.
-  kyan.officeDcBot.enable = false;
-
   users.users.kyandesutter = {
     name = "kyandesutter";
     home = "/Users/kyandesutter";
@@ -32,6 +28,8 @@
       self.homeModules.kyandesutter
       self.homeModules.kyandesutter-darwin
     ];
+    # SDK env and JDK for the Android Studio cask (mixins/android.nix).
+    kyan.android.enable = true;
   };
 
   # TouchID sudo disabled: fall back to password for sudo (TouchID isn't usable

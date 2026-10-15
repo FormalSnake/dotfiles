@@ -256,6 +256,9 @@
   # ignore_msrs option.
   kyan.macosVm.enable = true;
 
+  # Containers for testing Linux builds here (modules/nixos/mixins/docker.nix).
+  kyan.docker.enable = true;
+
   # Remote-builder key for the e1504g (nix.buildMachines in
   # systems/e1504g/default.nix). Its root connects here as kyandesutter over
   # Tailscale to run builds. Force-commanded to `nix-daemon --stdio` (all

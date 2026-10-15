@@ -19,7 +19,7 @@ in
       ProgramArguments = [
         "/bin/bash"
         "-lc"
-        "${flakeDir}/scripts/storage-gc.sh --apply"
+        "${flakeDir}/scripts/storage-gc.sh --apply --prune-worktrees"
       ];
       EnvironmentVariables = {
         # The tool sweeps reach for brew, npm, cargo, bun, pnpm and go; launchd

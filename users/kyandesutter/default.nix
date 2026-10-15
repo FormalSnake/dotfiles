@@ -27,8 +27,8 @@
     ./mixins/nh.nix
     ./mixins/nix-index.nix
     ./mixins/unfree.nix
-    ./mixins/spice-edit.nix
     ./mixins/kopuz.nix
+    ./mixins/android.nix
   ];
 
   home = {
