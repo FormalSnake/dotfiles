@@ -35,6 +35,7 @@
       ./mixins/minecraft.nix
       ./mixins/waylandcraft.nix
       ./mixins/roblox.nix
+      ./mixins/gaming.nix
       ./mixins/comms.nix
       ./mixins/asus.nix
       ./mixins/tuned.nix

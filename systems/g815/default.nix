@@ -221,6 +221,9 @@
   # profile.
   kyan.roblox.enable = true;
 
+  # Steam and Heroic for the Epic library (mixins/gaming.nix).
+  kyan.gaming.enable = true;
+
   # ASUS laptop support: asusd, Aura keyboard RGB (Flexoki blue), 80%
   # battery charge limit.
   kyan.asus.enable = true;
