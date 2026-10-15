@@ -63,6 +63,10 @@ in
 {
   home.packages = [ t3code ];
 
+  xdg.mimeApps.associations.added = lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
+    "x-scheme-handler/t3code" = [ "com.t3tools.T3Code.desktop" ];
+  };
+
   launchd.agents = lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
     t3code = {
       enable = true;

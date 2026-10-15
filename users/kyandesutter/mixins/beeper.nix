@@ -6,4 +6,5 @@
   # so it lives in the Linux-only home module rather than the cross-platform
   # programs.nix.
   home.packages = [ pkgs.beeper ];
+  xdg.mimeApps.associations.added."x-scheme-handler/beeper" = [ "beepertexts.desktop" ];
 }

@@ -56,6 +56,10 @@
   #   • PDFs → Papers; plain text → Code; Markdown → Apostrophe.
   #   • Video → Celluloid.
   #   • Office docs → the matching LibreOffice component (Writer/Calc/Impress).
+  # KDE rewrites mimeapps.list in place when an app registers a handler,
+  # replacing the symlink and blocking the next activation. Every handler it
+  # adds is declared next to its app, so the generated file wins.
+  xdg.configFile."mimeapps.list".force = true;
   xdg.mimeApps = {
     enable = true;
     defaultApplications =
