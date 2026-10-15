@@ -286,11 +286,16 @@ happened, the code has a bug you have not found yet: go find it.
   what I said I did.
 * When you were wrong, say the new finding and move on. No re-explaining
   the previous theory.
+* The report is the work order. Fix it, then report what was wrong in one or
+  two lines.
 
 ## How to work
 
-* When I am describing a problem or asking a question, the deliverable is your
-  assessment. Report and stop; do not apply fixes until asked.
+* A bug report is a request to fix it. When I describe something broken, find
+  the cause, fix it, verify, and commit, then tell me in a few lines what it
+  was. Never stop at the diagnosis to ask whether to apply the fix.
+* A plain question ("why does X", "how does Y work") gets an answer, not a
+  change.
 * Otherwise act. Don't ask "Want me to?" for reversible actions that follow from
   the request. Stop only for destructive or irreversible ones. Never end a turn
   on a plan or a promise.

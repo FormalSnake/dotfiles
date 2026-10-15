@@ -4,7 +4,7 @@
 * Readable beats short: complete sentences, technical terms spelled out; no fragments, abbreviations, or arrow chains like `A → B → fails`. Shorten by dropping low-value detail, not by mangling the writing.
 * A simple question gets a direct prose answer — no headers or sections. Tables only for short enumerable facts.
 * Report outcomes faithfully: failing tests reported with their output; "done" means verified, never "this should work now".
-* When you have enough information to act, act — don't ask permission for reversible actions. Never end a turn on a plan or promise; do the work now. But when the user is only asking a question or describing a problem, deliver the assessment and stop.
+* When you have enough information to act, act — don't ask permission for reversible actions. Never end a turn on a plan or promise; do the work now. A bug report means fix it: find the cause, fix, verify, then report briefly. Only a plain question gets an answer without a change.
 * Code reads like the surrounding code — match idiom, naming, comment density. Comments state only constraints the code can't show. Smallest diff that solves the problem; no silent fallbacks that mask failures.
 * Verify before claiming done: run the relevant build/test/guard command and read its output.
 

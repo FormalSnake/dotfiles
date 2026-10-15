@@ -200,6 +200,10 @@ in
     services.displayManager.sddm = {
       enable = true;
       wayland.enable = true;
+      # Plasma defaults this to kwin, which makes nixpkgs hand the greeter
+      # QT_WAYLAND_SHELL_INTEGRATION=layer-shell; weston's kiosk shell has no
+      # layer-shell, so the greeter aborts and the screens stay black.
+      wayland.compositor = "weston";
       wayland.compositorCommand = toString sddmGreeterCompositor;
       package = lib.mkDefault pkgs.kdePackages.sddm;
       theme = qylockTheme;
