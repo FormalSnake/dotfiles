@@ -28,6 +28,28 @@ lib.mkIf enabled {
     steam = kdeLoginItem "Steam" "steam";
   };
 
+  # The Steamed global theme and the olive Steam wallpaper (both from
+  # modules/nixos/mixins/kde.nix), applied once: after that the look is
+  # Plasma's own settings, so changing it in System Settings sticks.
+  systemd.user.services.steamed-theme = {
+    Unit = {
+      Description = "Apply the Steamed theme and wallpaper once";
+      ConditionEnvironment = "XDG_CURRENT_DESKTOP=KDE";
+      After = [ "plasma-plasmashell.service" ];
+      PartOf = [ "graphical-session.target" ];
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
+    Service = {
+      Type = "oneshot";
+      ExecStart = toString (pkgs.writeShellScript "steamed-theme" ''
+        PATH=/run/current-system/sw/bin:$PATH
+        [ "$(kreadconfig6 --file kdeglobals --group KDE --key LookAndFeelPackage)" = Steamed ] && exit 0
+        plasma-apply-lookandfeel --apply Steamed
+        plasma-apply-wallpaperimage /run/current-system/sw/share/wallpapers/steam-classic.png
+      '');
+    };
+  };
+
   # SteamOS keeps "Return to Gaming Mode" on the Plasma desktop; this is the
   # way back to Hyprland (modules/nixos/mixins/kde.nix).
   home.file."Desktop/switch-to-hyprland.desktop".source = config.lib.file.mkOutOfStoreSymlink
