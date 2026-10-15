@@ -64,5 +64,14 @@ in
         NVreg_TemporaryFilePath = "/var/tmp";
       };
     };
+
+    # The driver's GL/Vulkan pipeline cache defaults to a 128 MB cap and evicts
+    # past it. vkd3d-proton feeds every DX12 pipeline through this cache, so a
+    # single open-world game outgrows it (Forza sat at the cap) and recompiles
+    # evicted pipelines mid-play.
+    environment.sessionVariables = {
+      __GL_SHADER_DISK_CACHE_SIZE = toString (10 * 1024 * 1024 * 1024);
+      __GL_SHADER_DISK_CACHE_SKIP_CLEANUP = "1";
+    };
   };
 }

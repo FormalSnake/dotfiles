@@ -25,6 +25,14 @@ in
     programs.gamemode.enable = true;
     programs.gamescope.enable = true;
 
+    # Cap Proton games a few frames under the 144 Hz monitor. Uncapped, a game
+    # outruns the refresh, drops out of VRR into vsync and the frame times
+    # jump. DXVK covers D3D9-11, vkd3d-proton D3D12.
+    environment.sessionVariables = {
+      DXVK_FRAME_RATE = "138";
+      VKD3D_FRAME_RATE = "138";
+    };
+
     environment.systemPackages = [
       epic-games-launcher
       # Fallback Epic client (Legendary underneath) while the official one is
