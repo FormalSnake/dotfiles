@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 let
   # One-shot "reboot into Windows" helper. Limine (unlike systemd-boot) does
   # NOT implement systemd's Boot Loader Interface, so `systemctl reboot
@@ -247,6 +247,38 @@ in
       "nofail"
     ];
   };
+
+  # The other two Windows Steam libraries (D:\SteamLibrary on the Games
+  # partition, Z:\SteamLibrary on the USB SSD), added in Linux Steam under
+  # Settings > Storage. The USB one is an automount so boot never waits on it.
+  fileSystems."/mnt/games" = {
+    device = "/dev/disk/by-uuid/017BFE6375CF515B";
+    fsType = "ntfs3";
+    options = [ "rw" "uid=1000" "gid=100" "umask=022" "windows_names" "noatime" "nofail" ];
+  };
+  fileSystems."/mnt/steamlib" = {
+    device = "/dev/disk/by-uuid/7ED4F163D4F11E59";
+    fsType = "ntfs3";
+    options = [
+      "rw" "uid=1000" "gid=100" "umask=022" "windows_names" "noatime" "nofail"
+      "x-systemd.automount" "x-systemd.device-timeout=5s"
+    ];
+  };
+
+  # Proton prefixes cannot live on these volumes: a prefix needs names like
+  # dosdevices/c:, which windows_names refuses. Each library's compatdata
+  # points at the Linux one instead (Valve's "Using a NTFS disk with Linux and
+  # Windows" guide); Windows Steam never reads compatdata.
+  systemd.tmpfiles.rules =
+    let
+      compatdata = "${config.users.users.kyandesutter.home}/.local/share/Steam/steamapps/compatdata";
+    in
+    [ "d ${compatdata} 0755 kyandesutter users -" ]
+    ++ map (lib: ''L "${lib}/steamapps/compatdata" - - - - ${compatdata}'') [
+      "/mnt/windows/Program Files (x86)/Steam"
+      "/mnt/games/SteamLibrary"
+      "/mnt/steamlib/SteamLibrary"
+    ];
 
   # Ordered into the mount rather than run once at boot: Requires from the
   # mount unit means it also runs ahead of a manual `systemctl start
