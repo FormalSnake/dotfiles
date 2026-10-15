@@ -143,6 +143,13 @@
     # nixpkgs input of its own to override.
     nix-flatpak.url = "github:gmodena/nix-flatpak";
 
+    # SteamOS Gaming Mode on NixOS (gamescope-session, steamos-manager,
+    # Switch to Desktop), used by mixins/gaming.nix.
+    jovian = {
+      url = "github:Jovian-Experiments/Jovian-NixOS";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Dank Material Shell (DMS) desktop shell: Quickshell/QML, official flake
     # (home-manager module under homeModules.dank-material-shell). Pinned to the
     # `stable` branch rather than main. Build from source following our nixpkgs

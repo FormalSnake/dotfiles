@@ -1,4 +1,4 @@
-{ inputs, self, pkgs, ... }:
+{ inputs, self, lib, pkgs, ... }:
 {
   imports = [
     # Generated on first boot with `nixos-generate-config` (placeholder for now).
@@ -326,7 +326,7 @@
     AllowHybridSleep = false;
     AllowSuspendThenHibernate = false;
   };
-  services.upower.criticalPowerAction = "PowerOff";
+  services.upower.criticalPowerAction = lib.mkForce "PowerOff"; # over Jovian's "Ignore"
   services.logind.settings.Login = {
     HandleLidSwitch = "ignore";
     HandleLidSwitchExternalPower = "ignore";
