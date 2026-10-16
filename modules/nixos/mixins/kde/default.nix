@@ -1,6 +1,7 @@
 { config, lib, pkgs, ... }:
 let
   cfg = config.kyan.desktop.kde;
+  gaming = config.kyan.gaming.enable;
   user = "kyandesutter";
 
   # SteamOS-style session switching. SDDM only reads its config when it
@@ -11,7 +12,7 @@ let
   # so a switch cut off by a power loss cannot autologin the next boot; SDDM
   # skips the dangling link.
   sessions = {
-    plasma = "Gaming Mode";
+    plasma = if gaming then "Gaming Mode" else "Switch to Plasma";
     hyprland-uwsm = "Switch to Hyprland";
   };
   switchConf = "/run/sddm-session-switch.conf";
@@ -36,13 +37,13 @@ let
     name = "session-switch-${session}";
     desktopName = label;
     exec = "${lib.getExe session-switch} ${session}";
-    icon = if session == "plasma" then "steam" else "hyprland";
+    icon = if session != "plasma" then "hyprland" else if gaming then "steam" else "kde";
     categories = [ "System" ];
   }) sessions;
 in
 {
   options.kyan.desktop.kde.enable = lib.mkEnableOption
-    "a KDE Plasma session next to Hyprland, the gaming desktop (as on SteamOS)";
+    "a KDE Plasma session next to Hyprland (the gaming desktop on hosts with kyan.gaming, as on SteamOS)";
 
   config = lib.mkIf cfg.enable {
     # SDDM stays the greeter and lists Plasma next to Hyprland.
@@ -79,7 +80,8 @@ in
       });
     '';
 
-    environment.systemPackages = [ session-switch steamed steamClassicWallpaper ] ++ desktopItems;
-    fonts.packages = [ steamed ];
+    environment.systemPackages = [ session-switch ] ++ desktopItems
+      ++ lib.optionals gaming [ steamed steamClassicWallpaper ];
+    fonts.packages = lib.optionals gaming [ steamed ];
   };
 }

@@ -58,6 +58,10 @@
   # the greeter either way.
   kyan.desktop.shell = "formalshell";
 
+  # Plasma next to Hyprland, without the gaming bits the g815 gets with
+  # kyan.gaming (mixins/kde).
+  kyan.desktop.kde.enable = true;
+
   # iPhone notifications and now-playing over BLE (ancs4linux) and the
   # AirPlay receiver for screen mirroring, as on g815.
   services.formalshell.iphone.enable = true;
