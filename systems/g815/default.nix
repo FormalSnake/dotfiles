@@ -214,7 +214,10 @@
 
   # Second SDDM session: Minecraft with the waylandcraft compositor mod as the
   # desktop, no Hyprland underneath (mixins/waylandcraft.nix).
-  kyan.waylandcraft.enable = true;
+  kyan.waylandcraft = {
+    enable = true;
+    output = "HDMI-A-1";
+  };
 
   # Roblox via Sober (mixins/roblox.nix). Android-runtime client, needs
   # Vulkan, so it stays on the dGPU host rather than the shared desktop
