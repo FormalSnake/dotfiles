@@ -36,7 +36,6 @@
       ./mixins/waylandcraft.nix
       ./mixins/roblox.nix
       ./mixins/gaming
-      ./mixins/comms.nix
       ./mixins/asus.nix
       ./mixins/tuned.nix
       ./mixins/phone-integration.nix

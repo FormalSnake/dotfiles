@@ -10,7 +10,7 @@ let
   # entry and a terminal launch both get it.
   modrinth = pkgs.symlinkJoin {
     name = "modrinth-app-no-dmabuf";
-    paths = [ pkgs.modrinth-app ];
+    paths = [ (pkgs.modrinth-app.override { jdks = [ pkgs.zulu21 ]; }) ];
     nativeBuildInputs = [ pkgs.makeWrapper ];
     postBuild = ''
       wrapProgram "$out/bin/ModrinthApp" \
@@ -22,10 +22,11 @@ in
 {
   options.kyan.minecraft.enable = lib.mkEnableOption "Modrinth App launcher";
 
-  # The nixpkgs wrapper puts jdk8/17/21/25 on the launcher's PATH and sets
+  # The nixpkgs wrapper puts its JDK list on the launcher's PATH and sets
   # LD_LIBRARY_PATH for GLFW/LWJGL/OpenAL, so Modrinth's Java autodetect picks
   # up Nix JDKs. Without it the launcher downloads an Adoptium build whose FHS
-  # interpreter cannot exec here, and every instance fails to start.
+  # interpreter cannot exec here, and every instance fails to start. The list
+  # is Java 21 alone: the default adds jdk8, jdk17 and jdk25 to the closure.
   config = lib.mkIf cfg.enable {
     environment.systemPackages = [ modrinth ];
   };

@@ -29,6 +29,11 @@
 # worktree itself when `git status` is clean and nothing in it was touched for
 # WORKTREE_PRUNE_AGE_DAYS; the branch stays. A dirty worktree is never touched.
 #
+# Agent test runs leave their screenshots and logs in loose directories next
+# to the repos (nd-rel-058-runs, polish-shots, bench-rvs-mac, ti-gates): not
+# a git repo, named *-runs, *-shots, *-gates or bench-*, and never looked at
+# again once the task is over. They go after RUNS_AGE_DAYS.
+#
 # VM disks a dev script boots (dev/.linux-builder, dev/.testvm) go once no
 # qemu names them and they sat idle for the stale cutoff.
 #
@@ -42,8 +47,8 @@
 # cutoff is divided by 4 (minimum 1 day) so a full disk is cleared in one pass.
 #
 # Env: ROOTS (space-separated scan roots), AGE_DAYS, TARGET_AGE_DAYS,
-# WORKTREE_AGE_DAYS, WORKTREE_PRUNE_AGE_DAYS, INSTALL_AGE_DAYS, NIX_KEEP,
-# LOW_FREE_GB.
+# WORKTREE_AGE_DAYS, WORKTREE_PRUNE_AGE_DAYS, RUNS_AGE_DAYS, INSTALL_AGE_DAYS,
+# NIX_KEEP, LOW_FREE_GB.
 # Callable from a launchd user agent (mac) or a systemd service (NixOS); logs
 # to stdout/stderr.
 
@@ -63,6 +68,9 @@ WORKTREE_AGE_DAYS="${WORKTREE_AGE_DAYS:-3}"
 # A clean worktree nobody opened in two weeks is finished work; its branch
 # keeps the commits. Oct 2026: 83 of them under one repo's .claude/worktrees.
 WORKTREE_PRUNE_AGE_DAYS="${WORKTREE_PRUNE_AGE_DAYS:-14}"
+# Run artifacts are read within hours of the run or never. Oct 2026: 42 such
+# dirs on the g815, 15 GB, the oldest from July, none opened since.
+RUNS_AGE_DAYS="${RUNS_AGE_DAYS:-7}"
 NIX_KEEP="${NIX_KEEP:-14d}"
 LOW_FREE_GB="${LOW_FREE_GB:-30}"
 OS=$(uname -s)
@@ -89,7 +97,7 @@ LOW_FREE=0
 free_gb=$(df -Pk / | awk 'NR==2 {printf "%d", $4/1048576}')
 if (( free_gb < LOW_FREE_GB )); then
   LOW_FREE=1
-  for v in AGE_DAYS INSTALL_AGE_DAYS TARGET_AGE_DAYS WORKTREE_AGE_DAYS WORKTREE_PRUNE_AGE_DAYS; do
+  for v in AGE_DAYS INSTALL_AGE_DAYS TARGET_AGE_DAYS WORKTREE_AGE_DAYS WORKTREE_PRUNE_AGE_DAYS RUNS_AGE_DAYS; do
     n=$(( ${!v} / 4 )); (( n >= 1 )) || n=1
     printf -v "$v" '%s' "$n"
   done
@@ -277,7 +285,23 @@ for root in "${SCAN_ROOTS[@]}"; do
   )
 done
 
-### 1b. Agent worktrees that are finished
+### 1b. Agent run artifacts
+
+# Depth 1 under the scan roots and the home dir. A directory that is a git
+# repo, or sits inside one, is somebody's checkout whatever its name.
+for root in "${SCAN_ROOTS[@]}" "$HOME"; do
+  [[ -d "$root" ]] || continue
+  while IFS= read -r -d '' dir; do
+    name=$(basename "$dir")
+    [[ "$name" =~ (-runs[0-9]*|-shots|-macshots|-gates)$ || "$name" =~ ^bench- ]] || continue
+    [[ -e "$dir/.git" ]] && continue
+    git -C "$dir" rev-parse --is-inside-work-tree >/dev/null 2>&1 && continue
+    (( $(newest_age_days "$dir") >= RUNS_AGE_DAYS )) || continue
+    queue "agent-runs" "$dir"
+  done < <("$FIND" "$root" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null)
+done
+
+### 1c. Agent worktrees that are finished
 
 # Only the dirs agents create for themselves. Worktrees the owner checked out
 # directly under ~/Developer are never candidates. `git worktree remove`

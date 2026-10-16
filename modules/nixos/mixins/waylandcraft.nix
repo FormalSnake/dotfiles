@@ -9,7 +9,10 @@ let
   # waylandcraft shells out to xkbcli for the system keymap and autostarts
   # xwayland-satellite for X11 clients, both looked up on the game's PATH. Its
   # native library links libxkbcommon.
+  # Only Java 21 on the launcher's Java path: the wrapper's default set adds
+  # jdk8, jdk17 and jdk25 to the closure for Minecraft versions not played here.
   prism = pkgs.prismlauncher.override {
+    jdks = [ pkgs.zulu21 ];
     additionalPrograms = [ pkgs.libxkbcommon pkgs.xwayland-satellite ];
     additionalLibs = [ pkgs.libxkbcommon ];
   };

@@ -38,15 +38,11 @@
     pantheon.elementary-camera
     epiphany # web browser
 
-    # Media + office.
+    # Media.
     #   • celluloid: GTK4/libadwaita mpv frontend, plays every common video
     #     format. GNOME Videos (totem) is the "native" app but has weak codec
     #     support; mpv handles everything, so this is the reliable GTK choice.
-    #   • libreoffice-stable: the only real office suite here (GNOME has none).
-    #     It renders through the gtk3 VCL backend, so it follows the GTK theme
-    #     the shell sets (mixins/elementary). Opens Word/Excel/PowerPoint + ODF.
     celluloid
-    libreoffice-stable
   ];
 
   # Default apps by MIME. enable writes ~/.config/mimeapps.list.
@@ -55,7 +51,6 @@
   #   • Images → Loupe.
   #   • PDFs → Papers; plain text → Code; Markdown → Apostrophe.
   #   • Video → Celluloid.
-  #   • Office docs → the matching LibreOffice component (Writer/Calc/Impress).
   # KDE rewrites mimeapps.list in place when an app registers a handler,
   # replacing the symlink and blocking the next activation. Every handler it
   # adds is declared next to its app, so the generated file wins.
@@ -97,26 +92,6 @@
         "video/3gpp"
         "video/x-flv"
         "video/x-ms-wmv"
-      ] (_: [ "io.github.celluloid_player.Celluloid.desktop" ])
-      // lib.genAttrs [
-        # Word-processor documents (.doc/.docx/.odt/.rtf) → Writer.
-        "application/msword"
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        "application/vnd.oasis.opendocument.text"
-        "application/rtf"
-      ] (_: [ "writer.desktop" ])
-      // lib.genAttrs [
-        # Spreadsheets (.xls/.xlsx/.ods/.csv) → Calc.
-        "application/vnd.ms-excel"
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        "application/vnd.oasis.opendocument.spreadsheet"
-        "text/csv"
-      ] (_: [ "calc.desktop" ])
-      // lib.genAttrs [
-        # Presentations (.ppt/.pptx/.odp) → Impress.
-        "application/vnd.ms-powerpoint"
-        "application/vnd.openxmlformats-officedocument.presentationml.presentation"
-        "application/vnd.oasis.opendocument.presentation"
-      ] (_: [ "impress.desktop" ]);
+      ] (_: [ "io.github.celluloid_player.Celluloid.desktop" ]);
   };
 }
