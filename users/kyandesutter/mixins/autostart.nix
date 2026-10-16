@@ -139,6 +139,21 @@ in
     };
   };
 
+  # Signal (Flare, mixins/flare.nix). Window rule pins it to workspace 4.
+  systemd.user.services.flare = {
+    Unit = {
+      Description = "Flare (Signal)";
+      PartOf = [ "graphical-session.target" ];
+      After = [ "graphical-session.target" ];
+      "X-SwitchMethod" = "keep-old";
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
+    Service = {
+      Type = "simple";
+      ExecStart = loginExec "flare";
+    };
+  };
+
   # Messages (the iMessage client in mixins/messages.nix). Window rule pins it to
   # workspace 4.
   #

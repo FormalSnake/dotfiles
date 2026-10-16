@@ -18,6 +18,7 @@
     ./mixins/kde.nix
     ./mixins/discord.nix
     ./mixins/beeper.nix
+    ./mixins/flare.nix
     ./mixins/messages.nix
     ./mixins/formalmusic.nix
     ./mixins/helium.nix

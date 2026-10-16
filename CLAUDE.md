@@ -119,8 +119,10 @@ it.
 ## Overview
 
 Declarative config for three machines via one flake (flake-parts):
-- **`macbook`** — `aarch64-darwin`, nix-darwin + home-manager. Primary dev host.
-- **`g815`** — `x86_64-linux`, NixOS + home-manager. ASUS ROG laptop; Hyprland +
+- **`macbook`** — `aarch64-darwin`, nix-darwin + home-manager. The development
+  server, not a client: no desktop apps for general use (chat, media) go here.
+- **`g815`** — `x86_64-linux`, NixOS + home-manager. ASUS ROG laptop, a client
+  and also the build machine (compiles for the e1504g); Hyprland +
   FormalShell desktop, everything on the NVIDIA dGPU (MUX), always on AC.
 - **`e1504g`** — `x86_64-linux`, NixOS + home-manager. ASUS Vivobook (8 GB,
   Intel-only); same Hyprland + FormalShell desktop, none of the dGPU/asus
@@ -129,9 +131,11 @@ Declarative config for three machines via one flake (flake-parts):
   0 (since 2026-10-02), so a build fails when the g815 is unreachable instead
   of building locally.
 
-The macbook is the real development host; the g815 is used as a thin client that
-reaches the mac over SSH/MOSH and remote desktop to work remotely, rather than
-building locally.
+The macbook is a development server. The two NixOS laptops are the clients and
+the general-use computers: they reach the mac over SSH/MOSH and remote desktop
+for dev work, and everyday apps (Discord, Signal, Beeper, browsers) live on
+them. A request to install a desktop app means the Linux hosts unless it says
+mac.
 
 Both Linux hosts run **Hyprland** (since 2026-08-17; it replaced niri, which had
 replaced Hyprland in July). The config language is **Lua**, not hyprlang —
