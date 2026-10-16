@@ -12,7 +12,7 @@ let
 
   # Host mounts of partitions on that disk that Windows owns. / and /boot sit
   # on it too and stay mounted: the guest only ever sees its own overlay copy.
-  windowsMounts = [ "mnt-windows.mount" ];
+  windowsMounts = [ "mnt-windows.mount" "mnt-games.mount" ];
   runFlag = "/run/windows-vm.running";
 
   # Root free space the overlay may never take. The launcher wants 5G on top
