@@ -152,11 +152,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # FormalShell: the in-house Quickshell/QML desktop shell (bar, lock,
-    # notifications, menu; github.com/FormalSnake/FormalShell). Trialing as
-    # DMS's replacement, e1504g first (kyan.desktop.shell = "formalshell").
-    # Its pinned quickshell follows our nixpkgs, same as DMS: built from
-    # source, no cachix substituter.
+    # FormalShell: the in-house Rust desktop shell (bar, lock, notifications,
+    # menu; github.com/FormalSnake/FormalShell), DMS's replacement on both
+    # Linux hosts (kyan.desktop.shell = "formalshell"). Built from source
+    # against our nixpkgs, no cachix substituter.
     formalshell = {
       url = "github:FormalSnake/FormalShell";
       inputs.nixpkgs.follows = "nixpkgs";
