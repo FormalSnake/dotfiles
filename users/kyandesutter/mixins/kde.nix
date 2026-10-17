@@ -63,12 +63,6 @@ lib.mkIf osConfig.kyan.desktop.kde.enable (lib.mkMerge [
     };
   };
 
-  # SteamOS keeps "Return to Gaming Mode" on the Plasma desktop; this is the
-  # way back to Hyprland (modules/nixos/mixins/kde).
-  home.file."Desktop/switch-to-hyprland.desktop".source = config.lib.file.mkOutOfStoreSymlink
-    "/run/current-system/sw/share/applications/session-switch-hyprland-uwsm.desktop";
-}
-(lib.mkIf gaming {
   # The Steamed global theme and the olive Steam wallpaper (both from
   # modules/nixos/mixins/kde), applied once: after that the look is
   # Plasma's own settings, so changing it in System Settings sticks.
@@ -94,6 +88,12 @@ lib.mkIf osConfig.kyan.desktop.kde.enable (lib.mkMerge [
     };
   };
 
+  # SteamOS keeps "Return to Gaming Mode" on the Plasma desktop; this is the
+  # way back to Hyprland (modules/nixos/mixins/kde).
+  home.file."Desktop/switch-to-hyprland.desktop".source = config.lib.file.mkOutOfStoreSymlink
+    "/run/current-system/sw/share/applications/session-switch-hyprland-uwsm.desktop";
+}
+(lib.mkIf gaming {
   # Discord opens on the internal panel. KWin numbers screens by its own
   # output order, so screen 1 is the second output it enumerated.
   # Rule type 3 is "Apply Initially": Discord can still be dragged elsewhere.

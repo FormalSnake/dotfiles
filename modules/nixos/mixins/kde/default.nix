@@ -61,6 +61,9 @@ in
       path = [ pkgs.coreutils pkgs.systemd ];
       script = ''
         printf '[Autologin]\nUser=${user}\nSession=%s.desktop\n' "$1" > ${switchConf}
+        # The session's user units outlive its logind session, and uwsm will
+        # not start Hyprland while graphical-session.target is still active.
+        systemctl --user -M ${user}@ stop graphical-session.target || true
         systemctl restart display-manager.service
         sleep 20
         rm -f ${switchConf}
@@ -80,8 +83,23 @@ in
       });
     '';
 
-    environment.systemPackages = [ session-switch ] ++ desktopItems
-      ++ lib.optionals gaming [ steamed steamClassicWallpaper ];
-    fonts.packages = lib.optionals gaming [ steamed ];
+    # graphical-session.target is StopWhenUnneeded, but xdg-desktop-portal and
+    # uwsm's fumon hold it with Requisite=, so it outlives plasma-workspace.target
+    # at logout. kwin, plasmashell and the rest are PartOf it and keep running,
+    # the logind session never finishes closing, and the next uwsm login exits.
+    systemd.user.services.plasma-end-graphical-session = {
+      description = "Stop graphical-session.target when the Plasma workspace stops";
+      partOf = [ "plasma-workspace.target" ];
+      wantedBy = [ "plasma-workspace.target" ];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        ExecStart = "${pkgs.coreutils}/bin/true";
+        ExecStop = "${pkgs.systemd}/bin/systemctl --user --no-block stop graphical-session.target";
+      };
+    };
+
+    environment.systemPackages = [ session-switch steamed steamClassicWallpaper ] ++ desktopItems;
+    fonts.packages = [ steamed ];
   };
 }

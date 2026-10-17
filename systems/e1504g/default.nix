@@ -444,6 +444,8 @@
       systemd.user.services.panel-gamma = {
         Unit = {
           Description = "Punchier panel gamma via wl-gammarelay-rs";
+          # KWin has no wlr-gamma-control, so under Plasma this restart-loops.
+          ConditionEnvironment = "XDG_CURRENT_DESKTOP=Hyprland";
           PartOf = [ "graphical-session.target" ];
           After = [ "graphical-session.target" ];
         };
