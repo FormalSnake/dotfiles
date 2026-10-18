@@ -195,7 +195,7 @@
     # Messages, the iMessage client: package + home-manager module
     # (homeModules.default), wired in users/kyandesutter/mixins/messages.nix.
     messages = {
-      url = "github:FormalSnake/messages";
+      url = "github:FormalSnake/messages/nd-port";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

@@ -167,6 +167,21 @@
         "type": "github"
       }
     },
+    "crane_3": {
+      "locked": {
+        "lastModified": 1791754810,
+        "narHash": "sha256-cN0Mgk+sQtCJcGWs9H4M0CnLRAuC4I8aCwiBTcBJs6E=",
+        "owner": "ipetkov",
+        "repo": "crane",
+        "rev": "bd63bf1d0a0f6dcacd7549c714a671ee63b0db6a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ipetkov",
+        "repo": "crane",
+        "type": "github"
+      }
+    },
     "dank-material-shell": {
       "inputs": {
         "dank-qml-common": "dank-qml-common",
@@ -754,21 +769,45 @@
     },
     "messages": {
       "inputs": {
+        "nativedesktop": "nativedesktop",
         "nixpkgs": [
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1791466048,
-        "narHash": "sha256-pQBnVjiovuAX8YmyVd1hCM6kd0WwT9CFAn/Bp1+Qs9Y=",
+        "lastModified": 1792312693,
+        "narHash": "sha256-X6MoUbPhInUGLYU+FSy5UfB57+jkOJyFS1Dn+LjbMAM=",
         "owner": "FormalSnake",
         "repo": "messages",
-        "rev": "d12b6625cba6049b56d9c7f98cae22acc7c54cae",
+        "rev": "6917b4ff8593285c9319019b89a44837c933d963",
         "type": "github"
       },
       "original": {
         "owner": "FormalSnake",
+        "ref": "nd-port",
         "repo": "messages",
+        "type": "github"
+      }
+    },
+    "nativedesktop": {
+      "inputs": {
+        "crane": "crane_3",
+        "nixpkgs": [
+          "messages",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1792280624,
+        "narHash": "sha256-x+QYnJ71J9+8gzvTuDAcZZfbuWRiDGOQaEp0HI/25hI=",
+        "owner": "FormalSnake",
+        "repo": "NativeDesktop",
+        "rev": "08fc1658ffe505f222958f1856a129fbaed10edd",
+        "type": "github"
+      },
+      "original": {
+        "owner": "FormalSnake",
+        "repo": "NativeDesktop",
         "type": "github"
       }
     },
