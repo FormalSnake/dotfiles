@@ -26,6 +26,21 @@ let
 
   font = "${pkgs.nerd-fonts.geist-mono}/share/fonts/opentype/NerdFonts/GeistMono/GeistMonoNerdFont-Regular.otf";
 
+  # The desk unit is the Discord edition of the Mini (PID 0x00b3), which
+  # 0.9.8 doesn't list. Drop the patch once a release past 0.9.8 lands. The
+  # sdist ships these two files with CRLF endings and the GitHub patch is LF.
+  streamdeck = pkgs.python3Packages.streamdeck.overridePythonAttrs (old: {
+    prePatch = (old.prePatch or "") + ''
+      sed -i 's/\r$//' src/StreamDeck/DeviceManager.py src/StreamDeck/ProductIDs.py
+    '';
+    patches = (old.patches or [ ]) ++ [
+      (pkgs.fetchpatch {
+        url = "https://github.com/abcminiuser/python-elgato-streamdeck/commit/ac67de1f70.patch";
+        hash = "sha256-IOEfH32Dy0bKq4wNXTuDeRgx6eMJXXdLd6Dk6cJg/pc=";
+      })
+    ];
+  });
+
   # The Stream Deck Mini on the g815's desk: six keys, two pages, the last key
   # flips between them.
   #
@@ -44,7 +59,7 @@ let
   # remote side. See that unit for why ClearAllForwardings and bash -c.
   streamdeckKeys = pkgs.writers.writePython3Bin "streamdeck-keys"
     {
-      libraries = with pkgs.python3Packages; [ streamdeck pillow fonttools ];
+      libraries = [ streamdeck ] ++ (with pkgs.python3Packages; [ pillow fonttools ]);
       flakeIgnore = [ "E501" ];
     } ''
     import json
@@ -112,7 +127,7 @@ let
 
 
     def spawn(cmd):
-        threading.Thread(target=subprocess.run, args=(cmd,), kwargs={"check": False}, daemon=True).start()
+        threading.Thread(target=subprocess.run, args=(cmd,), kwargs={"check": False, "stdout": subprocess.DEVNULL}, daemon=True).start()
 
 
     def parse_agents(line):
