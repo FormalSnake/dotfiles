@@ -27,11 +27,19 @@ let
   font = "${pkgs.nerd-fonts.geist-mono}/share/fonts/opentype/NerdFonts/GeistMono/GeistMonoNerdFont-Regular.otf";
 
   # The desk unit is the Discord edition of the Mini (PID 0x00b3), which
-  # 0.9.8 doesn't list. Drop the patch once a release past 0.9.8 lands. The
+  # 0.9.8 doesn't list. Drop the fetchpatch once a release past 0.9.8 lands. The
   # sdist ships these two files with CRLF endings and the GitHub patch is LF.
   streamdeck = pkgs.python3Packages.streamdeck.overridePythonAttrs (old: {
     prePatch = (old.prePatch or "") + ''
       sed -i 's/\r$//' src/StreamDeck/DeviceManager.py src/StreamDeck/ProductIDs.py
+    '';
+    # nixpkgs points the transport at hidapi's libusb backend, which detaches
+    # usbhid and reads this unit's key reports in a layout the Mini class
+    # can't decode (presses land on other keys). The hidraw backend gets the
+    # plain Mini report, the same one rust-elgato-streamdeck decodes.
+    postPatch = (old.postPatch or "") + ''
+      substituteInPlace src/StreamDeck/Transport/LibUSBHIDAPI.py \
+        --replace-fail libhidapi-libusb libhidapi-hidraw
     '';
     patches = (old.patches or [ ]) ++ [
       (pkgs.fetchpatch {
@@ -245,7 +253,10 @@ let
             icon, label, fg, _, _ = key
             draw = ImageDraw.Draw(image)
             w, h = image.size
-            draw.text((w / 2, h * 0.42), glyph(icon), font=icon_font, fill=fg, anchor="mm")
+            # Nerd Font icons overflow their monospace cell, so centring on the
+            # advance box lands them right of centre. Centre the ink instead.
+            x0, y0, x1, y1 = draw.textbbox((0, 0), glyph(icon), font=icon_font)
+            draw.text(((w - (x1 - x0)) / 2 - x0, h * 0.42 - (y1 - y0) / 2 - y0), glyph(icon), font=icon_font, fill=fg)
             draw.text((w / 2, h * 0.84), label[:9], font=label_font, fill=fg, anchor="mm")
         return PILHelper.to_native_key_format(deck, image)
 
@@ -253,6 +264,7 @@ let
     def on_key(deck, index, pressed):
         if not pressed:
             return
+        print(f"key {index}", flush=True)
         with STATE.lock:
             page = STATE.page
         if page == "system" and index in SYSTEM_TOGGLES:
