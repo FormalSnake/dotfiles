@@ -33,14 +33,6 @@ let
     prePatch = (old.prePatch or "") + ''
       sed -i 's/\r$//' src/StreamDeck/DeviceManager.py src/StreamDeck/ProductIDs.py
     '';
-    # nixpkgs points the transport at hidapi's libusb backend, which detaches
-    # usbhid and reads this unit's key reports in a layout the Mini class
-    # can't decode (presses land on other keys). The hidraw backend gets the
-    # plain Mini report, the same one rust-elgato-streamdeck decodes.
-    postPatch = (old.postPatch or "") + ''
-      substituteInPlace src/StreamDeck/Transport/LibUSBHIDAPI.py \
-        --replace-fail libhidapi-libusb libhidapi-hidraw
-    '';
     patches = (old.patches or [ ]) ++ [
       (pkgs.fetchpatch {
         url = "https://github.com/abcminiuser/python-elgato-streamdeck/commit/ac67de1f70.patch";
@@ -79,6 +71,7 @@ let
     from fontTools.ttLib import TTFont
     from PIL import ImageDraw, ImageFont
     from StreamDeck.DeviceManager import DeviceManager
+    from StreamDeck.Devices.StreamDeck import ControlType
     from StreamDeck.ImageHelpers import PILHelper
 
     FONT = "${font}"
@@ -264,7 +257,6 @@ let
     def on_key(deck, index, pressed):
         if not pressed:
             return
-        print(f"key {index}", flush=True)
         with STATE.lock:
             page = STATE.page
         if page == "system" and index in SYSTEM_TOGGLES:
@@ -280,7 +272,34 @@ let
             keys[index][4]()
 
 
+    # The Discord edition Mini sends input packets larger than its HID
+    # descriptor declares (16 button bytes), so usbhid's hidraw path babbles on
+    # the first press ("input irq status -75" in dmesg) and goes quiet; only
+    # hidapi's libusb backend, which nixpkgs already uses, sees presses. Its
+    # packets don't follow the plain Mini layout: per press, byte 15 is set and
+    # the key sits at byte k + 1 for keys 0-3, byte 0 for key 5, and nowhere
+    # for key 4, mapped by pressing each key on the desk unit. Every packet is
+    # logged so the map can be checked against the journal.
+    DISCORD_PID = 0x00b3
+    DISCORD_BYTES = {1: 0, 2: 1, 3: 2, 4: 3, 0: 5}
+
+
+    def discord_states(deck):
+        report = deck.device.read(1024)
+        if not report:
+            return None
+        lit = {i: b for i, b in enumerate(report) if b}
+        states = [False] * 6
+        if report[15]:
+            pressed = next((key for byte, key in DISCORD_BYTES.items() if report[byte]), 4)
+            states[pressed] = True
+        print(f"report len={len(report)} lit={lit} keys={[i for i, s in enumerate(states) if s]}", flush=True)
+        return {ControlType.KEY: states}
+
+
     def drive(deck):
+        if deck.product_id() == DISCORD_PID:
+            deck._read_control_states = lambda: discord_states(deck)
         deck.open()
         deck.reset()
         deck.set_brightness(70)
