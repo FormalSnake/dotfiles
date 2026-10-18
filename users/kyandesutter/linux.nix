@@ -10,6 +10,7 @@
     ./mixins/macbook-mount.nix
     ./mixins/airpods.nix
     ./mixins/dualsense.nix
+    ./mixins/streamdeck.nix
     ./mixins/easyeffects.nix
     ./mixins/dms.nix
     ./mixins/dankcal.nix

@@ -32,6 +32,7 @@
       ./mixins/kde
       ./mixins/online-accounts.nix
       ./mixins/dualsense.nix
+      ./mixins/streamdeck.nix
       ./mixins/minecraft.nix
       ./mixins/waylandcraft.nix
       ./mixins/roblox.nix
