@@ -9,11 +9,28 @@ let
   # `t3 serve` runs on node, which already has it loaded, but the desktop app
   # runs its backend under Electron, which does not, so the backend dies on
   # start and the app never opens a window.
+  #
+  # Pinned to 0.1.0 ahead of nixpkgs-unstable: the mobile app refuses 0.0.x
+  # servers. Drop the src/pnpmDeps override (and the rpath fixup, which
+  # nixpkgs master carries too) once pkgs.t3code reaches 0.1.0.
   t3code = pkgs.t3code.override {
     enableCodex = false;
     t3code-unwrapped = pkgs.t3code.unwrapped.overrideAttrs (
-      old:
-      lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
+      finalAttrs: old:
+      {
+        version = "0.1.0";
+        src = old.src.override {
+          tag = "v${finalAttrs.version}";
+          hash = "sha256-P82DqoY1E9wtROwu5Nr7MB/I1PdmZHWXXR4nRa4GWXM=";
+        };
+        pnpmDeps = pkgs.fetchPnpmDeps {
+          inherit (finalAttrs) pname version src pnpmWorkspaces;
+          pnpm = pkgs.pnpm_11;
+          fetcherVersion = 4;
+          hash = "sha256-oX4tOu20tYO3ci7VvSEL8eFgxAYWp5HlQFSfAWJGJmg=";
+        };
+      }
+      // lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
         postFixup = (old.postFixup or "") + ''
           for pty in $out/libexec/t3code/node_modules/.pnpm/node-pty@*/node_modules/node-pty/prebuilds/linux-*/pty.node; do
             chmod u+w "$pty"
