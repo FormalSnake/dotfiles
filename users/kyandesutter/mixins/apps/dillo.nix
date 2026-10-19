@@ -6,7 +6,7 @@
   # HTML/CSS layout (no WebKit, no Blink), and speaks HTTPS through libressl.
   #
   # FLTK 1.3 is X11-only, so this runs through XWayland. XWayland renders at
-  # native pixel density here (force_zero_scaling in mixins/desktop/hyprland.nix), so on
+  # native pixel density here (force_zero_scaling in mixins/desktop/hyprland/options.nix), so on
   # the g815's 1.25-scaled panel the UI comes out small; FLTK's own scaling
   # (Ctrl +/-, or FLTK_SCALING_FACTOR) covers that per session.
   home.packages = [ pkgs.dillo ];

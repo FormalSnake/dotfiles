@@ -141,7 +141,7 @@ Both Linux hosts run **Hyprland** (since 2026-08-17; it replaced niri, which had
 replaced Hyprland in July). The config language is **Lua**, not hyprlang —
 Hyprland 0.55 dropped the old `.conf` syntax outright, and home-manager's
 `wayland.windowManager.hyprland.settings` still emits hyprlang, so
-`users/kyandesutter/mixins/desktop/hyprland.nix` writes `~/.config/hypr/hyprland.lua`
+`users/kyandesutter/mixins/desktop/hyprland/` writes `~/.config/hypr/hyprland.lua`
 itself rather than using the HM module. The tiling layout is Hyprland's built-in
 `scrolling` (in core since 0.54), so the niri column model carries over. Wiki:
 <https://wiki.hypr.land/Configuring/>.
@@ -230,7 +230,7 @@ the static Flexoki `general.col`. DMS's `settings.json` is runtime-mutable
 blanking must stay disabled there (eDP-1 wake-modeset bug). **Flexoki is only a
 static fallback** for consumers that genuinely can't be dynamic: Hyprland's
 pre-palette border colours (the static
-`general.col` in `users/kyandesutter/mixins/desktop/hyprland.nix`), and CLI tools with no matugen
+`general.col` in `users/kyandesutter/mixins/desktop/hyprland/options.nix`), and CLI tools with no matugen
 template (bat, fzf, lazygit, fish). Neovim has no template of its own: its
 `terminal` colourscheme (`users/kyandesutter/config/nvim/colors/`) paints with
 ANSI indices only (`termguicolors` off), so whichever Ghostty is outermost
@@ -273,7 +273,7 @@ removed on 2026-08-24 (git has them). What remains:
   its connector name follows the driver) and HDMI-A-1 scan out from the RTX
   5070; the iGPU is idle and not named in
   `AQ_DRM_DEVICES` (`~/.config/uwsm/env-hyprland`,
-  `users/kyandesutter/mixins/desktop/hyprland.nix`).
+  `users/kyandesutter/mixins/desktop/hyprland/session.nix`).
 - `modules/nixos/mixins/hardware/nvidia.nix`: open driver, `powerManagement.enable`
   (nvidia-suspend/resume services + VRAM preservation), PowerMizer max, VA-API
   on nvidia. PRIME and the per-app GPU wrappers are gone.

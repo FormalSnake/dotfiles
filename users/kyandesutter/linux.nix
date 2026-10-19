@@ -3,7 +3,7 @@
   # Linux/NixOS-only home mixins (Hyprland desktop). Wired on the g815 host via
   # self.homeModules.kyandesutter-linux.
   imports = [
-    ./mixins/desktop/hyprland.nix
+    ./mixins/desktop/hyprland
     ./mixins/desktop/qt.nix
     ./mixins/desktop/desktop-apps.nix
     ./mixins/desktop/autostart.nix

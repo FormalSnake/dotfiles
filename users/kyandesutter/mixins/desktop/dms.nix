@@ -51,9 +51,9 @@ let
   #     rest of the bar's config to `undefined`). niriLayoutRadiusOverride is
   #     left at its SPEC default (-1, off): it is a niri-only knob in DMS and
   #     does nothing under Hyprland, whose window rounding is set directly in
-  #     mixins/desktop/hyprland.nix (decoration.rounding).
+  #     mixins/desktop/hyprland/options.nix (decoration.rounding).
   #   - showWorkspaceName + showOccupiedWorkspacesOnly: renders the named
-  #     workspaces (wsName in mixins/desktop/hyprland.nix) on the bar's pills instead of
+  #     workspaces (wsName in mixins/desktop/hyprland/default.nix) on the bar's pills instead of
   #     bare indices, and hides empty ones (the closest match to Noctalia's
   #     old hide_when_empty=true + name-label behaviour). There's no per-widget
   #     "max name length" key upstream (WorkspaceSwitcher.qml renders the full
@@ -373,7 +373,7 @@ in
       # power-state widget was dropped by preference; this usage widget is the
       # only GPU pill on the bar.
       nvidiaGpuMonitor.enable = hasNvidia;
-      # Emoji & Unicode launcher, bound to Mod+Period in mixins/desktop/hyprland.nix via
+      # Emoji & Unicode launcher, bound to Mod+Period in mixins/desktop/hyprland/binds.nix via
       # `spotlight toggleQuery :e` (:e is the plugin's default trigger).
       emojiLauncher.enable = true;
 
@@ -390,7 +390,7 @@ in
       # dms-bar-plugins.jq (both kept in the same order).
       # githubNotifier (open PRs authored by you + issues assigned to you). Reads
       # via `gh` (present); run `gh auth login` once. The GitHub brand glyph
-      # needs font-awesome (added to fonts.packages in mixins/desktop/hyprland.nix).
+      # needs font-awesome (added to fonts.packages in modules/nixos/mixins/desktop/hyprland.nix).
       githubNotifier.enable = true;
       # claudeCodeUsage: token usage / rate limits / daily charts for the Claude
       # Code subscription. Parses ~/.claude logs with jq (added to home.packages).
@@ -535,7 +535,7 @@ in
       # through `hyprctl eval` so the colours apply instantly with no reload.
       # hyprland.lua also dofile's the same output on every config eval, so a
       # later `hyprctl reload` keeps the wallpaper colours instead of falling
-      # back to the static Flexoki `general.col` (see mixins/desktop/hyprland.nix).
+      # back to the static Flexoki `general.col` (see mixins/desktop/hyprland/options.nix).
       # primary = active border; outline = inactive.
       [templates.hypr-border]
       input_path = "~/.config/matugen/templates/hypr-border.lua.tmpl"

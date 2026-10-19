@@ -7,7 +7,7 @@
   #
   # The gesture button becomes Meta, so it IS the session's Mod: every Mod bind
   # is reachable with the mouse alone (see the wheel binds in
-  # users/kyandesutter/mixins/desktop/hyprland.nix). Back/forward become F13/F14, which
+  # users/kyandesutter/mixins/desktop/hyprland/binds.nix). Back/forward become F13/F14, which
   # no physical key here emits, and drive column focus. The thumb wheel is
   # deliberately left alone: a bare horizontal-wheel bind would take the axis
   # away from applications, and a modifier defeats the point of a thumb wheel.

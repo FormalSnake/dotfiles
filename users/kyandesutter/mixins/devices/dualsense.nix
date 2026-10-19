@@ -4,7 +4,7 @@ let
   inherit (flexoki) accents base;
   stripHash = lib.removePrefix "#";
 
-  # Same shell selector as mixins/desktop/hyprland.nix, so the launcher button opens
+  # Same shell selector as mixins/desktop/hyprland/default.nix, so the launcher button opens
   # whichever shell owns the session rather than a second one.
   useFormalshell = osConfig.kyan.desktop.shell == "formalshell";
   launcher =
@@ -206,7 +206,7 @@ let
   #   L2/R2              volume down/up, rate follows how far they're pressed
   #
   # Same dispatchers as the mod+H/L, mod+Q and mod+scroll binds in
-  # mixins/desktop/hyprland.nix, so the controller can't drift from the keyboard.
+  # mixins/desktop/hyprland/binds.nix, so the controller can't drift from the keyboard.
   # `hyprctl dispatch` takes Lua since 0.55 (it wraps the argument in
   # hl.dispatch(...)), hence expressions rather than the old "layoutmsg focus
   # l" strings.

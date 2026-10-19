@@ -83,7 +83,7 @@ verification is hardware-only (see the checklist above).
 ### Phase 3 — Desktop (Hyprland + noctalia)
 - [ ] `modules/nixos/mixins/desktop/hyprland.nix`: `programs.hyprland`, xdg portals, polkit, greetd/login.
 - [ ] `modules/nixos/mixins/hardware/audio.nix`: pipewire (alsa/pulse/jack) + rtkit.
-- [ ] `users/kyandesutter/mixins/desktop/hyprland.nix`: monitors (eDP-1 240Hz + external 1440p), keybinds
+- [ ] `users/kyandesutter/mixins/desktop/hyprland/`: monitors (eDP-1 240Hz + external 1440p), keybinds
       (SUPER mirror of aerospace), window→workspace rules, animations/look, autostart.
 - [ ] `users/kyandesutter/mixins/noctalia.nix`: import noctalia HM module + `programs.noctalia`.
 - [ ] `users/kyandesutter/mixins/apps/helium.nix`: helium overlay + package, default browser, web ws.

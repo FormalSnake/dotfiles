@@ -3,7 +3,7 @@ let
   gaming = osConfig.kyan.gaming.enable;
   hasNvidia = osConfig.kyan.nvidia.enable or false;
 
-  # Same layout and scale as the hl.monitor rules in mixins/desktop/hyprland.nix. The
+  # Same layout and scale as the hl.monitor rules in mixins/desktop/hyprland/outputs.nix. The
   # panel's connector name follows the driver (eDP-1 or eDP-2 behind the MUX),
   # so it is matched by prefix. VRR stays automatic, like Hyprland's vrr = 3.
   outputArgs = if hasNvidia then ''
