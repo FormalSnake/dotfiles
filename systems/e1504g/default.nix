@@ -397,6 +397,12 @@
     }
   ];
 
+  # UPower's default HybridSleep hibernates first, and there is no resume=
+  # for the swapfile, so the image could never be restored. On 2026-10-19 the
+  # image write hung outright at the 2% action and the machine needed a
+  # forced power-off. Shut down cleanly instead.
+  services.upower.criticalPowerAction = "PowerOff";
+
   home-manager.users.kyandesutter =
     { config, pkgs, lib, ... }:
     {
