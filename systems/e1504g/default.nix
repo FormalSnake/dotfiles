@@ -40,8 +40,16 @@
   # kernel ships energy_uj root-only (PLATYPUS side-channel mitigation);
   # relax the package-0 zone to world-readable for the user shell. The shell
   # degrades to charge-rate-only wherever this rule is absent.
+  #
+  # AC and battery notifications are s2idle wakeup sources, and the EC flips
+  # AC0 every ~5 s on a USB-C power bank it only gets a 5 V contract from, so
+  # a suspended machine woke within seconds and drained 4% in half an hour.
+  # Lid (EC _Q81 on \_SB.LID), power button and keyboard still wake it. The
+  # cost: a low-battery trip no longer wakes the machine to power off.
   services.udev.extraRules = ''
     ACTION=="add", SUBSYSTEM=="powercap", KERNEL=="intel-rapl:0", RUN+="${pkgs.coreutils}/bin/chmod 0444 /sys%p/energy_uj"
+    SUBSYSTEM=="power_supply", KERNEL=="AC0", ATTR{power/wakeup}="disabled"
+    SUBSYSTEM=="platform", DRIVER=="acpi-battery", ATTR{power/wakeup}="disabled"
   '';
 
   # Full Hyprland desktop. Everything hardware-specific stays off:
