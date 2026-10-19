@@ -12,11 +12,10 @@ let
   pad = n: v: "{${v}>${toString n}}";
 
   # fastfetch can't strip "Intel(R) Core(TM)" or "Max-Q / Mobile" and `>`
-  # truncates instead, and on the mac both rows would read "Apple M1 Pro", so
-  # known hosts get fixed labels. The g815's iGPU only idles behind the MUX,
+  # truncates instead, so known hosts get fixed labels. The g815's iGPU only idles behind the MUX,
   # so its GPU row is the RTX alone.
   hardware = {
-    macbook = { cpu = "M1 Pro, 8P + 2E cores"; gpu = "M1 Pro, 16 cores"; };
+    macbook = { cpu = "M1 Pro"; gpu = "M1 Pro"; };
     g815 = { cpu = "Core Ultra 9 275HX"; gpu = "GeForce RTX 5070"; };
     e1504g = { cpu = "Core i3-N305"; gpu = "UHD Graphics"; };
   };
