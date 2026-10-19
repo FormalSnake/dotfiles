@@ -11,6 +11,20 @@ let
 
   pad = n: v: "{${v}>${toString n}}";
 
+  # fastfetch can't strip "Intel(R) Core(TM)" or "Max-Q / Mobile" and `>`
+  # truncates instead, and on the mac both rows would read "Apple M1 Pro", so
+  # known hosts get fixed labels. The g815's iGPU only idles behind the MUX,
+  # so its GPU row is the RTX alone.
+  hardware = {
+    macbook = { cpu = "M1 Pro, 8P + 2E cores"; gpu = "M1 Pro, 16 cores"; };
+    g815 = { cpu = "Core Ultra 9 275HX"; gpu = "GeForce RTX 5070"; };
+    e1504g = { cpu = "Core i3-N305"; gpu = "UHD Graphics"; };
+  };
+  hwRow = type: label:
+    if hardware ? ${host}
+    then row { type = "custom"; inherit label; value = lib.fixedWidthString width " " hardware.${host}.${type}; }
+    else row { inherit type label; value = pad width "name"; };
+
   row = { type, label, value, ... }@extra:
     builtins.removeAttrs (extra // {
       inherit type;
@@ -19,6 +33,11 @@ let
     }) [ "label" "value" ];
 in
 {
+  # Interactive shells only, and not the ones an agent opens for itself.
+  programs.fish.interactiveShellInit = lib.mkAfter ''
+    set -q CLAUDECODE; or fastfetch
+  '';
+
   programs.fastfetch.settings = {
     "$schema" = "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json";
 
@@ -44,6 +63,8 @@ in
       (row { type = "wm";       label = "wm";     value = pad width "pretty-name"; })
       (row { type = "shell";    label = "shell";  value = pad width "pretty-name"; })
       (row { type = "uptime";   label = "uptime"; value = "${pad 15 "days"}d ${pad 2 "hours"}h ${pad 2 "minutes"}m"; })
+      (hwRow "cpu" "cpu")
+      (hwRow "gpu" "gpu")
       (row { type = "memory";   label = "mem";    value = "${pad 12 "used"} / ${pad 9 "total"}"; })
       (row { type = "packages"; label = "pkgs";   value = pad width "all"; })
       { type = "custom"; key = "┗${bar}┛"; }
