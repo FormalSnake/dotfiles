@@ -160,6 +160,7 @@
     "brand-guardian@claude-code-marketplace": false,
     "bug-detective@claude-code-marketplace": false,
     "bug-fix@claude-code-marketplace": false,
+    "canarycoders@canarycoders-skills": true,
     "clangd-lsp@claude-plugins-official": true,
     "claude-code-setup@claude-plugins-official": false,
     "claude-md-management@claude-plugins-official": false,
@@ -186,6 +187,12 @@
       "source": {
         "source": "github",
         "repo": "expo/skills"
+      }
+    },
+    "canarycoders-skills": {
+      "source": {
+        "source": "github",
+        "repo": "CanaryCoders/skills"
       }
     }
   },
