@@ -55,8 +55,7 @@ in
     modules = [
       "break"
       { type = "custom"; key = "┏${bar}┓"; }
-      (row { type = "command";  label = "user";   value = pad width "1"; text = "echo $USER"; })
-      (row { type = "custom";   label = "host";   value = lib.fixedWidthString width " " host; })
+      (row { type = "command";  label = "user";   value = pad width "1"; text = "echo $USER@${host}"; })
       (row { type = "os";       label = "distro"; value = pad width "name"; })
       (row { type = "kernel";   label = "kernel"; value = pad width "release"; })
       (row { type = "wm";       label = "wm";     value = pad width "pretty-name"; })
