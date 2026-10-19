@@ -4,53 +4,53 @@
     imports = [
       # CachyOS kernel overlay + binary cache + git scx schedulers.
       inputs.chaotic.nixosModules.default
-      # Declarative Flatpak (base service in ./mixins/flatpak.nix).
+      # Declarative Flatpak (base service in ./mixins/desktop/flatpak.nix).
       inputs.nix-flatpak.nixosModules.nix-flatpak
       ../shared
-      ./mixins/nix.nix
-      ./mixins/storage-gc.nix
-      ./mixins/users.nix
-      ./mixins/home-manager.nix
-      ./mixins/locale.nix
-      ./mixins/networking.nix
-      ./mixins/agenix.nix
-      ./mixins/boot.nix
-      ./mixins/plymouth.nix
-      ./mixins/oomd.nix
-      ./mixins/firmware.nix
-      ./mixins/smartd.nix
-      ./mixins/systemd-tuning.nix
-      ./mixins/scx.nix
-      ./mixins/ananicy.nix
-      ./mixins/irqbalance.nix
-      ./mixins/graphics.nix
-      ./mixins/nvidia.nix
-      ./mixins/audio.nix
-      ./mixins/bluetooth.nix
-      ./mixins/mouse.nix
-      ./mixins/hyprland.nix
-      ./mixins/kde
-      ./mixins/online-accounts.nix
-      ./mixins/dualsense.nix
-      ./mixins/streamdeck.nix
-      ./mixins/minecraft.nix
-      ./mixins/waylandcraft.nix
-      ./mixins/roblox.nix
+      ./mixins/core/nix.nix
+      ./mixins/core/storage-gc.nix
+      ./mixins/core/users.nix
+      ./mixins/core/home-manager.nix
+      ./mixins/core/locale.nix
+      ./mixins/core/networking.nix
+      ./mixins/core/agenix.nix
+      ./mixins/core/boot.nix
+      ./mixins/core/plymouth.nix
+      ./mixins/tuning/oomd.nix
+      ./mixins/hardware/firmware.nix
+      ./mixins/hardware/smartd.nix
+      ./mixins/tuning/systemd-tuning.nix
+      ./mixins/tuning/scx.nix
+      ./mixins/tuning/ananicy.nix
+      ./mixins/tuning/irqbalance.nix
+      ./mixins/hardware/graphics.nix
+      ./mixins/hardware/nvidia.nix
+      ./mixins/hardware/audio.nix
+      ./mixins/hardware/bluetooth.nix
+      ./mixins/hardware/mouse.nix
+      ./mixins/desktop/hyprland.nix
+      ./mixins/desktop/kde
+      ./mixins/desktop/online-accounts.nix
+      ./mixins/hardware/dualsense.nix
+      ./mixins/hardware/streamdeck.nix
+      ./mixins/gaming/minecraft.nix
+      ./mixins/gaming/waylandcraft.nix
+      ./mixins/gaming/roblox.nix
       ./mixins/gaming
-      ./mixins/asus.nix
-      ./mixins/tuned.nix
-      ./mixins/phone-integration.nix
-      ./mixins/usbflux.nix
-      ./mixins/printing.nix
-      ./mixins/flatpak.nix
-      ./mixins/nordvpn.nix
-      ./mixins/onepassword.nix
-      ./mixins/lynk-browser.nix
-      ./mixins/syncthing.nix
-      ./mixins/geolocation.nix
-      ./mixins/nix-ld.nix
-      ./mixins/macos-vm.nix
-      ./mixins/docker.nix
+      ./mixins/hardware/asus.nix
+      ./mixins/tuning/tuned.nix
+      ./mixins/hardware/phone-integration.nix
+      ./mixins/hardware/usbflux.nix
+      ./mixins/hardware/printing.nix
+      ./mixins/desktop/flatpak.nix
+      ./mixins/services/nordvpn.nix
+      ./mixins/desktop/onepassword.nix
+      ./mixins/desktop/lynk-browser.nix
+      ./mixins/services/syncthing.nix
+      ./mixins/core/geolocation.nix
+      ./mixins/core/nix-ld.nix
+      ./mixins/services/macos-vm.nix
+      ./mixins/services/docker.nix
       ./profiles
     ];
   };

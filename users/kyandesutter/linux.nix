@@ -3,34 +3,34 @@
   # Linux/NixOS-only home mixins (Hyprland desktop). Wired on the g815 host via
   # self.homeModules.kyandesutter-linux.
   imports = [
-    ./mixins/hyprland.nix
-    ./mixins/qt.nix
-    ./mixins/desktop-apps.nix
-    ./mixins/autostart.nix
-    ./mixins/macbook-mount.nix
-    ./mixins/airpods.nix
-    ./mixins/dualsense.nix
-    ./mixins/streamdeck.nix
-    ./mixins/easyeffects.nix
-    ./mixins/dms.nix
-    ./mixins/dankcal.nix
-    ./mixins/formalshell.nix
-    ./mixins/elementary
-    ./mixins/kde.nix
-    ./mixins/discord.nix
-    ./mixins/beeper.nix
-    ./mixins/flare.nix
-    ./mixins/messages.nix
-    ./mixins/formalmusic.nix
-    ./mixins/helium.nix
-    ./mixins/dillo.nix
-    ./mixins/lumen.nix
-    ./mixins/nordvpn.nix
-    ./mixins/godot.nix
-    ./mixins/obsidian.nix
-    ./mixins/parsec.nix
-    ./mixins/terminal-browser.nix
-    ./mixins/webapps.nix
+    ./mixins/desktop/hyprland.nix
+    ./mixins/desktop/qt.nix
+    ./mixins/desktop/desktop-apps.nix
+    ./mixins/desktop/autostart.nix
+    ./mixins/devices/macbook-mount.nix
+    ./mixins/devices/airpods.nix
+    ./mixins/devices/dualsense.nix
+    ./mixins/devices/streamdeck.nix
+    ./mixins/desktop/easyeffects.nix
+    ./mixins/desktop/dms.nix
+    ./mixins/desktop/dankcal.nix
+    ./mixins/desktop/formalshell.nix
+    ./mixins/desktop/elementary
+    ./mixins/desktop/kde.nix
+    ./mixins/apps/discord.nix
+    ./mixins/apps/beeper.nix
+    ./mixins/apps/flare.nix
+    ./mixins/apps/messages.nix
+    ./mixins/apps/formalmusic.nix
+    ./mixins/apps/helium.nix
+    ./mixins/apps/dillo.nix
+    ./mixins/apps/lumen.nix
+    ./mixins/apps/nordvpn.nix
+    ./mixins/dev/godot.nix
+    ./mixins/apps/obsidian.nix
+    ./mixins/apps/parsec.nix
+    ./mixins/cli/terminal-browser.nix
+    ./mixins/desktop/webapps.nix
   ];
 
   kyan.webapps.sites = [
@@ -38,13 +38,13 @@
       url = "https://music.youtube.com";
       name = "YouTube Music";
       profile = "Default";
-      icon = ./mixins/webapps-icons/youtube-music.png;
+      icon = ./mixins/desktop/webapps-icons/youtube-music.png;
     }
   ];
 
   # NixOS rebuild shortcut (linux-only, so it lives here rather than the shared
   # fish.nix: `nixos-rebuild` doesn't exist on the darwin host). Merges into the
-  # programs.fish.functions set defined in mixins/fish.nix.
+  # programs.fish.functions set defined in mixins/cli/fish.nix.
   #
   # The flake is referenced by absolute path (~/.config/nix#<host>), not `.#…`,
   # so `rebuild` works from any directory. The host attr comes from the live

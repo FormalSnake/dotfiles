@@ -1,0 +1,140 @@
+{ config, lib, pkgs, inputs, osConfig, ... }:
+let
+  # Shell selector from the host (kyan.desktop.shell in
+  # modules/nixos/mixins/desktop/hyprland.nix, default "formalshell").
+  useFormalshell = osConfig.kyan.desktop.shell == "formalshell";
+
+  # The shell's iPhone, AirPlay and LocalSend features follow the host's
+  # services.formalshell.<name>.enable (the system side: daemons, avahi,
+  # firewall), so turning one on per host is one line in systems/<host>.
+  fsSystem = name: osConfig.services.formalshell.${name}.enable;
+in
+{
+  # Imported unconditionally so programs.formalshell is declared on every
+  # Linux host; everything below is inert while the host's shell is dms.
+  imports = [ inputs.formalshell.homeModules.default ];
+
+  config = lib.mkIf useFormalshell {
+    # notify-send, for testing and scripting against the shell's own
+    # notification daemon (2026-08-19: neither host had it installed, which
+    # read as "toasts are broken" when they were merely never fired).
+    home.packages = [
+      pkgs.libnotify
+      # nothingctl for checking a Nothing or CMF device from a terminal; the
+      # shell carries its own copy on the wrapper PATH.
+      inputs.formalshell.packages.${pkgs.stdenv.hostPlatform.system}.nothingctl
+    ];
+
+    programs.formalshell = {
+      enable = true;
+      settings = {
+        # Syncthing-synced wallpaper folder (modules/nixos/mixins/services/syncthing.nix)
+        # for the picker's wallpaper mode.
+        picker.directory = "${config.home.homeDirectory}/Pictures/Wallpapers";
+        # Today's default right region plus the opt-in github (M12) and
+        # AI-usage (M14) widgets: gh comes from mixins/dev/gh.nix, usage reads
+        # ~/.claude/.credentials.json and the codex CLI; all three degrade
+        # honestly without auth. Left/center regions absent on purpose, they
+        # fall back to defaults (which include the M13b bell).
+        # The bar stands on the top edge (2026-09-18, with the pantheon
+        # preset: wingpanel is a top panel). It stood on the left from
+        # 2026-08-26 until then.
+        bar.position = "top";
+        # The screen frame (2026-08-26): the bar's fill carried round the other
+        # three edges as a 10px band, the desktop in a rounded cut-out.
+        frame.thickness = 6;
+        frame.radius = 20;
+        # Two-tier right region. A chevron in the right region governs what
+        # PRECEDES it (M25), so the collapsible group leads and the permanent
+        # cells sit outboard against the screen edge. That ordering is what
+        # keeps the chevron and everything right of it at a fixed x: the
+        # reveal grows leftward into empty bar instead of shoving the cells
+        # you were looking at.
+        #
+        # The split is monitor-versus-consult. Charge, volume, connectivity
+        # and pending notifications are state you glance at; dualsense,
+        # tailscale, github and usage are things you go and look at.
+        # bluetooth sits in the permanent tier immediately after
+        # network (owner ask 2026-08-28), so the two radios read as one pair.
+        # `indicators` stays permanent because its cells already self-hide, so
+        # they cost nothing at rest and matter exactly when they appear
+        # (recording, DND, night light, a due reminder). earbuds and dualsense
+        # (M29 builtins) self-hide the same way, so earbuds earns the permanent
+        # tier next to audio (owner ask 2026-08-18) and dualsense keeps its old
+        # collapsible slot. Collapse state is per region in state.json and
+        # starts collapsed, so the bar boots at six cells rather than ten.
+        # Weather rides the permanent tier (owner ask 2026-08-18, out of the
+        # center group) so the battery/audio/network cluster stays contiguous
+        # against the screen edge.
+        # The tray leads that tier, inboard of weather (owner ask 2026-08-28).
+        # Its cell is one dots toggle now, the icons themselves living in the
+        # tray's own second bar, so parking it behind the chevron hid the tray
+        # twice over: a collapsed bar left nothing at all to open.
+        bar.layout.right = [ "display" "dualsense" "tailscale" "github" "usage" "chevron" "tray" "weather" "battery" "earbuds" ]
+          ++ lib.optional (fsSystem "iphone") "iphone"
+          ++ [ "audio" "network" "bluetooth" "bell" "indicators" ];
+        airplay.enable = fsSystem "airplay";
+        localsend.receive = fsSystem "localsend";
+        # Codex off: the usage panel polls and renders a section per provider,
+        # and this machine only ever signs into Claude, so the CODEX section
+        # was permanently reporting on a tool that never gets used.
+        usage.codex = false;
+        # Apple Music animated album covers in the media panel (off upstream).
+        media.appleMusicArt = true;
+        # Tumbling wireframe equalizer for the media panel spectrum (bars upstream).
+        media.visualizerStyle = "redsector";
+        # The launcher's app results as a grid of icons over their names
+        # (off upstream).
+        menu.appGrid = true;
+        # Toast corner (M34). Matches the shipped default on purpose: the
+        # choice is the owner's, so it is written down rather than inherited.
+        notifications.position = "bottom-right";
+        # The shell's main display: the desk monitor while it's plugged in,
+        # the built-in panel otherwise, which is what e1504g always resolves
+        # to. The screensaver animates only this screen (a frame is a
+        # full-screen repaint; every other screen holds the converged banner), and
+        # the monitor panel, the launcher's monitor view and the display
+        # panel all name it.
+        display.outputPriority = [ "HDMI" "internal" ];
+      };
+    };
+
+    # DMS goes dormant, not away: mixins/desktop/dms.nix stays imported because its
+    # generated ~/.config/matugen/config.toml and templates are what
+    # FormalShell's ThemeEngine merges into its own matugen run (ghostty,
+    # neovim, obsidian, btop, yazi, hypr-border all keep re-theming), and
+    # rollback is one kyan.desktop.shell flip. Only the
+    # running daemons yield the session. dcal serves nothing here: FormalShell
+    # reads local .ics dirs only, it cannot consume dankcal's IPC.
+    programs.dank-material-shell.systemd.enable = lib.mkForce false;
+    programs.dank-calendar.systemd.enable = lib.mkForce false;
+
+    # Everything launched from the shell's menu lands in formalshell.service's
+    # cgroup: quickshell's DesktopEntry.execute only double-forks, it never
+    # moves the child into a scope of its own. With the default
+    # KillMode=control-group that means every rebuild restart takes the
+    # launched apps down with the shell, kopuz mid-track included. Killing
+    # only the main process leaves them running. Quickshell's own Process
+    # children (the wl-paste watchers, cava) still go, since it kills managed
+    # processes when it exits, and detached apps are exactly the set that
+    # should survive a shell restart.
+    systemd.user.services.formalshell.Service.KillMode = "process";
+
+    # The shell and its watchdog belong to the Hyprland session only;
+    # graphical-session.target is reached under KDE too (mixins/desktop/kde.nix).
+    systemd.user.services.formalshell.Unit.ConditionEnvironment = "XDG_CURRENT_DESKTOP=Hyprland";
+    systemd.user.timers.formalshell-watchdog.Unit.ConditionEnvironment = "XDG_CURRENT_DESKTOP=Hyprland";
+
+    # session.slice, next to the compositor: systemd-oomd pressure-kills in
+    # app.slice (modules/nixos/mixins/tuning/oomd.nix). Apps launched from the menu
+    # go through `uwsm app` into scopes of their own, so they stay in reach.
+    systemd.user.services.formalshell.Service.Slice = "session.slice";
+
+    # helium waits for the session notification daemon (see autostart.nix);
+    # with dms.service gone that is formalshell.service.
+    systemd.user.services.helium.Unit = {
+      After = lib.mkForce [ "formalshell.service" "graphical-session.target" ];
+      Wants = lib.mkForce [ "formalshell.service" ];
+    };
+  };
+}

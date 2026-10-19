@@ -28,7 +28,7 @@
       self.homeModules.kyandesutter
       self.homeModules.kyandesutter-darwin
     ];
-    # SDK env and JDK for the Android Studio cask (mixins/android.nix).
+    # SDK env and JDK for the Android Studio cask (mixins/dev/android.nix).
     kyan.android.enable = true;
   };
 

@@ -7,10 +7,10 @@ in
 
   config = lib.mkIf cfg.enable {
     # The Hyprland session, portals and login manager are wired in
-    # ../mixins/hyprland.nix; this flag gates them on per-host.
+    # ../mixins/desktop/hyprland.nix; this flag gates them on per-host.
     kyan.desktop.enable = true;
 
-    # Shared Flatpak base (mixins/flatpak.nix): every desktop host gets the
+    # Shared Flatpak base (mixins/desktop/flatpak.nix): every desktop host gets the
     # flatpak service + flathub remote, so user-level Flatpaks work everywhere.
     # GPU-bound Flatpaks don't belong in shared config, declare those per-host.
     kyan.flatpak.enable = lib.mkDefault true;

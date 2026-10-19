@@ -60,13 +60,13 @@ verification is hardware-only (see the checklist above).
       `helium`.
 - [ ] `modules/default.nix`: import `./nixos` alongside `./darwin`.
 - [ ] `modules/nixos/default.nix`: `flake.nixosModules.default` = shared + nixos mixins + profiles.
-- [ ] `modules/nixos/mixins/nix.nix`: experimental-features, chaotic substituter+key, gc, optimise.
-- [ ] `modules/nixos/mixins/users.nix`: `kyandesutter` normal user (wheel/networkmanager/video/
+- [ ] `modules/nixos/mixins/core/nix.nix`: experimental-features, chaotic substituter+key, gc, optimise.
+- [ ] `modules/nixos/mixins/core/users.nix`: `kyandesutter` normal user (wheel/networkmanager/video/
       audio/input/gamemode), `programs.fish.enable`, default shell fish.
-- [ ] `modules/nixos/mixins/home-manager.nix`: import HM nixosModule, useGlobalPkgs/UserPackages.
-- [ ] `modules/nixos/mixins/locale.nix`: timezone `Atlantic/Canary`, i18n, console, keymap.
-- [ ] `modules/nixos/mixins/networking.nix`: NetworkManager, firewall.
-- [ ] `modules/nixos/mixins/agenix.nix`: import agenix nixosModule, host identity TODO, secrets stubbed.
+- [ ] `modules/nixos/mixins/core/home-manager.nix`: import HM nixosModule, useGlobalPkgs/UserPackages.
+- [ ] `modules/nixos/mixins/core/locale.nix`: timezone `Atlantic/Canary`, i18n, console, keymap.
+- [ ] `modules/nixos/mixins/core/networking.nix`: NetworkManager, firewall.
+- [ ] `modules/nixos/mixins/core/agenix.nix`: import agenix nixosModule, host identity TODO, secrets stubbed.
 - [ ] `modules/nixos/profiles/{default,desktop,gaming}.nix`: `kyan.profiles.{desktop,gaming}` options.
 - [ ] `systems/default.nix`: add `flake.nixosConfigurations.g815`.
 - [ ] `systems/g815/default.nix`: hostPlatform, hostname, nixos-hardware imports, HM wiring,
@@ -74,24 +74,24 @@ verification is hardware-only (see the checklist above).
 - [ ] `systems/g815/hardware-configuration.nix`: placeholder template with TODO header.
 
 ### Phase 2 — Kernel + GPU
-- [ ] `modules/nixos/mixins/boot.nix`: Limine, `linuxPackages_cachyos`, kernel params.
-- [ ] `modules/nixos/mixins/scx.nix`: `services.scx` (`scx_bpfland`).
-- [ ] `modules/nixos/mixins/graphics.nix`: `hardware.graphics.enable + enable32Bit`.
-- [ ] `modules/nixos/mixins/nvidia.nix`: open driver, modesetting, prime offload, powerManagement,
+- [ ] `modules/nixos/mixins/core/boot.nix`: Limine, `linuxPackages_cachyos`, kernel params.
+- [ ] `modules/nixos/mixins/tuning/scx.nix`: `services.scx` (`scx_bpfland`).
+- [ ] `modules/nixos/mixins/hardware/graphics.nix`: `hardware.graphics.enable + enable32Bit`.
+- [ ] `modules/nixos/mixins/hardware/nvidia.nix`: open driver, modesetting, prime offload, powerManagement,
       Wayland env vars.
 
 ### Phase 3 — Desktop (Hyprland + noctalia)
-- [ ] `modules/nixos/mixins/hyprland.nix`: `programs.hyprland`, xdg portals, polkit, greetd/login.
-- [ ] `modules/nixos/mixins/audio.nix`: pipewire (alsa/pulse/jack) + rtkit.
-- [ ] `users/kyandesutter/mixins/hyprland.nix`: monitors (eDP-1 240Hz + external 1440p), keybinds
+- [ ] `modules/nixos/mixins/desktop/hyprland.nix`: `programs.hyprland`, xdg portals, polkit, greetd/login.
+- [ ] `modules/nixos/mixins/hardware/audio.nix`: pipewire (alsa/pulse/jack) + rtkit.
+- [ ] `users/kyandesutter/mixins/desktop/hyprland.nix`: monitors (eDP-1 240Hz + external 1440p), keybinds
       (SUPER mirror of aerospace), window→workspace rules, animations/look, autostart.
 - [ ] `users/kyandesutter/mixins/noctalia.nix`: import noctalia HM module + `programs.noctalia`.
-- [ ] `users/kyandesutter/mixins/helium.nix`: helium overlay + package, default browser, web ws.
+- [ ] `users/kyandesutter/mixins/apps/helium.nix`: helium overlay + package, default browser, web ws.
 
 ### Phase 4 — Gaming + game-mode + ASUS
 - [ ] `modules/nixos/mixins/gaming.nix`: steam (+proton-ge, gamescopeSession, firewall),
       gamescope, gamemode, mangohud, vkbasalt, lutris, heroic, obs, vesktop.
-- [ ] `modules/nixos/mixins/asus.nix`: `services.asusd` + `game-mode` writeShellApplication
+- [ ] `modules/nixos/mixins/hardware/asus.nix`: `services.asusd` + `game-mode` writeShellApplication
       (asusd Performance ↔ balanced, no relog).
 
 ### Phase 5 — Home split + polish
@@ -128,7 +128,7 @@ flake is not fully correct until all three are done:
 1. `systems/g815/hardware-configuration.nix` — filesystems / UUIDs
 2. PRIME GPU bus IDs in `systems/g815/default.nix` (the two `TODO verify` lines)
 3. The age host key — `secrets/secrets.nix` recipient + the commented `age.secrets` block in
-   `modules/nixos/mixins/agenix.nix`
+   `modules/nixos/mixins/core/agenix.nix`
 
 ### Phase 0 — BIOS (before installing anything)
 
@@ -238,7 +238,7 @@ Add that `age1...` to `secrets/secrets.nix` (alongside `kyan`), then re-encrypt 
 ```sh
 cd ~/.config/nix/secrets
 nix run github:ryantm/agenix -- -r
-# uncomment the age.secrets = … block in modules/nixos/mixins/agenix.nix
+# uncomment the age.secrets = … block in modules/nixos/mixins/core/agenix.nix
 cd ~/.config/nix && git add -A
 sudo nixos-rebuild switch --flake ~/.config/nix#g815
 ```

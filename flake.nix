@@ -57,7 +57,7 @@
 
     # Rosetta-backed Linux builder VM on the macbook: the only way an Apple
     # Silicon host can build x86_64-linux at a useful speed
-    # (modules/darwin/mixins/rosetta-builder.nix).
+    # (modules/darwin/mixins/remote/rosetta-builder.nix).
     nix-rosetta-builder = {
       url = "github:cpick/nix-rosetta-builder";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -164,7 +164,7 @@
 
     # qylock: SDDM greeter themes plus a Quickshell lock screen that renders the
     # same theme dirs. Both Linux hosts run its `man-bicycle` theme (see
-    # modules/nixos/mixins/hyprland.nix). Heavy input: the repo carries ~650 MB
+    # modules/nixos/mixins/desktop/hyprland.nix). Heavy input: the repo carries ~650 MB
     # of background video for the themes we don't use, and its derivations copy
     # all of them into the store, so a `nix flake update` here is a long fetch.
     qylock = {
@@ -175,7 +175,7 @@
     # DMS plugin registry: a flake that packages every community plugin
     # (built daily) and ships a home-manager module exposing them as
     # `programs.dank-material-shell.plugins.<id>.enable`. We enable a handful in
-    # mixins/dms.nix; each is a `fetchgit` + copy-into-$out derivation, so only
+    # mixins/desktop/dms.nix; each is a `fetchgit` + copy-into-$out derivation, so only
     # the enabled ones are ever realised.
     dms-plugin-registry = {
       url = "github:AvengeMedia/dms-plugin-registry";
@@ -186,21 +186,21 @@
     # backend (unifies Local/Google/Microsoft/CalDAV/iCloud accounts, stores
     # OAuth tokens in the keyring). Its home-manager module installs `dcal` and
     # runs `dcal run --session --hidden`; DMS's calendarBackend defaults to
-    # "auto" and picks up the running daemon over IPC. See mixins/dankcal.nix.
+    # "auto" and picks up the running daemon over IPC. See mixins/desktop/dankcal.nix.
     dankcalendar = {
       url = "github:AvengeMedia/dankcalendar";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # Messages, the iMessage client: package + home-manager module
-    # (homeModules.default), wired in users/kyandesutter/mixins/messages.nix.
+    # (homeModules.default), wired in users/kyandesutter/mixins/apps/messages.nix.
     messages = {
       url = "github:FormalSnake/messages/nd-port";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # FormalMusic, the YouTube Music client: package (app plus formalmusicd)
-    # and home-manager module, wired in users/kyandesutter/mixins/formalmusic.nix.
+    # and home-manager module, wired in users/kyandesutter/mixins/apps/formalmusic.nix.
     formalmusic = {
       url = "github:FormalSnake/formalmusic";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -208,7 +208,7 @@
 
     # meshtop, the live view of all three hosts, the links between them and
     # their coding agents: package and home-manager module, wired in
-    # users/kyandesutter/mixins/meshtop.nix.
+    # users/kyandesutter/mixins/cli/meshtop.nix.
     meshtop = {
       url = "github:FormalSnake/meshtop";
       inputs.nixpkgs.follows = "nixpkgs";

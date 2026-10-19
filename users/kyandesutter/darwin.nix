@@ -5,14 +5,14 @@
   imports = [
     # Disabled for a lighter dev host: using Apple's Stage Manager instead of
     # aerospace tiling. Configs are kept; just not imported.
-    # ./mixins/aerospace.nix
-    ./mixins/direnv-apple-toolchain.nix
-    ./mixins/discord.nix
-    ./mixins/hammerspoon.nix
-    ./mixins/kyan-drive.nix
-    ./mixins/lynk-browser.nix
-    ./mixins/omniwm.nix
-    ./mixins/sketchybar.nix
+    # ./mixins/macos/aerospace.nix
+    ./mixins/cli/direnv-apple-toolchain.nix
+    ./mixins/apps/discord.nix
+    ./mixins/macos/hammerspoon.nix
+    ./mixins/devices/kyan-drive.nix
+    ./mixins/apps/lynk-browser.nix
+    ./mixins/macos/omniwm.nix
+    ./mixins/macos/sketchybar.nix
   ];
 
   # macOS rebuild shortcut: the darwin counterpart to the g815 `rebuild`

@@ -15,6 +15,6 @@
   # There is no fallthrough to sshd for tailnet traffic, and the Mac runs the
   # App Store variant, which cannot be a Tailscale SSH server at all. Mobile
   # terminals use sshd with their own key instead (modules/nixos/mixins/
-  # users.nix, modules/darwin/mixins/remote-access.nix).
+  # users.nix, modules/darwin/mixins/remote/remote-access.nix).
   services.tailscale.enable = true;
 }

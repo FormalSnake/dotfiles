@@ -29,7 +29,7 @@
 
   # ASUS Vivobook E1504G, Intel-only (iGPU). The stock MediaTek Wi-Fi card was
   # swapped for an Intel one (iwlwifi: firmware comes from the global
-  # hardware.enableRedistributableFirmware in mixins/graphics.nix).
+  # hardware.enableRedistributableFirmware in mixins/hardware/graphics.nix).
   hardware.cpu.intel.updateMicrocode = true;
 
   # iwd cannot complete a PSK join on this card (iwctl: "Operation failed",
@@ -67,7 +67,7 @@
   kyan.desktop.shell = "formalshell";
 
   # Plasma next to Hyprland, without the gaming bits the g815 gets with
-  # kyan.gaming (mixins/kde).
+  # kyan.gaming (mixins/desktop/kde).
   kyan.desktop.kde.enable = true;
 
   # iPhone notifications and now-playing over BLE (ancs4linux) and the
@@ -77,12 +77,12 @@
   users.users.kyandesutter.extraGroups = [ "ancs4linux" ];
 
   # Syncthing mesh: wallpapers + Helium profile, macbook as hub
-  # (modules/nixos/mixins/syncthing.nix; spec 2026-07-22).
+  # (modules/nixos/mixins/services/syncthing.nix; spec 2026-07-22).
   kyan.syncthing.enable = true;
 
   # Export a USB-attached iPhone to the macbook over Tailscale, so Xcode there
   # builds and debugs onto a phone cabled to this laptop
-  # (modules/nixos/mixins/usbflux.nix). The mac's kyan.usbflux.remote still
+  # (modules/nixos/mixins/hardware/usbflux.nix). The mac's kyan.usbflux.remote still
   # defaults to the g815, so point it here with
   # `usbfluxctl add 100.109.196.64 5000` after `usbflux on`.
   kyan.usbflux.enable = true;
@@ -97,7 +97,7 @@
   # half is force-commanded to `nix-daemon --stdio` on the g815
   # (systems/g815/default.nix). Reached via the g815's stable Tailscale IP:
   # same /etc/hosts-over-MagicDNS reasoning as the macbook pin in
-  # modules/nixos/mixins/networking.nix, minus the need for a name at all.
+  # modules/nixos/mixins/core/networking.nix, minus the need for a name at all.
   # max-jobs is 0 below, so nothing builds on this machine: when the g815 is
   # off/asleep a build fails instead of falling back to local.
   nix.distributedBuilds = true;
@@ -124,7 +124,7 @@
       (g815 "100.114.32.78") # Tailscale (works away from home)
       (g815 "192.168.86.95") # home-LAN fallback when tailscale is down
 
-      # The macbook's Rosetta VM (modules/darwin/mixins/rosetta-builder.nix) is
+      # The macbook's Rosetta VM (modules/darwin/mixins/remote/rosetta-builder.nix) is
       # deliberately absent. Nix schedules on currentJobs / speedFactor, so an
       # idle VM takes the next derivation as soon as the g815 has one job
       # running, whatever the speed factors say. It stays reachable through
@@ -187,7 +187,7 @@
   # GPU here, so load just its driver.
   environment.sessionVariables.VK_LOADER_DRIVERS_SELECT = "*intel*";
 
-  # The profile backend is tuned-ppd (modules/nixos/mixins/tuned.nix), shared
+  # The profile backend is tuned-ppd (modules/nixos/mixins/tuning/tuned.nix), shared
   # with the g815. It displaces TLP the same way PPD did: nixos-hardware's
   # common-pc-laptop enables TLP only when power-profiles-daemon is off, and the
   # tuned module turns that off itself. No thermald: it exists to hold turbo
@@ -230,7 +230,7 @@
   # profile's sections win over the included one, so the [acpi] block is the
   # whole diff against stock throughput-performance.
   #
-  # This leans on sysfs_acpi_monitor=false in modules/nixos/mixins/tuned.nix.
+  # This leans on sysfs_acpi_monitor=false in modules/nixos/mixins/tuning/tuned.nix.
   # With that mirror on, tuned-ppd would read platform_profile=balanced back
   # out and flip the PPD profile to balanced, undoing the tier as soon as it
   # was picked.
@@ -363,7 +363,7 @@
 
   # 8 GB RAM: hand zram all of it. Compressed pages only cost what they compress
   # to, and zstd gets ~3.7:1 on this workload (3.4 GB of swapped pages held in
-  # 445 MB of RAM). The 50% default in mixins/boot.nix just fills up and
+  # 445 MB of RAM). The 50% default in mixins/core/boot.nix just fills up and
   # spills the rest onto the swapfile below at NVMe speed instead of RAM speed.
   zramSwap.memoryPercent = 100;
 
@@ -382,7 +382,7 @@
   # point where zram is full and pages start landing on disk.
   services.earlyoom.freeSwapThreshold = 70;
 
-  # systemd-oomd on top of earlyoom (modules/nixos/mixins/oomd.nix). The
+  # systemd-oomd on top of earlyoom (modules/nixos/mixins/tuning/oomd.nix). The
   # threshold above is a workaround for earlyoom's own shape: it needs free RAM
   # AND free swap to be low, and 23 GB of swap behind 7.4 GB of RAM means the
   # swap half is effectively never satisfied. oomd measures the reclaim stall

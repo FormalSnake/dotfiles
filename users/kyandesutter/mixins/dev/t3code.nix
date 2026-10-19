@@ -1,0 +1,154 @@
+{ config, lib, pkgs, ... }:
+let
+  home = config.home.homeDirectory;
+
+  # claude comes from programs.claude-code (claude-code-nix), so the wrapper's
+  # bundled codex is dropped rather than shadowing nothing useful.
+  #
+  # nixpkgs ships node-pty's linux prebuild without an RPATH to libstdc++.
+  # `t3 serve` runs on node, which already has it loaded, but the desktop app
+  # runs its backend under Electron, which does not, so the backend dies on
+  # start and the app never opens a window.
+  #
+  # Pinned to 0.1.0 ahead of nixpkgs-unstable: the mobile app refuses 0.0.x
+  # servers. Drop the src/pnpmDeps override (and the rpath fixup, which
+  # nixpkgs master carries too) once pkgs.t3code reaches 0.1.0.
+  t3code = pkgs.t3code.override {
+    enableCodex = false;
+    t3code-unwrapped = pkgs.t3code.unwrapped.overrideAttrs (
+      finalAttrs: old:
+      {
+        version = "0.1.0";
+        src = old.src.override {
+          tag = "v${finalAttrs.version}";
+          hash = "sha256-P82DqoY1E9wtROwu5Nr7MB/I1PdmZHWXXR4nRa4GWXM=";
+        };
+        pnpmDeps = pkgs.fetchPnpmDeps {
+          inherit (finalAttrs) pname version src pnpmWorkspaces;
+          pnpm = pkgs.pnpm_11;
+          fetcherVersion = 4;
+          hash = "sha256-oX4tOu20tYO3ci7VvSEL8eFgxAYWp5HlQFSfAWJGJmg=";
+        };
+      }
+      // lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
+        postFixup = (old.postFixup or "") + ''
+          for pty in $out/libexec/t3code/node_modules/.pnpm/node-pty@*/node_modules/node-pty/prebuilds/linux-*/pty.node; do
+            chmod u+w "$pty"
+            patchelf --add-rpath ${lib.getLib pkgs.stdenv.cc.cc}/lib "$pty"
+          done
+        '';
+      }
+    );
+  };
+
+  port = 3773;
+  httpsPort = 8773;
+
+  # The server only binds loopback; tailnet clients reach it through Tailscale
+  # Serve HTTPS, which the mobile app and app.t3.codes require anyway. 443 is
+  # CouchDB's on the mac (obsidian-livesync-serve.nix), so t3 gets its own
+  # port. `t3 serve --tailscale-serve` is not used: it edits the serve config
+  # itself, and a stray `tailscale serve` on 443 has already broken LiveSync
+  # once.
+  serveArgs = [
+    "${pkgs.tailscale}/bin/tailscale"
+    "serve"
+    "--bg"
+    "--https=${toString httpsPort}"
+    "http://127.0.0.1:${toString port}"
+  ];
+
+  serverArgs = [
+    (lib.getExe' t3code "t3")
+    "serve"
+    "--host"
+    "127.0.0.1"
+    "--port"
+    (toString port)
+    "${home}/Developer"
+  ];
+
+  # Provider CLIs (claude, gh, git) must resolve from a service environment
+  # that has no login shell behind it.
+  path = lib.concatStringsSep ":" [
+    "${config.home.profileDirectory}/bin"
+    "/run/current-system/sw/bin"
+    "/usr/bin"
+    "/bin"
+  ];
+in
+{
+  home.packages = [ t3code ];
+
+  xdg.mimeApps.associations.added = lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
+    "x-scheme-handler/t3code" = [ "com.t3tools.T3Code.desktop" ];
+  };
+
+  launchd.agents = lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
+    t3code = {
+      enable = true;
+      config = {
+        ProgramArguments = serverArgs;
+        RunAtLoad = true;
+        KeepAlive = true;
+        WorkingDirectory = home;
+        EnvironmentVariables = {
+          PATH = path;
+          SHELL = lib.getExe pkgs.fish;
+        };
+        StandardOutPath = "${home}/Library/Logs/t3code.log";
+        StandardErrorPath = "${home}/Library/Logs/t3code.log";
+      };
+    };
+
+    # Reasserted every five minutes for the same reason as the LiveSync
+    # mapping: any dev-session `tailscale serve` can replace it.
+    t3code-serve = {
+      enable = true;
+      config = {
+        ProgramArguments = serveArgs;
+        RunAtLoad = true;
+        StartInterval = 300;
+        StandardOutPath = "${home}/Library/Logs/t3code-serve.log";
+        StandardErrorPath = "${home}/Library/Logs/t3code-serve.log";
+      };
+    };
+  };
+
+  systemd.user = lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
+    services.t3code = {
+      Unit = {
+        Description = "T3 Code server";
+        After = [ "network-online.target" ];
+      };
+      Service = {
+        ExecStart = lib.escapeShellArgs serverArgs;
+        WorkingDirectory = home;
+        Environment = [
+          "PATH=${path}"
+          "SHELL=${lib.getExe pkgs.fish}"
+        ];
+        Restart = "always";
+        RestartSec = 5;
+      };
+      Install.WantedBy = [ "default.target" ];
+    };
+
+    # Needs tailscale operator rights, which modules/nixos/mixins/desktop/hyprland.nix
+    # grants kyandesutter.
+    services.t3code-serve = {
+      Unit.Description = "Publish the T3 Code server over Tailscale Serve";
+      Service = {
+        Type = "oneshot";
+        ExecStart = lib.escapeShellArgs serveArgs;
+      };
+    };
+    timers.t3code-serve = {
+      Timer = {
+        OnStartupSec = 10;
+        OnUnitActiveSec = 300;
+      };
+      Install.WantedBy = [ "timers.target" ];
+    };
+  };
+}

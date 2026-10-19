@@ -1,6 +1,6 @@
 # macOS 10.9 Mavericks guest on the g815 — runbook
 
-Declarative side: `modules/nixos/mixins/macos-vm.nix`, enabled with
+Declarative side: `modules/nixos/mixins/services/macos-vm.nix`, enabled with
 `kyan.macosVm.enable = true` in `systems/g815/default.nix`. It adds two
 commands, a desktop entry, and `ignore_msrs=1` on the kvm module.
 

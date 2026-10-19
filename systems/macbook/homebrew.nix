@@ -15,7 +15,7 @@
     # Everything else moved to nix/home-manager: see users/kyandesutter/programs.nix.
     brews = [
       "libadwaita" # NativeDesktop's GTK-on-macOS dev loop links brew GTK; cleanup="uninstall" kept wiping the imperative install
-      "sketchybar" # felixkratz/formulae: nixpkgs' build crashes the cctools linker; drives the OmniWM bar (users/kyandesutter/mixins/sketchybar.nix)
+      "sketchybar" # felixkratz/formulae: nixpkgs' build crashes the cctools linker; drives the OmniWM bar (users/kyandesutter/mixins/macos/sketchybar.nix)
       "terminal-notifier" # nixpkgs 26.11 crashes in the Darwin linker (SIGTRAP)
       "watchman" # nixpkgs build pulls folly, which fails to compile on darwin
       "wireguard-tools"
@@ -41,7 +41,7 @@
       "nordvpn"
       "orbstack"
       "stats"
-      "terminal-browser" # zenbu-labs: chromium in the terminal over the kitty graphics protocol; the Linux hosts take the release tarball (users/kyandesutter/mixins/terminal-browser.nix)
+      "terminal-browser" # zenbu-labs: chromium in the terminal over the kitty graphics protocol; the Linux hosts take the release tarball (users/kyandesutter/mixins/cli/terminal-browser.nix)
       "thaw"
       "the-unarchiver"
 
@@ -55,7 +55,7 @@
       "syncthing-app"
 
       # (remote desktop)
-      # Also installed on both NixOS hosts (users/kyandesutter/mixins/parsec.nix).
+      # Also installed on both NixOS hosts (users/kyandesutter/mixins/apps/parsec.nix).
       # This Mac is the only one of the three that can act as a Parsec *host*:
       # Parsec has no Linux hosting support, so the laptops are clients.
       "parsec"
@@ -68,13 +68,13 @@
       "font-sf-pro"
 
       # (tiling WM; mirrors the g815 niri setup)
-      "omniwm"             # barutsrb/tap: niri-style tiler (tap trusted automatically, see modules/darwin/mixins/homebrew.nix)
+      "omniwm"             # barutsrb/tap: niri-style tiler (tap trusted automatically, see modules/darwin/mixins/core/homebrew.nix)
       "karabiner-elements" # remaps Right Command → the OmniWM "Super" chord (Ctrl+Opt+Cmd)
 
       # (launcher)
       # Replaced Raycast Beta, which was a manual /Applications install. The
       # arm64 cask needs macOS 26+; it strips the quarantine flag itself since
-      # the app is self-signed. Started at login by modules/darwin/mixins/login-items.nix.
+      # the app is self-signed. Started at login by modules/darwin/mixins/core/login-items.nix.
       "tinycast"           # abue-ammar/tinycast
     ];
 

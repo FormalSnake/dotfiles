@@ -17,7 +17,7 @@ owner-only bits the flake cannot do. The owner runs every rebuild.
 ### 2. Bring up Tailscale on both
 - `sudo tailscale up` on the Mac, then on the laptop. Authenticate both into the
   same tailnet. Confirm the Mac's machine name (`tailscale status`) matches the
-  `HostName` in `users/kyandesutter/mixins/ssh.nix` (`macbook`); if MagicDNS
+  `HostName` in `users/kyandesutter/mixins/cli/ssh.nix` (`macbook`); if MagicDNS
   uses a different name, update that entry.
 
 ### 3. Install the laptop's SSH key on the Mac (BEFORE relying on key-only auth)
@@ -49,7 +49,7 @@ owner-only bits the flake cannot do. The owner runs every rebuild.
   home-profile `_1password-cli` Darwin-only).
 - *(Optional) SSH agent:* enable Settings → Developer → **Use the SSH agent**.
   Then add `IdentityAgent = "~/.config/1Password/ssh/agent.sock";` to the
-  `macbook` host in `users/kyandesutter/mixins/ssh.nix`, and put the
+  `macbook` host in `users/kyandesutter/mixins/cli/ssh.nix`, and put the
   1Password-held **public** key into the Mac's `~/.ssh/authorized_keys` (this
   replaces the raw `~/.ssh/id_ed25519` key from step 3).
 
@@ -96,7 +96,7 @@ owner-only bits the flake cannot do. The owner runs every rebuild.
 - **mosh stalls / "Nothing received from server on UDP port 600xx":** the macOS
   application firewall silently drops inbound UDP to the *unsigned* Nix
   `mosh-server` (SSH still works because sshd is Apple-signed). This is now fixed
-  declaratively — `modules/darwin/mixins/remote-access.nix` runs `socketfilterfw
+  declaratively — `modules/darwin/mixins/remote/remote-access.nix` runs `socketfilterfw
   --add`/`--unblockapp` on `mosh-server` every activation. If it still stalls
   after a `darwin-rebuild switch`, TCC may have no-op'd the call; allow it
   manually (System Settings → Network → Firewall → Options → add `mosh-server`)

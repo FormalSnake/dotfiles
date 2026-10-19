@@ -1,5 +1,5 @@
 -- Plugins, parsers and language servers all come from nixpkgs through
--- home-manager (mixins/neovim.nix); nothing here downloads anything.
+-- home-manager (mixins/dev/neovim.nix); nothing here downloads anything.
 
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"

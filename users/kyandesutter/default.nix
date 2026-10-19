@@ -6,29 +6,29 @@
   imports = [
     ./programs.nix
     ./shell.nix
-    ./mixins/fish.nix
-    ./mixins/git.nix
-    ./mixins/gh.nix
-    ./mixins/ssh.nix
-    ./mixins/clipssh.nix
-    ./mixins/claude-code.nix
-    ./mixins/pi.nix
-    ./mixins/ghostty.nix
-    ./mixins/tmux.nix
-    ./mixins/neovim.nix
+    ./mixins/cli/fish.nix
+    ./mixins/dev/git.nix
+    ./mixins/dev/gh.nix
+    ./mixins/cli/ssh.nix
+    ./mixins/cli/clipssh.nix
+    ./mixins/dev/claude-code.nix
+    ./mixins/dev/pi.nix
+    ./mixins/cli/ghostty.nix
+    ./mixins/cli/tmux.nix
+    ./mixins/dev/neovim.nix
     ./mixins/flexoki
-    ./mixins/fastfetch
-    ./mixins/fetch.nix
-    ./mixins/herdr.nix
-    ./mixins/meshtop.nix
-    ./mixins/t3code.nix
-    ./mixins/fast.nix
-    ./mixins/fut.nix
-    ./mixins/nh.nix
-    ./mixins/nix-index.nix
-    ./mixins/unfree.nix
-    ./mixins/kopuz.nix
-    ./mixins/android.nix
+    ./mixins/cli/fastfetch
+    ./mixins/cli/fetch.nix
+    ./mixins/cli/herdr.nix
+    ./mixins/cli/meshtop.nix
+    ./mixins/dev/t3code.nix
+    ./mixins/cli/fast.nix
+    ./mixins/cli/fut.nix
+    ./mixins/cli/nh.nix
+    ./mixins/cli/nix-index.nix
+    ./mixins/cli/unfree.nix
+    ./mixins/apps/kopuz.nix
+    ./mixins/dev/android.nix
   ];
 
   home = {

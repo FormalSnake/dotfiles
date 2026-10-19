@@ -1,7 +1,7 @@
 # Noctalia home-manager module — internals & IPC reference
 
 > **Superseded (2026-07-20):** Noctalia was replaced by Dank Material Shell
-> (`users/kyandesutter/mixins/dms.nix`); the `noctalia` flake input is gone.
+> (`users/kyandesutter/mixins/desktop/dms.nix`); the `noctalia` flake input is gone.
 > Kept as a reference for the old module's behavior only.
 
 Notes on how the upstream `noctalia` flake input's home-manager module
@@ -60,8 +60,8 @@ enable_ddcutil   = false   # set true to drive external monitors over DDC/CI
 ```
 
 Requires the i2c stack (already wired on g815: `hardware.i2c.enable`, user in the
-`i2c` group, `ddcutil` installed — see `modules/nixos/mixins/hyprland.nix` and
-`modules/nixos/mixins/users.nix`).
+`i2c` group, `ddcutil` installed — see `modules/nixos/mixins/desktop/hyprland.nix` and
+`modules/nixos/mixins/core/users.nix`).
 
 ## Runtime IPC — `noctalia msg <command>`
 

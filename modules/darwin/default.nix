@@ -2,25 +2,25 @@
   flake.darwinModules.default = {
     imports = [
       ../shared
-      ./mixins/determinate.nix
-      ./mixins/homebrew.nix
-      ./mixins/home-manager.nix
-      ./mixins/mac-app-util.nix
-      ./mixins/system-defaults.nix
-      ./mixins/dock-pins.nix
-      ./mixins/login-items.nix
-      ./mixins/caffeinate.nix
-      ./mixins/auto-update.nix
-      ./mixins/storage-gc.nix
-      ./mixins/agenix.nix
-      ./mixins/remote-access.nix
-      ./mixins/usbflux.nix
-      ./mixins/rosetta-builder.nix
-      ./mixins/obsidian-scan-watcher.nix
-      ./mixins/obsidian-note-watcher.nix
-      ./mixins/obsidian-livesync-daemon.nix
-      ./mixins/obsidian-livesync-serve.nix
-      ./mixins/portless-proxy.nix
+      ./mixins/core/determinate.nix
+      ./mixins/core/homebrew.nix
+      ./mixins/core/home-manager.nix
+      ./mixins/core/mac-app-util.nix
+      ./mixins/core/system-defaults.nix
+      ./mixins/core/dock-pins.nix
+      ./mixins/core/login-items.nix
+      ./mixins/core/caffeinate.nix
+      ./mixins/core/auto-update.nix
+      ./mixins/core/storage-gc.nix
+      ./mixins/core/agenix.nix
+      ./mixins/remote/remote-access.nix
+      ./mixins/remote/usbflux.nix
+      ./mixins/remote/rosetta-builder.nix
+      ./mixins/obsidian/obsidian-scan-watcher.nix
+      ./mixins/obsidian/obsidian-note-watcher.nix
+      ./mixins/obsidian/obsidian-livesync-daemon.nix
+      ./mixins/obsidian/obsidian-livesync-serve.nix
+      ./mixins/remote/portless-proxy.nix
       ./profiles
     ];
   };

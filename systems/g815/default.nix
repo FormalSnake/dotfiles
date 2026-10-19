@@ -85,12 +85,12 @@
   #
   # The resolved module sets networking.networkmanager.dns = "systemd-resolved"
   # and turns resolvconf off itself, so this line is the whole change. The
-  # /etc/hosts pin in modules/nixos/mixins/networking.nix stays: nordvpnd writes
+  # /etc/hosts pin in modules/nixos/mixins/core/networking.nix stays: nordvpnd writes
   # /etc/resolv.conf directly and knows nothing about resolved, so a connected
   # NordVPN still shadows MagicDNS the same way it does today.
   services.resolved.enable = true;
 
-  # NetworkManager's global-dns block (mixins/networking.nix) is inert under the
+  # NetworkManager's global-dns block (mixins/core/networking.nix) is inert under the
   # systemd-resolved plugin: NM keeps it in NetworkManager.conf but never pushes
   # it to resolved, so every link ends up with no DNS at all and lookups fall
   # through to resolved's built-in FallbackDNS (1.1.1.1 first). Give resolved the
@@ -213,13 +213,13 @@
   kyan.minecraft.enable = true;
 
   # Second SDDM session: Minecraft with the waylandcraft compositor mod as the
-  # desktop, no Hyprland underneath (mixins/waylandcraft.nix).
+  # desktop, no Hyprland underneath (mixins/gaming/waylandcraft.nix).
   kyan.waylandcraft = {
     enable = true;
     output = "HDMI-A-1";
   };
 
-  # Roblox via Sober (mixins/roblox.nix). Android-runtime client, needs
+  # Roblox via Sober (mixins/gaming/roblox.nix). Android-runtime client, needs
   # Vulkan, so it stays on the dGPU host rather than the shared desktop
   # profile.
   kyan.roblox.enable = true;
@@ -228,7 +228,7 @@
   kyan.gaming.enable = true;
 
   # KDE Plasma next to Hyprland as the gaming desktop, with SteamOS-style
-  # switch shortcuts between the two (mixins/kde).
+  # switch shortcuts between the two (mixins/desktop/kde).
   kyan.desktop.kde.enable = true;
 
   # ASUS laptop support: asusd, Aura keyboard RGB (Flexoki blue), 80%
@@ -244,14 +244,14 @@
 
   # Export a USB-attached iPhone to the macbook over Tailscale, so Xcode there
   # builds and debugs onto a phone cabled to this laptop
-  # (modules/nixos/mixins/usbflux.nix; `usbflux on` on the mac).
+  # (modules/nixos/mixins/hardware/usbflux.nix; `usbflux on` on the mac).
   kyan.usbflux.enable = true;
 
   # NordVPN (privacy/geo exit). This host holds the account login.
   kyan.nordvpn.enable = true;
 
   # Syncthing mesh: wallpapers + Helium profile, macbook as hub
-  # (modules/nixos/mixins/syncthing.nix; spec 2026-07-22).
+  # (modules/nixos/mixins/services/syncthing.nix; spec 2026-07-22).
   kyan.syncthing.enable = true;
 
   # macOS 10.9 guest (docs/macos-vm.md). Nothing runs until `macos-vm-fetch`
@@ -259,7 +259,7 @@
   # ignore_msrs option.
   kyan.macosVm.enable = true;
 
-  # Containers for testing Linux builds here (modules/nixos/mixins/docker.nix).
+  # Containers for testing Linux builds here (modules/nixos/mixins/services/docker.nix).
   kyan.docker.enable = true;
 
   # Remote-builder key for the e1504g (nix.buildMachines in
@@ -276,7 +276,7 @@
   # otherwise only reachable via the trusted tailscale0 interface.
   services.openssh.openFirewall = true;
 
-  # Memory tiering. 32 GB RAM, zram at 50% (modules/nixos/mixins/boot.nix), and
+  # Memory tiering. 32 GB RAM, zram at 50% (modules/nixos/mixins/core/boot.nix), and
   # until 2026-09-03 no disk swap at all: hardware-configuration.nix's
   # `swapDevices = [ ]` outranks the mixin's mkDefault list, so the overflow
   # tier it thought it was providing never existed. A Minecraft plus Helium
@@ -364,7 +364,7 @@
       self.homeModules.kyandesutter-linux
       # Weekly FormalMusic maintenance. The g815 alone: it is always on the
       # charger and the host that builds and deploys the e1504g.
-      ../../users/kyandesutter/mixins/formalmusic-maintenance.nix
+      ../../users/kyandesutter/mixins/apps/formalmusic-maintenance.nix
     ];
   };
 

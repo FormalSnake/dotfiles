@@ -338,7 +338,7 @@ in
   # Passwordless one-click for the "Windows" session button, scoped to the
   # active local wheel session (systemd manage-units defaults to a password
   # prompt, waived only for this one unit). The "BIOS" button's
-  # firmware-setup grant is generic and lives in mixins/boot.nix.
+  # firmware-setup grant is generic and lives in mixins/core/boot.nix.
   security.polkit.extraConfig = ''
     polkit.addRule(function(action, subject) {
       if (action.id == "org.freedesktop.systemd1.manage-units" &&

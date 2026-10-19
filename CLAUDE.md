@@ -36,7 +36,7 @@ If sudo unexpectedly prompts anyway, the agent chain is broken (no
 owner via `! <cmd>` rather than working around it. One known-benign case:
 sessions born under mosh inherit a dead forwarded socket (OpenSSH 10.1+
 unlinks `~/.ssh/agent/s.*` when the bootstrap ssh exits). Fish `shellInit`
-(`users/kyandesutter/mixins/fish.nix`) self-heals new shells by falling back
+(`users/kyandesutter/mixins/cli/fish.nix`) self-heals new shells by falling back
 to the local gcr agent; in an already-running session started before that fix,
 `set -x SSH_AUTH_SOCK $XDG_RUNTIME_DIR/gcr/ssh` restores the intended chain —
 that IS the fix, not a workaround.
@@ -58,9 +58,9 @@ accepts sudo iff the session's `SSH_AUTH_SOCK` agent holds a key from the
 machine-key list. Console sudo still password/Touch-ID prompts on the Linux
 hosts; on the mac `kyandesutter` is covered by the NOPASSWD line below
 instead, so nothing prompts there. The moving parts, all load-bearing:
-- **Machine-key lists**: `modules/nixos/mixins/users.nix` (Linux hosts, PAM
+- **Machine-key lists**: `modules/nixos/mixins/core/users.nix` (Linux hosts, PAM
   reads `/etc/ssh/authorized_keys.d/%u`) and
-  `modules/darwin/mixins/remote-access.nix` (mac). On the mac PAM can NOT read
+  `modules/darwin/mixins/remote/remote-access.nix` (mac). On the mac PAM can NOT read
   the nix-managed symlink (its path check rejects /nix/store), so activation
   installs a real root-owned copy at `/etc/ssh/sudo_authorized_keys`.
 - **`Defaults noninteractive_auth`** (sudoers, both platforms): without it
@@ -70,7 +70,7 @@ instead, so nothing prompts there. The moving parts, all load-bearing:
   pam_ssh_agent_auth can't help with. It makes that module redundant for this
   one account on the mac; the module still gates every other user arriving
   over SSH, so don't drop it.
-- **Agent forwarding** (`users/kyandesutter/mixins/ssh.nix`): our three host
+- **Agent forwarding** (`users/kyandesutter/mixins/cli/ssh.nix`): our three host
   entries set `ForwardAgent yes` + `IdentityAgent SSH_AUTH_SOCK`. The latter
   MUST NOT become `none` (that silently disables forwarding) or be removed
   (the global 1Password IdentityAgent would be forwarded instead, and its keys
@@ -141,13 +141,13 @@ Both Linux hosts run **Hyprland** (since 2026-08-17; it replaced niri, which had
 replaced Hyprland in July). The config language is **Lua**, not hyprlang —
 Hyprland 0.55 dropped the old `.conf` syntax outright, and home-manager's
 `wayland.windowManager.hyprland.settings` still emits hyprlang, so
-`users/kyandesutter/mixins/hyprland.nix` writes `~/.config/hypr/hyprland.lua`
+`users/kyandesutter/mixins/desktop/hyprland.nix` writes `~/.config/hypr/hyprland.lua`
 itself rather than using the HM module. The tiling layout is Hyprland's built-in
 `scrolling` (in core since 0.54), so the niri column model carries over. Wiki:
 <https://wiki.hypr.land/Configuring/>.
 
 Which shell owns the session is `kyan.desktop.shell` (enum `dms` |
-`formalshell`, defined in `modules/nixos/mixins/hyprland.nix`). Both Linux hosts run
+`formalshell`, defined in `modules/nixos/mixins/desktop/hyprland.nix`). Both Linux hosts run
 `formalshell`, the default since 2026-10-15 (the e1504g trialled it, the g815
 followed 2026-08-10). DMS stays installed but dormant on both, so rollback is
 flipping the host's `kyan.desktop.shell` line to `"dms"`. The theming section below still describes the DMS path.
@@ -179,13 +179,16 @@ modules/
   shared/              cross-platform system modules (nix settings, home-manager
                        glue, tailscale) — imported by BOTH platforms
   darwin/  nixos/      per-platform module trees, each with:
-    mixins/            one concern per file (audio, bluetooth, hyprland, …)
+    mixins/<category>/ one concern per file, grouped by category:
+                       nixos: core tuning hardware desktop gaming services
+                       darwin: core remote obsidian
     profiles/          compose mixins into roles (desktop)
 systems/<host>/        per-host config (hardware, host-specific options)
 users/kyandesutter/
   default.nix          cross-platform home base + imports
   darwin.nix linux.nix platform-specific home mixin wiring
-  mixins/              per-program home-manager config (one concern per file)
+  mixins/<category>/   per-program home-manager config (one concern per file):
+                       cli dev desktop apps devices macos, plus flexoki/
   matugen-templates/   matugen-syntax templates DMS renders at runtime
   claude/              VENDORED Claude config (skills/commands/agents) — data,
                        not nix; ignore when analyzing the config itself
@@ -194,7 +197,8 @@ secrets/               agenix .age files + secrets.nix
 
 Conventions:
 - **One concern per mixin.** A mixin that does several unrelated things should be
-  split. Hardware-specific tuning belongs in `systems/<host>/`, not generic mixins.
+  split. New mixins go in an existing category folder; only add a category
+  when several files share it, never a folder per program. Hardware-specific tuning belongs in `systems/<host>/`, not generic mixins.
 - **Enable flags:** togglable mixins use `options.kyan.<name>.enable =
   lib.mkEnableOption …` gated with `lib.mkIf`. Always-on mixins set options
   directly; use `lib.mkDefault` for anything a second host might override.
@@ -213,7 +217,7 @@ matugen on every wallpaper pick / light-dark flip: its built-in templates theme
 GTK (`~/.config/gtk-{3,4}.0/dank-colors.css`, imported via gtk.css) and Qt
 (`~/.config/qt{5,6}ct/colors/matugen.conf`), and it merges our user templates
 (`users/kyandesutter/matugen-templates/`, registered via the generated
-`~/.config/matugen/config.toml` in `mixins/dms.nix`: aura, ghostty,
+`~/.config/matugen/config.toml` in `mixins/desktop/dms.nix`: aura, ghostty,
 obsidian, hypr-border, btop, yazi) into the
 same matugen run, executing each template's post_hook. Hyprland's window borders
 are themed through the `hypr-border` template: it renders
@@ -222,16 +226,16 @@ and its post_hook applies it live with `hyprctl eval 'pcall(dofile, …)'`;
 `hyprland.lua` runs the same `pcall(dofile, …)` at the bottom of the config so a
 later `hyprctl reload` keeps the wallpaper colours instead of snapping back to
 the static Flexoki `general.col`. DMS's `settings.json` is runtime-mutable
-(NOT home-manager-managed): `mixins/dms.nix` seeds it once if absent — idle
+(NOT home-manager-managed): `mixins/desktop/dms.nix` seeds it once if absent — idle
 blanking must stay disabled there (eDP-1 wake-modeset bug). **Flexoki is only a
 static fallback** for consumers that genuinely can't be dynamic: Hyprland's
 pre-palette border colours (the static
-`general.col` in `mixins/hyprland.nix`), and CLI tools with no matugen
+`general.col` in `users/kyandesutter/mixins/desktop/hyprland.nix`), and CLI tools with no matugen
 template (bat, fzf, lazygit, fish). Neovim has no template of its own: its
 `terminal` colourscheme (`users/kyandesutter/config/nvim/colors/`) paints with
 ANSI indices only (`termguicolors` off), so whichever Ghostty is outermost
 resolves them, matugen on the g815 even over SSH/herdr to the macbook. Per-wallpaper Flexoki *pinning* lives on as
-`flexoki-pin.service` (`mixins/dms.nix`): it watches DMS's session.json and
+`flexoki-pin.service` (`mixins/desktop/dms.nix`): it watches DMS's session.json and
 pins/unpins the Flexoki custom theme while a flexoki-named wallpaper is active
 (same substring match as the old Noctalia `flexoki-scheme` hook). Under
 FormalShell that pinning lives in the shell itself (`shell/Theme/palette.js`
@@ -245,15 +249,15 @@ it — static Flexoki dark on Linux, appearance-following light/dark on macOS
 (where Flexoki is the *primary* scheme, not a fallback: Ghostty uses its built-in
 Flexoki Light/Dark, bat uses `auto:system`, fish re-selects by appearance). The
 greeter and the lock screen sit outside all of it: both are qylock on `man-bicycle`
-(`programs.qylock` in `modules/nixos/mixins/hyprland.nix`), since the greeter
+(`programs.qylock` in `modules/nixos/mixins/desktop/hyprland.nix`), since the greeter
 runs before any user session exists and so has no wallpaper to derive colours
 from. Herdr pins Flexoki Dark via `[theme.custom]` tokens
-sourced from `palette.nix` (`mixins/herdr.nix`) — it used to follow ghostty via its `terminal` theme, but
+sourced from `palette.nix` (`mixins/cli/herdr.nix`) — it used to follow ghostty via its `terminal` theme, but
 that reads the terminal palette over OSC, which doesn't survive SSH/mosh (herdr
 runs on the macbook, reached over SSH), so the static tokens keep it correct and
 low-contrast remotely. When
 adding a themed surface, prefer a matugen user template + a Flexoki fallback
-derived from `palette.nix` (see the `hypr-border` template in `mixins/dms.nix`
+derived from `palette.nix` (see the `hypr-border` template in `mixins/desktop/dms.nix`
 for the render + static-fallback pattern).
 
 ## GPU and power (g815)
@@ -269,13 +273,13 @@ removed on 2026-08-24 (git has them). What remains:
   its connector name follows the driver) and HDMI-A-1 scan out from the RTX
   5070; the iGPU is idle and not named in
   `AQ_DRM_DEVICES` (`~/.config/uwsm/env-hyprland`,
-  `users/kyandesutter/mixins/hyprland.nix`).
-- `modules/nixos/mixins/nvidia.nix`: open driver, `powerManagement.enable`
+  `users/kyandesutter/mixins/desktop/hyprland.nix`).
+- `modules/nixos/mixins/hardware/nvidia.nix`: open driver, `powerManagement.enable`
   (nvidia-suspend/resume services + VRAM preservation), PowerMizer max, VA-API
   on nvidia. PRIME and the per-app GPU wrappers are gone.
 - tuned-ppd starts in `performance` (`services.tuned.ppdSettings` on the g815).
-- `modules/nixos/mixins/asus.nix`: asusd, 80% charge limit, Aura keyboard seed.
-- `lock-before-sleep` (`modules/nixos/mixins/hyprland.nix`) starts
+- `modules/nixos/mixins/hardware/asus.nix`: asusd, 80% charge limit, Aura keyboard seed.
+- `lock-before-sleep` (`modules/nixos/mixins/desktop/hyprland.nix`) starts
   `qylock-lock.service` before sleep.target and must never fail (exit-0 always)
   so a dead session can't block suspend.
 
@@ -283,7 +287,7 @@ removed on 2026-08-24 (git has them). What remains:
 
 DE-agnostic login apps (Helium, Discord, …) are home-manager
 `systemd.user.services` bound to `graphical-session.target` in
-`users/kyandesutter/mixins/autostart.nix` (uwsm ties the compositor to that
+`users/kyandesutter/mixins/desktop/autostart.nix` (uwsm ties the compositor to that
 target, so they follow the session). Nothing is compositor-hook-launched: there
 is no `hl.on("hyprland.start", …)` block at all, and FormalShell registers its
 own in-shell polkit agent. Alt-Tab is `hl.dsp.window.cycle_next()`; Hyprland has no
@@ -349,5 +353,5 @@ code-searcher subagent. Never proactively create docs/*.md unless asked.
 
 On the macbook, direnv's `use flake`/`use nix` drop the darwin stdenv's nix
 SDK, clang, cctools and xcrun and put rustup ahead of a nix rustc
-(`users/kyandesutter/mixins/direnv-apple-toolchain.nix`); a project that needs
+(`users/kyandesutter/mixins/cli/direnv-apple-toolchain.nix`); a project that needs
 the nix toolchain puts `export DIRENV_NIX_TOOLCHAIN=1` above `use flake`.
