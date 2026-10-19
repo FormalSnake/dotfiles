@@ -76,8 +76,12 @@ let
             if "fallback" in fix or accuracy > MAX_ACCURACY_M:
                 print(f"wifi: rejected fix {lat:.4f},{lon:.4f} accuracy {accuracy} m fallback {fix.get('fallback')}")
                 return None
-            zone = TimezoneFinder().timezone_at(lat=lat, lng=lon)
-            print(f"wifi: fix {lat:.4f},{lon:.4f} accuracy {accuracy} m from {len(aps)} access points: {zone}")
+            # Land zones only: timezonefinder maps open sea to Etc/GMT+N, and
+            # beaconDB has put us 50 km off Lanzarote with a 50 m accuracy
+            # claim (2026-10-19, Etc/GMT+1, clock two hours out). A sea fix
+            # is a bad fix, so fall through to the IP lookup.
+            zone = TimezoneFinder().timezone_at_land(lat=lat, lng=lon)
+            print(f"wifi: fix {lat:.4f},{lon:.4f} accuracy {accuracy} m from {len(aps)} access points: {zone or 'at sea'}")
             return zone
 
 
