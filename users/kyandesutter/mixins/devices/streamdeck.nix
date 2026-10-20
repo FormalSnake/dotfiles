@@ -85,10 +85,11 @@ let
     import subprocess
     import threading
     import time
+    import urllib.error
     import urllib.request
 
     from fontTools.ttLib import TTFont
-    from PIL import Image, ImageDraw, ImageFont
+    from PIL import Image, ImageDraw, ImageFont, ImageSequence
     from StreamDeck.DeviceManager import DeviceManager
     from StreamDeck.ImageHelpers import PILHelper
 
@@ -356,34 +357,66 @@ let
     EMOJI_CACHE = {}
 
 
-    def emoji_image(sound, size):
-        """The sound's emoji as an RGBA image, or None if it has none."""
+    def fetch_emoji(emoji_id):
+        # The CDN answers urllib's default User-Agent with a 403, and asking
+        # for the .gif of a static emoji with a 415.
+        for ext in ("gif", "png"):
+            req = urllib.request.Request(
+                f"https://cdn.discordapp.com/emojis/{emoji_id}.{ext}?size=96",
+                headers={"User-Agent": "streamdeck-keys"},
+            )
+            try:
+                with urllib.request.urlopen(req, timeout=3) as resp:
+                    return Image.open(io.BytesIO(resp.read()))
+            except urllib.error.HTTPError as err:
+                if err.code != 415:
+                    raise
+        return None
+
+
+    def emoji_frames(sound, size):
+        """The sound's emoji as [(RGBA image, duration ms)], or None if it has none."""
         key = (sound["emojiId"] or sound["emoji"], size)
         if key in EMOJI_CACHE:
             return EMOJI_CACHE[key]
-        image = None
+        frames = None
         try:
             if sound["emojiId"]:
-                # The CDN answers urllib's default User-Agent with a 403.
-                req = urllib.request.Request(
-                    f"https://cdn.discordapp.com/emojis/{sound['emojiId']}.png?size=96",
-                    headers={"User-Agent": "streamdeck-keys"},
-                )
-                with urllib.request.urlopen(req, timeout=3) as resp:
-                    image = Image.open(io.BytesIO(resp.read())).convert("RGBA")
+                image = fetch_emoji(sound["emojiId"])
+                if image is not None:
+                    frames = [(f.convert("RGBA"), f.info.get("duration") or 100) for f in ImageSequence.Iterator(image)]
             elif sound["emoji"]:
                 # Noto Color Emoji is a bitmap font with a single 109px strike.
                 image = Image.new("RGBA", (160, 160))
                 ImageDraw.Draw(image).text((0, 0), sound["emoji"], font=ImageFont.truetype(EMOJI_FONT, 109), embedded_color=True)
                 box = image.getbbox()
-                image = image.crop(box) if box else None
+                frames = [(image.crop(box), 0)] if box else None
         except (OSError, ValueError) as err:
             print(f"emoji for {sound['name']}: {err}", flush=True)
-            image = None
-        if image is not None:
+            frames = None
+        for image, _ in frames or []:
             image.thumbnail((size, size))
-        EMOJI_CACHE[key] = image
-        return image
+        EMOJI_CACHE[key] = frames
+        return frames
+
+
+    def frame_at(frames, now_ms):
+        total = sum(ms for _, ms in frames)
+        if total == 0:
+            return frames[0][0]
+        t = now_ms % total
+        for image, ms in frames:
+            if t < ms:
+                return image
+            t -= ms
+        return frames[-1][0]
+
+
+    def animated(keys, size):
+        return any(
+            isinstance(k[0], dict) and len(emoji_frames(k[0], int(size * 0.5)) or []) > 1
+            for k in keys if k
+        )
 
 
     # The mute keys toggle by position rather than through a stored action, so
@@ -402,8 +435,9 @@ let
             draw = ImageDraw.Draw(image)
             w, h = image.size
             if isinstance(icon, dict):
-                emoji = emoji_image(icon, int(h * 0.5))
-                if emoji is not None:
+                frames = emoji_frames(icon, int(h * 0.5))
+                if frames:
+                    emoji = frame_at(frames, int(time.monotonic() * 1000))
                     image.paste(emoji, ((w - emoji.width) // 2, int(h * 0.42 - emoji.height / 2)), emoji)
                     draw.text((w / 2, h * 0.84), label[:9], font=label_font, fill=fg, anchor="mm")
                     return PILHelper.to_native_key_format(deck, image)
@@ -442,17 +476,27 @@ let
         icon_font = ImageFont.truetype(FONT, int(size * 0.45))
         label_font = ImageFont.truetype(FONT, int(size * 0.16))
         deck.set_key_callback(on_key)
+        sent = [None] * deck.key_count()
+        last_full = 0
         try:
             while deck.connected():
                 keys = layout()
                 with STATE.lock:
                     palette = STATE.palette
+                # A periodic full repaint covers the deck resetting itself
+                # across a suspend, which reports no event.
+                if time.monotonic() - last_full > 30:
+                    sent = [None] * deck.key_count()
+                    last_full = time.monotonic()
+                # Only keys whose image changed go over USB: the Mini takes
+                # uncompressed bitmaps, and animated emoji redraw constantly.
                 with deck:
                     for i in range(deck.key_count()):
-                        deck.set_key_image(i, render_key(deck, keys[i] if i < len(keys) else None, palette, icon_font, label_font))
-                # A periodic repaint covers the deck resetting itself across
-                # a suspend, which reports no event.
-                STATE.changed.wait(timeout=30)
+                        image = render_key(deck, keys[i] if i < len(keys) else None, palette, icon_font, label_font)
+                        if image != sent[i]:
+                            deck.set_key_image(i, image)
+                            sent[i] = image
+                STATE.changed.wait(timeout=0.05 if animated(keys, size) else 30)
                 STATE.changed.clear()
         finally:
             try:
