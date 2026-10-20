@@ -20,8 +20,6 @@
     ./mixins/apps/discord.nix
     ./mixins/apps/beeper.nix
     ./mixins/apps/flare.nix
-    ./mixins/apps/messages.nix
-    ./mixins/apps/formalmusic.nix
     ./mixins/apps/helium.nix
     ./mixins/apps/dillo.nix
     ./mixins/apps/lumen.nix

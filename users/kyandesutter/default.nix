@@ -28,6 +28,8 @@
     ./mixins/cli/nix-index.nix
     ./mixins/cli/unfree.nix
     ./mixins/apps/kopuz.nix
+    ./mixins/apps/messages.nix
+    ./mixins/apps/formalmusic.nix
     ./mixins/dev/android.nix
   ];
 
