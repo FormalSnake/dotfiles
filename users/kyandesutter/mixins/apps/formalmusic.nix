@@ -1,11 +1,15 @@
 { inputs, ... }:
 {
-  # FormalMusic (github:FormalSnake/formalmusic), the GPUI YouTube Music client.
-  # The module installs the app with its desktop entry and icon and runs
-  # formalmusicd as a user service, so playback and MPRIS survive closing the
-  # window. Matugen owns ~/.config/formalmusic/theme.json (mixins/desktop/dms.nix), so
+  # FormalMusic (github:FormalSnake/formalmusic), the NativeDesktop YouTube Music
+  # client on Kopuz's daemon. kopuzd and the Kopuz app (mixins/apps/kopuz.nix) own
+  # the same library and only one runs at a time, so no kopuzd service: the window
+  # attaches to whichever is up and starts kopuzd itself when nothing answers.
+  # Matugen owns ~/.config/formalmusic/theme.json (mixins/desktop/dms.nix), so
   # `theme` stays empty.
   imports = [ inputs.formalmusic.homeModules.default ];
 
-  programs.formalmusic.enable = true;
+  programs.formalmusic = {
+    enable = true;
+    daemon = false;
+  };
 }
