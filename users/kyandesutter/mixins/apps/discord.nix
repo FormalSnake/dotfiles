@@ -79,6 +79,11 @@ let
   # go straight into devSearchPaths.
   gifRoulette = ../../moonlight-extensions/dist/gifRoulette;
 
+  # Serves voice state and the soundboard to streamdeck-keys
+  # (mixins/devices/streamdeck.nix) over a socket in $XDG_RUNTIME_DIR. Linux
+  # only, since the deck hangs off the g815.
+  streamdeckBridge = ../../moonlight-extensions/dist/streamdeckBridge;
+
   # midnight-discord's colour module on its own. colors.css declares a
   # --bg/--text/--accent ladder and maps every Discord design token onto it,
   # which is the mapping layer a wallpaper palette needs; the rest of the theme
@@ -149,6 +154,7 @@ let
       };
 
       gifRoulette.enabled = true;
+      streamdeckBridge.enabled = pkgs.stdenv.hostPlatform.isLinux;
 
       # window.spacepack, so a failed lookup in a dev extension (gifRoulette
       # above) can be poked at from Discord's own DevTools console.
@@ -161,7 +167,8 @@ let
       "${moonlightCss}"
       "${lastFmRpc}"
       "${gifRoulette}"
-    ];
+    ]
+    ++ lib.optional pkgs.stdenv.hostPlatform.isLinux "${streamdeckBridge}";
   };
 
   # nixpkgs lags Discord's own releases, and the Linux client refuses to start

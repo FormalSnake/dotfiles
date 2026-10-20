@@ -1,0 +1,13 @@
+{
+  "$schema": "https://moonlight-mod.github.io/manifest.schema.json",
+  "id": "streamdeckBridge",
+  "version": "1.0.0",
+  "apiLevel": 2,
+  "meta": {
+    "name": "Stream Deck Bridge",
+    "tagline": "Drives voice controls and the soundboard from the streamdeck-keys service",
+    "authors": ["FormalSnake"],
+    "tags": ["voice"]
+  },
+  "dependencies": ["common", "spacepack"]
+}

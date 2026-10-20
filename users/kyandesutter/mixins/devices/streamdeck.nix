@@ -25,6 +25,12 @@ let
   pyList = xs: "[${lib.concatMapStringsSep ", " builtins.toJSON xs}]";
 
   font = "${pkgs.nerd-fonts.geist-mono}/share/fonts/opentype/NerdFonts/GeistMono/GeistMonoNerdFont-Regular.otf";
+  emojiFont = "${pkgs.noto-fonts-color-emoji}/share/fonts/noto/NotoColorEmoji.ttf";
+
+  # Soundboard sounds listed here (by name, case-insensitive) come first on
+  # the soundboard page, in this order; the rest follow as Discord lists them,
+  # the call's server first, then the defaults.
+  soundboardPins = [ ];
 
   # The desk unit is the Discord edition of the Mini (PID 0x00b3), which
   # 0.9.8 doesn't list. Drop the fetchpatch once a release past 0.9.8 lands. The
@@ -41,18 +47,28 @@ let
     ];
   });
 
-  # The Stream Deck Mini on the g815's desk: six keys, two pages, the last key
-  # flips between them.
+  # The Stream Deck Mini on the g815's desk: six keys, three pages, the last
+  # key cycles through them.
   #
   #   herdr                          system
   #   [blocked] [done]  [working]    [mic]        [mute] [play/pause]
-  #   [new tab] [herdr] [system]     [screenshot] [lock] [herdr]
+  #   [new tab] [herdr] [system]     [screenshot] [lock] [discord]
+  #
+  #   discord                        soundboard
+  #   [mute]  [deafen] [camera]      [sound] [sound] [sound]
+  #   [share] [sounds] [herdr]       [sound] [more]  [back]
   #
   # The jump keys show how many agents are in that state and focus the one
   # that entered it most recently. Focus goes to the macbook's Herdr server,
   # which every attached client (`herdr --remote macbook` included) follows;
-  # the herdr key opens such a client. The page key turns red on the system
-  # page while an agent is blocked.
+  # the herdr key opens such a client. The page key turns red on the other
+  # pages while an agent is blocked.
+  #
+  # The discord page talks to Discord through the streamdeckBridge moonlight
+  # extension (mixins/apps/discord.nix), which fires Discord's own keybind
+  # actions, so each key behaves exactly like the matching Discord keybind.
+  # The sounds key opens a page of the soundboard sounds usable in the current
+  # call, paged four at a time when there are more than five.
   #
   # Herdr runs on the macbook, so agent state arrives the same way as
   # dualsense-herdr's: one long-lived SSH connection with the poll loop on the
@@ -62,18 +78,24 @@ let
       libraries = [ streamdeck ] ++ (with pkgs.python3Packages; [ pillow fonttools ]);
       flakeIgnore = [ "E501" ];
     } ''
+    import io
     import json
     import os
+    import socket
     import subprocess
     import threading
     import time
+    import urllib.request
 
     from fontTools.ttLib import TTFont
-    from PIL import ImageDraw, ImageFont
+    from PIL import Image, ImageDraw, ImageFont
     from StreamDeck.DeviceManager import DeviceManager
     from StreamDeck.ImageHelpers import PILHelper
 
     FONT = "${font}"
+    EMOJI_FONT = "${emojiFont}"
+    DISCORD_SOCKET = os.path.join(os.environ.get("XDG_RUNTIME_DIR", "/tmp"), "discord-streamdeck.sock")
+    SOUNDBOARD_PINS = ${pyList soundboardPins}
     HERDR = "/etc/profiles/per-user/kyandesutter/bin/herdr"
     SSH = ["${pkgs.openssh}/bin/ssh", "-o", "BatchMode=yes", "-o", "ClearAllForwardings=yes", "-o", "ConnectTimeout=10"]
     WPCTL = "${pkgs.wireplumber}/bin/wpctl"
@@ -113,6 +135,8 @@ let
             self.agents = []
             self.sink_muted = False
             self.source_muted = False
+            self.discord = None
+            self.sound_page = 0
 
         def update(self, **kw):
             with self.lock:
@@ -161,6 +185,34 @@ let
             time.sleep(10)
 
 
+    DISCORD = {"sock": None}
+
+
+    def watch_discord():
+        while True:
+            try:
+                with socket.socket(socket.AF_UNIX) as sock:
+                    sock.connect(DISCORD_SOCKET)
+                    DISCORD["sock"] = sock
+                    for line in sock.makefile(encoding="utf-8"):
+                        STATE.update(discord=json.loads(line))
+            except (OSError, ValueError):
+                pass
+            DISCORD["sock"] = None
+            STATE.update(discord=None)
+            time.sleep(5)
+
+
+    def discord(cmd, **args):
+        sock = DISCORD["sock"]
+        if sock is None:
+            return
+        try:
+            sock.sendall((json.dumps({"cmd": cmd, **args}) + "\n").encode())
+        except OSError:
+            pass
+
+
     def muted(target):
         out = subprocess.run([WPCTL, "get-volume", target], capture_output=True, text=True, check=False).stdout
         return "[MUTED]" in out
@@ -183,12 +235,12 @@ let
         herdr("agent", "focus", pane)
 
 
-    PAGES = ["herdr", "system"]
+    PAGES = ["herdr", "system", "discord"]
 
 
     def page_key(page, blocked):
         nxt = PAGES[(PAGES.index(page) + 1) % len(PAGES)]
-        icon = {"herdr": "md-robot", "system": "md-cog"}[nxt]
+        icon = {"herdr": "md-robot", "system": "md-cog", "discord": "md-discord"}[nxt]
         fg, bg = (BG, RED) if blocked and page != "herdr" else (FG, BG)
         return (icon, nxt, fg, bg, lambda: STATE.update(page=nxt))
 
@@ -208,6 +260,7 @@ let
             page = STATE.page
             agents = list(STATE.agents)
             sink, source = STATE.sink_muted, STATE.source_muted
+            d, sound_page = STATE.discord, STATE.sound_page
 
         blocked = any(a["status"] == "blocked" for a in agents)
 
@@ -221,6 +274,11 @@ let
                 page_key(page, blocked),
             ]
 
+        if page == "discord":
+            return discord_page(d, blocked)
+        if page == "soundboard":
+            return soundboard_page(d, sound_page)
+
         return [
             ("md-microphone_off", "mic off", BG, RED, None) if source else ("md-microphone", "mic", FG, BG, None),
             ("md-volume_off", "muted", BG, RED, None) if sink else ("md-volume_high", "sound", FG, BG, None),
@@ -229,6 +287,76 @@ let
             ("md-lock", "lock", FG, BG, lambda: spawn(LOCK)),
             page_key(page, blocked),
         ]
+
+
+    def toggle_key(on, icon_on, label_on, icon_off, label_off, cmd, enabled=True):
+        if not enabled:
+            return (icon_off, label_off, DIM, BG, None)
+        if on:
+            return (icon_on, label_on, BG, RED, lambda: discord(cmd))
+        return (icon_off, label_off, FG, BG, lambda: discord(cmd))
+
+
+    def discord_page(d, blocked):
+        online = d is not None
+        call = online and d["inCall"]
+        return [
+            toggle_key(online and d["mute"], "md-microphone_off", "muted", "md-microphone", "mute", "mute", online),
+            toggle_key(online and d["deaf"], "md-headphones_off", "deafened", "md-headphones", "deafen", "deaf", online),
+            toggle_key(call and d["video"], "md-video", "camera on", "md-video_off", "camera", "camera", call),
+            toggle_key(call and d["sharing"], "md-monitor_share", "sharing", "md-monitor_share", "share", "share", call),
+            ("md-music_box_multiple", "sounds", FG, BG, lambda: STATE.update(page="soundboard", sound_page=0))
+            if call and d["sounds"] else ("md-music_box_multiple", "sounds", DIM, BG, None),
+            page_key("discord", blocked),
+        ]
+
+
+    def soundboard_page(d, sound_page):
+        rank = {name.lower(): i for i, name in enumerate(SOUNDBOARD_PINS)}
+        sounds = sorted(d["sounds"] if d and d["inCall"] else [], key=lambda s: rank.get(s["name"].lower(), len(rank)))
+        back = ("md-arrow_left", "back", FG, BG, lambda: STATE.update(page="discord"))
+        if len(sounds) <= 5:
+            shown, more = sounds, []
+        else:
+            pages = -(-len(sounds) // 4)
+            start = (sound_page % pages) * 4
+            shown = sounds[start:start + 4]
+            more = [("md-chevron_right", f"{sound_page % pages + 1}/{pages}", FG, BG,
+                     lambda: STATE.update(sound_page=(sound_page + 1) % pages))]
+        keys = [
+            (s, s["name"], FG, BG, lambda s=s: discord("sound", guild=s["guild"], id=s["id"]))
+            for s in shown
+        ]
+        return keys + [None] * (5 - len(keys) - len(more)) + more + [back]
+
+
+    EMOJI_CACHE = {}
+
+
+    def emoji_image(sound, size):
+        """The sound's emoji as an RGBA image, or None if it has none."""
+        key = (sound["emojiId"] or sound["emoji"], size)
+        if key in EMOJI_CACHE:
+            return EMOJI_CACHE[key]
+        image = None
+        try:
+            if sound["emojiId"]:
+                url = f"https://cdn.discordapp.com/emojis/{sound['emojiId']}.png?size=96"
+                with urllib.request.urlopen(url, timeout=3) as resp:
+                    image = Image.open(io.BytesIO(resp.read())).convert("RGBA")
+            elif sound["emoji"]:
+                # Noto Color Emoji is a bitmap font with a single 109px strike.
+                image = Image.new("RGBA", (160, 160))
+                ImageDraw.Draw(image).text((0, 0), sound["emoji"], font=ImageFont.truetype(EMOJI_FONT, 109), embedded_color=True)
+                box = image.getbbox()
+                image = image.crop(box) if box else None
+        except (OSError, ValueError) as err:
+            print(f"emoji for {sound['name']}: {err}", flush=True)
+            image = None
+        if image is not None:
+            image.thumbnail((size, size))
+        EMOJI_CACHE[key] = image
+        return image
 
 
     # The mute keys toggle by position rather than through a stored action, so
@@ -245,6 +373,13 @@ let
             icon, label, fg, _, _ = key
             draw = ImageDraw.Draw(image)
             w, h = image.size
+            if isinstance(icon, dict):
+                emoji = emoji_image(icon, int(h * 0.5))
+                if emoji is not None:
+                    image.paste(emoji, ((w - emoji.width) // 2, int(h * 0.42 - emoji.height / 2)), emoji)
+                    draw.text((w / 2, h * 0.84), label[:9], font=label_font, fill=fg, anchor="mm")
+                    return PILHelper.to_native_key_format(deck, image)
+                icon = "md-music_note"
             # Nerd Font icons overflow their monospace cell, so centring on the
             # advance box lands them right of centre. Centre the ink instead.
             x0, y0, x1, y1 = draw.textbbox((0, 0), glyph(icon), font=icon_font)
@@ -299,6 +434,7 @@ let
     def main():
         threading.Thread(target=watch_herdr, daemon=True).start()
         threading.Thread(target=watch_audio, daemon=True).start()
+        threading.Thread(target=watch_discord, daemon=True).start()
         while True:
             decks = DeviceManager().enumerate()
             if not decks:
@@ -319,7 +455,7 @@ in
 
   systemd.user.services.streamdeck-keys = {
     Unit = {
-      Description = "Stream Deck keys for Herdr agents and system controls";
+      Description = "Stream Deck keys for Herdr agents, system and Discord controls";
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
     };
