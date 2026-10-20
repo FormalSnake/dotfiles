@@ -447,6 +447,7 @@ in
     "matugen/templates/yazi-flavor.toml.tmpl".source = ../../matugen-templates/yazi-flavor.toml.tmpl;
     "matugen/templates/kopuz.json.tmpl".source = ../../matugen-templates/kopuz.json.tmpl;
     "matugen/templates/messages.json.tmpl".source = ../../matugen-templates/messages.json.tmpl;
+    "matugen/templates/streamdeck.json.tmpl".source = ../../matugen-templates/streamdeck.json.tmpl;
     "matugen/templates/formalmusic.json.tmpl".source = ../../matugen-templates/formalmusic.json.tmpl;
     "matugen/templates/discord.css.tmpl".source = ../../matugen-templates/discord.css.tmpl;
     "matugen/templates/beeper.css.tmpl".source = ../../matugen-templates/beeper.css.tmpl;
@@ -575,6 +576,13 @@ in
       [templates.messages]
       input_path = "~/.config/matugen/templates/messages.json.tmpl"
       output_path = "~/.config/messages/theme.json"
+
+      # Stream Deck key colours, read by streamdeck-keys
+      # (mixins/devices/streamdeck.nix), which polls the file and repaints, so
+      # no post_hook. Missing or unreadable, the keys stay on Flexoki.
+      [templates.streamdeck]
+      input_path = "~/.config/matugen/templates/streamdeck.json.tmpl"
+      output_path = "~/.cache/dank/streamdeck.json"
 
       # FormalMusic (~/Developer/youtubemusic, the YouTube Music client). Keys
       # are the base tokens of PaletteFile in crates/desktop/src/live_theme.rs;

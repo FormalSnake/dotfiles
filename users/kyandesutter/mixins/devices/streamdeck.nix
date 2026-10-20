@@ -104,13 +104,19 @@ let
     PLAY_PAUSE = ${pyList shellCmds.playPause}
     HERDR_TERMINAL = ["ghostty", "-e", "herdr", "--remote", "macbook"]
 
-    BG = "${base.black}"
-    FG = "${base.b200}"
-    DIM = "${base.b600}"
-    RED = "${accents.red.d}"
-    YELLOW = "${accents.yellow.d}"
-    GREEN = "${accents.green.d}"
-    BLUE = "${accents.blue.d}"
+    # Keys carry colour roles; render_key resolves them against the palette,
+    # so a matugen re-theme repaints without rebuilding any layout.
+    BG, FG, DIM, RED, YELLOW, GREEN, BLUE = "bg", "fg", "dim", "red", "yellow", "green", "blue"
+    FLEXOKI = {
+        BG: "${base.black}",
+        FG: "${base.b200}",
+        DIM: "${base.b600}",
+        RED: "${accents.red.d}",
+        YELLOW: "${accents.yellow.d}",
+        GREEN: "${accents.green.d}",
+        BLUE: "${accents.blue.d}",
+    }
+    THEME = os.path.expanduser("~/.cache/dank/streamdeck.json")
 
     AGENT_STYLE = {
         "blocked": ("md-alert", BG, RED),
@@ -137,6 +143,7 @@ let
             self.source_muted = False
             self.discord = None
             self.sound_page = 0
+            self.palette = dict(FLEXOKI)
 
         def update(self, **kw):
             with self.lock:
@@ -211,6 +218,22 @@ let
             sock.sendall((json.dumps({"cmd": cmd, **args}) + "\n").encode())
         except OSError:
             pass
+
+
+    def watch_theme():
+        seen = None
+        while True:
+            try:
+                mtime = os.stat(THEME).st_mtime
+                if mtime != seen:
+                    seen = mtime
+                    with open(THEME) as f:
+                        STATE.update(palette={**FLEXOKI, **json.load(f)})
+            except (OSError, ValueError):
+                if seen is not None:
+                    seen = None
+                    STATE.update(palette=dict(FLEXOKI))
+            time.sleep(2)
 
 
     def muted(target):
@@ -367,10 +390,11 @@ let
     }
 
 
-    def render_key(deck, key, icon_font, label_font):
-        image = PILHelper.create_key_image(deck, background=key[3] if key else BG)
+    def render_key(deck, key, palette, icon_font, label_font):
+        image = PILHelper.create_key_image(deck, background=palette[key[3] if key else BG])
         if key:
             icon, label, fg, _, _ = key
+            fg = palette[fg]
             draw = ImageDraw.Draw(image)
             w, h = image.size
             if isinstance(icon, dict):
@@ -417,9 +441,11 @@ let
         try:
             while deck.connected():
                 keys = layout()
+                with STATE.lock:
+                    palette = STATE.palette
                 with deck:
                     for i in range(deck.key_count()):
-                        deck.set_key_image(i, render_key(deck, keys[i] if i < len(keys) else None, icon_font, label_font))
+                        deck.set_key_image(i, render_key(deck, keys[i] if i < len(keys) else None, palette, icon_font, label_font))
                 # A periodic repaint covers the deck resetting itself across
                 # a suspend, which reports no event.
                 STATE.changed.wait(timeout=30)
@@ -435,6 +461,7 @@ let
         threading.Thread(target=watch_herdr, daemon=True).start()
         threading.Thread(target=watch_audio, daemon=True).start()
         threading.Thread(target=watch_discord, daemon=True).start()
+        threading.Thread(target=watch_theme, daemon=True).start()
         while True:
             decks = DeviceManager().enumerate()
             if not decks:
