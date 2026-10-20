@@ -105,9 +105,11 @@ let
 
       # A launch with its own --user-data-dir (FormalMusic's and Kopuz's
       # sign-in windows, test harnesses) never opens the synced profile, so it
-      # must not quit the peer's browser over it.
+      # must not quit the peer's browser over it. Neither may --version, which
+      # agents probe over ssh through the chromium alias below.
       for arg in "$@"; do
         case "$arg" in
+          --version | -version) exec "$real" --version ;;
           --user-data-dir=${userDataDir} | --user-data-dir=${userDataDir}/) ;;
           --user-data-dir=* | --user-data-dir) exec "$real" "$heliumFeatures" "$@" ;;
         esac
