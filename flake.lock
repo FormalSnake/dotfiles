@@ -708,16 +708,16 @@
         "rust-overlay": "rust-overlay_2"
       },
       "locked": {
-        "lastModified": 1792005056,
-        "narHash": "sha256-NbWq8mMYI14pJTlC1EXRJi5nEeRx+zvzaQVleRA1ZLY=",
+        "lastModified": 1792507774,
+        "narHash": "sha256-ZyZt6yThD+uTiggW4tcf2NggADq1ivHtqrUIgTN8ZJA=",
         "owner": "Kopuz-org",
         "repo": "kopuz",
-        "rev": "552400339461ef09c09d4db133bf356ea8fead18",
+        "rev": "23db9b35fe45bd773e3cdcdf0d6584b13ae5b8cc",
         "type": "github"
       },
       "original": {
         "owner": "Kopuz-org",
-        "ref": "v0.21.0",
+        "ref": "v0.22.0",
         "repo": "kopuz",
         "type": "github"
       }
@@ -1085,11 +1085,11 @@
     },
     "nixpkgs_5": {
       "locked": {
-        "lastModified": 1783776592,
-        "narHash": "sha256-+GVwKnbbSmf4cWMJyRzvw8H5yFknmkLoPD5v6snqPzo=",
-        "rev": "e7a3ca8092b61ff85b6a45bf863ea2b2d6a661b3",
+        "lastModified": 1791179034,
+        "narHash": "sha256-C9upu7DiyqMGzdnVbapqVYx2QvBXubxyrhSKV3C+Ngo=",
+        "rev": "494ce7fd23ff6a5dff39e1fb11e9b6f2ac74bf25",
         "type": "tarball",
-        "url": "https://releases.nixos.org/nixos/unstable/nixos-26.11pre1032869.e7a3ca8092b6/nixexprs.tar.xz"
+        "url": "https://releases.nixos.org/nixos/unstable/nixos-26.11pre1085777.494ce7fd23ff/nixexprs.tar.xz"
       },
       "original": {
         "type": "tarball",
