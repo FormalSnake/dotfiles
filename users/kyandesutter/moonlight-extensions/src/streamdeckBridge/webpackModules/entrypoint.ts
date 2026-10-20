@@ -117,8 +117,17 @@ function onCommand(line: string) {
   }
 }
 
-for (const store of [MediaEngineStore, SelectedChannelStore, SoundboardStore, ApplicationStreamingStore]) {
-  store.addChangeListener(publish);
+// The entrypoint runs before Discord has registered most of its stores, and
+// common_stores resolves a store that isn't there yet to undefined.
+function subscribe() {
+  const stores = [MediaEngineStore, SelectedChannelStore, SoundboardStore, ApplicationStreamingStore, ChannelStore];
+  if (stores.some((store) => store == null)) {
+    setTimeout(subscribe, 1000);
+    return;
+  }
+  for (const store of stores) store.addChangeListener(publish);
+  natives.start(onCommand);
+  publish();
 }
-natives.start(onCommand);
-publish();
+
+subscribe();
