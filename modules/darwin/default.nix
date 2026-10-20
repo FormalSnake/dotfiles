@@ -12,6 +12,7 @@
       ./mixins/core/caffeinate.nix
       ./mixins/core/auto-update.nix
       ./mixins/core/storage-gc.nix
+      ./mixins/core/dev-vm-reaper.nix
       ./mixins/core/agenix.nix
       ./mixins/remote/remote-access.nix
       ./mixins/remote/usbflux.nix
