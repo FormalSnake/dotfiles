@@ -364,8 +364,12 @@ let
         image = None
         try:
             if sound["emojiId"]:
-                url = f"https://cdn.discordapp.com/emojis/{sound['emojiId']}.png?size=96"
-                with urllib.request.urlopen(url, timeout=3) as resp:
+                # The CDN answers urllib's default User-Agent with a 403.
+                req = urllib.request.Request(
+                    f"https://cdn.discordapp.com/emojis/{sound['emojiId']}.png?size=96",
+                    headers={"User-Agent": "streamdeck-keys"},
+                )
+                with urllib.request.urlopen(req, timeout=3) as resp:
                     image = Image.open(io.BytesIO(resp.read())).convert("RGBA")
             elif sound["emoji"]:
                 # Noto Color Emoji is a bitmap font with a single 109px strike.
