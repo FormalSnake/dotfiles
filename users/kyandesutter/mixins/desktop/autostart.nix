@@ -44,7 +44,10 @@ in
   #
   # It does NOT stop a *closed* app from coming back: sd-switch has a second
   # pass that starts every inactive unit an active target wants, and keep-old
-  # has no say there (see messages below for the pair of options that closes it).
+  # has no say there. So the windowed login apps (Discord, Steam, Beeper, Flare,
+  # Messages) use RefuseManualStart/RefuseManualStop instead (see messages
+  # below for why that pair works); keep-old stays on the daemons that should
+  # come back (1Password, wl-clip-persist) and on helium, which no target wants.
 
   # Discord (moonlight-patched), launched minimized to the tray. Window rule
   # sends it to workspace 4 (communication, the internal panel).
@@ -55,7 +58,7 @@ in
       ConditionEnvironment = "XDG_CURRENT_DESKTOP=Hyprland";
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
-      "X-SwitchMethod" = "keep-old";
+      RefuseManualStart = true;      RefuseManualStop = true;
     };
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {
@@ -73,7 +76,7 @@ in
       ConditionEnvironment = "XDG_CURRENT_DESKTOP=KDE";
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
-      "X-SwitchMethod" = "keep-old";
+      RefuseManualStart = true;      RefuseManualStop = true;
     };
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {
@@ -87,7 +90,7 @@ in
       ConditionEnvironment = "XDG_CURRENT_DESKTOP=KDE";
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
-      "X-SwitchMethod" = "keep-old";
+      RefuseManualStart = true;      RefuseManualStop = true;
     };
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {
@@ -130,7 +133,7 @@ in
       Description = "Beeper";
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
-      "X-SwitchMethod" = "keep-old";
+      RefuseManualStart = true;      RefuseManualStop = true;
     };
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {
@@ -145,7 +148,7 @@ in
       Description = "Flare (Signal)";
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
-      "X-SwitchMethod" = "keep-old";
+      RefuseManualStart = true;      RefuseManualStop = true;
     };
     Install.WantedBy = [ "graphical-session.target" ];
     Service = {
