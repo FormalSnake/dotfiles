@@ -202,7 +202,7 @@ not on whether I named the skill.
 | Expo / React Native, anything at all | the `expo:*` skills. Never write Expo/EAS config or native UI from memory. |
 | Apple platforms | `Apple-Hig-Designer`, `swiftui-ui-patterns`, `serve-sim`; `write-swift` for any Swift code; `apple-design` for an Apple feel on the web |
 | Cloudflare | `cloudflare`, `wrangler`, `workers-best-practices`, `durable-objects`, `agents-sdk` |
-| My own services | `canaryllm-api`, `gem0-api` |
+| My own services | `canaryllm-api`, `gem0-api`, `kangaplanner-api` |
 | Review and quality passes | `deep-review`, `react-doctor`, `web-perf`, `web-quality-audit` |
 | Prose shipping under my name | `humanizer` |
 | Any library, framework, SDK or CLI question | Context7 MCP first, never memory |
