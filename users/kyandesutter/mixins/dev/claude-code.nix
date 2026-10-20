@@ -69,14 +69,16 @@ in
         if not set -q CLAUDE_CONFIG_DIR
           set -l id
           set -l argc (count $argv)
-          for i in (seq $argc)
-            switch $argv[$i]
+          set -l i 0
+          for arg in $argv
+            set i (math $i + 1)
+            switch $arg
               case --resume -r
                 if test $i -lt $argc
                   set id $argv[(math $i + 1)]
                 end
               case '--resume=*'
-                set id (string replace -- '--resume=' "" $argv[$i])
+                set id (string replace -- '--resume=' "" $arg)
             end
           end
           if test -n "$id"
