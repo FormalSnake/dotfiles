@@ -203,7 +203,10 @@ let
                     sock.connect(DISCORD_SOCKET)
                     DISCORD["sock"] = sock
                     for line in sock.makefile(encoding="utf-8"):
-                        STATE.update(discord=json.loads(line))
+                        d = json.loads(line)
+                        STATE.update(discord=d)
+                        # So the soundboard page opens with its emoji ready.
+                        prefetch_emoji(d["sounds"] if d else [])
             except (OSError, ValueError):
                 pass
             DISCORD["sock"] = None
@@ -374,11 +377,34 @@ let
         return None
 
 
+    EMOJI_PENDING = set()
+    EMOJI_LOCK = threading.Lock()
+    # Key image height, known once a deck is open; drive() sets it.
+    KEY_SIZE = {"px": None}
+
+
     def emoji_frames(sound, size):
-        """The sound's emoji as [(RGBA image, duration ms)], or None if it has none."""
+        """The sound's emoji as [(RGBA image, duration ms)], or None if it has
+        none or it is still downloading. Never blocks: a miss starts the
+        download and repaints once it lands."""
         key = (sound["emojiId"] or sound["emoji"], size)
-        if key in EMOJI_CACHE:
-            return EMOJI_CACHE[key]
+        with EMOJI_LOCK:
+            if key in EMOJI_CACHE:
+                return EMOJI_CACHE[key]
+            if key in EMOJI_PENDING:
+                return None
+            EMOJI_PENDING.add(key)
+        threading.Thread(target=load_emoji, args=(sound, size, key), daemon=True).start()
+        return None
+
+
+    def prefetch_emoji(sounds):
+        if KEY_SIZE["px"] is not None:
+            for sound in sounds:
+                emoji_frames(sound, int(KEY_SIZE["px"] * 0.5))
+
+
+    def load_emoji(sound, size, key):
         frames = None
         try:
             if sound["emojiId"]:
@@ -396,8 +422,10 @@ let
             frames = None
         for image, _ in frames or []:
             image.thumbnail((size, size))
-        EMOJI_CACHE[key] = frames
-        return frames
+        with EMOJI_LOCK:
+            EMOJI_CACHE[key] = frames
+            EMOJI_PENDING.discard(key)
+        STATE.changed.set()
 
 
     def frame_at(frames, now_ms):
@@ -412,9 +440,9 @@ let
         return frames[-1][0]
 
 
-    def animated(keys, size):
+    def animated(keys):
         return any(
-            isinstance(k[0], dict) and len(emoji_frames(k[0], int(size * 0.5)) or []) > 1
+            isinstance(k[0], dict) and len(emoji_frames(k[0], int(KEY_SIZE["px"] * 0.5)) or []) > 1
             for k in keys if k
         )
 
@@ -427,7 +455,26 @@ let
     }
 
 
+    RENDERED = {}
+
+
     def render_key(deck, key, palette, icon_font, label_font):
+        """Native key image, cached by what it shows: an animation tick
+        redraws every key, and most of them have not changed."""
+        emoji = None
+        if key and isinstance(key[0], dict):
+            frames = emoji_frames(key[0], int(KEY_SIZE["px"] * 0.5))
+            if frames:
+                emoji = frame_at(frames, int(time.monotonic() * 1000))
+        look = None if key is None else (id(emoji) if emoji is not None else key[0] if isinstance(key[0], str) else None, key[1], palette[key[2]], palette[key[3]])
+        if look not in RENDERED:
+            if len(RENDERED) > 512:
+                RENDERED.clear()
+            RENDERED[look] = draw_key(deck, key, emoji, palette, icon_font, label_font)
+        return RENDERED[look]
+
+
+    def draw_key(deck, key, emoji, palette, icon_font, label_font):
         image = PILHelper.create_key_image(deck, background=palette[key[3] if key else BG])
         if key:
             icon, label, fg, _, _ = key
@@ -435,9 +482,7 @@ let
             draw = ImageDraw.Draw(image)
             w, h = image.size
             if isinstance(icon, dict):
-                frames = emoji_frames(icon, int(h * 0.5))
-                if frames:
-                    emoji = frame_at(frames, int(time.monotonic() * 1000))
+                if emoji is not None:
                     image.paste(emoji, ((w - emoji.width) // 2, int(h * 0.42 - emoji.height / 2)), emoji)
                     draw.text((w / 2, h * 0.84), label[:9], font=label_font, fill=fg, anchor="mm")
                     return PILHelper.to_native_key_format(deck, image)
@@ -473,6 +518,10 @@ let
         deck.reset()
         deck.set_brightness(70)
         size = deck.key_image_format()["size"][1]
+        KEY_SIZE["px"] = size
+        with STATE.lock:
+            d = STATE.discord
+        prefetch_emoji(d["sounds"] if d else [])
         icon_font = ImageFont.truetype(FONT, int(size * 0.45))
         label_font = ImageFont.truetype(FONT, int(size * 0.16))
         deck.set_key_callback(on_key)
@@ -496,7 +545,7 @@ let
                         if image != sent[i]:
                             deck.set_key_image(i, image)
                             sent[i] = image
-                STATE.changed.wait(timeout=0.05 if animated(keys, size) else 30)
+                STATE.changed.wait(timeout=0.05 if animated(keys) else 30)
                 STATE.changed.clear()
         finally:
             try:
