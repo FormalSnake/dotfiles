@@ -16,6 +16,7 @@
       ./mixins/core/agenix.nix
       ./mixins/core/boot.nix
       ./mixins/core/plymouth
+      ./mixins/core/chime
       ./mixins/tuning/oomd.nix
       ./mixins/hardware/firmware.nix
       ./mixins/hardware/smartd.nix
