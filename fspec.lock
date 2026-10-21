@@ -1,0 +1,341 @@
+[[pkg]]
+name = "apostrophe"
+source = "flatpak:org.gnome.gitlab.somas.Apostrophe"
+
+[pkg.any]
+commit = "eebf714c88801c14b0c5bd343088f8a6cbadad29de22c61d345a7a47c795917a"
+
+[[pkg]]
+name = "astro-ls"
+source = "npm:@astrojs/language-server"
+version = "2.16.10"
+
+[pkg.any]
+url = "https://registry.npmjs.org/@astrojs/language-server/-/language-server-2.16.10.tgz"
+hash = "sha512-87VQ/5GSdHlRnUA+hGuerYyIGAj+9RbZmATyuKLEUePinUXhQ5YkRnRrHhOD9sSi5JOErLjrLkHnfZFEvGrV8w=="
+
+[[pkg]]
+name = "claude"
+source = "url:https://registry.npmjs.org/@anthropic-ai/claude-code-linux-x64/-/claude-code-linux-x64-2.1.289.tgz"
+
+[pkg.any]
+url = "https://registry.npmjs.org/@anthropic-ai/claude-code-linux-x64/-/claude-code-linux-x64-2.1.289.tgz"
+hash = "sha256-UKbrQzQi/rz6e3rB54unlc33nx/ljwF/sdmuuUkbM30="
+
+[[pkg]]
+name = "clipssh"
+source = "git:https://github.com/samuellawrentz/clipssh@c7f4e8ddcf102302c6375ba51534c7505ddc2616"
+rev = "c7f4e8ddcf102302c6375ba51534c7505ddc2616"
+
+[[pkg]]
+name = "dcal"
+source = "github:AvengeMedia/dankcalendar"
+version = "1.6.1"
+
+[pkg.x86_64-linux]
+url = "https://github.com/duxlabs-dev/dux-calendar/releases/download/v1.6.1/dcal-linux-amd64.tar.gz"
+hash = "sha256-9Y/AUBlUx3ybvApqPdjQiL6eRCEKv9SXPaQxCNoA4l4="
+
+[[pkg]]
+name = "discord"
+source = "flatpak:com.discordapp.Discord"
+
+[pkg.any]
+commit = "251fbd74f960cfc53235206c2fe698531a3fe86eabf0a16d2481e6ba8974ba26"
+
+[[pkg]]
+name = "docker-compose-langserver"
+source = "npm:@microsoft/compose-language-service"
+version = "0.2.0"
+
+[pkg.any]
+url = "https://registry.npmjs.org/@microsoft/compose-language-service/-/compose-language-service-0.2.0.tgz"
+hash = "sha512-U49V0aATlwNy3KGU+FKiDOVBRdw6cmxM0AmPxYn1jJmi/l/u2oBCEh0cWmzoqcrySNMwUJVkmHNc1w5bXNon6A=="
+
+[[pkg]]
+name = "docker-langserver"
+source = "npm:dockerfile-language-server-nodejs"
+version = "0.15.0"
+
+[pkg.any]
+url = "https://registry.npmjs.org/dockerfile-language-server-nodejs/-/dockerfile-language-server-nodejs-0.15.0.tgz"
+hash = "sha512-iS3GUUAn1bC3sDdLyg6CUnIaVQfViJBh+FhWBPftK6kJkhUMxFG2sr25OqMVaZgRsVuJEoNpflgJN3FCbkA01A=="
+
+[[pkg]]
+name = "fast"
+source = "git:https://github.com/maaslalani/fast@26d8fc9c189ba748c68f8930af11dee5c2467f7e"
+rev = "26d8fc9c189ba748c68f8930af11dee5c2467f7e"
+
+[[pkg]]
+name = "fetch"
+source = "git:https://github.com/areofyl/fetch@7b19d22c2d8e4b7b2295cc625c9fdf87adcabbcd"
+rev = "7b19d22c2d8e4b7b2295cc625c9fdf87adcabbcd"
+
+[[pkg]]
+name = "flare"
+source = "flatpak:de.schmidhuberj.Flare"
+
+[pkg.any]
+commit = "eeb5f6cb3ed56eee1d1e1a8c389cd12cdf8c400cc1475405e3d950b3d8354097"
+
+[[pkg]]
+name = "formalmusic"
+source = "git:https://github.com/FormalStudio/formalmusic@9ee98746fd0bbb804aebb8007132d1e05f992940"
+rev = "9ee98746fd0bbb804aebb8007132d1e05f992940"
+
+[[pkg]]
+name = "formalshell"
+source = "github:FormalSnake/FormalShell"
+version = "0.2.0"
+
+[pkg.x86_64-linux]
+url = "https://github.com/FormalStudio/FormalShell/releases/download/v0.2.0/formalshell-x86_64-linux.tar.gz"
+hash = "sha256-q5bXEjpwFfli0WwqbqcECe4Mz15whgQiJUBJvEH+7Wg="
+
+[[pkg]]
+name = "fut"
+source = "github:mikker/fut"
+version = "0.24"
+
+[pkg.x86_64-linux]
+url = "https://github.com/mikker/fut/releases/download/0.24/fut-linux-x86_64.tar.gz"
+hash = "sha256-WyEDdm9BVzEvyTF0IDLAEPckTzWxdealmpxPvUzbWy4="
+
+[[pkg]]
+name = "gopls"
+source = "git:https://github.com/golang/tools@gopls/v0.23.0"
+rev = "014f87ff5c01915bc90f4f11a6bb8aea3e0edbd7"
+
+[[pkg]]
+name = "helium"
+source = "github:imputnet/helium-linux"
+version = "0.19.4.1"
+
+[pkg.x86_64-linux]
+url = "https://github.com/imputnet/helium-linux/releases/download/0.19.4.1/helium-0.19.4.1-x86_64_linux.tar.xz"
+hash = "sha256-bKbkoA/vWRaCH7GvipYHzGs4b2eKfrQi5V8ZEWujBGk="
+
+[[pkg]]
+name = "herdr"
+source = "github:ogulcancelik/herdr"
+version = "0.9.3"
+
+[pkg.x86_64-linux]
+url = "https://github.com/herdrdev/herdr/releases/download/v0.9.3/herdr-linux-x86_64"
+hash = "sha256-GKjcZfHC+khYhDRDVt6hz9kRxvBs9G+njhk/QIf026c="
+
+[[pkg]]
+name = "kopuz"
+source = "github:Kopuz-org/kopuz"
+version = "0.22.0"
+
+[pkg.x86_64-linux]
+url = "https://github.com/Kopuz-org/kopuz/releases/download/v0.22.0/kopuz_v0.22.0_x86_64-linux.tar.gz"
+hash = "sha256-b9IHn0mn6cj7hdOb4ZRzObAwTmngqLqZUpzfAMC4cus="
+
+[[pkg]]
+name = "kopuzd"
+source = "git:https://github.com/Kopuz-org/kopuz@23db9b35fe45bd773e3cdcdf0d6584b13ae5b8cc"
+rev = "23db9b35fe45bd773e3cdcdf0d6584b13ae5b8cc"
+
+[[pkg]]
+name = "lazydocker"
+source = "aqua:jesseduffield/lazydocker"
+version = "0.25.2"
+
+[pkg.x86_64-linux]
+url = "https://github.com/jesseduffield/lazydocker/releases/download/v0.25.2/lazydocker_0.25.2_Linux_x86_64.tar.gz"
+hash = "sha256-DZ2/wmBoshjn7YSxBHSMrcbjz3M8Cv01RlMG+zm5Ujw="
+
+[[pkg]]
+name = "librepods"
+source = "git:https://github.com/thisisgm/omarchy-pods@307c5a6d2109f088d8e6a558c933ebe4f6b1db01"
+rev = "307c5a6d2109f088d8e6a558c933ebe4f6b1db01"
+patches = "sha256-qRVO6tEfvfFCA2wQSyqn09rT8wVq8+WN6pQOhpJepkg="
+
+[[pkg]]
+name = "lua-language-server"
+source = "aqua:LuaLS/lua-language-server"
+version = "3.19.1"
+
+[pkg.x86_64-linux]
+url = "https://github.com/LuaLS/lua-language-server/releases/download/3.19.1/lua-language-server-3.19.1-linux-x64.tar.gz"
+hash = "sha256-6SNdLXLvVbxBz4yZzaLtZHd2ggJLS7gfXepCUGDFy7g="
+bins = ["bin/lua-language-server"]
+
+[[pkg]]
+name = "lumen"
+source = "git:https://github.com/jnsahaj/lumen@4ad27231c3614e3f2acbc07bc794a4e8fde06fbf"
+rev = "4ad27231c3614e3f2acbc07bc794a4e8fde06fbf"
+
+[[pkg]]
+name = "marksman"
+source = "aqua:artempyanykh/marksman"
+version = "2026-02-08"
+
+[pkg.x86_64-linux]
+url = "https://github.com/artempyanykh/marksman/releases/download/2026-02-08/marksman-linux-x64"
+hash = "sha256-vlCY6CEyGSacR/wNkWpm+jHOBgLslnR1xyImCqvyYIc="
+bins = ["marksman"]
+
+[[pkg]]
+name = "matugen"
+source = "github:InioX/matugen"
+version = "4.2.0"
+
+[pkg.x86_64-linux]
+url = "https://github.com/InioX/matugen/releases/download/v4.2.0/matugen-4.2.0-x86_64.tar.gz"
+hash = "sha256-ouO1DkntZDmZm6PCUu0E+r2Y7k6dEuXl3/LmY3BWl1E="
+
+[[pkg]]
+name = "meshtop"
+source = "git:https://github.com/FormalSnake/meshtop@ca70d10d27e8fc1a0f0afc5c7d691887cb2c4020"
+rev = "ca70d10d27e8fc1a0f0afc5c7d691887cb2c4020"
+
+[[pkg]]
+name = "messages"
+source = "git:https://github.com/FormalStudio/messages@8df17ef38312e240f89428e98f85ef55e95b9c95"
+rev = "8df17ef38312e240f89428e98f85ef55e95b9c95"
+
+[[pkg]]
+name = "nil"
+source = "git:https://github.com/oxalica/nil@dbbb5c24f9215476992aa1bd305f8e5398e89654"
+rev = "dbbb5c24f9215476992aa1bd305f8e5398e89654"
+
+[[pkg]]
+name = "nixfmt"
+source = "github:NixOS/nixfmt"
+version = "1.5.0"
+
+[pkg.x86_64-linux]
+url = "https://github.com/NixOS/nixfmt/releases/download/v1.5.0/nixfmt"
+hash = "sha256-qgKSR6uJyJfi85SEY5Z1U/kC+G6G40AvooyynEpE90U="
+
+[[pkg]]
+name = "obsidian"
+source = "flatpak:md.obsidian.Obsidian"
+
+[pkg.any]
+commit = "ba4cac4feb375e6e79dafb4fbdb3684e972506dccc8e12ffdf12c0748bd89350"
+
+[[pkg]]
+name = "parsec"
+source = "flatpak:com.parsecgaming.parsec"
+
+[pkg.any]
+commit = "1f79530a7f2531821e21a2b271b6b4215daeea54e3f4b9e4c65c6e71bb890e3a"
+
+[[pkg]]
+name = "rust-analyzer"
+source = "aqua:rust-lang/rust-analyzer"
+version = "2026-09-28"
+
+[pkg.x86_64-linux]
+url = "https://github.com/rust-lang/rust-analyzer/releases/download/2026-09-28/rust-analyzer-x86_64-unknown-linux-gnu.gz"
+hash = "sha256-I/cR2Gtfgm4iiG8B1zVdwB4PTBNX2vopcQqVuQO0jIU="
+bins = ["rust-analyzer=rust-analyzer-x86_64-unknown-linux-gnu"]
+
+[[pkg]]
+name = "t3"
+source = "github:pingdotgg/t3code"
+version = "0.1.0"
+
+[pkg.x86_64-linux]
+url = "https://github.com/pingdotgg/t3code/releases/download/v0.1.0/t3-0.1.0-linux-x64.tar.gz"
+hash = "sha256-93A/8buPYkNYAFizzPLAKrti66S5keJrux2iL0tW2bE="
+
+[[pkg]]
+name = "t3code-desktop"
+source = "github:pingdotgg/t3code"
+version = "0.1.0"
+
+[pkg.x86_64-linux]
+url = "https://github.com/pingdotgg/t3code/releases/download/v0.1.0/T3-Code-0.1.0-x86_64.AppImage"
+hash = "sha256-442cX7UTsezgpwi5BtM4O1tH7RmVdbOaMeQauINOt0Q="
+
+[[pkg]]
+name = "tailwindcss-language-server"
+source = "npm:@tailwindcss/language-server"
+version = "0.16.0"
+
+[pkg.any]
+url = "https://registry.npmjs.org/@tailwindcss/language-server/-/language-server-0.16.0.tgz"
+hash = "sha512-ko2xr4nlFIkqwJFnnw7hfdpjbsnK0DOk+QEEI51tvKOCF97OG0RU59iGfadoaOoY6I9xkSMbTW+AAwgnGnLH3w=="
+
+[[pkg]]
+name = "tmux-agent-sidebar"
+source = "github:hiroppy/tmux-agent-sidebar"
+version = "0.13.0"
+
+[pkg.x86_64-linux]
+url = "https://github.com/hiroppy/tmux-agent-sidebar/releases/download/v0.13.0/tmux-agent-sidebar-linux-x86_64"
+hash = "sha256-4GSVoyegdMbjjD12l/BhvbbRnwS2fZ/DATfTTZMY40Q="
+
+[[pkg]]
+name = "tree-sitter"
+source = "aqua:tree-sitter/tree-sitter"
+version = "0.26.13"
+
+[pkg.x86_64-linux]
+url = "https://github.com/tree-sitter/tree-sitter/releases/download/v0.26.13/tree-sitter-linux-x64.gz"
+hash = "sha256-yci+8CdljWAknKT8BmNXjOsuICk0a7hwLgkeINdxZHU="
+bins = ["tree-sitter=tree-sitter-linux-x64"]
+
+[[pkg]]
+name = "typescript"
+source = "npm:typescript"
+version = "5.9.3"
+
+[pkg.any]
+url = "https://registry.npmjs.org/typescript/-/typescript-5.9.3.tgz"
+hash = "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="
+
+[[pkg]]
+name = "uv"
+source = "aqua:astral-sh/uv"
+version = "0.13.0"
+
+[pkg.x86_64-linux]
+url = "https://github.com/astral-sh/uv/releases/download/0.13.0/uv-x86_64-unknown-linux-musl.tar.gz"
+hash = "sha256-sIKPxM3EfWWVHpS18KFaU2RCDo3NiHI/OyHnouswu8M="
+bins = ["uv-x86_64-unknown-linux-musl/uv", "uv-x86_64-unknown-linux-musl/uvx"]
+
+[[pkg]]
+name = "vscode-langservers-extracted"
+source = "npm:vscode-langservers-extracted"
+version = "4.10.0"
+
+[pkg.any]
+url = "https://registry.npmjs.org/vscode-langservers-extracted/-/vscode-langservers-extracted-4.10.0.tgz"
+hash = "sha512-EFf9uQI4dAKbzMQFjDvVm1xJq1DXAQvBEuEfPGrK/xzfsL5xWTfIuRr90NgfmqwO+IEt6vLZm9EOj6R66xIifg=="
+
+[[pkg]]
+name = "vtsls"
+source = "npm:@vtsls/language-server"
+version = "0.3.0"
+
+[pkg.any]
+url = "https://registry.npmjs.org/@vtsls/language-server/-/language-server-0.3.0.tgz"
+hash = "sha512-EYTkCHNGz3MFSP7z0DZ5+WBQY5CWEH7bCUu53EaDloBTjghoi2vfZqSrS0+7WsRG03MhBhjGG9ifNee/2kixvQ=="
+
+[[pkg]]
+name = "wl-clip-persist"
+source = "git:https://github.com/Linus789/wl-clip-persist@v0.5.0"
+rev = "e26fde01c13922e3a65049dafb7d5adfbc52626e"
+
+[[pkg]]
+name = "wl-gammarelay-rs"
+source = "git:https://github.com/MaxVerevkin/wl-gammarelay-rs@v1.0.1"
+rev = "1dde760b03a5afd4761af17d8c49b7058cbd800d"
+
+[[pkg]]
+name = "yaml-language-server"
+source = "npm:yaml-language-server"
+version = "1.24.0"
+
+[pkg.any]
+url = "https://registry.npmjs.org/yaml-language-server/-/yaml-language-server-1.24.0.tgz"
+hash = "sha512-+HGcwu4M7IC+UDhDZScTZR8qsl2MMj/X1E5e83QcWzWn2pctj0fv8HHdrHHcbc1KB3CuRPJ4gc1Nm36D0iCu0g=="
+
+[zypper.e1504g]
+snapshot = "20261020"
