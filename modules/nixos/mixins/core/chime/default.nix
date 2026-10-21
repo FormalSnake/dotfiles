@@ -37,6 +37,8 @@ in
     after = [ "sound.target" ];
     before = [ "display-manager.service" ];
     unitConfig.DefaultDependencies = false;
+    # Boot only: a rebuild that changes it must not play it mid-session.
+    restartIfChanged = false;
     serviceConfig = {
       Type = "exec";
       ExecStart = "-${play}/bin/formalos-chime";
