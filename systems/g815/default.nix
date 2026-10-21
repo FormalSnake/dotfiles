@@ -203,10 +203,6 @@
   # machine.
   kyan.desktop.shell = "formalshell";
 
-  # FormalShell's greeter as the login screen, with a session picker for
-  # Plasma${' and Waylandcraft' if 'g815' in p else ''}. Rollback to SDDM is setting this to "sddm".
-  kyan.desktop.greeter = "formalshell";
-
   # NVIDIA dGPU stack. This chassis has the RTX 5070; an Intel-only host
   # leaves this off.
   kyan.nvidia.enable = true;

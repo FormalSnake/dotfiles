@@ -2,48 +2,6 @@
 let
   cfg = config.kyan.desktop;
 
-  qylockTheme = "man-bicycle";
-  # man-bicycle takes none of the per-theme conf edits qylock can apply (only
-  # terraria, Genshin, clockwork and osu have any).
-  qylockThemeOptions = { };
-
-  # qylock's SDDM theme tree, with Tab in man-bicycle's password field cycling
-  # the session. Upstream only cycles it on a click, and the greeter has no
-  # working pointer, so without this the last-used session is the only one
-  # reachable.
-  qylockSddm = (inputs.qylock.legacyPackages.${pkgs.stdenv.hostPlatform.system}.mkSddmThemes {
-    themeOptions = qylockThemeOptions;
-  }).overrideAttrs (old: {
-    postPatch = (old.postPatch or "") + ''
-      substituteInPlace themes/man-bicycle/Main.qml --replace-fail \
-        'onAccepted: doLogin()' \
-        'onAccepted: doLogin(); Keys.onTabPressed: if (typeof sessionModel !== "undefined") root.sessionIndex = (root.sessionIndex + 1) % sessionModel.rowCount()'
-    '';
-  });
-
-  # weston.ini for the SDDM Wayland greeter compositor. Mirrors what the NixOS
-  # sddm module generates by default (keyboard from the xkb config, the module's
-  # libinput defaults), so behaviour is unchanged except that we hand weston a
-  # fixed config path while the wrapper below varies only the --drm-device.
-  sddmWestonIni = pkgs.writeText "sddm-weston.ini" ''
-    [keyboard]
-    keymap_layout=${config.services.xserver.xkb.layout}
-    keymap_model=${config.services.xserver.xkb.model}
-    keymap_options=${config.services.xserver.xkb.options}
-    keymap_variant=${config.services.xserver.xkb.variant}
-
-    [libinput]
-    enable-tap=true
-    left-handed=false
-  '';
-
-  # SDDM Wayland greeter compositor launcher. Weston picks the boot_vga card,
-  # which on both hosts owns every connector (the g815 panel and HDMI both
-  # hang off the dGPU since the MUX switch, see systems/g815/default.nix).
-  sddmGreeterCompositor = pkgs.writeShellScript "sddm-greeter-compositor" ''
-    exec ${pkgs.weston}/bin/weston --shell=kiosk -c ${sddmWestonIni}
-  '';
-
   # The FormalShell greeter's sway. sway refuses the nvidia driver without
   # --unsupported-gpu, and on the g815 it gets the same card the session pins
   # (users/kyandesutter/mixins/desktop/hyprland/session.nix), resolved at run
@@ -160,11 +118,6 @@ in
       default = "formalshell";
       description = "Which desktop shell owns the session (bar, notification daemon). Gates the shell-facing binds and user services in users/kyandesutter/mixins/{hyprland,formalshell}.nix. The lock screen and lock-before-sleep are FormalShell's only.";
     };
-    greeter = lib.mkOption {
-      type = lib.types.enum [ "formalshell" "sddm" ];
-      default = "formalshell";
-      description = "The login screen: FormalShell's greetd greeter, or SDDM with qylock. Both list every session in services.displayManager.sessionPackages.";
-    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -212,9 +165,10 @@ in
     };
 
     # FormalShell's greeter under greetd: the desktop's wallpaper, palette and
-    # preset, and a session picker under the field (Tab or a click) that
-    # remembers each user's last pick and starts on Hyprland.
-    services.formalshell-greeter = lib.mkIf (cfg.greeter == "formalshell") {
+    # preset, and a session picker under the field (Tab or a click) listing
+    # every services.displayManager.sessionPackages entry, remembering each
+    # user's last pick and starting on Hyprland.
+    services.formalshell-greeter = {
       enable = true;
       compositorPackage = greeterSway;
       mirrorUser = "kyandesutter";
@@ -227,36 +181,6 @@ in
         XCURSOR_PATH = "${pkgs.bibata-cursors}/share/icons";
         XCURSOR_THEME = "Bibata-Modern-Classic";
         XCURSOR_SIZE = "24";
-      };
-    };
-
-    # SDDM (Qt6, Wayland), the rollback greeter. It lists the sessions from
-    # services.displayManager.sessionPackages.
-    services.displayManager.sddm = lib.mkIf (cfg.greeter == "sddm") {
-      enable = true;
-      wayland.enable = true;
-      # Plasma defaults this to kwin, which makes nixpkgs hand the greeter
-      # QT_WAYLAND_SHELL_INTEGRATION=layer-shell; weston's kiosk shell has no
-      # layer-shell, so the greeter aborts and the screens stay black.
-      wayland.compositor = "weston";
-      wayland.compositorCommand = toString sddmGreeterCompositor;
-      package = lib.mkDefault pkgs.kdePackages.sddm;
-      theme = qylockTheme;
-      # On-screen keyboard, the patched qylock themes, and the Qt runtime
-      # their QML imports (the same list qylock's own sddm half installs).
-      extraPackages = [
-        pkgs.kdePackages.qtvirtualkeyboard
-        qylockSddm
-        pkgs.qt6.qt5compat
-        pkgs.qt6.qtmultimedia
-        pkgs.qt6.qtsvg
-      ];
-      # The greeter's XCURSOR_PATH ends at the system profile, and the user's
-      # Bibata lives in the home-manager profile, which the sddm user cannot
-      # see. With no theme to load, the greeter draws no pointer at all.
-      settings.Theme = {
-        CursorTheme = "Bibata-Modern-Classic";
-        CursorSize = 24;
       };
     };
 
@@ -437,10 +361,8 @@ in
     # applied by tailscaled at service start.
     services.tailscale.extraSetFlags = [ "--operator=kyandesutter" ];
 
-    environment.systemPackages = with pkgs; lib.optionals (cfg.greeter == "sddm") [
-      qylockSddm
-    ] ++ [
-      # Pointer theme for both greeters.
+    environment.systemPackages = with pkgs; [
+      # Pointer theme for the greeter (XCURSOR_PATH above).
       bibata-cursors
 
       # Night light backend for FormalShell (M16): the shell manages the

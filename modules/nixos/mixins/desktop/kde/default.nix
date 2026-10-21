@@ -4,25 +4,16 @@ let
   gaming = config.kyan.gaming.enable;
   user = "kyandesutter";
 
-  # SteamOS-style session switching. Under the FormalShell greeter the switch
-  # makes the target the greeter's remembered pick and ends the session, so
-  # the greeter comes back on it and a password logs straight in; greetd has
-  # no one-shot autologin to borrow.
-  #
-  # SDDM only reads its config when it starts, and autologin runs once per
-  # start, so there the switch writes a one-shot autologin file, restarts SDDM
-  # (which ends the current session) and removes the file once SDDM has logged
-  # into the target. The file lives in /run behind a symlink in
-  # /etc/sddm.conf.d, so a switch cut off by a power loss cannot autologin the
-  # next boot; SDDM skips the dangling link.
-  sddm = config.kyan.desktop.greeter == "sddm";
+  # SteamOS-style session switching. The switch makes the target the
+  # FormalShell greeter's remembered pick and ends the session, so the greeter
+  # comes back on it and a password logs straight in; greetd has no one-shot
+  # autologin to borrow.
   greeterHome = config.services.formalshell-greeter.stateDir;
   greeterSessions = "${greeterHome}/.local/state/formalshell/sessions";
   sessions = {
     plasma = if gaming then "Gaming Mode" else "Switch to Plasma";
     hyprland-uwsm = "Switch to Hyprland";
   };
-  switchConf = "/run/sddm-session-switch.conf";
 
   session-switch = pkgs.writeShellApplication {
     name = "session-switch";
@@ -66,15 +57,7 @@ in
       serviceConfig.Type = "oneshot";
       scriptArgs = "%i";
       path = [ pkgs.coreutils pkgs.systemd ];
-      script = if sddm then ''
-        printf '[Autologin]\nUser=${user}\nSession=%s.desktop\n' "$1" > ${switchConf}
-        # The session's user units outlive its logind session, and uwsm will
-        # not start Hyprland while graphical-session.target is still active.
-        systemctl --user -M ${user}@ stop graphical-session.target || true
-        systemctl restart display-manager.service
-        sleep 20
-        rm -f ${switchConf}
-      '' else ''
+      script = ''
         install -d -o greeter -g greeter -m 0700 ${greeterHome}/.local ${greeterHome}/.local/state \
           ${greeterHome}/.local/state/formalshell ${greeterSessions}
         for f in ${greeterSessions}/${user} ${greeterSessions}/.last; do
@@ -82,11 +65,12 @@ in
           chown greeter:greeter "$f"
         done
         session=$(loginctl show-user ${user} -p Display --value)
+        # The session's user units outlive its logind session, and uwsm will
+        # not start Hyprland while graphical-session.target is still active.
         systemctl --user -M ${user}@ stop graphical-session.target || true
         [ -n "$session" ] && loginctl terminate-session "$session"
       '';
     };
-    environment.etc."sddm.conf.d/zz-session-switch.conf" = lib.mkIf sddm { source = switchConf; };
 
     security.polkit.extraConfig = ''
       polkit.addRule(function(action, subject) {

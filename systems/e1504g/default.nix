@@ -65,10 +65,6 @@
   # online-accounts` sign-in, emoji picker, shell screenshots).
   kyan.desktop.shell = "formalshell";
 
-  # FormalShell's greeter as the login screen, with a session picker for
-  # Plasma${' and Waylandcraft' if 'g815' in p else ''}. Rollback to SDDM is setting this to "sddm".
-  kyan.desktop.greeter = "formalshell";
-
   # Plasma next to Hyprland, without the gaming bits the g815 gets with
   # kyan.gaming (mixins/desktop/kde).
   kyan.desktop.kde.enable = true;
