@@ -540,11 +540,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792611892,
-        "narHash": "sha256-9LSQVHygRYt6UuejeSdGFbXQKLL5HzxC6/DVNBeoens=",
+        "lastModified": 1792616664,
+        "narHash": "sha256-DgOzBv2zcnYGR7NmFSGa5Qr8N1w873jfCNz9ddA4ZGg=",
         "owner": "FormalStudio",
         "repo": "formalmusic",
-        "rev": "5e5b5380d9e23185cd020db16fdb86cac893d2eb",
+        "rev": "5d71637494f460350edb9f001cb618cba436bdfb",
         "type": "github"
       },
       "original": {
@@ -814,11 +814,11 @@
     "nativedesktop": {
       "flake": false,
       "locked": {
-        "lastModified": 1792610751,
-        "narHash": "sha256-bI5mXzs1KQTfwb4JOa9GR89cHbx4Hr3c7Zz2Ay9afEo=",
+        "lastModified": 1792615433,
+        "narHash": "sha256-Y/MKEtEKltqI4S5lgw5KPrLGvWZFVHfdXcn162Yvqws=",
         "owner": "FormalStudio",
         "repo": "NativeDesktop",
-        "rev": "fc27844b0275f8d242f9c5d9a5355a4f7f098202",
+        "rev": "f70b86f8d05d159161d6baf9a81ac6d8a2ae3dc4",
         "type": "github"
       },
       "original": {
