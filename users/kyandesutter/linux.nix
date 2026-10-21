@@ -22,6 +22,7 @@
     ./mixins/apps/helium.nix
     ./mixins/apps/dillo.nix
     ./mixins/apps/lumen.nix
+    ./mixins/apps/boxxy.nix
     ./mixins/apps/nordvpn.nix
     ./mixins/dev/godot.nix
     ./mixins/apps/obsidian.nix
