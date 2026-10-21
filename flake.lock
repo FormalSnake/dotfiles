@@ -540,11 +540,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792537344,
-        "narHash": "sha256-MBcComYTs9Qv84Ug3qLQHVGVHEGXsUhNwAAykYJAJC8=",
+        "lastModified": 1792609956,
+        "narHash": "sha256-bmwAJJyl4GxIWkIZHwobKf/B2k61wBF1lpTe8AMQEpc=",
         "owner": "FormalStudio",
         "repo": "formalmusic",
-        "rev": "9ee98746fd0bbb804aebb8007132d1e05f992940",
+        "rev": "cf64420ebda53d0aa2fcbe2af588de3036192b85",
         "type": "github"
       },
       "original": {
@@ -798,11 +798,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792595368,
-        "narHash": "sha256-LXU67FIxBntvdCcMV9rCymNvXh+0HiM6ctT+2KrOo0A=",
+        "lastModified": 1792609202,
+        "narHash": "sha256-i/wmNCpkBdB0CKgnygmdyc5v/gkkRdUF7n3+pXtHu8U=",
         "owner": "FormalStudio",
         "repo": "messages",
-        "rev": "b2368df7bfb57813e59a7b32c499c3053a17e4df",
+        "rev": "c37926c92bfd6210a2796ba5f863dfb6eb2d27db",
         "type": "github"
       },
       "original": {
@@ -814,15 +814,15 @@
     "nativedesktop": {
       "flake": false,
       "locked": {
-        "lastModified": 1792536428,
-        "narHash": "sha256-oZHhT9Hy2ATqMPz9YHLOFOuR1Np2OuZDjg5AVngNh7E=",
-        "owner": "FormalSnake",
+        "lastModified": 1792609206,
+        "narHash": "sha256-E2R2ZZFsCWuPjXgj/l8c3jPySCbxXv3QVVlviEnaWgE=",
+        "owner": "FormalStudio",
         "repo": "NativeDesktop",
-        "rev": "7ad936d8bcf2ef7c7d026798cb63044b9c088b71",
+        "rev": "620bd710fa4df39d9709c2d73e60aec64a8503e8",
         "type": "github"
       },
       "original": {
-        "owner": "FormalSnake",
+        "owner": "FormalStudio",
         "repo": "NativeDesktop",
         "type": "github"
       }
@@ -836,11 +836,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792536428,
-        "narHash": "sha256-oZHhT9Hy2ATqMPz9YHLOFOuR1Np2OuZDjg5AVngNh7E=",
+        "lastModified": 1792608492,
+        "narHash": "sha256-eD2+PORYv4OtiMySBGSEtaN1o/fbbuvGIJM+vDFKDyM=",
         "owner": "FormalStudio",
         "repo": "NativeDesktop",
-        "rev": "7ad936d8bcf2ef7c7d026798cb63044b9c088b71",
+        "rev": "9ac56c7452040673f249790ba0547d3959408b39",
         "type": "github"
       },
       "original": {
