@@ -4,10 +4,28 @@ let
   gaming = config.kyan.gaming.enable;
   user = "kyandesutter";
 
-  # SteamOS-style session switching. The switch makes the target the
-  # FormalShell greeter's remembered pick and ends the session, so the greeter
-  # comes back on it and a password logs straight in; greetd has no one-shot
-  # autologin to borrow.
+  # SteamOS-style session switching through greetd's initial_session, its
+  # autologin. greetd runs that once per start unless its runfile exists, so
+  # tmpfiles creates the runfile at boot (no autologin on a normal boot) and a
+  # switch writes the target, deletes the runfile, ends the session and
+  # restarts greetd. The target also becomes the FormalShell greeter's
+  # remembered pick, so a logout from it comes back on it.
+  switchDir = "/run/session-switch";
+  runfile = "${switchDir}/greetd.run";
+  waylandSessions = "${config.services.displayManager.sessionData.desktops}/share/wayland-sessions";
+
+  # Runs as ${user} under greetd. With no target it exits, and the greeter
+  # comes up as after any logout.
+  switch-login = pkgs.writeShellScript "session-switch-login" ''
+    target=$(cat ${switchDir}/target 2>/dev/null) || exit 0
+    desktop=${waylandSessions}/$target.desktop
+    [ -f "$desktop" ] || exit 0
+    export XDG_SESSION_TYPE=wayland XDG_SESSION_DESKTOP="$target"
+    names=$(${pkgs.gnused}/bin/sed -n 's/^DesktopNames=//p' "$desktop" | ${pkgs.gnused}/bin/sed 's/;$//; s/;/:/g')
+    [ -n "$names" ] && export XDG_CURRENT_DESKTOP="$names"
+    exec sh -c "$(${pkgs.gnused}/bin/sed -n 's/^Exec=//p' "$desktop" | head -n 1)"
+  '';
+
   greeterHome = config.services.formalshell-greeter.stateDir;
   greeterSessions = "${greeterHome}/.local/state/formalshell/sessions";
   sessions = {
@@ -53,7 +71,7 @@ in
     ];
 
     systemd.services."session-switch@" = {
-      description = "Log into the %i session through the greeter";
+      description = "Log into the %i session";
       serviceConfig.Type = "oneshot";
       scriptArgs = "%i";
       path = [ pkgs.coreutils pkgs.systemd ];
@@ -64,13 +82,34 @@ in
           printf '%s\n' "$1" > "$f"
           chown greeter:greeter "$f"
         done
+        printf '%s\n' "$1" > ${switchDir}/target
+        rm -f ${runfile}
         session=$(loginctl show-user ${user} -p Display --value)
         # The session's user units outlive its logind session, and uwsm will
         # not start Hyprland while graphical-session.target is still active.
         systemctl --user -M ${user}@ stop graphical-session.target || true
-        [ -n "$session" ] && loginctl terminate-session "$session"
+        if [ -n "$session" ]; then
+          loginctl terminate-session "$session"
+          for _ in $(seq 1 50); do
+            loginctl show-session "$session" >/dev/null 2>&1 || break
+            sleep 0.2
+          done
+        fi
+        systemctl restart display-manager.service
       '';
     };
+
+    services.greetd.settings = {
+      general.runfile = runfile;
+      initial_session = {
+        inherit user;
+        command = "${switch-login}";
+      };
+    };
+    systemd.tmpfiles.rules = [
+      "d ${switchDir} 0755 root root -"
+      "f ${runfile} 0644 root root -"
+    ];
 
     security.polkit.extraConfig = ''
       polkit.addRule(function(action, subject) {
