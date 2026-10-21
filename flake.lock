@@ -542,13 +542,13 @@
       "locked": {
         "lastModified": 1792537344,
         "narHash": "sha256-MBcComYTs9Qv84Ug3qLQHVGVHEGXsUhNwAAykYJAJC8=",
-        "owner": "FormalSnake",
+        "owner": "FormalStudio",
         "repo": "formalmusic",
         "rev": "9ee98746fd0bbb804aebb8007132d1e05f992940",
         "type": "github"
       },
       "original": {
-        "owner": "FormalSnake",
+        "owner": "FormalStudio",
         "repo": "formalmusic",
         "type": "github"
       }
@@ -798,15 +798,15 @@
         ]
       },
       "locked": {
-        "lastModified": 1792536449,
-        "narHash": "sha256-BnbdHD9n0wwpOwZSWpVDT/f2nSp3o8hNbLxoSSY4Rqg=",
-        "owner": "FormalSnake",
+        "lastModified": 1792595368,
+        "narHash": "sha256-LXU67FIxBntvdCcMV9rCymNvXh+0HiM6ctT+2KrOo0A=",
+        "owner": "FormalStudio",
         "repo": "messages",
-        "rev": "8df17ef38312e240f89428e98f85ef55e95b9c95",
+        "rev": "b2368df7bfb57813e59a7b32c499c3053a17e4df",
         "type": "github"
       },
       "original": {
-        "owner": "FormalSnake",
+        "owner": "FormalStudio",
         "repo": "messages",
         "type": "github"
       }
@@ -838,13 +838,13 @@
       "locked": {
         "lastModified": 1792536428,
         "narHash": "sha256-oZHhT9Hy2ATqMPz9YHLOFOuR1Np2OuZDjg5AVngNh7E=",
-        "owner": "FormalSnake",
+        "owner": "FormalStudio",
         "repo": "NativeDesktop",
         "rev": "7ad936d8bcf2ef7c7d026798cb63044b9c088b71",
         "type": "github"
       },
       "original": {
-        "owner": "FormalSnake",
+        "owner": "FormalStudio",
         "repo": "NativeDesktop",
         "type": "github"
       }

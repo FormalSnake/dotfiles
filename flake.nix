@@ -185,14 +185,14 @@
     # Messages, the iMessage client: package + home-manager module
     # (homeModules.default), wired in users/kyandesutter/mixins/apps/messages.nix.
     messages = {
-      url = "github:FormalSnake/messages";
+      url = "github:FormalStudio/messages";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # FormalMusic, the YouTube Music client: package (app plus formalmusicd)
     # and home-manager module, wired in users/kyandesutter/mixins/apps/formalmusic.nix.
     formalmusic = {
-      url = "github:FormalSnake/formalmusic";
+      url = "github:FormalStudio/formalmusic";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
