@@ -577,6 +577,26 @@
         "type": "github"
       }
     },
+    "formalspec": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1792584771,
+        "narHash": "sha256-zH/1P8M8klyspv0fJ1woCGOCgtyl0Sc1lKdEh2MxS3I=",
+        "owner": "FormalStudio",
+        "repo": "formalspec",
+        "rev": "7b4488923d42c32879dda083d4e64cbc754532d0",
+        "type": "github"
+      },
+      "original": {
+        "owner": "FormalStudio",
+        "repo": "formalspec",
+        "type": "github"
+      }
+    },
     "git-hooks-nix": {
       "inputs": {
         "flake-compat": "flake-compat_2",
@@ -1250,6 +1270,7 @@
         "flake-parts": "flake-parts_2",
         "formalmusic": "formalmusic",
         "formalshell": "formalshell",
+        "formalspec": "formalspec",
         "helium": "helium",
         "herdr": "herdr",
         "home-manager": "home-manager",

@@ -13,6 +13,7 @@
     ./mixins/cli/clipssh.nix
     ./mixins/dev/claude-code.nix
     ./mixins/dev/pi.nix
+    ./mixins/dev/fspec.nix
     ./mixins/cli/ghostty.nix
     ./mixins/cli/tmux.nix
     ./mixins/dev/neovim.nix

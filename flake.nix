@@ -204,6 +204,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # FormalSpec: `fspec` and the direnv library behind `use fspec`, wired in
+    # users/kyandesutter/mixins/dev/fspec.nix.
+    formalspec = {
+      url = "github:FormalStudio/formalspec";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Helium browser (Chromium fork): exposes overlays.default -> pkgs.helium.
     helium = {
       url = "github:schembriaiden/helium-browser-nix-flake";
