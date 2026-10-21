@@ -15,7 +15,20 @@
 
   fileSystems."/" =
     { device = "/dev/disk/by-uuid/1a10e345-3d66-4bde-9f6b-55d43e6f7e0d";
-      fsType = "ext4";
+      fsType = "btrfs";
+      options = [ "subvol=@nixos" "noatime" ];
+    };
+
+  fileSystems."/home" =
+    { device = "/dev/disk/by-uuid/1a10e345-3d66-4bde-9f6b-55d43e6f7e0d";
+      fsType = "btrfs";
+      options = [ "subvol=@home" "noatime" ];
+    };
+
+  fileSystems."/swap" =
+    { device = "/dev/disk/by-uuid/1a10e345-3d66-4bde-9f6b-55d43e6f7e0d";
+      fsType = "btrfs";
+      options = [ "subvol=@swap" "noatime" ];
     };
 
   fileSystems."/boot" =

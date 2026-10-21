@@ -362,14 +362,6 @@
     "intel_iommu=on"
   ];
 
-  # The root fs is ext4 and the generated hardware-configuration.nix leaves it
-  # at the kernel default (relatime), so every read still writes back an access
-  # timestamp once a day per inode. Nothing on this machine reads atime, and it
-  # spends a third of its time in iowait as it is (measured 2026-09-01: vmstat
-  # wa 31-37% with a browser and a chat client open). Merges with the fileSystems
-  # entry in hardware-configuration.nix rather than editing that generated file.
-  fileSystems."/".options = [ "noatime" ];
-
   # 8 GB RAM: hand zram all of it. Compressed pages only cost what they compress
   # to, and zstd gets ~3.7:1 on this workload (3.4 GB of swapped pages held in
   # 445 MB of RAM). The 50% default in mixins/core/boot.nix just fills up and
@@ -408,7 +400,9 @@
   # (RAM-speed) tier.
   swapDevices = [
     {
-      device = "/swapfile";
+      # Its own nocow subvolume: btrfs refuses a swapfile on a snapshotted
+      # or copy-on-write subvolume, and @nixos gets snapshotted.
+      device = "/swap/swapfile";
       size = 16 * 1024; # MiB → 16 GiB
       priority = 1;
     }
