@@ -200,8 +200,12 @@
   # deal as there: DMS stays installed but dormant, rollback is deleting this
   # line. The GOA/EDS calendar still needs its one-time
   # `XDG_CURRENT_DESKTOP=GNOME gnome-control-center online-accounts` sign-in per
-  # machine, and SDDM stays the greeter.
+  # machine.
   kyan.desktop.shell = "formalshell";
+
+  # FormalShell's greeter as the login screen, with a session picker for
+  # Plasma${' and Waylandcraft' if 'g815' in p else ''}. Rollback to SDDM is setting this to "sddm".
+  kyan.desktop.greeter = "formalshell";
 
   # NVIDIA dGPU stack. This chassis has the RTX 5070; an Intel-only host
   # leaves this off.
@@ -212,7 +216,7 @@
   # same mods, config and worlds instead of two copies that drift.
   kyan.minecraft.enable = true;
 
-  # Second SDDM session: Minecraft with the waylandcraft compositor mod as the
+  # Second login session: Minecraft with the waylandcraft compositor mod as the
   # desktop, no Hyprland underneath (mixins/gaming/waylandcraft.nix).
   kyan.waylandcraft = {
     enable = true;

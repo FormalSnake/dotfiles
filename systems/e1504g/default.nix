@@ -62,9 +62,12 @@
   # shell-facing Hyprland binds. DMS stays installed but dormant, and rollback is
   # deleting this one line. M12/M13 closed the launch trade-offs (GOA/EDS
   # calendar after a one-time `XDG_CURRENT_DESKTOP=GNOME gnome-control-center
-  # online-accounts` sign-in, emoji picker, shell screenshots). SDDM stays
-  # the greeter either way.
+  # online-accounts` sign-in, emoji picker, shell screenshots).
   kyan.desktop.shell = "formalshell";
+
+  # FormalShell's greeter as the login screen, with a session picker for
+  # Plasma${' and Waylandcraft' if 'g815' in p else ''}. Rollback to SDDM is setting this to "sddm".
+  kyan.desktop.greeter = "formalshell";
 
   # Plasma next to Hyprland, without the gaming bits the g815 gets with
   # kyan.gaming (mixins/desktop/kde).

@@ -19,7 +19,7 @@ let
 
   # Minecraft has no DRM backend of its own, so cage hosts the one window.
   # -s keeps VT switching alive as the way out if the game wedges. Cage exits
-  # with Prism, and SDDM comes back.
+  # with Prism, and the greeter comes back.
   start = pkgs.writeShellScript "waylandcraft-session" ''
     # waylandcraft README: required on NVIDIA, a no-op elsewhere.
     export __GL_THREADED_OPTIMIZATIONS=0

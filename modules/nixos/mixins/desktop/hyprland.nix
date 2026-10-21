@@ -44,6 +44,17 @@ let
     exec ${pkgs.weston}/bin/weston --shell=kiosk -c ${sddmWestonIni}
   '';
 
+  # The FormalShell greeter's sway. sway refuses the nvidia driver without
+  # --unsupported-gpu, and on the g815 it gets the same card the session pins
+  # (users/kyandesutter/mixins/desktop/hyprland/session.nix), resolved at run
+  # time because the by-path name's colons would split WLR_DRM_DEVICES.
+  greeterSway = pkgs.writeShellScriptBin "sway" ''
+    ${lib.optionalString config.kyan.nvidia.enable ''
+      export WLR_DRM_DEVICES="$(${pkgs.coreutils}/bin/readlink -f /dev/dri/by-path/pci-0000:02:00.0-card)"
+    ''}
+    exec ${lib.getExe pkgs.sway} --unsupported-gpu "$@"
+  '';
+
   # Apple's emoji, the set every iMessage and iOS device draws, from upstream's
   # Linux conversion of the .ttc Apple ships in /System/Library/Fonts: one TTF
   # in CBDT/CBLC, the same colour-bitmap format Noto Color Emoji uses.
@@ -139,6 +150,7 @@ in
   # services.formalshell.enable flips on below.
   imports = [
     inputs.formalshell.nixosModules.formalshell
+    inputs.formalshell.nixosModules.formalshell-greeter
   ];
 
   options.kyan.desktop = {
@@ -147,6 +159,11 @@ in
       type = lib.types.enum [ "dms" "formalshell" ];
       default = "formalshell";
       description = "Which desktop shell owns the session (bar, notification daemon). Gates the shell-facing binds and user services in users/kyandesutter/mixins/{hyprland,formalshell}.nix. The lock screen and lock-before-sleep are FormalShell's only.";
+    };
+    greeter = lib.mkOption {
+      type = lib.types.enum [ "formalshell" "sddm" ];
+      default = "formalshell";
+      description = "The login screen: FormalShell's greetd greeter, or SDDM with qylock. Both list every session in services.displayManager.sessionPackages.";
     };
   };
 
@@ -166,7 +183,7 @@ in
     services.gnome.gnome-online-accounts.enable = lib.mkIf (cfg.shell == "formalshell") true;
 
     # Hyprland session (nixpkgs module): installs the package, registers the
-    # hyprland-uwsm Wayland session for SDDM, wires the portal and XWayland.
+    # hyprland-uwsm Wayland session for the greeter, wires the portal and XWayland.
     #
     # withUWSM: uwsm owns the session as a systemd unit tree
     # (wayland-wm@Hyprland.service BindsTo graphical-session.target, which the
@@ -194,10 +211,28 @@ in
       };
     };
 
-    # SDDM (Qt6, Wayland). SDDM lists the Hyprland uwsm session
-    # (hyprland-uwsm.desktop, installed by programs.hyprland) from
-    # /run/current-system/sw/share/wayland-sessions.
-    services.displayManager.sddm = {
+    # FormalShell's greeter under greetd: the desktop's wallpaper, palette and
+    # preset, and a session picker under the field (Tab or a click) that
+    # remembers each user's last pick and starts on Hyprland.
+    services.formalshell-greeter = lib.mkIf (cfg.greeter == "formalshell") {
+      enable = true;
+      compositorPackage = greeterSway;
+      mirrorUser = "kyandesutter";
+      settings.theme = config.home-manager.users.kyandesutter.programs.formalshell.settings.theme or { };
+      extraEnvironment = {
+        XKB_DEFAULT_LAYOUT = config.services.xserver.xkb.layout;
+        XKB_DEFAULT_MODEL = config.services.xserver.xkb.model;
+        XKB_DEFAULT_OPTIONS = config.services.xserver.xkb.options;
+        XKB_DEFAULT_VARIANT = config.services.xserver.xkb.variant;
+        XCURSOR_PATH = "${pkgs.bibata-cursors}/share/icons";
+        XCURSOR_THEME = "Bibata-Modern-Classic";
+        XCURSOR_SIZE = "24";
+      };
+    };
+
+    # SDDM (Qt6, Wayland), the rollback greeter. It lists the sessions from
+    # services.displayManager.sessionPackages.
+    services.displayManager.sddm = lib.mkIf (cfg.greeter == "sddm") {
       enable = true;
       wayland.enable = true;
       # Plasma defaults this to kwin, which makes nixpkgs hand the greeter
@@ -402,9 +437,10 @@ in
     # applied by tailscaled at service start.
     services.tailscale.extraSetFlags = [ "--operator=kyandesutter" ];
 
-    environment.systemPackages = with pkgs; [
+    environment.systemPackages = with pkgs; lib.optionals (cfg.greeter == "sddm") [
       qylockSddm
-      # Pointer theme for the SDDM greeter (Theme.CursorTheme above).
+    ] ++ [
+      # Pointer theme for both greeters.
       bibata-cursors
 
       # Night light backend for FormalShell (M16): the shell manages the
