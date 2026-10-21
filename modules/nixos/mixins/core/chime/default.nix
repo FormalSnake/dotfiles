@@ -14,7 +14,7 @@ let
     runtimeInputs = [ pkgs.alsa-utils pkgs.gnugrep pkgs.coreutils ];
     text = ''
       for info in /proc/asound/card*/pcm*p/info; do
-        grep -q '^name: .*Analog' "$info" || continue
+        grep -qE '^(id|name): .*Analog' "$info" || continue
         card=$(grep '^card:' "$info" | cut -d' ' -f2)
         dev=$(grep '^device:' "$info" | cut -d' ' -f2)
         for control in Master Speaker Headphone PCM; do
