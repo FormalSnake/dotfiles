@@ -1,0 +1,6 @@
+#!/bin/sh
+for attr in brightness multi_intensity; do
+  [ -e "$1/$attr" ] || continue
+  chgrp users "$1/$attr"
+  chmod g+w "$1/$attr"
+done

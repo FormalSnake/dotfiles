@@ -1,0 +1,24 @@
+#!/bin/sh
+# Per-profile RAPL package caps (PL1/PL2 in W), following power-profiles-daemon's ActiveProfile.
+ppd="--system --dest net.hadess.PowerProfiles --object-path /net/hadess/PowerProfiles"
+apply() {
+  case $1 in
+    performance) pl1=15 pl2=35 ;;
+    balanced)    pl1=8  pl2=14 ;;
+    power-saver) pl1=5  pl2=8  ;;
+    *) return 0 ;;
+  esac
+  for d in /sys/class/powercap/intel-rapl:0 /sys/class/powercap/intel-rapl-mmio:0; do
+    [ -d "$d" ] || continue
+    echo $((pl1 * 1000000)) >"$d/constraint_0_power_limit_uw"
+    echo $((pl2 * 1000000)) >"$d/constraint_1_power_limit_uw"
+  done
+}
+# shellcheck disable=SC2086
+apply "$(gdbus call $ppd --method org.freedesktop.DBus.Properties.Get net.hadess.PowerProfiles ActiveProfile \
+  | sed -nE "s/.*'([a-z-]+)'.*/\1/p")"
+# shellcheck disable=SC2086
+gdbus monitor $ppd | while IFS= read -r line; do
+  p=$(printf '%s\n' "$line" | sed -nE "s/.*'ActiveProfile': <'([a-z-]+)'>.*/\1/p")
+  [ -n "$p" ] && apply "$p"
+done

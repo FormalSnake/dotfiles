@@ -1,0 +1,2 @@
+#!/usr/bin/bash
+exec /opt/fspec/current/bin/helium --password-store=basic --enable-features=WaylandWindowDecorations,AcceleratedVideoDecodeLinuxGL --app=https://music.youtube.com --class=webapp-youtube-music --window-size=1200,800 --no-first-run --no-default-browser-check --profile-directory=Default "$@"

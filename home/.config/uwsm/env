@@ -1,0 +1,3 @@
+export QS_ICON_THEME="Colloid-Dark"
+export QT_QPA_PLATFORMTHEME="qt6ct"
+export XDG_CONFIG_DIRS="$HOME/.local/share/kdeglobals-matugen${XDG_CONFIG_DIRS:+:$XDG_CONFIG_DIRS}"

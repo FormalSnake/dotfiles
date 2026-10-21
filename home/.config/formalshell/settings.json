@@ -1,0 +1,66 @@
+{
+  "airplay": {
+    "enable": true
+  },
+  "bar": {
+    "layout": {
+      "right": [
+        "display",
+        "dualsense",
+        "tailscale",
+        "github",
+        "usage",
+        "chevron",
+        "tray",
+        "weather",
+        "battery",
+        "earbuds",
+        "iphone",
+        "audio",
+        "network",
+        "bluetooth",
+        "bell",
+        "indicators"
+      ]
+    },
+    "position": "top"
+  },
+  "caffeinate": {
+    "onStartup": true
+  },
+  "display": {
+    "outputPriority": [
+      "HDMI",
+      "internal"
+    ]
+  },
+  "frame": {
+    "radius": 20,
+    "thickness": 6
+  },
+  "localsend": {
+    "receive": true
+  },
+  "media": {
+    "appleMusicArt": true,
+    "visualizerStyle": "redsector"
+  },
+  "menu": {
+    "appGrid": true
+  },
+  "notifications": {
+    "position": "bottom-right"
+  },
+  "picker": {
+    "directory": "/home/kyandesutter/Pictures/Wallpapers"
+  },
+  "screensaver": {
+    "timeoutSeconds": 600
+  },
+  "theme": {
+    "preset": "pantheon"
+  },
+  "usage": {
+    "codex": false
+  }
+}

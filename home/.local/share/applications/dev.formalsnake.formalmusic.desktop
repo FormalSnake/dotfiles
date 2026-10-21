@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=FormalMusic
+Comment=YouTube Music on Linux
+Exec=/opt/fspec/current/bin/formalmusic
+Icon=dev.formalsnake.formalmusic
+Terminal=false
+Categories=AudioVideo;Audio;Player;Music;
+Keywords=YouTube;Music;YTM;player;
+StartupWMClass=formalmusic

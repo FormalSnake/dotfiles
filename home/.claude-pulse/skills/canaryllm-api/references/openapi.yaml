@@ -1,0 +1,3176 @@
+openapi: 3.1.0
+info:
+  title: CanaryLLM API
+  version: 1.0.0
+  description: >
+    Multi-provider LLM gateway with queue system, supporting chat completions,
+    image/video/audio generation, vision, and conversational AI.
+
+servers:
+  - url: http://localhost:3000
+    description: Local development
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Chat Completions
+    description: Submit chat completion requests to any supported LLM provider.
+  - name: Queue Management
+    description: Check status, retrieve results, stream, or cancel queued tasks.
+  - name: Image Generation
+    description: Generate images via OpenAI, Gemini, Vertex, xAI, or Ollama.
+  - name: Video Generation
+    description: Generate videos via Gemini, Vertex, or xAI.
+  - name: Audio (TTS/STT)
+    description: Text-to-speech and speech-to-text via ElevenLabs or MLX Audio.
+  - name: Sound & Music
+    description: Sound effect and music generation via ElevenLabs.
+  - name: Vision
+    description: Object detection, face detection, auto-labeling, and custom model training.
+  - name: Conversational AI
+    description: ElevenLabs Conversational AI template and session management.
+  - name: Public
+    description: Unauthenticated endpoints for model/voice discovery.
+  - name: OpenAI Compatible
+    description: Drop-in OpenAI-compatible chat completions endpoint.
+  - name: Anthropic Compatible
+    description: Anthropic Messages API-compatible endpoint for Claude Code integration.
+
+paths:
+  # ──────────────────────────────────────────────
+  #  Chat Completions
+  # ──────────────────────────────────────────────
+  /api/llm/complete:
+    post:
+      operationId: createCompletion
+      summary: Submit a chat completion request
+      tags: [Chat Completions]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [provider, messages]
+              properties:
+                provider:
+                  type: string
+                  enum: [openai, gemini, vertex, anthropic, xai, lmstudio, perplexity]
+                messages:
+                  type: array
+                  minItems: 1
+                  maxItems: 100
+                  items:
+                    $ref: "#/components/schemas/Message"
+                model:
+                  type: string
+                temperature:
+                  type: number
+                  minimum: 0
+                  maximum: 2
+                maxTokens:
+                  type: integer
+                  minimum: 1
+                topP:
+                  type: number
+                  minimum: 0
+                  maximum: 1
+                frequencyPenalty:
+                  type: number
+                  minimum: -2
+                  maximum: 2
+                presencePenalty:
+                  type: number
+                  minimum: -2
+                  maximum: 2
+                stop:
+                  type: array
+                  items:
+                    type: string
+                stream:
+                  type: boolean
+                responseFormat:
+                  type: string
+                  enum: [text, json, json_schema]
+                jsonSchema:
+                  type: object
+                tools:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/ToolDefinition"
+                toolChoice:
+                  oneOf:
+                    - type: string
+                      enum: [auto, none, required]
+                    - type: object
+                      required: [type, function]
+                      properties:
+                        type:
+                          type: string
+                          enum: [function]
+                        function:
+                          type: object
+                          required: [name]
+                          properties:
+                            name:
+                              type: string
+                thinkingMode:
+                  type: object
+                  required: [enabled]
+                  properties:
+                    enabled:
+                      type: boolean
+                    budget:
+                      type: number
+                      minimum: -1
+                webSearch:
+                  type: object
+                  required: [enabled]
+                  properties:
+                    enabled:
+                      type: boolean
+                    maxUses:
+                      type: integer
+                      minimum: 1
+                    allowedDomains:
+                      type: array
+                      items:
+                        type: string
+                    blockedDomains:
+                      type: array
+                      items:
+                        type: string
+                    recencyFilter:
+                      type: string
+                      enum: [month, week, day, hour]
+                    userLocation:
+                      type: object
+                      properties:
+                        country:
+                          type: string
+                        city:
+                          type: string
+                        region:
+                          type: string
+                        timezone:
+                          type: string
+                    xSearch:
+                      type: object
+                      properties:
+                        allowedHandles:
+                          type: array
+                          maxItems: 10
+                          items:
+                            type: string
+                        excludedHandles:
+                          type: array
+                          maxItems: 10
+                          items:
+                            type: string
+                        fromDate:
+                          type: string
+                        toDate:
+                          type: string
+                        enableImageUnderstanding:
+                          type: boolean
+                        enableVideoUnderstanding:
+                          type: boolean
+                cache:
+                  type: object
+                  properties:
+                    enabled:
+                      type: boolean
+                    ttl:
+                      type: number
+                      minimum: 1
+                tag:
+                  type: string
+                  maxLength: 100
+                service:
+                  type: string
+                timeout:
+                  type: integer
+                  minimum: 1000
+                  maximum: 300000
+      responses:
+        "200":
+          description: Task queued successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QueueResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+
+  # ──────────────────────────────────────────────
+  #  Queue Management
+  # ──────────────────────────────────────────────
+  /api/llm/queue/status:
+    post:
+      operationId: getQueueStatus
+      summary: Get task queue status
+      tags: [Queue Management]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [queueId]
+              properties:
+                queueId:
+                  type: string
+      responses:
+        "200":
+          description: Queue status.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      queueId:
+                        type: string
+                      status:
+                        type: string
+                        enum: [queued, processing, completed, error, cancelled, not_found]
+                      position:
+                        type: integer
+                      createdAt:
+                        type: string
+                        format: date-time
+                      startedAt:
+                        type: string
+                        format: date-time
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/llm/queue/result:
+    post:
+      operationId: getQueueResult
+      summary: Retrieve the result of a completed task
+      tags: [Queue Management]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [queueId]
+              properties:
+                queueId:
+                  type: string
+      responses:
+        "200":
+          description: Task completed. Result included.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      queueId:
+                        type: string
+                      status:
+                        type: string
+                      completedAt:
+                        type: string
+                        format: date-time
+                      result:
+                        type: object
+                        description: Provider-specific result payload.
+        "202":
+          description: Task still processing.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: false
+                  error:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      status:
+                        type: string
+                        enum: [queued, processing]
+                      position:
+                        type: integer
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/llm/queue/stream:
+    post:
+      operationId: streamQueueResult
+      summary: Stream results via SSE
+      description: >
+        Returns a Server-Sent Events stream. Events: `start`, `chunk`, `done`, `error`.
+      tags: [Queue Management]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [queueId]
+              properties:
+                queueId:
+                  type: string
+      responses:
+        "200":
+          description: SSE stream.
+          content:
+            text/event-stream:
+              schema:
+                type: string
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/llm/queue/cancel:
+    post:
+      operationId: cancelQueueTask
+      summary: Cancel a queued task
+      tags: [Queue Management]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [queueId]
+              properties:
+                queueId:
+                  type: string
+      responses:
+        "200":
+          description: Task cancelled.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  data:
+                    type: object
+                    properties:
+                      queueId:
+                        type: string
+                      status:
+                        type: string
+                        const: cancelled
+                  message:
+                    type: string
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  # ──────────────────────────────────────────────
+  #  Image Generation
+  # ──────────────────────────────────────────────
+  /api/llm/generate-image:
+    post:
+      operationId: generateImage
+      summary: Generate images from a text prompt
+      tags: [Image Generation]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [provider, prompt]
+              properties:
+                provider:
+                  type: string
+                  enum: [openai, gemini, vertex, xai, ollama]
+                prompt:
+                  type: string
+                  minLength: 1
+                  maxLength: 10000
+                model:
+                  type: string
+                n:
+                  type: integer
+                  minimum: 1
+                  maximum: 10
+                size:
+                  type: string
+                aspectRatio:
+                  type: string
+                quality:
+                  type: string
+                  enum: [standard, hd, ultra]
+                tag:
+                  type: string
+                  maxLength: 100
+                service:
+                  type: string
+      responses:
+        "200":
+          description: Image generation task queued.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QueueResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  # ──────────────────────────────────────────────
+  #  Video Generation
+  # ──────────────────────────────────────────────
+  /api/llm/generate-video:
+    post:
+      operationId: generateVideo
+      summary: Generate videos from a text prompt
+      tags: [Video Generation]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [provider, prompt]
+              properties:
+                provider:
+                  type: string
+                  enum: [gemini, vertex, xai]
+                prompt:
+                  type: string
+                  minLength: 1
+                  maxLength: 10000
+                model:
+                  type: string
+                aspectRatio:
+                  type: string
+                resolution:
+                  type: string
+                durationSeconds:
+                  type: integer
+                  minimum: 1
+                  maximum: 60
+                numberOfVideos:
+                  type: integer
+                  minimum: 1
+                  maximum: 4
+                imageUrl:
+                  type: string
+                  format: uri
+                tag:
+                  type: string
+                  maxLength: 100
+                service:
+                  type: string
+      responses:
+        "200":
+          description: Video generation task queued.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QueueResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/llm/upload-video:
+    post:
+      operationId: uploadVideo
+      summary: Upload a video file for use in chat completions
+      tags: [Video Generation]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [video]
+              properties:
+                video:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: Video uploaded.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  data:
+                    type: object
+                    properties:
+                      fileId:
+                        type: string
+                        format: uuid
+                      mimeType:
+                        type: string
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  # ──────────────────────────────────────────────
+  #  Audio (TTS / STT)
+  # ──────────────────────────────────────────────
+  /api/llm/generate-audio:
+    post:
+      operationId: generateAudio
+      summary: Generate speech from text (TTS)
+      tags: [Audio (TTS/STT)]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [provider, text]
+              properties:
+                provider:
+                  type: string
+                  enum: [elevenlabs, mlxaudio]
+                text:
+                  type: string
+                  minLength: 1
+                  maxLength: 100000
+                model:
+                  type: string
+                voiceId:
+                  type: string
+                outputFormat:
+                  type: string
+                  enum:
+                    - mp3_44100_128
+                    - mp3_44100_192
+                    - pcm_16000
+                    - pcm_22050
+                    - pcm_24000
+                    - pcm_44100
+                voiceSettings:
+                  type: object
+                  properties:
+                    stability:
+                      type: number
+                      minimum: 0
+                      maximum: 1
+                    similarityBoost:
+                      type: number
+                      minimum: 0
+                      maximum: 1
+                    style:
+                      type: number
+                      minimum: 0
+                      maximum: 1
+                    useSpeakerBoost:
+                      type: boolean
+                languageCode:
+                  type: string
+                  maxLength: 10
+                previousText:
+                  type: string
+                  maxLength: 5000
+                nextText:
+                  type: string
+                  maxLength: 5000
+                applyTextNormalization:
+                  type: string
+                  enum: [auto, on, off]
+                previousRequestIds:
+                  type: array
+                  items:
+                    type: string
+                  maxItems: 3
+                  description: ElevenLabs request IDs from previous TTS calls for prosody continuity
+                tag:
+                  type: string
+                  maxLength: 100
+                service:
+                  type: string
+      responses:
+        "200":
+          description: TTS task queued.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QueueResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/llm/transcribe:
+    post:
+      operationId: transcribeAudio
+      summary: Transcribe audio to text (STT)
+      tags: [Audio (TTS/STT)]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [provider, audio, mimeType]
+              properties:
+                provider:
+                  type: string
+                  enum: [elevenlabs, mlxaudio]
+                audio:
+                  type: string
+                  description: Base64-encoded audio data.
+                  minLength: 1
+                mimeType:
+                  type: string
+                  description: MIME type of the audio (e.g. audio/mp3, audio/wav).
+                model:
+                  type: string
+                language:
+                  type: string
+                tag:
+                  type: string
+                  maxLength: 100
+                service:
+                  type: string
+      responses:
+        "200":
+          description: STT task queued.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QueueResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  # ──────────────────────────────────────────────
+  #  Sound & Music
+  # ──────────────────────────────────────────────
+  /api/llm/generate-sound-effect:
+    post:
+      operationId: generateSoundEffect
+      summary: Generate a sound effect from a text description
+      tags: [Sound & Music]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text]
+              properties:
+                text:
+                  type: string
+                  minLength: 1
+                  maxLength: 10000
+                model:
+                  type: string
+                durationSeconds:
+                  type: number
+                  minimum: 0.5
+                  maximum: 30
+                promptInfluence:
+                  type: number
+                  minimum: 0
+                  maximum: 1
+                loop:
+                  type: boolean
+                tag:
+                  type: string
+                  maxLength: 100
+                service:
+                  type: string
+      responses:
+        "200":
+          description: Sound effect task queued.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QueueResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/llm/generate-music:
+    post:
+      operationId: generateMusic
+      summary: Generate music from a text prompt
+      tags: [Sound & Music]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [prompt]
+              properties:
+                prompt:
+                  type: string
+                  minLength: 1
+                  maxLength: 10000
+                model:
+                  type: string
+                durationMs:
+                  type: integer
+                  minimum: 3000
+                  maximum: 600000
+                forceInstrumental:
+                  type: boolean
+                tag:
+                  type: string
+                  maxLength: 100
+                service:
+                  type: string
+      responses:
+        "200":
+          description: Music generation task queued.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QueueResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/llm/generate-dialogue:
+    post:
+      operationId: generateDialogue
+      summary: Generate multi-speaker dialogue audio
+      description: >
+        Generates audio from a multi-speaker dialogue. Each input turn has its own voice_id.
+        Only the eleven_v3 model is supported. Maximum 10 unique voice IDs per request.
+      tags: [Sound & Music]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [inputs]
+              properties:
+                inputs:
+                  type: array
+                  minItems: 1
+                  maxItems: 100
+                  items:
+                    type: object
+                    required: [text, voiceId]
+                    properties:
+                      text:
+                        type: string
+                        minLength: 1
+                        maxLength: 50000
+                      voiceId:
+                        type: string
+                        minLength: 1
+                model:
+                  type: string
+                  description: Only "eleven_v3" is supported.
+                outputFormat:
+                  type: string
+                  enum: [mp3_44100_128, mp3_44100_192, pcm_16000, pcm_22050, pcm_24000, pcm_44100]
+                languageCode:
+                  type: string
+                  maxLength: 10
+                voiceSettings:
+                  type: object
+                  properties:
+                    stability:
+                      type: number
+                      minimum: 0
+                      maximum: 1
+                    similarityBoost:
+                      type: number
+                      minimum: 0
+                      maximum: 1
+                    style:
+                      type: number
+                      minimum: 0
+                      maximum: 1
+                    useSpeakerBoost:
+                      type: boolean
+                seed:
+                  type: integer
+                  minimum: 0
+                  maximum: 4294967295
+                applyTextNormalization:
+                  type: string
+                  enum: [auto, "on", "off"]
+                tag:
+                  type: string
+                  maxLength: 100
+                service:
+                  type: string
+      responses:
+        "200":
+          description: Dialogue generation task queued.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QueueResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  # ──────────────────────────────────────────────
+  #  Provider Info
+  # ──────────────────────────────────────────────
+  /api/llm/providers:
+    get:
+      operationId: listProviders
+      summary: List available providers
+      tags: [Chat Completions]
+      responses:
+        "200":
+          description: Provider list.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  data:
+                    type: object
+                    properties:
+                      providers:
+                        type: array
+                        items:
+                          type: string
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/llm/models:
+    get:
+      operationId: listModels
+      summary: List models for a provider
+      tags: [Chat Completions]
+      parameters:
+        - name: provider
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Model list.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  data:
+                    type: object
+                    properties:
+                      provider:
+                        type: string
+                      models:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/ModelInfo"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/llm/voices:
+    get:
+      operationId: listVoices
+      summary: List voices for a provider
+      tags: [Audio (TTS/STT)]
+      parameters:
+        - name: provider
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Voice list.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  data:
+                    type: object
+                    properties:
+                      provider:
+                        type: string
+                      voices:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/VoiceInfo"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/llm/capabilities:
+    get:
+      operationId: getCapabilities
+      summary: Get capability matrix for all providers
+      tags: [Chat Completions]
+      responses:
+        "200":
+          description: Capabilities per provider.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  data:
+                    type: object
+                    additionalProperties:
+                      type: object
+                      properties:
+                        imageGeneration:
+                          type: boolean
+                        videoGeneration:
+                          type: boolean
+                        textToSpeech:
+                          type: boolean
+                        speechToText:
+                          type: boolean
+                        imageRecognition:
+                          type: boolean
+                        faceDetection:
+                          type: boolean
+                        soundEffects:
+                          type: boolean
+                        musicGeneration:
+                          type: boolean
+                        models:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                              name:
+                                type: string
+                              capabilities:
+                                type: array
+                                items:
+                                  type: string
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/llm/concurrency:
+    get:
+      operationId: getConcurrency
+      summary: Get concurrency status for all providers
+      tags: [Queue Management]
+      responses:
+        "200":
+          description: Concurrency status map.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  data:
+                    type: object
+                    additionalProperties:
+                      type: object
+                      properties:
+                        active:
+                          type: integer
+                        queued:
+                          type: integer
+                        limit:
+                          type: integer
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/llm/concurrency/{provider}:
+    get:
+      operationId: getProviderConcurrency
+      summary: Get concurrency status for a specific provider
+      tags: [Queue Management]
+      parameters:
+        - name: provider
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Provider concurrency status.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  data:
+                    type: object
+                    properties:
+                      provider:
+                        type: string
+                      active:
+                        type: integer
+                      queued:
+                        type: integer
+                      limit:
+                        type: integer
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/llm/usage:
+    get:
+      operationId: getUsage
+      summary: Get current month usage stats
+      tags: [Queue Management]
+      responses:
+        "200":
+          description: Usage statistics.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/llm/usage/monthly:
+    get:
+      operationId: getMonthlyUsage
+      summary: Get monthly usage breakdown
+      tags: [Queue Management]
+      responses:
+        "200":
+          description: Monthly usage.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/llm/usage/daily:
+    get:
+      operationId: getDailyUsage
+      summary: Get daily usage breakdown
+      tags: [Queue Management]
+      responses:
+        "200":
+          description: Daily usage.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/llm/health:
+    get:
+      operationId: getHealth
+      summary: Health check
+      tags: [Queue Management]
+      security: []
+      responses:
+        "200":
+          description: Service healthy.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    const: healthy
+                  service:
+                    type: string
+                    const: llm
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  # ──────────────────────────────────────────────
+  #  Vision
+  # ──────────────────────────────────────────────
+  /api/vision/detect:
+    post:
+      operationId: detectObjects
+      summary: Run object detection on an image
+      tags: [Vision]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [image]
+              properties:
+                image:
+                  type: string
+                  description: Base64-encoded image (max 50 MB).
+                  maxLength: 50000000
+                model:
+                  type: string
+                confidence:
+                  type: number
+                  minimum: 0
+                  maximum: 1
+                classes:
+                  type: array
+                  items:
+                    type: integer
+                tag:
+                  type: string
+                  maxLength: 100
+                service:
+                  type: string
+      responses:
+        "200":
+          description: Detection task queued.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QueueResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/vision/detect/zero-shot:
+    post:
+      operationId: detectZeroShot
+      summary: Run zero-shot object detection with a text prompt
+      tags: [Vision]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [image, prompt]
+              properties:
+                image:
+                  type: string
+                  description: Base64-encoded image (max 50 MB).
+                  maxLength: 50000000
+                prompt:
+                  type: string
+                  minLength: 1
+                  maxLength: 1000
+                confidence:
+                  type: number
+                  minimum: 0
+                  maximum: 1
+                tag:
+                  type: string
+                  maxLength: 100
+                service:
+                  type: string
+      responses:
+        "200":
+          description: Zero-shot detection task queued.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QueueResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/vision/detect/faces:
+    post:
+      operationId: detectFaces
+      summary: Detect and optionally blur faces in an image
+      tags: [Vision]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [image]
+              properties:
+                image:
+                  type: string
+                  description: Base64-encoded image (max 50 MB).
+                  maxLength: 50000000
+                model:
+                  type: string
+                  enum: [haarcascade, mediapipe, yolo-face]
+                blur:
+                  type: boolean
+                blurStrength:
+                  type: integer
+                  minimum: 1
+                  maximum: 255
+                confidence:
+                  type: number
+                  minimum: 0
+                  maximum: 1
+                minSize:
+                  type: integer
+                  minimum: 1
+                scaleFactor:
+                  type: number
+                  minimum: 1
+                  maximum: 2
+                minNeighbors:
+                  type: integer
+                  minimum: 1
+                  maximum: 20
+                tag:
+                  type: string
+                  maxLength: 100
+                service:
+                  type: string
+      responses:
+        "200":
+          description: Face detection task queued.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QueueResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/vision/train:
+    post:
+      operationId: startTraining
+      summary: Start a custom model training job
+      tags: [Vision]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                datasetB64:
+                  type: string
+                  description: Base64-encoded dataset archive.
+                datasetUrl:
+                  type: string
+                  format: uri
+                  description: URL to a dataset archive.
+                baseModel:
+                  type: string
+                classes:
+                  type: array
+                  items:
+                    type: string
+                epochs:
+                  type: integer
+                  minimum: 1
+                  maximum: 1000
+                imageSize:
+                  type: integer
+                  minimum: 32
+                  maximum: 1280
+                tag:
+                  type: string
+                  maxLength: 100
+      responses:
+        "200":
+          description: Training job started.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    get:
+      operationId: listTrainingJobs
+      summary: List training jobs
+      tags: [Vision]
+      responses:
+        "200":
+          description: Training job list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/vision/train/{jobId}:
+    get:
+      operationId: getTrainingJob
+      summary: Get training job status
+      tags: [Vision]
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Training job status.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  data:
+                    type: object
+                    properties:
+                      jobId:
+                        type: string
+                      status:
+                        type: string
+                        enum: [pending, training, completed, failed]
+                      baseModel:
+                        type: string
+                      classes:
+                        type: array
+                        items:
+                          type: string
+                      epochs:
+                        type: integer
+                      imageSize:
+                        type: integer
+                      progress:
+                        type: number
+                      currentEpoch:
+                        type: integer
+                      metrics:
+                        type: object
+                      outputModel:
+                        type: string
+                      error:
+                        type: string
+                      createdAt:
+                        type: string
+                        format: date-time
+                      startedAt:
+                        type: string
+                        format: date-time
+                      completedAt:
+                        type: string
+                        format: date-time
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/vision/auto-label:
+    post:
+      operationId: autoLabel
+      summary: Auto-label images using zero-shot detection
+      tags: [Vision]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [images, classes]
+              properties:
+                images:
+                  type: array
+                  minItems: 1
+                  maxItems: 1000
+                  items:
+                    type: string
+                    description: Base64-encoded image.
+                classes:
+                  type: array
+                  minItems: 1
+                  maxItems: 100
+                  items:
+                    type: string
+                confidence:
+                  type: number
+                  minimum: 0
+                  maximum: 1
+                outputFormat:
+                  type: string
+                valSplit:
+                  type: number
+                  minimum: 0.05
+                  maximum: 0.5
+                tag:
+                  type: string
+                  maxLength: 100
+      responses:
+        "200":
+          description: Auto-labeling result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/vision/auto-train:
+    post:
+      operationId: autoTrain
+      summary: Auto-label images and start a training job
+      tags: [Vision]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [images, classes]
+              properties:
+                images:
+                  type: array
+                  minItems: 10
+                  maxItems: 1000
+                  items:
+                    type: string
+                    description: Base64-encoded image.
+                classes:
+                  type: array
+                  minItems: 1
+                  maxItems: 100
+                  items:
+                    type: string
+                baseModel:
+                  type: string
+                confidence:
+                  type: number
+                  minimum: 0
+                  maximum: 1
+                imageSize:
+                  type: integer
+                  minimum: 32
+                  maximum: 1280
+                epochs:
+                  type: integer
+                  minimum: 1
+                  maximum: 1000
+                tag:
+                  type: string
+                  maxLength: 100
+      responses:
+        "200":
+          description: Auto-train job started.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/vision/models:
+    get:
+      operationId: listVisionModels
+      summary: List available vision models
+      tags: [Vision]
+      responses:
+        "200":
+          description: Vision model list.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ModelInfo"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/vision/models/{modelId}:
+    delete:
+      operationId: deleteVisionModel
+      summary: Delete a custom vision model
+      tags: [Vision]
+      parameters:
+        - name: modelId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Model deleted.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  data:
+                    type: object
+                    properties:
+                      deleted:
+                        type: boolean
+                      modelId:
+                        type: string
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ──────────────────────────────────────────────
+  #  Conversational AI
+  # ──────────────────────────────────────────────
+  /api/convagents/templates:
+    post:
+      operationId: createTemplate
+      summary: Create a conversation template
+      tags: [Conversational AI]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, type, systemPrompt]
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 255
+                description:
+                  type: string
+                  maxLength: 2000
+                type:
+                  type: string
+                  enum: [interview, conversation]
+                systemPrompt:
+                  type: string
+                  minLength: 1
+                  maxLength: 10000
+                firstMessage:
+                  type: string
+                  maxLength: 1000
+                voiceId:
+                  type: string
+                  maxLength: 100
+                voiceModel:
+                  type: string
+                  maxLength: 100
+                voiceSettings:
+                  type: object
+                  description: ElevenLabs agent TTS voice settings. Lower stability renders audio tags (e.g. [laughs]) more expressively.
+                  properties:
+                    stability:
+                      type: number
+                      minimum: 0
+                      maximum: 1
+                    speed:
+                      type: number
+                      minimum: 0.7
+                      maximum: 1.2
+                    similarityBoost:
+                      type: number
+                      minimum: 0
+                      maximum: 1
+                language:
+                  type: string
+                  maxLength: 100
+                languagePresets:
+                  type: object
+                  additionalProperties:
+                    type: object
+                    properties:
+                      firstMessage:
+                        type: string
+                        maxLength: 1000
+                llmProvider:
+                  type: string
+                  enum: [gemini, vertex, openai, anthropic, xai, perplexity, lmstudio]
+                llmModel:
+                  type: string
+                  maxLength: 100
+                clientWebhookUrl:
+                  type: string
+                  format: uri
+                webhookSecret:
+                  type: string
+                  maxLength: 255
+                maxDurationSeconds:
+                  type: integer
+                  minimum: 30
+                  maximum: 3600
+                tag:
+                  type: string
+                  maxLength: 100
+                questions:
+                  type: array
+                  maxItems: 50
+                  items:
+                    type: object
+                    required: [question]
+                    properties:
+                      question:
+                        type: string
+                        minLength: 1
+                        maxLength: 2000
+                      context:
+                        type: string
+                        maxLength: 2000
+                      isRequired:
+                        type: boolean
+                tools:
+                  type: array
+                  maxItems: 7
+                  items:
+                    type: object
+                    required: [name]
+                    properties:
+                      name:
+                        type: string
+                        enum:
+                          - end_call
+                          - language_detection
+                          - transfer_to_agent
+                          - transfer_to_number
+                          - skip_turn
+                          - play_keypad_touch_tone
+                          - voicemail_detection
+                      description:
+                        type: string
+                        maxLength: 500
+      responses:
+        "201":
+          description: Template created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    get:
+      operationId: listTemplates
+      summary: List conversation templates
+      tags: [Conversational AI]
+      responses:
+        "200":
+          description: Template list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/convagents/templates/{id}:
+    get:
+      operationId: getTemplate
+      summary: Get a conversation template
+      tags: [Conversational AI]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Template detail.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      operationId: updateTemplate
+      summary: Update a conversation template
+      tags: [Conversational AI]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 255
+                description:
+                  type: string
+                  maxLength: 2000
+                type:
+                  type: string
+                  enum: [interview, conversation]
+                systemPrompt:
+                  type: string
+                  minLength: 1
+                  maxLength: 10000
+                firstMessage:
+                  type: string
+                  maxLength: 1000
+                voiceId:
+                  type: string
+                  maxLength: 100
+                voiceModel:
+                  type: string
+                  maxLength: 100
+                voiceSettings:
+                  type: object
+                  nullable: true
+                  description: ElevenLabs agent TTS voice settings. Lower stability renders audio tags (e.g. [laughs]) more expressively.
+                  properties:
+                    stability:
+                      type: number
+                      minimum: 0
+                      maximum: 1
+                    speed:
+                      type: number
+                      minimum: 0.7
+                      maximum: 1.2
+                    similarityBoost:
+                      type: number
+                      minimum: 0
+                      maximum: 1
+                language:
+                  type: string
+                  maxLength: 100
+                languagePresets:
+                  oneOf:
+                    - type: object
+                      additionalProperties:
+                        type: object
+                        properties:
+                          firstMessage:
+                            type: string
+                            maxLength: 1000
+                    - type: "null"
+                llmProvider:
+                  oneOf:
+                    - type: string
+                      enum: [gemini, vertex, openai, anthropic, xai, perplexity, lmstudio]
+                    - type: "null"
+                llmModel:
+                  oneOf:
+                    - type: string
+                      maxLength: 100
+                    - type: "null"
+                clientWebhookUrl:
+                  type: string
+                  format: uri
+                webhookSecret:
+                  type: string
+                  maxLength: 255
+                maxDurationSeconds:
+                  type: integer
+                  minimum: 30
+                  maximum: 3600
+                tag:
+                  oneOf:
+                    - type: string
+                      maxLength: 100
+                    - type: "null"
+                questions:
+                  type: array
+                  maxItems: 50
+                  items:
+                    type: object
+                    required: [question]
+                    properties:
+                      question:
+                        type: string
+                        minLength: 1
+                        maxLength: 2000
+                      context:
+                        type: string
+                        maxLength: 2000
+                      isRequired:
+                        type: boolean
+                tools:
+                  oneOf:
+                    - type: array
+                      maxItems: 7
+                      items:
+                        type: object
+                        required: [name]
+                        properties:
+                          name:
+                            type: string
+                            enum:
+                              - end_call
+                              - language_detection
+                              - transfer_to_agent
+                              - transfer_to_number
+                              - skip_turn
+                              - play_keypad_touch_tone
+                              - voicemail_detection
+                          description:
+                            type: string
+                            maxLength: 500
+                    - type: "null"
+      responses:
+        "200":
+          description: Template updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      operationId: deleteTemplate
+      summary: Delete a conversation template
+      tags: [Conversational AI]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Template deleted.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  message:
+                    type: string
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/convagents/sessions:
+    post:
+      operationId: createSession
+      summary: Create a conversation session
+      tags: [Conversational AI]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [templateId]
+              properties:
+                templateId:
+                  type: integer
+                  minimum: 1
+                metadata:
+                  type: object
+                  additionalProperties: true
+      responses:
+        "201":
+          description: Session created with signed URL.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  data:
+                    type: object
+                    properties:
+                      session:
+                        type: object
+                        description: Session details.
+                      signedUrl:
+                        type: string
+                        description: WebRTC signed URL for ElevenLabs.
+                      expiresIn:
+                        type: integer
+                        const: 900
+                        description: Signed URL TTL in seconds.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    get:
+      operationId: listSessions
+      summary: List conversation sessions
+      tags: [Conversational AI]
+      parameters:
+        - name: templateId
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Session list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/convagents/sessions/{id}:
+    get:
+      operationId: getSession
+      summary: Get a conversation session
+      tags: [Conversational AI]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Session detail.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ──────────────────────────────────────────────
+  #  Agents
+  # ──────────────────────────────────────────────
+  /api/agents/signed-url:
+    post:
+      operationId: getSignedUrl
+      summary: Get a signed URL for an ElevenLabs Conversational AI agent
+      tags: [Conversational AI]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [agentId]
+              properties:
+                agentId:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                sessionId:
+                  type: integer
+                  minimum: 1
+      responses:
+        "200":
+          description: Signed URL generated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  data:
+                    type: object
+                    properties:
+                      signedUrl:
+                        type: string
+                      expiresIn:
+                        type: integer
+                        const: 900
+                      sessionId:
+                        type: integer
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  # ──────────────────────────────────────────────
+  #  OpenAI Compatible
+  # ──────────────────────────────────────────────
+  /v1/chat/completions:
+    post:
+      operationId: openaiChatCompletions
+      summary: OpenAI-compatible chat completions
+      description: >
+        Drop-in replacement for the OpenAI chat completions API.
+        Model format: `provider/model` (e.g. `anthropic/claude-sonnet-4-5`).
+        Supports streaming via SSE.
+        Compatible with pi.dev via a custom provider in `~/.pi/agent/models.json`.
+      tags: [OpenAI Compatible]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [model, messages]
+              properties:
+                model:
+                  type: string
+                  description: 'Format: provider/model (e.g. "anthropic/claude-sonnet-4-5").'
+                messages:
+                  type: array
+                  minItems: 1
+                  maxItems: 5000
+                  items:
+                    type: object
+                    required: [role]
+                    properties:
+                      role:
+                        type: string
+                        enum: [system, developer, user, assistant, tool]
+                      content:
+                        oneOf:
+                          - type: string
+                          - type: "null"
+                          - type: array
+                            items:
+                              oneOf:
+                                - type: object
+                                  required: [type, text]
+                                  properties:
+                                    type:
+                                      type: string
+                                      const: text
+                                    text:
+                                      type: string
+                                - type: object
+                                  required: [type, image_url]
+                                  properties:
+                                    type:
+                                      type: string
+                                      const: image_url
+                                    image_url:
+                                      type: object
+                                      required: [url]
+                                      properties:
+                                        url:
+                                          type: string
+                                        detail:
+                                          type: string
+                      name:
+                        type: string
+                      tool_calls:
+                        type: array
+                        items:
+                          type: object
+                          required: [id, type, function]
+                          properties:
+                            id:
+                              type: string
+                            type:
+                              type: string
+                              const: function
+                            function:
+                              type: object
+                              required: [name, arguments]
+                              properties:
+                                name:
+                                  type: string
+                                arguments:
+                                  type: string
+                      tool_call_id:
+                        type: string
+                stream:
+                  type: boolean
+                temperature:
+                  type: number
+                  minimum: 0
+                  maximum: 2
+                max_tokens:
+                  type: integer
+                top_p:
+                  type: number
+                  minimum: 0
+                  maximum: 1
+                frequency_penalty:
+                  type: number
+                  minimum: -2
+                  maximum: 2
+                presence_penalty:
+                  type: number
+                  minimum: -2
+                  maximum: 2
+                stop:
+                  oneOf:
+                    - type: string
+                    - type: array
+                      items:
+                        type: string
+                tools:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/ToolDefinition"
+                tool_choice: {}
+                response_format:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      enum: [text, json_object]
+                reasoning_effort:
+                  type: string
+                  enum: [minimal, low, medium, high, xhigh]
+                  description: >
+                    Extended-thinking effort level (de-facto OpenAI o-series convention,
+                    also used by pi.dev). Maps to a token budget for Gemini/Anthropic
+                    extended thinking, or passes through as `reasoning_effort` to OpenAI
+                    o-series + xAI grok-reasoning models. `xhigh` is clamped to `high`
+                    for providers that don't support it natively.
+      responses:
+        "200":
+          description: Chat completion response (non-streaming) or SSE stream.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  object:
+                    type: string
+                    const: chat.completion
+                  created:
+                    type: integer
+                  model:
+                    type: string
+                  choices:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        index:
+                          type: integer
+                        message:
+                          type: object
+                          properties:
+                            role:
+                              type: string
+                              const: assistant
+                            content:
+                              type: string
+                            reasoning_content:
+                              type: string
+                              description: >
+                                Extended-thinking content (Gemini thinking, Anthropic
+                                extended thinking, xAI grok reasoning). Omitted for
+                                providers that hide reasoning content (e.g. OpenAI o-series).
+                            tool_calls:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  id:
+                                    type: string
+                                  type:
+                                    type: string
+                                    const: function
+                                  function:
+                                    type: object
+                                    properties:
+                                      name:
+                                        type: string
+                                      arguments:
+                                        type: string
+                        finish_reason:
+                          type: string
+                          enum: [stop, length, content_filter, tool_calls]
+                  usage:
+                    type: object
+                    properties:
+                      prompt_tokens:
+                        type: integer
+                      completion_tokens:
+                        type: integer
+                      total_tokens:
+                        type: integer
+            text/event-stream:
+              schema:
+                type: string
+                description: "SSE stream of chat.completion.chunk objects, terminated by data: [DONE]."
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  # ──────────────────────────────────────────────
+  #  Anthropic Compatible
+  # ──────────────────────────────────────────────
+  /v1/messages:
+    post:
+      operationId: anthropicMessages
+      summary: Anthropic Messages API-compatible endpoint
+      description: >
+        Drop-in replacement for the Anthropic Messages API.
+        Model format: `provider/model` (e.g. `anthropic/claude-sonnet-4-5`).
+        Compatible with Claude Code via ANTHROPIC_BASE_URL.
+        Supports streaming via named SSE events and non-streaming JSON responses.
+      tags: [Anthropic Compatible]
+      parameters:
+        - name: anthropic-version
+          in: header
+          required: false
+          schema:
+            type: string
+          description: Accepted but not enforced. Example "2023-06-01".
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [model, messages, max_tokens]
+              properties:
+                model:
+                  type: string
+                  description: 'Format: provider/model (e.g. "anthropic/claude-sonnet-4-5").'
+                messages:
+                  type: array
+                  minItems: 1
+                  maxItems: 100
+                  items:
+                    type: object
+                    required: [role, content]
+                    properties:
+                      role:
+                        type: string
+                        enum: [user, assistant]
+                      content:
+                        oneOf:
+                          - type: string
+                          - type: array
+                            items:
+                              oneOf:
+                                - type: object
+                                  required: [type, text]
+                                  properties:
+                                    type:
+                                      type: string
+                                      const: text
+                                    text:
+                                      type: string
+                                - type: object
+                                  required: [type, source]
+                                  properties:
+                                    type:
+                                      type: string
+                                      const: image
+                                    source:
+                                      type: object
+                                      required: [type, media_type, data]
+                                      properties:
+                                        type:
+                                          type: string
+                                          const: base64
+                                        media_type:
+                                          type: string
+                                        data:
+                                          type: string
+                                - type: object
+                                  required: [type, id, name, input]
+                                  properties:
+                                    type:
+                                      type: string
+                                      const: tool_use
+                                    id:
+                                      type: string
+                                    name:
+                                      type: string
+                                    input:
+                                      type: object
+                                - type: object
+                                  required: [type, tool_use_id]
+                                  properties:
+                                    type:
+                                      type: string
+                                      const: tool_result
+                                    tool_use_id:
+                                      type: string
+                                    content:
+                                      oneOf:
+                                        - type: string
+                                        - type: array
+                                          items:
+                                            type: object
+                                            properties:
+                                              type:
+                                                type: string
+                                                const: text
+                                              text:
+                                                type: string
+                                    is_error:
+                                      type: boolean
+                max_tokens:
+                  type: integer
+                  minimum: 1
+                system:
+                  oneOf:
+                    - type: string
+                    - type: array
+                      items:
+                        type: object
+                        required: [type, text]
+                        properties:
+                          type:
+                            type: string
+                            const: text
+                          text:
+                            type: string
+                stream:
+                  type: boolean
+                temperature:
+                  type: number
+                  minimum: 0
+                  maximum: 1
+                top_p:
+                  type: number
+                  minimum: 0
+                  maximum: 1
+                top_k:
+                  type: integer
+                stop_sequences:
+                  type: array
+                  items:
+                    type: string
+                tools:
+                  type: array
+                  items:
+                    type: object
+                    required: [name, input_schema]
+                    properties:
+                      name:
+                        type: string
+                      description:
+                        type: string
+                      input_schema:
+                        type: object
+                tool_choice:
+                  oneOf:
+                    - type: object
+                      required: [type]
+                      properties:
+                        type:
+                          type: string
+                          enum: [auto, any]
+                    - type: object
+                      required: [type, name]
+                      properties:
+                        type:
+                          type: string
+                          const: tool
+                        name:
+                          type: string
+                metadata:
+                  type: object
+                  properties:
+                    user_id:
+                      type: string
+      responses:
+        "200":
+          description: Message response (non-streaming) or named SSE events stream.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  type:
+                    type: string
+                    const: message
+                  role:
+                    type: string
+                    const: assistant
+                  content:
+                    type: array
+                    items:
+                      oneOf:
+                        - type: object
+                          properties:
+                            type:
+                              type: string
+                              const: text
+                            text:
+                              type: string
+                        - type: object
+                          properties:
+                            type:
+                              type: string
+                              const: tool_use
+                            id:
+                              type: string
+                            name:
+                              type: string
+                            input:
+                              type: object
+                  model:
+                    type: string
+                  stop_reason:
+                    type: string
+                    enum: [end_turn, max_tokens, stop_sequence, tool_use]
+                  stop_sequence:
+                    type: string
+                    nullable: true
+                  usage:
+                    type: object
+                    properties:
+                      input_tokens:
+                        type: integer
+                      output_tokens:
+                        type: integer
+            text/event-stream:
+              schema:
+                type: string
+                description: >
+                  Named SSE events: message_start, content_block_start, ping,
+                  content_block_delta, content_block_stop, message_delta, message_stop.
+        "400":
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    const: error
+                  error:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                        enum: [invalid_request_error, authentication_error, permission_error, not_found_error, rate_limit_error, api_error, overloaded_error]
+                      message:
+                        type: string
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /v1/responses:
+    post:
+      operationId: openaiResponses
+      summary: OpenAI Responses API-compatible endpoint
+      description: >
+        Drop-in replacement for the OpenAI Responses API.
+        Model format: `provider/model` (e.g. `openai/gpt-5`).
+        Compatible with Codex CLI (which dropped Chat Completions support in 0.125),
+        Cursor, and the OpenAI Responses SDK.
+        Supports streaming via canonical Responses event sequence and non-streaming JSON.
+      tags: [OpenAI Responses Compatible]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [model, input]
+              properties:
+                model:
+                  type: string
+                  description: 'Format: provider/model (e.g. "openai/gpt-5").'
+                input:
+                  oneOf:
+                    - type: string
+                    - type: array
+                      items:
+                        oneOf:
+                          - type: object
+                            required: [role, content]
+                            properties:
+                              type:
+                                type: string
+                                const: message
+                              role:
+                                type: string
+                                enum: [user, assistant, system, developer]
+                              content:
+                                oneOf:
+                                  - type: string
+                                  - type: array
+                                    items:
+                                      oneOf:
+                                        - type: object
+                                          required: [type, text]
+                                          properties:
+                                            type:
+                                              type: string
+                                              const: input_text
+                                            text:
+                                              type: string
+                                        - type: object
+                                          required: [type]
+                                          properties:
+                                            type:
+                                              type: string
+                                              const: input_image
+                                            image_url:
+                                              type: string
+                                              nullable: true
+                                            file_id:
+                                              type: string
+                                              nullable: true
+                                            detail:
+                                              type: string
+                                              enum: [low, high, auto, original]
+                                        - type: object
+                                          required: [type, text]
+                                          properties:
+                                            type:
+                                              type: string
+                                              const: output_text
+                                            text:
+                                              type: string
+                          - type: object
+                            required: [type, call_id, name, arguments]
+                            properties:
+                              type:
+                                type: string
+                                const: function_call
+                              call_id:
+                                type: string
+                              name:
+                                type: string
+                              arguments:
+                                type: string
+                          - type: object
+                            required: [type, call_id, output]
+                            properties:
+                              type:
+                                type: string
+                                const: function_call_output
+                              call_id:
+                                type: string
+                              output:
+                                oneOf:
+                                  - type: string
+                                  - type: array
+                                    items:
+                                      type: object
+                instructions:
+                  type: string
+                  nullable: true
+                stream:
+                  type: boolean
+                temperature:
+                  type: number
+                  minimum: 0
+                  maximum: 2
+                  nullable: true
+                top_p:
+                  type: number
+                  minimum: 0
+                  maximum: 1
+                  nullable: true
+                max_output_tokens:
+                  type: integer
+                  minimum: 1
+                  nullable: true
+                tools:
+                  type: array
+                  nullable: true
+                  items:
+                    type: object
+                    required: [type, name]
+                    properties:
+                      type:
+                        type: string
+                        const: function
+                      name:
+                        type: string
+                      description:
+                        type: string
+                        nullable: true
+                      parameters:
+                        type: object
+                        nullable: true
+                      strict:
+                        type: boolean
+                        nullable: true
+                tool_choice:
+                  oneOf:
+                    - type: string
+                      enum: [auto, required, none]
+                    - type: object
+                      required: [type, name]
+                      properties:
+                        type:
+                          type: string
+                          const: function
+                        name:
+                          type: string
+                parallel_tool_calls:
+                  type: boolean
+                  nullable: true
+                metadata:
+                  type: object
+                  additionalProperties:
+                    type: string
+                  nullable: true
+      responses:
+        "200":
+          description: Response object (non-streaming) or canonical SSE events stream.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  object:
+                    type: string
+                    const: response
+                  created_at:
+                    type: integer
+                  status:
+                    type: string
+                    enum: [completed, failed, in_progress, incomplete]
+                  model:
+                    type: string
+                  output:
+                    type: array
+                    items:
+                      oneOf:
+                        - type: object
+                          properties:
+                            type:
+                              type: string
+                              const: message
+                            id:
+                              type: string
+                            role:
+                              type: string
+                              const: assistant
+                            status:
+                              type: string
+                            content:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  type:
+                                    type: string
+                                    const: output_text
+                                  text:
+                                    type: string
+                                  annotations:
+                                    type: array
+                        - type: object
+                          properties:
+                            type:
+                              type: string
+                              const: function_call
+                            id:
+                              type: string
+                            call_id:
+                              type: string
+                            name:
+                              type: string
+                            arguments:
+                              type: string
+                            status:
+                              type: string
+                  output_text:
+                    type: string
+                  usage:
+                    type: object
+                    nullable: true
+                    properties:
+                      input_tokens:
+                        type: integer
+                      output_tokens:
+                        type: integer
+                      total_tokens:
+                        type: integer
+            text/event-stream:
+              schema:
+                type: string
+                description: >
+                  Canonical Responses SSE events:
+                  response.created, response.in_progress, response.output_item.added,
+                  response.content_part.added, response.output_text.delta,
+                  response.output_text.done, response.content_part.done,
+                  response.output_item.done, response.function_call_arguments.delta,
+                  response.function_call_arguments.done, response.completed,
+                  response.failed, error.
+        "400":
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                      message:
+                        type: string
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  # ──────────────────────────────────────────────
+  #  Public (no auth)
+  # ──────────────────────────────────────────────
+  /api/public/models:
+    get:
+      operationId: getPublicModels
+      summary: List all providers with models, pricing, and capabilities
+      tags: [Public]
+      security: []
+      responses:
+        "200":
+          description: Provider and model catalogue.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  data:
+                    type: object
+                    additionalProperties:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        description:
+                          type: string
+                        models:
+                          type: array
+                          items:
+                            $ref: "#/components/schemas/ModelInfo"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+
+  /api/public/voices:
+    get:
+      operationId: getPublicVoices
+      summary: List all voices by provider
+      tags: [Public]
+      security: []
+      responses:
+        "200":
+          description: Voice catalogue.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  data:
+                    type: object
+                    additionalProperties:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        voices:
+                          type: array
+                          items:
+                            $ref: "#/components/schemas/VoiceInfo"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+
+  /api/public/voices/preview:
+    post:
+      operationId: previewVoice
+      summary: Generate a voice preview (mlxaudio only)
+      tags: [Public]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [provider, voiceId]
+              properties:
+                provider:
+                  type: string
+                  const: mlxaudio
+                voiceId:
+                  type: string
+      responses:
+        "200":
+          description: Voice preview audio.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    const: true
+                  data:
+                    type: object
+                    properties:
+                      audio:
+                        type: string
+                        description: Base64-encoded audio.
+                      mimeType:
+                        type: string
+                      voiceId:
+                        type: string
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+
+  /api/public/openapi.yaml:
+    get:
+      operationId: getOpenApiSpec
+      summary: Download this OpenAPI specification
+      tags: [Public]
+      security: []
+      responses:
+        "200":
+          description: OpenAPI 3.1 YAML specification.
+          content:
+            application/x-yaml:
+              schema:
+                type: string
+
+# ═══════════════════════════════════════════════
+#  Components
+# ═══════════════════════════════════════════════
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: API key passed as a Bearer token.
+
+  schemas:
+    Message:
+      type: object
+      required: [role]
+      properties:
+        role:
+          type: string
+          enum: [system, user, assistant, tool]
+        content:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                $ref: "#/components/schemas/ContentPart"
+        toolCalls:
+          type: array
+          items:
+            type: object
+            required: [id, type, function]
+            properties:
+              id:
+                type: string
+              type:
+                type: string
+                const: function
+              function:
+                type: object
+                required: [name, arguments]
+                properties:
+                  name:
+                    type: string
+                  arguments:
+                    type: string
+        toolCallId:
+          type: string
+
+    ContentPart:
+      oneOf:
+        - $ref: "#/components/schemas/TextContent"
+        - $ref: "#/components/schemas/ImageContent"
+        - $ref: "#/components/schemas/DocumentContent"
+        - $ref: "#/components/schemas/VideoContent"
+
+    TextContent:
+      type: object
+      required: [type, text]
+      properties:
+        type:
+          type: string
+          const: text
+        text:
+          type: string
+          maxLength: 100000
+
+    ImageContent:
+      type: object
+      required: [type, data]
+      properties:
+        type:
+          type: string
+          const: image
+        data:
+          type: string
+          description: Base64-encoded image data.
+          maxLength: 10000000
+        mimeType:
+          type: string
+
+    DocumentContent:
+      type: object
+      required: [type, data, mimeType]
+      properties:
+        type:
+          type: string
+          const: document
+        data:
+          type: string
+          description: Base64-encoded PDF data.
+          maxLength: 10000000
+        mimeType:
+          type: string
+          const: application/pdf
+
+    VideoContent:
+      type: object
+      required: [type]
+      properties:
+        type:
+          type: string
+          const: video
+        data:
+          type: string
+          description: Base64-encoded video data.
+          maxLength: 20000000
+        fileId:
+          type: string
+          format: uuid
+          description: Reference to a previously uploaded video.
+        mimeType:
+          type: string
+
+    ToolDefinition:
+      type: object
+      required: [type, function]
+      properties:
+        type:
+          type: string
+          const: function
+        function:
+          type: object
+          required: [name]
+          properties:
+            name:
+              type: string
+            description:
+              type: string
+            parameters:
+              type: object
+
+    ModelInfo:
+      type: object
+      required: [id, name, contextWindow, maxOutputTokens]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        contextWindow:
+          type: integer
+        maxOutputTokens:
+          type: integer
+        inputCostPer1k:
+          type: number
+          description: Cost per 1K input tokens (USD).
+        outputCostPer1k:
+          type: number
+          description: Cost per 1K output tokens (USD).
+        costPerImage:
+          type: number
+        costPerSecond:
+          type: number
+        costPerCharacter:
+          type: number
+        costPerHour:
+          type: number
+        costPerAnalysis:
+          type: number
+        capabilities:
+          type: array
+          items:
+            type: string
+            enum:
+              - chat
+              - image-generation
+              - video-generation
+              - text-to-speech
+              - speech-to-text
+              - image-recognition
+              - face-detection
+              - conversation
+              - sound-effect
+              - music-generation
+              - embeddings
+
+    VoiceInfo:
+      type: object
+      required: [id, name, provider, category]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        provider:
+          type: string
+        category:
+          type: string
+        gender:
+          type: string
+        accent:
+          type: string
+        age:
+          type: string
+        language:
+          type: string
+        description:
+          type: string
+        preview_url:
+          type: string
+          format: uri
+        labels:
+          type: object
+          additionalProperties:
+            type: string
+
+    QueueResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+          required: [queueId, status, message]
+          properties:
+            queueId:
+              type: string
+            status:
+              type: string
+              const: queued
+            message:
+              type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        code:
+          type: string
+        statusCode:
+          type: integer
+        message:
+          type: string
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          const: true
+        data:
+          type: object
+
+  responses:
+    BadRequest:
+      description: Invalid request parameters.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    Unauthorized:
+      description: Missing or invalid bearer token.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    Forbidden:
+      description: Insufficient permissions.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    RateLimited:
+      description: Rate limit exceeded.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"

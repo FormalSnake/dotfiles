@@ -1,0 +1,8 @@
+[Desktop Entry]
+Categories=Network
+Exec=/home/kyandesutter/.local/bin/webapp-youtube-music %U
+Icon=/home/kyandesutter/.local/share/webapps/icons/youtube-music.png
+Name=YouTube Music
+StartupWMClass=chrome-music.youtube.com__-Default
+Type=Application
+Version=1.5

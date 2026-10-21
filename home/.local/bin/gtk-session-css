@@ -1,0 +1,5 @@
+#!/usr/bin/bash
+for dir in "/home/kyandesutter/.config"/gtk-3.0 "/home/kyandesutter/.config"/gtk-4.0; do
+  /usr/bin/ln -sfn hyprland.css "$dir/session.css"
+done
+

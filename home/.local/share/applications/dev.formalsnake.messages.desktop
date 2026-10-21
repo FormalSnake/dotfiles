@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Messages
+Comment=iMessage on Linux
+Exec=/opt/fspec/current/bin/messages
+Icon=dev.formalsnake.messages
+Terminal=false
+Categories=Network;InstantMessaging;
+Keywords=iMessage;SMS;chat;
+StartupWMClass=dev.formalsnake.messages

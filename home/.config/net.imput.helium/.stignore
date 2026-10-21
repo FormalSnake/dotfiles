@@ -1,0 +1,33 @@
+(?d)/SingletonLock
+(?d)/SingletonSocket
+(?d)/SingletonCookie
+(?d)/lockfile
+(?d)LOCK
+LOG
+LOG.old
+/BrowserMetrics*
+/Crash Reports
+/Crashpad
+/Local Traces
+/GPUPersistentCache
+/GrShaderCache
+/GraphiteDawnCache
+/ShaderCache
+/component_crx_cache
+/segmentation_platform
+/Webstore Downloads
+/WidevineCdm
+/*/Cache
+/*/Code Cache
+/*/GPUCache
+/*/DawnGraphiteCache
+/*/DawnWebGPUCache
+/*/Service Worker
+/*/Extension State
+/*/Network Action Predictor*
+/*/Network Persistent State
+/*/blob_storage
+/*/Shared Dictionary
+/*/optimization_guide_*
+/*/Local Extension Settings/aeblfdkhhhdcdjpifhhbdiojplfjncoa
+/*/IndexedDB/chrome-extension_aeblfdkhhhdcdjpifhhbdiojplfjncoa_*

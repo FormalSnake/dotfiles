@@ -1,0 +1,39 @@
+[Added Associations]
+x-scheme-handler/beeper=beepertexts.desktop
+x-scheme-handler/t3code=com.t3tools.T3Code.desktop
+
+[Default Applications]
+application/pdf=org.gnome.Papers.desktop
+application/xhtml+xml=helium.desktop
+image/avif=org.gnome.Loupe.desktop
+image/bmp=org.gnome.Loupe.desktop
+image/gif=org.gnome.Loupe.desktop
+image/heif=org.gnome.Loupe.desktop
+image/jpeg=org.gnome.Loupe.desktop
+image/png=org.gnome.Loupe.desktop
+image/svg+xml=org.gnome.Loupe.desktop
+image/tiff=org.gnome.Loupe.desktop
+image/webp=org.gnome.Loupe.desktop
+image/x-icon=org.gnome.Loupe.desktop
+inode/directory=org.gnome.Nautilus.desktop
+text/html=helium.desktop
+text/markdown=org.gnome.gitlab.somas.Apostrophe.desktop
+text/plain=org.gnome.TextEditor.desktop
+text/x-markdown=org.gnome.gitlab.somas.Apostrophe.desktop
+video/3gpp=io.github.celluloid_player.Celluloid.desktop
+video/mp4=io.github.celluloid_player.Celluloid.desktop
+video/mpeg=io.github.celluloid_player.Celluloid.desktop
+video/ogg=io.github.celluloid_player.Celluloid.desktop
+video/quicktime=io.github.celluloid_player.Celluloid.desktop
+video/webm=io.github.celluloid_player.Celluloid.desktop
+video/x-flv=io.github.celluloid_player.Celluloid.desktop
+video/x-m4v=io.github.celluloid_player.Celluloid.desktop
+video/x-matroska=io.github.celluloid_player.Celluloid.desktop
+video/x-ms-wmv=io.github.celluloid_player.Celluloid.desktop
+video/x-msvideo=io.github.celluloid_player.Celluloid.desktop
+x-scheme-handler/about=helium.desktop
+x-scheme-handler/http=helium.desktop
+x-scheme-handler/https=helium.desktop
+x-scheme-handler/unknown=helium.desktop
+
+[Removed Associations]

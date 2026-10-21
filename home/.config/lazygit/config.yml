@@ -1,0 +1,24 @@
+%YAML 1.1
+---
+gui:
+  theme:
+    activeBorderColor:
+    - '#4385be'
+    - bold
+    cherryPickedCommitBgColor:
+    - '#282726'
+    cherryPickedCommitFgColor:
+    - '#3aa99f'
+    defaultFgColor:
+    - '#cecdc3'
+    inactiveBorderColor:
+    - '#575653'
+    optionsTextColor:
+    - '#4385be'
+    searchingActiveBorderColor:
+    - '#d0a215'
+    - bold
+    selectedLineBgColor:
+    - '#282726'
+    unstagedChangesColor:
+    - '#d14d41'

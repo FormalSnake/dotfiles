@@ -1,0 +1,158 @@
+#!/usr/bin/python3
+import math
+import os
+import select
+import subprocess
+import time
+
+import evdev
+from evdev import ecodes as e
+
+# Exact match: the touchpad and motion sensors are separate devices whose
+# names extend this one.
+PAD = "DualSense Wireless Controller"
+HYPRCTL = "/usr/bin/hyprctl"
+WPCTL = "/usr/bin/wpctl"
+
+TICK = 1.0 / 60
+# Sticks rest at 128 and jitter a point or two either side, so the
+# deadzone is not optional. Past it the response is squared: small
+# deflections stay slow enough to land on a target.
+DEADZONE = 0.12
+POINTER_PX_S = 900.0
+SCROLL_NOTCH_S = 14.0
+# Triggers rest at 0 and travel to 255. wpctl is spawned per step, so the
+# step rate is capped well below the tick rate.
+TRIGGER_DEADZONE = 30
+VOLUME_INTERVAL = 0.12
+
+
+def dispatch(lua):
+    return [HYPRCTL, "dispatch", lua]
+
+
+BUTTONS = {
+    e.BTN_TL: dispatch('hl.dsp.layout("focus l")'),
+    e.BTN_TR: dispatch('hl.dsp.layout("focus r")'),
+    e.BTN_SOUTH: ["/opt/fspec/current/bin/formalshell", "ipc", "--any-display", "call", "menu", "toggle"],
+    e.BTN_EAST: dispatch('hl.dsp.window.close()'),
+    e.BTN_NORTH: dispatch('hl.dsp.window.fullscreen({ action = "toggle", mode = "fullscreen" })'),
+    e.BTN_WEST: dispatch('hl.dsp.window.fullscreen({ action = "toggle", mode = "maximized" })'),
+    e.BTN_MODE: [os.path.expanduser("~/.local/bin/dualsense-osk")],
+}
+
+HATS = {
+    (e.ABS_HAT0X, -1): dispatch('hl.dsp.layout("focus l")'),
+    (e.ABS_HAT0X, 1): dispatch('hl.dsp.layout("focus r")'),
+    (e.ABS_HAT0Y, -1): dispatch('hl.dsp.focus({ workspace = "e-1" })'),
+    (e.ABS_HAT0Y, 1): dispatch('hl.dsp.focus({ workspace = "e+1" })'),
+}
+
+CLICKS = {e.BTN_THUMBR: e.BTN_LEFT, e.BTN_THUMBL: e.BTN_RIGHT}
+
+POINTER_CAPS = {
+    e.EV_REL: [e.REL_X, e.REL_Y, e.REL_WHEEL, e.REL_HWHEEL],
+    e.EV_KEY: [e.BTN_LEFT, e.BTN_RIGHT],
+}
+
+
+def find_pad():
+    for path in evdev.list_devices():
+        try:
+            dev = evdev.InputDevice(path)
+        except OSError:
+            continue
+        if dev.name == PAD:
+            return dev
+        dev.close()
+    return None
+
+
+def curve(value):
+    """0-255 axis to -1.0..1.0, deadzoned and squared."""
+    norm = (value - 128) / 127.0
+    if abs(norm) < DEADZONE:
+        return 0.0
+    scaled = (abs(norm) - DEADZONE) / (1.0 - DEADZONE)
+    return math.copysign(scaled * scaled, norm)
+
+
+def volume_step(axes, last):
+    now = time.monotonic()
+    if now - last < VOLUME_INTERVAL:
+        return last
+    up = axes[e.ABS_RZ]
+    down = axes[e.ABS_Z]
+    depth = max(up, down)
+    if depth <= TRIGGER_DEADZONE:
+        return last
+    span = 255 - TRIGGER_DEADZONE
+    percent = 1 + int(4 * (depth - TRIGGER_DEADZONE) / span)
+    sign = "+" if up >= down else "-"
+    subprocess.run(
+        [WPCTL, "set-volume", "-l", "1.0", "@DEFAULT_AUDIO_SINK@", f"{percent}%{sign}"],
+        check=False,
+    )
+    return now
+
+
+def pump(dev, pointer):
+    axes = {e.ABS_X: 128, e.ABS_Y: 128, e.ABS_RX: 128, e.ABS_RY: 128, e.ABS_Z: 0, e.ABS_RZ: 0}
+    # Fractional pixels and notches carry across ticks, so a slow push
+    # still moves instead of rounding to nothing every frame.
+    carry = {e.REL_X: 0.0, e.REL_Y: 0.0, e.REL_WHEEL: 0.0, e.REL_HWHEEL: 0.0}
+    last_volume = 0.0
+
+    while True:
+        ready, _, _ = select.select([dev.fd], [], [], TICK)
+        if ready:
+            for event in dev.read():
+                if event.type == e.EV_ABS:
+                    if event.code in (e.ABS_HAT0X, e.ABS_HAT0Y):
+                        action = HATS.get((event.code, event.value))
+                        if action is not None:
+                            subprocess.run(action, check=False)
+                    elif event.code in axes:
+                        axes[event.code] = event.value
+                elif event.type == e.EV_KEY:
+                    if event.code in CLICKS:
+                        pointer.write(e.EV_KEY, CLICKS[event.code], event.value)
+                        pointer.syn()
+                    elif event.value == 1 and event.code in BUTTONS:
+                        subprocess.run(BUTTONS[event.code], check=False)
+
+        carry[e.REL_X] += curve(axes[e.ABS_RX]) * POINTER_PX_S * TICK
+        carry[e.REL_Y] += curve(axes[e.ABS_RY]) * POINTER_PX_S * TICK
+        # Pushing up reads as a decreasing axis, and a positive wheel is
+        # scroll-up, so the vertical sign flips here.
+        carry[e.REL_WHEEL] += -curve(axes[e.ABS_Y]) * SCROLL_NOTCH_S * TICK
+        carry[e.REL_HWHEEL] += curve(axes[e.ABS_X]) * SCROLL_NOTCH_S * TICK
+
+        moved = False
+        for code, value in carry.items():
+            whole = int(value)
+            if whole:
+                carry[code] = value - whole
+                pointer.write(e.EV_REL, code, whole)
+                moved = True
+        if moved:
+            pointer.syn()
+
+        last_volume = volume_step(axes, last_volume)
+
+
+def main():
+    pointer = evdev.UInput(POINTER_CAPS, name="dualsense-pointer")
+    while True:
+        dev = find_pad()
+        if dev is None:
+            time.sleep(5)
+            continue
+        try:
+            pump(dev, pointer)
+        except OSError:
+            # Controller went away mid-read; fall back to scanning.
+            time.sleep(2)
+
+
+main()

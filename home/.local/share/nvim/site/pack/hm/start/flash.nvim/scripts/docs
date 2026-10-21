@@ -1,0 +1,3 @@
+#!/usr/bin/bash
+
+nvim -u tests/minit.lua -l lua/flash/docs.lua

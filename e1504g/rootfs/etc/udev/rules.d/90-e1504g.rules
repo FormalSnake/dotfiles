@@ -1,0 +1,4 @@
+ACTION=="add", SUBSYSTEM=="powercap", KERNEL=="intel-rapl:0", RUN+="/usr/bin/chmod 0444 /sys%p/energy_uj"
+# AC0 wakes the machine every few seconds on a 5 V power bank contract.
+SUBSYSTEM=="power_supply", KERNEL=="AC0", ATTR{power/wakeup}="disabled"
+SUBSYSTEM=="platform", DRIVER=="acpi-battery", ATTR{power/wakeup}="disabled"

@@ -1,0 +1,30 @@
+#!/usr/bin/bash
+dim=40
+state=$XDG_RUNTIME_DIR/power-saver-dim.brightness
+cur() { /usr/bin/brightnessctl -m | cut -d, -f4 | tr -d '%'; }
+
+apply() {
+  if [ "$1" = power-saver ]; then
+    [ -e "$state" ] && return
+    now=$(cur)
+    if [ "$now" -gt "$dim" ]; then
+      echo "$now" >"$state"
+      /usr/bin/brightnessctl -q set "$dim%"
+    fi
+  elif [ -e "$state" ]; then
+    [ "$(cur)" = "$dim" ] && /usr/bin/brightnessctl -q set "$(cat "$state")%"
+    rm -f "$state"
+  fi
+}
+
+apply "$(/usr/bin/gdbus call --system --dest net.hadess.PowerProfiles --object-path /net/hadess/PowerProfiles \
+  --method org.freedesktop.DBus.Properties.Get net.hadess.PowerProfiles ActiveProfile \
+  | sed -nE "s/.*'([a-z-]+)'.*/\1/p")"
+
+/usr/bin/gdbus monitor --system --dest net.hadess.PowerProfiles --object-path /net/hadess/PowerProfiles | while IFS= read -r line; do
+  case $line in
+    *"'ActiveProfile': <'power-saver'>"*) apply power-saver ;;
+    *"'ActiveProfile': <'"*"'>"*) apply other ;;
+  esac
+done
+

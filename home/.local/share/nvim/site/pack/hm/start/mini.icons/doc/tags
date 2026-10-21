@@ -1,0 +1,10 @@
+MiniIcons	mini-icons.txt	/*MiniIcons*
+MiniIcons-hl-groups	mini-icons.txt	/*MiniIcons-hl-groups*
+MiniIcons-in-other-plugins	mini-icons.txt	/*MiniIcons-in-other-plugins*
+MiniIcons.config	mini-icons.txt	/*MiniIcons.config*
+MiniIcons.get()	mini-icons.txt	/*MiniIcons.get()*
+MiniIcons.list()	mini-icons.txt	/*MiniIcons.list()*
+MiniIcons.mock_nvim_web_devicons()	mini-icons.txt	/*MiniIcons.mock_nvim_web_devicons()*
+MiniIcons.setup()	mini-icons.txt	/*MiniIcons.setup()*
+MiniIcons.tweak_lsp_kind()	mini-icons.txt	/*MiniIcons.tweak_lsp_kind()*
+mini.icons	mini-icons.txt	/*mini.icons*

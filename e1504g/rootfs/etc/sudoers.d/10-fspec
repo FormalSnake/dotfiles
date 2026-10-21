@@ -1,0 +1,5 @@
+# The sudo mesh: a forwarded agent holding one of the keys in /etc/ssh/authorized_keys.d/%u
+# authenticates sudo (pam_ssh_agent_auth reads SSH_AUTH_SOCK).
+Defaults env_keep += "SSH_AUTH_SOCK"
+Defaults noninteractive_auth
+%wheel ALL=(ALL) NOPASSWD: ALL

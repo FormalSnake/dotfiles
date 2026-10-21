@@ -1,0 +1,40 @@
+#!/usr/bin/bash
+set -o errexit
+set -o nounset
+set -o pipefail
+
+
+shopt -s nullglob
+rgb=(/sys/class/leds/input*:rgb:indicator)
+[ ${#rgb[@]} -gt 0 ] || exit 0
+lightbar="${rgb[0]}"
+base="${lightbar%:rgb:indicator}"
+
+# Agent state outranks the wallpaper accent: the lightbar is the only
+# thing on the desk that can say "an agent is waiting on you" while the
+# screen shows something else.
+case "$(cat "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/dualsense-herdr" 2>/dev/null || true)" in
+  blocked) colour=D14D41 ;;
+  working) colour=D0A215 ;;
+  # Rendered by matugen's [templates.dualsense] block (dms.nix) on every
+  # wallpaper/light-dark change. The seed keeps a first boot before the
+  # first retheme from blanking the lightbar.
+  *)       colour="$(cat "$HOME/.cache/dank/dualsense-color" 2>/dev/null || true)" ;;
+esac
+[ -n "$colour" ] || colour=b15bf5
+printf '%d %d %d\n' \
+  "$((16#${colour:0:2}))" "$((16#${colour:2:2}))" "$((16#${colour:4:2}))" \
+  > "$lightbar/multi_intensity"
+
+# Unlike dualsensectl's symmetric player patterns, the individual LEDs
+# fill from one end, so this reads as a bar.
+cap="$(cat /sys/class/power_supply/BAT0/capacity 2>/dev/null || echo 100)"
+lit=$(( (cap + 19) / 20 ))
+[ "$lit" -ge 1 ] || lit=1
+[ "$lit" -le 5 ] || lit=5
+for i in 1 2 3 4 5; do
+  led="$base:white:player-$i"
+  [ -e "$led/brightness" ] || continue
+  if [ "$i" -le "$lit" ]; then echo 1 > "$led/brightness"; else echo 0 > "$led/brightness"; fi
+done
+

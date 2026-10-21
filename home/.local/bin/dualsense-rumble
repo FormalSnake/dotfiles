@@ -1,0 +1,41 @@
+#!/usr/bin/python3
+import time
+
+import evdev
+from evdev import ecodes as e, ff
+
+PAD = "DualSense Wireless Controller"
+
+
+def find_pad():
+    for path in evdev.list_devices():
+        try:
+            dev = evdev.InputDevice(path)
+        except OSError:
+            continue
+        if dev.name == PAD:
+            return dev
+        dev.close()
+    return None
+
+
+def main():
+    dev = find_pad()
+    if dev is None:
+        return
+    rumble = ff.Rumble(strong_magnitude=0xC000, weak_magnitude=0x8000)
+    effect = ff.Effect(
+        e.FF_RUMBLE, -1, 0,
+        ff.Trigger(0, 0),
+        ff.Replay(350, 0),
+        ff.EffectType(ff_rumble_effect=rumble),
+    )
+    effect_id = dev.upload_effect(effect)
+    dev.write(e.EV_FF, effect_id, 1)
+    # The kernel plays the effect asynchronously; erasing it immediately
+    # cancels it, so wait out the replay length first.
+    time.sleep(0.4)
+    dev.erase_effect(effect_id)
+
+
+main()

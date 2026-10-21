@@ -1,0 +1,34 @@
+#!/usr/bin/bash
+set -o nounset
+set -o pipefail
+
+# EasyEffects 8 autoloads a preset only when a device's output route changes, not when the default
+# sink changes. This follows `pw-metadata -n default -m` (one line per default.audio.sink change,
+# replayed on connect) and loads the matching output preset.
+map_preset() {
+  case "$1" in
+    *pci-0000_02_00.1*) echo bass-boost ;;
+    *pci-0000_80_1f.3*) echo laptop-neutral ;;
+    *skl_hda_dsp_generic.HiFi__Speaker__sink) echo vivobook-bass ;;
+    *) echo flat ;;
+  esac
+}
+
+last=""
+apply() {
+  preset="$1"
+  if [ "$preset" = "$last" ]; then return 0; fi
+  if /usr/bin/easyeffects -l "$preset"; then last="$preset"; fi
+}
+
+# Let the EasyEffects daemon finish coming up before the first -l.
+sleep 2
+
+/usr/bin/pw-metadata -n default -m 2>/dev/null | while IFS= read -r line; do
+  case "$line" in
+    *"key:'default.audio.sink'"*)
+      sink="$(printf '%s\n' "$line" | sed -nE 's/.*"name"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/p')"
+      [ -n "$sink" ] && apply "$(map_preset "$sink")"
+      ;;
+  esac
+done

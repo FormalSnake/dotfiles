@@ -1,0 +1,144 @@
+[config]
+
+# An ANSI ramp for the templates that need one. Material has no green
+# and no yellow, so a terminal template reading its slots off
+# primary/secondary/tertiary paints green, yellow and magenta in the
+# accent's own hue and the whole terminal comes out one colour. These
+# sixteen give it eight real hues instead: `blend = false` keeps each
+# hue and only tones it for the mode, so a wallpaper palette still
+# drives the lightness. Seeds are Flexoki's 400 and 600 stops, and a
+# wallpaper FormalShell pins (path carrying a pinned palette's name:
+# "flexoki", "zenbones") replaces them with that palette's own tones
+# before matugen runs, so `<hue>` and `<hue>_alt` are ANSI 1-6 and 9-14
+# exactly as the palette's own terminal ports spend them.
+[config.custom_colors]
+red = { color = "#D14D41", blend = false }
+orange = { color = "#DA702C", blend = false }
+yellow = { color = "#D0A215", blend = false }
+green = { color = "#879A39", blend = false }
+cyan = { color = "#3AA99F", blend = false }
+blue = { color = "#4385BE", blend = false }
+purple = { color = "#8B7EC8", blend = false }
+magenta = { color = "#CE5D97", blend = false }
+red_alt = { color = "#AF3029", blend = false }
+orange_alt = { color = "#BC5215", blend = false }
+yellow_alt = { color = "#AD8301", blend = false }
+green_alt = { color = "#66800B", blend = false }
+cyan_alt = { color = "#24837B", blend = false }
+blue_alt = { color = "#205EA6", blend = false }
+purple_alt = { color = "#5E409D", blend = false }
+magenta_alt = { color = "#A02F6F", blend = false }
+
+[templates]
+
+# DualSense lightbar. One-line accent payload, dualsense-sync reads it
+# back and also repaints the player LEDs. Full path: this hook runs inside the
+# shell's systemd user service, whose PATH may not include ~/.local/bin.
+[templates.dualsense]
+input_path = "~/.config/matugen/templates/dualsense.tmpl"
+output_path = "~/.cache/dank/dualsense-color"
+post_hook = "$HOME/.local/bin/dualsense-sync || true"
+
+# Ghostty, written into its themes dir; the config references it with
+# `theme = "Matugen"` (see mixins/cli/ghostty.nix). SIGUSR2 live-reloads it
+# without a restart. DMS's own builtin ghostty template writes a
+# separate `themes/dankcolors` file nothing references, so the two
+# don't conflict.
+[templates.ghostty]
+input_path = "~/.config/matugen/templates/ghostty.tmpl"
+output_path = "~/.config/ghostty/themes/Matugen"
+post_hook = "pkill -SIGUSR2 ghostty || true"
+
+# Obsidian (Verso theme). Rendered into the vault's snippet dir,
+# Obsidian watches ~/Notes/.obsidian/snippets and hot-reloads on write,
+# so no post_hook. macOS rides Verso's own light/dark palette instead
+# (no DMS there), so this template is Linux-only (dms.nix is
+# g815-only). scripts/obsidian-vault-bootstrap.sh seeds an empty enabled
+# snippet before the first render.
+[templates.obsidian]
+input_path = "~/.config/matugen/templates/obsidian.css.tmpl"
+output_path = "~/Notes/.obsidian/snippets/dank.css"
+
+# Hyprland window borders. DMS doesn't touch the compositor; this renders
+# the wallpaper palette into a Lua fragment, and the post_hook runs it
+# through `hyprctl eval` so the colours apply instantly with no reload.
+# hyprland.lua also dofile's the same output on every config eval, so a
+# later `hyprctl reload` keeps the wallpaper colours instead of falling
+# back to the static Flexoki `general.col` (see mixins/desktop/hyprland/options.nix).
+# primary = active border; outline = inactive.
+[templates.hypr-border]
+input_path = "~/.config/matugen/templates/hypr-border.lua.tmpl"
+output_path = "~/.cache/dank/hypr-border.lua"
+post_hook = "/usr/bin/hyprctl eval 'pcall(dofile, os.getenv(\"HOME\") .. \"/.cache/dank/hypr-border.lua\")' || true"
+
+# btop. DMS has no builtin btop template, programs.btop.settings.color_theme
+# in programs.nix points at this output. Picks up colours on next launch
+# (no live reload).
+[templates.btop]
+input_path = "~/.config/matugen/templates/btop.theme.tmpl"
+output_path = "~/.config/btop/themes/dank.theme"
+
+# yazi. DMS has no builtin yazi template; programs.yazi.theme in
+# programs.nix points ~/.config/yazi/theme.toml's [flavor] dark/light at
+# "dank", so this one output covers both modes. Picks up colours on next
+# yazi launch (no live reload).
+[templates.yazi]
+input_path = "~/.config/matugen/templates/yazi-flavor.toml.tmpl"
+output_path = "~/.config/yazi/flavors/dank.yazi/flavor.toml"
+
+# Kopuz (mixins/apps/kopuz.nix), since 0.14.0. The keys are the ones its
+# themes.json uses; unknown keys are ignored and missing ones keep their
+# built-in colour. Kopuz polls this file twice a second while its "Matugen
+# / Pywal (live)" theme is selected, so no post_hook. The output name and
+# location are what it looks for by default (config_dir/matugen.json), so
+# its live_theme_path can stay empty. One-time: Settings → Appearance →
+# Matugen / Pywal (live).
+[templates.kopuz]
+input_path = "~/.config/matugen/templates/kopuz.json.tmpl"
+output_path = "~/.config/kopuz/matugen.json"
+
+# Messages (~/Developer/messages, the iMessage client). Keys are the
+# palette tokens in apps/desktop/src/ui/theme.ts; unknown keys are
+# ignored and missing ones keep the Apple default. The app polls the
+# output once a second, so no post_hook.
+[templates.messages]
+input_path = "~/.config/matugen/templates/messages.json.tmpl"
+output_path = "~/.config/messages/theme.json"
+
+# Stream Deck key colours, read by streamdeck-keys
+# (mixins/devices/streamdeck.nix), which polls the file and repaints, so
+# no post_hook. Missing or unreadable, the keys stay on Flexoki.
+[templates.streamdeck]
+input_path = "~/.config/matugen/templates/streamdeck.json.tmpl"
+output_path = "~/.cache/dank/streamdeck.json"
+
+# FormalMusic (~/Developer/youtubemusic, the YouTube Music client). Keys
+# are the base tokens of PaletteFile in crates/desktop/src/live_theme.rs;
+# the app polls the output once a second, so no post_hook.
+[templates.formalmusic]
+input_path = "~/.config/matugen/templates/formalmusic.json.tmpl"
+output_path = "~/.config/formalmusic/theme.json"
+
+# Discord (moonlight, via its moonlight-css extension). The extension
+# watches every local path in its `paths` setting and re-injects on
+# write, so no post_hook. Output feeds refact0r/midnight-discord's
+# colors.css, which mixins/apps/discord.nix pins and lists ahead of it.
+[templates.discord]
+input_path = "~/.config/matugen/templates/discord.css.tmpl"
+output_path = "~/.config/moonlight-mod/matugen.css"
+
+# Beeper (Beeper Desktop v4). This path is the file Settings > Appearance
+# > "Open CSS file in editor" opens. No post_hook: Beeper reads custom.css
+# at launch and when its own "Reload CSS" button is pressed, it does not
+# watch the file, and bouncing a chat client on every wallpaper change
+# costs more than the colours arriving at the next start.
+[templates.beeper]
+input_path = "~/.config/matugen/templates/beeper.css.tmpl"
+output_path = "~/.config/BeeperTexts/custom.css"
+
+# KDE apps ignore the qtct palette off Plasma: KColorSchemeManager falls
+# back to Breeze Light/Dark unless [UiSettings] ColorScheme names a
+# scheme, which mixins/desktop/qt.nix points at this one.
+[templates.kde-colors]
+input_path = "~/.config/matugen/templates/kde-colors.colors.tmpl"
+output_path = "~/.local/share/color-schemes/Matugen.colors"

@@ -1,0 +1,3 @@
+#!/usr/bin/bash
+/opt/fspec/current/bin/formalshell ipc --any-display call lock lock >/dev/null 2>&1 || true
+

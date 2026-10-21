@@ -1,0 +1,4 @@
+#!/usr/bin/bash
+sleep 2
+exec $HOME/.local/bin/dualsense-sync
+

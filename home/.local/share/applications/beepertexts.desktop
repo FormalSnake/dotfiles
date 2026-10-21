@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Beeper
+Exec=/opt/fspec/current/bin/beeper --no-sandbox %U
+Terminal=false
+Type=Application
+Icon=beepertexts
+StartupWMClass=Beeper
+Comment=Beeper
+MimeType=x-scheme-handler/beeper;
+Categories=Network;

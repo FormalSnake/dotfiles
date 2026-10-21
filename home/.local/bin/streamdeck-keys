@@ -1,0 +1,495 @@
+#!/usr/bin/python3
+import io
+import json
+import os
+import socket
+import subprocess
+import threading
+import time
+import urllib.error
+import urllib.request
+
+from fontTools.ttLib import TTFont
+from PIL import Image, ImageDraw, ImageFont, ImageSequence
+from StreamDeck.DeviceManager import DeviceManager
+from StreamDeck.ImageHelpers import PILHelper
+
+FONT = "/usr/share/fonts/geist-mono-nerd/GeistMonoNerdFont-Regular.otf"
+EMOJI_FONT = "/usr/share/fonts/truetype/NotoColorEmoji.ttf"
+DISCORD_SOCKET = os.path.join(os.environ.get("XDG_RUNTIME_DIR", "/tmp"), "discord-streamdeck.sock")
+SOUNDBOARD_PINS = []
+HERDR = "/etc/profiles/per-user/kyandesutter/bin/herdr"
+SSH = ["/usr/bin/ssh", "-o", "BatchMode=yes", "-o", "ClearAllForwardings=yes", "-o", "ConnectTimeout=10"]
+WPCTL = "/usr/bin/wpctl"
+LOCK = ["/opt/fspec/current/bin/formalshell", "ipc", "--any-display", "call", "lock", "lock"]
+SCREENSHOT = ["/opt/fspec/current/bin/formalshell", "ipc", "--any-display", "call", "screenshot", "pick", "smart", "default"]
+PLAY_PAUSE = ["/opt/fspec/current/bin/formalshell", "ipc", "--any-display", "call", "media", "playPause"]
+HERDR_TERMINAL = ["ghostty", "-e", "herdr", "--remote", "macbook"]
+
+# Keys carry colour roles; render_key resolves them against the palette,
+# so a matugen re-theme repaints without rebuilding any layout.
+BG, FG, DIM, RED, YELLOW, GREEN, BLUE = "bg", "fg", "dim", "red", "yellow", "green", "blue"
+FLEXOKI = {
+    BG: "#100F0F",
+    FG: "#CECDC3",
+    DIM: "#6F6E69",
+    RED: "#D14D41",
+    YELLOW: "#D0A215",
+    GREEN: "#879A39",
+    BLUE: "#4385BE",
+}
+THEME = os.path.expanduser("~/.cache/dank/streamdeck.json")
+
+AGENT_STYLE = {
+    "blocked": ("md-alert", BG, RED),
+    "done": ("md-check_circle", GREEN, BG),
+    "working": ("md-robot", YELLOW, BG),
+}
+
+# Glyphs are looked up by their Nerd Font name rather than hardcoded
+# codepoints, so a renamed or missing icon fails loudly at start.
+GLYPHS = {name: chr(cp) for cp, name in TTFont(FONT).getBestCmap().items()}
+
+
+def glyph(name):
+    return GLYPHS[name]
+
+
+class State:
+    def __init__(self):
+        self.lock = threading.Lock()
+        self.changed = threading.Event()
+        self.page = "herdr"
+        self.agents = []
+        self.sink_muted = False
+        self.source_muted = False
+        self.discord = None
+        self.sound_page = 0
+        self.palette = dict(FLEXOKI)
+
+    def update(self, **kw):
+        with self.lock:
+            dirty = any(getattr(self, k) != v for k, v in kw.items())
+            for k, v in kw.items():
+                setattr(self, k, v)
+        if dirty:
+            self.changed.set()
+
+
+STATE = State()
+
+
+def spawn(cmd):
+    threading.Thread(target=subprocess.run, args=(cmd,), kwargs={"check": False, "stdout": subprocess.DEVNULL}, daemon=True).start()
+
+
+def parse_agents(line):
+    try:
+        agents = json.loads(line)["result"]["agents"]
+    except (ValueError, KeyError, TypeError):
+        return []
+    out = [
+        {
+            "pane": a["pane_id"],
+            "status": a.get("agent_status", "idle"),
+            "seq": a.get("state_change_seq", 0),
+            "label": os.path.basename((a.get("cwd") or "").rstrip("/")) or a.get("agent", "?"),
+        }
+        for a in agents
+    ]
+    return out
+
+
+def watch_herdr():
+    remote = f"bash -c 'while :; do {HERDR} agent list 2>/dev/null || echo null; sleep 2; done'"
+    while True:
+        proc = subprocess.Popen(
+            SSH + ["-o", "ServerAliveInterval=15", "-o", "ServerAliveCountMax=2", "macbook", remote],
+            stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True,
+        )
+        for line in proc.stdout:
+            STATE.update(agents=parse_agents(line))
+        proc.wait()
+        STATE.update(agents=[])
+        time.sleep(10)
+
+
+DISCORD = {"sock": None}
+
+
+def watch_discord():
+    while True:
+        try:
+            with socket.socket(socket.AF_UNIX) as sock:
+                sock.connect(DISCORD_SOCKET)
+                DISCORD["sock"] = sock
+                for line in sock.makefile(encoding="utf-8"):
+                    d = json.loads(line)
+                    STATE.update(discord=d)
+                    # So the soundboard page opens with its emoji ready.
+                    prefetch_emoji(d["sounds"] if d else [])
+        except (OSError, ValueError):
+            pass
+        DISCORD["sock"] = None
+        STATE.update(discord=None)
+        time.sleep(5)
+
+
+def discord(cmd, **args):
+    sock = DISCORD["sock"]
+    if sock is None:
+        return
+    try:
+        sock.sendall((json.dumps({"cmd": cmd, **args}) + "\n").encode())
+    except OSError:
+        pass
+
+
+def watch_theme():
+    seen = None
+    while True:
+        try:
+            mtime = os.stat(THEME).st_mtime
+            if mtime != seen:
+                seen = mtime
+                with open(THEME) as f:
+                    STATE.update(palette={**FLEXOKI, **json.load(f)})
+        except (OSError, ValueError):
+            if seen is not None:
+                seen = None
+                STATE.update(palette=dict(FLEXOKI))
+        time.sleep(2)
+
+
+def muted(target):
+    out = subprocess.run([WPCTL, "get-volume", target], capture_output=True, text=True, check=False).stdout
+    return "[MUTED]" in out
+
+
+def watch_audio():
+    while True:
+        STATE.update(
+            sink_muted=muted("@DEFAULT_AUDIO_SINK@"),
+            source_muted=muted("@DEFAULT_AUDIO_SOURCE@"),
+        )
+        time.sleep(1)
+
+
+def herdr(*args):
+    spawn(SSH + ["macbook", HERDR, *args])
+
+
+def focus_agent(pane):
+    herdr("agent", "focus", pane)
+
+
+PAGES = ["herdr", "system", "discord"]
+
+
+def page_key(page, blocked):
+    nxt = PAGES[(PAGES.index(page) + 1) % len(PAGES)]
+    icon = {"herdr": "md-robot", "system": "md-cog", "discord": "md-discord"}[nxt]
+    fg, bg = (BG, RED) if blocked and page != "herdr" else (FG, BG)
+    return (icon, nxt, fg, bg, lambda: STATE.update(page=nxt))
+
+
+def jump_key(agents, status, label):
+    matches = [a for a in agents if a["status"] == status]
+    icon, fg, bg = AGENT_STYLE[status]
+    if not matches:
+        return (icon, label, DIM, BG, None)
+    newest = max(matches, key=lambda a: a["seq"])
+    return (icon, f"{len(matches)} {newest['label']}", fg, bg, lambda p=newest["pane"]: focus_agent(p))
+
+
+def layout():
+    """Six (icon, label, fg, bg, action) tuples for the current page."""
+    with STATE.lock:
+        page = STATE.page
+        agents = list(STATE.agents)
+        sink, source = STATE.sink_muted, STATE.source_muted
+        d, sound_page = STATE.discord, STATE.sound_page
+
+    blocked = any(a["status"] == "blocked" for a in agents)
+
+    if page == "herdr":
+        return [
+            jump_key(agents, "blocked", "blocked"),
+            jump_key(agents, "done", "done"),
+            jump_key(agents, "working", "working"),
+            ("md-tab_plus", "new tab", FG, BG, lambda: herdr("tab", "create")),
+            ("md-console", "herdr", BLUE, BG, lambda: spawn(HERDR_TERMINAL)),
+            page_key(page, blocked),
+        ]
+
+    if page == "discord":
+        return discord_page(d, blocked)
+    if page == "soundboard":
+        return soundboard_page(d, sound_page)
+
+    return [
+        ("md-microphone_off", "mic off", BG, RED, None) if source else ("md-microphone", "mic", FG, BG, None),
+        ("md-volume_off", "muted", BG, RED, None) if sink else ("md-volume_high", "sound", FG, BG, None),
+        ("md-play_pause", "play", FG, BG, lambda: spawn(PLAY_PAUSE)),
+        ("md-monitor_screenshot", "shot", FG, BG, lambda: spawn(SCREENSHOT)),
+        ("md-lock", "lock", FG, BG, lambda: spawn(LOCK)),
+        page_key(page, blocked),
+    ]
+
+
+def toggle_key(on, icon_on, label_on, icon_off, label_off, cmd, enabled=True):
+    if not enabled:
+        return (icon_off, label_off, DIM, BG, None)
+    if on:
+        return (icon_on, label_on, BG, RED, lambda: discord(cmd))
+    return (icon_off, label_off, FG, BG, lambda: discord(cmd))
+
+
+def discord_page(d, blocked):
+    online = d is not None
+    call = online and d["inCall"]
+    return [
+        toggle_key(online and d["mute"], "md-microphone_off", "muted", "md-microphone", "mute", "mute", online),
+        toggle_key(online and d["deaf"], "md-headphones_off", "deafened", "md-headphones", "deafen", "deaf", online),
+        toggle_key(call and d["video"], "md-video", "camera on", "md-video_off", "camera", "camera", call),
+        toggle_key(call and d["sharing"], "md-monitor_share", "sharing", "md-monitor_share", "share", "share", call),
+        ("md-music_box_multiple", "sounds", FG, BG, lambda: STATE.update(page="soundboard", sound_page=0))
+        if call and d["sounds"] else ("md-music_box_multiple", "sounds", DIM, BG, None),
+        page_key("discord", blocked),
+    ]
+
+
+def soundboard_page(d, sound_page):
+    rank = {name.lower(): i for i, name in enumerate(SOUNDBOARD_PINS)}
+    sounds = sorted(d["sounds"] if d and d["inCall"] else [], key=lambda s: rank.get(s["name"].lower(), len(rank)))
+    back = ("md-arrow_left", "back", FG, BG, lambda: STATE.update(page="discord"))
+    if len(sounds) <= 5:
+        shown, more = sounds, []
+    else:
+        pages = -(-len(sounds) // 4)
+        start = (sound_page % pages) * 4
+        shown = sounds[start:start + 4]
+        more = [("md-chevron_right", f"{sound_page % pages + 1}/{pages}", FG, BG,
+                 lambda: STATE.update(sound_page=(sound_page + 1) % pages))]
+    keys = [
+        (s, s["name"], FG, BG, lambda s=s: discord("sound", guild=s["guild"], id=s["id"]))
+        for s in shown
+    ]
+    return keys + [None] * (5 - len(keys) - len(more)) + more + [back]
+
+
+EMOJI_CACHE = {}
+
+
+def fetch_emoji(emoji_id):
+    # The CDN answers urllib's default User-Agent with a 403, and asking
+    # for the .gif of a static emoji with a 415.
+    for ext in ("gif", "png"):
+        req = urllib.request.Request(
+            f"https://cdn.discordapp.com/emojis/{emoji_id}.{ext}?size=96",
+            headers={"User-Agent": "streamdeck-keys"},
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=3) as resp:
+                return Image.open(io.BytesIO(resp.read()))
+        except urllib.error.HTTPError as err:
+            if err.code != 415:
+                raise
+    return None
+
+
+EMOJI_PENDING = set()
+EMOJI_LOCK = threading.Lock()
+# Key image height, known once a deck is open; drive() sets it.
+KEY_SIZE = {"px": None}
+
+
+def emoji_frames(sound, size):
+    """The sound's emoji as [(RGBA image, duration ms)], or None if it has
+    none or it is still downloading. Never blocks: a miss starts the
+    download and repaints once it lands."""
+    key = (sound["emojiId"] or sound["emoji"], size)
+    with EMOJI_LOCK:
+        if key in EMOJI_CACHE:
+            return EMOJI_CACHE[key]
+        if key in EMOJI_PENDING:
+            return None
+        EMOJI_PENDING.add(key)
+    threading.Thread(target=load_emoji, args=(sound, size, key), daemon=True).start()
+    return None
+
+
+def prefetch_emoji(sounds):
+    if KEY_SIZE["px"] is not None:
+        for sound in sounds:
+            emoji_frames(sound, int(KEY_SIZE["px"] * 0.5))
+
+
+def load_emoji(sound, size, key):
+    frames = None
+    try:
+        if sound["emojiId"]:
+            image = fetch_emoji(sound["emojiId"])
+            if image is not None:
+                frames = [(f.convert("RGBA"), f.info.get("duration") or 100) for f in ImageSequence.Iterator(image)]
+        elif sound["emoji"]:
+            # Noto Color Emoji is a bitmap font with a single 109px strike.
+            image = Image.new("RGBA", (160, 160))
+            ImageDraw.Draw(image).text((0, 0), sound["emoji"], font=ImageFont.truetype(EMOJI_FONT, 109), embedded_color=True)
+            box = image.getbbox()
+            frames = [(image.crop(box), 0)] if box else None
+    except (OSError, ValueError) as err:
+        print(f"emoji for {sound['name']}: {err}", flush=True)
+        frames = None
+    for image, _ in frames or []:
+        image.thumbnail((size, size))
+    with EMOJI_LOCK:
+        EMOJI_CACHE[key] = frames
+        EMOJI_PENDING.discard(key)
+    STATE.changed.set()
+
+
+def frame_at(frames, now_ms):
+    total = sum(ms for _, ms in frames)
+    if total == 0:
+        return frames[0][0]
+    t = now_ms % total
+    for image, ms in frames:
+        if t < ms:
+            return image
+        t -= ms
+    return frames[-1][0]
+
+
+def animated(keys):
+    return any(
+        isinstance(k[0], dict) and len(emoji_frames(k[0], int(KEY_SIZE["px"] * 0.5)) or []) > 1
+        for k in keys if k
+    )
+
+
+# The mute keys toggle by position rather than through a stored action, so
+# a press always flips whatever the live state is.
+SYSTEM_TOGGLES = {
+    0: [WPCTL, "set-mute", "@DEFAULT_AUDIO_SOURCE@", "toggle"],
+    1: [WPCTL, "set-mute", "@DEFAULT_AUDIO_SINK@", "toggle"],
+}
+
+
+RENDERED = {}
+
+
+def render_key(deck, key, palette, icon_font, label_font):
+    """Native key image, cached by what it shows: an animation tick
+    redraws every key, and most of them have not changed."""
+    emoji = None
+    if key and isinstance(key[0], dict):
+        frames = emoji_frames(key[0], int(KEY_SIZE["px"] * 0.5))
+        if frames:
+            emoji = frame_at(frames, int(time.monotonic() * 1000))
+    look = None if key is None else (id(emoji) if emoji is not None else key[0] if isinstance(key[0], str) else None, key[1], palette[key[2]], palette[key[3]])
+    if look not in RENDERED:
+        if len(RENDERED) > 512:
+            RENDERED.clear()
+        RENDERED[look] = draw_key(deck, key, emoji, palette, icon_font, label_font)
+    return RENDERED[look]
+
+
+def draw_key(deck, key, emoji, palette, icon_font, label_font):
+    image = PILHelper.create_key_image(deck, background=palette[key[3] if key else BG])
+    if key:
+        icon, label, fg, _, _ = key
+        fg = palette[fg]
+        draw = ImageDraw.Draw(image)
+        w, h = image.size
+        if isinstance(icon, dict):
+            if emoji is not None:
+                image.paste(emoji, ((w - emoji.width) // 2, int(h * 0.42 - emoji.height / 2)), emoji)
+                draw.text((w / 2, h * 0.84), label[:9], font=label_font, fill=fg, anchor="mm")
+                return PILHelper.to_native_key_format(deck, image)
+            icon = "md-music_note"
+        # Nerd Font icons overflow their monospace cell, so centring on the
+        # advance box lands them right of centre. Centre the ink instead.
+        x0, y0, x1, y1 = draw.textbbox((0, 0), glyph(icon), font=icon_font)
+        draw.text(((w - (x1 - x0)) / 2 - x0, h * 0.42 - (y1 - y0) / 2 - y0), glyph(icon), font=icon_font, fill=fg)
+        draw.text((w / 2, h * 0.84), label[:9], font=label_font, fill=fg, anchor="mm")
+    return PILHelper.to_native_key_format(deck, image)
+
+
+def on_key(deck, index, pressed):
+    if not pressed:
+        return
+    with STATE.lock:
+        page = STATE.page
+    if page == "system" and index in SYSTEM_TOGGLES:
+        spawn(SYSTEM_TOGGLES[index])
+        # wpctl's poll picks the new state up within a second; nudge it.
+        threading.Timer(0.2, lambda: STATE.update(
+            sink_muted=muted("@DEFAULT_AUDIO_SINK@"),
+            source_muted=muted("@DEFAULT_AUDIO_SOURCE@"),
+        )).start()
+        return
+    keys = layout()
+    if index < len(keys) and keys[index] and keys[index][4]:
+        keys[index][4]()
+
+
+def drive(deck):
+    deck.open()
+    deck.reset()
+    deck.set_brightness(70)
+    size = deck.key_image_format()["size"][1]
+    KEY_SIZE["px"] = size
+    with STATE.lock:
+        d = STATE.discord
+    prefetch_emoji(d["sounds"] if d else [])
+    icon_font = ImageFont.truetype(FONT, int(size * 0.45))
+    label_font = ImageFont.truetype(FONT, int(size * 0.16))
+    deck.set_key_callback(on_key)
+    sent = [None] * deck.key_count()
+    last_full = 0
+    try:
+        while deck.connected():
+            keys = layout()
+            with STATE.lock:
+                palette = STATE.palette
+            # A periodic full repaint covers the deck resetting itself
+            # across a suspend, which reports no event.
+            if time.monotonic() - last_full > 30:
+                sent = [None] * deck.key_count()
+                last_full = time.monotonic()
+            # Only keys whose image changed go over USB: the Mini takes
+            # uncompressed bitmaps, and animated emoji redraw constantly.
+            with deck:
+                for i in range(deck.key_count()):
+                    image = render_key(deck, keys[i] if i < len(keys) else None, palette, icon_font, label_font)
+                    if image != sent[i]:
+                        deck.set_key_image(i, image)
+                        sent[i] = image
+            STATE.changed.wait(timeout=0.05 if animated(keys) else 30)
+            STATE.changed.clear()
+    finally:
+        try:
+            deck.close()
+        except Exception:
+            pass
+
+
+def main():
+    threading.Thread(target=watch_herdr, daemon=True).start()
+    threading.Thread(target=watch_audio, daemon=True).start()
+    threading.Thread(target=watch_discord, daemon=True).start()
+    threading.Thread(target=watch_theme, daemon=True).start()
+    while True:
+        decks = DeviceManager().enumerate()
+        if not decks:
+            time.sleep(5)
+            continue
+        try:
+            drive(decks[0])
+        except Exception as err:
+            print(f"stream deck lost: {err}", flush=True)
+        time.sleep(2)
+
+
+main()

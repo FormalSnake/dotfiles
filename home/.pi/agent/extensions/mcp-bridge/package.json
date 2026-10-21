@@ -1,0 +1,12 @@
+{
+  "name": "pi-mcp-bridge",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Bridges Claude Code MCP servers into pi as native tools",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0"
+  },
+  "pi": {
+    "extensions": ["./index.ts"]
+  }
+}

@@ -1,0 +1,18 @@
+#!/usr/bin/bash
+# moonlight rewrites stable.json on launch and from moonbase; 0400 makes those writes fail
+# (it logs "Failed to write config" and keeps what it read), so this file stays as rendered.
+set -eu
+conf=/home/kyandesutter/.config/moonlight-mod/stable.json
+secret=/etc/fspec/secrets/lastfm-api-key
+key=""
+if [ -r "$secret" ]; then
+  key=$(tr -d '\n' < "$secret")
+else
+  echo "moonlight-config: $secret is missing, Last.fm presence will not authenticate" >&2
+fi
+rm -f "$conf"
+(
+  umask 077
+  sed "s|@lastfmApiKey@|$key|" "$conf.tmpl" > "$conf"
+)
+chmod 400 "$conf"

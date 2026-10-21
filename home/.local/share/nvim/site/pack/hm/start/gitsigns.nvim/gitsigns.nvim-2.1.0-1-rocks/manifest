@@ -1,0 +1,205 @@
+commands = {}
+dependencies = {
+   ["gitsigns.nvim"] = {
+      ["2.1.0-1"] = {
+         {
+            constraints = {
+               {
+                  op = ">=",
+                  version = {
+                     5, 1, string = "5.1"
+                  }
+               }
+            },
+            name = "lua"
+         }
+      }
+   }
+}
+modules = {
+   gitsigns = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.actions"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.actions.blame"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.actions.blame_line"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.actions.diffthis"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.actions.nav"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.actions.preview"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.actions.qflist"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.actions.show_commit"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.async"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.attach"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.cache"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.cli"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.cli.argparse"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.color"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.config"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.current_line_blame"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.debounce"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.debug"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.debug.log"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.diff"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.diff_ext"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.diff_int"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.gh"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.git"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.git.blame"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.git.cmd"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.git.errors"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.git.repo"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.git.repo.watcher"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.git.version"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.highlight"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.hunks"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.manager"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.message"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.popup"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.repeat"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.signs"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.status"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.system"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.system.compat"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.test"] = {
+      "gitsigns.nvim/2.1.0-1"
+   },
+   ["gitsigns.util"] = {
+      "gitsigns.nvim/2.1.0-1"
+   }
+}
+repository = {
+   ["gitsigns.nvim"] = {
+      ["2.1.0-1"] = {
+         {
+            arch = "installed",
+            commands = {},
+            dependencies = {},
+            modules = {
+               gitsigns = "gitsigns.lua",
+               ["gitsigns.actions"] = "gitsigns/actions.lua",
+               ["gitsigns.actions.blame"] = "gitsigns/actions/blame.lua",
+               ["gitsigns.actions.blame_line"] = "gitsigns/actions/blame_line.lua",
+               ["gitsigns.actions.diffthis"] = "gitsigns/actions/diffthis.lua",
+               ["gitsigns.actions.nav"] = "gitsigns/actions/nav.lua",
+               ["gitsigns.actions.preview"] = "gitsigns/actions/preview.lua",
+               ["gitsigns.actions.qflist"] = "gitsigns/actions/qflist.lua",
+               ["gitsigns.actions.show_commit"] = "gitsigns/actions/show_commit.lua",
+               ["gitsigns.async"] = "gitsigns/async.lua",
+               ["gitsigns.attach"] = "gitsigns/attach.lua",
+               ["gitsigns.cache"] = "gitsigns/cache.lua",
+               ["gitsigns.cli"] = "gitsigns/cli.lua",
+               ["gitsigns.cli.argparse"] = "gitsigns/cli/argparse.lua",
+               ["gitsigns.color"] = "gitsigns/color.lua",
+               ["gitsigns.config"] = "gitsigns/config.lua",
+               ["gitsigns.current_line_blame"] = "gitsigns/current_line_blame.lua",
+               ["gitsigns.debounce"] = "gitsigns/debounce.lua",
+               ["gitsigns.debug"] = "gitsigns/debug.lua",
+               ["gitsigns.debug.log"] = "gitsigns/debug/log.lua",
+               ["gitsigns.diff"] = "gitsigns/diff.lua",
+               ["gitsigns.diff_ext"] = "gitsigns/diff_ext.lua",
+               ["gitsigns.diff_int"] = "gitsigns/diff_int.lua",
+               ["gitsigns.gh"] = "gitsigns/gh.lua",
+               ["gitsigns.git"] = "gitsigns/git.lua",
+               ["gitsigns.git.blame"] = "gitsigns/git/blame.lua",
+               ["gitsigns.git.cmd"] = "gitsigns/git/cmd.lua",
+               ["gitsigns.git.errors"] = "gitsigns/git/errors.lua",
+               ["gitsigns.git.repo"] = "gitsigns/git/repo.lua",
+               ["gitsigns.git.repo.watcher"] = "gitsigns/git/repo/watcher.lua",
+               ["gitsigns.git.version"] = "gitsigns/git/version.lua",
+               ["gitsigns.highlight"] = "gitsigns/highlight.lua",
+               ["gitsigns.hunks"] = "gitsigns/hunks.lua",
+               ["gitsigns.manager"] = "gitsigns/manager.lua",
+               ["gitsigns.message"] = "gitsigns/message.lua",
+               ["gitsigns.popup"] = "gitsigns/popup.lua",
+               ["gitsigns.repeat"] = "gitsigns/repeat.lua",
+               ["gitsigns.signs"] = "gitsigns/signs.lua",
+               ["gitsigns.status"] = "gitsigns/status.lua",
+               ["gitsigns.system"] = "gitsigns/system.lua",
+               ["gitsigns.system.compat"] = "gitsigns/system/compat.lua",
+               ["gitsigns.test"] = "gitsigns/test.lua",
+               ["gitsigns.util"] = "gitsigns/util.lua"
+            }
+         }
+      }
+   }
+}

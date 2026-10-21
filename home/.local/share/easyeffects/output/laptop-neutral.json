@@ -1,0 +1,23 @@
+{
+  "output": {
+    "blocklist": [],
+    "filter#0": {
+      "balance": 0.0,
+      "bypass": false,
+      "decramp": "Off",
+      "equal-mode": "IIR",
+      "frequency": 120.0,
+      "gain": 4.0,
+      "input-gain": -4.0,
+      "mode": "RLC (BT)",
+      "output-gain": 0.0,
+      "quality": 0.0,
+      "slope": "x1",
+      "type": "Low-shelf",
+      "width": 4.0
+    },
+    "plugins_order": [
+      "filter#0"
+    ]
+  }
+}
