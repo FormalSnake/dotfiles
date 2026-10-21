@@ -154,11 +154,14 @@ in
     # xdg portals: hyprland's own portal for screencast/screenshot, gtk for the
     # rest (file pickers). gnome-keyring's Secret portal is gated `UseIn=gnome`
     # and $XDG_CURRENT_DESKTOP=Hyprland bypasses it. Keep the explicit pin so
-    # sandboxed Flatpaks can reach the keyring.
+    # sandboxed Flatpaks can reach the keyring. Scoped to Hyprland rather than
+    # `common`: portals.conf applies to every desktop without its own
+    # <desktop>-portals.conf, and under Plasma it routed ScreenCast to the
+    # hyprland portal, which cannot capture KWin.
     xdg.portal = {
       enable = true;
       extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
-      config.common = {
+      config.hyprland = {
         default = [ "hyprland" "gtk" ];
         "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];
       };
