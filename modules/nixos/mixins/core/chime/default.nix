@@ -13,6 +13,12 @@ let
     name = "formalos-chime";
     runtimeInputs = [ pkgs.alsa-utils pkgs.gnugrep pkgs.coreutils ];
     text = ''
+      # sound.target comes before SOF has loaded its firmware and registered
+      # the card, so wait for the PCM while the splash is still up.
+      for _ in $(seq 50); do
+        grep -lqE '^(id|name): .*Analog' /proc/asound/card*/pcm*p/info 2>/dev/null && break
+        sleep 0.2
+      done
       for info in /proc/asound/card*/pcm*p/info; do
         grep -qE '^(id|name): .*Analog' "$info" || continue
         card=$(grep '^card:' "$info" | cut -d' ' -f2)
