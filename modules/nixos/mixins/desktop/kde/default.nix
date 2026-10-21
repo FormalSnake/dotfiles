@@ -87,7 +87,9 @@ in
         session=$(loginctl show-user ${user} -p Display --value)
         # The session's user units outlive its logind session, and uwsm will
         # not start Hyprland while graphical-session.target is still active.
-        systemctl --user -M ${user}@ stop graphical-session.target || true
+        # Apps crashing on the way down start drkonqi-coredump-launcher, whose
+        # Requisite= on the target cancels a plain stop job and leaves it up.
+        systemctl --user -M ${user}@ stop --job-mode=replace-irreversibly graphical-session.target || true
         if [ -n "$session" ]; then
           loginctl terminate-session "$session"
           for _ in $(seq 1 50); do
@@ -135,7 +137,7 @@ in
         Type = "oneshot";
         RemainAfterExit = true;
         ExecStart = "${pkgs.coreutils}/bin/true";
-        ExecStop = "${pkgs.systemd}/bin/systemctl --user --no-block stop graphical-session.target";
+        ExecStop = "${pkgs.systemd}/bin/systemctl --user --no-block --job-mode=replace-irreversibly stop graphical-session.target";
       };
     };
 
