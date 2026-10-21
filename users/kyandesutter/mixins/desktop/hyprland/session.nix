@@ -162,6 +162,10 @@ in
     gtk4.extraCss = ''@import url("session.css");'';
   };
 
+  # KDE rewrites ~/.gtkrc-2.0 as a plain file, which would otherwise block the
+  # switch on a backup clash.
+  home.file.${config.gtk.gtk2.configLocation}.force = true;
+
   # gtk.css is read in every session, so it only imports session.css, which
   # the session picks at startup: this unit points it at hyprland.css (the
   # shell's palette imports) at every Hyprland login.
