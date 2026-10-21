@@ -193,6 +193,16 @@
     battery_detection = false;
   };
 
+  # Root is only 256 GB (Windows has the rest of the NVMe), and agent builds
+  # can eat 25 GB of store garbage between daily nix-gc runs. Chromium's
+  # storage-pressure bubble ("Free up space to continue") fires once free space
+  # drops under 15% (38 GB here), so the daemon collects garbage during a
+  # build whenever free space falls under 45 GB, until 70 GB are free.
+  nix.settings = {
+    min-free = 45 * 1024 * 1024 * 1024;
+    max-free = 70 * 1024 * 1024 * 1024;
+  };
+
   # Profiles (enable the desktop stack for this host).
   kyan.profiles.desktop.enable = true;
 
