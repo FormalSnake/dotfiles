@@ -7,6 +7,13 @@
 }:
 {
   imports = [
+    # Fallback-only NixOS beside Fedora Atomic: /home is shared with Fedora,
+    # which owns the dotfiles as real files there. Home Manager would back
+    # them up once and refuse on the next fallback boot, so this generation
+    # keeps only the system (ssh, tailscale, the sudo mesh) for recovery. A
+    # module of its own because home-manager.users is also set further down.
+    { home-manager.users = lib.mkForce { }; }
+
     # Generated on the machine with `nixos-generate-config` (2026-07-21).
     ./hardware-configuration.nix
 
@@ -26,6 +33,7 @@
   hardware.asus.battery.chargeUpto = 100;
 
   networking.hostName = "e1504g";
+
 
   # systemd-boot instead of the shared Limine setup while this host moves to
   # Fedora Atomic: the unattended trial boots need systemd-boot's boot counting
