@@ -11,6 +11,10 @@
   -- Beeper (Electron) maps its main window floating, so it never tiles.
   -- Force it back into the layout.
   hl.window_rule({ match = { class = "^([Bb]eeper)$" }, float = false })
+  -- Sushi sizes itself to the previewed content, so it floats centred like
+  -- Quick Look instead of tiling into the layout.
+  hl.window_rule({ match = { class = "^(org.gnome.NautilusPreviewer)$" },
+    float = true, center = true })
   -- The quake console maps straight onto its own special workspace,
   -- floating, without ever touching the layout you are looking at. The
   -- shell sizes and reveals it afterwards either way, but without this

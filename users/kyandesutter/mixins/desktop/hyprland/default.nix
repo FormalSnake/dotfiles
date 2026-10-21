@@ -16,8 +16,7 @@ let
   # theme.radius, 10 by default), so windows and shell cards share one curve.
   fsRadius = toString ((config.programs.formalshell.settings.theme or { }).radius or 10);
 
-  iconTheme = pkgs.callPackage ../elementary/icon-theme.nix { };
-  iconThemeName = iconTheme.themeName;
+  iconThemeName = "Colloid-Dark";
 
   # NVIDIA dGPU flag from the host (same gate as dms.nix/godot.nix). The g815
   # specifics in this module (the AQ_DRM_DEVICES pick, the nvidia env, the two-monitor

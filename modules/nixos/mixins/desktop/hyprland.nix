@@ -230,24 +230,20 @@ in
     services.gnome.gnome-keyring.enable = true;
 
     # GNOME/GTK desktop plumbing the apps and file manager rely on:
-    #   • gvfs + wsdd: Files trash, removable-drive / network mounting, MTP,
+    #   • gvfs + wsdd: Nautilus trash, removable-drive / network mounting, MTP,
     #     and Windows-network discovery. gvfsd-network starts `wsdd` on its first
-    #     activation. Without it, Files waits for the failed automount and logs
+    #     activation. Without it, Nautilus waits for the failed automount and logs
     #     "Failed to spawn the wsdd daemon".
-    #   • tumbler (+ ffmpegthumbnailer): thumbnails, including video, in Files.
+    #   • tumbler (+ ffmpegthumbnailer): thumbnails, including video, in Nautilus.
     #   • dconf: the settings backend every GTK/GNOME app reads and writes.
     services.gvfs.enable = true;
     services.tumbler.enable = true;
     programs.dconf.enable = true;
 
-    # elementary Files' extract/compress actions are contractor .contract files
-    # under share/contractor, which per-user profiles do not link by default.
-    environment.pathsToLink = [ "/share/contractor" ];
-
-    # Files is installed via home-manager (home.packages), so it isn't wrapped
+    # Nautilus is installed via home-manager (home.packages), so it isn't wrapped
     # with the GNOME GIO module environment the NixOS gnome session would provide.
     # Without gvfs's client module (libgvfsdbus.so) on GIO_EXTRA_MODULES, GIO only
-    # knows local backends, so `trash://` is unavailable and the file manager
+    # knows local backends, so `trash://` is unavailable and Nautilus
     # reports "Trash locations are not supported" when you open Trash. Put gvfs's gio
     # modules on the session search path (this list merges with dconf's, which is
     # already there), so the trash backend (gvfsd-trash) loads and D-Bus-activates.

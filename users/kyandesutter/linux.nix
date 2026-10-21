@@ -15,7 +15,6 @@
     ./mixins/desktop/dms.nix
     ./mixins/desktop/dankcal.nix
     ./mixins/desktop/formalshell.nix
-    ./mixins/desktop/elementary
     ./mixins/desktop/kde.nix
     ./mixins/apps/discord.nix
     ./mixins/apps/beeper.nix

@@ -5,8 +5,7 @@ let
   useFormalshell = osConfig.kyan.desktop.shell == "formalshell";
   shellColors = if useFormalshell then "formalshell-colors.css" else "dank-colors.css";
 
-  iconTheme = pkgs.callPackage ../elementary/icon-theme.nix { };
-  iconThemeName = iconTheme.themeName;
+  iconThemeName = "Colloid-Dark";
 
   hasNvidia = (osConfig.kyan or { }).nvidia.enable or false;
 in
@@ -67,11 +66,10 @@ in
     # selects it (see the dark-mode block below).
     adw-gtk3
 
-    # Icon themes. elementary-colloid (iconTheme above) is the desktop-wide set
-    # (gtk.iconTheme below, plus qt{5,6}ct.conf + QS_ICON_THEME for Qt), and
-    # these two are its fallback chain: Colloid-Dark first, then adwaita as the
-    # complete freedesktop set so a missing icon resolves to a real glyph
-    # instead of the broken-image placeholder.
+    # Icon themes. Colloid-Dark is the desktop-wide icon set (set via gtk.iconTheme
+    # below, plus qt{5,6}ct.conf + QS_ICON_THEME above for Qt). adwaita is kept
+    # as the complete freedesktop fallback so any icon Colloid lacks resolves
+    # to a real glyph instead of the broken-image placeholder.
     colloid-icon-theme
     adwaita-icon-theme
 
@@ -113,7 +111,7 @@ in
   # own would drift.
   #
   # We keep this module for the things the shell does NOT do:
-  #   • gtk.iconTheme: sets elementary-colloid as the icon theme. Neither shell
+  #   • gtk.iconTheme: sets Colloid-Dark as the icon theme. Neither shell
   #     touches the icon theme; without this GTK falls back to hicolor and
   #     renders every app/mime icon as the broken-image placeholder.
   #   • gtk-application-prefer-dark-theme in settings.ini: the X11/XWayland
@@ -135,15 +133,14 @@ in
   # FormalShell hosts get the same treatment with FormalShell's names: its
   # ThemeEngine renders formalshell-colors.css (gtk template) + the qt{5,6}ct
   # matugen.conf, and asserts color-scheme/gtk-theme via dconf on every
-  # retheme, flipping between the gtk.theme / gtk.themeDark names that
-  # mixins/desktop/elementary sets (adw-gtk3 stays installed for the DMS arm). The static
+  # retheme, flipping between adw-gtk3 and adw-gtk3-dark, the same pair DMS uses. The static
   # settings.ini prefer-dark hint is DMS-only: FormalShell has a real light
   # mode, and the hint would keep X11/XWayland GTK3 fallback apps dark in it.
   gtk = {
     enable = true;
     iconTheme = {
       name = iconThemeName;
-      package = iconTheme;
+      package = pkgs.colloid-icon-theme;
     };
     font = {
       name = "Adwaita Sans";
@@ -184,4 +181,8 @@ in
     monospace-font-name = "GeistMono Nerd Font 11";
     document-font-name = "Adwaita Sans 12";
   };
+
+  # No buttons on GTK headerbars. Hyprland answers every decoration request
+  # with server-side, so Qt draws none of its own, and GTK matches that.
+  dconf.settings."org/gnome/desktop/wm/preferences".button-layout = ":";
 }
