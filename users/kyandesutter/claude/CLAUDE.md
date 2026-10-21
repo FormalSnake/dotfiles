@@ -351,11 +351,12 @@ history uses one. No body unless it closes an issue. Never claim co-authorship.
 in `~/.config/nix`. Always `git add` new files first; flakes only see
 git-tracked files. Details and the sudo mesh live in that repo's own CLAUDE.md.
 
-**Never build on e1504g.** It is far too slow. Build its closure on g815 and
-push it over: from g815,
+**Avoid building on e1504g.** It is slow (8 GB RAM, slow disk). Build its
+NixOS closure on g815 and push it over: from g815,
 `nixos-rebuild switch --flake .#e1504g --target-host e1504g --sudo`
-(`ssh -A g815` so the sudo mesh reaches e1504g). Never run `nixos-rebuild`
-or `nix build` on e1504g itself, not even through its remote builders.
+(`ssh -A g815` so the sudo mesh reaches e1504g), and keep heavy compiles on
+g815 when that is faster end to end. Running checks, tests and small builds
+on e1504g itself is fine.
 
 ### Subagent model routing
 
