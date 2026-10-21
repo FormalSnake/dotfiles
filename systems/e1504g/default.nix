@@ -27,6 +27,16 @@
 
   networking.hostName = "e1504g";
 
+  # systemd-boot instead of the shared Limine setup while this host moves to
+  # Fedora Atomic: the unattended trial boots need systemd-boot's boot counting
+  # (+N tries, blessed once ssh and tailscale are up) to fall back to NixOS
+  # without hands, and Limine has no equivalent.
+  boot.loader.limine.enable = lib.mkForce false;
+  boot.loader.systemd-boot = {
+    enable = true;
+    configurationLimit = 3;
+  };
+
   # ASUS Vivobook E1504G, Intel-only (iGPU). The stock MediaTek Wi-Fi card was
   # swapped for an Intel one (iwlwifi: firmware comes from the global
   # hardware.enableRedistributableFirmware in mixins/hardware/graphics.nix).
