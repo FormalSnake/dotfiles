@@ -451,6 +451,7 @@ in
     "matugen/templates/formalmusic.json.tmpl".source = ../../matugen-templates/formalmusic.json.tmpl;
     "matugen/templates/discord.css.tmpl".source = ../../matugen-templates/discord.css.tmpl;
     "matugen/templates/beeper.css.tmpl".source = ../../matugen-templates/beeper.css.tmpl;
+    "matugen/templates/kde-colors.colors.tmpl".source = ../../matugen-templates/kde-colors.colors.tmpl;
 
     # DMS reads ~/.config/matugen/config.toml on every re-theme and splices its
     # [config] and [templates] sections verbatim into the matugen invocation it
@@ -607,6 +608,13 @@ in
       [templates.beeper]
       input_path = "~/.config/matugen/templates/beeper.css.tmpl"
       output_path = "~/.config/BeeperTexts/custom.css"
+
+      # KDE apps ignore the qtct palette off Plasma: KColorSchemeManager falls
+      # back to Breeze Light/Dark unless [UiSettings] ColorScheme names a
+      # scheme, which mixins/desktop/qt.nix points at this one.
+      [templates.kde-colors]
+      input_path = "~/.config/matugen/templates/kde-colors.colors.tmpl"
+      output_path = "~/.local/share/color-schemes/Matugen.colors"
     '';
   };
 

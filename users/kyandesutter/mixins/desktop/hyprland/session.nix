@@ -8,6 +8,15 @@ let
   iconThemeName = "Colloid-Dark";
 
   hasNvidia = (osConfig.kyan or { }).nvidia.enable or false;
+
+  # KDE apps off Plasma take Breeze Light/Dark over the qtct palette unless
+  # [UiSettings] ColorScheme names a scheme. Set through XDG_CONFIG_DIRS so
+  # only this session sees it: ~/.config/kdeglobals is Plasma's, which keeps
+  # its own scheme. Matugen renders the scheme (kde-colors in dms.nix).
+  kdeGlobals = pkgs.writeTextDir "kdeglobals" ''
+    [UiSettings]
+    ColorScheme=Matugen
+  '';
 in
 {
   # Session environment (uwsm)
@@ -20,6 +29,7 @@ in
   xdg.configFile."uwsm/env".text = ''
     export QS_ICON_THEME="${iconThemeName}"
     export QT_QPA_PLATFORMTHEME="qt6ct"
+    export XDG_CONFIG_DIRS="${kdeGlobals}''${XDG_CONFIG_DIRS:+:$XDG_CONFIG_DIRS}"
   '';
 
   # GPU selection (g815)

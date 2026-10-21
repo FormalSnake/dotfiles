@@ -1,5 +1,15 @@
 { config, pkgs, ... }:
 let
+  # Style::polish(QPalette &) overwrites the application palette with
+  # adwaita-qt's built-in light one, so the qtct palette never shows. Leaving
+  # the palette alone keeps the widget shapes and takes the matugen colours.
+  keepPalette = p: p.overrideAttrs (old: {
+    postPatch = (old.postPatch or "") + ''
+      substituteInPlace src/style/adwaitastyle.cpp \
+        --replace-fail "palette = Colors::palette(_variant);" ""
+    '';
+  });
+
   qtctConf = qt: ''
     [Appearance]
     style=Adwaita
@@ -14,9 +24,9 @@ let
   '';
 in
 {
-  # adwaita-qt draws the libadwaita widget shapes and takes its colours from
-  # the application palette, so Qt apps match the adw-gtk3 GTK side.
-  home.packages = [ pkgs.adwaita-qt pkgs.adwaita-qt6 ];
+  # adwaita-qt draws the libadwaita widget shapes, so Qt apps match the
+  # adw-gtk3 GTK side.
+  home.packages = [ (keepPalette pkgs.adwaita-qt) (keepPalette pkgs.adwaita-qt6) ];
 
   # qt6ct / qt5ct config: select the Adwaita style and the shell's generated
   # colour scheme. The colors/matugen.conf files are written at runtime by the
