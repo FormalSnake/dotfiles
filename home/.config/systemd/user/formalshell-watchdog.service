@@ -1,0 +1,8 @@
+[Unit]
+After=formalshell.service
+Description=FormalShell liveness probe
+PartOf=graphical-session.target
+
+[Service]
+ExecStart=/opt/fspec/current/bin/formalshell-watchdog
+Type=oneshot

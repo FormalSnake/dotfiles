@@ -1,0 +1,14 @@
+[Unit]
+After=graphical-session.target
+ConditionEnvironment=XDG_CURRENT_DESKTOP=Hyprland
+Description=FormalShell
+PartOf=graphical-session.target
+
+[Service]
+ExecStart=/opt/fspec/current/bin/formalshell
+KillMode=process
+Restart=on-failure
+Slice=session.slice
+
+[Install]
+WantedBy=graphical-session.target

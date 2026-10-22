@@ -12,8 +12,8 @@ generation on the e1504g. The Tumbleweed root is `spec.star`, `system.star` and 
 - `git()` builds on `fspec ci packages` (ubuntu-24.04) take no build dependencies. librepods
   (Qt 6 Bluetooth, libpulse), Messages and formalmusic (NativeDesktop: GTK, WebKit, Vulkan) and
   kopuzd need apt packages the runner lacks.
-- Prebuilt archives only link executables in their top two levels. FormalShell's release tarball
-  keeps them in `formalshell/bin/` and terminal-browser in its own tree, so neither links.
+- Prebuilt archives only link executables in their top two levels, and terminal-browser keeps
+  its own deeper tree, so it does not link.
 - `url()` stores a bare file as data, so the Beeper 4.3.73 AppImage cannot be a store pkg. The
   unit skips until `/opt/fspec/current/bin/beeper` exists.
 - Data-only pkgs (no executables) are refused: Bibata cursor, Geist Mono Nerd Font, Colloid-Dark,

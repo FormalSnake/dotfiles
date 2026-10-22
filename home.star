@@ -49,6 +49,10 @@ def _autostart(name, exec, description, unit = {}, **kw):
 
 def _services():
     return [
+        # Units `formalshell install` writes under their own names (home/.config/systemd/user),
+        # since formalshell-watchdog and the shell's IPC restart formalshell.service by name.
+        service("formalshell.service", user = True),
+        service("formalshell-watchdog.timer", user = True),
         _autostart("discord", "/usr/bin/flatpak run com.discordapp.Discord --start-minimized", "Discord (minimized to tray)", hyprland_only = True),
         _autostart("beeper", PKG_BIN + "/beeper", "Beeper", needs = PKG_BIN + "/beeper"),
         _autostart("flare", "/usr/bin/flatpak run de.schmidhuberj.Flare", "Flare (Signal)"),
