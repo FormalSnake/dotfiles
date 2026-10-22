@@ -540,11 +540,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792671539,
-        "narHash": "sha256-McDy63+uOC5SMoMqtM9Q5NGiwPShMRykN7NPTY4tVHU=",
+        "lastModified": 1792671693,
+        "narHash": "sha256-z4KFa+v/BLOCTSJP3ZlhCk0ilm67C1+MO2bFOLbn0RY=",
         "owner": "FormalStudio",
         "repo": "formalmusic",
-        "rev": "16e92dc5eb54f205963c642a1250614c1645e9b0",
+        "rev": "9fa5817d77eb22c5d29874bbfa87a8e677f32ef6",
         "type": "github"
       },
       "original": {
