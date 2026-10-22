@@ -1,3 +1,0 @@
-#!/usr/bin/bash
-
-nvim -u tests/minit.lua --headless +'lua require("snacks.meta.docs").fix_titles()' +qa

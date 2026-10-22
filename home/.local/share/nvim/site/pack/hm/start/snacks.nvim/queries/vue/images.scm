@@ -1,2 +1,0 @@
-; inherits: html
-; extends

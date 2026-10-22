@@ -1,3 +1,0 @@
-#!/usr/bin/bash
-
-nvim -u tests/minit.lua -l lua/which-key/docs.lua
