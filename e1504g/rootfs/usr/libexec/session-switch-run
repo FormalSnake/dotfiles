@@ -1,0 +1,24 @@
+#!/bin/sh
+# session-switch@<session>.service: end kyandesutter's session and log straight into <session>.
+# The greeter remembers it as the last pick; greetd's initial_session runs it once, because this
+# deletes the runfile greetd checks to tell a first start from a restart.
+set -eu
+greeter=/var/lib/formalshell-greeter
+sessions=$greeter/.local/state/formalshell/sessions
+install -d -o greeter -g greeter -m 0700 $greeter/.local $greeter/.local/state $greeter/.local/state/formalshell $sessions
+for f in $sessions/kyandesutter $sessions/.last; do
+  printf '%s\n' "$1" > "$f"
+  chown greeter:greeter "$f"
+done
+printf '%s\n' "$1" > /run/session-switch/target
+rm -f /run/session-switch/greetd.run
+session=$(loginctl show-user kyandesutter -p Display --value)
+systemctl --user -M kyandesutter@ stop --job-mode=replace-irreversibly graphical-session.target || true
+if [ -n "$session" ]; then
+  loginctl terminate-session "$session"
+  for _ in $(seq 1 50); do
+    loginctl show-session "$session" >/dev/null 2>&1 || break
+    sleep 0.2
+  done
+fi
+systemctl restart greetd.service

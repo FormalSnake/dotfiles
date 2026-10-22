@@ -1,0 +1,79 @@
+#!/bin/bash
+set -o errexit
+set -o nounset
+set -o pipefail
+
+# Make the newest connected sink the default when it outranks the current one (by
+# priority.session), and move Bluetooth cards that come up profile-less to A2DP.
+
+declare -A seen
+primed=0
+
+reconcile() {
+  local dump
+  dump=$(pw-dump 2>/dev/null) || return 0
+
+  # 1. Kick connected BT cards stuck at profile "off" onto A2DP.
+  local id idx
+  while read -r id idx; do
+    [ -n "$id" ] && wpctl set-profile "$id" "$idx" 2>/dev/null || true
+  done < <(printf '%s' "$dump" | jq -r '
+    .[] | select(.type=="PipeWire:Interface:Device")
+        | select(.info.props["device.api"]=="bluez5")
+        | select((.info.params.Profile[0].index // -1) == 0)
+        | (.info.params.EnumProfile[]?
+           | select(.name=="a2dp-sink" and .available=="yes") | .index) as $a2dp
+        | "\(.id) \($a2dp)"
+  ')
+
+  # 2. Make a newly-appeared device-backed sink the default if it wins on
+  #    priority.
+  local newest_serial=-1 newest_id="" newest_prio=0 serial sid prio
+  local -a current=()
+  while read -r serial sid prio; do
+    [ -n "$sid" ] || continue
+    current+=("$sid")
+    if [ -z "${seen[$sid]:-}" ] && [ "$serial" -gt "$newest_serial" ]; then
+      newest_serial=$serial
+      newest_id=$sid
+      newest_prio=$prio
+    fi
+  done < <(printf '%s' "$dump" | jq -r '
+    .[] | select(.type=="PipeWire:Interface:Node")
+        | select(.info.props["media.class"]=="Audio/Sink")
+        | select(.info.props["device.id"] != null)
+        | select(.info.props["object.serial"] != null)
+        | "\(.info.props["object.serial"]) \(.id) \(.info.props["priority.session"] // 0 | tonumber? // 0 | floor)"
+  ')
+
+  if [ "$primed" -eq 1 ] && [ -n "$newest_id" ]; then
+    local cur_name cur_prio
+    cur_name=$(printf '%s' "$dump" | jq -r '
+      [ .[] | select(.type=="PipeWire:Interface:Metadata")
+            | select(.props["metadata.name"]=="default")
+            | .metadata[]? | select(.key=="default.audio.sink") | .value.name
+      ] | first // ""
+    ')
+    cur_prio=$(printf '%s' "$dump" | jq -r --arg n "$cur_name" '
+      [ .[] | select(.type=="PipeWire:Interface:Node")
+            | select(.info.props["node.name"]==$n)
+            | (.info.props["priority.session"] // 0 | tonumber? // 0 | floor)
+      ] | first // 0
+    ')
+    # No default yet means WirePlumber is still settling at session start;
+    # let its own priority pick land instead of racing it.
+    if [ -n "$cur_name" ] && [ "$newest_prio" -gt "$cur_prio" ]; then
+      wpctl set-default "$newest_id" 2>/dev/null || true
+    fi
+  fi
+
+  seen=()
+  for sid in "${current[@]}"; do seen[$sid]=1; done
+  primed=1
+}
+
+while true; do
+  reconcile
+  sleep 2
+done
+

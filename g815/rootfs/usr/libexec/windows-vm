@@ -1,0 +1,130 @@
+#!/bin/bash
+set -o errexit
+set -o nounset
+set -o pipefail
+
+
+state=/var/lib/windows-vm
+disk=$(readlink -f /dev/disk/by-id/nvme-WD_PC_SN5000S_SDEQNSJ-1T00-1002_25458D806996)
+mkdir -p "$state/tpm" /mnt/steamlib/windows-vm
+
+# Every Windows partition on the disk must be unmounted, or the guest
+# boots from a volume the host is changing underneath it.
+for part in /sys/block/"$(basename "$disk")"/*/partition; do
+  dev=/dev/$(basename "$(dirname "$part")")
+  [ "$(blkid -o value -s TYPE "$dev" || true)" = ntfs ] || continue
+  if findmnt -rn -S "$dev" >/dev/null; then
+    echo "$dev is mounted on the host, refusing to boot" >&2
+    exit 1
+  fi
+  # A hibernated or Fast Startup session lives in hiberfil.sys; booting
+  # anything else on top of it throws that session away.
+  hdr=$(ntfscat "$dev" hiberfil.sys 2>/dev/null | head -c 4 | tr '[:upper:]' '[:lower:]' || true)
+  if [ "$hdr" = hibr ]; then
+    echo "$dev holds a hibernated Windows session, refusing to boot" >&2
+    exit 1
+  fi
+done
+
+# The last session's overlay is garbage now, and must not count against
+# the free-space check below.
+rm -f /mnt/steamlib/windows-vm/overlay.qcow2
+
+avail=$(df --output=avail -B1G /mnt/steamlib/windows-vm | tail -1)
+if [ "$avail" -lt 45 ]; then
+  echo "only ${avail}G free under /mnt/steamlib/windows-vm, refusing to start (needs 45G)" >&2
+  exit 1
+fi
+
+qemu-img create -q -f qcow2 -F raw -b "$disk" /mnt/steamlib/windows-vm/overlay.qcow2
+
+# The shared ESP's \EFI\BOOT\BOOTX64.EFI is not the Windows loader, and an
+# empty OVMF NVRAM only tries that fallback path. A throwaway ESP whose
+# fallback is bootmgfw.efi, next to a copy of the BCD it reads, boots
+# Windows directly; the BCD finds C: by disk and partition GUID, which
+# the passed-through disk keeps.
+# OVMF only scans a fixed disk for an ESP inside a partition table, so a
+# bare FAT image is invisible to it.
+esp="$state/esp.img"
+rm -f "$esp"
+truncate -s 100M "$esp"
+printf 'label: gpt\nstart=2048, type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B\n' | sfdisk -q "$esp"
+mformat -i "$esp@@1M" -F -T 202752 -v VMESP ::
+mmd -i "$esp@@1M" ::/EFI ::/EFI/BOOT ::/EFI/Microsoft
+mcopy -s -i "$esp@@1M" "$(bootctl -p)"/EFI/Microsoft/Boot ::/EFI/Microsoft/
+mcopy -i "$esp@@1M" "$(bootctl -p)"/EFI/Microsoft/Boot/bootmgfw.efi ::/EFI/BOOT/BOOTX64.EFI
+
+# No keys enrolled, so Secure Boot is off.
+if [ ! -f "$state/vars.fd" ]; then
+  install -m 0600 /usr/share/qemu/ovmf-x86_64-ms-4m-vars.bin "$state/vars.fd"
+fi
+
+swtpm socket --tpm2 --tpmstate dir="$state/tpm" \
+  --ctrl type=unixio,path="$state/swtpm.sock" --terminate &
+for _ in $(seq 50); do [ -S "$state/swtpm.sock" ] && break; sleep 0.1; done
+
+serial=$(cat /sys/block/"$(basename "$disk")"/device/serial)
+
+# shellcheck disable=SC2054  # QEMU flags carry their own commas
+args=(
+  -name windows-vm
+  -enable-kvm
+  -machine q35,smm=on
+  -global driver=cfi.pflash01,property=secure,value=on
+  # A named model, not `host`: on this hybrid Arrow Lake part the
+  # Windows kernel resets itself within seconds of winload with `host`
+  # plus any hv_* flag, and hangs at the boot logo with plain `host`.
+  # hv_crash makes QEMU log the bugcheck code if the guest ever panics.
+  -cpu Skylake-Client-v4,hv_relaxed,hv_vapic,hv_spinlocks=0x1fff,hv_time,hv_crash
+  -smp 6,cores=6,sockets=1
+  -m 8192
+  -rtc base=localtime
+  -drive if=pflash,format=raw,readonly=on,file=/usr/share/qemu/ovmf-x86_64-ms-4m-code.bin
+  -drive if=pflash,format=raw,file="$state/vars.fd"
+  -chardev socket,id=tpm,path="$state/swtpm.sock"
+  -tpmdev emulator,id=tpm0,chardev=tpm
+  -device tpm-tis,tpmdev=tpm0
+
+  -drive id=esp,if=none,format=raw,file="$state/esp.img"
+  -device ide-hd,bus=ide.0,drive=esp,bootindex=0
+  # Read-only is the backing node's own flag, not just qcow2's default.
+  -blockdev driver=host_device,node-name=base,filename="$disk",read-only=on,cache.direct=on,aio=native
+  # ntfs3 does not punch holes, so guest TRIM only lets qcow2 reuse
+  # freed clusters; the file never shrinks before the stop deletes it.
+  -blockdev driver=file,node-name=ovl,filename=/mnt/steamlib/windows-vm/overlay.qcow2,discard=unmap
+  -blockdev driver=qcow2,node-name=win,file=ovl,backing=base,discard=unmap,detect-zeroes=unmap
+  # Emulated NVMe binds Windows' inbox stornvme, the driver it already
+  # boots from on bare metal (no VMD on this laptop).
+  -device nvme,drive=win,serial="$serial",bootindex=1
+
+  -netdev user,id=net0,hostfwd=tcp:127.0.0.1:2222-:22
+  -device e1000e,netdev=net0,mac=52:54:00:57:31:01
+  -device qemu-xhci
+  -device usb-tablet
+  # A silent output endpoint: audio apps refuse to start without one.
+  -audiodev none,id=snd0
+  -device ich9-intel-hda
+  -device hda-output,audiodev=snd0
+  -vga std
+  -display vnc=127.0.0.1:1
+  -monitor unix:"$state/monitor.sock",server,nowait
+)
+# The overlay takes every guest write, and one WinUI build grew it past
+# 30G, so power the guest off before it eats Steam's floor: ACPI first,
+# then SIGINT (QEMU's quit) if it ignores that for a minute. $$ is QEMU
+# itself once the exec below has run.
+(
+  while sleep 10 && kill -0 $$ 2>/dev/null; do
+    avail=$(df --output=avail -B1G /mnt/steamlib/windows-vm | tail -1)
+    [ "$avail" -lt 30 ] || continue
+    echo "only ${avail}G left under /mnt/steamlib/windows-vm, powering the guest off" >&2
+    echo system_powerdown | socat - unix-connect:"$state/monitor.sock" >/dev/null || true
+    sleep 60
+    kill -INT $$ 2>/dev/null || true
+    exit 0
+  done
+) &
+
+# P-cores only: a vCPU on an E-core stalls the Windows compositor.
+exec taskset -c 0-5 qemu-system-x86_64 "${args[@]}"
+

@@ -1,0 +1,21 @@
+#!/bin/bash
+set -o errexit
+set -o nounset
+set -o pipefail
+
+
+num=$(efibootmgr | awk '/Windows Boot Manager/ { n=$1; sub(/^Boot/,"",n); sub(/\*.*/,"",n); print n; exit }')
+if [ -n "${num:-}" ]; then
+  efibootmgr --bootnext "$num" >/dev/null
+else
+  # No firmware entry yet: create a one-shot one pointing at the Windows
+  # bootloader on the ESP.
+  src=$(findmnt -no SOURCE "$(bootctl -p)")
+  bn=$(basename "$src")
+  part=$(cat "/sys/class/block/$bn/partition")
+  disk=$(lsblk -no PKNAME "$src" | head -1)
+  efibootmgr --create-next --disk "/dev/$disk" --part "$part" \
+    --loader '\EFI\Microsoft\Boot\bootmgfw.efi' --label 'Windows Boot Manager' >/dev/null
+fi
+systemctl reboot
+

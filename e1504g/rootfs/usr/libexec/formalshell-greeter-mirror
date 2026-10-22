@@ -1,0 +1,23 @@
+#!/bin/bash
+# Copy kyandesutter's FormalShell wallpaper, theme.json and ~/.face into the greeter's state, so the
+# login screen matches the desktop.
+set -eu
+greeter=/var/lib/formalshell-greeter/.local/state/formalshell
+home=/home/kyandesutter
+state=$home/.local/state/formalshell
+install -d -o greeter -g greeter -m 0700 /var/lib/formalshell-greeter/.local /var/lib/formalshell-greeter/.local/state "$greeter" "$greeter/avatars"
+copy() {
+  tmp="$greeter/$2.tmp"
+  if runuser -u kyandesutter -- cat -- "$1" > "$tmp" 2>/dev/null && [ -s "$tmp" ]; then
+    if cmp -s "$tmp" "$greeter/$2"; then rm -f "$tmp"; return; fi
+    chown greeter:greeter "$tmp"
+    chmod 0600 "$tmp"
+    mv -f "$tmp" "$greeter/$2"
+  else
+    rm -f "$tmp" "$greeter/$2"
+  fi
+}
+wallpaper=$(runuser -u kyandesutter -- jq -r '.wallpaper // empty' "$state/state.json" 2>/dev/null || true)
+copy "${wallpaper:-/nonexistent}" wallpaper
+copy "$state/theme.json" theme.json
+copy "$home/.face" avatars/kyandesutter

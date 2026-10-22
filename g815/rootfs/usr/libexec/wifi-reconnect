@@ -1,0 +1,8 @@
+#!/bin/bash
+set -e
+
+[ "$(nmcli -t -f WIFI general)" = enabled ] || exit 0
+[ "$(nmcli -g GENERAL.STATE device show wlan0)" = "30 (disconnected)" ] || exit 0
+nmcli device connect wlan0
+
+

@@ -1,0 +1,10 @@
+#!/bin/sh
+# The allowlist and LAN discovery keep the tailnet and the LAN reachable while connected.
+for _ in $(seq 1 30); do
+  nordvpn settings >/dev/null 2>&1 && break
+  sleep 1
+done
+settings=$(nordvpn settings 2>/dev/null || true)
+echo "$settings" | grep -q '100.64.0.0/10' || nordvpn allowlist add subnet 100.64.0.0/10
+echo "$settings" | grep -qi 'LAN Discovery: enabled' || nordvpn set lan-discovery enable
+echo "$settings" | grep -qi 'Auto-connect: disabled' || nordvpn set autoconnect disable

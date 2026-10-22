@@ -1,0 +1,252 @@
+diff --git i/ancs4linux/common/apis.py w/ancs4linux/common/apis.py
+index 9407ee4..56c9562 100644
+--- i/ancs4linux/common/apis.py
++++ w/ancs4linux/common/apis.py
+@@ -17,6 +17,19 @@ class ShowNotificationData:
+     body: str
+     positive_action: Optional[str]
+     negative_action: Optional[str]
++    # ANCS carries more than the original API exposed: a category, the
++    # phone's own flags, a subtitle, and the phone-side timestamp.
++    subtitle: str = ""
++    date: str = ""
++    category_id: int = 0
++    category_count: int = 0
++    silent: bool = False
++    important: bool = False
++    preexisting: bool = False
++    # Identifies the connection this notification belongs to. Notification ids
++    # are only meaningful within one connection, so an id from an earlier
++    # session cannot be acted on.
++    session: int = 0
+ 
+     def json(self) -> str:
+         return json.dumps(vars(self))
+diff --git i/ancs4linux/observer/ancs/builders.py w/ancs4linux/observer/ancs/builders.py
+index ef0130f..651f416 100644
+--- i/ancs4linux/observer/ancs/builders.py
++++ w/ancs4linux/observer/ancs/builders.py
+@@ -18,15 +18,21 @@ class GetNotificationAttributes:
+     get_negative_action: bool
+ 
+     def to_list(self) -> List[int]:
++        # Subtitle and Date are cheap and carry real signal: the subtitle is
++        # often the sender, and the date is the phone's own timestamp rather
++        # than whenever the desktop happened to receive it.
+         msg = struct.pack(
+-            "<BIBBHBH",
++            "<BIBBHBHBHB",
+             CommandID.GetNotificationAttributes,
+             self.id,
+             NotificationAttributeID.AppIdentifier,
+             NotificationAttributeID.Title,
+             USHORT_MAX,
++            NotificationAttributeID.Subtitle,
++            USHORT_MAX,
+             NotificationAttributeID.Message,
+             USHORT_MAX,
++            NotificationAttributeID.Date,
+         )
+         if self.get_positive_action:
+             msg += struct.pack("<B", NotificationAttributeID.PositiveActionLabel)
+diff --git i/ancs4linux/observer/ancs/parsers.py w/ancs4linux/observer/ancs/parsers.py
+index d6e99a1..0c17d71 100644
+--- i/ancs4linux/observer/ancs/parsers.py
++++ w/ancs4linux/observer/ancs/parsers.py
+@@ -21,11 +21,21 @@ class Notification:
+     id: int
+     type: EventID
+     flags: EventFlag
++    category_id: int = 0
++    category_count: int = 0
+ 
+     @classmethod
+     def parse(cls, data: bytes) -> "Notification":
+-        [type, flags, _, _, id] = struct.unpack("<BBBBI", bytearray(data))
+-        return cls(id=id, type=type, flags=flags)
++        [type, flags, category_id, category_count, id] = struct.unpack(
++            "<BBBBI", bytearray(data)
++        )
++        return cls(
++            id=id,
++            type=type,
++            flags=flags,
++            category_id=category_id,
++            category_count=category_count,
++        )
+ 
+     def is_preexisting(self) -> bool:
+         return self.flags & EventFlag.PreExisting > 0
+@@ -39,6 +49,14 @@ class Notification:
+     def has_negative_action(self) -> bool:
+         return self.flags & EventFlag.NegativeAction > 0
+ 
++    def is_silent(self) -> bool:
++        """iOS asked for this to be delivered quietly."""
++        return self.flags & EventFlag.Silent > 0
++
++    def is_important(self) -> bool:
++        """iOS itself marked this important."""
++        return self.flags & EventFlag.Important > 0
++
+ 
+ @dataclass
+ class DataSourceEvent:
+@@ -68,14 +86,20 @@ class NotificationAttributes:
+     message: str
+     positive_action: Optional[str]
+     negative_action: Optional[str]
++    subtitle: str = ""
++    date: str = ""
+ 
+     @classmethod
+     def parse(cls, data: bytes) -> "NotificationAttributes":
+         msg = bytearray(data)
+         id, msg = struct.unpack("<I", msg[:4])[0], msg[4:]
++        # Order here must match the order the attributes were requested in
++        # builders.GetNotificationAttributes.
+         app_id, msg = parse_string(msg)
+         title, msg = parse_string(msg)
++        subtitle, msg = parse_string(msg)
+         message, msg = parse_string(msg)
++        date, msg = parse_string(msg)
+         positive_action = negative_action = None
+         if len(msg) > 0 and msg[0] == NotificationAttributeID.PositiveActionLabel:
+             positive_action, msg = parse_string(msg)
+@@ -88,6 +112,8 @@ class NotificationAttributes:
+             message=message,
+             positive_action=positive_action,
+             negative_action=negative_action,
++            subtitle=subtitle,
++            date=date,
+         )
+ 
+ 
+diff --git i/ancs4linux/observer/device_comm.py w/ancs4linux/observer/device_comm.py
+index 3e99676..debb4b4 100644
+--- i/ancs4linux/observer/device_comm.py
++++ w/ancs4linux/observer/device_comm.py
+@@ -1,3 +1,4 @@
++import logging
+ import random
+ from typing import TYPE_CHECKING, Dict, List, Set
+ 
+@@ -16,6 +17,8 @@ from ancs4linux.observer.ancs.parsers import (
+     NotificationAttributes,
+ )
+ 
++log = logging.getLogger(__name__)
++
+ if TYPE_CHECKING:
+     from ancs4linux.observer.device import MobileDevice
+ 
+@@ -27,6 +30,9 @@ class DeviceCommunicator:
+         self.notification_queue: List[ShowNotificationData] = []
+         self.awaiting_app_names: Set[str] = set()
+         self.known_app_names: Dict[str, str] = dict()
++        # id -> Notification, so the attribute response can recover the
++        # category and flags that only the notification-source event carried.
++        self.pending_meta: Dict[int, Notification] = dict()
+ 
+     def attach(self) -> None:
+         assert self.device.notification_source and self.device.data_source
+@@ -42,14 +48,20 @@ class DeviceCommunicator:
+             return
+ 
+         notification = Notification.parse(changes["Value"].unpack())
+-        if notification.type == EventID.NotificationAdded and notification.is_fresh():
+-            self.ask_for_notification_details(notification)
+-        elif notification.type == EventID.NotificationModified:
++        if notification.type in (EventID.NotificationAdded, EventID.NotificationModified):
+             self.ask_for_notification_details(notification)
+         else:
+-            self.device.server.emit_dismiss_notification(notification.id)
++            # ShowNotification reports ids offset by this connection's base,
++            # so the removal has to use the same space. Emitting the raw ANCS
++            # uid here meant no dismissal ever matched a shown notification:
++            # cleared items lingered, and acting on one later returned ATT
++            # 0xA2 because the phone had long since dropped that uid.
++            self.device.server.emit_dismiss_notification(
++                (self.id + notification.id) % UINT_MAX
++            )
+ 
+     def ask_for_notification_details(self, notification: Notification) -> None:
++        self.pending_meta[notification.id] = notification
+         msg = GetNotificationAttributes(
+             id=notification.id,
+             get_positive_action=notification.has_positive_action(),
+@@ -72,6 +84,7 @@ class DeviceCommunicator:
+ 
+     def on_notification_attributes(self, attrs: NotificationAttributes) -> None:
+         assert self.device.name
++        meta = self.pending_meta.pop(attrs.id, None)
+         self.queue_notification(
+             ShowNotificationData(
+                 device_handle=self.device.path,
+@@ -83,6 +96,14 @@ class DeviceCommunicator:
+                 body=attrs.message,
+                 positive_action=attrs.positive_action,
+                 negative_action=attrs.negative_action,
++                subtitle=attrs.subtitle,
++                date=attrs.date,
++                category_id=meta.category_id if meta else 0,
++                category_count=meta.category_count if meta else 0,
++                silent=meta.is_silent() if meta else False,
++                important=meta.is_important() if meta else False,
++                preexisting=meta.is_preexisting() if meta else False,
++                session=self.id,
+             )
+         )
+         self.process_queue()
+@@ -119,6 +140,23 @@ class DeviceCommunicator:
+ 
+     def ask_for_action(self, notification_id: int, is_positive: bool) -> None:
+         id = (notification_id - self.id) % UINT_MAX
++        # An action is only meaningful against the connection that produced
++        # the id. Log what we resolved it to: a mismatched base writes a
++        # well-formed command for a notification the phone never had, which
++        # succeeds silently and does nothing.
++        log.info(
++            f"action: session={self.id} given={notification_id} -> ancs_id={id} "
++            f"positive={is_positive}"
++        )
+         msg = PerformNotificationAction(notification_id=id, is_positive=is_positive)
+         assert self.device.control_point
+-        self.device.control_point.WriteValue(msg.to_list(), {})
++        try:
++            self.device.control_point.WriteValue(msg.to_list(), {})
++            log.info("action: control point write OK")
++        except Exception as e:
++            # Let this reach the caller. ANCS answers a bad action with an ATT
++            # error (0xA2 "invalid parameter" when the notification is already
++            # gone), and swallowing it makes a failed action indistinguishable
++            # from a successful one.
++            log.error(f"action: control point write FAILED: {e!r}")
++            raise
+diff --git i/ancs4linux/observer/server.py w/ancs4linux/observer/server.py
+index e5388dd..221139d 100644
+--- i/ancs4linux/observer/server.py
++++ w/ancs4linux/observer/server.py
+@@ -1,7 +1,11 @@
++import logging
++
+ from ancs4linux.common.apis import ObserverAPI
+ from ancs4linux.common.dbus import Bool, Str, UInt32, dbus_interface, dbus_signal
+ from ancs4linux.observer.scanner import Scanner
+ 
++log = logging.getLogger(__name__)
++
+ 
+ @dbus_interface(ObserverAPI.interface)
+ class ObserverServer(ObserverAPI):
+@@ -14,6 +18,10 @@ class ObserverServer(ObserverAPI):
+         if self.scanner is None:
+             return
+         if device_handle not in self.scanner.devices:
++            log.warning(
++                f"InvokeDeviceAction: unknown handle {device_handle}; "
++                f"known={list(self.scanner.devices)}"
++            )
+             return
+         self.scanner.devices[device_handle].handle_action(notification_id, is_positive)
+ 

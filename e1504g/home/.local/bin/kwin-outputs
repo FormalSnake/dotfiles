@@ -1,0 +1,7 @@
+#!/bin/sh
+# KWin's scale, as Hyprland has it.
+for o in $(kscreen-doctor -j | jq -r '.outputs[] | select(.connected) | .name'); do
+  case "$o" in
+    eDP-*) kscreen-doctor "output.$o.scale.1" ;;
+  esac
+done

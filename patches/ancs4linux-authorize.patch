@@ -1,0 +1,11 @@
+--- a/ancs4linux/advertising/pairing.py
++++ b/ancs4linux/advertising/pairing.py
+@@ -38,7 +38,7 @@
+         raise PairingRejected
+ 
+     def AuthorizeService(self, device: ObjPath, uuid: Str) -> None:
+-        raise PairingRejected
++        pass
+ 
+     def Cancel(self) -> None:
+         pass

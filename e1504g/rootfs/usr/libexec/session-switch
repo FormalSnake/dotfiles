@@ -1,0 +1,6 @@
+#!/bin/sh
+case "${1:-}" in
+  plasma|hyprland-uwsm) ;;
+  *) echo "usage: session-switch {plasma|hyprland-uwsm}" >&2; exit 2 ;;
+esac
+exec systemctl start --no-block "session-switch@$1.service"

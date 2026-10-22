@@ -7,5 +7,5 @@ secrets = {
     "secrets/" + name + ".age": [kyan]
     for name in ["openai", "anthropic", "gemini", "deepseek", "nucleo-license", "npm-github-token",
                  "npm-registry-token", "wstunnel-path-prefix", "wstunnel-endpoint", "couchdb-admin",
-                 "lastfm-api-key"]
+                 "lastfm-api-key", "livesync-passphrase"]
 }

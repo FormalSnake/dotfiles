@@ -1,0 +1,41 @@
+#!/bin/bash
+out=/run/formalshell/ucsi
+rapl=/sys/class/powercap/intel-rapl:0
+prev_uj=
+prev_us=
+while :; do
+  if [ -r "$rapl/energy_uj" ]; then
+    uj=$(cat "$rapl/energy_uj")
+    us=$(( $(date +%s%N) / 1000 ))
+    if [ -n "$prev_uj" ] && [ "$us" -gt "$prev_us" ]; then
+      d=$((uj - prev_uj))
+      [ "$d" -lt 0 ] && d=$((d + $(cat "$rapl/max_energy_range_uj")))
+      echo $((d * 1000 / (us - prev_us))) > /run/formalshell/rapl.tmp
+      chmod 644 /run/formalshell/rapl.tmp
+      mv -f /run/formalshell/rapl.tmp /run/formalshell/rapl
+    fi
+    prev_uj=$uj
+    prev_us=$us
+  fi
+  : > "$out.tmp"
+  ports=0
+  for p in /sys/class/typec/port[0-9]*; do
+    case "$p" in *-partner) ;; *) ports=$((ports + 1)) ;; esac
+  done
+  for dir in /sys/kernel/debug/usb/ucsi/*; do
+    [ -w "$dir/command" ] || continue
+    c=1
+    while [ "$c" -le "$ports" ]; do
+      # debugfs parses the value with base 0, so without the 0x prefix
+      # it reads as decimal and sends a different command.
+      printf '0x%x\n' $((0x12 | (c << 16))) > "$dir/command" 2>/dev/null || break
+      if r=$(cat "$dir/response" 2>/dev/null); then
+        echo "$c $r" >> "$out.tmp"
+      fi
+      c=$((c + 1))
+    done
+  done
+  chmod 644 "$out.tmp"
+  mv -f "$out.tmp" "$out"
+  sleep 3
+done

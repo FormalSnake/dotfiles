@@ -1,7 +1,7 @@
 
 vim.g.loaded_node_provider=0;vim.g.loaded_perl_provider=0;vim.g.loaded_ruby_provider=0;vim.g.loaded_python3_provider=0
--- Plugins are files under ~/.local/share/nvim/site/pack/hm; parsers and
--- language servers come from the system. Nothing here downloads anything.
+-- Plugins come from vim.pack at the revisions in nvim-pack-lock.json, parsers from
+-- nvim-treesitter's own installer; language servers come from the system.
 
 -- astro-ls needs a TypeScript SDK and a project without node_modules has none: take the one
 -- from the typescript pkg, whose tsc links to <pkg>/package/bin/tsc.
@@ -9,8 +9,11 @@ local tsc = vim.fn.exepath("tsc")
 if tsc ~= "" then
   vim.g.tsdk = vim.fs.dirname(vim.fs.dirname(vim.fn.resolve(tsc))) .. "/lib"
 end
--- rust-analyzer's std sources, from Fedora's rust-src, unless the toolchain points elsewhere.
-vim.env.RUST_SRC_PATH = vim.env.RUST_SRC_PATH or "/usr/lib/rustlib/src/rust/library"
+-- rust-analyzer's std sources, from the distro's rust-src, unless the toolchain points elsewhere.
+local rust_src = "/usr/lib/rustlib/src/rust/library"
+if not vim.env.RUST_SRC_PATH and vim.uv.fs_stat(rust_src) then
+  vim.env.RUST_SRC_PATH = rust_src
+end
 
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
@@ -129,6 +132,22 @@ vim.diagnostic.config({
 
 -- Plugins ---------------------------------------------------------------------
 
+local gh = function(repo) return "https://github.com/" .. repo end
+vim.pack.add({
+  gh("folke/snacks.nvim"),
+  gh("folke/which-key.nvim"),
+  gh("folke/flash.nvim"),
+  gh("folke/persistence.nvim"),
+  gh("folke/lazydev.nvim"),
+  gh("nvim-mini/mini.icons"),
+  gh("lewis6991/gitsigns.nvim"),
+  -- A release tag, so blink downloads its prebuilt fuzzy matcher instead of building it.
+  { src = gh("Saghen/blink.cmp"), version = vim.version.range("1.*") },
+  gh("MeanderingProgrammer/render-markdown.nvim"),
+  gh("neovim/nvim-lspconfig"),
+  { src = gh("nvim-treesitter/nvim-treesitter"), version = "main" },
+}, { confirm = false })
+
 require("mini.icons").setup()
 MiniIcons.mock_nvim_web_devicons()
 
@@ -236,6 +255,10 @@ require("blink.cmp").setup({
 })
 
 -- Treesitter ------------------------------------------------------------------
+
+-- install() skips parsers already present, so after the first run this costs a
+-- directory listing. It compiles with tree-sitter and a C compiler.
+vim.schedule(function() require("nvim-treesitter").install("all") end)
 
 -- nvim-treesitter's main branch only ships parsers and queries; starting the
 -- highlighter and indent is left to the user.

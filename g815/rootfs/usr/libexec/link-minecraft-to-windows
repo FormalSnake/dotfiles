@@ -1,0 +1,42 @@
+#!/bin/bash
+set -o errexit
+set -o nounset
+set -o pipefail
+
+# One Modrinth profile for Windows and Linux: the Linux profile directory is the Windows one.
+# Run once per profile with Modrinth closed; a local profile moves to <profile>.local.
+
+profile="${1:-Fabric 26.2}"
+win="/mnt/windows/Users/Kyan/AppData/Roaming/ModrinthApp/profiles/$profile"
+lin="$HOME/.local/share/ModrinthApp/profiles/$profile"
+
+case ",$(findmnt -no OPTIONS /mnt/windows)," in
+  *,rw,*) ;;
+  *)
+    echo "/mnt/windows is not read-write: NTFS is dirty, so ntfs3 refused it." >&2
+    echo "Boot Windows and shut down cleanly with Fast Startup and hibernation off." >&2
+    exit 1
+    ;;
+esac
+
+[ -d "$win" ] || { echo "no such Windows profile: $win" >&2; exit 1; }
+
+if [ -L "$lin" ]; then
+  if [ "$(readlink "$lin")" = "$win" ]; then
+    echo "already linked: $lin -> $win"
+    exit 0
+  fi
+  rm "$lin"
+elif [ -e "$lin" ]; then
+  if [ -e "$lin.local" ]; then
+    echo "$lin.local is in the way; move it aside" >&2
+    exit 1
+  fi
+  mv "$lin" "$lin.local"
+  echo "moved the local profile to $lin.local"
+fi
+
+mkdir -p "$(dirname "$lin")"
+ln -s "$win" "$lin"
+echo "linked $lin -> $win"
+

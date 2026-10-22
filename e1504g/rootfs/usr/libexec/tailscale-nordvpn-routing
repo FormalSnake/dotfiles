@@ -1,0 +1,11 @@
+#!/bin/sh
+# tailscaled marks its underlay with 0x80000. NordVPN's policy routing would send those packets out
+# of the tunnel's table, so LAN and link-local peers go out the main table and everything else
+# through NordVPN's table 205, ahead of NordVPN's own rules.
+for rule in "5190 169.254.0.0/16" "5191 192.168.0.0/16" "5192 172.16.0.0/12" "5193 10.0.0.0/8"; do
+  set -- $rule
+  while ip rule del priority "$1" 2>/dev/null; do :; done
+  ip rule add priority "$1" fwmark 0x80000/0xff0000 to "$2" lookup main
+done
+while ip rule del priority 5200 2>/dev/null; do :; done
+ip rule add priority 5200 fwmark 0x80000/0xff0000 lookup 205

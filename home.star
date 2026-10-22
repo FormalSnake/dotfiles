@@ -1,6 +1,7 @@
-# Kyan's user layer on the e1504g's Fedora root, ported from the Home Manager generation in
-# ~/.config/nix (users/kyandesutter). home/ mirrors ~ with every /nix/store path rewritten;
-# GAPS.md lists what is not ported.
+# Kyan's user layer on the Linux hosts' Tumbleweed roots, ported from the Home Manager generation in
+# ~/.config/nix (users/kyandesutter). home/ mirrors ~ with every /nix/store path rewritten, and
+# <host>/home/ holds the files that differ per host (monitors, logos, GPU env), which win over
+# home/; GAPS.md lists what is not ported.
 
 HOME = "/home/kyandesutter"
 BIN = HOME + "/.local/bin"
@@ -16,15 +17,17 @@ EXECUTABLE_DIRS = ["home/.local/bin/", "home/.claude/hooks/", "home/.claude-puls
 TUMBLEWEED = "registry.opensuse.org/opensuse/tumbleweed"
 NATIVEDESKTOP_DEPS = ["gcc", "gcc-c++", "make", "pkgconf", "git-core", "curl", "tar", "xz", "fontconfig-devel", "freetype2-devel", "libxkbcommon-devel", "libxkbcommon-x11-devel", "wayland-devel", "vulkan-devel", "libX11-devel", "alsa-devel", "dbus-1-devel", "libopenssl-devel"]
 
-def _files():
-    out = []
-    for src in glob("home/**/*"):
-        perms = None
-        for d in EXECUTABLE_DIRS:
-            if src.startswith(d):
-                perms = "0755"
-        out.append(file("~/" + src.removeprefix("home/"), src = src, perms = perms))
-    return out
+def _files(h):
+    files = {}
+    for root in ["home/", h.name + "/home/"]:
+        for src in glob(root + "**/*"):
+            rel = src.removeprefix(root)
+            perms = None
+            for d in EXECUTABLE_DIRS:
+                if ("home/" + rel).startswith(d):
+                    perms = "0755"
+            files[rel] = file("~/" + rel, src = src, perms = perms)
+    return files.values()
 
 def _merge(a, b):
     out = dict(a)
@@ -195,6 +198,61 @@ def _services():
             systemd = {"RestartSec": 5, "WorkingDirectory": HOME, "unit": {"ConditionPathExists": PKG_BIN + "/t3"}},
         ),
         timer("t3code-serve", exec = "/usr/bin/tailscale serve --bg --https=8773 http://127.0.0.1:3773", schedule = "*/5 * * * *", user = True),
+        # mixins/hardware/audio.nix.
+        service(
+            "audio-autoswitch",
+            exec = BIN + "/audio-autoswitch",
+            user = True,
+            restart = "always",
+            description = "Switch default output to newly-connected audio devices",
+            systemd = {"RestartSec": 3, "unit": {"After": "wireplumber.service"}, "install": {"WantedBy": "pipewire.service"}},
+        ),
+    ]
+
+# mixins/desktop/kde.nix: the Plasma session's user side. kwin-outputs is per host (<host>/home).
+def _kde():
+    kde = {"ConditionEnvironment": "XDG_CURRENT_DESKTOP=KDE", "PartOf": "graphical-session.target"}
+    return [
+        # Home Manager ran these kwriteconfig6 calls on every switch: no Baloo indexing, no edge or
+        # corner barriers between outputs.
+        service(
+            "kde-config",
+            exec = "/usr/bin/sh -c 'kwriteconfig6 --file baloofilerc --group \"Basic Settings\" --key Indexing-Enabled false && kwriteconfig6 --file kwinrc --group EdgeBarrier --key EdgeBarrier 0 && kwriteconfig6 --file kwinrc --group EdgeBarrier --key CornerBarrier --type bool false'",
+            user = True,
+            description = "Plasma's Baloo and edge barrier keys",
+            systemd = {"Type": "oneshot", "RemainAfterExit": True},
+        ),
+        service(
+            "kwin-outputs",
+            exec = BIN + "/kwin-outputs",
+            user = True,
+            description = "Match the KWin output layout and scale to Hyprland",
+            systemd = {"Type": "oneshot", "unit": _merge(kde, {"After": "plasma-kwin_wayland.service"}), "install": {"WantedBy": "graphical-session.target"}},
+        ),
+        service(
+            "steamed-theme",
+            exec = "/usr/bin/sh -c '[ \"$(kreadconfig6 --file kdeglobals --group KDE --key LookAndFeelPackage)\" = Steamed ] || { plasma-apply-lookandfeel --apply Steamed && plasma-apply-wallpaperimage /usr/local/share/wallpapers/steam-classic.png; }'",
+            user = True,
+            description = "Apply the Steamed theme and wallpaper once",
+            systemd = {"Type": "oneshot", "unit": _merge(kde, {"After": "plasma-plasmashell.service"}), "install": {"WantedBy": "graphical-session.target"}},
+        ),
+        # A Plasma logout otherwise leaves graphical-session.target up, and the Hyprland session
+        # after it starts with the Plasma one's units.
+        service(
+            "plasma-end-graphical-session",
+            exec = "/usr/bin/true",
+            user = True,
+            description = "Stop graphical-session.target when the Plasma workspace stops",
+            systemd = {
+                "Type": "oneshot",
+                "RemainAfterExit": True,
+                "ExecStop": "/usr/bin/systemctl --user --no-block --job-mode=replace-irreversibly stop graphical-session.target",
+                "unit": {"PartOf": "plasma-workspace.target"},
+                "install": {"WantedBy": "plasma-workspace.target"},
+            },
+        ),
+        _autostart("discord-kde", "/usr/bin/flatpak run com.discordapp.Discord", "Discord", unit = {"ConditionEnvironment": ["WAYLAND_DISPLAY", "XDG_CURRENT_DESKTOP=KDE"]}),
+        file("~/Desktop/switch-to-hyprland.desktop", perms = "0755", content = "[Desktop Entry]\nType=Application\nName=Switch to Hyprland\nExec=/usr/local/bin/session-switch hyprland-uwsm\nIcon=hyprland\n"),
     ]
 
 def _flatpaks():
@@ -249,11 +307,11 @@ def _tools():
         pkg("tmux-agent-sidebar", version = "0.13.0", source = github("hiroppy/tmux-agent-sidebar", asset = "tmux-agent-sidebar-linux-*")),
     ]
 
-# The language servers and formatters the NixOS neovim wrapper put on PATH, at its versions. taplo
-# comes from Tumbleweed at the same version; nil and gopls are source builds in system.star.
+# The language servers and formatters the NixOS neovim wrapper put on PATH that Tumbleweed lacks.
+# taplo, gopls, lua-language-server, tree-sitter and typescript are Tumbleweed packages; nil is a
+# source build in system.star.
 def _nvim():
     return [
-        pkg("lua-language-server", version = "3.19.1", source = aqua("LuaLS/lua-language-server")),
         pkg("rust-analyzer", version = "2026-09-28", source = aqua("rust-lang/rust-analyzer")),
         pkg("marksman", version = "2026-02-08", source = aqua("artempyanykh/marksman")),
         pkg("nixfmt", version = "1.5.0", source = github("NixOS/nixfmt", asset = "nixfmt")),
@@ -263,22 +321,8 @@ def _nvim():
         pkg("yaml-language-server", version = "1.24.0", source = npm("yaml-language-server")),
         pkg("docker-langserver", version = "0.15.0", source = npm("dockerfile-language-server-nodejs")),
         pkg("docker-compose-langserver", version = "0.2.0", source = npm("@microsoft/compose-language-service")),
-        # The SDK astro-ls falls back to (init.lua sets vim.g.tsdk from it); 7.x dropped tsserverlibrary.js.
-        pkg("typescript", version = "5.9.3", source = npm("typescript")),
         # nixpkgs builds 1.126.04524 from the VS Code tree; npm's newest is 4.10.0.
         pkg("vscode-langservers-extracted", version = "4.10.0", source = npm("vscode-langservers-extracted")),
-        # nvim-treesitter's main branch builds parsers with tree-sitter-cli and gcc.
-        pkg("tree-sitter", version = "0.26.13", source = aqua("tree-sitter/tree-sitter")),
-        # Nix shipped nvim-treesitter.withAllGrammars; install() skips parsers already present.
-        service(
-            "nvim-treesitter-parsers",
-            exec = "/usr/bin/nvim --headless -c \"lua require('nvim-treesitter').install('all'):wait(1800000)\" -c qa",
-            user = True,
-            after = ["network"],
-            description = "Install every nvim-treesitter parser",
-            env = {"PATH": PKG_BIN + ":/usr/bin:/bin"},
-            systemd = {"Type": "oneshot", "RemainAfterExit": True, "TimeoutStartSec": "45min"},
-        ),
     ]
 
 # The Nix-built apps and CLIs, from their upstream sources at the revisions ~/.config/nix locks.
@@ -316,6 +360,6 @@ def _apps():
         pkg("dcal", version = "1.6.1", source = github("AvengeMedia/dankcalendar", asset = "dcal-linux-amd64.tar.gz"), links = {"dcal": "dcal-linux-amd64"}),
     ]
 
-# Called with the host facts when listed in host(modules = [home]), or bare as home().
-def home(h = None):
-    return _files() + _services() + _flatpaks() + _discord() + _claude_pulse() + _tools() + _nvim() + _apps()
+# Called with the host facts when listed in host(modules = [home]).
+def home(h):
+    return list(_files(h)) + _services() + _kde() + _flatpaks() + _discord() + _claude_pulse() + _tools() + _nvim() + _apps()

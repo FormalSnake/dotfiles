@@ -1,0 +1,4 @@
+export AQ_DRM_DEVICES="$(readlink -f /dev/dri/by-path/pci-0000:02:00.0-card)"
+export LIBVA_DRIVER_NAME=nvidia
+export NVD_BACKEND=direct
+export __GLX_VENDOR_LIBRARY_NAME=nvidia

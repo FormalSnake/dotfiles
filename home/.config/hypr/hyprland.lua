@@ -53,8 +53,24 @@ do
 end
 local function fsColor(c) return fsColors[c] or c end
 
+-- Per-host layout: monitors, which workspaces sit on which output, window opacity and GPU
+-- environment. host.lua comes from fspec's <host>/home overlay and returns a table with any of
+-- these keys; without it the internal panel is all there is.
+local host = {
+  monitors = { { output = "eDP-1", mode = "preferred", position = "auto", scale = 1.0 } },
+  workspaces = {},
+  opacity = 1.0,
+  env = {},
+}
+do
+  local ok, loaded = pcall(dofile, os.getenv("HOME") .. "/.config/hypr/host.lua")
+  if ok and type(loaded) == "table" then
+    for key, value in pairs(loaded) do host[key] = value end
+  end
+end
+
 -- Monitors
-hl.monitor({ output = "eDP-1", mode = "preferred", position = "auto", scale = 1.0 })
+for _, m in ipairs(host.monitors) do hl.monitor(m) end
 
 -- Catch-all: any other external display at its highest refresh rate
 -- ("highrr" forces the panel's max, unlike "preferred" which is usually
@@ -72,7 +88,9 @@ local terminal = "ghostty"
 local wsName = { " web", " term", " dev", " chat", " prod", " print", "󰚩 ai", " media", " game" }
 
 for i = 1, 9 do
-  hl.workspace_rule({ workspace = tostring(i), default_name = wsName[i] })
+  local rule = { workspace = tostring(i), default_name = wsName[i] }
+  for key, value in pairs(host.workspaces[i] or {}) do rule[key] = value end
+  hl.workspace_rule(rule)
 end
 
 
@@ -89,6 +107,7 @@ hl.env("XCURSOR_SIZE", "24")
 -- them too.
 hl.env("QS_ICON_THEME", "Colloid-Dark")
 hl.env("QT_QPA_PLATFORMTHEME", "qt6ct")
+for key, value in pairs(host.env) do hl.env(key, value) end
 
 
 -- General options
@@ -201,8 +220,8 @@ hl.config({
     -- Ever-so-slight transparency on every window, active and inactive
     -- alike, so the backdrop blur below has something to show through
     -- (dGPU hosts only, see windowOpacity).
-    active_opacity = 1.0,
-    inactive_opacity = 1.0,
+    active_opacity = host.opacity,
+    inactive_opacity = host.opacity,
     blur = {
       enabled = fsChrome.blur,
       size = 8,

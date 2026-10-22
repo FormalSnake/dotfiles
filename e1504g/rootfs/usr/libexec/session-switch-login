@@ -1,0 +1,9 @@
+#!/bin/sh
+# greetd's initial_session: start the session session-switch picked, as its .desktop entry does.
+target=$(cat /run/session-switch/target 2>/dev/null) || exit 0
+desktop=/etc/formalshell-greeter/wayland-sessions/$target.desktop
+[ -f "$desktop" ] || exit 0
+export XDG_SESSION_TYPE=wayland XDG_SESSION_DESKTOP="$target"
+names=$(sed -n 's/^DesktopNames=//p' "$desktop" | sed 's/;$//; s/;/:/g')
+[ -n "$names" ] && export XDG_CURRENT_DESKTOP="$names"
+exec sh -c "$(sed -n 's/^Exec=//p' "$desktop" | head -n 1)"
