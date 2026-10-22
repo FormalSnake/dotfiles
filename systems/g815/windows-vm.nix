@@ -2,12 +2,19 @@
 let
   # The bare-metal Windows 11 install, booted as a KVM guest without ever
   # writing to it. QEMU opens the whole NVMe disk read-only as the backing file
-  # of a qcow2 overlay on ext4, so every guest write lands in the overlay. The
-  # overlay is recreated on each start: bare-metal Windows (and the host's own
-  # ntfs3 mount) change the disk under it between sessions, and an overlay over
-  # a changed base is garbage.
+  # of a qcow2 overlay, so every guest write lands in the overlay. The overlay
+  # is recreated on each start and deleted on stop: bare-metal Windows (and the
+  # host's own ntfs3 mount) change the disk under it between sessions, and an
+  # overlay over a changed base is garbage.
   disk = "/dev/disk/by-id/nvme-WD_PC_SN5000S_SDEQNSJ-1T00-1002_25458D806996";
   state = "/var/lib/windows-vm";
+  # The overlay lives on the Steam library's USB SSD (ntfs3), not on root,
+  # which FormalSpec and nd builds share and which one WinUI build in the guest
+  # once took to 15G free. That disk is not the passed-through NVMe, so it
+  # stays mounted while the guest runs. TPM state, NVRAM, the ESP image and the
+  # sockets stay under state.
+  overlayDir = "/mnt/steamlib/windows-vm";
+  overlay = "${overlayDir}/overlay.qcow2";
   ovmf = pkgs.OVMFFull.fd;
 
   # Host mounts of partitions on that disk that Windows owns. / and /boot sit
@@ -15,9 +22,10 @@ let
   windowsMounts = [ "mnt-windows.mount" "mnt-games.mount" ];
   runFlag = "/run/windows-vm.running";
 
-  # Root free space the overlay may never take. The launcher wants 5G on top
-  # of this to start at all.
-  minFreeGiB = 10;
+  # Free space on the overlay's disk the guest may never take, so Steam keeps
+  # its 30G. The launcher wants 15G on top of this to start at all.
+  minFreeGiB = 30;
+  startFreeGiB = minFreeGiB + 15;
 
   launcher = pkgs.writeShellApplication {
     name = "windows-vm-run";
@@ -34,7 +42,7 @@ let
     text = ''
       state=${state}
       disk=$(readlink -f ${disk})
-      mkdir -p "$state/tpm"
+      mkdir -p "$state/tpm" ${overlayDir}
 
       # Every Windows partition on the disk must be unmounted, or the guest
       # boots from a volume the host is changing underneath it.
@@ -56,15 +64,15 @@ let
 
       # The last session's overlay is garbage now, and must not count against
       # the free-space check below.
-      rm -f "$state/overlay.qcow2"
+      rm -f ${overlay}
 
-      avail=$(df --output=avail -B1G "$state" | tail -1)
-      if [ "$avail" -lt $((${toString minFreeGiB} + 5)) ]; then
-        echo "only ''${avail}G free under $state, refusing to start" >&2
+      avail=$(df --output=avail -B1G ${overlayDir} | tail -1)
+      if [ "$avail" -lt ${toString startFreeGiB} ]; then
+        echo "only ''${avail}G free under ${overlayDir}, refusing to start (needs ${toString startFreeGiB}G)" >&2
         exit 1
       fi
 
-      qemu-img create -q -f qcow2 -F raw -b "$disk" "$state/overlay.qcow2"
+      qemu-img create -q -f qcow2 -F raw -b "$disk" ${overlay}
 
       # The shared ESP's \EFI\BOOT\BOOTX64.EFI is not the Windows loader, and an
       # empty OVMF NVRAM only tries that fallback path. A throwaway ESP whose
@@ -117,9 +125,9 @@ let
         -device ide-hd,bus=ide.0,drive=esp,bootindex=0
         # Read-only is the backing node's own flag, not just qcow2's default.
         -blockdev driver=host_device,node-name=base,filename="$disk",read-only=on,cache.direct=on,aio=native
-        # Guest TRIM frees overlay clusters on the host, so a deleted build
-        # tree gives its space back instead of pinning it until the next start.
-        -blockdev driver=file,node-name=ovl,filename="$state/overlay.qcow2",discard=unmap
+        # ntfs3 does not punch holes, so guest TRIM only lets qcow2 reuse
+        # freed clusters; the file never shrinks before the stop deletes it.
+        -blockdev driver=file,node-name=ovl,filename=${overlay},discard=unmap
         -blockdev driver=qcow2,node-name=win,file=ovl,backing=base,discard=unmap,detect-zeroes=unmap
         # Emulated NVMe binds Windows' inbox stornvme, the driver it already
         # boots from on bare metal (no VMD on this laptop).
@@ -138,14 +146,14 @@ let
         -monitor unix:"$state/monitor.sock",server,nowait
       )
       # The overlay takes every guest write, and one WinUI build grew it past
-      # 30G, so power the guest off before it eats the host's root: ACPI first,
+      # 30G, so power the guest off before it eats Steam's floor: ACPI first,
       # then SIGINT (QEMU's quit) if it ignores that for a minute. $$ is QEMU
       # itself once the exec below has run.
       (
         while sleep 10 && kill -0 $$ 2>/dev/null; do
-          avail=$(df --output=avail -B1G "$state" | tail -1)
+          avail=$(df --output=avail -B1G ${overlayDir} | tail -1)
           [ "$avail" -lt ${toString minFreeGiB} ] || continue
-          echo "only ''${avail}G left under $state, powering the guest off" >&2
+          echo "only ''${avail}G left under ${overlayDir}, powering the guest off" >&2
           echo system_powerdown | socat - unix-connect:"$state/monitor.sock" >/dev/null || true
           sleep 60
           kill -INT $$ 2>/dev/null || true
@@ -264,6 +272,7 @@ in
     # the mounts, which would stop the guest. The run flag makes those starts
     # skip instead (see the mount drop-in below).
     after = windowsMounts;
+    unitConfig.RequiresMountsFor = overlayDir;
     serviceConfig = {
       ExecStartPre = [
         "${pkgs.coreutils}/bin/touch ${runFlag}"
@@ -271,7 +280,7 @@ in
       ];
       ExecStart = lib.getExe launcher;
       ExecStopPost = [
-        "${pkgs.coreutils}/bin/rm -f ${runFlag}"
+        "${pkgs.coreutils}/bin/rm -f ${runFlag} ${overlay}"
         "-${pkgs.systemd}/bin/systemctl start --no-block ${lib.concatStringsSep " " windowsMounts}"
       ];
       KillSignal = "SIGINT";
