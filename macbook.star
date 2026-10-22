@@ -10,23 +10,34 @@ SECRETS = "/var/run/fspec/secrets"
 LOGS = HOME + "/Library/Logs"
 PATH = ":".join([HOME + "/.local/bin", STORE, BREW, "/opt/homebrew/opt/node@24/bin", "/usr/bin", "/bin", "/usr/sbin", "/sbin"])
 
-# Files that apps or Kyan edit in place: symlinks into the repo, so the edit lands here.
-LINKED = [
-    "home/.config/karabiner/",
-    "home/.config/omniwm/",
-    "home/.config/sketchybar/",
-    "home/.config/lynk-browser/",
-    "home/.hammerspoon/",
-    "home/.pi/agent/",
-    "home/.claude/CLAUDE",
-    "home/.claude/AGENTS.md",
-    "home/.claude/agents/",
-    "home/.claude/commands/",
-    "home/.claude/hooks/",
+# What apps or Kyan edit in place: symlinks into the repo, so the edit lands here.
+LINKED_DIRS = [
+    ".config/sketchybar",
+    ".config/lynk-browser",
+    ".hammerspoon",
+    ".pi/agent/extensions/mcp-bridge",
+    ".pi/agent/extensions/mode-cycle",
+    ".claude/agents",
+    ".claude/commands",
+    ".claude/hooks",
+]
+LINKED_FILES = [
+    ".config/karabiner/karabiner.json",
+    ".config/omniwm/settings.toml",
+    ".pi/agent/settings.json",
+    ".pi/agent/keybindings.json",
+    ".claude/CLAUDE.md",
+    ".claude/AGENTS.md",
+    ".claude/CLAUDE-cloudflare.md",
+    ".claude/CLAUDE-cloudflare-mini.md",
 ]
 
-# The second Claude Code profile shares the primary's config.
-PULSE = ["CLAUDE.md", "AGENTS.md", "settings.json", "agents/", "commands/", "hooks/", "rules/", "skills/"]
+# The second Claude Code profile shares the primary's config and plugins; it signs in separately.
+PULSE = ["CLAUDE.md", "AGENTS.md", "settings.json", "agents", "commands", "hooks", "rules", "skills", "plugins"]
+
+# Media and the big caches live on the external SSD; the links dangle while it is unmounted.
+DRIVE = "/Volumes/Kyan Drive"
+ON_DRIVE = {"Movies": "Movies", ".gradle": "gradle", "Library/Developer/CoreSimulator": "CoreSimulator"}
 
 # ---- packages ----
 
@@ -57,18 +68,18 @@ CASKS = [
     "terminal-browser", "thaw", "the-unarchiver", "zulu@21",
 ]
 
-# Casks and formulae from third-party taps, which Homebrew 6 only installs once the tap is trusted.
+# From third-party taps: (name, tap, cask).
 TAPPED = [
-    ("barutsrb/tap/omniwm", True),
-    ("abue-ammar/tinycast/tinycast", True),
-    ("pluk-inc/tap/markdown-preview", True),
-    ("felixkratz/formulae/sketchybar", False),
+    ("omniwm", "barutsrb/tap", True),
+    ("tinycast", "abue-ammar/tinycast", True),
+    ("markdown-preview", "pluk-inc/tap", True),
+    ("sketchybar", "felixkratz/formulae", False),
 ]
 
 def _brew():
     out = [pkg(n, source = brew()) for n in FORMULAE]
     out += [pkg(n, source = brew(cask = True)) for n in CASKS]
-    out += [pkg(n.split("/")[-1], source = brew(n, cask = c)) for n, c in TAPPED]
+    out += [pkg(n, source = brew(cask = c, tap = t)) for n, t, c in TAPPED]
     return out
 
 # What no Homebrew formula or cask carries, from upstream releases at the versions nix runs.
@@ -95,7 +106,7 @@ def _store():
         pkg(
             "clipssh",
             source = git("https://github.com/samuellawrentz/clipssh", rev = "c7f4e8ddcf102302c6375ba51534c7505ddc2616"),
-            build = ["sh", "-c", "install -Dm755 $FSPEC_SRC/clipssh $FSPEC_OUT/bin/clipssh"],
+            build = ["sh", "-c", "mkdir -p $FSPEC_OUT/bin && install -m755 $FSPEC_SRC/clipssh $FSPEC_OUT/bin/clipssh"],
             bins = ["clipssh"],
         ),
         pkg(
@@ -104,36 +115,58 @@ def _store():
             build_flags = ["-p", "kopuz-kopuzd", "-p", "kopuz-ctl"],
             bins = ["kopuzd", "kopuzctl"],
         ),
-        # sketchybar's Lua config loads this module (GAPS.md: no stable path to it yet).
+        # sketchybar's Lua config loads this module through LUA_CPATH.
         pkg(
             "sbarlua",
             source = git("https://github.com/FelixKratz/SbarLua", rev = "dba9cc421b868c918d5c23c408544a28aadf2f2f"),
             build = ["sh", "-c", "cd \"$FSPEC_SRC\" && make install INSTALL_DIR=\"$FSPEC_OUT/lib/lua/5.5\""],
         ),
+        # The sudo mesh's PAM module, which no package manager builds for macOS: nixpkgs' recipe
+        # and patches, against the system OpenPAM. Modern autoconf picks gnu23, which breaks the
+        # K&R code in openbsd-compat, and the SDK's fortify macros collide with its replacements.
+        pkg(
+            "pam_ssh_agent_auth",
+            source = git("https://github.com/jbeverly/pam_ssh_agent_auth", rev = "7ff785809f6ecad45051e333c0ffa72e15ba4f2a"),
+            patches = glob(MB + "patches/pam_ssh_agent_auth-*.patch"),
+            build = ["sh", "-c", " && ".join([
+                "set -e",
+                "cd \"$FSPEC_SRC\"",
+                "git clone -q https://github.com/floodyberry/ed25519-donna \"$FSPEC_SRC.donna\"",
+                "git -C \"$FSPEC_SRC.donna\" checkout -q 8757bd4cd209cb032853ece0ce413f122eef212c",
+                "mkdir -p ed25519-donna && cp -R \"$FSPEC_SRC.donna/.\" ed25519-donna/",
+                "brew install -q autoconf automake openssl@3",
+                "autoreconf -fi",
+                "ssl=$(brew --prefix openssl@3)",
+                "CFLAGS=\"-std=gnu99 -D_FORTIFY_SOURCE=0\" ./configure --without-openssl-header-check --with-cflags=\"-I$PWD -I$ssl/include\" --with-ldflags=\"-L$ssl/lib\"",
+                "make LD=cc",
+                "mkdir -p \"$FSPEC_OUT/lib\"",
+                "install -m755 pam_ssh_agent_auth.so \"$FSPEC_OUT/lib/pam_ssh_agent_auth.so\"",
+            ])],
+        ),
     ]
 
 # ---- files ----
 
-def _linked(src):
-    for d in LINKED:
-        if src.startswith(d):
+def _under(rel, dirs):
+    for d in dirs:
+        if rel == d or rel.startswith(d + "/"):
             return True
     return False
 
 def _home():
     out = []
     for src in glob(MB + "home/**/*"):
-        rel = src.removeprefix(MB)
-        out.append(file("~/" + rel.removeprefix("home/"), src = src, mode = "link" if _linked(rel) else "managed"))
-    for src in glob(MB + "home/.claude/**/*"):
-        rel = src.removeprefix(MB + "home/.claude/")
-        for p in PULSE:
-            if rel == p or (p.endswith("/") and rel.startswith(p)):
-                out.append(file("~/.claude-pulse/" + rel, src = src))
+        rel = src.removeprefix(MB + "home/")
+        if _under(rel, LINKED_DIRS):
+            continue
+        out.append(file("~/" + rel, src = src, mode = "link" if rel in LINKED_FILES else "managed"))
+    out += [file("~/" + d, src = MB + "home/" + d, mode = "link") for d in LINKED_DIRS]
+    out += [file("~/.claude-pulse/" + p, mode = "link", target = "~/.claude/" + p) for p in PULSE]
+    out += [file("~/" + p, mode = "link", target = DRIVE + "/" + sub) for p, sub in ON_DRIVE.items()]
     out += [
         file("~/.pi/agent/CLAUDE.md", src = MB + "home/.claude/CLAUDE.md", mode = "link"),
         # claude-code rewrites this on nearly every turn; the second profile only needs the trust
-        # flag for the config repo, and it signs in separately.
+        # flag for the config repo.
         file(
             "~/.claude-pulse/.claude.json",
             mode = "seed",
@@ -152,6 +185,8 @@ def _rootfs():
         # pam_ssh_agent_auth's key list; not the builder key, which would get passwordless sudo.
         f("etc/ssh/sudo_authorized_keys", perms = "0444"),
         f("etc/sudoers.d/10-fspec", perms = "0440"),
+        # /etc/pam.d/sudo includes sudo_local, so an agent holding a machine key authenticates sudo.
+        file("/etc/pam.d/sudo_local", content = "auth       sufficient     /opt/fspec/current/pkgs/pam_ssh_agent_auth/lib/pam_ssh_agent_auth.so file=/etc/ssh/sudo_authorized_keys\n"),
         f("Library/Fonts/MEK-Mono.otf"),
         f("Library/Fonts/MEKSans-Regular.otf"),
         f("Library/Fonts/GROUT-Display.otf"),
@@ -241,14 +276,19 @@ def _defaults():
 
 # ---- launchd ----
 
-def _logged(cmd, log):
-    return "/bin/sh -c 'mkdir -p %s && exec %s >> %s 2>&1'" % (LOGS, cmd, LOGS + "/" + log)
+def _logs(name, extra = {}):
+    d = {"StandardOutPath": LOGS + "/" + name + ".log", "StandardErrorPath": LOGS + "/" + name + ".log"}
+    d.update(extra)
+    return d
 
 # Menu-bar apps started hidden at login.
 LOGIN_APPS = {
     "omniwm": "OmniWM", "nordvpn": "NordVPN", "tinycast": "Tinycast", "aldente": "AlDente",
     "orbstack": "OrbStack", "betterdisplay": "BetterDisplay",
 }
+
+def _poll(name, exec, interval, env = {"PATH": PATH}, extra = {}):
+    return service(name, exec = exec, user = True, env = env, launchd = _logs(name, dict({"StartInterval": interval}, **extra)))
 
 def _services():
     out = [
@@ -262,7 +302,7 @@ def _services():
         # Root binds 127.0.0.1:443 next to tailscale serve's *:443; state stays in the user's home.
         service(
             "portless-proxy",
-            exec = _logged(STORE + "/portless proxy start --foreground --port 443 --https --skip-trust", "portless-proxy.log"),
+            exec = STORE + "/portless proxy start --foreground --port 443 --https --skip-trust",
             restart = "always",
             env = {
                 "HOME": HOME,
@@ -276,14 +316,33 @@ def _services():
                 "PORTLESS_WILDCARD": "0",
                 "PATH": "/opt/homebrew/opt/openssl@3/bin:/opt/homebrew/opt/node@24/bin:/usr/bin:/bin:/usr/sbin:/sbin",
             },
+            launchd = {"ThrottleInterval": 5, "StandardOutPath": HOME + "/.portless/service.log", "StandardErrorPath": HOME + "/.portless/service.log"},
         ),
-        service("couchdb", exec = "/opt/homebrew/opt/couchdb/bin/couchdb", user = True, restart = "always"),
+        # Puts a phone plugged into a Linux laptop in Xcode here. It renames /var/run/usbmuxd while it
+        # runs, so it stays loaded but idle until `usbflux on` kickstarts it.
         service(
-            "sketchybar",
-            exec = "/bin/sh -c 'mkdir -p %s/.cache/sketchybar && exec %s/sketchybar >> %s/.cache/sketchybar/out.log 2>> %s/.cache/sketchybar/err.log'" % (HOME, BREW, HOME, HOME),
+            "usbfluxd",
+            exec = STORE + "/usbfluxd -f -m -r 100.114.32.78:5000",
+            launchd = {"RunAtLoad": False, "KeepAlive": False, "StandardOutPath": "/var/log/usbfluxd.log", "StandardErrorPath": "/var/log/usbfluxd.log"},
+        ),
+        service(
+            "couchdb",
+            exec = "/opt/homebrew/opt/couchdb/bin/couchdb",
             user = True,
             restart = "always",
-            env = {"PATH": PATH},
+            launchd = {"LimitLoadToSessionType": ["Aqua", "Background", "LoginWindow", "StandardIO", "System"]},
+        ),
+        service(
+            "sketchybar",
+            exec = BREW + "/sketchybar",
+            user = True,
+            restart = "always",
+            env = {"PATH": PATH, "LUA_CPATH": "/opt/fspec/current/pkgs/sbarlua/lib/lua/5.5/?.so;;"},
+            launchd = {
+                "ProcessType": "Interactive",
+                "StandardOutPath": HOME + "/.cache/sketchybar/out.log",
+                "StandardErrorPath": HOME + "/.cache/sketchybar/err.log",
+            },
         ),
         # omniwmctl exits while OmniWM's IPC is down, so it respawns until the socket exists.
         service(
@@ -292,33 +351,45 @@ def _services():
             user = True,
             restart = "always",
             env = {"PATH": PATH},
+            launchd = {"ThrottleInterval": 5},
         ),
         service(
             "t3code",
-            exec = _logged(STORE + "/t3 serve --host 127.0.0.1 --port 3773 " + HOME + "/Developer", "t3code.log"),
+            exec = STORE + "/t3 serve --host 127.0.0.1 --port 3773 " + HOME + "/Developer",
             user = True,
             restart = "always",
             env = {"PATH": PATH, "SHELL": BREW + "/fish"},
+            launchd = _logs("t3code", {"WorkingDirectory": HOME}),
         ),
+        # Keeps ~/Notes current off CouchDB's _changes feed without the Obsidian app open.
         service(
             "obsidian-livesync-daemon",
-            exec = _logged("/bin/bash " + HOME + "/.local/bin/obsidian-livesync-daemon.sh", "obsidian-livesync-daemon.log"),
+            exec = "/bin/bash " + HOME + "/.local/bin/obsidian-livesync-daemon.sh",
             user = True,
             restart = "always",
             env = {"PATH": PATH},
+            launchd = _logs("obsidian-livesync-daemon", {"ThrottleInterval": 30}),
         ),
-    ]
-    # launchd StartInterval jobs, as calendar timers until fspec has a launchd interval.
-    out += [
-        timer("t3code-serve", exec = _logged(BREW + "/tailscale serve --bg --https=8773 http://127.0.0.1:3773", "t3code-serve.log"), schedule = "*/5 * * * *", user = True),
+        _poll("t3code-serve", BREW + "/tailscale serve --bg --https=8773 http://127.0.0.1:3773", 300, env = {}),
         # tailscale serve run from a dev session replaces the / handler on 443 and every device's
         # LiveSync stops, so this reasserts it.
-        timer("obsidian-livesync-serve", exec = _logged(BREW + "/tailscale serve --bg --https=443 http://127.0.0.1:5984", "obsidian-livesync-serve.log"), schedule = "*/5 * * * *", user = True),
-        timer("obsidian-note-watcher", exec = _logged("env PATH=%s /bin/bash %s/.local/bin/obsidian-note-watcher.sh" % (PATH, HOME), "obsidian-note-watcher.log"), schedule = "*/5 * * * *", user = True),
-        timer("obsidian-scan-watcher", exec = _logged("env PATH=%s /bin/bash %s/.local/bin/obsidian-scan-watcher.sh" % (PATH, HOME), "obsidian-scan-watcher.log"), schedule = "*/10 * * * *", user = True),
-        timer("dev-vm-reaper", exec = _logged("env PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/bash %s/.local/bin/dev-vm-reaper.sh" % HOME, "dev-vm-reaper.log"), schedule = "*/15 * * * *", user = True),
-        # Two hours after the Saturday update window, daily: agent worktrees regrow fast.
-        timer("storage-gc", exec = "/bin/sh -c 'mkdir -p %s && env PATH=%s:%s/.cargo/bin /bin/bash %s/.local/bin/storage-gc.sh --apply --prune-worktrees > %s/storage-gc.log 2>&1'" % (LOGS, PATH, HOME, HOME, LOGS), schedule = "0 12 * * *", user = True),
+        _poll("obsidian-livesync-serve", BREW + "/tailscale serve --bg --https=443 http://127.0.0.1:5984", 300, env = {}),
+        _poll("obsidian-note-watcher", "/bin/bash " + HOME + "/.local/bin/obsidian-note-watcher.sh", 300),
+        # WatchPaths fires on any change in the scan inbox; the interval covers missed events.
+        _poll("obsidian-scan-watcher", "/bin/bash " + HOME + "/.local/bin/obsidian-scan-watcher.sh", 600, extra = {
+            "WatchPaths": [HOME + "/Notes/_inbox/scans"],
+            "ThrottleInterval": 15,
+        }),
+        _poll("dev-vm-reaper", "/bin/bash " + HOME + "/.local/bin/dev-vm-reaper.sh", 900, env = {"PATH": "/usr/bin:/bin:/usr/sbin:/sbin", "HOME": HOME}),
+        # Daily: agent worktrees regrow tens of GB of build output between runs. A redirect, so the
+        # log holds one run.
+        timer(
+            "storage-gc",
+            exec = "/bin/sh -c '/bin/bash %s/.local/bin/storage-gc.sh --apply --prune-worktrees > %s/storage-gc.log 2>&1'" % (HOME, LOGS),
+            schedule = "0 12 * * *",
+            user = True,
+            env = {"PATH": PATH + ":" + HOME + "/.cargo/bin", "HOME": HOME},
+        ),
     ]
     return out
 

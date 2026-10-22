@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+set -euo pipefail
+case "${1-status}" in
+  on)
+    sudo launchctl kickstart -k system/fspec.usbfluxd
+    echo "usbfluxd -> 100.114.32.78:5000. Restart Xcode so it reconnects to the new socket."
+    ;;
+  off)
+    sudo launchctl kill TERM system/fspec.usbfluxd 2>/dev/null || true
+    # usbfluxd restores /var/run/usbmuxd on SIGTERM; give it a moment to finish.
+    for _ in 1 2 3 4 5; do
+      [ -e /var/run/usbmuxd.orig ] || break
+      sleep 0.3
+    done
+    if [ -e /var/run/usbmuxd.orig ]; then
+      echo "warning: /var/run/usbmuxd.orig still present, local USB devices may be unreachable" >&2
+      exit 1
+    fi
+    echo "usbfluxd stopped, local usbmuxd restored. Restart Xcode."
+    ;;
+  status)
+    if [ -e /var/run/usbmuxd.orig ]; then
+      echo "on: usbmuxd socket is held by usbfluxd (remote 100.114.32.78:5000)"
+    else
+      echo "off: local usbmuxd owns the socket"
+    fi
+    sudo /opt/fspec/current/bin/usbfluxctl list 2>/dev/null || true
+    ;;
+  *)
+    echo "usage: usbflux [on|off|status]" >&2
+    exit 2
+    ;;
+esac

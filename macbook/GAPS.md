@@ -6,22 +6,8 @@ standalone with `fspec --spec macbook.star plan --host macbook --local`.
 
 ## Open: fspec has no way to express it yet
 
-Each one is a request sent to the formalspec agent.
+Each one is a request queued with the formalspec agent.
 
-- launchd keys beyond `RunAtLoad`/`KeepAlive`/env (request 1). `StartInterval` jobs became
-  calendar timers (`*/5`, `*/10`, `*/15`), logs go through a `/bin/sh -c` redirect, and these are
-  missing outright: `WatchPaths` on `~/Notes/_inbox/scans` (the scan watcher now only polls every
-  ten minutes), `ThrottleInterval`, `ProcessType = Interactive` for sketchybar, and an idle
-  `usbfluxd` daemon that `usbflux on` kickstarts. usbfluxd always starting at load would take
-  over usbmuxd, so the daemon and the `usbflux` wrapper are not declared; the binary is.
-- Symlinks to directories and to targets outside the repo (request 2): `~/Movies`, `~/.gradle`
-  and `~/Library/Developer/CoreSimulator` into `/Volumes/Kyan Drive`, and
-  `~/.claude-pulse/plugins` into `~/.claude/plugins`. Directories from the repo (sketchybar,
-  hammerspoon, the pi extensions, Claude's agents, commands and hooks) are linked file by file
-  instead, so a new file there needs a re-apply.
-- Homebrew taps and tap trust (request 3): omniwm, tinycast, markdown-preview and sketchybar
-  are written as `brew("<tap>/<name>")`. `fspec update` resolves through formulae.brew.sh, which
-  has no tapped names, and nothing runs `brew tap` or trusts the tap first.
 - System settings outside user defaults (request 4): `pmset` sleep never and `womp 1`,
   `systemsetup -setRestartFreeze on` and `-setremotelogin on`, the application firewall off (it
   drops mosh's UDP), and root-domain defaults: `com.apple.SoftwareUpdate
@@ -30,22 +16,13 @@ Each one is a request sent to the formalspec agent.
 - `.app` bundles from store packages (request 5): Messages and FormalMusic (FormalStudio source
   builds), Kopuz (dmg only, no cask). Nothing places an app in `/Applications`, and fspec unpacks
   no dmg. The kopuzd daemon and kopuzctl are declared; the player app is not.
-- No stable path into a store package on macOS (request 7, `share` is Linux only):
-  pam_ssh_agent_auth's `.so`, which `/etc/pam.d/sudo_local` names, and SbarLua's
-  `sketchybar.so`, which sketchybar's `LUA_CPATH` names. sbarlua is declared (its build is the
-  makefile's own `install` target); the sketchybar service has no `LUA_CPATH` until the path
-  exists. pam_ssh_agent_auth 0.10.4 (`7ff7858`, built against OpenPAM with `-std=gnu99
-  -D_FORTIFY_SOURCE=0`) and `sudo_local` are not declared. The sudoers NOPASSWD line covers
-  kyandesutter meanwhile; the module only gated other accounts arriving over ssh.
-- One lock entry per package name (request 8). The macbook takes lazydocker, uv, herdr, gopls,
-  nixfmt, rust-analyzer, marksman, lua-language-server, the brew language servers, discord and
-  parsec from Homebrew where the e1504g uses aqua, github, npm or Flathub, so `plan` reports the
-  lock as out of date and an `fspec update` from either host rewrites the other's entries.
-  `fspec update` for this spec has not run: it writes the shared `examples/kyan/fspec.lock`.
-- Remote builders: formalspec's builder config has not landed. The macbook ran
-  nix-rosetta-builder (x86_64-linux in a Rosetta VM on port 31122, socket-activated, 6 cores,
-  8 GiB) as the e1504g's fallback builder, and Determinate's native aarch64-linux builder. The
-  e1504g's `restrict,port-forwarding,permitopen` key stays in `authorized_keys.d` for when it does.
+## Not verified
+
+- The pam_ssh_agent_auth and sbarlua `git()` recipes have not been built: they run on the
+  macos-14 CI runner. pam_ssh_agent_auth follows nixpkgs' recipe (its four patches in
+  `patches/`, ed25519-donna at `8757bd4`, autoreconf, OpenSSL 3 from Homebrew) plus the
+  `-std=gnu99 -D_FORTIFY_SOURCE=0` the nix override adds for OpenPAM.
+- The lock has no entries for this host yet: `fspec update` has not run.
 
 ## Waiting on p2p sync
 
@@ -68,6 +45,12 @@ Secret-carrying state, declared once formalspec's encrypted sync lands:
   instead of shipping `withAllGrammars`.
 
 ## Dropped
+
+- nix-rosetta-builder (x86_64-linux in a Rosetta VM, port 31122) and Determinate's aarch64-linux
+  builder. fspec's `builder()` builds only for its own platform, so the macbook cannot build for
+  the e1504g (the g815 does), and no other host builds for aarch64-darwin: its `git()` packages
+  come from CI or build here. The e1504g's `restrict,permitopen` key is gone from
+  `authorized_keys.d` with it.
 
 - Determinate Nix, nix-homebrew, mac-app-util, the Home Manager glue, `nixpkgs.config`, the
   `nix-weekly-update` agent, nix-index and comma, nh, `NH_FLAKE`, `NIXPKGS_ALLOW_UNFREE`, the
