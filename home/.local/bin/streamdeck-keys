@@ -14,7 +14,7 @@ from PIL import Image, ImageDraw, ImageFont, ImageSequence
 from StreamDeck.DeviceManager import DeviceManager
 from StreamDeck.ImageHelpers import PILHelper
 
-FONT = "/usr/share/fonts/geist-mono-nerd/GeistMonoNerdFont-Regular.otf"
+FONT = "/usr/local/share/fonts/GeistMonoNerdFont/GeistMonoNerdFont-Regular.otf"
 EMOJI_FONT = "/usr/share/fonts/truetype/NotoColorEmoji.ttf"
 DISCORD_SOCKET = os.path.join(os.environ.get("XDG_RUNTIME_DIR", "/tmp"), "discord-streamdeck.sock")
 SOUNDBOARD_PINS = []

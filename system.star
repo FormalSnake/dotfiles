@@ -180,6 +180,9 @@ def _pkgs():
             source = zypper(repo = "nordvpn"),
             services = [service("nordvpnd.socket"), service("nordvpnd"), service("nordvpnd-killswitch")],
         ),
+        # Data-only: the cursor theme and the font streamdeck-keys draws with.
+        pkg("bibata", version = "2.0.7", source = github("ful1e5/Bibata_Cursor", asset = "Bibata-Modern-Classic.tar.xz"), share = {"icons/Bibata-Modern-Classic": "Bibata-Modern-Classic"}),
+        pkg("geist-mono-nerd-font", version = "3.4.0", source = github("ryanoasis/nerd-fonts", asset = "GeistMono.tar.xz"), share = {"fonts/GeistMonoNerdFont": "."}),
         # The rev ~/.config/nix's flake.lock pins, so both roots run the same shell. dev/tarball.sh
         # is upstream's release build: it installs its own deps on bookworm, whose glibc it targets.
         pkg(

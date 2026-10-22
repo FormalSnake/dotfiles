@@ -15,6 +15,15 @@ url = "https://registry.npmjs.org/@astrojs/language-server/-/language-server-2.1
 hash = "sha512-87VQ/5GSdHlRnUA+hGuerYyIGAj+9RbZmATyuKLEUePinUXhQ5YkRnRrHhOD9sSi5JOErLjrLkHnfZFEvGrV8w=="
 
 [[pkg]]
+name = "bibata"
+source = "github:ful1e5/Bibata_Cursor"
+version = "2.0.7"
+
+[pkg.x86_64-linux]
+url = "https://github.com/ful1e5/Bibata_Cursor/releases/download/v2.0.7/Bibata-Modern-Classic.tar.xz"
+hash = "sha256-fTSVhk5bvvAvXnfedgspBZA7Y8cUlaeO9jBtGaO1Vtg="
+
+[[pkg]]
 name = "claude"
 source = "url:https://registry.npmjs.org/@anthropic-ai/claude-code-linux-x64/-/claude-code-linux-x64-2.1.289.tgz"
 
@@ -111,6 +120,15 @@ version = "0.24"
 [pkg.x86_64-linux]
 url = "https://github.com/mikker/fut/releases/download/0.24/fut-linux-x86_64.tar.gz"
 hash = "sha256-WyEDdm9BVzEvyTF0IDLAEPckTzWxdealmpxPvUzbWy4="
+
+[[pkg]]
+name = "geist-mono-nerd-font"
+source = "github:ryanoasis/nerd-fonts"
+version = "3.4.0"
+
+[pkg.x86_64-linux]
+url = "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/GeistMono.tar.xz"
+hash = "sha256-Q+89c8rd3qW+dG4gyfJ/uqWc6xBriyb3JFui3i5GsfY="
 
 [[pkg]]
 name = "gopls"

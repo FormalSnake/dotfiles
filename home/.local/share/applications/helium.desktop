@@ -1,0 +1,11 @@
+[Desktop Entry]
+Categories=Network;WebBrowser
+Comment=Private, fast, and honest web browser
+Exec=/opt/fspec/current/bin/helium %U
+GenericName=Web Browser
+Icon=helium
+MimeType=text/html;text/xml;application/xhtml+xml;x-scheme-handler/http;x-scheme-handler/https
+Name=Helium
+Terminal=false
+Type=Application
+Version=1.5

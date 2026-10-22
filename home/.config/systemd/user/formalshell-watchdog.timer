@@ -1,5 +1,4 @@
 [Unit]
-ConditionEnvironment=XDG_CURRENT_DESKTOP=Hyprland
 Description=FormalShell liveness probe
 PartOf=graphical-session.target
 
