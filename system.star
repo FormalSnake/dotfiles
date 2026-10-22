@@ -139,6 +139,9 @@ def _formalshell_files():
 # Written by `formalshell install`; `formalshell update` rewrites it.
 export XDG_RUNTIME_DIR=/run/formalshell-greeter
 export HOME=/var/lib/formalshell-greeter
+# pam_env's xdg.conf derives these from the greeter account's passwd home, /var/lib/greetd, so
+# the greeter would read its settings.json from there.
+unset XDG_CONFIG_HOME XDG_STATE_HOME XDG_CACHE_HOME XDG_DATA_HOME
 export XDG_SESSION_TYPE=wayland
 printf 'output * bg #000000 solid_color\\ninput type:keyboard {\\n  xkb_layout """ + KEYBOARD["layout"] + """\\n  xkb_options """ + KEYBOARD["options"] + """\\n}\\n' > "$HOME/sway.conf"
 sway --config "$HOME/sway.conf" &
