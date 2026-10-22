@@ -798,11 +798,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792615517,
-        "narHash": "sha256-d7wCs4zaz1+2/QUBcTAmQsbROKZUEJQ73LEgIsq5rMo=",
+        "lastModified": 1792661761,
+        "narHash": "sha256-lAY/OkCMAN8v6kbzUzyJxdjatjyt8zyaJ423r71ndGY=",
         "owner": "FormalStudio",
         "repo": "messages",
-        "rev": "281caa5ad5b7665a33ce9ffd79ca8a6a2e703173",
+        "rev": "c965067d3fe0c3ef0039ebf4b48172d8c688bc90",
         "type": "github"
       },
       "original": {
@@ -836,11 +836,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792615433,
-        "narHash": "sha256-Y/MKEtEKltqI4S5lgw5KPrLGvWZFVHfdXcn162Yvqws=",
+        "lastModified": 1792659795,
+        "narHash": "sha256-DyqqGQXYTJYHXERKWn3vg8KvEaB6VxxoLUy9MwrcFAY=",
         "owner": "FormalStudio",
         "repo": "NativeDesktop",
-        "rev": "f70b86f8d05d159161d6baf9a81ac6d8a2ae3dc4",
+        "rev": "786b16928fb11153c4921c09cfb1360d8843dc5c",
         "type": "github"
       },
       "original": {
