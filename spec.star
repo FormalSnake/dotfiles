@@ -1,6 +1,7 @@
 load("//g815.star", G815_PACKAGES = "PACKAGES", "g815")
 load("//home.star", "home")
 load("//system.star", "E1504G_PACKAGES", "PACKAGES", "system")
+load("//macbook.star", "macbook")
 
 # Kyan's Linux hosts, ported from ~/.config/nix. Both run openSUSE Tumbleweed (the e1504g beside its
 # NixOS root); GAPS.md lists what is not ported and why.
@@ -51,4 +52,4 @@ g815 = host(
     modules = secrets() + [system, home, g815],
 )
 
-hosts = [e1504g, g815]
+hosts = [e1504g, g815, macbook]
