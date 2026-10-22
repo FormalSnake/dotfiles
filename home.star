@@ -273,7 +273,7 @@ def _nvim():
     ]
 
 # The Nix-built apps and CLIs, from their upstream sources at the revisions ~/.config/nix locks.
-# dillo, boxxy and terminal-browser have no source here yet (GAPS.md).
+# dillo and terminal-browser have no source here yet (GAPS.md).
 def _apps():
     return [
         pkg("lazydocker", version = "0.25.2", source = aqua("jesseduffield/lazydocker")),

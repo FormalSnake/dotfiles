@@ -11,7 +11,7 @@ generation on the e1504g. The Tumbleweed root is `spec.star`, `system.star` and 
   apply adds them.
 - `git()` builds on `fspec ci packages` (ubuntu-24.04) take no build dependencies. librepods
   (Qt 6 Bluetooth, libpulse), Messages and formalmusic (NativeDesktop: GTK, WebKit, Vulkan) and
-  kopuzd need apt packages the runner lacks; boxxy needs GTK 4.22, newer than Ubuntu 24.04 has.
+  kopuzd need apt packages the runner lacks.
 - Prebuilt archives only link executables in their top two levels. FormalShell's release tarball
   keeps them in `formalshell/bin/` and terminal-browser in its own tree, so neither links.
 - `url()` stores a bare file as data, so the Beeper 4.3.73 AppImage cannot be a store pkg. The
