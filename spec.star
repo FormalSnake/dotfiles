@@ -1,3 +1,4 @@
+load("//boot.star", "boot")
 load("//home.star", "home")
 load("//system.star", "PACKAGES", "system")
 
@@ -34,7 +35,7 @@ e1504g = host(
     platform = "x86_64-linux",
     system = tumbleweed(packages = PACKAGES),
     users = [user("kyandesutter", uid = 1000, shell = "fish", groups = ["wheel", "video", "audio", "input", "docker", "uinput", "i2c", "nordvpn"])],
-    modules = secrets() + [system, home],
+    modules = secrets() + [system, home, boot],
 )
 
 hosts = [e1504g]

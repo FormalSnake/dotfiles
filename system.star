@@ -118,7 +118,7 @@ exit 0
         file("/etc/modprobe.d/90-e1504g.conf", content = "blacklist ucsi_acpi\ninstall ucsi_acpi /bin/false\nblacklist intel_ish_ipc\ninstall intel_ish_ipc /bin/false\n"),
         # mixins/core/boot.nix and plymouth: mitigations off, VT-d on, quiet boot. fspec-esp-sync
         # copies this line into each Tumbleweed entry.
-        file("/etc/kernel/cmdline", content = "root=UUID=1a10e345-3d66-4bde-9f6b-55d43e6f7e0d rootflags=subvol=@tumbleweed,noatime,compress=zstd:1 rw panic=10 rd.shell=0 rd.emergency=reboot mitigations=off intel_iommu=on quiet udev.log_level=3 module_blacklist=ucsi_acpi,intel_ish_ipc\n"),
+        file("/etc/kernel/cmdline", content = "root=UUID=1a10e345-3d66-4bde-9f6b-55d43e6f7e0d rootflags=subvol=@tumbleweed,noatime,compress=zstd:1 rw panic=10 rd.shell=0 rd.emergency=reboot mitigations=off intel_iommu=on quiet splash udev.log_level=3 module_blacklist=ucsi_acpi,intel_ish_ipc\n"),
         # mixins/tuning/systemd-tuning.nix: cap how long a wedged unit can hold up boot or reboot.
         file("/etc/systemd/system.conf.d/10-kyan-timeouts.conf", content = "[Manager]\nDefaultTimeoutStopSec=5s\nDefaultTimeoutStartSec=15s\n"),
         file("/etc/systemd/user.conf.d/10-kyan-timeouts.conf", content = "[Manager]\nDefaultTimeoutStopSec=5s\nDefaultTimeoutStartSec=15s\n"),
@@ -153,9 +153,6 @@ ACTION=="add|change", KERNEL=="sd[a-z]*", ATTR{queue/rotational}=="0", ATTR{queu
         # and HID devices that are not bonded over classic Bluetooth, like the DualSense over BLE.
         file("/etc/bluetooth/main.conf", content = "[General]\nExperimental = true\nFastConnectable = true\n\n[Policy]\nAutoEnable = true\n"),
         file("/etc/bluetooth/input.conf", content = "[General]\nClassicBondedOnly = false\n"),
-        # NixOS wrote loader.conf until its root went; Tumbleweed's entries are the ones to boot,
-        # ahead of the one-shot installer entry that sorts before them.
-        file("/boot/efi/loader/loader.conf", content = "timeout 4\nconsole-mode keep\npreferred tumbleweed-*\n"),
         # NixOS's xdg.portal.config.hyprland: gnome-keyring's Secret portal is gated UseIn=gnome.
         file("/etc/xdg-desktop-portal/hyprland-portals.conf", content = "[preferred]\ndefault=hyprland;gtk\norg.freedesktop.impl.portal.Secret=gnome-keyring\n"),
         file("/etc/pam.d/greetd", content = """#%PAM-1.0
