@@ -61,8 +61,7 @@ in
     # second profile's transcript dir then fails with "no conversation found"
     # and would come back under the primary account if it did load. Session
     # ids are UUIDs, so the transcript's location settles which profile owns
-    # it. The same applies to the `claude --resume` line herdr-reap leaves in
-    # a reaped pane.
+    # it.
     claude = {
       wraps = "claude";
       body = ''
