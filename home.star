@@ -286,7 +286,7 @@ def _apps():
         # formalmusic starts kopuzd when no daemon runs; the release tarball has only the player.
         pkg(
             "kopuzd",
-            source = git("https://github.com/Kopuz-org/kopuz", rev = "23db9b35fe45bd773e3cdcdf0d6584b13ae5b8cc", image = TUMBLEWEED, deps = ["rustup", "gcc", "pkgconf", "alsa-devel", "dbus-1-devel", "libopenssl-devel"]),
+            source = git("https://github.com/Kopuz-org/kopuz", rev = "23db9b35fe45bd773e3cdcdf0d6584b13ae5b8cc", image = TUMBLEWEED, deps = ["rustup", "gcc", "cmake", "make", "pkgconf", "alsa-devel", "dbus-1-devel", "libopenssl-devel"]),
             build_flags = ["-p", "kopuz-kopuzd", "-p", "kopuz-ctl"],
             bins = ["kopuzd", "kopuzctl"],
         ),
