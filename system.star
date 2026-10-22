@@ -43,7 +43,7 @@ SYSTEM = [
     # useradd and usermod, which the base pattern leaves out.
     "shadow",
     # From the vendor repos below.
-    "1password", "1password-cli", "nordvpn",
+    "1password", "1password-cli",
 ]
 
 CLI = [
@@ -146,6 +146,13 @@ wait "$compositor" 2>/dev/null
 # The image's build stages, as store packages at the versions the NixOS root runs.
 def _pkgs():
     return [
+        # From Nord's repo, which a filtering network can block; then it and its units wait for
+        # the next apply. The rpm's postinstall enables the three units.
+        pkg(
+            "nordvpn",
+            source = zypper(repo = "nordvpn"),
+            services = [service("nordvpnd.socket"), service("nordvpnd"), service("nordvpnd-killswitch")],
+        ),
         # v0.2.0 is the newest release; NixOS runs e8a800d, which has no release tarball.
         pkg("formalshell", version = "0.2.0", source = github("FormalSnake/FormalShell", asset = "formalshell-*-linux.tar.gz")),
         pkg("herdr", version = "0.9.3", source = github("ogulcancelik/herdr", asset = "herdr-linux-*")),
@@ -184,10 +191,6 @@ def _services():
         service("tuned-ppd"),
         service("docker.socket"),
         service("syncthing@kyandesutter"),
-        # The rpm's postinstall enables these three.
-        service("nordvpnd.socket"),
-        service("nordvpnd"),
-        service("nordvpnd-killswitch"),
         service(
             "power-cap",
             exec = "/usr/local/libexec/power-cap",
