@@ -1,0 +1,27 @@
+#!/bin/sh
+# Plays the boot chime ($1) on the first analog playback device while the splash is up. No
+# PipeWire exists yet at boot and ALSA's default device routes to it, so this goes to the hardware:
+# an HDA or SOF codec's speakers and jack, never HDMI or a USB mic.
+wav=$1
+# Boot only: an apply that restarts the unit must not play it mid-session.
+case $(systemctl is-system-running) in initializing | starting) ;; *) exit 0 ;; esac
+# sound.target comes before SOF has loaded its firmware and registered the card.
+for _ in $(seq 50); do
+	grep -lqE '^(id|name): .*Analog' /proc/asound/card*/pcm*p/info 2>/dev/null && break
+	sleep 0.2
+done
+for info in /proc/asound/card*/pcm*p/info; do
+	grep -qE '^(id|name): .*Analog' "$info" || continue
+	card=$(grep '^card:' "$info" | cut -d ' ' -f 2)
+	dev=$(grep '^device:' "$info" | cut -d ' ' -f 2)
+	# A cold codec can come up muted; WirePlumber restores its own levels when the session starts.
+	for control in Master Speaker Headphone PCM; do
+		amixer -q -c "$card" sset "$control" unmute 2>/dev/null || true
+	done
+	amixer -q -c "$card" sset Master 60% 2>/dev/null || true
+	amixer -q -c "$card" sset PCM 100% 2>/dev/null || true
+	aplay -q -D "plughw:$card,$dev" "$wav"
+	# A missing chime never fails the boot.
+	echo "aplay exited $?"
+	exit 0
+done

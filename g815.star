@@ -275,6 +275,9 @@ net.ipv4.conf.default.forwarding = 1
         file("/etc/UPower/UPower.conf.d/10-g815.conf", content = "[UPower]\nCriticalPowerAction=PowerOff\n"),
         # Intel BE200: iwd, no power save (latency spikes), and resolved for per-link DNS with
         # Google's servers globally, so tailscale0's routing domain still takes *.ts.net first.
+        # The e1504g's loader.conf comes from boot.star. Tumbleweed's entries are the ones to boot,
+        # ahead of the one-shot installer entry that sorts before them.
+        file("/boot/efi/loader/loader.conf", content = "timeout 4\nconsole-mode keep\npreferred tumbleweed-*\n"),
         file("/etc/NetworkManager/conf.d/90-g815.conf", content = "[device]\nwifi.backend=iwd\n\n[connection]\nwifi.powersave=2\n\n[main]\ndns=systemd-resolved\n"),
         file("/etc/systemd/resolved.conf.d/10-kyan.conf", content = "[Resolve]\nDNS=8.8.8.8 8.8.4.4\n"),
         service("systemd-resolved"),

@@ -1,0 +1,81 @@
+#!/bin/sh
+# Renders the boot theme in /usr/local/share/formalos-boot into its plymouth theme and Limine
+# wallpaper, rebuilds the initrds when the splash changed, and keeps Limine's EFI binary on the ESP
+# current.
+# Limine goes first in the firmware boot order only after a boot came through it; until then it
+# gets a single BootNext try, so a Limine that cannot boot leaves systemd-boot first.
+set -eu
+src=/usr/local/share/formalos-boot
+esp=/boot/efi
+state=/var/lib/formalos-boot
+. "$src/theme.env"
+theme=/usr/share/plymouth/themes/$name
+limine=$esp/EFI/limine
+mkdir -p "$state" "$limine"
+
+sum=$(cat "$src"/* /etc/plymouth/plymouthd.conf | sha256sum | cut -d ' ' -f 1)
+if [ "$sum" != "$(cat "$state/theme.sum" 2>/dev/null)" ] || [ ! -f "$limine/$name.png" ]; then
+	# Without the dracut hook the rebuilt initrds would carry no splash, and the sum would hide it.
+	[ -x /usr/libexec/plymouth/plymouth-populate-initrd ] || {
+		echo "formalos-boot: plymouth-dracut is not installed" >&2
+		exit 1
+	}
+	rm -rf "$theme.new"
+	mkdir -p "$theme.new"
+	# Plymouth only scales with interpolation and Limine not at all, so the pixel art is
+	# point-scaled here for every integer scale the splash script picks.
+	for s in 1 2 3 4; do
+		magick "$src/logo.png" -filter point -resize $((200 * s))% "$theme.new/logo-$s.png"
+		magick "$src/wordmark.png" -filter point -resize $((100 * s))% "$theme.new/wordmark-$s.png"
+	done
+	magick -size 1x1 "xc:#$track" "$theme.new/track.png"
+	magick -size 1x1 "xc:#$fill" "$theme.new/fill.png"
+	cp "$src/splash.script" "$theme.new/$name.script"
+	printf '[Plymouth Theme]\nName=%s\nDescription=The %s boot splash\nModuleName=script\n\n[script]\nImageDir=%s\nScriptFile=%s/%s.script\n' \
+		"$branding" "$branding" "$theme" "$theme" "$name" >"$theme.new/$name.plymouth"
+	rm -rf "$theme"
+	mv "$theme.new" "$theme"
+	# Limine centres the wallpaper and the menu on the same point, so the logo sits at the top of a
+	# tall canvas to land above the entries.
+	magick -size "$wallpaper_size" "xc:#$backdrop" \( "$src/logo.png" -filter point -resize "$wallpaper_scale"00% \) \
+		-gravity north -composite "png24:$limine/$name.png.new"
+	mv "$limine/$name.png.new" "$limine/$name.png"
+	dracut --force --regenerate-all
+	systemctl start fspec-esp-sync.service
+	echo "$sum" >"$state/theme.sum"
+fi
+
+if ! cmp -s /usr/share/limine/BOOTX64.EFI "$limine/BOOTX64.EFI"; then
+	cp /usr/share/limine/BOOTX64.EFI "$limine/BOOTX64.EFI.new"
+	mv "$limine/BOOTX64.EFI.new" "$limine/BOOTX64.EFI"
+fi
+
+entry() {
+	efibootmgr | grep -i '\\efi\\limine\\bootx64\.efi' | sed -n 's/^Boot\([0-9A-F]\{4\}\).*/\1/p' | head -n 1
+}
+order() {
+	efibootmgr | sed -n 's/^BootOrder: //p'
+}
+num=$(entry)
+if [ -z "$num" ]; then
+	was=$(order)
+	part=$(findmnt -no SOURCE "$esp")
+	efibootmgr -q -c -d "/dev/$(lsblk -no PKNAME "$part")" -p "$(cat "/sys/class/block/${part##*/}/partition")" \
+		-L Limine -l '\EFI\limine\BOOTX64.EFI'
+	num=$(entry)
+	efibootmgr -q -o "${was:+$was,}$num"
+fi
+case $(order) in
+"$num" | "$num",*) ;;
+*)
+	if [ "$(efibootmgr | sed -n 's/^BootCurrent: //p')" = "$num" ]; then
+		rest=$(order | tr , '\n' | grep -vx "$num" | paste -sd , -)
+		efibootmgr -q -o "$num${rest:+,$rest}"
+	elif [ ! -e "$state/limine-tried" ]; then
+		efibootmgr -q -n "$num"
+		touch "$state/limine-tried"
+	else
+		echo "formalos-boot: Limine (Boot$num) has not booted this machine; systemd-boot stays first" >&2
+	fi
+	;;
+esac

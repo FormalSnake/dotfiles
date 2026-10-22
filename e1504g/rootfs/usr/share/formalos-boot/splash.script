@@ -1,0 +1,50 @@
+# The FormalOS splash from the blog (blog-new, global.css "Boot splash"):
+# black, the logo, the name and a progress bar that fills in 13 steps.
+# Layout is in the blog's CSS pixels, multiplied by an integer scale so the
+# pre-scaled pixel art lands on whole device pixels.
+
+Window.SetBackgroundTopColor(0, 0, 0);
+Window.SetBackgroundBottomColor(0, 0, 0);
+
+s = Math.Int(Window.GetHeight() / 500);
+if (s < 1) s = 1;
+if (s > 4) s = 4;
+
+# Image() takes a literal file name; plymouth scaling would blur the pixels.
+if (s == 1) { logo = Image("logo-1.png"); wordmark = Image("wordmark-1.png"); }
+if (s == 2) { logo = Image("logo-2.png"); wordmark = Image("wordmark-2.png"); }
+if (s == 3) { logo = Image("logo-3.png"); wordmark = Image("wordmark-3.png"); }
+if (s == 4) { logo = Image("logo-4.png"); wordmark = Image("wordmark-4.png"); }
+
+cx = Window.GetX() + Math.Int(Window.GetWidth() / 2);
+cy = Window.GetY() + Math.Int(Window.GetHeight() / 2);
+
+logo_sprite = Sprite(logo);
+logo_sprite.SetPosition(cx - Math.Int(logo.GetWidth() / 2), cy - 66 * s - Math.Int(logo.GetHeight() / 2), 1);
+
+wordmark_sprite = Sprite(wordmark);
+wordmark_sprite.SetPosition(cx - Math.Int(wordmark.GetWidth() / 2), cy + 2 * s, 1);
+
+track = Sprite(Image("track.png").Scale(162 * s, 12 * s));
+track.SetPosition(cx - 81 * s, cy + 43 * s, 1);
+
+fill_image = Image("fill.png");
+fill = Sprite();
+fill.SetPosition(cx - 78 * s, cy + 46 * s, 2);
+steps = 0;
+
+fun progress_callback(duration, progress) {
+  n = Math.Int(progress * 13);
+  if (n > 13) n = 13;
+  if (n > 0 && n != global.steps) {
+    global.steps = n;
+    global.fill.SetImage(global.fill_image.Scale(n * 12 * global.s, 6 * global.s));
+  }
+}
+
+# Shutdown and reboot have no meaningful progress; the logo and name stay.
+if (Plymouth.GetMode() == "boot") {
+  Plymouth.SetBootProgressFunction(progress_callback);
+} else {
+  track.SetOpacity(0);
+}

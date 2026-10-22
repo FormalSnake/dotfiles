@@ -294,9 +294,6 @@ RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
         _libexec("formalshell-power-poll"),
         file("/etc/systemd/system/formalshell-greeter-mirror.path", content = "[Path]\nPathChanged=/home/kyandesutter/.local/state/formalshell/state.json\nPathChanged=/home/kyandesutter/.local/state/formalshell/theme.json\nPathChanged=/home/kyandesutter/.face\n\n[Install]\nWantedBy=multi-user.target\n"),
         file("/etc/systemd/system/formalshell-greeter-mirror.service", content = "[Unit]\nDescription=Copy kyandesutter's FormalShell wallpaper and theme to the greeter\nAfter=systemd-tmpfiles-setup.service\n\n[Service]\nType=oneshot\nExecStart=" + LIBEXEC + "/formalshell-greeter-mirror\n"),
-        # mixins/core/chime: generated once from the script, then played before the greeter.
-        _libexec("formalos-chime"),
-        _rootfs("usr/libexec/formalos-chime.py", LIBEXEC + "/formalos-chime.py"),
         # mixins/core/storage-gc.nix, the script ~/.config/nix/scripts/storage-gc.sh at its rev.
         _libexec("storage-gc"),
         _libexec("nordvpn-settings"),
@@ -322,16 +319,13 @@ exit 0
         file("/etc/modprobe.d/90-e1504g.conf", content = "blacklist ucsi_acpi\ninstall ucsi_acpi /bin/false\nblacklist intel_ish_ipc\ninstall intel_ish_ipc /bin/false\n"),
         # mixins/core/boot.nix and plymouth: mitigations off, VT-d on, quiet boot. fspec-esp-sync
         # copies this line into each Tumbleweed entry.
-        file("/etc/kernel/cmdline", content = "root=UUID=1a10e345-3d66-4bde-9f6b-55d43e6f7e0d rootflags=subvol=@tumbleweed,noatime,compress=zstd:1 rw panic=10 rd.shell=0 rd.emergency=reboot mitigations=off intel_iommu=on quiet udev.log_level=3 module_blacklist=ucsi_acpi,intel_ish_ipc\n"),
+        file("/etc/kernel/cmdline", content = "root=UUID=1a10e345-3d66-4bde-9f6b-55d43e6f7e0d rootflags=subvol=@tumbleweed,noatime,compress=zstd:1 rw panic=10 rd.shell=0 rd.emergency=reboot mitigations=off intel_iommu=on quiet splash udev.log_level=3 module_blacklist=ucsi_acpi,intel_ish_ipc\n"),
         # NixOS's 16 GB swapfile in @swap (NOCOW), behind zram: priority 1 under zram's 5.
         file("/etc/systemd/system/swap.mount", content = "[Unit]\nDescription=The @swap subvolume\n\n[Mount]\nWhat=UUID=1a10e345-3d66-4bde-9f6b-55d43e6f7e0d\nWhere=/swap\nType=btrfs\nOptions=subvol=@swap,noatime\n\n[Install]\nWantedBy=local-fs.target\n"),
         file("/etc/systemd/system/swap-swapfile.swap", content = "[Unit]\nDescription=Swapfile in @swap\nRequires=swap.mount\nAfter=swap.mount\n\n[Swap]\nWhat=/swap/swapfile\nPriority=1\n\n[Install]\nWantedBy=swap.target\n"),
         # mixins/core/networking.nix: Google DNS for every connection, over what DHCP hands out.
         # The g815 runs systemd-resolved instead (g815.star).
         file("/etc/NetworkManager/conf.d/90-kyan-dns.conf", content = "[global-dns-domain-*]\nservers=8.8.8.8,8.8.4.4\n"),
-        # NixOS wrote loader.conf until its root went; Tumbleweed's entries are the ones to boot,
-        # ahead of the one-shot installer entry that sorts before them.
-        file("/boot/efi/loader/loader.conf", content = "timeout 4\nconsole-mode keep\npreferred tumbleweed-*\n"),
         # nixos-hardware's asus-battery with chargeUpto = 100.
         file("/etc/tmpfiles.d/90-e1504g-battery.conf", content = "w /sys/class/power_supply/BAT?/charge_control_end_threshold - - - - 100\n"),
         # mixins/tuning/oomd.nix: Fedora's desktop policy.
@@ -540,12 +534,6 @@ def _services(h):
             restart = "on_failure",
             description = "FormalShell USB-C and CPU power readings for the Power panel",
             systemd = {"RuntimeDirectory": "formalshell", "RuntimeDirectoryMode": "0755"},
-        ),
-        service(
-            "formalos-chime",
-            exec = LIBEXEC + "/formalos-chime",
-            description = "FormalOS boot chime",
-            systemd = {"Type": "exec", "unit": {"DefaultDependencies": False, "Wants": "sound.target", "After": "sound.target", "Before": "display-manager.service"}},
         ),
         service(
             "ancs4linux-observer",

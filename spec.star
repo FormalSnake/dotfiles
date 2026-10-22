@@ -1,3 +1,4 @@
+load("//boot.star", "boot")
 load("//g815.star", G815_PACKAGES = "PACKAGES", "g815")
 load("//home.star", "home")
 load("//system.star", "E1504G_PACKAGES", "PACKAGES", "system")
@@ -41,7 +42,7 @@ e1504g = host(
     system = tumbleweed(packages = PACKAGES + E1504G_PACKAGES),
     users = [user("kyandesutter", uid = 1000, shell = "fish", groups = GROUPS)],
     builders = [builder("g815", routes = ["g815", "192.168.86.95"])],
-    modules = secrets() + [system, home],
+    modules = secrets() + [system, home, boot],
 )
 
 g815 = host(
