@@ -1,3 +1,4 @@
+load("//boot.star", "limine_entry")
 load("//system.star", "FIREWALL_TCP", "FIREWALL_UDP", "GREETER_SESSIONS", "LIBEXEC", "PKG_BIN", "firewall_zone")
 
 # The g815's own layer on top of system.star and home.star: the RTX 5070 and the ASUS MUX, asusd,
@@ -21,6 +22,9 @@ PACKAGES = [
     # NetworkManager's Wi-Fi backend here, and per-link DNS so tailscaled owns only *.ts.net.
     "iwd", "systemd-resolved",
 ]
+
+# windows-dualboot.nix's limine extraEntries. Windows shares the ESP, so boot():/ finds it.
+WINDOWS_BOOT = limine_entry("Windows 11", "Chainload the Windows Boot Manager", "boot():///EFI/Microsoft/Boot/bootmgfw.efi")
 
 def _rootfs(path, dest = None, perms = None):
     return file(dest or "/" + path, src = ROOTFS + path, perms = perms)
@@ -275,13 +279,10 @@ net.ipv4.conf.default.forwarding = 1
         file("/etc/UPower/UPower.conf.d/10-g815.conf", content = "[UPower]\nCriticalPowerAction=PowerOff\n"),
         # Intel BE200: iwd, no power save (latency spikes), and resolved for per-link DNS with
         # Google's servers globally, so tailscale0's routing domain still takes *.ts.net first.
-        # The e1504g's loader.conf comes from boot.star. Tumbleweed's entries are the ones to boot,
-        # ahead of the one-shot installer entry that sorts before them.
-        file("/boot/efi/loader/loader.conf", content = "timeout 4\nconsole-mode keep\npreferred tumbleweed-*\n"),
         file("/etc/NetworkManager/conf.d/90-g815.conf", content = "[device]\nwifi.backend=iwd\n\n[connection]\nwifi.powersave=2\n\n[main]\ndns=systemd-resolved\n"),
         file("/etc/systemd/resolved.conf.d/10-kyan.conf", content = "[Resolve]\nDNS=8.8.8.8 8.8.4.4\n"),
         service("systemd-resolved"),
-        file("/etc/resolv.conf", mode = "link", src = "/run/systemd/resolve/stub-resolv.conf"),
+        file("/etc/resolv.conf", mode = "link", target = "/run/systemd/resolve/stub-resolv.conf"),
         # This machine is driven remotely; a deliberate-looking deactivation once left it off the
         # tailnet for 50 minutes.
         _libexec("wifi-reconnect"),

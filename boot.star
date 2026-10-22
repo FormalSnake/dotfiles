@@ -7,7 +7,9 @@
 # tries for fspec-boot-guard and falls through to the next entry after three failed boots.
 # systemd-boot's own menu stays hidden behind a zero timeout; a key held at its start shows it.
 
-ROOTFS = "e1504g/rootfs/"
+# Shared by every Linux host. fspec switch mounts the ESP at /boot/efi on a Tumbleweed root, also
+# where the host's NixOS mounts the same partition at /boot.
+ASSETS = "boot/"
 ESP = "/boot/efi"
 # Openly readable for magick: SUSE's ImageMagick policy denies every path under /etc.
 SRC = "/usr/local/share/formalos-boot"
@@ -64,9 +66,9 @@ FORMALOS_CHIME = boot_chime(
 FORMALOS = boot_theme(
     name = "formalos",
     branding = "FormalOS",
-    logo = ROOTFS + "usr/share/formalos-boot/logo.png",
-    wordmark = ROOTFS + "usr/share/formalos-boot/wordmark.png",
-    splash = ROOTFS + "usr/share/formalos-boot/splash.script",
+    logo = ASSETS + "logo.png",
+    wordmark = ASSETS + "wordmark.png",
+    splash = ASSETS + "splash.script",
     colours = {"fg": "cecdc3", "accent": "879a39", "track": "2a2927", "backdrop": "000000"},
     # Cyan is the comment line under the menu.
     palette = "000000;af3029;879a39;ad8301;205ea6;a02f6f;878580;878580",
@@ -74,7 +76,17 @@ FORMALOS = boot_theme(
     chime = FORMALOS_CHIME,
 )
 
-def _limine_conf(t):
+# A Limine menu entry after the FormalOS one, such as a Windows chainload on a dual-boot host.
+def limine_entry(name, comment, path, protocol = "efi"):
+    return [
+        "/" + name,
+        "    comment: " + comment,
+        "    protocol: " + protocol,
+        "    path: " + path,
+        "",
+    ]
+
+def _limine_conf(t, entries):
     c = t["colours"]
     return "\n".join([
         "timeout: %d" % t["timeout"],
@@ -101,7 +113,7 @@ def _limine_conf(t):
         "    protocol: efi",
         "    path: boot():/EFI/systemd/systemd-bootx64.efi",
         "",
-    ])
+    ] + [line for e in entries for line in e])
 
 def _theme_env(t):
     c = t["colours"]
@@ -120,7 +132,7 @@ def _theme_env(t):
 def _chime(c):
     return [
         c["pkg"],
-        file("/usr/local/libexec/formalos-boot-chime", src = ROOTFS + "usr/libexec/formalos-boot-chime", perms = "0755"),
+        file("/usr/local/libexec/formalos-boot-chime", src = ASSETS + "formalos-boot-chime", perms = "0755"),
         service(
             "boot-chime",
             exec = "/usr/local/libexec/formalos-boot-chime " + c["path"],
@@ -137,7 +149,7 @@ def _chime(c):
         ),
     ]
 
-def formalos_boot(t):
+def formalos_boot(t, entries = []):
     return (_chime(t["chime"]) if t["chime"] else []) + [
         pkg("plymouth", source = zypper(), files = [
             file("/etc/plymouth/plymouthd.conf", content = "[Daemon]\nTheme=%s\nShowDelay=0\nDeviceTimeout=8\n" % t["name"]),
@@ -146,7 +158,7 @@ def formalos_boot(t):
         pkg("plymouth-dracut", source = zypper()),
         pkg("limine", source = zypper(), files = [
             # Next to the EFI app, which Limine reads before /limine/limine.conf.
-            file(ESP + "/EFI/limine/limine.conf", content = _limine_conf(t)),
+            file(ESP + "/EFI/limine/limine.conf", content = _limine_conf(t, entries)),
         ]),
         pkg("efibootmgr", source = zypper()),
         file(ESP + "/loader/loader.conf", content = "timeout 0\nconsole-mode keep\npreferred %s\n" % t["preferred"]),
@@ -154,7 +166,7 @@ def formalos_boot(t):
         file(SRC + "/wordmark.png", src = t["wordmark"]),
         file(SRC + "/splash.script", src = t["splash"]),
         file(SRC + "/theme.env", content = _theme_env(t)),
-        file("/usr/local/libexec/formalos-boot", src = ROOTFS + "usr/libexec/formalos-boot", perms = "0755"),
+        file("/usr/local/libexec/formalos-boot", src = ASSETS + "formalos-boot", perms = "0755"),
         # magick comes from ImageMagick in system.star's CLI packages.
         service(
             "formalos-boot",
@@ -177,5 +189,6 @@ WantedBy=paths.target
         service("formalos-boot.path"),
     ]
 
-def boot(h = None):
-    return formalos_boot(FORMALOS)
+# `entries` are the host's own Limine entries, from limine_entry().
+def boot(entries = []):
+    return formalos_boot(FORMALOS, entries)

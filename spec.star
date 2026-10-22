@@ -1,5 +1,5 @@
 load("//boot.star", "boot")
-load("//g815.star", G815_PACKAGES = "PACKAGES", "g815")
+load("//g815.star", G815_PACKAGES = "PACKAGES", "WINDOWS_BOOT", "g815")
 load("//home.star", "home")
 load("//system.star", "E1504G_PACKAGES", "PACKAGES", "system")
 load("//macbook.star", "macbook")
@@ -47,7 +47,7 @@ e1504g = host(
     ]),
     users = [user("kyandesutter", uid = 1000, shell = "fish", groups = GROUPS)],
     builders = [builder("g815", routes = ["g815", "192.168.86.95"])],
-    modules = secrets() + [system, home, boot],
+    modules = secrets() + [system, home, boot()],
 )
 
 g815 = host(
@@ -59,7 +59,7 @@ g815 = host(
         "quiet", "splash", "loglevel=3", "udev.log_level=3",
     ]),
     users = [user("kyandesutter", uid = 1000, shell = "fish", groups = GROUPS + ["gamemode"])],
-    modules = secrets() + [system, home, g815],
+    modules = secrets() + [system, home, g815, boot(entries = [WINDOWS_BOOT])],
 )
 
 hosts = [e1504g, g815, macbook]
