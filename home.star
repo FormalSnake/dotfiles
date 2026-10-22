@@ -33,9 +33,11 @@ def _merge(a, b):
 
 # A graphical-session user service, the shape Home Manager's autostart units had.
 def _gui(name, exec, description, restart = "no", hyprland_only = False, needs = None, unit = {}, extra = {}, env = {}):
-    u = {"After": "graphical-session.target", "PartOf": "graphical-session.target"}
+    # graphical-session.target can be up without the compositor's environment (a bare Hyprland
+    # session); Restart= then loops the app every RestartSec, so it skips instead.
+    u = {"After": "graphical-session.target", "PartOf": "graphical-session.target", "ConditionEnvironment": ["WAYLAND_DISPLAY"]}
     if hyprland_only:
-        u["ConditionEnvironment"] = "XDG_CURRENT_DESKTOP=Hyprland"
+        u["ConditionEnvironment"] = ["WAYLAND_DISPLAY", "XDG_CURRENT_DESKTOP=Hyprland"]
     if needs:
         # Apps from vendor repos or the fspec store skip cleanly until they are there.
         u["ConditionPathExists"] = needs
