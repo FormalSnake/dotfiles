@@ -1,0 +1,33 @@
+[core]
+	precomposeUnicode = true
+
+[credential "https://gist.github.com"]
+	helper = ""
+	helper = "/opt/fspec/current/bin/gh auth git-credential"
+
+[credential "https://github.com"]
+	helper = ""
+	helper = "/opt/fspec/current/bin/gh auth git-credential"
+
+[diff "lockb"]
+	binary = true
+	textconv = "bun"
+
+[filter "lfs"]
+	clean = "git-lfs clean -- %f"
+	process = "git-lfs filter-process"
+	required = true
+	smudge = "git-lfs smudge -- %f"
+
+[http]
+	postBuffer = 157286400
+
+[init]
+	defaultBranch = "main"
+
+[pull]
+	rebase = false
+
+[user]
+	email = "kyaniserni@gmail.com"
+	name = "FormalSnake"
