@@ -14,7 +14,7 @@ DESKTOP = [
     "xdg-utils", "evolution-data-server", "geoclue2", "libgtk-4-1", "libadwaita-1-0", "python313-gobject",
     "hyprlock", "hypridle", "hyprpicker", "ghostty", "adwaita-icon-theme", "libhidapi-hidraw0",
     "python313-evdev", "python313-FontTools", "python313-Pillow", "python313-streamdeck", "xrdb",
-    "gnome-keyring", "gnome-keyring-pam", "hyprland-guiutils", "apparmor-abstractions", "gvfs", "tumbler", "nautilus", "qt6ct", "qt5ct", "dconf", "glib2-tools",
+    "gnome-keyring", "gnome-keyring-pam", "hyprland-guiutils", "apparmor-abstractions", "gvfs", "tumbler", "nautilus", "qt6ct", "qt5ct", "dconf", "gsettings-backend-dconf", "glib2-tools",
     "adwaita-fonts", "google-noto-sans-symbols2-fonts", "google-noto-coloremoji-fonts",
     "google-noto-sans-cjk-fonts", "liberation-fonts", "easyeffects", "pipewire-tools", "wvkbd",
     "dualsensectl", "flatpak",
@@ -108,6 +108,8 @@ exit 0
         # Tumbleweed's /usr/lib/pam.d/sudo with pam_ssh_agent_auth first, as on the NixOS root.
         # Tumbleweed's vendor greetd stack plus pam_gnome_keyring, which unlocks the login
         # keyring with the login password as NixOS's services.gnome.gnome-keyring does.
+        # NixOS's xdg.portal.config.hyprland: gnome-keyring's Secret portal is gated UseIn=gnome.
+        file("/etc/xdg-desktop-portal/hyprland-portals.conf", content = "[preferred]\ndefault=hyprland;gtk\norg.freedesktop.impl.portal.Secret=gnome-keyring\n"),
         file("/etc/pam.d/greetd", content = """#%PAM-1.0
 auth     requisite      pam_nologin.so
 auth     include        common-auth
