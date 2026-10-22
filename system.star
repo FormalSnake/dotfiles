@@ -97,6 +97,8 @@ def _files():
         _rootfs("etc/udev/rules.d/90-e1504g.rules"),
         _rootfs("usr/lib/modules-load.d/uinput.conf", "/etc/modules-load.d/uinput.conf"),
         _rootfs("usr/lib/sysusers.d/uinput.conf", "/etc/sysusers.d/uinput.conf"),
+        # ddcutil's udev rule hands /dev/i2c-* to this group, which Tumbleweed does not create.
+        file("/etc/sysusers.d/i2c.conf", content = "g i2c - -\n"),
         _rootfs("usr/lib/tuned/profiles/throughput-performance-quiet-fan/tuned.conf", "/etc/tuned/profiles/throughput-performance-quiet-fan/tuned.conf"),
         file("/etc/udev/rules.d/70-kyan-devices.rules", content = """# dualsense-pad drives a virtual pointer; the session user writes the lightbar LEDs.
 KERNEL=="uinput", SUBSYSTEM=="misc", GROUP="uinput", MODE="0660", OPTIONS+="static_node=uinput"
@@ -112,11 +114,11 @@ SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", TAG+="uaccess"
 exit 0
 """),
         # The NixOS root passed these as kernel arguments (modprobe.blacklist=...).
-        # blacklist alone does not stop a modalias or explicit load, so each module also gets an install stub.
+        # The initrd loads both before this file applies; module_blacklist= on the cmdline covers that.
         file("/etc/modprobe.d/90-e1504g.conf", content = "blacklist ucsi_acpi\ninstall ucsi_acpi /bin/false\nblacklist intel_ish_ipc\ninstall intel_ish_ipc /bin/false\n"),
         # mixins/core/boot.nix and plymouth: mitigations off, VT-d on, quiet boot. fspec-esp-sync
         # copies this line into each Tumbleweed entry.
-        file("/etc/kernel/cmdline", content = "root=UUID=1a10e345-3d66-4bde-9f6b-55d43e6f7e0d rootflags=subvol=@tumbleweed,noatime,compress=zstd:1 rw panic=10 rd.shell=0 rd.emergency=reboot mitigations=off intel_iommu=on quiet udev.log_level=3\n"),
+        file("/etc/kernel/cmdline", content = "root=UUID=1a10e345-3d66-4bde-9f6b-55d43e6f7e0d rootflags=subvol=@tumbleweed,noatime,compress=zstd:1 rw panic=10 rd.shell=0 rd.emergency=reboot mitigations=off intel_iommu=on quiet udev.log_level=3 module_blacklist=ucsi_acpi,intel_ish_ipc\n"),
         # mixins/tuning/systemd-tuning.nix: cap how long a wedged unit can hold up boot or reboot.
         file("/etc/systemd/system.conf.d/10-kyan-timeouts.conf", content = "[Manager]\nDefaultTimeoutStopSec=5s\nDefaultTimeoutStartSec=15s\n"),
         file("/etc/systemd/user.conf.d/10-kyan-timeouts.conf", content = "[Manager]\nDefaultTimeoutStopSec=5s\nDefaultTimeoutStartSec=15s\n"),

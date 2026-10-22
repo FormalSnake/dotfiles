@@ -33,7 +33,7 @@ e1504g = host(
     name = "e1504g",
     platform = "x86_64-linux",
     system = tumbleweed(packages = PACKAGES),
-    users = [user("kyandesutter", uid = 1000, shell = "fish", groups = ["wheel", "video", "audio", "input", "docker", "uinput", "nordvpn"])],
+    users = [user("kyandesutter", uid = 1000, shell = "fish", groups = ["wheel", "video", "audio", "input", "docker", "uinput", "i2c", "nordvpn"])],
     modules = secrets() + [system, home],
 )
 
