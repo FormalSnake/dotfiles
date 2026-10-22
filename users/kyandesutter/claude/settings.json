@@ -203,5 +203,9 @@
       "Gooning",
       "Jorking it"
     ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "sh \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/statusline-usage.sh\""
   }
 }
