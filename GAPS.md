@@ -28,7 +28,6 @@ generation on the e1504g. The Tumbleweed root is `spec.star`, `system.star` and 
 
 ## Version differences from NixOS
 
-- FormalShell: v0.2.0 release; NixOS runs e8a800d, which has no release.
 - vscode-langservers-extracted 4.10.0 from npm; NixOS packages 1.126.04524, not published to npm.
 - gopls 0.23.0 is a source build; Tumbleweed has 0.24.0. taplo 0.10.0 comes from Tumbleweed
   (aqua resolves `tamasfe/taplo` ambiguously against `tamasfe/taplo/full`, an fspec bug).

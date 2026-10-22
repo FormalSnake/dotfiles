@@ -97,12 +97,8 @@ oci = "ghcr.io/formalstudio/fspec-cache/formalmusic@sha256:d8bc38a4dea173348a2e5
 
 [[pkg]]
 name = "formalshell"
-source = "github:FormalSnake/FormalShell"
-version = "0.2.0"
-
-[pkg.x86_64-linux]
-url = "https://github.com/FormalStudio/FormalShell/releases/download/v0.2.0/formalshell-x86_64-linux.tar.gz"
-hash = "sha256-q5bXEjpwFfli0WwqbqcECe4Mz15whgQiJUBJvEH+7Wg="
+source = "git:https://github.com/FormalSnake/FormalShell@e8a800d3da54f586f187a328916785ff691f8759"
+rev = "e8a800d3da54f586f187a328916785ff691f8759"
 
 [[pkg]]
 name = "fut"

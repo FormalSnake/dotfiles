@@ -177,8 +177,13 @@ def _pkgs():
             source = zypper(repo = "nordvpn"),
             services = [service("nordvpnd.socket"), service("nordvpnd"), service("nordvpnd-killswitch")],
         ),
-        # v0.2.0 is the newest release; NixOS runs e8a800d, which has no release tarball.
-        pkg("formalshell", version = "0.2.0", source = github("FormalSnake/FormalShell", asset = "formalshell-*-linux.tar.gz")),
+        # The rev ~/.config/nix's flake.lock pins, so both roots run the same shell. dev/tarball.sh
+        # is upstream's release build: it installs its own deps on bookworm, whose glibc it targets.
+        pkg(
+            "formalshell",
+            source = git("https://github.com/FormalSnake/FormalShell", rev = "e8a800d3da54f586f187a328916785ff691f8759", image = "docker.io/library/debian:bookworm"),
+            build = ["sh", "-c", "WORK=\"$FSPEC_OUT.work\" bash \"$FSPEC_SRC/dev/tarball.sh\" \"$FSPEC_OUT.tar\" && tar -xzf \"$FSPEC_OUT.tar\"/formalshell-*-linux.tar.gz -C \"$FSPEC_OUT\" && rm -rf \"$FSPEC_OUT.work\" \"$FSPEC_OUT.tar\""],
+        ),
         pkg("herdr", version = "0.9.3", source = github("ogulcancelik/herdr", asset = "herdr-linux-*")),
         # helium-wrapper sets LD_LIBRARY_PATH to its own directory, so `helium` is the wrapper.
         pkg("helium", version = "0.19.4.1", source = github("imputnet/helium-linux", asset = "helium-*_linux.tar.xz"), links = {"helium": "helium-wrapper"}),
