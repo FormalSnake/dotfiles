@@ -105,6 +105,9 @@ def _services():
             "Idle manager for Wayland",
             restart = "always",
             unit = {"ConditionEnvironment": "WAYLAND_DISPLAY"},
+            # Without a delay it burns its start limit while the compositor goes away at logout,
+            # and the next login cannot start it for those ten seconds.
+            extra = {"RestartSec": 2},
         ),
         _gui(
             "panel-gamma",
