@@ -1,20 +1,13 @@
 # Not ported from nix-darwin
 
 Source: `darwinConfigurations.macbook` in ~/.config/nix at 98ca1b6c and the live machine (Home
-Manager generation `pvy93i9lkhxfxz0byv8n80y0h2zmi7sz`). The spec is `../macbook.star`; it plans
-standalone with `fspec --spec macbook.star plan --host macbook --local`.
+Manager generation `pvy93i9lkhxfxz0byv8n80y0h2zmi7sz`). The spec is `../macbook.star`, loaded
+from `spec.star`: `fspec --spec examples/kyan/spec.star plan --host macbook --local`.
 
-## Open: fspec has no way to express it yet
-
-Each one is a request queued with the formalspec agent.
-
-- `.app` bundles from store packages (request 5): Messages and FormalMusic (FormalStudio source
-  builds), Kopuz (dmg only, no cask). Nothing places an app in `/Applications`, and fspec unpacks
-  no dmg. The kopuzd daemon and kopuzctl are declared; the player app is not.
 ## Not verified
 
-- The pam_ssh_agent_auth and sbarlua `git()` recipes have not been built: they run on the
-  macos-14 CI runner. pam_ssh_agent_auth follows nixpkgs' recipe (its four patches in
+- The pam_ssh_agent_auth, sbarlua, Messages and FormalMusic `git()` recipes have not been
+  built: they run on the macos-14 CI runner. pam_ssh_agent_auth follows nixpkgs' recipe (its four patches in
   `patches/`, ed25519-donna at `8757bd4`, autoreconf, OpenSSL 3 from Homebrew) plus the
   `-std=gnu99 -D_FORTIFY_SOURCE=0` the nix override adds for OpenPAM.
 - The lock has no entries for this host yet: `fspec update` has not run.
@@ -61,6 +54,9 @@ Secret-carrying state, declared once formalspec's encrypted sync lands:
 - Hammerspoon's config is ported, the app is not installed (nix never installed it either).
 
 ## Changed behaviour
+
+- Messages and FormalMusic run unwrapped: nix put ffmpeg on their PATH, so from the Dock, where
+  PATH has no `/opt/homebrew/bin`, Messages' video thumbnails find no ffmpeg.
 
 - Secrets decrypt to `/var/run/fspec/secrets/<name>` (was `/run/agenix`); fish, wgtunnel and the
   LiveSync daemon read them there, and `fspec-secrets` decrypts them again at boot.

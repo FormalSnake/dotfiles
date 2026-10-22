@@ -82,6 +82,44 @@ def _brew():
     out += [pkg(n, source = brew(cask = c, tap = t)) for n, t, c in TAPPED]
     return out
 
+# A NativeDesktop app has no release yet: build it at the rev ~/.config/nix's flake.lock pins and
+# wrap the binary in the bundle its nix package makes. Cargo.lock pins the NativeDesktop crates.
+def _nd_app(name, title, repo, rev, icon):
+    plist = "".join([
+        '<?xml version="1.0" encoding="UTF-8"?><plist version="1.0"><dict>',
+        "<key>CFBundleDevelopmentRegion</key><string>en</string>",
+        "<key>CFBundleExecutable</key><string>%s</string>" % name,
+        "<key>CFBundleIdentifier</key><string>dev.formalsnake.%s</string>" % name,
+        "<key>CFBundleInfoDictionaryVersion</key><string>6.0</string>",
+        "<key>CFBundleName</key><string>%s</string>" % title,
+        "<key>CFBundleDisplayName</key><string>%s</string>" % title,
+        "<key>CFBundlePackageType</key><string>APPL</string>",
+        "<key>CFBundleShortVersionString</key><string>0.1.0</string>",
+        "<key>CFBundleVersion</key><string>0.1.0</string>",
+        "<key>CFBundleIconFile</key><string>AppIcon</string>",
+        "<key>LSMinimumSystemVersion</key><string>14.0</string>",
+        "<key>NSPrincipalClass</key><string>NSApplication</string>",
+        "<key>NSHighResolutionCapable</key><true/>",
+        "</dict></plist>",
+    ])
+    app = "$FSPEC_OUT/%s.app/Contents" % title
+    return pkg(
+        name,
+        source = git("https://github.com/" + repo, rev = rev),
+        build = ["sh", "-c", " && ".join([
+            "set -e",
+            "cd \"$FSPEC_SRC\"",
+            "cargo build --release --locked --package " + name,
+            "mkdir -p \"%s/MacOS\" \"%s/Resources\" \"$FSPEC_OUT/bin\"" % (app, app),
+            "printf '%%s' '%s' > \"%s/Info.plist\"" % (plist, app),
+            "printf 'APPL????' > \"%s/PkgInfo\"" % app,
+            "sips -s format icns %s --out \"%s/Resources/AppIcon.icns\" > /dev/null" % (icon, app),
+            "cp target/release/%s \"%s/MacOS/%s\"" % (name, app, name),
+            "ln -s ../%s.app/Contents/MacOS/%s \"$FSPEC_OUT/bin/%s\"" % (title, name, name),
+        ])],
+        apps = [title + ".app"],
+    )
+
 # What no Homebrew formula or cask carries, from upstream releases at the versions nix runs.
 def _store():
     return [
@@ -110,6 +148,9 @@ def _store():
             build = ["sh", "-c", "mkdir -p $FSPEC_OUT/bin && install -m755 $FSPEC_SRC/clipssh $FSPEC_OUT/bin/clipssh"],
             bins = ["clipssh"],
         ),
+        pkg("kopuz", version = "0.22.0", source = github("Kopuz-org/kopuz", asset = "Kopuz_*_aarch64.dmg"), apps = ["Kopuz.app"]),
+        _nd_app("messages", "Messages", "FormalStudio/messages", "e9455505f88f101897d001f4a61ab9c82b0232c7", "packaging/linux/dev.formalsnake.messages.png"),
+        _nd_app("formalmusic", "FormalMusic", "FormalStudio/formalmusic", "9a9d93af0fbb75594f3e91f087cf77e6c8a7f576", "packaging/icon.png"),
         pkg(
             "kopuzd",
             source = git("https://github.com/Kopuz-org/kopuz", rev = "23db9b35fe45bd773e3cdcdf0d6584b13ae5b8cc"),
