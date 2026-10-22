@@ -40,6 +40,8 @@ SYSTEM = [
     # A remote `fspec apply` unpacks the shipped spec with tar, which the base pattern lacks; the
     # store pulls CI-built git(...) packages from ghcr.io with oras.
     "tar", "oras",
+    # useradd and usermod, which the base pattern leaves out.
+    "shadow",
     # From the vendor repos below.
     "1password", "1password-cli", "nordvpn",
 ]
