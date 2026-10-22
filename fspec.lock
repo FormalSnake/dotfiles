@@ -1,4 +1,22 @@
 [[pkg]]
+name = "1password"
+source = "brew:cask"
+version = "8.12.42"
+
+[[pkg]]
+name = "1password"
+source = "zypper:"
+
+[[pkg]]
+name = "1password-cli"
+source = "brew:cask"
+version = "2.41.1"
+
+[[pkg]]
+name = "1password-cli"
+source = "zypper:"
+
+[[pkg]]
 name = "adw-gtk3"
 source = "github:lassekongo83/adw-gtk3"
 version = "6.5"
@@ -8,8 +26,43 @@ url = "https://github.com/lassekongo83/adw-gtk3/releases/download/v6.5/adw-gtk3v
 hash = "sha256-qBeA+t/EMr4Pw9icTrtBqijk8DLULDb5eJxX3RDPpBw="
 
 [[pkg]]
+name = "alcove"
+source = "brew:cask"
+version = "1.7.7"
+
+[[pkg]]
+name = "aldente"
+source = "brew:cask"
+version = "1.39.4"
+
+[[pkg]]
+name = "ananicy-cpp"
+source = "git:https://gitlab.com/ananicy-cpp/ananicy-cpp@v1.2.0"
+rev = "7117eaf278082bdbb8e25d94c4f7a141afeb1ae4"
+
+[[pkg]]
+name = "ananicy-rules"
+source = "url:https://github.com/CachyOS/ananicy-rules/archive/03ef03fbf7e834385377432ccecaedd32e3414bb.tar.gz"
+
+[pkg.any]
+url = "https://github.com/CachyOS/ananicy-rules/archive/03ef03fbf7e834385377432ccecaedd32e3414bb.tar.gz"
+hash = "sha256-Yr9RvRfH9NMw8sb6el+OHE4SC4CUr0HofWgb5JA0Bv4="
+
+[[pkg]]
+name = "ancs4linux"
+source = "git:https://github.com/pzmarzly/ancs4linux@b658546f08d1468f6d79aa900cc7faa9d938837d"
+rev = "b658546f08d1468f6d79aa900cc7faa9d938837d"
+patches = "sha256-hVIHOmWFCPNPUdkaRQ7OcO8B6GAVQ6fk/stVTM5XMSw="
+
+[[pkg]]
+name = "android-studio"
+source = "brew:cask"
+version = "2026.2.1.8,rabbit1"
+
+[[pkg]]
 name = "apostrophe"
 source = "flatpak:org.gnome.gitlab.somas.Apostrophe"
+version = "3.5"
 
 [pkg.any]
 commit = "eebf714c88801c14b0c5bd343088f8a6cbadad29de22c61d345a7a47c795917a"
@@ -24,6 +77,25 @@ url = "https://registry.npmjs.org/@astrojs/language-server/-/language-server-2.1
 hash = "sha512-87VQ/5GSdHlRnUA+hGuerYyIGAj+9RbZmATyuKLEUePinUXhQ5YkRnRrHhOD9sSi5JOErLjrLkHnfZFEvGrV8w=="
 
 [[pkg]]
+name = "asusctl"
+source = "github:OpenGamingCollective/asusctl"
+version = "6.5.0"
+
+[pkg.x86_64-linux]
+url = "https://github.com/OpenGamingCollective/asusctl/releases/download/6.5.0/asusctl-6.5.0.r0.gec09e762-1-x86_64.pkg.tar.zst"
+hash = "sha256-GsAvJMOKZX7p3dhXOP/3c+cu5q6OW388bAMKO+1JAjA="
+
+[[pkg]]
+name = "bat"
+source = "brew"
+version = "0.26.1"
+
+[[pkg]]
+name = "betterdisplay"
+source = "brew:cask"
+version = "5.1.1"
+
+[[pkg]]
 name = "bibata"
 source = "github:ful1e5/Bibata_Cursor"
 version = "2.0.7"
@@ -31,6 +103,34 @@ version = "2.0.7"
 [pkg.x86_64-linux]
 url = "https://github.com/ful1e5/Bibata_Cursor/releases/download/v2.0.7/Bibata-Modern-Classic.tar.xz"
 hash = "sha256-fTSVhk5bvvAvXnfedgspBZA7Y8cUlaeO9jBtGaO1Vtg="
+
+[[pkg]]
+name = "bluebubbles"
+source = "brew:cask"
+version = "1.9.9"
+
+[[pkg]]
+name = "btop"
+source = "brew"
+version = "1.4.7"
+
+[[pkg]]
+name = "bun"
+source = "brew"
+version = "1.4.4"
+
+[[pkg]]
+name = "chafa"
+source = "brew"
+version = "1.18.3"
+
+[[pkg]]
+name = "claude"
+source = "url:https://registry.npmjs.org/@anthropic-ai/claude-code-darwin-arm64/-/claude-code-darwin-arm64-2.1.289.tgz"
+
+[pkg.any]
+url = "https://registry.npmjs.org/@anthropic-ai/claude-code-darwin-arm64/-/claude-code-darwin-arm64-2.1.289.tgz"
+hash = "sha256-Cqhs8zft5gQVE6cugU5wOl2UwedemD8OWw4/LtHgtwA="
 
 [[pkg]]
 name = "claude"
@@ -49,6 +149,31 @@ rev = "c7f4e8ddcf102302c6375ba51534c7505ddc2616"
 oci = "ghcr.io/formalstudio/fspec-cache/clipssh@sha256:d6c66a94850417757d5049ce8553beea369e7ab0f2c454f3bc5cb474184b694b"
 
 [[pkg]]
+name = "clop"
+source = "brew:cask"
+version = "3.6.2"
+
+[[pkg]]
+name = "cmake"
+source = "brew"
+version = "4.4.4"
+
+[[pkg]]
+name = "cocoapods"
+source = "brew"
+version = "1.17.0"
+
+[[pkg]]
+name = "coreutils"
+source = "brew"
+version = "9.12"
+
+[[pkg]]
+name = "couchdb"
+source = "brew"
+version = "3.5.3"
+
+[[pkg]]
 name = "dcal"
 source = "github:AvengeMedia/dankcalendar"
 version = "1.6.1"
@@ -58,11 +183,32 @@ url = "https://github.com/duxlabs-dev/dux-calendar/releases/download/v1.6.1/dcal
 hash = "sha256-9Y/AUBlUx3ybvApqPdjQiL6eRCEKv9SXPaQxCNoA4l4="
 
 [[pkg]]
+name = "deno"
+source = "brew"
+version = "2.9.8"
+
+[[pkg]]
+name = "dipc"
+source = "brew"
+version = "1.2.0"
+
+[[pkg]]
+name = "direnv"
+source = "brew"
+version = "2.38.2"
+
+[[pkg]]
+name = "discord"
+source = "brew:cask"
+version = "0.0.419"
+
+[[pkg]]
 name = "discord"
 source = "flatpak:com.discordapp.Discord"
+version = "1.0.164"
 
 [pkg.any]
-commit = "251fbd74f960cfc53235206c2fe698531a3fe86eabf0a16d2481e6ba8974ba26"
+commit = "ef8a34dda1cad1e4d21ad9c6a67ed52263eca68149228f2b9c45070a0c3b04fc"
 
 [[pkg]]
 name = "docker-compose-langserver"
@@ -83,12 +229,32 @@ url = "https://registry.npmjs.org/dockerfile-language-server-nodejs/-/dockerfile
 hash = "sha512-iS3GUUAn1bC3sDdLyg6CUnIaVQfViJBh+FhWBPftK6kJkhUMxFG2sr25OqMVaZgRsVuJEoNpflgJN3FCbkA01A=="
 
 [[pkg]]
+name = "dockerfile-language-server"
+source = "brew"
+version = "0.15.0"
+
+[[pkg]]
 name = "fast"
 source = "git:https://github.com/maaslalani/fast@26d8fc9c189ba748c68f8930af11dee5c2467f7e"
 rev = "26d8fc9c189ba748c68f8930af11dee5c2467f7e"
 
 [pkg.x86_64-linux]
 oci = "ghcr.io/formalstudio/fspec-cache/fast@sha256:8572d75f00a7bf50054d8777445dcd964ecbf704fb8ea76fd3282fa78fcf1386"
+
+[[pkg]]
+name = "fastfetch"
+source = "brew"
+version = "2.70.0"
+
+[[pkg]]
+name = "fastlane"
+source = "brew"
+version = "2.241.1"
+
+[[pkg]]
+name = "fd"
+source = "brew"
+version = "10.5.0"
 
 [[pkg]]
 name = "fetch"
@@ -99,11 +265,27 @@ rev = "7b19d22c2d8e4b7b2295cc625c9fdf87adcabbcd"
 oci = "ghcr.io/formalstudio/fspec-cache/fetch@sha256:216a2d485afc3115d5930f6eeb113ce6fb73015f0ca10cb309e34705a9f5c235"
 
 [[pkg]]
+name = "ffmpeg"
+source = "brew"
+version = "9.0.2"
+
+[[pkg]]
+name = "fish"
+source = "brew"
+version = "4.9.3"
+
+[[pkg]]
 name = "flare"
 source = "flatpak:de.schmidhuberj.Flare"
+version = "0.22.7"
 
 [pkg.any]
-commit = "eeb5f6cb3ed56eee1d1e1a8c389cd12cdf8c400cc1475405e3d950b3d8354097"
+commit = "1c01fcf684499f04b6770a39fccf711ae4c19c263fa17fe380c1fd98e4622adb"
+
+[[pkg]]
+name = "font-sf-pro"
+source = "brew:cask"
+version = "latest"
 
 [[pkg]]
 name = "formalmusic"
@@ -126,9 +308,18 @@ name = "fut"
 source = "github:mikker/fut"
 version = "0.24"
 
+[pkg.aarch64-darwin]
+url = "https://github.com/mikker/fut/releases/download/0.24/fut-macos-arm64.tar.gz"
+hash = "sha256-Ul3iLy+7FKHxs7ro3ZSwIuiGTSc+VFmuvOIKmM+ajwM="
+
 [pkg.x86_64-linux]
 url = "https://github.com/mikker/fut/releases/download/0.24/fut-linux-x86_64.tar.gz"
 hash = "sha256-WyEDdm9BVzEvyTF0IDLAEPckTzWxdealmpxPvUzbWy4="
+
+[[pkg]]
+name = "fzf"
+source = "brew"
+version = "0.74.5"
 
 [[pkg]]
 name = "geist-mono-nerd-font"
@@ -140,12 +331,49 @@ url = "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/GeistMon
 hash = "sha256-Q+89c8rd3qW+dG4gyfJ/uqWc6xBriyb3JFui3i5GsfY="
 
 [[pkg]]
-name = "gopls"
-source = "git:https://github.com/golang/tools@gopls/v0.23.0"
-rev = "014f87ff5c01915bc90f4f11a6bb8aea3e0edbd7"
+name = "gh"
+source = "brew"
+version = "2.103.0"
 
-[pkg.x86_64-linux]
-oci = "ghcr.io/formalstudio/fspec-cache/gopls@sha256:f7961e51eca5a079315a52ebe512beb4f64ed03e42167d43e8668d3828ec62b2"
+[[pkg]]
+name = "ghostscript"
+source = "brew"
+version = "10.08.0"
+
+[[pkg]]
+name = "ghostty"
+source = "brew:cask"
+version = "1.3.1"
+
+[[pkg]]
+name = "git"
+source = "brew"
+version = "2.56.0"
+
+[[pkg]]
+name = "git-lfs"
+source = "brew"
+version = "3.8.0"
+
+[[pkg]]
+name = "go"
+source = "brew"
+version = "1.27.3"
+
+[[pkg]]
+name = "google-chrome"
+source = "brew:cask"
+version = "156.0.8078.48"
+
+[[pkg]]
+name = "gopls"
+source = "brew"
+version = "0.24.0"
+
+[[pkg]]
+name = "gstreamer-runtime"
+source = "brew:cask"
+version = "1.28.6"
 
 [[pkg]]
 name = "helium"
@@ -158,12 +386,47 @@ hash = "sha256-bKbkoA/vWRaCH7GvipYHzGs4b2eKfrQi5V8ZEWujBGk="
 
 [[pkg]]
 name = "herdr"
+source = "brew"
+version = "0.9.5"
+
+[[pkg]]
+name = "herdr"
 source = "github:ogulcancelik/herdr"
 version = "0.9.3"
 
 [pkg.x86_64-linux]
 url = "https://github.com/herdrdev/herdr/releases/download/v0.9.3/herdr-linux-x86_64"
 hash = "sha256-GKjcZfHC+khYhDRDVt6hz9kRxvBs9G+njhk/QIf026c="
+
+[[pkg]]
+name = "ideviceinstaller"
+source = "brew"
+version = "1.2.0"
+
+[[pkg]]
+name = "imagemagick"
+source = "brew"
+version = "7.1.2-34"
+
+[[pkg]]
+name = "jq"
+source = "brew"
+version = "1.8.2"
+
+[[pkg]]
+name = "jump-desktop-connect"
+source = "brew:cask"
+version = "10.15.28"
+
+[[pkg]]
+name = "just"
+source = "brew"
+version = "1.59.0"
+
+[[pkg]]
+name = "karabiner-elements"
+source = "brew:cask"
+version = "16.3.0"
 
 [[pkg]]
 name = "kopuz"
@@ -192,6 +455,26 @@ url = "https://github.com/jesseduffield/lazydocker/releases/download/v0.25.2/laz
 hash = "sha256-DZ2/wmBoshjn7YSxBHSMrcbjz3M8Cv01RlMG+zm5Ujw="
 
 [[pkg]]
+name = "lazydocker"
+source = "brew"
+version = "0.25.2"
+
+[[pkg]]
+name = "lazygit"
+source = "brew"
+version = "0.66.2"
+
+[[pkg]]
+name = "libadwaita"
+source = "brew"
+version = "1.10.0"
+
+[[pkg]]
+name = "libimobiledevice"
+source = "brew"
+version = "1.4.0"
+
+[[pkg]]
 name = "librepods"
 source = "git:https://github.com/thisisgm/omarchy-pods@307c5a6d2109f088d8e6a558c933ebe4f6b1db01"
 rev = "307c5a6d2109f088d8e6a558c933ebe4f6b1db01"
@@ -201,14 +484,19 @@ patches = "sha256-qRVO6tEfvfFCA2wQSyqn09rT8wVq8+WN6pQOhpJepkg="
 oci = "ghcr.io/formalstudio/fspec-cache/librepods@sha256:f15548ae3eba4a18058e6295925278b9239b76707900a9b9f9c1649332e20543"
 
 [[pkg]]
-name = "lua-language-server"
-source = "aqua:LuaLS/lua-language-server"
-version = "3.19.1"
+name = "lsd"
+source = "brew"
+version = "1.2.0"
 
-[pkg.x86_64-linux]
-url = "https://github.com/LuaLS/lua-language-server/releases/download/3.19.1/lua-language-server-3.19.1-linux-x64.tar.gz"
-hash = "sha256-6SNdLXLvVbxBz4yZzaLtZHd2ggJLS7gfXepCUGDFy7g="
-bins = ["bin/lua-language-server"]
+[[pkg]]
+name = "lua"
+source = "brew"
+version = "5.5.1"
+
+[[pkg]]
+name = "lua-language-server"
+source = "brew"
+version = "3.19.2"
 
 [[pkg]]
 name = "lumen"
@@ -219,6 +507,18 @@ rev = "4ad27231c3614e3f2acbc07bc794a4e8fde06fbf"
 oci = "ghcr.io/formalstudio/fspec-cache/lumen@sha256:f489d0d1944ca354ebfd331a03ca05a51fa211947bd310cb70fe8aa67c96edca"
 
 [[pkg]]
+name = "mangohud-vulkan-layer"
+source = "flatpak:org.freedesktop.Platform.VulkanLayer.MangoHud/x86_64/25.08"
+version = "0.8.4"
+
+[pkg.any]
+commit = "5e930a39701a1883e46113a3089beb9c7e57636b961d97242f74b9265bb4e7a1"
+
+[[pkg]]
+name = "markdown-preview"
+source = "brew:cask:pluk-inc/tap"
+
+[[pkg]]
 name = "marksman"
 source = "aqua:artempyanykh/marksman"
 version = "2026-02-08"
@@ -227,6 +527,16 @@ version = "2026-02-08"
 url = "https://github.com/artempyanykh/marksman/releases/download/2026-02-08/marksman-linux-x64"
 hash = "sha256-vlCY6CEyGSacR/wNkWpm+jHOBgLslnR1xyImCqvyYIc="
 bins = ["marksman"]
+
+[[pkg]]
+name = "marksman"
+source = "brew"
+version = "2026-02-08"
+
+[[pkg]]
+name = "mas"
+source = "brew"
+version = "7.0.0"
 
 [[pkg]]
 name = "matugen"
@@ -254,12 +564,36 @@ rev = "8df17ef38312e240f89428e98f85ef55e95b9c95"
 oci = "ghcr.io/formalstudio/fspec-cache/messages@sha256:1f25a343c0cf76c356bdee2491390196d8f05364ab0f2c5c1f6d06602e356b62"
 
 [[pkg]]
+name = "modrinth-app"
+source = "github:modrinth/code"
+version = "0.21.6"
+
+[pkg.x86_64-linux]
+url = "https://github.com/modrinth/code/releases/download/v0.21.6/Modrinth.App_0.21.6_amd64.AppImage"
+hash = "sha256-jSaNdcui+T3hXcI3OaOg6FR0a8Of7nUZ8wxU+YB7OXY="
+
+[[pkg]]
+name = "mosh"
+source = "brew"
+version = "1.4.0"
+
+[[pkg]]
+name = "neovim"
+source = "brew"
+version = "0.12.6"
+
+[[pkg]]
 name = "nil"
 source = "git:https://github.com/oxalica/nil@dbbb5c24f9215476992aa1bd305f8e5398e89654"
 rev = "dbbb5c24f9215476992aa1bd305f8e5398e89654"
 
 [pkg.x86_64-linux]
 oci = "ghcr.io/formalstudio/fspec-cache/nil@sha256:a13960eb609646a998d29ddd838f08d85e53d6f9558d64fef69de8085de93797"
+
+[[pkg]]
+name = "nixfmt"
+source = "brew"
+version = "1.5.0"
 
 [[pkg]]
 name = "nixfmt"
@@ -271,18 +605,135 @@ url = "https://github.com/NixOS/nixfmt/releases/download/v1.5.0/nixfmt"
 hash = "sha256-qgKSR6uJyJfi85SEY5Z1U/kC+G6G40AvooyynEpE90U="
 
 [[pkg]]
+name = "node@24"
+source = "brew"
+version = "24.22.1"
+
+[[pkg]]
+name = "nordvpn"
+source = "brew:cask"
+version = "10.13.1"
+
+[[pkg]]
+name = "nordvpn"
+source = "zypper:"
+
+[[pkg]]
+name = "nvidia-compute-utils-G07"
+source = "zypper:"
+
+[[pkg]]
+name = "nvidia-gl-G07"
+source = "zypper:"
+
+[[pkg]]
+name = "nvidia-gl-G07-32bit"
+source = "zypper:"
+
+[[pkg]]
+name = "nvidia-open-driver-G07-signed-kmp-meta"
+source = "zypper:"
+
+[[pkg]]
+name = "nvidia-settings"
+source = "zypper:"
+
+[[pkg]]
+name = "nvidia-video-G07"
+source = "zypper:"
+
+[[pkg]]
 name = "obsidian"
 source = "flatpak:md.obsidian.Obsidian"
+version = "1.14.4"
 
 [pkg.any]
 commit = "ba4cac4feb375e6e79dafb4fbdb3684e972506dccc8e12ffdf12c0748bd89350"
 
 [[pkg]]
+name = "omniwm"
+source = "brew:cask:barutsrb/tap"
+
+[[pkg]]
+name = "opencode"
+source = "brew"
+version = "2.1.2"
+
+[[pkg]]
+name = "openssl@3"
+source = "brew"
+version = "3.5.9"
+
+[[pkg]]
+name = "orbstack"
+source = "brew:cask"
+version = "2.2.4,21120"
+
+[[pkg]]
+name = "pam_ssh_agent_auth"
+source = "git:https://github.com/jbeverly/pam_ssh_agent_auth@7ff785809f6ecad45051e333c0ffa72e15ba4f2a"
+rev = "7ff785809f6ecad45051e333c0ffa72e15ba4f2a"
+patches = "sha256-H2JKlDTc4G8yFOwUCdQjdCEzgP/DB5LrwCBVRioASv0="
+
+[[pkg]]
+name = "parsec"
+source = "brew:cask"
+version = "150-105c"
+
+[[pkg]]
 name = "parsec"
 source = "flatpak:com.parsecgaming.parsec"
+version = "3.9.9"
 
 [pkg.any]
 commit = "1f79530a7f2531821e21a2b271b6b4215daeea54e3f4b9e4c65c6e71bb890e3a"
+
+[[pkg]]
+name = "pi"
+source = "github:badlogic/pi-mono"
+version = "1.1.0"
+
+[pkg.aarch64-darwin]
+url = "https://github.com/earendil-works/pi/releases/download/v1.1.0/pi-darwin-arm64.tar.gz"
+hash = "sha256-NFWxPeNcFaWJPN68kiZ4GZ6Qp86ZsGy8I/N4YOkNY8c="
+
+[[pkg]]
+name = "pillow"
+source = "brew"
+version = "13.0.0"
+
+[[pkg]]
+name = "pngpaste"
+source = "brew"
+version = "0.2.3"
+
+[[pkg]]
+name = "portless"
+source = "npm:portless"
+version = "0.15.4"
+
+[pkg.any]
+url = "https://registry.npmjs.org/portless/-/portless-0.15.4.tgz"
+hash = "sha512-tOxEsdlDGuPHO6DPkuK3c3mMV5ctXEgVFm53Sa8nfZ2RsRGTq4By424C6z5+JWfNbd3ktR5SOd1FJBOlB1Woqg=="
+
+[[pkg]]
+name = "proton-ge"
+source = "github:GloriousEggroll/proton-ge-custom"
+version = "GE-Proton11-7"
+
+[pkg.x86_64-linux]
+url = "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton11-7/GE-Proton11-7-x86_64.tar.gz"
+hash = "sha256-xUSLdqIwOE4te8a+tcy5e6+34sO2xSfLA6GlRrvLAKA="
+
+[[pkg]]
+name = "python@3.14"
+source = "brew"
+version = "3.14.9"
+
+[[pkg]]
+name = "ripgrep"
+source = "brew"
+version = "15.2.0"
 
 [[pkg]]
 name = "rust-analyzer"
@@ -295,13 +746,76 @@ hash = "sha256-I/cR2Gtfgm4iiG8B1zVdwB4PTBNX2vopcQqVuQO0jIU="
 bins = ["rust-analyzer"]
 
 [[pkg]]
+name = "rust-analyzer"
+source = "brew"
+version = "2026-10-19"
+
+[[pkg]]
+name = "sbarlua"
+source = "git:https://github.com/FelixKratz/SbarLua@dba9cc421b868c918d5c23c408544a28aadf2f2f"
+rev = "dba9cc421b868c918d5c23c408544a28aadf2f2f"
+
+[[pkg]]
+name = "sketchybar"
+source = "brew:felixkratz/formulae"
+
+[[pkg]]
+name = "sober"
+source = "flatpak:org.vinegarhq.Sober"
+version = "1.8.0"
+
+[pkg.any]
+commit = "7b6430c703e8178baa536062099fc5a1e0c7cf213c0789695fa7660b62cb9d26"
+
+[[pkg]]
+name = "stats"
+source = "brew:cask"
+version = "3.0.22"
+
+[[pkg]]
+name = "steamed"
+source = "url:https://github.com/gaspar-of-time/Steamed/archive/14e8a1c0db188870ab3ac2059dbf941fad9c3065.tar.gz"
+
+[pkg.any]
+url = "https://github.com/gaspar-of-time/Steamed/archive/14e8a1c0db188870ab3ac2059dbf941fad9c3065.tar.gz"
+hash = "sha256-roaN9JfRExKDBT+VSf1hFMhOqqpx1nxO7Dg976AvUUI="
+
+[[pkg]]
+name = "stow"
+source = "brew"
+version = "2.4.1"
+
+[[pkg]]
+name = "stripe"
+source = "github:stripe/stripe-cli"
+version = "1.43.2"
+
+[pkg.aarch64-darwin]
+url = "https://github.com/stripe/stripe-cli/releases/download/v1.43.2/stripe_1.43.2_mac-os_arm64.tar.gz"
+hash = "sha256-9E5eUGukhGi8iJ2L+KYhEdLJaegQgVvbzfjZQ9UGtDA="
+
+[[pkg]]
+name = "syncthing-app"
+source = "brew:cask"
+version = "2.1.6-1"
+
+[[pkg]]
 name = "t3"
 source = "github:pingdotgg/t3code"
 version = "0.1.0"
 
+[pkg.aarch64-darwin]
+url = "https://github.com/pingdotgg/t3code/releases/download/v0.1.0/t3-0.1.0-linux-x64.tar.gz"
+hash = "sha256-93A/8buPYkNYAFizzPLAKrti66S5keJrux2iL0tW2bE="
+
 [pkg.x86_64-linux]
 url = "https://github.com/pingdotgg/t3code/releases/download/v0.1.0/t3-0.1.0-linux-x64.tar.gz"
 hash = "sha256-93A/8buPYkNYAFizzPLAKrti66S5keJrux2iL0tW2bE="
+
+[[pkg]]
+name = "t3-code"
+source = "brew:cask"
+version = "0.1.1"
 
 [[pkg]]
 name = "t3code-desktop"
@@ -313,6 +827,16 @@ url = "https://github.com/pingdotgg/t3code/releases/download/v0.1.0/T3-Code-0.1.
 hash = "sha256-442cX7UTsezgpwi5BtM4O1tH7RmVdbOaMeQauINOt0Q="
 
 [[pkg]]
+name = "tailscale"
+source = "brew"
+version = "1.104.2"
+
+[[pkg]]
+name = "tailwindcss-language-server"
+source = "brew"
+version = "0.16.0"
+
+[[pkg]]
 name = "tailwindcss-language-server"
 source = "npm:@tailwindcss/language-server"
 version = "0.16.0"
@@ -320,6 +844,45 @@ version = "0.16.0"
 [pkg.any]
 url = "https://registry.npmjs.org/@tailwindcss/language-server/-/language-server-0.16.0.tgz"
 hash = "sha512-ko2xr4nlFIkqwJFnnw7hfdpjbsnK0DOk+QEEI51tvKOCF97OG0RU59iGfadoaOoY6I9xkSMbTW+AAwgnGnLH3w=="
+
+[[pkg]]
+name = "taplo"
+source = "brew"
+version = "0.10.0"
+
+[[pkg]]
+name = "terminal-browser"
+source = "brew:cask"
+version = "0.13.4"
+
+[[pkg]]
+name = "terminal-notifier"
+source = "brew"
+version = "3.1.0"
+
+[[pkg]]
+name = "thaw"
+source = "brew:cask"
+version = "2.1.0"
+
+[[pkg]]
+name = "the-unarchiver"
+source = "brew:cask"
+version = "4.3.9,147,1742287964"
+
+[[pkg]]
+name = "tinycast"
+source = "brew:cask:abue-ammar/tinycast"
+
+[[pkg]]
+name = "tmux"
+source = "brew"
+version = "3.8"
+
+[[pkg]]
+name = "tmux-agent-sidebar"
+source = "git:https://github.com/hiroppy/tmux-agent-sidebar@2cff1cb955363394f8dd9c52d040d027536cfbd8"
+rev = "2cff1cb955363394f8dd9c52d040d027536cfbd8"
 
 [[pkg]]
 name = "tmux-agent-sidebar"
@@ -331,14 +894,9 @@ url = "https://github.com/hiroppy/tmux-agent-sidebar/releases/download/v0.13.0/t
 hash = "sha256-4GSVoyegdMbjjD12l/BhvbbRnwS2fZ/DATfTTZMY40Q="
 
 [[pkg]]
-name = "tree-sitter"
-source = "aqua:tree-sitter/tree-sitter"
-version = "0.26.13"
-
-[pkg.x86_64-linux]
-url = "https://github.com/tree-sitter/tree-sitter/releases/download/v0.26.13/tree-sitter-linux-x64.gz"
-hash = "sha256-yci+8CdljWAknKT8BmNXjOsuICk0a7hwLgkeINdxZHU="
-bins = ["tree-sitter"]
+name = "tree-sitter-cli"
+source = "brew"
+version = "0.27.1"
 
 [[pkg]]
 name = "typescript"
@@ -350,14 +908,23 @@ url = "https://registry.npmjs.org/typescript/-/typescript-5.9.3.tgz"
 hash = "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="
 
 [[pkg]]
-name = "uv"
-source = "aqua:astral-sh/uv"
-version = "0.13.0"
+name = "usbfluxd"
+source = "github:corellium/usbfluxd"
+version = "1.0"
 
-[pkg.x86_64-linux]
-url = "https://github.com/astral-sh/uv/releases/download/0.13.0/uv-x86_64-unknown-linux-musl.tar.gz"
-hash = "sha256-sIKPxM3EfWWVHpS18KFaU2RCDo3NiHI/OyHnouswu8M="
-bins = ["uv-x86_64-unknown-linux-musl/uv", "uv-x86_64-unknown-linux-musl/uvx"]
+[pkg.aarch64-darwin]
+url = "https://github.com/corellium/usbfluxd/releases/download/v1.0/usbfluxd-macho-arm64.tar.gz"
+hash = "sha256-uB2sr7MvdtLFRxskBFr/vlqAuPOMSfHHB5FswL7CpHw="
+
+[[pkg]]
+name = "uv"
+source = "brew"
+version = "0.13.5"
+
+[[pkg]]
+name = "vscode-langservers-extracted"
+source = "brew"
+version = "4.10.0"
 
 [[pkg]]
 name = "vscode-langservers-extracted"
@@ -370,12 +937,32 @@ hash = "sha512-EFf9uQI4dAKbzMQFjDvVm1xJq1DXAQvBEuEfPGrK/xzfsL5xWTfIuRr90NgfmqwO+
 
 [[pkg]]
 name = "vtsls"
+source = "brew"
+version = "0.3.0"
+
+[[pkg]]
+name = "vtsls"
 source = "npm:@vtsls/language-server"
 version = "0.3.0"
 
 [pkg.any]
 url = "https://registry.npmjs.org/@vtsls/language-server/-/language-server-0.3.0.tgz"
 hash = "sha512-EYTkCHNGz3MFSP7z0DZ5+WBQY5CWEH7bCUu53EaDloBTjghoi2vfZqSrS0+7WsRG03MhBhjGG9ifNee/2kixvQ=="
+
+[[pkg]]
+name = "watchman"
+source = "brew"
+version = "2026.10.19.00"
+
+[[pkg]]
+name = "wget"
+source = "brew"
+version = "1.25.0"
+
+[[pkg]]
+name = "wireguard-tools"
+source = "brew"
+version = "1.0.20260223"
 
 [[pkg]]
 name = "wl-clip-persist"
@@ -394,6 +981,16 @@ rev = "1dde760b03a5afd4761af17d8c49b7058cbd800d"
 oci = "ghcr.io/formalstudio/fspec-cache/wl-gammarelay-rs@sha256:29b6e4b8aad2d59c866ac6c4d213524dbf8425b2c34de35b85dc52705aec4ad5"
 
 [[pkg]]
+name = "xcbeautify"
+source = "brew"
+version = "3.2.1"
+
+[[pkg]]
+name = "yaml-language-server"
+source = "brew"
+version = "2.0.0"
+
+[[pkg]]
 name = "yaml-language-server"
 source = "npm:yaml-language-server"
 version = "1.24.0"
@@ -402,5 +999,28 @@ version = "1.24.0"
 url = "https://registry.npmjs.org/yaml-language-server/-/yaml-language-server-1.24.0.tgz"
 hash = "sha512-+HGcwu4M7IC+UDhDZScTZR8qsl2MMj/X1E5e83QcWzWn2pctj0fv8HHdrHHcbc1KB3CuRPJ4gc1Nm36D0iCu0g=="
 
+[[pkg]]
+name = "yazi"
+source = "brew"
+version = "26.9.1"
+
+[[pkg]]
+name = "zig"
+source = "brew"
+version = "0.17.0"
+
+[[pkg]]
+name = "zoxide"
+source = "brew"
+version = "0.10.0"
+
+[[pkg]]
+name = "zulu@21"
+source = "brew:cask"
+version = "21.0.12.1,21.52.203"
+
 [zypper.e1504g]
-snapshot = "20261020"
+snapshot = "20261021"
+
+[zypper.g815]
+snapshot = "20261021"
