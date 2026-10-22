@@ -12,8 +12,6 @@ generation on the e1504g. The Tumbleweed root is `spec.star`, `system.star` and 
 - `git()` builds on `fspec ci packages` (ubuntu-24.04) take no build dependencies. librepods
   (Qt 6 Bluetooth, libpulse), Messages and formalmusic (NativeDesktop: GTK, WebKit, Vulkan) and
   kopuzd need apt packages the runner lacks.
-- Prebuilt archives only link executables in their top two levels, and terminal-browser keeps
-  its own deeper tree, so it does not link.
 - `url()` stores a bare file as data, so the Beeper 4.3.73 AppImage cannot be a store pkg. The
   unit skips until `/opt/fspec/current/bin/beeper` exists.
 - Colloid-Dark: not in Tumbleweed's repos, and no release ships the built theme tree a `share`
@@ -24,7 +22,7 @@ generation on the e1504g. The Tumbleweed root is `spec.star`, `system.star` and 
 
 ## Open: no Tumbleweed package and no upstream binary
 
-- quickshell (dcal runs on it), dillo, uxplay: not in Tumbleweed, no release binaries.
+- quickshell (dcal runs on it), uxplay: not in Tumbleweed, no release binaries.
 
 ## Version differences from NixOS
 
@@ -37,6 +35,7 @@ generation on the e1504g. The Tumbleweed root is `spec.star`, `system.star` and 
 ## Dropped
 
 - Android Studio, codex, the formalmusic maintenance timer: not in the e1504g's generations.
+- dillo and terminal-browser: no longer wanted.
 - `.cache/nix-index`, comma, fish `nix`/`rebuild`, `NH_FLAKE`, `nixpkgs/config.nix`,
   `hm-nix-direnv.sh`, `10-hm-fonts.conf`: Nix only. `cnf` replaces command-not-found and the
   `fish-completions` timer regenerates completions.

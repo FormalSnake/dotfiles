@@ -23,7 +23,7 @@ DESKTOP = [
     # Messages: video thumbnails through ffmpeg, notifications, its Vulkan renderer and media playback.
     "ffmpeg-8", "libnotify4", "libvulkan1", "gstreamer-plugins-good", "gstreamer-plugins-bad",
     "gstreamer-plugins-libav",
-    # What the fspec-installed librepods, kopuz, formalmusic and terminal-browser (Electron) load.
+    # What the fspec-installed librepods, kopuz, formalmusic and the Electron apps load.
     "libQt6Core6", "libQt6DBus6", "libQt6Bluetooth6", "libpulse0", "libwebkit2gtk-4_1-0", "libgtk-3-0",
     "libsoup-3_0-0", "glib-networking", "libasound2", "xdotool", "libayatana-appindicator3-1", "libopus0",
     "libgbm1", "libxkbfile1", "libgtksourceview-5-0", "mozilla-nss", "libatk-bridge-2_0-0", "libcups2",
