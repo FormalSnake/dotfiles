@@ -27,6 +27,9 @@ name = "clipssh"
 source = "git:https://github.com/samuellawrentz/clipssh@c7f4e8ddcf102302c6375ba51534c7505ddc2616"
 rev = "c7f4e8ddcf102302c6375ba51534c7505ddc2616"
 
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalstudio/fspec-cache/clipssh@sha256:5ca2a4e684e7846a4bac64bc07b8582fddb54c4fa99bc304852aefce6be13e69"
+
 [[pkg]]
 name = "dcal"
 source = "github:AvengeMedia/dankcalendar"
@@ -66,10 +69,16 @@ name = "fast"
 source = "git:https://github.com/maaslalani/fast@26d8fc9c189ba748c68f8930af11dee5c2467f7e"
 rev = "26d8fc9c189ba748c68f8930af11dee5c2467f7e"
 
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalstudio/fspec-cache/fast@sha256:e0da9ea857241f6e7d964e18515c64dd1f952c2a39b6f6e0f3ab89a9efb78244"
+
 [[pkg]]
 name = "fetch"
 source = "git:https://github.com/areofyl/fetch@7b19d22c2d8e4b7b2295cc625c9fdf87adcabbcd"
 rev = "7b19d22c2d8e4b7b2295cc625c9fdf87adcabbcd"
+
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalstudio/fspec-cache/fetch@sha256:918926beb6ca9d4a1f6a50b1f817139c9ac1cad521924fed484b9836ec5a8624"
 
 [[pkg]]
 name = "flare"
@@ -82,6 +91,9 @@ commit = "eeb5f6cb3ed56eee1d1e1a8c389cd12cdf8c400cc1475405e3d950b3d8354097"
 name = "formalmusic"
 source = "git:https://github.com/FormalStudio/formalmusic@9ee98746fd0bbb804aebb8007132d1e05f992940"
 rev = "9ee98746fd0bbb804aebb8007132d1e05f992940"
+
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalstudio/fspec-cache/formalmusic@sha256:b25228763000e58e45239461655199b9a8b96b0c247791c8bb1989de9066860b"
 
 [[pkg]]
 name = "formalshell"
@@ -105,6 +117,9 @@ hash = "sha256-WyEDdm9BVzEvyTF0IDLAEPckTzWxdealmpxPvUzbWy4="
 name = "gopls"
 source = "git:https://github.com/golang/tools@gopls/v0.23.0"
 rev = "014f87ff5c01915bc90f4f11a6bb8aea3e0edbd7"
+
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalstudio/fspec-cache/gopls@sha256:697c4fd66e59cd8d179c29dd300122d77670ec1cf0d0e4a43f33a84042c3c7f7"
 
 [[pkg]]
 name = "helium"
@@ -138,6 +153,9 @@ name = "kopuzd"
 source = "git:https://github.com/Kopuz-org/kopuz@23db9b35fe45bd773e3cdcdf0d6584b13ae5b8cc"
 rev = "23db9b35fe45bd773e3cdcdf0d6584b13ae5b8cc"
 
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalstudio/fspec-cache/kopuzd@sha256:f2ccebaa3161c8338125dbba6d9f124105c5a3ec5464eba66e87223fbc0bd18a"
+
 [[pkg]]
 name = "lazydocker"
 source = "aqua:jesseduffield/lazydocker"
@@ -168,6 +186,9 @@ name = "lumen"
 source = "git:https://github.com/jnsahaj/lumen@4ad27231c3614e3f2acbc07bc794a4e8fde06fbf"
 rev = "4ad27231c3614e3f2acbc07bc794a4e8fde06fbf"
 
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalstudio/fspec-cache/lumen@sha256:a1367ceeddba6737f55e9d65cbe57e937f2da6a51a1c3ad588a7ae5bbe0e4f72"
+
 [[pkg]]
 name = "marksman"
 source = "aqua:artempyanykh/marksman"
@@ -192,15 +213,24 @@ name = "meshtop"
 source = "git:https://github.com/FormalSnake/meshtop@ca70d10d27e8fc1a0f0afc5c7d691887cb2c4020"
 rev = "ca70d10d27e8fc1a0f0afc5c7d691887cb2c4020"
 
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalstudio/fspec-cache/meshtop@sha256:a9369f0046f55d1b75d55396e0dce3345783d0ec4edb77ec1ff3dd8beac9ed23"
+
 [[pkg]]
 name = "messages"
 source = "git:https://github.com/FormalStudio/messages@8df17ef38312e240f89428e98f85ef55e95b9c95"
 rev = "8df17ef38312e240f89428e98f85ef55e95b9c95"
 
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalstudio/fspec-cache/messages@sha256:be5f138b4fbf904305d9b844523cb04fcf874e7419837260605e807b052040fd"
+
 [[pkg]]
 name = "nil"
 source = "git:https://github.com/oxalica/nil@dbbb5c24f9215476992aa1bd305f8e5398e89654"
 rev = "dbbb5c24f9215476992aa1bd305f8e5398e89654"
+
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalstudio/fspec-cache/nil@sha256:400c50aaa2a6192b73cb5cbff2a7bdc541266666d0f34d73b69911b908dd5984"
 
 [[pkg]]
 name = "nixfmt"
@@ -323,10 +353,16 @@ name = "wl-clip-persist"
 source = "git:https://github.com/Linus789/wl-clip-persist@v0.5.0"
 rev = "e26fde01c13922e3a65049dafb7d5adfbc52626e"
 
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalstudio/fspec-cache/wl-clip-persist@sha256:c39934d13d95da193d6a98b719c62882df994b467fce5e2a604efbbf36096407"
+
 [[pkg]]
 name = "wl-gammarelay-rs"
 source = "git:https://github.com/MaxVerevkin/wl-gammarelay-rs@v1.0.1"
 rev = "1dde760b03a5afd4761af17d8c49b7058cbd800d"
+
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalstudio/fspec-cache/wl-gammarelay-rs@sha256:992518d77e0da7a12d4c9c0c19582d77d50c2d4d1887cf01fc183b599a5edcd6"
 
 [[pkg]]
 name = "yaml-language-server"
