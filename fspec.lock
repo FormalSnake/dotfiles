@@ -1,4 +1,13 @@
 [[pkg]]
+name = "adw-gtk3"
+source = "github:lassekongo83/adw-gtk3"
+version = "6.5"
+
+[pkg.x86_64-linux]
+url = "https://github.com/lassekongo83/adw-gtk3/releases/download/v6.5/adw-gtk3v6.5.tar.xz"
+hash = "sha256-qBeA+t/EMr4Pw9icTrtBqijk8DLULDb5eJxX3RDPpBw="
+
+[[pkg]]
 name = "apostrophe"
 source = "flatpak:org.gnome.gitlab.somas.Apostrophe"
 

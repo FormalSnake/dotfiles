@@ -14,7 +14,7 @@ DESKTOP = [
     "xdg-utils", "evolution-data-server", "geoclue2", "libgtk-4-1", "libadwaita-1-0", "python313-gobject",
     "hyprlock", "hypridle", "hyprpicker", "ghostty", "adwaita-icon-theme", "libhidapi-hidraw0",
     "python313-evdev", "python313-FontTools", "python313-Pillow", "python313-streamdeck", "xrdb",
-    "gnome-keyring", "gvfs", "tumbler", "nautilus", "qt6ct", "qt5ct", "dconf", "glib2-tools",
+    "gnome-keyring", "gnome-keyring-pam", "hyprland-guiutils", "apparmor-abstractions", "gvfs", "tumbler", "nautilus", "qt6ct", "qt5ct", "dconf", "glib2-tools",
     "adwaita-fonts", "google-noto-sans-symbols2-fonts", "google-noto-coloremoji-fonts",
     "google-noto-sans-cjk-fonts", "liberation-fonts", "easyeffects", "pipewire-tools", "wvkbd",
     "dualsensectl", "flatpak",
@@ -106,6 +106,19 @@ exit 0
         # The NixOS root passed these as kernel arguments (modprobe.blacklist=...).
         file("/etc/modprobe.d/90-e1504g.conf", content = "blacklist ucsi_acpi\nblacklist intel_ish_ipc\n"),
         # Tumbleweed's /usr/lib/pam.d/sudo with pam_ssh_agent_auth first, as on the NixOS root.
+        # Tumbleweed's vendor greetd stack plus pam_gnome_keyring, which unlocks the login
+        # keyring with the login password as NixOS's services.gnome.gnome-keyring does.
+        file("/etc/pam.d/greetd", content = """#%PAM-1.0
+auth     requisite      pam_nologin.so
+auth     include        common-auth
+auth     optional       pam_gnome_keyring.so
+account  include        common-account
+password include        common-password
+session  required       pam_loginuid.so
+session  optional       pam_keyinit.so force revoke
+session  include        common-session
+session  optional       pam_gnome_keyring.so auto_start
+"""),
         file("/etc/pam.d/sudo", content = """#%PAM-1.0
 auth     sufficient     pam_ssh_agent_auth.so file=/etc/ssh/authorized_keys.d/%u
 auth     include        common-auth
@@ -182,6 +195,8 @@ def _pkgs():
         ),
         # Data-only: the cursor theme and the font streamdeck-keys draws with.
         pkg("bibata", version = "2.0.7", source = github("ful1e5/Bibata_Cursor", asset = "Bibata-Modern-Classic.tar.xz"), share = {"icons/Bibata-Modern-Classic": "Bibata-Modern-Classic"}),
+        # FormalShell's gtk template sets gtk-theme to adw-gtk3-dark; without it GTK3 apps are light.
+        pkg("adw-gtk3", version = "6.5", source = github("lassekongo83/adw-gtk3", asset = "adw-gtk3v*.tar.xz"), share = {"themes/adw-gtk3": "adw-gtk3", "themes/adw-gtk3-dark": "adw-gtk3-dark"}),
         pkg("geist-mono-nerd-font", version = "3.4.0", source = github("ryanoasis/nerd-fonts", asset = "GeistMono.tar.xz"), share = {"fonts/GeistMonoNerdFont": "."}),
         # The rev ~/.config/nix's flake.lock pins, so both roots run the same shell. dev/tarball.sh
         # is upstream's release build: it installs its own deps on bookworm, whose glibc it targets.

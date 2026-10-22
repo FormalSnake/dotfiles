@@ -16,8 +16,8 @@ generation on the e1504g. The Tumbleweed root is `spec.star`, `system.star` and 
   its own deeper tree, so it does not link.
 - `url()` stores a bare file as data, so the Beeper 4.3.73 AppImage cannot be a store pkg. The
   unit skips until `/opt/fspec/current/bin/beeper` exists.
-- Colloid-Dark and adw-gtk3: not in Tumbleweed's repos, and no release ships the built theme
-  tree a `share` pkg can link.
+- Colloid-Dark: not in Tumbleweed's repos, and no release ships the built theme tree a `share`
+  pkg can link.
 - Discord with Moonlight, Last.fm RPC and midnight: Tumbleweed's non-oss `discord` is 1.0.156
   (NixOS runs 1.0.164) and Discord's own tarball is brotli-compressed modules fspec cannot
   unpack. Discord runs from Flathub without Moonlight; the moonlight config files are ported.
