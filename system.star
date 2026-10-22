@@ -60,29 +60,22 @@ PACKAGES = DESKTOP + SYSTEM + CLI
 def _rootfs(path, dest = None, perms = None):
     return file(dest or "/" + path, src = ROOTFS + path, perms = perms)
 
-# zypper reads these before the packages install; both vendors document the same baseurl for
-# openSUSE (1Password's `zypper addrepo`, Nord's install.sh).
+# Both vendors document these baseurls for openSUSE (1Password's `zypper addrepo`, Nord's
+# install.sh). fspec imports each key only when its fingerprint matches.
 def _repos():
     return [
-        file("/etc/zypp/repos.d/1password.repo", content = """[1password]
-name=1Password
-baseurl=https://downloads.1password.com/linux/rpm/stable/$basearch
-enabled=1
-autorefresh=1
-type=rpm-md
-gpgcheck=1
-repo_gpgcheck=1
-gpgkey=https://downloads.1password.com/linux/keys/1password.asc
-"""),
-        file("/etc/zypp/repos.d/nordvpn.repo", content = """[nordvpn]
-name=NordVPN
-baseurl=https://repo.nordvpn.com/yum/nordvpn/centos/$basearch
-enabled=1
-autorefresh=1
-type=rpm-md
-gpgcheck=1
-gpgkey=https://repo.nordvpn.com/gpg/nordvpn_public.asc
-"""),
+        repo(
+            "1password",
+            url = "https://downloads.1password.com/linux/rpm/stable/x86_64",
+            key = "https://downloads.1password.com/linux/keys/1password.asc",
+            fingerprint = "3FEF9748469ADBE15DA7CA80AC2D62742012EA22",
+        ),
+        repo(
+            "nordvpn",
+            url = "https://repo.nordvpn.com/yum/nordvpn/centos/x86_64",
+            key = "https://repo.nordvpn.com/gpg/nordvpn_public.asc",
+            fingerprint = "BC5480EFEC5C081CE5BCFBE26B219E535C964CA1",
+        ),
     ]
 
 def _files():
