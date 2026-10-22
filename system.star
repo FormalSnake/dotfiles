@@ -116,8 +116,18 @@ session  include        common-session-nonlogin
 """),
     ] + _formalshell_files()
 
+# The host keyboard, which the greeter's sway carries so the password prompt matches the session
+# (home/.config/hypr/hyprland.lua sets the same layout).
+KEYBOARD = {"layout": "es", "options": "caps:escape"}
+
+# The greeter offers only this session, so a pick remembered from Tumbleweed's plain
+# hyprland.desktop (bare Hyprland, no graphical-session.target, no user units) cannot win.
+# The entry is NixOS's programs.hyprland.withUWSM one.
+GREETER_SESSIONS = "/etc/formalshell-greeter/wayland-sessions"
+
 # What `formalshell install --yes` writes on a distro with common-auth, greetd and sway
-# (crates/formalshell-rs/src/install.rs at the pinned rev), with the greeter from the fspec store.
+# (crates/formalshell-rs/src/install.rs at the pinned rev), with the greeter from the fspec store,
+# plus the keyboard in sway's input block and the uwsm session.
 def _formalshell_files():
     return [
         file("/etc/pam.d/formalshell-lock", content = "#%PAM-1.0\n@include common-auth\n@include common-account\n"),
@@ -128,7 +138,7 @@ def _formalshell_files():
 export XDG_RUNTIME_DIR=/run/formalshell-greeter
 export HOME=/var/lib/formalshell-greeter
 export XDG_SESSION_TYPE=wayland
-printf 'output * bg #000000 solid_color\\n' > "$HOME/sway.conf"
+printf 'output * bg #000000 solid_color\\ninput type:keyboard {\\n  xkb_layout """ + KEYBOARD["layout"] + """\\n  xkb_options """ + KEYBOARD["options"] + """\\n}\\n' > "$HOME/sway.conf"
 sway --config "$HOME/sway.conf" &
 compositor=$!
 for _ in $(seq 100); do
@@ -141,6 +151,15 @@ export WAYLAND_DISPLAY=$(basename "$socket")
 kill "$compositor" 2>/dev/null
 wait "$compositor" 2>/dev/null
 """),
+        file(GREETER_SESSIONS + "/hyprland-uwsm.desktop", content = """[Desktop Entry]
+Name=Hyprland (uwsm-managed)
+Comment=An intelligent dynamic tiling Wayland compositor
+Exec=/usr/bin/uwsm start -e -D Hyprland hyprland.desktop
+TryExec=/usr/bin/uwsm
+DesktopNames=Hyprland
+Type=Application
+"""),
+        file("/var/lib/formalshell-greeter/.config/formalshell/settings.json", content = {"greeter": {"sessionDirs": [GREETER_SESSIONS]}}),
     ]
 
 # The image's build stages, as store packages at the versions the NixOS root runs.
@@ -189,7 +208,8 @@ def _services():
     return [
         service("tailscaled"),
         service("sshd"),
-        service("greetd"),
+        # Tumbleweed boots to multi-user.target, under which greetd never starts.
+        service("greetd", display_manager = True),
         service("tuned"),
         service("tuned-ppd"),
         service("docker.socket"),
