@@ -266,7 +266,7 @@ version = "2026-09-28"
 [pkg.x86_64-linux]
 url = "https://github.com/rust-lang/rust-analyzer/releases/download/2026-09-28/rust-analyzer-x86_64-unknown-linux-gnu.gz"
 hash = "sha256-I/cR2Gtfgm4iiG8B1zVdwB4PTBNX2vopcQqVuQO0jIU="
-bins = ["rust-analyzer=rust-analyzer-x86_64-unknown-linux-gnu"]
+bins = ["rust-analyzer"]
 
 [[pkg]]
 name = "t3"
@@ -312,7 +312,7 @@ version = "0.26.13"
 [pkg.x86_64-linux]
 url = "https://github.com/tree-sitter/tree-sitter/releases/download/v0.26.13/tree-sitter-linux-x64.gz"
 hash = "sha256-yci+8CdljWAknKT8BmNXjOsuICk0a7hwLgkeINdxZHU="
-bins = ["tree-sitter=tree-sitter-linux-x64"]
+bins = ["tree-sitter"]
 
 [[pkg]]
 name = "typescript"
