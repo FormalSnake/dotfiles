@@ -31,7 +31,9 @@ DESKTOP = [
 ]
 
 SYSTEM = [
-    "tailscale", "syncthing", "docker", "tuned", "tuned-ppd", "!power-profiles-daemon", "fish", "sshfs", "usbmuxd",
+    # The minimal base ships power-profiles-daemon and busybox-gzip, which conflict with tuned-ppd
+    # and with the gzip fish needs.
+    "tailscale", "syncthing", "docker", "tuned", "tuned-ppd", "!power-profiles-daemon", "fish", "!busybox-gzip", "sshfs", "usbmuxd",
     "imobiledevice-tools", "ifuse", "smartmontools", "pam_ssh_agent_auth",
     # The wheel, audio, video and input groups the user joins.
     "system-group-wheel", "system-group-hardware",
