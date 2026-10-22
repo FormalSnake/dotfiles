@@ -36,7 +36,7 @@ DESKTOP = [
     # mixins/desktop/kde: Plasma next to Hyprland, kscreen-doctor for kwin-outputs, kwriteconfig6.
     "patterns-kde-kde_plasma", "kscreen6", "kf6-kconfig",
     # ancs4linux's runtime, and the libraries the ananicy-cpp build links.
-    "python313-dasbus", "python313-typer", "libfmt12", "libspdlog1_17",
+    "python313-dasbus", "python313-typer", "libfmt12", "libspdlog1_17", "libpcre2-8-0",
 ]
 
 SYSTEM = [
@@ -489,7 +489,7 @@ def _pkgs():
         # ananicy-cpp with CachyOS's rules, as services.ananicy has them; neither is packaged.
         pkg(
             "ananicy-cpp",
-            source = git("https://gitlab.com/ananicy-cpp/ananicy-cpp", rev = "v1.2.0", image = TUMBLEWEED, deps = ["cmake", "make", "gcc-c++", "pkgconf", "fmt-devel", "spdlog-devel", "nlohmann_json-devel", "systemd-devel"]),
+            source = git("https://gitlab.com/ananicy-cpp/ananicy-cpp", rev = "v1.2.0", image = TUMBLEWEED, deps = ["cmake", "make", "gcc-c++", "pkgconf", "fmt-devel", "spdlog-devel", "nlohmann_json-devel", "systemd-devel", "pcre2-devel"]),
             build_flags = ["-DENABLE_SYSTEMD=ON", "-DENABLE_REGEX_SUPPORT=ON", "-DUSE_EXTERNAL_FMTLIB=ON", "-DUSE_EXTERNAL_JSON=ON", "-DUSE_EXTERNAL_SPDLOG=ON", "-DVERSION=1.2.0"],
             bins = ["ananicy-cpp"],
         ),
