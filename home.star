@@ -10,6 +10,9 @@ PKG_BIN = "/opt/fspec/current/bin"
 # Files outside these keep the mode they have in the repo.
 EXECUTABLE_DIRS = ["home/.local/bin/", "home/.claude/hooks/", "home/.claude-pulse/hooks/"]
 
+# What NativeDesktop apps link against, for the Ubuntu runner that builds them.
+NATIVEDESKTOP_DEPS = ["libfontconfig-dev", "libfreetype-dev", "libxkbcommon-dev", "libxkbcommon-x11-dev", "libwayland-dev", "libvulkan-dev", "libx11-xcb-dev", "libasound2-dev", "libdbus-1-dev", "libssl-dev"]
+
 def _files():
     out = []
     for src in glob("home/**/*"):
@@ -229,6 +232,7 @@ def _tools():
         pkg(
             "messages",
             source = git("https://github.com/FormalStudio/messages", rev = "8df17ef38312e240f89428e98f85ef55e95b9c95"),
+            build_deps = NATIVEDESKTOP_DEPS,
             build = ["sh", "-c", "set -e; nd=\"$FSPEC_SRC/../nativedesktop-wt-msg-linux\"; git init -q \"$nd\"; git -C \"$nd\" fetch -q --depth 1 https://github.com/FormalStudio/NativeDesktop 7ad936d8bcf2ef7c7d026798cb63044b9c088b71; git -C \"$nd\" checkout -q FETCH_HEAD; cd \"$FSPEC_SRC\"; cargo build --release --locked -p messages; install -Dm755 target/release/messages \"$FSPEC_OUT/bin/messages\""],
         ),
         pkg("tmux-agent-sidebar", version = "0.13.0", source = github("hiroppy/tmux-agent-sidebar", asset = "tmux-agent-sidebar-linux-*")),
@@ -282,12 +286,14 @@ def _apps():
             "kopuzd",
             source = git("https://github.com/Kopuz-org/kopuz", rev = "23db9b35fe45bd773e3cdcdf0d6584b13ae5b8cc"),
             build_flags = ["-p", "kopuz-kopuzd", "-p", "kopuz-ctl"],
+            build_deps = ["libasound2-dev", "libdbus-1-dev", "libssl-dev"],
             bins = ["kopuzd", "kopuzctl"],
         ),
         # Cargo.toml points at ../nativedesktop, and libghostty-vt builds with zig 0.16.0.
         pkg(
             "formalmusic",
             source = git("https://github.com/FormalStudio/formalmusic", rev = "9ee98746fd0bbb804aebb8007132d1e05f992940"),
+            build_deps = NATIVEDESKTOP_DEPS,
             build = ["sh", "-c", "set -e; w=$(mktemp -d); git clone -q https://github.com/FormalStudio/NativeDesktop $w/nativedesktop; git -C $w/nativedesktop checkout -q 7ad936d8bcf2ef7c7d026798cb63044b9c088b71; cp -r $FSPEC_SRC $w/formalmusic; curl -fsSL https://ziglang.org/download/0.16.0/zig-x86_64-linux-0.16.0.tar.xz | tar -xJ -C $w; PATH=$w/zig-x86_64-linux-0.16.0:$PATH cargo build --release --locked --manifest-path $w/formalmusic/Cargo.toml --package formalmusic; install -Dm755 $w/formalmusic/target/release/formalmusic $FSPEC_OUT/bin/formalmusic"],
         ),
         pkg("fast", source = git("https://github.com/maaslalani/fast", rev = "26d8fc9c189ba748c68f8930af11dee5c2467f7e")),

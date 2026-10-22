@@ -35,8 +35,9 @@ SYSTEM = [
     "system-group-wheel", "system-group-hardware",
     # fish's fish_command_not_found runs openSUSE's command-not-found, which cnf ships.
     "cnf",
-    # A remote `fspec apply` unpacks the shipped spec with tar, which the base pattern lacks.
-    "tar",
+    # A remote `fspec apply` unpacks the shipped spec with tar, which the base pattern lacks; the
+    # store pulls CI-built git(...) packages from ghcr.io with oras.
+    "tar", "oras",
     # From the vendor repos below.
     "1password", "1password-cli", "nordvpn",
 ]
@@ -164,10 +165,11 @@ def _pkgs():
             "librepods",
             source = git("https://github.com/thisisgm/omarchy-pods", rev = "307c5a6d2109f088d8e6a558c933ebe4f6b1db01"),
             patches = glob("patches/librepods-*.patch"),
+            build_deps = ["qt6-base-dev", "qt6-declarative-dev", "qt6-connectivity-dev", "qt6-tools-dev", "qt6-tools-dev-tools", "qt6-l10n-tools", "libssl-dev", "libpulse-dev"],
             build = ["sh", "-c", "cmake -S \"$FSPEC_SRC/daemon\" -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=\"$FSPEC_OUT\" && cmake --build build -j && cmake --install build"],
         ),
         # nvim's nil (tag 2026-07-23) and gopls publish no Linux binaries.
-        pkg("nil", source = git("https://github.com/oxalica/nil", rev = "dbbb5c24f9215476992aa1bd305f8e5398e89654"), bins = ["nil"]),
+        pkg("nil", source = git("https://github.com/oxalica/nil", rev = "dbbb5c24f9215476992aa1bd305f8e5398e89654"), bins = ["nil"], build_deps = ["nix-bin"]),
         pkg("gopls", source = git("https://github.com/golang/tools", rev = "gopls/v0.23.0"), build = ["sh", "-c", "cd \"$FSPEC_SRC/gopls\" && GOBIN=\"$FSPEC_OUT/bin\" go install -trimpath ."]),
     ]
 
