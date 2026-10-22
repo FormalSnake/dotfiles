@@ -7,7 +7,11 @@ img="$(realpath "$1")"
 name="$(basename "$img")"
 version="$(sed -n 's/^.*-\([0-9][0-9.]*\)\.AppImage$/\1/p' <<<"$name")"
 [ -n "$version" ] || { echo "expected <Name>-<version>.AppImage, got $name" >&2; exit 1; }
-nix-store --add-fixed sha256 "$img" >/dev/null
+# Without a root, the auto-GC that runs before the next build deletes the image.
+path="$(nix-store --add-fixed sha256 "$img")"
+root_dir="${XDG_STATE_HOME:-$HOME/.local/state}/lynk-browser"
+mkdir -p "$root_dir"
+nix-store --realise --add-root "$root_dir/image" --indirect "$path" >/dev/null
 hash="$(nix hash file --type sha256 --sri "$img")"
 jq -n --arg name "$name" --arg version "$version" --arg hash "$hash" \
   '{name: $name, version: $version, hash: $hash}' \
