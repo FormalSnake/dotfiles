@@ -180,6 +180,11 @@ let
   # fresh overlay's first boot reboots by itself too, hence the try around
   # Restart-Computer, and the reboot can cut the ssh session before it
   # returns (exit 255).
+  #
+  # Zig in the guest fails TLS to deps.files.ghostty.org (TlsInitializationFailed)
+  # where PowerShell gets through, so nd's libghostty-vt-sys build cannot fetch
+  # its packages there. The host's own Linux builds already fetched them into
+  # ~/.cache/zig/p; the guest gets that cache as its zig global cache.
   prep = pkgs.writeShellApplication {
     name = "windows-vm-prep";
     runtimeInputs = with pkgs; [
@@ -217,6 +222,8 @@ let
         foreach (\$d in \"\$k\\AppData\\Local\\Microsoft\\WinGet\", \"\$k\\.nd-tools\", \"\$k\\.cargo\", \"\$k\\.rustup\", \"\$k\\.dotnet\") { \
           if (Test-Path \$d) { icacls \$d /grant 'ndvm:(OI)(CI)(RX)' /T /C /Q | Out-Null } }; \
         New-Item -ItemType Directory -Force C:\\nd | Out-Null; icacls C:\\nd /grant 'ndvm:(OI)(CI)(M)' /Q | Out-Null; \
+        New-Item -ItemType Directory -Force C:\\nd\\zig-cache | Out-Null; \
+        [Environment]::SetEnvironmentVariable('ZIG_GLOBAL_CACHE_DIR', 'C:\\nd\\zig-cache', 'Machine'); \
         try { Restart-Computer -Force -ErrorAction Stop } catch { }" || [ $? = 255 ]
       # Wait for sshd to go down with the old boot before waiting for it back.
       for _ in $(seq 60); do guest exit 2>/dev/null || break; sleep 2; done
@@ -240,6 +247,11 @@ let
       done
       if [ "$ok" = 0 ]; then echo "ndvm never logged in" >&2; exit 1; fi
       guest "if (Test-Path C:\\pagefile.sys) { 'pagefile still present' } else { 'pagefile off' }"
+      if [ -d "$HOME/.cache/zig/p" ]; then
+        scp -q -r -P 2222 -o BatchMode=yes -o LogLevel=ERROR \
+          -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+          "$HOME/.cache/zig/p" kyan@127.0.0.1:C:/nd/zig-cache/ || echo "zig cache copy failed" >&2
+      fi
     '';
   };
 in
