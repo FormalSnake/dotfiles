@@ -8,11 +8,6 @@ standalone with `fspec --spec macbook.star plan --host macbook --local`.
 
 Each one is a request queued with the formalspec agent.
 
-- System settings outside user defaults (request 4): `pmset` sleep never and `womp 1`,
-  `systemsetup -setRestartFreeze on` and `-setremotelogin on`, the application firewall off (it
-  drops mosh's UDP), and root-domain defaults: `com.apple.SoftwareUpdate
-  AutomaticallyInstallMacOSUpdates = false`, `com.apple.RemoteManagement RestoreMachineState =
-  false`. These already hold on the machine and survive without nix; a fresh Mac would miss them.
 - `.app` bundles from store packages (request 5): Messages and FormalMusic (FormalStudio source
   builds), Kopuz (dmg only, no cask). Nothing places an app in `/Applications`, and fspec unpacks
   no dmg. The kopuzd daemon and kopuzctl are declared; the player app is not.

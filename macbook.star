@@ -275,6 +275,24 @@ DEFAULTS = {
 def _defaults():
     return [defaults(d, k, v) for d, keys in DEFAULTS.items() for k, v in keys.items()]
 
+# The remote work server has to stay reachable with nobody at it. On 2026-07-23 an unattended
+# reboot left it at the login window, asleep within minutes and unreachable.
+def _system():
+    return [
+        setting("pmset", "sleep", 0),
+        # Wake on LAN and Bonjour wake-on-demand, for a lid close or a manual sleep.
+        setting("pmset", "womp", 1),
+        setting("systemsetup", "restartfreeze", True),
+        setting("systemsetup", "remotelogin", True),
+        # The firewall drops inbound UDP to ad-hoc-signed binaries, which kills mosh, and its allow
+        # list stopped taking effect in macOS 26.5.2. Tailscale and the network edge gate inbound.
+        setting("firewall", "globalstate", False),
+        # An unattended update reboot parks the machine at the FileVault screen.
+        defaults("com.apple.SoftwareUpdate", "AutomaticallyInstallMacOSUpdates", False, system = True),
+        # Screen Sharing would lock the screen again when a session that unlocked it ends.
+        defaults("com.apple.RemoteManagement", "RestoreMachineState", False, system = True),
+    ]
+
 # ---- launchd ----
 
 def _logs(name, extra = {}):
@@ -395,7 +413,7 @@ def _services():
     return out
 
 def _all(h):
-    return _brew() + _store() + _home() + _rootfs() + _secrets() + _defaults() + _services()
+    return _brew() + _store() + _home() + _rootfs() + _secrets() + _defaults() + _system() + _services()
 
 macbook = host(
     name = "macbook",
