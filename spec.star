@@ -39,7 +39,12 @@ GROUPS = ["wheel", "video", "audio", "input", "docker", "uinput", "i2c", "nordvp
 e1504g = host(
     name = "e1504g",
     platform = "x86_64-linux",
-    system = tumbleweed(packages = PACKAGES + E1504G_PACKAGES),
+    # mixins/core/boot.nix and plymouth: mitigations off, VT-d on, quiet boot. The two modules the
+    # initrd would load before /etc/modprobe.d applies are blacklisted here too.
+    system = tumbleweed(packages = PACKAGES + E1504G_PACKAGES, kernel_args = [
+        "mitigations=off", "intel_iommu=on", "quiet", "splash", "udev.log_level=3",
+        "module_blacklist=ucsi_acpi,intel_ish_ipc",
+    ]),
     users = [user("kyandesutter", uid = 1000, shell = "fish", groups = GROUPS)],
     builders = [builder("g815", routes = ["g815", "192.168.86.95"])],
     modules = secrets() + [system, home, boot],
@@ -48,7 +53,11 @@ e1504g = host(
 g815 = host(
     name = "g815",
     platform = "x86_64-linux",
-    system = tumbleweed(packages = PACKAGES + G815_PACKAGES),
+    # NixOS's boot.kernelParams minus root=fstab and lsm=, which Tumbleweed sets itself.
+    system = tumbleweed(packages = PACKAGES + G815_PACKAGES, kernel_args = [
+        "nvidia-drm.modeset=1", "acpi_backlight=native", "cfg80211.ieee80211_regdom=ES", "mitigations=off",
+        "quiet", "splash", "loglevel=3", "udev.log_level=3",
+    ]),
     users = [user("kyandesutter", uid = 1000, shell = "fish", groups = GROUPS + ["gamemode"])],
     modules = secrets() + [system, home, g815],
 )

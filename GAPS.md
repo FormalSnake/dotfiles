@@ -86,9 +86,6 @@ Nothing beyond the shared list.
 
 ### Waiting on formalspec
 
-- Kernel arguments: `tumbleweed(kernel_args = [...])` (FR). The cmdline needs
-  `nvidia-drm.modeset=1 acpi_backlight=native cfg80211.ieee80211_regdom=ES mitigations=off`;
-  the full `/etc/kernel/cmdline` cannot be a file because the root UUID is unknown before install.
 - The root is ext4, so the install needs `fspec disk` to carve the Tumbleweed root before
   `fspec switch --beside`.
 
