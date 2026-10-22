@@ -124,6 +124,8 @@ KEYBOARD = {"layout": "es", "options": "caps:escape"}
 # hyprland.desktop (bare Hyprland, no graphical-session.target, no user units) cannot win.
 # The entry is NixOS's programs.hyprland.withUWSM one.
 GREETER_SESSIONS = "/etc/formalshell-greeter/wayland-sessions"
+# A greeter without the session picker starts greeter.sessionCommand instead.
+UWSM_HYPRLAND = "/usr/bin/uwsm start -e -D Hyprland hyprland.desktop"
 
 # What `formalshell install --yes` writes on a distro with common-auth, greetd and sway
 # (crates/formalshell-rs/src/install.rs at the pinned rev), with the greeter from the fspec store,
@@ -154,12 +156,12 @@ wait "$compositor" 2>/dev/null
         file(GREETER_SESSIONS + "/hyprland-uwsm.desktop", content = """[Desktop Entry]
 Name=Hyprland (uwsm-managed)
 Comment=An intelligent dynamic tiling Wayland compositor
-Exec=/usr/bin/uwsm start -e -D Hyprland hyprland.desktop
+Exec=""" + UWSM_HYPRLAND + """
 TryExec=/usr/bin/uwsm
 DesktopNames=Hyprland
 Type=Application
 """),
-        file("/var/lib/formalshell-greeter/.config/formalshell/settings.json", content = {"greeter": {"sessionDirs": [GREETER_SESSIONS]}}),
+        file("/var/lib/formalshell-greeter/.config/formalshell/settings.json", content = {"greeter": {"sessionDirs": [GREETER_SESSIONS], "sessionCommand": [UWSM_HYPRLAND]}}),
     ]
 
 # The image's build stages, as store packages at the versions the NixOS root runs.
