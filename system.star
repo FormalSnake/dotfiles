@@ -47,6 +47,11 @@ SYSTEM = [
     "tar", "oras",
     # useradd and usermod, which the base pattern leaves out.
     "shadow",
+    # Video decode (Chromium dlopens libva), IRQ spreading, mDNS printer discovery, network and USB
+    # diagnostics, DDC/CI buses for ddcutil, the GNOME online-accounts panel, and the userspace OOM guard.
+    # ideviceinstaller has no Tumbleweed package.
+    "intel-media-driver", "libva-utils", "irqbalance", "avahi", "nss-mdns", "cups-filters-cups-browsed",
+    "traceroute", "mtr", "usbutils", "alsa-utils", "i2c-tools", "gnome-control-center", "earlyoom",
 ]
 
 CLI = [
@@ -107,7 +112,33 @@ SUBSYSTEM=="usb", ATTRS{idVendor}=="0fd9", TAG+="uaccess"
 exit 0
 """),
         # The NixOS root passed these as kernel arguments (modprobe.blacklist=...).
-        file("/etc/modprobe.d/90-e1504g.conf", content = "blacklist ucsi_acpi\nblacklist intel_ish_ipc\n"),
+        # blacklist alone does not stop a modalias or explicit load, so each module also gets an install stub.
+        file("/etc/modprobe.d/90-e1504g.conf", content = "blacklist ucsi_acpi\ninstall ucsi_acpi /bin/false\nblacklist intel_ish_ipc\ninstall intel_ish_ipc /bin/false\n"),
+        # mixins/core/boot.nix and plymouth: mitigations off, VT-d on, quiet boot. fspec-esp-sync
+        # copies this line into each Tumbleweed entry.
+        file("/etc/kernel/cmdline", content = "root=UUID=1a10e345-3d66-4bde-9f6b-55d43e6f7e0d rootflags=subvol=@tumbleweed,noatime,compress=zstd:1 rw panic=10 rd.shell=0 rd.emergency=reboot mitigations=off intel_iommu=on quiet udev.log_level=3\n"),
+        # mixins/tuning/systemd-tuning.nix: cap how long a wedged unit can hold up boot or reboot.
+        file("/etc/systemd/system.conf.d/10-kyan-timeouts.conf", content = "[Manager]\nDefaultTimeoutStopSec=5s\nDefaultTimeoutStartSec=15s\n"),
+        file("/etc/systemd/user.conf.d/10-kyan-timeouts.conf", content = "[Manager]\nDefaultTimeoutStopSec=5s\nDefaultTimeoutStartSec=15s\n"),
+        # mixins/core/boot.nix: the journal and coredumps otherwise grow to a share of /var.
+        file("/etc/systemd/journald.conf.d/10-kyan.conf", content = "[Journal]\nSystemMaxUse=500M\n"),
+        file("/etc/systemd/coredump.conf.d/10-kyan.conf", content = "[Coredump]\nMaxUse=256M\n"),
+        # The sysctls of mixins/core/boot.nix that 90-fspec.conf does not already carry.
+        file("/etc/sysctl.d/90-kyan.conf", content = "vm.dirty_writeback_centisecs = 1500\nnet.core.netdev_max_backlog = 4096\n"),
+        # THP defrag and HWP dynamic boost from mixins/core/boot.nix.
+        file("/etc/tmpfiles.d/90-kyan-tuning.conf", content = "w! /sys/kernel/mm/transparent_hugepage/defrag - - - - defer+madvise\nw! /sys/devices/system/cpu/intel_pstate/hwp_dynamic_boost - - - - 1\n"),
+        file("/etc/udev/rules.d/60-kyan-ioschedulers.rules", content = """ACTION=="add|change", KERNEL=="nvme[0-9]*", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="kyber"
+ACTION=="add|change", KERNEL=="sd[a-z]*", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="mq-deadline"
+"""),
+        # NixOS's 16 GB swapfile in @swap (NOCOW), behind zram: priority 1 under zram's 5.
+        file("/etc/systemd/system/swap.mount", content = "[Unit]\nDescription=The @swap subvolume\n\n[Mount]\nWhat=UUID=1a10e345-3d66-4bde-9f6b-55d43e6f7e0d\nWhere=/swap\nType=btrfs\nOptions=subvol=@swap,noatime\n\n[Install]\nWantedBy=local-fs.target\n"),
+        file("/etc/systemd/system/swap-swapfile.swap", content = "[Unit]\nDescription=Swapfile in @swap\nRequires=swap.mount\nAfter=swap.mount\n\n[Swap]\nWhat=/swap/swapfile\nPriority=1\n\n[Install]\nWantedBy=swap.target\n"),
+        # mixins/hardware/mouse.nix: MX Master 3S back/forward to F13/F14, gesture button to Super.
+        file("/etc/udev/hwdb.d/70-mx-master.hwdb", content = "evdev:input:b0005v046DpB034*\n KEYBOARD_KEY_90004=f13\n KEYBOARD_KEY_90005=f14\n KEYBOARD_KEY_90006=leftmeta\n"),
+        # mixins/core/networking.nix: Google DNS for every connection, over what DHCP hands out.
+        file("/etc/NetworkManager/conf.d/90-kyan-dns.conf", content = "[global-dns-domain-*]\nservers=8.8.8.8,8.8.4.4\n"),
+        # mixins/core/boot.nix earlyoom.
+        file("/etc/sysconfig/earlyoom", content = "EARLYOOM_ARGS=\"-n -m 10 -s 70 --avoid '^(Hyprland|hyprland|\\.dms-wrapped|dms|\\.quickshell-wra|quickshell|qs|polkit-kde-aut|sshd|systemd)$'\"\n"),
         # Tumbleweed's /usr/lib/pam.d/sudo with pam_ssh_agent_auth first, as on the NixOS root.
         # Tumbleweed's vendor greetd stack plus pam_gnome_keyring, which unlocks the login
         # keyring with the login password as NixOS's services.gnome.gnome-keyring does.
@@ -255,6 +286,13 @@ def _services():
         service("sshd"),
         service("bluetooth"),
         service("chronyd"),
+        service("irqbalance"),
+        service("avahi-daemon"),
+        service("cups-browsed"),
+        service("earlyoom"),
+        service("swap.mount"),
+        service("swap-swapfile.swap"),
+        service("hwdb", exec = "/usr/bin/systemd-hwdb update", description = "Compile /etc/udev/hwdb.d", systemd = {"Type": "oneshot", "RemainAfterExit": True}),
         # Tumbleweed boots to multi-user.target, under which greetd never starts.
         service("greetd", display_manager = True),
         service("tuned"),
