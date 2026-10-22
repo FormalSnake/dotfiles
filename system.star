@@ -44,8 +44,6 @@ SYSTEM = [
     "tar", "oras",
     # useradd and usermod, which the base pattern leaves out.
     "shadow",
-    # From the vendor repos below.
-    "1password", "1password-cli",
 ]
 
 CLI = [
@@ -148,6 +146,9 @@ wait "$compositor" 2>/dev/null
 # The image's build stages, as store packages at the versions the NixOS root runs.
 def _pkgs():
     return [
+        # The CLI's %post runs groupadd, so it installs after shadow, in the packages phase.
+        pkg("1password", source = zypper(repo = "1password")),
+        pkg("1password-cli", source = zypper(repo = "1password")),
         # From Nord's repo, which a filtering network can block; then it and its units wait for
         # the next apply. The rpm's postinstall enables the three units.
         pkg(
