@@ -35,6 +35,8 @@ SYSTEM = [
     "system-group-wheel", "system-group-hardware",
     # fish's fish_command_not_found runs openSUSE's command-not-found, which cnf ships.
     "cnf",
+    # A remote `fspec apply` unpacks the shipped spec with tar, which the base pattern lacks.
+    "tar",
     # From the vendor repos below.
     "1password", "1password-cli", "nordvpn",
 ]

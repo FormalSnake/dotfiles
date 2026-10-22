@@ -3,7 +3,7 @@
 # (it logs "Failed to write config" and keeps what it read), so this file stays as rendered.
 set -eu
 conf=/home/kyandesutter/.config/moonlight-mod/stable.json
-secret=/etc/fspec/secrets/lastfm-api-key
+secret=/run/fspec/secrets/lastfm-api-key
 key=""
 if [ -r "$secret" ]; then
   key=$(tr -d '\n' < "$secret")
