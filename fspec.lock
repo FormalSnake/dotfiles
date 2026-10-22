@@ -37,8 +37,8 @@ version = "1.39.4"
 
 [[pkg]]
 name = "ananicy-cpp"
-source = "git:https://gitlab.com/ananicy-cpp/ananicy-cpp@v1.2.0"
-rev = "7117eaf278082bdbb8e25d94c4f7a141afeb1ae4"
+source = "git:https://gitlab.com/ananicy-cpp/ananicy-cpp@3554447c1ca495478bd00e002078847dfd2205d6"
+rev = "3554447c1ca495478bd00e002078847dfd2205d6"
 
 [[pkg]]
 name = "ananicy-rules"

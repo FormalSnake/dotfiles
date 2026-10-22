@@ -487,9 +487,10 @@ def _pkgs():
             build = ["sh", "-c", ANCS4LINUX_BUILD],
         ),
         # ananicy-cpp with CachyOS's rules, as services.ananicy has them; neither is packaged.
+        # Past v1.2.0: that tag misses the headers glibc 2.42 no longer pulls in.
         pkg(
             "ananicy-cpp",
-            source = git("https://gitlab.com/ananicy-cpp/ananicy-cpp", rev = "v1.2.0", image = TUMBLEWEED, deps = ["cmake", "make", "gcc-c++", "pkgconf", "fmt-devel", "spdlog-devel", "nlohmann_json-devel", "systemd-devel", "pcre2-devel"]),
+            source = git("https://gitlab.com/ananicy-cpp/ananicy-cpp", rev = "3554447c1ca495478bd00e002078847dfd2205d6", image = TUMBLEWEED, deps = ["cmake", "make", "gcc-c++", "pkgconf", "fmt-devel", "spdlog-devel", "nlohmann_json-devel", "systemd-devel", "pcre2-devel"]),
             build_flags = ["-DENABLE_SYSTEMD=ON", "-DENABLE_REGEX_SUPPORT=ON", "-DUSE_EXTERNAL_FMTLIB=ON", "-DUSE_EXTERNAL_JSON=ON", "-DUSE_EXTERNAL_SPDLOG=ON", "-DVERSION=1.2.0"],
             bins = ["ananicy-cpp"],
         ),
