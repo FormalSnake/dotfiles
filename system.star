@@ -35,6 +35,9 @@ SYSTEM = [
     # and with the gzip fish needs.
     "tailscale", "syncthing", "docker", "tuned", "tuned-ppd", "!power-profiles-daemon", "fish", "!busybox-gzip", "sshfs", "usbmuxd",
     "imobiledevice-tools", "ifuse", "smartmontools", "pam_ssh_agent_auth",
+    # The rest of ~/.config/nix's core and hardware mixins: the Tiger Lake DSP's audio firmware
+    # (no sinks without it), BlueZ, chrony, fwupd, and the es_ES and en_GB locales.
+    "sof-firmware", "bluez", "chrony", "fwupd", "glibc-locale",
     # The wheel, audio, video and input groups the user joins.
     "system-group-wheel", "system-group-hardware",
     # fish's fish_command_not_found runs openSUSE's command-not-found, which cnf ships.
@@ -108,6 +111,15 @@ exit 0
         # Tumbleweed's /usr/lib/pam.d/sudo with pam_ssh_agent_auth first, as on the NixOS root.
         # Tumbleweed's vendor greetd stack plus pam_gnome_keyring, which unlocks the login
         # keyring with the login password as NixOS's services.gnome.gnome-keyring does.
+        # mixins/core/locale.nix: en_US with British time and Spanish units, the es console keymap
+        # and the Canary Islands' zone (NixOS's tzupdate only moved it when travelling).
+        file("/etc/locale.conf", content = "LANG=en_US.UTF-8\nLC_TIME=en_GB.UTF-8\nLC_MONETARY=es_ES.UTF-8\nLC_PAPER=es_ES.UTF-8\nLC_MEASUREMENT=es_ES.UTF-8\n"),
+        file("/etc/vconsole.conf", content = "KEYMAP=es\n"),
+        file("/etc/localtime", mode = "link", src = "/usr/share/zoneinfo/Atlantic/Canary"),
+        # mixins/hardware/bluetooth.nix: powered on at boot, experimental features (battery levels),
+        # and HID devices that are not bonded over classic Bluetooth, like the DualSense over BLE.
+        file("/etc/bluetooth/main.conf", content = "[General]\nExperimental = true\nFastConnectable = true\n\n[Policy]\nAutoEnable = true\n"),
+        file("/etc/bluetooth/input.conf", content = "[General]\nClassicBondedOnly = false\n"),
         # NixOS wrote loader.conf until its root went; Tumbleweed's entries are the ones to boot,
         # ahead of the one-shot installer entry that sorts before them.
         file("/boot/efi/loader/loader.conf", content = "timeout 4\nconsole-mode keep\npreferred tumbleweed-*\n"),
@@ -241,6 +253,8 @@ def _services():
     return [
         service("tailscaled"),
         service("sshd"),
+        service("bluetooth"),
+        service("chronyd"),
         # Tumbleweed boots to multi-user.target, under which greetd never starts.
         service("greetd", display_manager = True),
         service("tuned"),
