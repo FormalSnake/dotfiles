@@ -31,7 +31,7 @@ DESKTOP = [
 ]
 
 SYSTEM = [
-    "tailscale", "syncthing", "docker", "tuned", "tuned-ppd", "fish", "sshfs", "usbmuxd",
+    "tailscale", "syncthing", "docker", "tuned", "tuned-ppd", "!power-profiles-daemon", "fish", "sshfs", "usbmuxd",
     "imobiledevice-tools", "ifuse", "smartmontools", "pam_ssh_agent_auth",
     # The wheel, audio, video and input groups the user joins.
     "system-group-wheel", "system-group-hardware",
