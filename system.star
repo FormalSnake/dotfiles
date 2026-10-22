@@ -249,8 +249,9 @@ session  include        common-session-nonlogin
         file("/var/lib/systemd/linger/kyandesutter", content = ""),
         # mixins/tuning/scx.nix: scx_bpfland (scx_lavd busy-loops a core on Arrow Lake-HX).
         file("/etc/default/scx", content = "SCX_SCHEDULER=scx_bpfland\nSCX_FLAGS=\n"),
-        # ananicy-cpp reads its config and rules only from /etc/ananicy.d.
-        file("/etc/ananicy.d", mode = "link", src = "/usr/local/share/ananicy-rules/cachyos"),
+        # ananicy-cpp reads its config and rules only from /etc/ananicy.d. The target appears when the
+        # ananicy-rules pkg installs, later in the same apply.
+        file("/etc/ananicy.d", mode = "link", target = "/usr/local/share/ananicy-rules/cachyos"),
         # mixins/hardware/usbflux.nix: usbmuxd over TCP 5000 for Xcode on the macbook, tailnet only
         # (the firewall trusts tailscale0 and leaves 5000 closed elsewhere).
         file("/etc/systemd/system/usbflux-export.socket", content = "[Unit]\nDescription=usbmuxd TCP export for remote Xcode\n\n[Socket]\nListenStream=5000\n\n[Install]\nWantedBy=sockets.target\n"),
