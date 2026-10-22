@@ -108,6 +108,9 @@ exit 0
         # Tumbleweed's /usr/lib/pam.d/sudo with pam_ssh_agent_auth first, as on the NixOS root.
         # Tumbleweed's vendor greetd stack plus pam_gnome_keyring, which unlocks the login
         # keyring with the login password as NixOS's services.gnome.gnome-keyring does.
+        # NixOS wrote loader.conf until its root went; Tumbleweed's entries are the ones to boot,
+        # ahead of the one-shot installer entry that sorts before them.
+        file("/boot/efi/loader/loader.conf", content = "timeout 4\nconsole-mode keep\npreferred tumbleweed-*\n"),
         # NixOS's xdg.portal.config.hyprland: gnome-keyring's Secret portal is gated UseIn=gnome.
         file("/etc/xdg-desktop-portal/hyprland-portals.conf", content = "[preferred]\ndefault=hyprland;gtk\norg.freedesktop.impl.portal.Secret=gnome-keyring\n"),
         file("/etc/pam.d/greetd", content = """#%PAM-1.0
