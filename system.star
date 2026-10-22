@@ -4,6 +4,8 @@
 
 ROOTFS = "e1504g/rootfs/"
 PKG_BIN = "/opt/fspec/current/bin"
+# git() builds that link system libraries run in the target's own distro, so the sonames match.
+TUMBLEWEED = "registry.opensuse.org/opensuse/tumbleweed"
 
 DESKTOP = [
     "hyprland", "uwsm", "xdg-desktop-portal-hyprland", "xdg-desktop-portal-gtk", "greetd", "sway",
@@ -163,13 +165,18 @@ def _pkgs():
         # build carries; the daemon lives in daemon/.
         pkg(
             "librepods",
-            source = git("https://github.com/thisisgm/omarchy-pods", rev = "307c5a6d2109f088d8e6a558c933ebe4f6b1db01"),
+            source = git(
+                "https://github.com/thisisgm/omarchy-pods",
+                rev = "307c5a6d2109f088d8e6a558c933ebe4f6b1db01",
+                image = TUMBLEWEED,
+                deps = ["cmake", "make", "gcc-c++", "pkgconf", "qt6-base-devel", "qt6-declarative-devel", "qt6-quickcontrols2-devel", "qt6-connectivity-devel", "qt6-tools-devel", "qt6-linguist-devel", "libopenssl-devel", "libpulse-devel"],
+            ),
             patches = glob("patches/librepods-*.patch"),
-            build_deps = ["qt6-base-dev", "qt6-declarative-dev", "qt6-connectivity-dev", "qt6-tools-dev", "qt6-tools-dev-tools", "qt6-l10n-tools", "libssl-dev", "libpulse-dev"],
             build = ["sh", "-c", "cmake -S \"$FSPEC_SRC/daemon\" -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=\"$FSPEC_OUT\" && cmake --build build -j && cmake --install build"],
         ),
         # nvim's nil (tag 2026-07-23) and gopls publish no Linux binaries.
-        pkg("nil", source = git("https://github.com/oxalica/nil", rev = "dbbb5c24f9215476992aa1bd305f8e5398e89654"), bins = ["nil"], build_deps = ["nix-bin"]),
+        # nil's build script asks nix for its builtins.
+        pkg("nil", source = git("https://github.com/oxalica/nil", rev = "dbbb5c24f9215476992aa1bd305f8e5398e89654", image = TUMBLEWEED, deps = ["cargo", "gcc", "nix"]), bins = ["nil"]),
         pkg("gopls", source = git("https://github.com/golang/tools", rev = "gopls/v0.23.0"), build = ["sh", "-c", "cd \"$FSPEC_SRC/gopls\" && GOBIN=\"$FSPEC_OUT/bin\" go install -trimpath ."]),
     ]
 
