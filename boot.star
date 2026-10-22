@@ -24,7 +24,8 @@ def boot_theme(
         timeout = 4,
         wallpaper_size = "400x560",
         wallpaper_scale = 4,
-        preferred = "tumbleweed-*"):
+        preferred = "tumbleweed-*",
+        chime = None):
     return {
         "name": name,
         "branding": branding,
@@ -38,7 +39,25 @@ def boot_theme(
         "wallpaper_size": wallpaper_size,
         "wallpaper_scale": wallpaper_scale,
         "preferred": preferred,
+        "chime": chime,
     }
+
+# A boot chime: a store package that ships `wav` under /usr/local/share/<share>.
+def boot_chime(pkg, share, wav):
+    return {"pkg": pkg, "path": "/usr/local/share/%s/%s" % (share, wav)}
+
+# chime.py synthesises the wav with the stdlib only, at the rev of ~/.config/nix the NixOS root
+# had, so the store builds it once instead of the repo carrying a binary.
+FORMALOS_CHIME = boot_chime(
+    pkg(
+        "formalos-chime",
+        source = git("https://github.com/FormalSnake/dotfiles", rev = "98ca1b6c069b2eb1029cc9b816b735bcc3251202"),
+        build = ["sh", "-c", "mkdir -p \"$FSPEC_OUT\" && python3 \"$FSPEC_SRC/modules/nixos/mixins/core/chime/chime.py\" \"$FSPEC_OUT/formalos-chime.wav\""],
+        share = {"sounds/formalos-chime": "."},
+    ),
+    share = "sounds/formalos-chime",
+    wav = "formalos-chime.wav",
+)
 
 # Flexoki on black, with the olive progress-bar green as the accent. Limine's built-in font is
 # IBM VGA 8x16, the face the blog uses for its NT stop screen.
@@ -52,6 +71,7 @@ FORMALOS = boot_theme(
     # Cyan is the comment line under the menu.
     palette = "000000;af3029;879a39;ad8301;205ea6;a02f6f;878580;878580",
     palette_bright = "575653;d14d41;a0af54;d0a215;4385be;ce5d97;3aa99f;cecdc3",
+    chime = FORMALOS_CHIME,
 )
 
 def _limine_conf(t):
@@ -95,8 +115,30 @@ def _theme_env(t):
         ("wallpaper_scale", t["wallpaper_scale"]),
     ]])
 
-def formalos_boot(t):
+# Plays while the splash is up: ahead of the greeter without holding it back, never failing the
+# boot. aplay and amixer come from alsa-utils in system.star's packages.
+def _chime(c):
     return [
+        c["pkg"],
+        file("/usr/local/libexec/formalos-boot-chime", src = ROOTFS + "usr/libexec/formalos-boot-chime", perms = "0755"),
+        service(
+            "boot-chime",
+            exec = "/usr/local/libexec/formalos-boot-chime " + c["path"],
+            description = "Boot chime",
+            systemd = {
+                "Type": "exec",
+                "unit": {
+                    "DefaultDependencies": False,
+                    "Wants": "sound.target",
+                    "After": "sound.target",
+                    "Before": "display-manager.service",
+                },
+            },
+        ),
+    ]
+
+def formalos_boot(t):
+    return (_chime(t["chime"]) if t["chime"] else []) + [
         pkg("plymouth", source = zypper(), files = [
             file("/etc/plymouth/plymouthd.conf", content = "[Daemon]\nTheme=%s\nShowDelay=0\nDeviceTimeout=8\n" % t["name"]),
         ]),

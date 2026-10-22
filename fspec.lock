@@ -114,6 +114,11 @@ rev = "9ee98746fd0bbb804aebb8007132d1e05f992940"
 oci = "ghcr.io/formalstudio/fspec-cache/formalmusic@sha256:314cac1507413e878fc38c62ebfb382c3effe797708794529d7078edec4daa79"
 
 [[pkg]]
+name = "formalos-chime"
+source = "git:https://github.com/FormalSnake/dotfiles@98ca1b6c069b2eb1029cc9b816b735bcc3251202"
+rev = "98ca1b6c069b2eb1029cc9b816b735bcc3251202"
+
+[[pkg]]
 name = "formalshell"
 source = "git:https://github.com/FormalSnake/FormalShell@e8a800d3da54f586f187a328916785ff691f8759"
 rev = "e8a800d3da54f586f187a328916785ff691f8759"
