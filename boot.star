@@ -139,6 +139,8 @@ def _chime(c):
             description = "Boot chime",
             systemd = {
                 "Type": "exec",
+                # An exited unit is inactive, and apply starts every inactive unit it wants.
+                "RemainAfterExit": True,
                 "unit": {
                     "DefaultDependencies": False,
                     "Wants": "sound.target",

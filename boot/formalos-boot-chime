@@ -5,6 +5,8 @@
 wav=$1
 # Boot only: an apply that restarts the unit must not play it mid-session.
 case $(systemctl is-system-running) in initializing | starting) ;; *) exit 0 ;; esac
+# A unit started long after boot (an apply, a restart) is not a boot.
+[ "$(cut -d. -f1 /proc/uptime)" -lt 120 ] || exit 0
 # sound.target comes before SOF has loaded its firmware and registered the card.
 for _ in $(seq 50); do
 	grep -lqE '^(id|name): .*Analog' /proc/asound/card*/pcm*p/info 2>/dev/null && break
