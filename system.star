@@ -481,7 +481,7 @@ def _pkgs():
         # nvim's nil (tag 2026-07-23) publishes no Linux binaries; its build script asks nix for its
         # builtins. Tumbleweed's nix 2.35.3 segfaults in a container, even on --version, so this
         # builds on Debian, whose cargo is older than nil's rust-version 1.89.
-        pkg("nil", source = git("https://github.com/oxalica/nil", rev = "dbbb5c24f9215476992aa1bd305f8e5398e89654", image = "docker.io/library/debian:trixie", deps = ["rustup", "gcc", "libc6-dev", "nix-bin"]), build = ["sh", "-c", NIL_BUILD], bins = ["nil"]),
+        pkg("nil", source = git("https://github.com/oxalica/nil", rev = "dbbb5c24f9215476992aa1bd305f8e5398e89654", image = "docker.io/library/debian:trixie", deps = ["rustup", "ca-certificates", "gcc", "libc6-dev", "nix-bin"]), build = ["sh", "-c", NIL_BUILD], bins = ["nil"]),
         # FormalShell's iPhone panel: ancs4linux at the rev and patches FormalShell's nix/ancs4linux.nix
         # builds, on Tumbleweed's python and its dasbus, gobject and typer.
         pkg(

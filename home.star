@@ -336,10 +336,10 @@ def _apps():
         pkg("claude", source = url("https://registry.npmjs.org/@anthropic-ai/claude-code-linux-x64/-/claude-code-linux-x64-2.1.289.tgz")),
         pkg("kopuz", version = "0.22.0", source = github("Kopuz-org/kopuz", asset = "kopuz_v*_x86_64-linux.tar.gz")),
         # formalmusic starts kopuzd when no daemon runs; the release tarball has only the player.
-        # rookie's build script shells out to git.
+        # rookie's build script shells out to git, and a C++ dependency builds through cc-rs.
         pkg(
             "kopuzd",
-            source = git("https://github.com/Kopuz-org/kopuz", rev = "23db9b35fe45bd773e3cdcdf0d6584b13ae5b8cc", image = TUMBLEWEED, deps = ["rustup", "gcc", "cmake", "make", "pkgconf", "alsa-devel", "dbus-1-devel", "libopenssl-devel", "git-core"]),
+            source = git("https://github.com/Kopuz-org/kopuz", rev = "23db9b35fe45bd773e3cdcdf0d6584b13ae5b8cc", image = TUMBLEWEED, deps = ["rustup", "gcc", "cmake", "make", "pkgconf", "alsa-devel", "dbus-1-devel", "libopenssl-devel", "git-core", "gcc-c++"]),
             build_flags = ["-p", "kopuz-kopuzd", "-p", "kopuz-ctl"],
             bins = ["kopuzd", "kopuzctl"],
         ),
