@@ -28,7 +28,8 @@ def _wallpapers():
         sync(
             "wallpapers",
             peers = PAIR,
-            paths = ["~/Pictures/Wallpapers/dark/", "~/Pictures/Wallpapers/light/", "~/Pictures/Wallpapers/originals/"],
+            # dark/, light/, originals/ and the loose files at the top, which pickers also offer.
+            paths = ["~/Pictures/Wallpapers/"],
         ),
         # The rest of state.json is per host. formalshell-greeter-mirror.path (system.star) watches
         # state.json, so the greeter follows.
