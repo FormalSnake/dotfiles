@@ -1,4 +1,4 @@
-{ lib, osConfig ? { }, ... }:
+{ config, lib, pkgs, osConfig ? { }, ... }:
 let
   # nix-darwin leaves networking.hostName null, so the sole darwin host falls
   # back to its flake attribute (same rule as mixins/dev/claude-code.nix).
@@ -30,11 +30,27 @@ let
       key = "┃   ${label}${lib.fixedWidthString (7 - lib.stringLength label) " " ""}";
       format = "${value} ┃";
     }) [ "label" "value" ];
+
+  # The packages module validates its cache with three `nix-store --query`
+  # calls through the daemon on every run, which stall for seconds while the
+  # daemon is busy (the g815 builds for the e1504g). The row shows the last
+  # count instead, refreshed in the background after fastfetch has drawn.
+  pkgsCount = "${config.xdg.cacheHome}/fastfetch/pkgs-count";
+  refreshPkgsCount = pkgs.writeShellScript "fastfetch-pkgs-count" ''
+    n=$(${lib.getExe config.programs.fastfetch.package} -c none -s packages --format json \
+      | ${lib.getExe pkgs.jq} -r '.[0].result.all') || exit 0
+    mkdir -p "${config.xdg.cacheHome}/fastfetch"
+    tmp=$(mktemp "${pkgsCount}.XXXXXX") && echo "$n" > "$tmp" && mv "$tmp" "${pkgsCount}"
+  '';
 in
 {
   # Interactive shells only, and not the ones an agent opens for itself.
   programs.fish.interactiveShellInit = lib.mkAfter ''
-    set -q CLAUDECODE; or fastfetch
+    if not set -q CLAUDECODE
+      fastfetch
+      ${refreshPkgsCount} &
+      disown
+    end
   '';
 
   programs.fastfetch.settings = {
@@ -64,7 +80,7 @@ in
       (hwRow "cpu" "cpu")
       (hwRow "gpu" "gpu")
       (row { type = "memory";   label = "mem";    value = "${pad 12 "used"} / ${pad 9 "total"}"; })
-      (row { type = "packages"; label = "pkgs";   value = pad width "all"; })
+      (row { type = "command";  label = "pkgs";   value = pad width "1"; text = "cat ${pkgsCount} 2>/dev/null || echo -"; })
       { type = "custom"; key = "┗${bar}┛"; }
       "break"
     ];
