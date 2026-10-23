@@ -376,6 +376,9 @@ in
       # runs cava itself, gated on playback; binary on PATH is enough.
       cava
 
+      # secret-tool: fspec sync reads and writes keyring items through it.
+      libsecret
+
       brightnessctl
       ddcutil # external-monitor brightness over DDC/CI (the shell's brightness backend; drives the slider + the XF86MonBrightness keybinds)
       playerctl
