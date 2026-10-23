@@ -48,6 +48,12 @@
       bluetui
       # ifconfig/route/netstat. Linux-only because macOS ships them in /sbin.
       nettools
+      # What the Xcode CLT and rustup give the mac outside a devshell: node-gyp
+      # builds, plain `make`, and cargo in repos without a flake.
+      gcc
+      gnumake
+      pkg-config
+      rustup
     ];
 
   programs = {
