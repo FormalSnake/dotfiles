@@ -7,7 +7,7 @@ from `spec.star`: `fspec --spec examples/kyan/spec.star plan --host macbook --lo
 ## Not verified
 
 - The pam_ssh_agent_auth, sbarlua, Messages and FormalMusic `git()` recipes have not been
-  built: they run on the macos-14 CI runner. pam_ssh_agent_auth follows nixpkgs' recipe (its four patches in
+  built: they run on the macos-15 CI runner. pam_ssh_agent_auth follows nixpkgs' recipe (its four patches in
   `patches/`, ed25519-donna at `8757bd4`, autoreconf, OpenSSL 3 from Homebrew) plus the
   `-std=gnu99 -D_FORTIFY_SOURCE=0` the nix override adds for OpenPAM.
 
