@@ -13,6 +13,8 @@ let
     name = "formalos-chime";
     runtimeInputs = [ pkgs.alsa-utils pkgs.gnugrep pkgs.coreutils ];
     text = ''
+      # A start long after boot is a switch picking the unit up, not a boot.
+      [ "$(cut -d. -f1 /proc/uptime)" -lt 120 ] || exit 0
       # sound.target comes before SOF has loaded its firmware and registered
       # the card, so wait for the PCM while the splash is still up.
       for _ in $(seq 50); do
@@ -43,10 +45,13 @@ in
     after = [ "sound.target" ];
     before = [ "display-manager.service" ];
     unitConfig.DefaultDependencies = false;
-    # Boot only: a rebuild that changes it must not play it mid-session.
+    # Boot only. restartIfChanged covers a changed unit; RemainAfterExit keeps
+    # it active after playing, since switch-to-configuration starts any
+    # inactive unit multi-user.target wants, so every rebuild replayed it.
     restartIfChanged = false;
     serviceConfig = {
       Type = "exec";
+      RemainAfterExit = true;
       ExecStart = "-${play}/bin/formalos-chime";
     };
   };
