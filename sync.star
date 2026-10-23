@@ -38,7 +38,8 @@ def _wallpapers():
             peers = PAIR,
             keys = json_keys("~/.local/state/formalshell/state.json", ["wallpaper"]),
             after = ["wallpapers"],
-            on_receive = PKG_BIN + "/formalshell ipc --any-display call wallpaper set {wallpaper}",
+            # With no shell running (logged out) there is nothing to tell: it reads state.json at start.
+            on_receive = "[ -S \"$XDG_RUNTIME_DIR/formalshell/ipc-default.sock\" ] || exit 0; " + PKG_BIN + "/formalshell ipc --any-display call wallpaper set {wallpaper}",
         ),
     ]
 
