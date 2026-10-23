@@ -170,7 +170,8 @@
     "superpowers@claude-plugins-official": true,
     "swift-lsp@claude-plugins-official": true,
     "tmux-agent-notifications@claude-plugin-tmux-notifications": true,
-    "typescript-lsp@claude-plugins-official": true
+    "typescript-lsp@claude-plugins-official": true,
+    "cloudflare@cloudflare": true
   },
   "extraKnownMarketplaces": {
     "expo-plugins": {
@@ -183,6 +184,12 @@
       "source": {
         "source": "github",
         "repo": "CanaryCoders/skills"
+      }
+    },
+    "cloudflare": {
+      "source": {
+        "repo": "cloudflare/skills",
+        "source": "github"
       }
     }
   },
