@@ -792,7 +792,7 @@ version = "2.2.4,21120"
 name = "pam_ssh_agent_auth"
 source = "git:https://github.com/jbeverly/pam_ssh_agent_auth@7ff785809f6ecad45051e333c0ffa72e15ba4f2a"
 rev = "7ff785809f6ecad45051e333c0ffa72e15ba4f2a"
-patches = "sha256-H2JKlDTc4G8yFOwUCdQjdCEzgP/DB5LrwCBVRioASv0="
+patches = "sha256-ovQrzhqdk4eXj+xFd1ZI8LNIPMdjPo+ufm4WzSNbSvg="
 
 [[pkg]]
 name = "parsec"
