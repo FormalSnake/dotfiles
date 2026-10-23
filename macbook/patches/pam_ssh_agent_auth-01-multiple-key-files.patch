@@ -1,7 +1,8 @@
-diff -u pam_ssh_agent_auth-0.10.3-orig/iterate_ssh_agent_keys.c pam_ssh_agent_auth-0.10.3/iterate_ssh_agent_keys.c
---- pam_ssh_agent_auth-0.10.3-orig/iterate_ssh_agent_keys.c	2016-11-12 19:24:32.000000000 -0800
-+++ pam_ssh_agent_auth-0.10.3/iterate_ssh_agent_keys.c	2017-03-02 23:47:18.012203283 -0800
-@@ -176,7 +176,7 @@
+diff --git a/iterate_ssh_agent_keys.c b/iterate_ssh_agent_keys.c
+index 1f551c2..df1f178 100644
+--- a/iterate_ssh_agent_keys.c
++++ b/iterate_ssh_agent_keys.c
+@@ -176,7 +176,7 @@ pamsshagentauth_session_id2_gen(Buffer * session_id2, const char * user,
      return;
  }
  
@@ -10,7 +11,7 @@ diff -u pam_ssh_agent_auth-0.10.3-orig/iterate_ssh_agent_keys.c pam_ssh_agent_au
  pamsshagentauth_find_authorized_keys(const char * user, const char * ruser, const char * servicename)
  {
      Buffer session_id2 = { 0 };
-@@ -184,7 +184,7 @@
+@@ -184,7 +184,7 @@ pamsshagentauth_find_authorized_keys(const char * user, const char * ruser, cons
      Key *key;
      AuthenticationConnection *ac;
      char *comment;
@@ -19,7 +20,7 @@ diff -u pam_ssh_agent_auth-0.10.3-orig/iterate_ssh_agent_keys.c pam_ssh_agent_au
      uid_t uid = getpwnam(ruser)->pw_uid;
  
      OpenSSL_add_all_digests();
-@@ -199,13 +199,11 @@
+@@ -199,13 +199,11 @@ pamsshagentauth_find_authorized_keys(const char * user, const char * ruser, cons
                  id->key = key;
                  id->filename = comment;
                  id->ac = ac;
@@ -35,16 +36,17 @@ diff -u pam_ssh_agent_auth-0.10.3-orig/iterate_ssh_agent_keys.c pam_ssh_agent_au
                      break;
              }
          }
-@@ -217,5 +215,5 @@
+@@ -217,5 +215,5 @@ pamsshagentauth_find_authorized_keys(const char * user, const char * ruser, cons
      }
      /* pamsshagentauth_xfree(session_id2); */
      EVP_cleanup();
 -    return retval;
 +    return key_file;
  }
-diff -u pam_ssh_agent_auth-0.10.3-orig/iterate_ssh_agent_keys.h pam_ssh_agent_auth-0.10.3/iterate_ssh_agent_keys.h
---- pam_ssh_agent_auth-0.10.3-orig/iterate_ssh_agent_keys.h	2016-11-12 19:24:32.000000000 -0800
-+++ pam_ssh_agent_auth-0.10.3/iterate_ssh_agent_keys.h	2017-03-02 23:48:06.345803339 -0800
+diff --git a/iterate_ssh_agent_keys.h b/iterate_ssh_agent_keys.h
+index e6c75aa..483e750 100644
+--- a/iterate_ssh_agent_keys.h
++++ b/iterate_ssh_agent_keys.h
 @@ -31,6 +31,6 @@
  #ifndef _ITERATE_SSH_AGENT_KEYS_H
  #define _ITERATE_SSH_AGENT_KEYS_H
@@ -53,10 +55,11 @@ diff -u pam_ssh_agent_auth-0.10.3-orig/iterate_ssh_agent_keys.h pam_ssh_agent_au
 +const char * pamsshagentauth_find_authorized_keys(const char * user, const char * ruser, const char * servicename);
  
  #endif
-diff -u pam_ssh_agent_auth-0.10.3-orig/pam_ssh_agent_auth.c pam_ssh_agent_auth-0.10.3/pam_ssh_agent_auth.c
---- pam_ssh_agent_auth-0.10.3-orig/pam_ssh_agent_auth.c	2016-11-12 19:24:32.000000000 -0800
-+++ pam_ssh_agent_auth-0.10.3/pam_ssh_agent_auth.c	2017-03-02 23:51:57.642669946 -0800
-@@ -61,7 +61,6 @@
+diff --git a/pam_ssh_agent_auth.c b/pam_ssh_agent_auth.c
+index 1af81f5..366184a 100644
+--- a/pam_ssh_agent_auth.c
++++ b/pam_ssh_agent_auth.c
+@@ -62,7 +62,6 @@
  #define strncasecmp_literal(A,B) strncasecmp( A, B, sizeof(B) - 1)
  #define UNUSED(expr) do { (void)(expr); } while (0)
  
@@ -64,7 +67,7 @@ diff -u pam_ssh_agent_auth-0.10.3-orig/pam_ssh_agent_auth.c pam_ssh_agent_auth-0
  uint8_t         allow_user_owned_authorized_keys_file = 0;
  char           *authorized_keys_command = NULL;
  char           *authorized_keys_command_user = NULL;
-@@ -171,15 +170,13 @@
+@@ -173,15 +172,13 @@ pam_sm_authenticate(pam_handle_t * pamh, int flags, int argc, const char **argv)
          goto cleanexit;
      }
  
@@ -87,19 +90,25 @@ diff -u pam_ssh_agent_auth-0.10.3-orig/pam_ssh_agent_auth.c pam_ssh_agent_auth-0
  
      /*
       * PAM_USER and PAM_RUSER do not necessarily have to get set by the calling application, and we may be unable to divine the latter.
-@@ -184,5 +181,5 @@
+@@ -189,7 +186,7 @@ pam_sm_authenticate(pam_handle_t * pamh, int flags, int argc, const char **argv)
       */
  
      if(user && strlen(ruser) > 0) {
 -        pamsshagentauth_verbose("Attempting authentication: `%s' as `%s' using %s", ruser, user, authorized_keys_file);
 +        pamsshagentauth_verbose("Attempting authentication: `%s' as `%s' using %s", ruser, user, authorized_keys_file_input);
  
-@@ -201,3 +197,3 @@
+         /*
+          * Attempt to read data from the sshd if we're being called as an auth agent.
+@@ -200,7 +197,7 @@ pam_sm_authenticate(pam_handle_t * pamh, int flags, int argc, const char **argv)
+             pamsshagentauth_verbose("Got SSH_AUTH_INFO_0: `%.20s...'", ssh_user_auth);
+             if (userauth_pubkey_from_pam(ruser, ssh_user_auth) > 0) {
                  retval = PAM_SUCCESS;
 -                pamsshagentauth_logit("Authenticated (sshd): `%s' as `%s' using %s", ruser, user, authorized_keys_file);
 +                pamsshagentauth_logit("Authenticated (sshd): `%s' as `%s' using %s", ruser, user, authorized_keys_file_input);
- 
-@@ -211,11 +208,12 @@
+                 goto cleanexit;
+             }
+         }
+@@ -208,11 +205,12 @@ pam_sm_authenticate(pam_handle_t * pamh, int flags, int argc, const char **argv)
          /*
           * this pw_uid is used to validate the SSH_AUTH_SOCK, and so must be the uid of the ruser invoking the program, not the target-user
           */
@@ -115,7 +124,7 @@ diff -u pam_ssh_agent_auth-0.10.3-orig/pam_ssh_agent_auth.c pam_ssh_agent_auth-0
          }
      } else {
          pamsshagentauth_logit("No %s specified, cannot continue with this form of authentication", (user) ? "ruser" : "user" );
-@@ -208,7 +206,7 @@
+@@ -224,7 +222,7 @@ cleanexit:
      free(__progname);
  #endif
  
@@ -124,10 +133,11 @@ diff -u pam_ssh_agent_auth-0.10.3-orig/pam_ssh_agent_auth.c pam_ssh_agent_auth-0
  
      return retval;
  }
-diff -u pam_ssh_agent_auth-0.10.3-orig/pam_ssh_agent_auth.pod pam_ssh_agent_auth-0.10.3/pam_ssh_agent_auth.pod
---- pam_ssh_agent_auth-0.10.3-orig/pam_ssh_agent_auth.pod	2016-11-12 19:24:32.000000000 -0800
-+++ pam_ssh_agent_auth-0.10.3/pam_ssh_agent_auth.pod	2017-03-02 23:52:28.914857449 -0800
-@@ -31,7 +31,7 @@
+diff --git a/pam_ssh_agent_auth.pod b/pam_ssh_agent_auth.pod
+index f645df3..6036490 100644
+--- a/pam_ssh_agent_auth.pod
++++ b/pam_ssh_agent_auth.pod
+@@ -56,7 +56,7 @@ This configuration would permit anyone who originally authenticated to sshd with
  
  =item file=<path to authorized_keys>
  
@@ -136,9 +146,10 @@ diff -u pam_ssh_agent_auth-0.10.3-orig/pam_ssh_agent_auth.pod pam_ssh_agent_auth
  
  =item allow_user_owned_authorized_keys_file
  
-diff -u pam_ssh_agent_auth-0.10.3-orig/pam_user_authorized_keys.c pam_ssh_agent_auth-0.10.3/pam_user_authorized_keys.c
---- pam_ssh_agent_auth-0.10.3-orig/pam_user_authorized_keys.c	2016-11-12 19:24:32.000000000 -0800
-+++ pam_ssh_agent_auth-0.10.3/pam_user_authorized_keys.c	2017-03-03 00:07:45.201322570 -0800
+diff --git a/pam_user_authorized_keys.c b/pam_user_authorized_keys.c
+index abe7a15..18b67de 100644
+--- a/pam_user_authorized_keys.c
++++ b/pam_user_authorized_keys.c
 @@ -79,8 +79,12 @@
  
  #include "identity.h"
@@ -153,7 +164,7 @@ diff -u pam_ssh_agent_auth-0.10.3-orig/pam_user_authorized_keys.c pam_ssh_agent_
  
  extern char *authorized_keys_command;
  
-@@ -91,79 +95,88 @@
+@@ -91,79 +95,88 @@ extern uint8_t allow_user_owned_authorized_keys_file;
  uid_t authorized_keys_file_allowed_owner_uid;
  
  void
@@ -176,31 +187,14 @@ diff -u pam_ssh_agent_auth-0.10.3-orig/pam_user_authorized_keys.c pam_ssh_agent_
 -     */
 -    strncat(auth_keys_file_buf, authorized_keys_file_input,
 -            sizeof(auth_keys_file_buf) - 1);
-+    char fqdn[HOST_NAME_MAX] = "";
- 
+-
 -    if(allow_user_owned_authorized_keys_file)
 -        authorized_keys_file_allowed_owner_uid = getpwnam(user)->pw_uid;
-+#if HAVE_GETHOSTNAME
-+    *hostname = '\0';
-+    gethostname(fqdn, HOST_NAME_MAX);
-+    strncat(hostname, fqdn, strcspn(fqdn,"."));
-+#endif
- 
+-
 -    if(*auth_keys_file_buf == '~') {
 -        if(*(auth_keys_file_buf + 1) == '/') {
 -            authorized_keys_file_allowed_owner_uid = getpwnam(user)->pw_uid;
-+    while (pos) {
-+        const char *colon = strchr(pos, ':');
-+        char auth_keys_file_buf[4096] = "";
-+        char *slash_ptr = NULL;
-+        char owner_uname[128] = "";
-+        size_t owner_uname_len = 0;
-+
-+        strncat(auth_keys_file_buf, pos, sizeof(auth_keys_file_buf) - 1);
-+        if (colon) {
-+            auth_keys_file_buf[colon - pos] = 0;
-+            pos = colon + 1;
-         } else {
+-        } else {
 -            slash_ptr = strchr(auth_keys_file_buf, '/');
 -            if(!slash_ptr)
 -                pamsshagentauth_fatal
@@ -214,6 +208,46 @@ diff -u pam_ssh_agent_auth-0.10.3-orig/pam_user_authorized_keys.c pam_ssh_agent_
 -            if(!authorized_keys_file_allowed_owner_uid)
 -                authorized_keys_file_allowed_owner_uid =
 -                    getpwnam(owner_uname)->pw_uid;
+-        }
+-        authorized_keys_file =
+-            pamsshagentauth_tilde_expand_filename(auth_keys_file_buf,
+-                                                  authorized_keys_file_allowed_owner_uid);
+-        strncpy(auth_keys_file_buf, authorized_keys_file,
+-                sizeof(auth_keys_file_buf) - 1);
+-        pamsshagentauth_xfree(authorized_keys_file)        /* when we
+-                                                              percent_expand
+-                                                              later, we'd step
+-                                                              on this, so free
+-                                                              it immediately */ ;
+-    }
++    char fqdn[HOST_NAME_MAX] = "";
+ 
+-    if(strstr(auth_keys_file_buf, "%h")) {
+-        authorized_keys_file_allowed_owner_uid = getpwnam(user)->pw_uid;
+-    }
+ #if HAVE_GETHOSTNAME
+     *hostname = '\0';
+     gethostname(fqdn, HOST_NAME_MAX);
+-    strncat(hostname, fqdn, strcspn(fqdn, "."));
++    strncat(hostname, fqdn, strcspn(fqdn,"."));
+ #endif
+-    authorized_keys_file =
+-        pamsshagentauth_percent_expand(auth_keys_file_buf, "h",
+-                                       getpwnam(user)->pw_dir, "H", hostname,
+-                                       "f", fqdn, "u", user, NULL);
++
++    while (pos) {
++        const char *colon = strchr(pos, ':');
++        char auth_keys_file_buf[4096] = "";
++        char *slash_ptr = NULL;
++        char owner_uname[128] = "";
++        size_t owner_uname_len = 0;
++
++        strncat(auth_keys_file_buf, pos, sizeof(auth_keys_file_buf) - 1);
++        if (colon) {
++            auth_keys_file_buf[colon - pos] = 0;
++            pos = colon + 1;
++        } else {
 +            pos = 0;
 +        }
 +
@@ -240,21 +274,8 @@ diff -u pam_ssh_agent_auth-0.10.3-orig/pam_user_authorized_keys.c pam_ssh_agent_
 +            char *tmp = pamsshagentauth_tilde_expand_filename(auth_keys_file_buf, authorized_keys_file_allowed_owner_uid);
 +            strncpy(auth_keys_file_buf, tmp, sizeof(auth_keys_file_buf) - 1 );
 +            pamsshagentauth_xfree(tmp);
-         }
--        authorized_keys_file =
--            pamsshagentauth_tilde_expand_filename(auth_keys_file_buf,
--                                                  authorized_keys_file_allowed_owner_uid);
--        strncpy(auth_keys_file_buf, authorized_keys_file,
--                sizeof(auth_keys_file_buf) - 1);
--        pamsshagentauth_xfree(authorized_keys_file)        /* when we
--                                                              percent_expand
--                                                              later, we'd step
--                                                              on this, so free
--                                                              it immediately */ ;
--    }
- 
--    if(strstr(auth_keys_file_buf, "%h")) {
--        authorized_keys_file_allowed_owner_uid = getpwnam(user)->pw_uid;
++        }
++
 +        if(strstr(auth_keys_file_buf, "%h")) {
 +            authorized_keys_file_allowed_owner_uid = getpwnam(user)->pw_uid;
 +        }
@@ -263,19 +284,9 @@ diff -u pam_ssh_agent_auth-0.10.3-orig/pam_user_authorized_keys.c pam_ssh_agent_
 +            pamsshagentauth_fatal("Too many authorized key files");
 +        authorized_keys_files[nr_authorized_keys_files++] =
 +            pamsshagentauth_percent_expand(auth_keys_file_buf, "h", getpwnam(user)->pw_dir, "H", hostname, "f", fqdn, "u", user, NULL);
-     }
--#if HAVE_GETHOSTNAME
--    *hostname = '\0';
--    gethostname(fqdn, HOST_NAME_MAX);
--    strncat(hostname, fqdn, strcspn(fqdn, "."));
--#endif
--    authorized_keys_file =
--        pamsshagentauth_percent_expand(auth_keys_file_buf, "h",
--                                       getpwnam(user)->pw_dir, "H", hostname,
--                                       "f", fqdn, "u", user, NULL);
- }
- 
--int
++    }
++}
++
 +void
 +free_authorized_key_files()
 +{
@@ -283,8 +294,9 @@ diff -u pam_ssh_agent_auth-0.10.3-orig/pam_user_authorized_keys.c pam_ssh_agent_
 +    for (n = 0; n < nr_authorized_keys_files; n++)
 +        free(authorized_keys_files[n]);
 +    nr_authorized_keys_files = 0;
-+}
-+
+ }
+ 
+-int
 +const char *
  pam_user_key_allowed(const char *ruser, Key * key)
  {
@@ -305,9 +317,10 @@ diff -u pam_ssh_agent_auth-0.10.3-orig/pam_user_authorized_keys.c pam_ssh_agent_
 +    }
 +    return 0;
  }
-diff -u pam_ssh_agent_auth-0.10.3-orig/pam_user_authorized_keys.h pam_ssh_agent_auth-0.10.3/pam_user_authorized_keys.h
---- pam_ssh_agent_auth-0.10.3-orig/pam_user_authorized_keys.h	2016-11-12 19:24:32.000000000 -0800
-+++ pam_ssh_agent_auth-0.10.3/pam_user_authorized_keys.h	2017-03-03 00:09:17.256064914 -0800
+diff --git a/pam_user_authorized_keys.h b/pam_user_authorized_keys.h
+index a871bf0..5a11bbd 100644
+--- a/pam_user_authorized_keys.h
++++ b/pam_user_authorized_keys.h
 @@ -28,11 +28,12 @@
   */
  
@@ -325,9 +338,10 @@ diff -u pam_ssh_agent_auth-0.10.3-orig/pam_user_authorized_keys.h pam_ssh_agent_
 +void free_authorized_key_files();
  
  #endif
-diff -u pam_ssh_agent_auth-0.10.3-orig/userauth_pubkey_from_id.c pam_ssh_agent_auth-0.10.3/userauth_pubkey_from_id.c
---- pam_ssh_agent_auth-0.10.3-orig/userauth_pubkey_from_id.c	2016-11-12 19:24:32.000000000 -0800
-+++ pam_ssh_agent_auth-0.10.3/userauth_pubkey_from_id.c	2017-03-03 00:10:33.163545380 -0800
+diff --git a/userauth_pubkey_from_id.c b/userauth_pubkey_from_id.c
+index df61c91..50275a5 100644
+--- a/userauth_pubkey_from_id.c
++++ b/userauth_pubkey_from_id.c
 @@ -52,7 +52,7 @@
  extern uint8_t  session_id_len;
   */
@@ -337,7 +351,7 @@ diff -u pam_ssh_agent_auth-0.10.3-orig/userauth_pubkey_from_id.c pam_ssh_agent_a
  userauth_pubkey_from_id(const char *ruser, Identity * id, Buffer * session_id2)
  {
      Buffer          b = { 0 };
-@@ -60,11 +60,12 @@
+@@ -60,11 +60,12 @@ userauth_pubkey_from_id(const char *ruser, Identity * id, Buffer * session_id2)
      u_char         *pkblob = NULL, *sig = NULL;
      u_int           blen = 0, slen = 0;
      int             authenticated = 0;
@@ -351,16 +365,17 @@ diff -u pam_ssh_agent_auth-0.10.3-orig/userauth_pubkey_from_id.c pam_ssh_agent_a
          goto user_auth_clean_exit;
  
      if(pamsshagentauth_key_to_blob(id->key, &pkblob, &blen) == 0)
-@@ -97,5 +98,5 @@
+@@ -97,5 +98,5 @@ userauth_pubkey_from_id(const char *ruser, Identity * id, Buffer * session_id2)
      if(pkblob != NULL)
          pamsshagentauth_xfree(pkblob);
      CRYPTO_cleanup_all_ex_data();
 -    return authenticated;
 +    return authenticated ? key_file : 0;
  }
-diff -u pam_ssh_agent_auth-0.10.3-orig/userauth_pubkey_from_id.h pam_ssh_agent_auth-0.10.3/userauth_pubkey_from_id.h
---- pam_ssh_agent_auth-0.10.3-orig/userauth_pubkey_from_id.h	2016-11-12 19:24:32.000000000 -0800
-+++ pam_ssh_agent_auth-0.10.3/userauth_pubkey_from_id.h	2017-03-03 00:10:59.067046872 -0800
+diff --git a/userauth_pubkey_from_id.h b/userauth_pubkey_from_id.h
+index 7758808..6e4d242 100644
+--- a/userauth_pubkey_from_id.h
++++ b/userauth_pubkey_from_id.h
 @@ -32,6 +32,6 @@
  #define _USERAUTH_PUBKEY_FROM_ID_H
  

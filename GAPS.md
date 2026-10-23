@@ -28,8 +28,7 @@ earlier Fedora Atomic image and nothing loads it.
 
 ### Not verified
 
-- The `git()` builds of uxplay and colloid-icon-theme have not run: no CI job builds them yet, so
-  the g815 builds them on the first apply.
+- uxplay and colloid-icon-theme run as `fspec-packages.yml` jobs; nothing has applied them yet.
 
 ### Version differences from NixOS
 
