@@ -11,14 +11,14 @@ from `spec.star`: `fspec --spec examples/kyan/spec.star plan --host macbook --lo
   `patches/`, ed25519-donna at `8757bd4`, autoreconf, OpenSSL 3 from Homebrew) plus the
   `-std=gnu99 -D_FORTIFY_SOURCE=0` the nix override adds for OpenPAM.
 
-## Waiting on formalspec: sync
+## Not in sync.star yet
 
-Secret-carrying state, declared once formalspec's encrypted sync lands (`../sync.star` drafts the
-Linux pair's items; the macbook's join it then):
+Secret-carrying state `fspec sync` can carry, still to be declared with the macbook as a peer
+(`../sync.star` holds the Linux pair's items):
 
 - The Helium profile.
 - Claude Code sign-ins: `~/.claude.json` (oauthAccount) and the `~/.claude-pulse` login.
-- `gh` auth (`~/.config/gh/hosts.yml`), 1Password, NordVPN, Tailscale node state.
+- `gh` auth (`~/.config/gh/hosts.yml`), NordVPN, Tailscale node state. 1Password stays per device.
 - App sessions: Discord, BlueBubbles, Parsec, Jump Desktop, Syncthing's device keys.
 - `~/.config/age/keys.txt`, the identity the secrets decrypt with, and `~/.ssh` keys.
 

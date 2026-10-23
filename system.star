@@ -38,7 +38,7 @@ DESKTOP = [
     "libQt6Core6", "libQt6DBus6", "libQt6Bluetooth6", "libpulse0", "libwebkit2gtk-4_1-0", "libgtk-3-0",
     "libsoup-3_0-0", "glib-networking", "libasound2", "xdotool", "libayatana-appindicator3-1", "libopus0",
     "libgbm1", "libxkbfile1", "libgtksourceview-5-0", "mozilla-nss", "libatk-bridge-2_0-0", "libcups2",
-    "libXcomposite1", "libXdamage1", "libXrandr2", "libsecret-1-0", "libpipewire-0_3-0", "libxshmfence1",
+    "libXcomposite1", "libXdamage1", "libXrandr2", "libsecret-1-0", "secret-tool", "libpipewire-0_3-0", "libxshmfence1",
     # mixins/desktop/kde: Plasma next to Hyprland, kscreen-doctor for kwin-outputs, kwriteconfig6.
     "patterns-kde-kde_plasma", "kscreen6", "kf6-kconfig",
     # ancs4linux's runtime, and the libraries the ananicy-cpp build links.

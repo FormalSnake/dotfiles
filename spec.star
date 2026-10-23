@@ -3,6 +3,7 @@ load("//g815.star", G815_PACKAGES = "PACKAGES", "WINDOWS_BOOT", "g815")
 load("//home.star", "home")
 load("//system.star", "E1504G_PACKAGES", "PACKAGES", "system")
 load("//macbook.star", "macbook")
+load("//sync.star", "sync_items")
 
 # Kyan's Linux hosts, ported from ~/.config/nix. Both run openSUSE Tumbleweed (the e1504g beside its
 # NixOS root); GAPS.md lists what is not ported and why.
@@ -47,7 +48,7 @@ e1504g = host(
     ]),
     users = [user("kyandesutter", uid = 1000, shell = "fish", groups = GROUPS)],
     builders = [builder("g815", routes = ["g815", "192.168.86.95"])],
-    modules = secrets() + [system, home, boot()],
+    modules = secrets() + sync_items() + [system, home, boot()],
 )
 
 g815 = host(
@@ -59,7 +60,7 @@ g815 = host(
         "quiet", "splash", "loglevel=3", "udev.log_level=3",
     ]),
     users = [user("kyandesutter", uid = 1000, shell = "fish", groups = GROUPS + ["gamemode"])],
-    modules = secrets() + [system, home, g815, boot(entries = [WINDOWS_BOOT])],
+    modules = secrets() + sync_items() + [system, home, g815, boot(entries = [WINDOWS_BOOT])],
 )
 
 hosts = [e1504g, g815, macbook]

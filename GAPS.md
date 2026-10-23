@@ -7,16 +7,6 @@ earlier Fedora Atomic image and nothing loads it.
 
 ## Both Linux hosts
 
-### Waiting on formalspec
-
-- users-before-packages: Users run before Packages, so on a first apply
-  `usermod -aG docker,uinput,nordvpn,ancs4linux` runs before the rpms and `/etc/sysusers.d/*.conf`
-  create those groups. A second apply adds them.
-- sync (draft in `sync.star`, nothing loads it): the Helium profile and its Safe Storage key, the
-  app logins and tokens (each app signs in again on the new root until then). Flare, Beeper and
-  1Password are linked per device and never synced: Flathub plus the `fspec-flare` unit for Flare,
-  and the e1504g's old `~/.local/share/flare` stays where it is.
-
 ### Needs Kyan
 
 - quickshell, which dcal's UI runs on: no Tumbleweed package and no release binary, so it would be
@@ -58,6 +48,9 @@ earlier Fedora Atomic image and nothing loads it.
 
 ### Changed behaviour
 
+- App logins, the Helium profile and its Safe Storage key, and the wallpapers move with
+  `fspec sync` (`sync.star`). Flare, Beeper and 1Password are linked per device, never synced;
+  the e1504g's old `~/.local/share/flare` stays where it is.
 - `.claude/CLAUDE.md`, `.claude/hooks`, `.pi/agent/*` were symlinks into `~/.config/nix`; they are
   copies now, so an edit there needs a re-apply here.
 - Store tools live in `/opt/fspec/current/bin`, which `environment.d` and fish put on PATH;

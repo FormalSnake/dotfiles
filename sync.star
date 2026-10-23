@@ -1,15 +1,12 @@
-# Draft: nothing loads this yet. Wire `sync_items()` into the g815 and e1504g modules in spec.star
-# when fspec has sync. The builtins (`sync`, `json_keys`, `keyring`) are the shape proposed to
-# formalspec, not ones the engine has.
+# App data the spec cannot declare, moved between the Linux pair by `fspec sync` (docs/design.md,
+# "Sync between hosts"). Both hosts load the same items from spec.star.
 #
-# Peer to peer and encrypted between the hosts, no GitHub or other relay. Two modes:
-#   live  both hosts write; a change goes to the peers, `conflict` decides between two writes.
-#   seed  copied once to a host that lacks it, then each host keeps its own. For single-writer
-#         LevelDB/SQLite stores and rotating refresh tokens, which break when two copies diverge.
-# `keyring` items are Secret Service entries matched by schema and attributes, moved with the files
-# they unlock.
+# live  both hosts write, newest wins per file, keyring item and JSON key.
+# seed  copied whole to a host that has none of it, then each keeps its own: single-writer
+#       LevelDB/SQLite profiles and rotating refresh tokens break when two copies diverge.
+#       `fspec sync <item> --from <host>` hands one over again.
 #
-# Never synced, linked on each device instead, so nobody adds them here:
+# Never synced, each host links itself, so nobody adds them here:
 #   Flare (Signal): a linked device per host.
 #   Beeper: Matrix device keys, one session per device.
 #   1Password: each host is a registered device.
@@ -32,50 +29,44 @@ def _wallpapers():
             "wallpapers",
             peers = PAIR,
             paths = ["~/Pictures/Wallpapers/dark/", "~/Pictures/Wallpapers/light/", "~/Pictures/Wallpapers/originals/"],
-            mode = "live",
-            conflict = "newest",
         ),
-        # The rest of state.json is per host. The receiving host waits for the collection to hold
-        # the file before it switches; formalshell-greeter-mirror.path (system.star) then copies it
-        # to the greeter, since it watches state.json.
+        # The rest of state.json is per host. formalshell-greeter-mirror.path (system.star) watches
+        # state.json, so the greeter follows.
         sync(
             "active-wallpaper",
             peers = PAIR,
             keys = json_keys("~/.local/state/formalshell/state.json", ["wallpaper"]),
-            mode = "live",
-            conflict = "newest",
             after = ["wallpapers"],
             on_receive = PKG_BIN + "/formalshell ipc --any-display call wallpaper set {wallpaper}",
         ),
     ]
 
-# The e1504g syncs a helium-profile folder live through syncthing today; that folder goes when
-# Helium moves to seed here. Syncthing itself stays for now.
+# The e1504g also syncs a helium-profile folder through syncthing; that folder goes once this seed
+# has run. Syncthing itself stays.
 def _helium():
     return [
         sync(
             "helium",
             peers = PAIR,
             paths = ["~/.config/net.imput.helium/"],
+            exclude = ["Cache", "Code Cache", "GPUCache", "DawnGraphiteCache", "DawnWebGPUCache", "WidevineCdm"],
             keyring = [_safe_storage("chromium")],
             mode = "seed",
-            # A profile copied while Helium has it open is torn.
             unless_running = ["helium"],
         ),
     ]
 
 def _seeded():
     return [
-        # Discord runs from Flathub on Tumbleweed (NixOS kept it in ~/.config/discord).
-        sync("discord", peers = PAIR, paths = ["~/.var/app/com.discordapp.Discord/config/discord/"], keyring = [_portal("com.discordapp.Discord")], mode = "seed", unless_running = ["Discord"]),
+        sync("discord", peers = PAIR, paths = ["~/.config/discord/"], exclude = ["Cache", "Code Cache", "GPUCache", "modules"], mode = "seed", unless_running = ["Discord"]),
         sync("steam", peers = PAIR, paths = ["~/.local/share/Steam/config/loginusers.vdf", "~/.local/share/Steam/config/config.vdf"], mode = "seed", unless_running = ["steam"]),
         sync(
             "heroic",
             peers = PAIR,
             paths = ["~/.config/heroic/"],
             keyring = [
-                keyring(label = "keyring:credentials@com.epicgames.eglv2.prod"),
-                keyring(label = "keyring:v1@com.epicgames.eglv2.dpop"),
+                keyring(schema = "org.freedesktop.Secret.Generic", attrs = {"service": "com.epicgames.eglv2.prod", "username": "credentials"}),
+                keyring(schema = "org.freedesktop.Secret.Generic", attrs = {"service": "com.epicgames.eglv2.dpop", "username": "v1"}),
             ],
             mode = "seed",
             unless_running = ["heroic"],
@@ -86,16 +77,16 @@ def _seeded():
         sync("lynk", peers = PAIR, paths = ["~/.config/lynk/"], mode = "seed", unless_running = ["lynk"]),
     ]
 
-# Plain tokens that do not rotate: both hosts can hold the same one.
+# Plain tokens that do not rotate: both hosts hold the same one.
 def _live_tokens():
     return [
-        sync("gh", peers = PAIR, keyring = [keyring(label = "Password for 'FormalSnake' on 'gh:github.com'")], mode = "live", conflict = "newest"),
-        # The account token sits in Electron's Local Storage, a LevelDB: it moves only while
+        sync("gh", peers = PAIR, keyring = [keyring(schema = "org.freedesktop.Secret.Generic", attrs = {"service": "gh:github.com", "username": "FormalSnake"})]),
+        # The account token sits in Electron's Local Storage, a LevelDB, so it moves only while
         # Obsidian is closed on both ends.
-        sync("obsidian-account", peers = PAIR, paths = ["~/.config/obsidian/Local Storage/"], mode = "live", conflict = "newest", unless_running = ["obsidian"]),
-        sync("spotify", peers = PAIR, keyring = [_portal("com.spotify.Client")], mode = "live", conflict = "newest"),
-        sync("goa-google", peers = PAIR, keyring = [keyring(schema = "org.gnome.OnlineAccounts", attrs = {"goa-identity": "google:*"})], mode = "live", conflict = "newest"),
-        sync("remmina", peers = PAIR, keyring = [keyring(schema = "org.remmina.Password")], mode = "live", conflict = "newest"),
+        sync("obsidian-account", peers = PAIR, paths = ["~/.var/app/md.obsidian.Obsidian/config/obsidian/Local Storage/"], unless_running = ["obsidian"]),
+        sync("spotify", peers = PAIR, keyring = [_portal("com.spotify.Client")]),
+        sync("goa-google", peers = PAIR, keyring = [keyring(schema = "org.gnome.OnlineAccounts", attrs = {"goa-identity": "google:*"})]),
+        sync("remmina", peers = PAIR, keyring = [keyring(schema = "org.remmina.Password")]),
     ]
 
 def sync_items():
