@@ -157,8 +157,9 @@ def formalos_boot(t, entries = []):
         pkg("plymouth-plugin-script", source = zypper()),
         pkg("plymouth-dracut", source = zypper()),
         pkg("limine", source = zypper(), files = [
-            # Next to the EFI app, which Limine reads before /limine/limine.conf.
-            file(ESP + "/EFI/limine/limine.conf", content = _limine_conf(t, entries)),
+            # The menu's header: fspec-esp-sync writes it to the ESP next to the EFI app, with a
+            # Kernels submenu under it.
+            file("/etc/fspec/limine.conf", content = _limine_conf(t, entries)),
         ]),
         pkg("efibootmgr", source = zypper()),
         file(ESP + "/loader/loader.conf", content = "timeout 0\nconsole-mode keep\npreferred %s\n" % t["preferred"]),
