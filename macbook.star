@@ -116,7 +116,10 @@ def _nd_app(name, title, repo, rev, icon):
             "mkdir -p \"%s/MacOS\" \"%s/Resources\" \"$FSPEC_OUT/bin\"" % (app, app),
             "printf '%%s' '%s' > \"%s/Info.plist\"" % (plist, app),
             "printf 'APPL????' > \"%s/PkgInfo\"" % app,
-            "sips -s format icns %s --out \"%s/Resources/AppIcon.icns\" > /dev/null" % (icon, app),
+            # macOS 26's sips fails (error 13) writing a 1024px PNG straight to icns; iconutil takes an iconset.
+            "mkdir -p \"$FSPEC_SRC.iconset\"",
+            "for s in 16 32 128 256 512; do sips -z $s $s %s --out \"$FSPEC_SRC.iconset/icon_${s}x${s}.png\" > /dev/null; sips -z $((s*2)) $((s*2)) %s --out \"$FSPEC_SRC.iconset/icon_${s}x${s}@2x.png\" > /dev/null; done" % (icon, icon),
+            "iconutil -c icns \"$FSPEC_SRC.iconset\" -o \"%s/Resources/AppIcon.icns\"" % app,
             "cp target/release/%s \"%s/MacOS/%s\"" % (name, app, name),
             "ln -s ../%s.app/Contents/MacOS/%s \"$FSPEC_OUT/bin/%s\"" % (title, name, name),
         ])],
