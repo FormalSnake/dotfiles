@@ -335,6 +335,8 @@ def _apps():
         # postinstall replaces.
         pkg("claude", source = url("https://registry.npmjs.org/@anthropic-ai/claude-code-linux-x64/-/claude-code-linux-x64-2.1.289.tgz")),
         pkg("kopuz", version = "0.22.0", source = github("Kopuz-org/kopuz", asset = "kopuz_v*_x86_64-linux.tar.gz")),
+        # mixins/apps/beeper.nix: nixpkgs' AppImage. Its desktop entry is in home/.
+        pkg("beeper", source = url("https://beeper-desktop.download.beeper.com/builds/Beeper-4.3.73-x86_64.AppImage")),
         # formalmusic starts kopuzd when no daemon runs; the release tarball has only the player.
         # rookie's build script shells out to git, and a C++ dependency builds through cc-rs.
         pkg(

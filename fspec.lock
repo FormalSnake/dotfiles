@@ -91,6 +91,14 @@ source = "brew"
 version = "0.26.1"
 
 [[pkg]]
+name = "beeper"
+source = "url:https://beeper-desktop.download.beeper.com/builds/Beeper-4.3.73-x86_64.AppImage"
+
+[pkg.any]
+url = "https://beeper-desktop.download.beeper.com/builds/Beeper-4.3.73-x86_64.AppImage"
+hash = "sha256-j6HTTqU7+z8AJ20hYgia6wOH0/n3gxrUocCpMPmgQvQ="
+
+[[pkg]]
 name = "betterdisplay"
 source = "brew:cask"
 version = "5.1.1"
@@ -164,6 +172,11 @@ source = "brew"
 version = "1.17.0"
 
 [[pkg]]
+name = "colloid-icon-theme"
+source = "git:https://github.com/vinceliuice/Colloid-icon-theme@e3a8f89fac888af715233f8f8ef0a5b1e350f0dd"
+rev = "e3a8f89fac888af715233f8f8ef0a5b1e350f0dd"
+
+[[pkg]]
 name = "coreutils"
 source = "brew"
 version = "9.12"
@@ -232,6 +245,22 @@ hash = "sha512-iS3GUUAn1bC3sDdLyg6CUnIaVQfViJBh+FhWBPftK6kJkhUMxFG2sr25OqMVaZgRs
 name = "dockerfile-language-server"
 source = "brew"
 version = "0.15.0"
+
+[[pkg]]
+name = "dotnet-sdk-8"
+source = "url:https://builds.dotnet.microsoft.com/dotnet/Sdk/8.0.425/dotnet-sdk-8.0.425-linux-x64.tar.gz"
+
+[pkg.any]
+url = "https://builds.dotnet.microsoft.com/dotnet/Sdk/8.0.425/dotnet-sdk-8.0.425-linux-x64.tar.gz"
+hash = "sha256-7CxVc486oWxYssDFZc4QrW/qg5JVdKbwjJILpio5cSs="
+
+[[pkg]]
+name = "epic-games-launcher-appimage"
+source = "url:https://content-download-egs.distro.on.epicgames.com/Builds/EGLv2/0.95.2%2Bgfa9ad49/Linux/EpicGamesLauncher-x86_64.AppImage"
+
+[pkg.any]
+url = "https://content-download-egs.distro.on.epicgames.com/Builds/EGLv2/0.95.2%2Bgfa9ad49/Linux/EpicGamesLauncher-x86_64.AppImage"
+hash = "sha256-cGYVnsmHr83CcGnwcLRWvbmoBb1fAhFKp62G5VWcv9U="
 
 [[pkg]]
 name = "fast"
@@ -364,6 +393,24 @@ version = "3.8.0"
 name = "go"
 source = "brew"
 version = "1.27.3"
+
+[[pkg]]
+name = "godot-mcp"
+source = "npm:@coding-solo/godot-mcp"
+version = "0.1.1"
+
+[pkg.any]
+url = "https://registry.npmjs.org/@coding-solo/godot-mcp/-/godot-mcp-0.1.1.tgz"
+hash = "sha512-tSwmKN5D3JWGfnyPFxijxjdsT+GKIQrf9g6zYNefLvOVYx2UTC9PhyFFHc9vphtjyFrtjYf1n5Vq1zRNN3UXBA=="
+
+[[pkg]]
+name = "godot-mono"
+source = "github:godotengine/godot-builds"
+version = "4.7.2-stable"
+
+[pkg.x86_64-linux]
+url = "https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_mono_linux_x86_64.zip"
+hash = "sha256-Ep+C23uv1UrhS7W7KEBBxzhg6MegCaOgJspelGy/8kc="
 
 [[pkg]]
 name = "google-chrome"
@@ -925,6 +972,11 @@ hash = "sha256-uB2sr7MvdtLFRxskBFr/vlqAuPOMSfHHB5FswL7CpHw="
 name = "uv"
 source = "brew"
 version = "0.13.5"
+
+[[pkg]]
+name = "uxplay"
+source = "git:https://github.com/FDH2/UxPlay@df67c212a433cf6dda3676dd40c097900d24e645"
+rev = "df67c212a433cf6dda3676dd40c097900d24e645"
 
 [[pkg]]
 name = "vscode-langservers-extracted"

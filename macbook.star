@@ -100,6 +100,9 @@ def _nd_app(name, title, repo, rev, icon):
         "<key>LSMinimumSystemVersion</key><string>14.0</string>",
         "<key>NSPrincipalClass</key><string>NSApplication</string>",
         "<key>NSHighResolutionCapable</key><true/>",
+        # nix wrapped both with ffmpeg on PATH; from the Dock PATH has no /opt/homebrew/bin, and
+        # LaunchServices applies LSEnvironment to every launch it makes.
+        "<key>LSEnvironment</key><dict><key>PATH</key><string>/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string></dict>",
         "</dict></plist>",
     ])
     app = "$FSPEC_OUT/%s.app/Contents" % title

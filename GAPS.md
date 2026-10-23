@@ -7,34 +7,29 @@ earlier Fedora Atomic image and nothing loads it.
 
 ## Both Linux hosts
 
-### Open: fspec has no way to express it yet
+### Waiting on formalspec
 
-- Users run before Packages, so on a first apply `usermod -aG docker,uinput,nordvpn,ancs4linux`
-  runs before the rpms and `/etc/sysusers.d/*.conf` create those groups. A second apply adds them.
-- Store packages cannot link into system unit, dbus or udev dirs (FR to formalspec). ananicy-cpp
-  runs from a `service()` and asusd's dbus policy is a copied file instead of the upstream ones.
-- `git()` builds on `fspec ci packages` (ubuntu-24.04) take no build dependencies. librepods
-  (Qt 6 Bluetooth, libpulse), Messages and formalmusic (NativeDesktop: GTK, WebKit, Vulkan) and
-  kopuzd need apt packages the runner lacks.
-- `url()` stores a bare file as data, so the Beeper 4.3.73 and Epic Games Launcher AppImages
-  cannot be store pkgs. The Beeper unit skips until `/opt/fspec/current/bin/beeper` exists; Heroic
-  covers the Epic library.
-- Colloid-Dark: not in Tumbleweed's repos, and no release ships the built theme tree a `share`
-  pkg can link.
-- Discord with Moonlight, Last.fm RPC and midnight: Tumbleweed's non-oss `discord` is 1.0.156
-  (NixOS runs 1.0.164) and Discord's own tarball is brotli-compressed modules fspec cannot
-  unpack. Discord runs from Flathub without Moonlight; the moonlight config files are ported.
+- users-before-packages: Users run before Packages, so on a first apply
+  `usermod -aG docker,uinput,nordvpn,ancs4linux` runs before the rpms and `/etc/sysusers.d/*.conf`
+  create those groups. A second apply adds them.
+- brotli-url: Discord with Moonlight, Last.fm RPC and midnight. Tumbleweed's non-oss `discord` is
+  1.0.156 (NixOS runs 1.0.160), and Discord's own build is a brotli tar plus one brotli tar per
+  module. Discord runs from Flathub without Moonlight; the moonlight config files are ported.
+- sync (draft in `sync.star`, nothing loads it): the Helium profile and its Safe Storage key, the
+  app logins and tokens (each app signs in again on the new root until then). Flare, Beeper and
+  1Password are linked per device and never synced: Flathub plus the `fspec-flare` unit for Flare,
+  and the e1504g's old `~/.local/share/flare` stays where it is.
 
-### Waiting on p2p sync
+### Needs Kyan
 
-- Helium profile and the Helium takeover guard (synced over syncthing on NixOS).
-- App logins and tokens: each app signs in again on the new root.
-- Flare is linked per device, not synced: Flathub plus the `fspec-flare` unit on both hosts. The
-  e1504g's old `~/.local/share/flare` stays where it is.
+- quickshell, which dcal's UI runs on: no Tumbleweed package and no release binary, so it would be
+  a Qt 6 source build (`git()` on the Tumbleweed image, its QML modules found outside the store
+  prefix). dcal's daemon runs without it. Build it, or keep dcal UI-less.
 
-### Open: no Tumbleweed package and no upstream binary
+### Not verified
 
-- quickshell (dcal runs on it), uxplay.
+- The `git()` builds of uxplay and colloid-icon-theme have not run: no CI job builds them yet, so
+  the g815 builds them on the first apply.
 
 ### Version differences from NixOS
 
@@ -70,6 +65,8 @@ earlier Fedora Atomic image and nothing loads it.
 - `dualsense-herdr` and `streamdeck-keys` keep `/etc/profiles/per-user/kyandesutter/bin/herdr`:
   the macbook's path, reached over ssh.
 - Units are `fspec-<name>.service` and exec directly instead of `bash -lc`.
+- ananicy-cpp and asusd run from a `service()` with the store path, since their upstream units
+  name `/usr/bin`; asusd's dbus policy is linked from its package with `etc`.
 - dconf loads through `fspec-dconf-load` and `.Xresources` through `fspec-xrdb-merge` at login.
 - nvim plugins come from `vim.pack` pinned by `nvim-pack-lock.json`; nvim-treesitter compiles its
   parsers on first start.
@@ -84,21 +81,22 @@ Nothing beyond the shared list.
 
 ## g815
 
-### Waiting on formalspec
+### Needs Kyan
 
 - The root is ext4, so the install needs `fspec disk` to carve the Tumbleweed root before
   `fspec switch --beside`.
-
-### Not ported
-
-- The 16G swapfile tier: depends on the new disk layout.
-- macos-vm: its OpenCore EFI is a nix build.
-- godot-mono, dotnet, godot-mcp.
-- NixOS's `checkReversePath = false`; firewalld keeps rp_filter at the kernel default.
+- The 16G swapfile tier: it goes on the disk layout `fspec disk` makes.
+- macos-vm (macOS 10.9 guest): its OpenCore EFI is a nix build. Port it as a `git()` OpenCore
+  build, or drop it.
 
 ### Version differences from NixOS
 
 - NVIDIA G07 from NVIDIA's openSUSE repo is 595.x; NixOS runs 615.71.09 and nvidia-settings.
+- godot-mcp is the npm release 0.1.1; nixpkgs builds the 2026-01-30 git snapshot.
+
+### Dropped
+
+- `checkReversePath = false`: no longer in the nix config. Tumbleweed's IPv4 rp_filter is loose.
 
 ## macbook
 

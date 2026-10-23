@@ -7,6 +7,7 @@ load("//system.star", "FIREWALL_TCP", "FIREWALL_UDP", "GREETER_SESSIONS", "LIBEX
 
 ROOTFS = "g815/rootfs/"
 HOME = "/home/kyandesutter"
+TUMBLEWEED = "registry.opensuse.org/opensuse/tumbleweed"
 
 # Windows C:, the Games partition and the USB SSD's Steam library (systems/g815/windows-dualboot.nix).
 WIN_UUID = "D0409F99409F84BE"
@@ -21,6 +22,8 @@ PACKAGES = [
     "qemu-x86", "qemu-ovmf-x86_64", "swtpm", "mtools", "socat", "ntfs-3g", "hivex", "xxd", "efibootmgr",
     # NetworkManager's Wi-Fi backend here, and per-link DNS so tailscaled owns only *.ts.net.
     "iwd", "systemd-resolved",
+    # UxPlay's runtime: Avahi's dns_sd and the H.264/AAC decoders it plays through.
+    "libdns_sd", "gstreamer-plugins-ugly",
 ]
 
 # windows-dualboot.nix's limine extraEntries. Windows shares the ESP, so boot():/ finds it.
@@ -100,9 +103,15 @@ def _asus():
     return [
         # asusctl has no Tumbleweed package; its release ships Arch's build, whose binaries need only
         # glibc and libudev. The unit is upstream's with the store path.
-        pkg("asusctl", version = "6.5.0", source = github("OpenGamingCollective/asusctl", asset = "asusctl-*-x86_64.pkg.tar.zst"), bins = ["asusd", "asusctl"]),
-        _rootfs("etc/dbus-1/system.d/asusd.conf"),
-        # asusd reads its keyboard table from here.
+        # Its udev rule wants asusd.service by that name, so it stays out.
+        pkg(
+            "asusctl",
+            version = "6.5.0",
+            source = github("OpenGamingCollective/asusctl", asset = "asusctl-*-x86_64.pkg.tar.zst"),
+            bins = ["asusd", "asusctl"],
+            etc = {"dbus-1/system.d/asusd.conf": "usr/share/dbus-1/system.d/asusd.conf"},
+        ),
+        # asusd reads its keyboard table from here; this one carries the g815's board.
         _rootfs("usr/share/asusd/aura_support.ron"),
         service(
             "asusd",
@@ -135,6 +144,34 @@ def _gaming():
         pkg("proton-ge", version = "GE-Proton11-7", source = github("GloriousEggroll/proton-ge-custom", asset = "GE-Proton*-x86_64.tar.gz"), share = {"steam/compatibilitytools.d/GE-Proton11-7": "GE-Proton11-7"}),
         # mixins/gaming/minecraft.nix: the Modrinth App, its release AppImage. Its WebKit draws
         # nothing with the DMA-BUF renderer on NVIDIA.
+        # FormalShell's AirPlay receiver (services.formalshell.airplay) runs uxplay, nixpkgs' v1.73.7,
+        # which neither Tumbleweed nor a release ships for Linux.
+        pkg(
+            "uxplay",
+            source = git("https://github.com/FDH2/UxPlay", rev = "df67c212a433cf6dda3676dd40c097900d24e645", image = TUMBLEWEED, deps = ["cmake", "make", "gcc-c++", "pkgconf", "libopenssl-devel", "libplist-2_0-devel", "gstreamer-devel", "gstreamer-plugins-base-devel", "avahi-compat-mDNSResponder-devel"]),
+            bins = ["uxplay"],
+        ),
+        # mixins/gaming/epic-games-launcher.nix: Epic's Linux preview replaces the AppImage it ran
+        # from to update, so the store copy only seeds a writable one in the home on first launch.
+        pkg("epic-games-launcher-appimage", source = url("https://content-download-egs.distro.on.epicgames.com/Builds/EGLv2/0.95.2%2Bgfa9ad49/Linux/EpicGamesLauncher-x86_64.AppImage")),
+        file("/usr/local/bin/epic-games-launcher", perms = "0755", content = """#!/bin/sh
+set -e
+dir="${XDG_DATA_HOME:-$HOME/.local/share}/epic-games-launcher"
+img="$dir/EpicGamesLauncher-x86_64.AppImage"
+if [ ! -e "$img" ]; then
+	mkdir -p "$dir"
+	install -m 755 """ + PKG_BIN + """/epic-games-launcher-appimage "$img"
+fi
+export WEBKIT_DISABLE_DMABUF_RENDERER=1
+exec "$img" "$@"
+"""),
+        file("~/.local/share/applications/epic-games-launcher.desktop", content = """[Desktop Entry]
+Type=Application
+Name=Epic Games Launcher
+Exec=/usr/local/bin/epic-games-launcher %U
+Terminal=false
+Categories=Game;
+"""),
         pkg("modrinth-app", version = "0.21.6", source = github("modrinth/code", asset = "Modrinth.App_*_amd64.AppImage")),
         file("~/.local/share/applications/modrinth-app.desktop", content = """[Desktop Entry]
 Type=Application
@@ -304,5 +341,21 @@ net.ipv4.conf.default.forwarding = 1
         firewall_zone(FIREWALL_TCP + [443, 27036, 27037, 27040], FIREWALL_UDP + [1194, 10400, 10401, 27036], udp_ranges = ["27031-27035"]),
     ]
 
+# mixins/dev/godot.nix, gated on the NVIDIA dGPU: Godot's .NET editor, the SDK its C# template
+# targets (net8.0), and the MCP server Claude Code drives it through.
+GODOT = PKG_BIN + "/godot4-mono"
+
+def _godot():
+    return [
+        pkg("godot-mono", version = "4.7.2-stable", source = github("godotengine/godot-builds", asset = "Godot_v*-stable_mono_linux_x86_64.zip"), links = {
+            "godot4-mono": "Godot_v4.7.2-stable_mono_linux_x86_64/Godot_v4.7.2-stable_mono_linux.x86_64",
+        }),
+        pkg("dotnet-sdk-8", source = url("https://builds.dotnet.microsoft.com/dotnet/Sdk/8.0.425/dotnet-sdk-8.0.425-linux-x64.tar.gz"), links = {"dotnet": "dotnet"}),
+        pkg("godot-mcp", version = "0.1.1", source = npm("@coding-solo/godot-mcp")),
+        file("~/.claude.json", mode = "patch", owns = {
+            "mcpServers.godot": {"command": PKG_BIN + "/godot-mcp", "env": {"GODOT_PATH": GODOT}},
+        }),
+    ]
+
 def g815(h):
-    return _nvidia() + _asus() + _gaming() + _windows() + _host()
+    return _nvidia() + _asus() + _gaming() + _windows() + _godot() + _host()

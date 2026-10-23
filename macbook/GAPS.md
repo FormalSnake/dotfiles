@@ -10,11 +10,11 @@ from `spec.star`: `fspec --spec examples/kyan/spec.star plan --host macbook --lo
   built: they run on the macos-14 CI runner. pam_ssh_agent_auth follows nixpkgs' recipe (its four patches in
   `patches/`, ed25519-donna at `8757bd4`, autoreconf, OpenSSL 3 from Homebrew) plus the
   `-std=gnu99 -D_FORTIFY_SOURCE=0` the nix override adds for OpenPAM.
-- The lock has no entries for this host yet: `fspec update` has not run.
 
-## Waiting on p2p sync
+## Waiting on formalspec: sync
 
-Secret-carrying state, declared once formalspec's encrypted sync lands:
+Secret-carrying state, declared once formalspec's encrypted sync lands (`../sync.star` drafts the
+Linux pair's items; the macbook's join it then):
 
 - The Helium profile.
 - Claude Code sign-ins: `~/.claude.json` (oauthAccount) and the `~/.claude-pulse` login.
@@ -55,9 +55,8 @@ Secret-carrying state, declared once formalspec's encrypted sync lands:
 
 ## Changed behaviour
 
-- Messages and FormalMusic run unwrapped: nix put ffmpeg on their PATH, so from the Dock, where
-  PATH has no `/opt/homebrew/bin`, Messages' video thumbnails find no ffmpeg.
-
+- Messages and FormalMusic run unwrapped; nix put ffmpeg on their PATH, and their `Info.plist`
+  now does through `LSEnvironment` (`/opt/homebrew/bin` first).
 - Secrets decrypt to `/var/run/fspec/secrets/<name>` (was `/run/agenix`); fish, wgtunnel and the
   LiveSync daemon read them there, and `fspec-secrets` decrypts them again at boot.
 - `livesync-passphrase` is macbook-only, so its `.age` file sits in `macbook/secrets/`; it still

@@ -448,6 +448,14 @@ def _pkgs():
         ),
         # Data-only: the cursor theme and the font streamdeck-keys draws with.
         pkg("bibata", version = "2.0.7", source = github("ful1e5/Bibata_Cursor", asset = "Bibata-Modern-Classic.tar.xz"), share = {"icons/Bibata-Modern-Classic": "Bibata-Modern-Classic"}),
+        # session.nix's icon theme, nixpkgs' tag 2026-08-10. No release ships the built tree; the
+        # installer only copies and links, so the build is that. Colloid-Dark inherits Colloid.
+        pkg(
+            "colloid-icon-theme",
+            source = git("https://github.com/vinceliuice/Colloid-icon-theme", rev = "e3a8f89fac888af715233f8f8ef0a5b1e350f0dd", image = TUMBLEWEED, deps = ["bash", "sed", "findutils"]),
+            build = ["sh", "-c", "cd \"$FSPEC_SRC\" && mkdir -p \"$FSPEC_OUT/icons\" && bash ./install.sh -d \"$FSPEC_OUT/icons\" -s default -t default"],
+            share = {"icons/Colloid": "icons/Colloid", "icons/Colloid-Light": "icons/Colloid-Light", "icons/Colloid-Dark": "icons/Colloid-Dark"},
+        ),
         # FormalShell's gtk template sets gtk-theme to adw-gtk3-dark; without it GTK3 apps are light.
         pkg("adw-gtk3", version = "6.5", source = github("lassekongo83/adw-gtk3", asset = "adw-gtk3v*.tar.xz"), share = {"themes/adw-gtk3": "adw-gtk3", "themes/adw-gtk3-dark": "adw-gtk3-dark"}),
         pkg("geist-mono-nerd-font", version = "3.4.0", source = github("ryanoasis/nerd-fonts", asset = "GeistMono.tar.xz"), share = {"fonts/GeistMonoNerdFont": "."}),
