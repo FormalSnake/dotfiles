@@ -10,6 +10,12 @@ PKG_BIN = "/opt/fspec/current/bin"
 LIBEXEC = "/usr/local/libexec"
 # git() builds that link system libraries run in the target's own distro, so the sonames match.
 TUMBLEWEED = "registry.opensuse.org/opensuse/tumbleweed"
+
+NIL_BUILD = """set -e
+rustup -q default stable
+cargo build --release --locked --manifest-path "$FSPEC_SRC/Cargo.toml" --target-dir "$FSPEC_SRC/target" -p nil
+install -Dm755 "$FSPEC_SRC/target/release/nil" "$FSPEC_OUT/bin/nil"
+"""
 STEAMED = "Steamed-14e8a1c0db188870ab3ac2059dbf941fad9c3065"
 
 DESKTOP = [
@@ -473,8 +479,9 @@ def _pkgs():
             build = ["sh", "-c", "cmake -S \"$FSPEC_SRC/daemon\" -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=\"$FSPEC_OUT\" && cmake --build build -j && cmake --install build"],
         ),
         # nvim's nil (tag 2026-07-23) publishes no Linux binaries; its build script asks nix for its
-        # builtins.
-        pkg("nil", source = git("https://github.com/oxalica/nil", rev = "dbbb5c24f9215476992aa1bd305f8e5398e89654", image = TUMBLEWEED, deps = ["cargo", "gcc", "nix"]), bins = ["nil"]),
+        # builtins. Tumbleweed's nix 2.35.3 segfaults in a container, even on --version, so this
+        # builds on Debian, whose cargo is older than nil's rust-version 1.89.
+        pkg("nil", source = git("https://github.com/oxalica/nil", rev = "dbbb5c24f9215476992aa1bd305f8e5398e89654", image = "docker.io/library/debian:trixie", deps = ["rustup", "gcc", "libc6-dev", "nix-bin"]), build = ["sh", "-c", NIL_BUILD], bins = ["nil"]),
         # FormalShell's iPhone panel: ancs4linux at the rev and patches FormalShell's nix/ancs4linux.nix
         # builds, on Tumbleweed's python and its dasbus, gobject and typer.
         pkg(
