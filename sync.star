@@ -51,10 +51,12 @@ def _helium():
             peers = PAIR,
             paths = ["~/.config/net.imput.helium/"],
             exclude = ["Cache", "Code Cache", "GPUCache", "DawnGraphiteCache", "DawnWebGPUCache", "WidevineCdm"],
-            keyring = [_safe_storage("chromium")],
             mode = "seed",
             unless_running = ["helium"],
         ),
+        # Its own item, since a locked keyring fails the item that carries it: the profile can move
+        # while the other host is logged out, and the key follows once both keyrings are open.
+        sync("helium-key", peers = PAIR, keyring = [_safe_storage("chromium")], mode = "seed", after = ["helium"]),
     ]
 
 def _seeded():
