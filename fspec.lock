@@ -318,6 +318,11 @@ version = "latest"
 
 [[pkg]]
 name = "formalmusic"
+source = "git:https://github.com/FormalStudio/formalmusic@9a9d93af0fbb75594f3e91f087cf77e6c8a7f576"
+rev = "9a9d93af0fbb75594f3e91f087cf77e6c8a7f576"
+
+[[pkg]]
+name = "formalmusic"
 source = "git:https://github.com/FormalStudio/formalmusic@9ee98746fd0bbb804aebb8007132d1e05f992940"
 rev = "9ee98746fd0bbb804aebb8007132d1e05f992940"
 
@@ -614,6 +619,11 @@ rev = "8df17ef38312e240f89428e98f85ef55e95b9c95"
 
 [pkg.x86_64-linux]
 oci = "ghcr.io/formalstudio/fspec-cache/messages@sha256:1f25a343c0cf76c356bdee2491390196d8f05364ab0f2c5c1f6d06602e356b62"
+
+[[pkg]]
+name = "messages"
+source = "git:https://github.com/FormalStudio/messages@e9455505f88f101897d001f4a61ab9c82b0232c7"
+rev = "e9455505f88f101897d001f4a61ab9c82b0232c7"
 
 [[pkg]]
 name = "modrinth-app"
