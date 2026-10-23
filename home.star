@@ -58,7 +58,7 @@ def _services():
         # since formalshell-watchdog and the shell's IPC restart formalshell.service by name.
         service("formalshell.service", user = True),
         service("formalshell-watchdog.timer", user = True),
-        _autostart("discord", "/usr/bin/flatpak run com.discordapp.Discord --start-minimized", "Discord (minimized to tray)", hyprland_only = True),
+        _autostart("discord", BIN + "/discord --start-minimized", "Discord (minimized to tray)", hyprland_only = True),
         _autostart("beeper", PKG_BIN + "/beeper", "Beeper", needs = PKG_BIN + "/beeper"),
         _autostart("flare", "/usr/bin/flatpak run de.schmidhuberj.Flare", "Flare (Signal)"),
         _autostart("messages", PKG_BIN + "/messages", "Messages", needs = PKG_BIN + "/messages"),
@@ -251,23 +251,85 @@ def _kde():
                 "install": {"WantedBy": "plasma-workspace.target"},
             },
         ),
-        _autostart("discord-kde", "/usr/bin/flatpak run com.discordapp.Discord", "Discord", unit = {"ConditionEnvironment": ["WAYLAND_DISPLAY", "XDG_CURRENT_DESKTOP=KDE"]}),
+        _autostart("discord-kde", BIN + "/discord", "Discord", unit = {"ConditionEnvironment": ["WAYLAND_DISPLAY", "XDG_CURRENT_DESKTOP=KDE"]}),
         file("~/Desktop/switch-to-hyprland.desktop", perms = "0755", content = "[Desktop Entry]\nType=Application\nName=Switch to Hyprland\nExec=/usr/local/bin/session-switch hyprland-uwsm\nIcon=hyprland\n"),
     ]
 
 def _flatpaks():
     return [
-        pkg("discord", source = flatpak("com.discordapp.Discord")),
         pkg("flare", source = flatpak("de.schmidhuberj.Flare")),
         pkg("obsidian", source = flatpak("md.obsidian.Obsidian")),
         pkg("parsec", source = flatpak("com.parsecgaming.parsec")),
         pkg("apostrophe", source = flatpak("org.gnome.gitlab.somas.Apostrophe")),
     ]
 
-# moonlight's per-user parts, written for a native Discord (~/.config/moonlight-mod); the Flathub
-# build reads ~/.var/app/com.discordapp.Discord/config and is not injected yet (GAPS.md).
+# nixpkgs' Discord with moonlight (pkgs/by-name/di/discord, withMoonlight): Discord's own distro,
+# a brotli tar with the app under files/ beside a delta manifest, one more per module, and
+# moonlight's release dist. The patch moves app.asar aside for moonlight's injector.
+DISCORD_VERSION = "1.0.160"
+DISCORD_DISTRO = "https://stable.dl2.discordapp.net/distro/app/stable/linux/x64/" + DISCORD_VERSION
+DISCORD_MODULES = {
+    "discord_cloudsync": 1, "discord_desktop_core": 2, "discord_dispatch": 1, "discord_erlpack": 1,
+    "discord_game_utils": 1, "discord_krisp": 1, "discord_modules": 1, "discord_rpc": 1,
+    "discord_spellcheck": 1, "discord_sysimg": 1, "discord_utils": 1, "discord_voice": 1, "discord_zstd": 1,
+}
+DISCORD = "/opt/fspec/current/pkgs/discord"
+
+# nixpkgs' stageModules and disable-breaking-updates: Discord loads its modules from the config
+# dir and would update itself into the read-only store, so the modules are links there and the
+# host update is skipped.
+DISCORD_LAUNCHER = """#!/bin/sh
+conf="${XDG_CONFIG_HOME:-$HOME/.config}/discord"
+mods="$conf/%s/modules"
+rm -rf "$mods"
+mkdir -p "$mods"
+for m in %s/modules/*; do
+	ln -sn "$m/files" "$mods/${m##*/}"
+done
+printf '%%s' '%s' >"$mods/installed.json"
+python3 - "$conf/settings.json" <<'PY'
+import json, sys
+path = sys.argv[1]
+try:
+    with open(path) as f:
+        settings = json.load(f)
+except (OSError, ValueError):
+    settings = {}
+settings["SKIP_HOST_UPDATE"] = True
+with open(path, "w") as f:
+    json.dump(settings, f, indent=2)
+PY
+exec %s/files/Discord ${WAYLAND_DISPLAY:+--ozone-platform=wayland --enable-features=WaylandWindowDecorations --enable-wayland-ime=true} "$@"
+""" % (
+    DISCORD_VERSION,
+    DISCORD,
+    "{" + ",".join(['"%s":{"installedVersion":%d}' % (m, v) for m, v in DISCORD_MODULES.items()]) + "}",
+    DISCORD,
+)
+
 def _discord():
     return [
+        pkg(
+            "discord",
+            source = url(DISCORD_DISTRO + "/full.distro"),
+            parts = dict(
+                {"modules/%s" % m: url("%s/%s/%d/full.distro" % (DISCORD_DISTRO, m, v)) for m, v in DISCORD_MODULES.items()},
+                moonlight = url("https://github.com/moonlight-mod/moonlight/releases/download/v2026.10.0/dist.tar.gz"),
+            ),
+            patches = ["patches/discord-moonlight.patch"],
+            links = {"discord-app": "files/Discord"},
+        ),
+        file("~/.local/bin/discord", perms = "0755", content = DISCORD_LAUNCHER),
+        file("~/.local/share/applications/discord.desktop", content = """[Desktop Entry]
+Type=Application
+Name=Discord
+GenericName=Instant Messenger
+Exec=""" + BIN + """/discord
+Icon=""" + DISCORD + """/files/discord.png
+Categories=Network;InstantMessaging;
+MimeType=x-scheme-handler/discord;
+StartupWMClass=discord
+"""),
         # matugen rewrites it on every re-theme; moonlight-css drops a path it cannot stat at load.
         file("~/.config/moonlight-mod/matugen.css", mode = "seed", content = ""),
         # The Last.fm key is a secret, so stable.json is rendered at login rather than shipped.

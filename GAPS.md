@@ -12,9 +12,6 @@ earlier Fedora Atomic image and nothing loads it.
 - users-before-packages: Users run before Packages, so on a first apply
   `usermod -aG docker,uinput,nordvpn,ancs4linux` runs before the rpms and `/etc/sysusers.d/*.conf`
   create those groups. A second apply adds them.
-- brotli-url: Discord with Moonlight, Last.fm RPC and midnight. Tumbleweed's non-oss `discord` is
-  1.0.156 (NixOS runs 1.0.160), and Discord's own build is a brotli tar plus one brotli tar per
-  module. Discord runs from Flathub without Moonlight; the moonlight config files are ported.
 - sync (draft in `sync.star`, nothing loads it): the Helium profile and its Safe Storage key, the
   app logins and tokens (each app signs in again on the new root until then). Flare, Beeper and
   1Password are linked per device and never synced: Flathub plus the `fspec-flare` unit for Flare,
@@ -29,6 +26,10 @@ earlier Fedora Atomic image and nothing loads it.
 ### Not verified
 
 - uxplay and colloid-icon-theme run as `fspec-packages.yml` jobs; nothing has applied them yet.
+- Discord 1.0.160 with moonlight from Discord's distro and module archives (`pkg(parts = ...)`) and
+  `~/.local/bin/discord`, which links the modules into `~/.config/discord` and skips the host update
+  as nixpkgs' wrapper does: not applied yet. It replaces the Flathub Discord, so the e1504g's
+  `~/.var/app/com.discordapp.Discord` login stays behind.
 
 ### Version differences from NixOS
 

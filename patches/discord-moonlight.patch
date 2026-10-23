@@ -1,0 +1,17 @@
+diff --git a/files/resources/app.asar b/files/resources/_app.asar
+similarity index 100%
+rename from files/resources/app.asar
+rename to files/resources/_app.asar
+diff --git a/files/resources/app/package.json b/files/resources/app/package.json
+new file mode 100644
+--- /dev/null
++++ b/files/resources/app/package.json
+@@ -0,0 +1 @@
++{"name":"discord","main":"injector.js","private":true}
+diff --git a/files/resources/app/injector.js b/files/resources/app/injector.js
+new file mode 100644
+--- /dev/null
++++ b/files/resources/app/injector.js
+@@ -0,0 +1,2 @@
++const path = require("path");
++require(path.join(__dirname, "../../../moonlight/injector.js")).inject(path.join(__dirname, "../_app.asar"));
