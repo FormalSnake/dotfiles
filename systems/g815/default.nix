@@ -25,6 +25,11 @@
   # Intel Core Ultra 9 275HX (Arrow Lake-HX).
   hardware.cpu.intel.updateMicrocode = true;
 
+  # The macbook's aarch64 linux-builder VM image is itself an aarch64-linux
+  # build, so bootstrapping it needs an aarch64 builder somewhere: this one,
+  # under qemu-user.
+  boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
+
   # Intel BE200 (Wi-Fi 7) latency fix. The iwlmld driver defaults to the
   # "balanced" power scheme (=2), which lets the radio sleep between packets;
   # the AP then buffers and delivers them in bursts, producing big latency
