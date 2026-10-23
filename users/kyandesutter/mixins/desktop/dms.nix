@@ -570,7 +570,7 @@ in
       input_path = "~/.config/matugen/templates/kopuz.json.tmpl"
       output_path = "~/.config/kopuz/matugen.json"
 
-      # Messages (~/Developer/messages, the iMessage client). Keys are the
+      # Messages (~/Developer/ecosystem/messages, the iMessage client). Keys are the
       # palette tokens in apps/desktop/src/ui/theme.ts; unknown keys are
       # ignored and missing ones keep the Apple default. The app polls the
       # output once a second, so no post_hook.
@@ -585,7 +585,7 @@ in
       input_path = "~/.config/matugen/templates/streamdeck.json.tmpl"
       output_path = "~/.cache/dank/streamdeck.json"
 
-      # FormalMusic (~/Developer/youtubemusic, the YouTube Music client). Keys
+      # FormalMusic (~/Developer/ecosystem/formalmusic, the YouTube Music client). Keys
       # are the base tokens of PaletteFile in crates/desktop/src/live_theme.rs;
       # the app polls the output once a second, so no post_hook.
       [templates.formalmusic]

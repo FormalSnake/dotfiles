@@ -373,6 +373,17 @@ When building AI features, default to the newest models: Fable 5
 (`claude-fable-5`), Opus 5 (`claude-opus-5`), Sonnet 5 (`claude-sonnet-5`),
 Haiku 4.5 (`claude-haiku-4-5-20251001`).
 
+## Where checkouts live
+
+`~/Developer/ecosystem/` holds my own stack (FormalShell, NativeDesktop,
+formalmusic, lynk, FormalSpec, messages, kopuz); anything else sits at
+`~/Developer/<repo>`. Extra worktrees and throwaway clones of a repo go in
+`<repo>-wt/<name>` next to the main checkout (`ecosystem/NativeDesktop-wt/rel-059`),
+never as a loose sibling in `~/Developer` or `~`. Use `git worktree add` from
+the main checkout so the worktree stays listed, and remove it with
+`git worktree remove` once its branch is merged. Scripts, logs and screenshots
+from a run go in that worktree, not in `~/Developer` or `~`.
+
 ## Tooling
 
 `fd` instead of `find`, `rg` instead of `grep`, `jq` for JSON, `bunx` instead

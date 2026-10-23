@@ -2,11 +2,11 @@
 let
   # The weekly FormalMusic maintenance run: headless Claude Code with the
   # repo's maintenance/weekly.md as the prompt, in a clone that belongs to the
-  # run alone (never the working copies in ~/Developer/formalmusic*). The run
+  # run alone (never the working copies under ~/Developer/ecosystem/formalmusic*). The run
   # itself keeps the clone on origin/main; the prompt is read from origin/main
   # so an edit to it takes effect on the next run without touching the tree.
   claude = inputs.claude-code-nix.packages.${pkgs.stdenv.hostPlatform.system}.default;
-  clone = "${config.home.homeDirectory}/Developer/formalmusic-maintenance";
+  clone = "${config.home.homeDirectory}/Developer/ecosystem/formalmusic-wt/maintenance";
 
   # sudo -n comes from /run/wrappers (pam_ssh_agent_auth against the gcr
   # agent); nix, nixos-rebuild, systemd-run and dbus-run-session from the
