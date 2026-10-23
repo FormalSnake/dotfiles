@@ -5,7 +5,7 @@ description: Interface directly with Gem0 (the CouchDB-backed headless CMS / dat
 
 # Gem0 HTTP API
 
-For the new admin-api with a personal `gem_pat_` agent token (`GEM0_TOKEN`), use the `gem0-agent` skill instead; it pulls its reference from the server.
+With a personal `gem_pat_` agent token (`GEM0_TOKEN`), use the `gem0-agent` skill instead; it pulls its reference from apist.gem0.dev.
 
 Gem0 stores data as **Company → Project → Scheme (table) → Row (document)**. There are **two separate API planes with two different keys** — using the wrong key on the wrong plane is the #1 failure mode:
 
