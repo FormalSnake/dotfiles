@@ -96,8 +96,8 @@ in
         # the monitor panel, the launcher's monitor view and the display
         # panel all name it.
         display.outputPriority = [ "HDMI" "internal" ];
-        # elementary's relief on every control and a shadow under every card.
-        theme.preset = "pantheon";
+        # The cartridge console: shard backdrop, boot sequence and blips.
+        theme.preset = "cartridge";
       };
     };
 
