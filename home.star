@@ -317,7 +317,7 @@ def _discord():
                 moonlight = url("https://github.com/moonlight-mod/moonlight/releases/download/v2026.10.0/dist.tar.gz"),
             ),
             patches = ["patches/discord-moonlight.patch"],
-            links = {"discord-app": "files/Discord"},
+            links = {"discord-app": "Discord"},
         ),
         file("~/.local/bin/discord", perms = "0755", content = DISCORD_LAUNCHER),
         file("~/.local/share/applications/discord.desktop", content = """[Desktop Entry]
