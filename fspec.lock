@@ -393,11 +393,8 @@ rev = "98ca1b6c069b2eb1029cc9b816b735bcc3251202"
 
 [[pkg]]
 name = "formalshell"
-source = "git:https://github.com/FormalSnake/FormalShell@e8a800d3da54f586f187a328916785ff691f8759"
-rev = "e8a800d3da54f586f187a328916785ff691f8759"
-
-[pkg.x86_64-linux]
-oci = "ghcr.io/formalstudio/fspec-cache/formalshell@sha256:6ede711df0ab29120657b9cf3385265c26b478f91f13050e00c751bd42abd33f"
+source = "git:https://github.com/FormalSnake/FormalShell@71ad649b4a31a0eb9e4cbbdd967eac034b506192"
+rev = "71ad649b4a31a0eb9e4cbbdd967eac034b506192"
 
 [[pkg]]
 name = "fut"
