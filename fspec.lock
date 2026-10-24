@@ -396,6 +396,9 @@ name = "formalshell"
 source = "git:https://github.com/FormalSnake/FormalShell@71ad649b4a31a0eb9e4cbbdd967eac034b506192"
 rev = "71ad649b4a31a0eb9e4cbbdd967eac034b506192"
 
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalstudio/fspec-cache/formalshell@sha256:1e6299f0e2936a1b0c043775683d6a4d5721af75fc82d6bb1be5359a29d070db"
+
 [[pkg]]
 name = "fut"
 source = "github:mikker/fut"
