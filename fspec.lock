@@ -50,9 +50,9 @@ hash = "sha256-Yr9RvRfH9NMw8sb6el+OHE4SC4CUr0HofWgb5JA0Bv4="
 
 [[pkg]]
 name = "ancs4linux"
-source = "git:https://github.com/pzmarzly/ancs4linux@b658546f08d1468f6d79aa900cc7faa9d938837d"
-rev = "b658546f08d1468f6d79aa900cc7faa9d938837d"
-patches = "sha256-hVIHOmWFCPNPUdkaRQ7OcO8B6GAVQ6fk/stVTM5XMSw="
+source = "git:https://github.com/pzmarzly/ancs4linux@138451721ff10d3c8634b32656ae3d38a99b9163"
+rev = "138451721ff10d3c8634b32656ae3d38a99b9163"
+patches = "sha256-fMZ2hbqA0i+EUk2vaRppPoxZT3pSeOu/5hqhmPRpOnQ="
 
 [[pkg]]
 name = "android-studio"
@@ -393,11 +393,8 @@ rev = "98ca1b6c069b2eb1029cc9b816b735bcc3251202"
 
 [[pkg]]
 name = "formalshell"
-source = "git:https://github.com/FormalSnake/FormalShell@71ad649b4a31a0eb9e4cbbdd967eac034b506192"
-rev = "71ad649b4a31a0eb9e4cbbdd967eac034b506192"
-
-[pkg.x86_64-linux]
-oci = "ghcr.io/formalstudio/fspec-cache/formalshell@sha256:1e6299f0e2936a1b0c043775683d6a4d5721af75fc82d6bb1be5359a29d070db"
+source = "git:https://github.com/FormalSnake/FormalShell@34a0139d7c6a5e453c52485df2298fe55cc74a87"
+rev = "34a0139d7c6a5e453c52485df2298fe55cc74a87"
 
 [[pkg]]
 name = "fut"

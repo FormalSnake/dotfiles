@@ -463,7 +463,7 @@ def _pkgs():
         # is upstream's release build: it installs its own deps on bookworm, whose glibc it targets.
         pkg(
             "formalshell",
-            source = git("https://github.com/FormalSnake/FormalShell", rev = "71ad649b4a31a0eb9e4cbbdd967eac034b506192", image = "docker.io/library/debian:bookworm"),
+            source = git("https://github.com/FormalSnake/FormalShell", rev = "34a0139d7c6a5e453c52485df2298fe55cc74a87", image = "docker.io/library/debian:bookworm"),
             build = ["sh", "-c", "WORK=\"$FSPEC_OUT.work\" bash \"$FSPEC_SRC/dev/tarball.sh\" \"$FSPEC_OUT.tar\" && tar -xzf \"$FSPEC_OUT.tar\"/formalshell-*-linux.tar.gz -C \"$FSPEC_OUT\" && rm -rf \"$FSPEC_OUT.work\" \"$FSPEC_OUT.tar\""],
         ),
         pkg("herdr", version = "0.9.3", source = github("ogulcancelik/herdr", asset = "herdr-linux-*")),
@@ -494,8 +494,8 @@ def _pkgs():
         # builds, on Tumbleweed's python and its dasbus, gobject and typer.
         pkg(
             "ancs4linux",
-            source = git("https://github.com/pzmarzly/ancs4linux", rev = "b658546f08d1468f6d79aa900cc7faa9d938837d", image = TUMBLEWEED, deps = ["python313-pip", "python313-hatchling"]),
-            patches = ["patches/ancs4linux-0-metadata.patch", "patches/ancs4linux-authorize.patch", "patches/ancs4linux-busy.patch", "patches/ancs4linux-reconnect.patch", "patches/ancs4linux-resubscribe.patch"],
+            source = git("https://github.com/pzmarzly/ancs4linux", rev = "138451721ff10d3c8634b32656ae3d38a99b9163", image = TUMBLEWEED, deps = ["python313-pip", "python313-hatchling"]),
+            patches = ["patches/ancs4linux-0-metadata.patch", "patches/ancs4linux-authorize.patch"],
             build = ["sh", "-c", ANCS4LINUX_BUILD],
         ),
         # ananicy-cpp with CachyOS's rules, as services.ananicy has them; neither is packaged.
