@@ -323,6 +323,9 @@ which has no LocalForwards) and the first launch migrated it into the
 encrypted `connection-catalog.json`. Launch it in the console session, not
 over ssh, or safeStorage cannot encrypt the catalog: from ssh, register a
 `New-ScheduledTaskPrincipal -UserId (whoami) -LogonType Interactive` task.
+Windows' `w32time` is set to start automatically (it was demand-start and
+stopped, which left the clock an hour behind after the DST change and made
+relay.t3.codes reject environment link proofs as expired).
 
 **Storage sweep on the Windows side.** `scripts/storage-gc.ps1` is the
 Windows twin of `storage-gc.sh`: stale cargo targets (CACHEDIR.TAG), old
