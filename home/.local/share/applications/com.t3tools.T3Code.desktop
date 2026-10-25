@@ -2,7 +2,7 @@
 Type=Application
 Name=T3 Code (Alpha)
 Comment=Minimal web GUI for coding agents
-Exec=/opt/fspec/current/bin/t3code-desktop %U
+Exec=/usr/bin/env T3CODE_HOME=/home/kyandesutter/.t3-desktop /opt/fspec/current/bin/t3code-desktop %U
 Icon=t3code
 StartupWMClass=t3code
 Terminal=false

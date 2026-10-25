@@ -427,6 +427,13 @@ def _services():
             env = {"PATH": PATH, "SHELL": BREW + "/fish"},
             launchd = _logs("t3code", {"WorkingDirectory": HOME}),
         ),
+        # The second Claude account as its own T3 Code provider (home.star has the Linux side).
+        file("~/.t3/userdata/settings.json", mode = "patch", owns = {"providerInstances.claude-pulse": {
+            "driver": "claudeAgent",
+            "displayName": "Claude Pulse",
+            "enabled": True,
+            "config": {"homePath": HOME + "/.claude-pulse"},
+        }}),
         # Keeps ~/Notes current off CouchDB's _changes feed without the Obsidian app open.
         service(
             "obsidian-livesync-daemon",

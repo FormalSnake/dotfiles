@@ -187,17 +187,6 @@ def _services():
             description = "Load the GNOME interface keys from ~/.config/fspec/dconf.ini",
             systemd = {"Type": "oneshot", "RemainAfterExit": True},
         ),
-        service(
-            "t3code",
-            exec = PKG_BIN + "/t3 serve --host 127.0.0.1 --port 3773 " + HOME + "/Developer",
-            user = True,
-            restart = "always",
-            after = ["network"],
-            description = "T3 Code server",
-            env = {"PATH": BIN + ":" + PKG_BIN + ":" + HOME + "/.bun/bin:/usr/bin:/bin", "SHELL": "/usr/bin/fish"},
-            systemd = {"RestartSec": 5, "WorkingDirectory": HOME, "unit": {"ConditionPathExists": PKG_BIN + "/t3"}},
-        ),
-        timer("t3code-serve", exec = "/usr/bin/tailscale serve --bg --https=8773 http://127.0.0.1:3773", schedule = "*/5 * * * *", user = True),
         # mixins/hardware/audio.nix.
         service(
             "audio-autoswitch",
@@ -354,6 +343,54 @@ def _claude_pulse():
         ),
     ]
 
+# T3 Code: the server runs on the g815 only. The desktop app always starts its own backend and
+# refuses a data directory the server owns, so it gets ~/.t3-desktop and reaches every server, this
+# host's included, over ssh. It reads saved-environments.json once, to migrate it into its encrypted
+# connection catalog; the ids are each server's ~/.t3/userdata/environment-id.
+T3_SERVERS = {
+    "macbook": {"alias": "macbook-t3", "id": "5c911926-9553-4e77-afea-49eacc89b011"},
+    "g815": {"alias": "g815", "id": "d0c1975c-343f-40d3-8370-2689724f8040"},
+}
+
+# The second Claude account as its own provider, so the model picker switches between the logins.
+T3_PULSE = {"driver": "claudeAgent", "displayName": "Claude Pulse", "enabled": True, "config": {"homePath": HOME + "/.claude-pulse"}}
+
+def _t3code(h):
+    out = [
+        file("~/.t3-desktop/userdata/settings.json", mode = "patch", owns = {"providerInstances.claude-pulse": T3_PULSE}),
+        file("~/.t3-desktop/userdata/saved-environments.json", mode = "seed", perms = "0600", content = {
+            "version": 1,
+            "records": [
+                {
+                    "environmentId": s["id"],
+                    "label": name,
+                    "httpBaseUrl": "http://127.0.0.1:3773",
+                    "wsBaseUrl": "ws://127.0.0.1:3773",
+                    "createdAt": "2026-10-25T00:00:00.000Z",
+                    "lastConnectedAt": None,
+                    "desktopSsh": {"alias": s["alias"], "hostname": s["alias"], "username": None, "port": None},
+                }
+                for name, s in T3_SERVERS.items()
+            ],
+        }),
+    ]
+    if h.name in T3_SERVERS:
+        out += [
+            file("~/.t3/userdata/settings.json", mode = "patch", owns = {"providerInstances.claude-pulse": T3_PULSE}),
+            service(
+                "t3code",
+                exec = PKG_BIN + "/t3 serve --host 127.0.0.1 --port 3773 " + HOME + "/Developer",
+                user = True,
+                restart = "always",
+                after = ["network"],
+                description = "T3 Code server",
+                env = {"PATH": BIN + ":" + PKG_BIN + ":" + HOME + "/.bun/bin:/usr/bin:/bin", "SHELL": "/usr/bin/fish"},
+                systemd = {"RestartSec": 5, "WorkingDirectory": HOME, "unit": {"ConditionPathExists": PKG_BIN + "/t3"}},
+            ),
+            timer("t3code-serve", exec = "/usr/bin/tailscale serve --bg --https=8773 http://127.0.0.1:3773", schedule = "*/5 * * * *", user = True),
+        ]
+    return out
+
 def _tools():
     return [
         # The plugin's .tmux script falls back to tmux-agent-sidebar on PATH when its bin/ is empty.
@@ -427,4 +464,4 @@ def _apps():
 
 # Called with the host facts when listed in host(modules = [home]).
 def home(h):
-    return list(_files(h)) + _services() + _kde() + _flatpaks() + _discord() + _claude_pulse() + _tools() + _nvim() + _apps()
+    return list(_files(h)) + _services() + _kde() + _flatpaks() + _discord() + _claude_pulse() + _t3code(h) + _tools() + _nvim() + _apps()
