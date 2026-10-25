@@ -255,7 +255,12 @@
   # UxPlay AirPlay receiver (mirroring window kept, shared in meetings).
   services.formalshell.iphone.enable = true;
   services.formalshell.airplay.enable = true;
-  users.users.kyandesutter.extraGroups = [ "ancs4linux" ];
+  users.users.kyandesutter.extraGroups = [ "ancs4linux" "libvirtd" ];
+
+  # libvirt and virt-manager for test VMs such as the FormalSpec installer ISO.
+  # OVMF ships with qemu in nixpkgs, so UEFI guests need no extra firmware.
+  virtualisation.libvirtd.enable = true;
+  programs.virt-manager.enable = true;
 
   # Export a USB-attached iPhone to the macbook over Tailscale, so Xcode there
   # builds and debugs onto a phone cabled to this laptop
