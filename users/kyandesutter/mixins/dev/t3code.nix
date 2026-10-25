@@ -35,7 +35,7 @@ let
           username = null;
           port = null;
         };
-      }) (removeAttrs servers [ host ]);
+      }) servers;
     }
   );
 
@@ -91,6 +91,22 @@ let
     );
   };
 
+  # The desktop app always starts its own backend, and 0.1.0 refuses to start
+  # one on a data directory the background server owns, so the app gets its
+  # own home and reaches every server, this host's included, as a connection.
+  desktopHome = "${home}/.t3-desktop";
+  # symlinkJoin bakes postBuild into buildCommand, so the wrap appends there.
+  t3codeDesktop = t3code.overrideAttrs (old: {
+    buildCommand = old.buildCommand + ''
+      wrapProgram "$out/bin/t3code-desktop" --set-default T3CODE_HOME ${desktopHome}
+    '' + lib.optionalString pkgs.stdenv.hostPlatform.isDarwin ''
+      # lndir links the bundle's executable to the unwrapped bin/.
+      for exe in "$out"/Applications/*.app/Contents/MacOS/*; do
+        ln -sfn ../../../../bin/t3code-desktop "$exe"
+      done
+    '';
+  });
+
   port = 3773;
   httpsPort = 8773;
 
@@ -128,18 +144,20 @@ let
   ];
 in
 {
-  home.packages = [ t3code ];
+  home.packages = [ t3codeDesktop ];
 
   # settings.json is the server's own runtime file (it watches it and writes
   # UI changes back), so only the provider instances are merged in.
   home.activation.t3codeSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    dir="${home}/.t3/userdata"
-    run mkdir -p "$dir"
-    [ -s "$dir/settings.json" ] || echo '{}' > "$dir/settings.json"
-    run ${lib.getExe pkgs.jq} --slurpfile add ${providerInstances} \
-      '.providerInstances = ((.providerInstances // {}) * $add[0])' \
-      "$dir/settings.json" > "$dir/settings.json.hm-tmp"
-    run mv "$dir/settings.json.hm-tmp" "$dir/settings.json"
+    for dir in "${home}/.t3/userdata" "${desktopHome}/userdata"; do
+      run mkdir -p "$dir"
+      [ -s "$dir/settings.json" ] || echo '{}' > "$dir/settings.json"
+      run ${lib.getExe pkgs.jq} --slurpfile add ${providerInstances} \
+        '.providerInstances = ((.providerInstances // {}) * $add[0])' \
+        "$dir/settings.json" > "$dir/settings.json.hm-tmp"
+      run mv "$dir/settings.json.hm-tmp" "$dir/settings.json"
+    done
+    dir="${desktopHome}/userdata"
     if [ ! -e "$dir/connection-catalog.json" ]; then
       run install -m 600 ${savedEnvironments} "$dir/saved-environments.json"
     fi
