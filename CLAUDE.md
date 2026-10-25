@@ -315,6 +315,15 @@ up there too (2026-09-20). None of it is nix-managed:
 - The win32 code paths (clipboard, toasts, links, file picker) shell out to
   Windows PowerShell through `packages/core/src/windows.ts`.
 
+**T3 Code on the Windows side** (2026-10-25): `winget install -e --id
+T3Tools.T3Code` (machine scope; `--scope user` has no installer). No server
+runs there: `~/.t3/userdata/saved-environments.json` was seeded with the
+macbook as an SSH connection (alias `macbook` from `C:\Users\Kyan\.ssh\config`,
+which has no LocalForwards) and the first launch migrated it into the
+encrypted `connection-catalog.json`. Launch it in the console session, not
+over ssh, or safeStorage cannot encrypt the catalog: from ssh, register a
+`New-ScheduledTaskPrincipal -UserId (whoami) -LogonType Interactive` task.
+
 **Storage sweep on the Windows side.** `scripts/storage-gc.ps1` is the
 Windows twin of `storage-gc.sh`: stale cargo targets (CACHEDIR.TAG), old
 Roblox builds, BeamNG temp, temp dirs, driver installer leftovers, and with
