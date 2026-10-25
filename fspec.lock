@@ -397,6 +397,11 @@ source = "git:https://github.com/FormalSnake/FormalShell@34a0139d7c6a5e453c52485
 rev = "34a0139d7c6a5e453c52485df2298fe55cc74a87"
 
 [[pkg]]
+name = "fspec"
+source = "git:https://github.com/FormalStudio/formalspec@main"
+rev = "622f5c087fe8031a41b3a6089cb9a50a75f25412"
+
+[[pkg]]
 name = "fut"
 source = "github:mikker/fut"
 version = "0.24"
