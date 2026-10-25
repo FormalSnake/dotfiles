@@ -1,6 +1,56 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, osConfig ? { }, ... }:
 let
   home = config.home.homeDirectory;
+
+  # Same fallback as claude-code.nix: nix-darwin leaves networking.hostName null.
+  osHostName = (osConfig.networking or { }).hostName or null;
+  host = if osHostName == null || osHostName == "" then "macbook" else osHostName;
+
+  # Hosts that run the server, keyed by ssh alias. The ids are each server's
+  # ~/.t3/userdata/environment-id; the desktop matches the connection to the
+  # server by it.
+  servers = {
+    macbook = "5c911926-9553-4e77-afea-49eacc89b011";
+    g815 = "d0c1975c-343f-40d3-8370-2689724f8040";
+  };
+  isServer = servers ? ${host};
+
+  # The desktop app only reads saved-environments.json to migrate it into its
+  # safeStorage-encrypted connection-catalog.json, once, while the catalog does
+  # not exist. SSH targets carry no token: the app pairs itself over ssh and
+  # reuses the server already listening on the remote.
+  savedEnvironments = pkgs.writeText "t3code-saved-environments.json" (
+    builtins.toJSON {
+      version = 1;
+      records = lib.mapAttrsToList (alias: environmentId: {
+        inherit environmentId;
+        label = alias;
+        httpBaseUrl = "http://127.0.0.1:${toString port}";
+        wsBaseUrl = "ws://127.0.0.1:${toString port}";
+        createdAt = "2026-10-25T00:00:00.000Z";
+        lastConnectedAt = null;
+        desktopSsh = {
+          inherit alias;
+          hostname = alias;
+          username = null;
+          port = null;
+        };
+      }) (removeAttrs servers [ host ]);
+    }
+  );
+
+  # Second Claude account (claude-code.nix) as its own provider instance, so
+  # the model picker switches between the two logins.
+  providerInstances = pkgs.writeText "t3code-provider-instances.json" (
+    builtins.toJSON {
+      claude-pulse = {
+        driver = "claudeAgent";
+        displayName = "Claude Pulse";
+        enabled = true;
+        config.homePath = "${home}/.claude-pulse";
+      };
+    }
+  );
 
   # claude comes from programs.claude-code (claude-code-nix), so the wrapper's
   # bundled codex is dropped rather than shadowing nothing useful.
@@ -80,11 +130,26 @@ in
 {
   home.packages = [ t3code ];
 
+  # settings.json is the server's own runtime file (it watches it and writes
+  # UI changes back), so only the provider instances are merged in.
+  home.activation.t3codeSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    dir="${home}/.t3/userdata"
+    run mkdir -p "$dir"
+    [ -s "$dir/settings.json" ] || echo '{}' > "$dir/settings.json"
+    run ${lib.getExe pkgs.jq} --slurpfile add ${providerInstances} \
+      '.providerInstances = ((.providerInstances // {}) * $add[0])' \
+      "$dir/settings.json" > "$dir/settings.json.hm-tmp"
+    run mv "$dir/settings.json.hm-tmp" "$dir/settings.json"
+    if [ ! -e "$dir/connection-catalog.json" ]; then
+      run install -m 600 ${savedEnvironments} "$dir/saved-environments.json"
+    fi
+  '';
+
   xdg.mimeApps.associations.added = lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
     "x-scheme-handler/t3code" = [ "com.t3tools.T3Code.desktop" ];
   };
 
-  launchd.agents = lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
+  launchd.agents = lib.optionalAttrs (isServer && pkgs.stdenv.hostPlatform.isDarwin) {
     t3code = {
       enable = true;
       config = {
@@ -115,7 +180,7 @@ in
     };
   };
 
-  systemd.user = lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
+  systemd.user = lib.optionalAttrs (isServer && pkgs.stdenv.hostPlatform.isLinux) {
     services.t3code = {
       Unit = {
         Description = "T3 Code server";
