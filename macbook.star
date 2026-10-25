@@ -55,6 +55,8 @@ FORMULAE = [
     "tree-sitter-cli", "ghostscript",
     # clipssh reads the clipboard image with pngpaste
     "pngpaste",
+    # an apply from here pulls the locked fspec for an older remote with oras
+    "oras",
     # network, remote iPhone, VPN
     "tailscale", "wireguard-tools", "libimobiledevice", "ideviceinstaller", "openssl@3",
     # Obsidian LiveSync backend on 127.0.0.1:5984
