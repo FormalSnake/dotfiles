@@ -86,6 +86,15 @@
         ];
       };
 
+      # The macbook without the dev-port forwards, for tools that open their
+      # own tunnel with ExitOnForwardFailure (T3 Code's desktop app), which an
+      # interactive `macbook` session holding those ports would otherwise kill.
+      "macbook-t3" = {
+        HostName = "macbook-pro-2";
+        User = "kyandesutter";
+        IdentityAgent = "SSH_AUTH_SOCK"; # see the macbook entry
+      };
+
       # ASUS Vivobook E1504G over its stable Tailscale IP (works from both the
       # g815 and the macbook; the IP sidesteps the g815's MagicDNS-hostile DNS
       # setup, see the macbook entry above). Auth via the 1Password agent key

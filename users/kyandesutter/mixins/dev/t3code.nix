@@ -6,12 +6,19 @@ let
   osHostName = (osConfig.networking or { }).hostName or null;
   host = if osHostName == null || osHostName == "" then "macbook" else osHostName;
 
-  # Hosts that run the server, keyed by ssh alias. The ids are each server's
+  # Hosts that run the server and the ssh alias the desktop reaches each by
+  # (users/kyandesutter/mixins/cli/ssh.nix). The ids are each server's
   # ~/.t3/userdata/environment-id; the desktop matches the connection to the
   # server by it.
   servers = {
-    macbook = "5c911926-9553-4e77-afea-49eacc89b011";
-    g815 = "d0c1975c-343f-40d3-8370-2689724f8040";
+    macbook = {
+      alias = "macbook-t3";
+      environmentId = "5c911926-9553-4e77-afea-49eacc89b011";
+    };
+    g815 = {
+      alias = "g815";
+      environmentId = "d0c1975c-343f-40d3-8370-2689724f8040";
+    };
   };
   isServer = servers ? ${host};
 
@@ -22,9 +29,9 @@ let
   savedEnvironments = pkgs.writeText "t3code-saved-environments.json" (
     builtins.toJSON {
       version = 1;
-      records = lib.mapAttrsToList (alias: environmentId: {
+      records = lib.mapAttrsToList (name: { alias, environmentId }: {
         inherit environmentId;
-        label = alias;
+        label = name;
         httpBaseUrl = "http://127.0.0.1:${toString port}";
         wsBaseUrl = "ws://127.0.0.1:${toString port}";
         createdAt = "2026-10-25T00:00:00.000Z";
