@@ -70,6 +70,9 @@ let
   # Pinned to 0.1.0 ahead of nixpkgs-unstable: the mobile app refuses 0.0.x
   # servers. Drop the src/pnpmDeps override (and the rpath fixup, which
   # nixpkgs master carries too) once pkgs.t3code reaches 0.1.0.
+  #
+  # The import patch appends CLI turns to a thread imported earlier; upstream
+  # imports a session once and never follows it (t3code-cli-sync below).
   t3code = pkgs.t3code.override {
     enableCodex = false;
     t3code-unwrapped = pkgs.t3code.unwrapped.overrideAttrs (
@@ -86,6 +89,7 @@ let
           fetcherVersion = 4;
           hash = "sha256-oX4tOu20tYO3ci7VvSEL8eFgxAYWp5HlQFSfAWJGJmg=";
         };
+        patches = (old.patches or [ ]) ++ [ ./t3code-import-new-turns.patch ];
       }
       // lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
         postFixup = (old.postFixup or "") + ''
@@ -116,6 +120,17 @@ let
 
   port = 3773;
   httpsPort = 8773;
+
+  # Imports Claude Code CLI sessions into the server as their transcripts
+  # change, for both accounts.
+  cliSyncArgs = [
+    (lib.getExe pkgs.nodejs)
+    "${./t3code-cli-sync.mjs}"
+    (lib.getExe' t3code "t3")
+    "${config.xdg.stateHome}/t3code-cli-sync"
+    "${home}/.claude"
+    "${home}/.claude-pulse"
+  ];
 
   # The server only binds loopback; tailnet clients reach it through Tailscale
   # Serve HTTPS, which the mobile app and app.t3.codes require anyway. 443 is
@@ -191,6 +206,18 @@ in
       };
     };
 
+    t3code-cli-sync = {
+      enable = true;
+      config = {
+        ProgramArguments = cliSyncArgs;
+        RunAtLoad = true;
+        KeepAlive = true;
+        ThrottleInterval = 30;
+        StandardOutPath = "${home}/Library/Logs/t3code-cli-sync.log";
+        StandardErrorPath = "${home}/Library/Logs/t3code-cli-sync.log";
+      };
+    };
+
     # Reasserted every five minutes for the same reason as the LiveSync
     # mapping: any dev-session `tailscale serve` can replace it.
     t3code-serve = {
@@ -220,6 +247,20 @@ in
         ];
         Restart = "always";
         RestartSec = 5;
+      };
+      Install.WantedBy = [ "default.target" ];
+    };
+
+    services.t3code-cli-sync = {
+      Unit = {
+        Description = "Import Claude Code CLI sessions into T3 Code";
+        After = [ "t3code.service" ];
+        BindsTo = [ "t3code.service" ];
+      };
+      Service = {
+        ExecStart = lib.escapeShellArgs cliSyncArgs;
+        Restart = "always";
+        RestartSec = 30;
       };
       Install.WantedBy = [ "default.target" ];
     };

@@ -1,0 +1,44 @@
+--- a/apps/server/src/project/AgentSessionImporter.ts
++++ b/apps/server/src/project/AgentSessionImporter.ts
+@@ -249,7 +249,9 @@
+               providerSessionId: thread.providerSessionId,
+             });
+           }
+-          const existing = yield* Effect.option(orchestrator.getThreadRecords(threadId, []));
++          const existing = yield* Effect.option(
++            orchestrator.getThreadRecords(threadId, ["messages", "runs"]),
++          );
+           if (Option.isSome(existing)) {
+             if (existing.value.thread.projectId !== input.projectId) {
+               return yield* new AgentSessionThreadProjectConflictError({
+@@ -260,6 +262,30 @@
+             }
+             if (existing.value.thread.historyOrigin !== "v1_import") {
+               return yield* new AgentSessionThreadModifiedError({ threadId });
++            }
++            // The transcript grew since the last import because the session went on in the CLI.
++            // Append the turns newer than anything the thread holds. Once the thread has run here
++            // its own turns are in the transcript too, and their ordinals would collide, so it
++            // stops following the CLI.
++            if (existing.value.runs.length === 0) {
++              const known = existing.value.messages;
++              const latest = Math.max(
++                0,
++                ...known.map((message) => DateTime.toEpochMillis(message.createdAt)),
++              );
++              const imported = known.filter((message) =>
++                message.id.startsWith(`${threadId}:`),
++              ).length;
++              const fresh = thread.messages.filter(
++                (message) => Date.parse(message.createdAt) > latest,
++              );
++              if (fresh.length > 0) {
++                yield* eventSink.write({
++                  events: fresh.flatMap((message, offset) =>
++                    messageEvents({ threadId, index: imported + offset, message }),
++                  ),
++                });
++              }
+             }
+             yield* runtimes.recordImportedTranscript({ threadId, source });
+             return true;
