@@ -200,7 +200,7 @@ not on whether I named the skill.
 | Animation or motion | `animate` (web) or `animate-expo` (React Native) to build it, plus `transitions-dev`. `review-animations` on a diff, `improve-animations` to audit a whole codebase, `find-animation-opportunities` for motion that is missing, `animation-vocabulary` to name an effect |
 | A screen or flow reviewed end to end | `better-interface` (user-invoked only); `improve-ui` for design-system drift |
 | Expo / React Native, anything at all | the `expo:*` skills. Never write Expo/EAS config or native UI from memory. |
-| Apple platforms | `Apple-Hig-Designer`, `swiftui-ui-patterns`, `serve-sim`; `write-swift` for any Swift code; `apple-design` for an Apple feel on the web |
+| Apple platforms | `Apple-Hig-Designer`, `swiftui-ui-patterns`, `serve-sim` (`t3code` inside T3 Code); `write-swift` for any Swift code; `apple-design` for an Apple feel on the web |
 | Cloudflare | `cloudflare`, `wrangler`, `workers-best-practices`, `durable-objects`, `agents-sdk` |
 | My own services | `canaryllm-api`, `gem0-api`, `kangaplanner-api` |
 | Review and quality passes | `deep-review`, `react-doctor`, `web-perf`, `web-quality-audit` |
@@ -230,6 +230,11 @@ and never call a pane command started or done until its sentinel came back
 (the skill has the pattern). Outside Herdr, fall back to the
 Agent tool or backgrounded Bash, and never drive a Herdr session from outside
 one.
+
+When the `mcp__t3-code__*` tools are present you are inside T3 Code: load the
+`t3code` skill before touching a simulator or device, a web page, a chart,
+cross-model delegation, worktrees, PRs or recurring work. Its Device panel and
+browser preview replace serve-sim and playwriter there.
 
 ## Peer agents are colleagues, not suspects
 
