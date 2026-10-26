@@ -1,9 +1,9 @@
 --- a/apps/server/src/project/AgentSessionImporter.ts
 +++ b/apps/server/src/project/AgentSessionImporter.ts
-@@ -249,7 +249,9 @@
-               providerSessionId: thread.providerSessionId,
-             });
-           }
+@@ -267,7 +267,9 @@
+             },
+             { onConflict: "ignore" },
+           );
 -          const existing = yield* Effect.option(orchestrator.getThreadRecords(threadId, []));
 +          const existing = yield* Effect.option(
 +            orchestrator.getThreadRecords(threadId, ["messages", "runs"]),
@@ -11,7 +11,7 @@
            if (Option.isSome(existing)) {
              if (existing.value.thread.projectId !== input.projectId) {
                return yield* new AgentSessionThreadProjectConflictError({
-@@ -260,6 +262,30 @@
+@@ -278,6 +280,30 @@
              }
              if (existing.value.thread.historyOrigin !== "v1_import") {
                return yield* new AgentSessionThreadModifiedError({ threadId });
@@ -40,5 +40,5 @@
 +                });
 +              }
              }
+             yield* persistRuntime;
              yield* runtimes.recordImportedTranscript({ threadId, source });
-             return true;

@@ -67,9 +67,9 @@ let
   # runs its backend under Electron, which does not, so the backend dies on
   # start and the app never opens a window.
   #
-  # Pinned to 0.1.0 ahead of nixpkgs-unstable: the mobile app refuses 0.0.x
+  # Pinned to 0.1.2 ahead of nixpkgs-unstable: the mobile app refuses 0.0.x
   # servers. Drop the src/pnpmDeps override (and the rpath fixup, which
-  # nixpkgs master carries too) once pkgs.t3code reaches 0.1.0.
+  # nixpkgs master carries too) once pkgs.t3code reaches 0.1.2.
   #
   # The import patch appends CLI turns to a thread imported earlier; upstream
   # imports a session once and never follows it (t3code-cli-sync below).
@@ -78,16 +78,16 @@ let
     t3code-unwrapped = pkgs.t3code.unwrapped.overrideAttrs (
       finalAttrs: old:
       {
-        version = "0.1.0";
+        version = "0.1.2";
         src = old.src.override {
           tag = "v${finalAttrs.version}";
-          hash = "sha256-P82DqoY1E9wtROwu5Nr7MB/I1PdmZHWXXR4nRa4GWXM=";
+          hash = "sha256-C5l7541kanlsukhswrAEu8GFpr/YpWDnofJ5dlg7+LM=";
         };
         pnpmDeps = pkgs.fetchPnpmDeps {
           inherit (finalAttrs) pname version src pnpmWorkspaces;
           pnpm = pkgs.pnpm_11;
           fetcherVersion = 4;
-          hash = "sha256-oX4tOu20tYO3ci7VvSEL8eFgxAYWp5HlQFSfAWJGJmg=";
+          hash = "sha256-xRmOrOZbBljaF1IJr0JFUFzdhkld6+ehLIlpVOg/J3E=";
         };
         patches = (old.patches or [ ]) ++ [ ./t3code-import-new-turns.patch ];
       }
@@ -164,18 +164,24 @@ let
     "/usr/bin"
     "/bin"
   ];
+
+  deviceHub = lib.concatMapStrings (
+    key: " | if has(\"${key}\") then . else .${key} = true end"
+  ) [ "enableDeviceSupport" "deviceOnboardingCompleted" "enableAgentDeviceAccess" ];
 in
 {
   home.packages = [ t3codeDesktop ];
 
   # settings.json is the server's own runtime file (it watches it and writes
-  # UI changes back), so only the provider instances are merged in.
+  # UI changes back), so only the provider instances are merged in. The
+  # device hub (iOS simulators, via xcrun) is switched on once on the mac and
+  # left to the UI after that.
   home.activation.t3codeSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     for dir in "${home}/.t3/userdata" "${desktopHome}/userdata"; do
       run mkdir -p "$dir"
       [ -s "$dir/settings.json" ] || echo '{}' > "$dir/settings.json"
       run ${lib.getExe pkgs.jq} --slurpfile add ${providerInstances} \
-        '.providerInstances = ((.providerInstances // {}) * $add[0])' \
+        '.providerInstances = ((.providerInstances // {}) * $add[0])${lib.optionalString pkgs.stdenv.hostPlatform.isDarwin deviceHub}' \
         "$dir/settings.json" > "$dir/settings.json.hm-tmp"
       run mv "$dir/settings.json.hm-tmp" "$dir/settings.json"
     done
