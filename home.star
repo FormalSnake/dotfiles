@@ -469,7 +469,7 @@ def _apps():
         # Cargo.toml points at ../nativedesktop, and libghostty-vt builds with zig 0.16.0.
         pkg(
             "formalmusic",
-            source = git("https://github.com/FormalStudio/formalmusic", rev = "2aab94ef66e01596dc45043f9b2477ae8419b042", image = TUMBLEWEED, deps = ["cargo"] + NATIVEDESKTOP_DEPS),
+            source = git("https://github.com/FormalStudio/formalmusic", rev = "84e167a9d144ee9c2a9446747e381d7fd905ed00", image = TUMBLEWEED, deps = ["cargo"] + NATIVEDESKTOP_DEPS),
             build = ["sh", "-c", "set -e; w=$(mktemp -d); git clone -q https://github.com/FormalStudio/NativeDesktop $w/nativedesktop; git -C $w/nativedesktop checkout -q 7ad936d8bcf2ef7c7d026798cb63044b9c088b71; cp -r $FSPEC_SRC $w/formalmusic; curl -fsSL https://ziglang.org/download/0.16.0/zig-x86_64-linux-0.16.0.tar.xz | tar -xJ -C $w; PATH=$w/zig-x86_64-linux-0.16.0:$PATH cargo build --release --locked --manifest-path $w/formalmusic/Cargo.toml --package formalmusic; install -Dm755 $w/formalmusic/target/release/formalmusic $FSPEC_OUT/bin/formalmusic"],
         ),
         pkg("fast", source = git("https://github.com/maaslalani/fast", rev = "26d8fc9c189ba748c68f8930af11dee5c2467f7e")),
