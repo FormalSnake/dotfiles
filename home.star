@@ -59,6 +59,8 @@ def _services():
         service("formalshell.service", user = True),
         service("formalshell-watchdog.timer", user = True),
         _autostart("discord", BIN + "/discord --start-minimized", "Discord (minimized to tray)", hyprland_only = True),
+        # patterns-kde-kde_plasma pulls it in; its autostart has no OnlyShowIn, so Hyprland maps its window.
+        file("~/.config/autostart/org.kde.xwaylandvideobridge.desktop", content = "[Desktop Entry]\nType=Application\nName=Xwayland Video Bridge\nExec=xwaylandvideobridge --autostart\nOnlyShowIn=KDE;\n"),
         _autostart("beeper", PKG_BIN + "/beeper", "Beeper", needs = PKG_BIN + "/beeper"),
         _autostart("flare", "/usr/bin/flatpak run de.schmidhuberj.Flare", "Flare (Signal)"),
         _autostart("messages", PKG_BIN + "/messages", "Messages", needs = PKG_BIN + "/messages"),
