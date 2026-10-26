@@ -96,8 +96,9 @@ in
         # the monitor panel, the launcher's monitor view and the display
         # panel all name it.
         display.outputPriority = [ "HDMI" "internal" ];
-        # The cartridge console: shard backdrop, boot sequence and blips.
-        theme.preset = "cartridge";
+        # elementary's relief on every control and a shadow under every card,
+        # the same preset e1504g's settings.json pins.
+        theme.preset = "pantheon";
       };
     };
 
