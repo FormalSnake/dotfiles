@@ -396,7 +396,8 @@ UWSM_HYPRLAND = "/usr/bin/uwsm start -e -D Hyprland hyprland.desktop"
 # plus the keyboard in sway's input block and the uwsm session.
 def _formalshell_files(h):
     return [
-        file("/etc/pam.d/formalshell-lock", content = "#%PAM-1.0\n@include common-auth\n@include common-account\n"),
+        # `include`, not Debian's `@include`, which Tumbleweed's PAM rejects.
+        file("/etc/pam.d/formalshell-lock", content = "#%PAM-1.0\nauth     include        common-auth\naccount  include        common-account\n"),
         file("/etc/tmpfiles.d/formalshell-greeter.conf", content = "d /run/formalshell-greeter 0700 greeter greeter -\nd /var/lib/formalshell-greeter 0700 greeter greeter -\n"),
         # The runfile and initial_session are mixins/desktop/kde's session switch.
         file("/etc/greetd/config.toml", content = '[terminal]\nvt = 1\n\n[general]\nrunfile = "/run/session-switch/greetd.run"\n\n[default_session]\ncommand = "/etc/greetd/formalshell-session.sh"\nuser = "greeter"\n\n[initial_session]\ncommand = "' + LIBEXEC + '/session-switch-login"\nuser = "kyandesutter"\n'),
