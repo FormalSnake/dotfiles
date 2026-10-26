@@ -124,8 +124,8 @@ Declarative config for two machines via one flake (flake-parts):
   and also the build machine (compiles for the e1504g); Hyprland +
   FormalShell desktop, everything on the NVIDIA dGPU (MUX), always on AC.
 - **`e1504g`** is not configured here. It runs openSUSE Tumbleweed under
-  fspec: its config is `examples/kyan/` in `~/Developer/ecosystem/formalspec`,
-  and nothing in this repo (modules, `nixosConfigurations.e1504g`, the
+  fspec: its config is this repo's `formalspec` branch, checked out at
+  `~/.config/nix-wt/formalspec`, and nothing on `main` (modules, `nixosConfigurations.e1504g`, the
   rebuild commands) reaches it. ASUS Vivobook (8 GB, Intel-only), same
   Hyprland + FormalShell desktop; g815 is its fspec `builder(...)`.
 
