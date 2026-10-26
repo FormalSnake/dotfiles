@@ -134,13 +134,13 @@ def _store():
         pkg("fut", version = "0.24", source = github("mikker/fut", asset = "fut-macos-arm64.tar.gz")),
         # Upstream releases ship Linux binaries only.
         pkg("tmux-agent-sidebar", source = git("https://github.com/hiroppy/tmux-agent-sidebar", rev = "2cff1cb955363394f8dd9c52d040d027536cfbd8")),
-        pkg("t3", version = "0.1.0", source = github("pingdotgg/t3code", asset = "t3-*-darwin-arm64.tar.gz")),
+        pkg("t3", version = "0.1.2", source = github("pingdotgg/t3code", asset = "t3-*-darwin-arm64.tar.gz")),
         pkg("pi", version = "1.1.0", source = github("badlogic/pi-mono", asset = "pi-darwin-arm64.tar.gz")),
         pkg("stripe", version = "1.43.2", source = github("stripe/stripe-cli", asset = "stripe_*_mac-os_arm64.tar.gz")),
         pkg("usbfluxd", version = "1.0", source = github("corellium/usbfluxd", asset = "usbfluxd-macho-arm64.tar.gz")),
         # The platform tarball holds the real binary; the main npm package's bin is a stub its
         # postinstall replaces. Claude Code updates itself from there.
-        pkg("claude", source = url("https://registry.npmjs.org/@anthropic-ai/claude-code-darwin-arm64/-/claude-code-darwin-arm64-2.1.289.tgz"), mode = "self_managed"),
+        pkg("claude", source = url("https://registry.npmjs.org/@anthropic-ai/claude-code-darwin-arm64/-/claude-code-darwin-arm64-2.1.310.tgz"), mode = "self_managed"),
         pkg("portless", version = "0.15.4", source = npm("portless")),
         # The SDK astro-ls falls back to (init.lua sets vim.g.tsdk from it); 7.x dropped tsserverlibrary.js.
         pkg("typescript", version = "5.9.3", source = npm("typescript")),

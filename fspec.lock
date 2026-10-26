@@ -140,19 +140,19 @@ version = "1.18.3"
 
 [[pkg]]
 name = "claude"
-source = "url:https://registry.npmjs.org/@anthropic-ai/claude-code-darwin-arm64/-/claude-code-darwin-arm64-2.1.289.tgz"
+source = "url:https://registry.npmjs.org/@anthropic-ai/claude-code-darwin-arm64/-/claude-code-darwin-arm64-2.1.310.tgz"
 
 [pkg.any]
-url = "https://registry.npmjs.org/@anthropic-ai/claude-code-darwin-arm64/-/claude-code-darwin-arm64-2.1.289.tgz"
-hash = "sha256-Cqhs8zft5gQVE6cugU5wOl2UwedemD8OWw4/LtHgtwA="
+url = "https://registry.npmjs.org/@anthropic-ai/claude-code-darwin-arm64/-/claude-code-darwin-arm64-2.1.310.tgz"
+hash = "sha256-4CR7748Sc63Ef7Sy5b0NouiGekMMk0ehxi2bARdBcus="
 
 [[pkg]]
 name = "claude"
-source = "url:https://registry.npmjs.org/@anthropic-ai/claude-code-linux-x64/-/claude-code-linux-x64-2.1.289.tgz"
+source = "url:https://registry.npmjs.org/@anthropic-ai/claude-code-linux-x64/-/claude-code-linux-x64-2.1.310.tgz"
 
 [pkg.any]
-url = "https://registry.npmjs.org/@anthropic-ai/claude-code-linux-x64/-/claude-code-linux-x64-2.1.289.tgz"
-hash = "sha256-UKbrQzQi/rz6e3rB54unlc33nx/ljwF/sdmuuUkbM30="
+url = "https://registry.npmjs.org/@anthropic-ai/claude-code-linux-x64/-/claude-code-linux-x64-2.1.310.tgz"
+hash = "sha256-jJCwFw0I/bNw2ygsYddIl7g0/CVp3RTDXrHkkSEtxt4="
 
 [[pkg]]
 name = "clipssh"
@@ -962,29 +962,29 @@ version = "2.1.6-1"
 [[pkg]]
 name = "t3"
 source = "github:pingdotgg/t3code"
-version = "0.1.0"
+version = "0.1.2"
 
 [pkg.aarch64-darwin]
-url = "https://github.com/pingdotgg/t3code/releases/download/v0.1.0/t3-0.1.0-linux-x64.tar.gz"
-hash = "sha256-93A/8buPYkNYAFizzPLAKrti66S5keJrux2iL0tW2bE="
+url = "https://github.com/pingdotgg/t3code/releases/download/v0.1.2/t3-0.1.2-linux-x64.tar.gz"
+hash = "sha256-eu1iXLlhk43xdMGgZ8DwUjU2CUC1PogqFkMSa3VNoWw="
 
 [pkg.x86_64-linux]
-url = "https://github.com/pingdotgg/t3code/releases/download/v0.1.0/t3-0.1.0-linux-x64.tar.gz"
-hash = "sha256-93A/8buPYkNYAFizzPLAKrti66S5keJrux2iL0tW2bE="
+url = "https://github.com/pingdotgg/t3code/releases/download/v0.1.2/t3-0.1.2-linux-x64.tar.gz"
+hash = "sha256-eu1iXLlhk43xdMGgZ8DwUjU2CUC1PogqFkMSa3VNoWw="
 
 [[pkg]]
 name = "t3-code"
 source = "brew:cask"
-version = "0.1.1"
+version = "0.1.2"
 
 [[pkg]]
 name = "t3code-desktop"
 source = "github:pingdotgg/t3code"
-version = "0.1.0"
+version = "0.1.2"
 
 [pkg.x86_64-linux]
-url = "https://github.com/pingdotgg/t3code/releases/download/v0.1.0/T3-Code-0.1.0-x86_64.AppImage"
-hash = "sha256-442cX7UTsezgpwi5BtM4O1tH7RmVdbOaMeQauINOt0Q="
+url = "https://github.com/pingdotgg/t3code/releases/download/v0.1.2/T3-Code-0.1.2-x86_64.AppImage"
+hash = "sha256-zwHi0Wfv+dAcTBAE0xssDaniUizJQmLkFkTRyxXf21w="
 
 [[pkg]]
 name = "tailscale"

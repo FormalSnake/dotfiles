@@ -396,8 +396,8 @@ def _t3code(h):
 def _tools():
     return [
         # The plugin's .tmux script falls back to tmux-agent-sidebar on PATH when its bin/ is empty.
-        pkg("t3", version = "0.1.0", source = github("pingdotgg/t3code", asset = "t3-*-linux-x64.tar.gz")),
-        pkg("t3code-desktop", version = "0.1.0", source = github("pingdotgg/t3code", asset = "T3-Code-*-x86_64.AppImage")),
+        pkg("t3", version = "0.1.2", source = github("pingdotgg/t3code", asset = "t3-*-linux-x64.tar.gz")),
+        pkg("t3code-desktop", version = "0.1.2", source = github("pingdotgg/t3code", asset = "T3-Code-*-x86_64.AppImage")),
         # Cargo.toml points at a NativeDesktop checkout beside the repo; the rev is the one its flake locks.
         # rust-toolchain.toml picks the compiler, so the build runs from the checkout.
         pkg(
@@ -434,7 +434,7 @@ def _apps():
         pkg("lumen", source = git("https://github.com/jnsahaj/lumen", rev = "4ad27231c3614e3f2acbc07bc794a4e8fde06fbf")),
         # The platform tarball holds the real binary; the main npm package's bin is a stub its
         # postinstall replaces.
-        pkg("claude", source = url("https://registry.npmjs.org/@anthropic-ai/claude-code-linux-x64/-/claude-code-linux-x64-2.1.289.tgz")),
+        pkg("claude", source = url("https://registry.npmjs.org/@anthropic-ai/claude-code-linux-x64/-/claude-code-linux-x64-2.1.310.tgz")),
         pkg("kopuz", version = "0.22.0", source = github("Kopuz-org/kopuz", asset = "kopuz_v*_x86_64-linux.tar.gz")),
         # mixins/apps/beeper.nix: nixpkgs' AppImage. Its desktop entry is in home/.
         pkg("beeper", source = url("https://beeper-desktop.download.beeper.com/builds/Beeper-4.3.73-x86_64.AppImage")),

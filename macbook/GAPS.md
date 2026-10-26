@@ -27,7 +27,7 @@ Secret-carrying state `fspec sync` can carry, still to be declared with the macb
 - Homebrew ships its current versions: herdr 0.9.5 (nix 0.9.3), opencode 2.1.2 (1.18.35), go
   1.27.3 (1.26.8), zig 0.17.0 (0.16.0), node 24.22.1 (24.21.0), Discord 0.0.418 (0.0.414),
   T3 Code app 0.1.1 (0.1.0), gopls 0.24.0, typescript stays 5.9.3 from npm.
-- Claude Code is `self_managed` at 2.1.289 and updates itself.
+- Claude Code is `self_managed` at 2.1.310 and updates itself.
 - nvim plugins are the same revisions nix pinned, through `vim.pack` and
   `.config/nvim/nvim-pack-lock.json`; nvim-treesitter compiles every parser on first start
   instead of shipping `withAllGrammars`.
