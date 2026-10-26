@@ -393,16 +393,13 @@ version = "latest"
 
 [[pkg]]
 name = "formalmusic"
-source = "git:https://github.com/FormalStudio/formalmusic@9a9d93af0fbb75594f3e91f087cf77e6c8a7f576"
-rev = "9a9d93af0fbb75594f3e91f087cf77e6c8a7f576"
+source = "git:https://github.com/FormalStudio/formalmusic@2aab94ef66e01596dc45043f9b2477ae8419b042"
+rev = "2aab94ef66e01596dc45043f9b2477ae8419b042"
 
 [[pkg]]
 name = "formalmusic"
-source = "git:https://github.com/FormalStudio/formalmusic@9ee98746fd0bbb804aebb8007132d1e05f992940"
-rev = "9ee98746fd0bbb804aebb8007132d1e05f992940"
-
-[pkg.x86_64-linux]
-oci = "ghcr.io/formalstudio/fspec-cache/formalmusic@sha256:c65e405d9b686d3950e69ae19ad2616a12cc9f4239c6380d1326662d3ef3d313"
+source = "git:https://github.com/FormalStudio/formalmusic@9a9d93af0fbb75594f3e91f087cf77e6c8a7f576"
+rev = "9a9d93af0fbb75594f3e91f087cf77e6c8a7f576"
 
 [[pkg]]
 name = "formalos-chime"
@@ -703,16 +700,13 @@ oci = "ghcr.io/formalstudio/fspec-cache/meshtop@sha256:530450a4ec992f0ee72762e28
 
 [[pkg]]
 name = "messages"
-source = "git:https://github.com/FormalStudio/messages@8df17ef38312e240f89428e98f85ef55e95b9c95"
-rev = "8df17ef38312e240f89428e98f85ef55e95b9c95"
-
-[pkg.x86_64-linux]
-oci = "ghcr.io/formalstudio/fspec-cache/messages@sha256:69d7c49a03e0706903f1f51790e1a1edf53ab8e9d96ffc7d11e8e862b4c82403"
+source = "git:https://github.com/FormalStudio/messages@e9455505f88f101897d001f4a61ab9c82b0232c7"
+rev = "e9455505f88f101897d001f4a61ab9c82b0232c7"
 
 [[pkg]]
 name = "messages"
-source = "git:https://github.com/FormalStudio/messages@e9455505f88f101897d001f4a61ab9c82b0232c7"
-rev = "e9455505f88f101897d001f4a61ab9c82b0232c7"
+source = "git:https://github.com/FormalStudio/messages@f880762c9624b692454048de852c274c50195e60"
+rev = "f880762c9624b692454048de852c274c50195e60"
 
 [[pkg]]
 name = "modrinth-app"
