@@ -422,7 +422,7 @@ def _tools():
         # rust-toolchain.toml picks the compiler, so the build runs from the checkout.
         pkg(
             "messages",
-            source = git("https://github.com/FormalStudio/messages", rev = "f880762c9624b692454048de852c274c50195e60", image = TUMBLEWEED, deps = ["rustup"] + NATIVEDESKTOP_DEPS),
+            source = git("https://github.com/FormalStudio/messages", rev = "097b732d57198bbaa2386b6e072416f9e6c0184e", image = TUMBLEWEED, deps = ["rustup"] + NATIVEDESKTOP_DEPS),
             build = ["sh", "-c", "set -e; nd=\"$FSPEC_SRC/../nativedesktop-wt-msg-linux\"; git init -q \"$nd\"; git -C \"$nd\" fetch -q --depth 1 https://github.com/FormalStudio/NativeDesktop 7ad936d8bcf2ef7c7d026798cb63044b9c088b71; git -C \"$nd\" checkout -q FETCH_HEAD; cd \"$FSPEC_SRC\"; cargo build --release --locked -p messages; install -Dm755 target/release/messages \"$FSPEC_OUT/bin/messages\""],
         ),
         pkg("tmux-agent-sidebar", version = "0.13.0", source = github("hiroppy/tmux-agent-sidebar", asset = "tmux-agent-sidebar-linux-*")),

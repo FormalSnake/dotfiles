@@ -709,16 +709,13 @@ oci = "ghcr.io/formalsnake/fspec-cache/meshtop@sha256:e216513761ee465dc9b8401540
 
 [[pkg]]
 name = "messages"
-source = "git:https://github.com/FormalStudio/messages@e9455505f88f101897d001f4a61ab9c82b0232c7"
-rev = "e9455505f88f101897d001f4a61ab9c82b0232c7"
+source = "git:https://github.com/FormalStudio/messages@097b732d57198bbaa2386b6e072416f9e6c0184e"
+rev = "097b732d57198bbaa2386b6e072416f9e6c0184e"
 
 [[pkg]]
 name = "messages"
-source = "git:https://github.com/FormalStudio/messages@f880762c9624b692454048de852c274c50195e60"
-rev = "f880762c9624b692454048de852c274c50195e60"
-
-[pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/messages@sha256:29886c090ed25fcc8be8a6fe76da73bdc6f353caeb66bc7448586ceff48563c1"
+source = "git:https://github.com/FormalStudio/messages@e9455505f88f101897d001f4a61ab9c82b0232c7"
+rev = "e9455505f88f101897d001f4a61ab9c82b0232c7"
 
 [[pkg]]
 name = "modrinth-app"
