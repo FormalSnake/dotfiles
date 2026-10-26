@@ -338,8 +338,18 @@ not something to ask about. Do not commit half-done work, a checkpoint every
 few edits, or a tidy-up that touches nothing behaviourally, and squash into
 the existing commit rather than adding "fix typo" on top when the first one
 has not been pushed yet. One task, one commit, unless the change genuinely
-splits into independent pieces. Pushing is separate: never push unless I ask
-or the task is a handoff to another agent that needs the branch on the remote.
+splits into independent pieces.
+
+### Pushing, building and deploying
+
+Repos owned by CanaryCoders, FormalStudio, KangaCoders or me (`FormalSnake`)
+are yours to push once the commit is verified; don't wait for me. The same
+goes for the builds, rebuilds, CI runs, releases and deploys that ship that
+work to my own machines and services: carry a fix all the way to the place I
+hit the bug, then tell me it is live. Check the remote owner with
+`git remote get-url origin` before pushing; anything else (forks, upstream
+projects, third-party repos) still waits for me to ask. Force-pushing over
+commits that aren't yours stays a confirm-first action.
 
 Match the repo's existing style; read recent `git log` first. Default: short
 imperative lowercase subject, conventional prefix (`fix(scope): …`) when the
