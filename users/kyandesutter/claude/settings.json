@@ -195,7 +195,7 @@
   },
   "alwaysThinkingEnabled": true,
   "effortLevel": "high",
-  "autoCompactWindow": 400000,
+  "autoCompactWindow": 200000,
   "tui": "fullscreen",
   "awaySummaryEnabled": false,
   "skipDangerousModePermissionPrompt": true,
