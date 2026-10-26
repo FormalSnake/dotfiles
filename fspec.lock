@@ -421,7 +421,7 @@ rev = "fb07d252092da64719ea29beb098857c4afbef7e"
 [[pkg]]
 name = "fspec"
 source = "git:https://github.com/FormalStudio/formalspec@main"
-rev = "9e80425202682e96b5d4335d1934b5afd90c308a"
+rev = "55a77afc6c2a022d4a5faebf33171c448a925012"
 
 [[pkg]]
 name = "fut"
