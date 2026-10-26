@@ -1,0 +1,44 @@
+name: fspec update
+
+# GitHub runs schedules from the default branch only, and this spec lives on `formalspec`, so it
+# runs on demand: `gh workflow run fspec-update.yml --ref formalspec`.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  packages: read
+
+jobs:
+  update:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: oras-project/setup-oras@v1
+      - run: cargo install --locked --git https://github.com/FormalStudio/formalspec fspec
+      - name: Resolve the lock
+        run: fspec --spec spec.star update
+      # Records the digest of every artifact fspec-packages has pushed. A tag that is not built yet
+      # fails the command; the digests that did resolve are saved, and the next night picks up the rest.
+      - name: Record the cache digests
+        continue-on-error: true
+        run: |
+          echo "$GITHUB_TOKEN" | oras login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          fspec --spec spec.star update --cache
+      # A pull request opened with GITHUB_TOKEN starts no workflows, so FSPEC_UPDATE_TOKEN (a PAT or
+      # app token with contents and pull-requests write) is what makes ci and fspec-packages run on it.
+      - uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
+        with:
+          token: ${{ secrets.FSPEC_UPDATE_TOKEN || secrets.GITHUB_TOKEN }}
+          branch: fspec/update-lock
+          add-paths: fspec.lock
+          commit-message: "chore(kyan): update the lock"
+          title: "chore(kyan): update the lock"
+          body: |
+            `fspec update` for this spec. Merge once ci and fspec-packages are green.
+          delete-branch: true

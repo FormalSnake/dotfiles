@@ -2,7 +2,7 @@
 
 Source: `darwinConfigurations.macbook` in ~/.config/nix at 98ca1b6c and the live machine (Home
 Manager generation `pvy93i9lkhxfxz0byv8n80y0h2zmi7sz`). The spec is `../macbook.star`, loaded
-from `spec.star`: `fspec --spec examples/kyan/spec.star plan --host macbook --local`.
+from `spec.star`: `fspec plan --host macbook --local`, run from the spec.
 
 ## Not verified
 

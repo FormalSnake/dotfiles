@@ -1,0 +1,70 @@
+name: fspec packages
+
+on:
+  push:
+    branches: [formalspec]
+    paths: ["fspec.lock", "patches/**"]
+  pull_request:
+    paths: ["fspec.lock", "patches/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    name: ${{ matrix.pkg }} (${{ matrix.platform }})
+    # Builds the nightly lock update before it merges, so the cache holds its artifacts. Other
+    # pull requests run without package write access.
+    if: github.event_name != 'pull_request' || github.head_ref == 'fspec/update-lock'
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { pkg: ananicy-cpp, platform: x86_64-linux, runner: ubuntu-24.04 }
+          - { pkg: ancs4linux, platform: x86_64-linux, runner: ubuntu-24.04 }
+          - { pkg: clipssh, platform: aarch64-darwin, runner: macos-26 }
+          - { pkg: clipssh, platform: x86_64-linux, runner: ubuntu-24.04 }
+          - { pkg: colloid-icon-theme, platform: x86_64-linux, runner: ubuntu-24.04 }
+          - { pkg: fast, platform: aarch64-darwin, runner: macos-26 }
+          - { pkg: fast, platform: x86_64-linux, runner: ubuntu-24.04 }
+          - { pkg: fetch, platform: aarch64-darwin, runner: macos-26 }
+          - { pkg: fetch, platform: x86_64-linux, runner: ubuntu-24.04 }
+          - { pkg: formalmusic, platform: aarch64-darwin, runner: macos-26 }
+          - { pkg: formalmusic, platform: x86_64-linux, runner: ubuntu-24.04 }
+          - { pkg: formalos-chime, platform: x86_64-linux, runner: ubuntu-24.04 }
+          - { pkg: formalshell, platform: x86_64-linux, runner: ubuntu-24.04 }
+          - { pkg: fspec, platform: x86_64-linux, runner: ubuntu-24.04 }
+          - { pkg: kopuzd, platform: aarch64-darwin, runner: macos-26 }
+          - { pkg: kopuzd, platform: x86_64-linux, runner: ubuntu-24.04 }
+          - { pkg: librepods, platform: x86_64-linux, runner: ubuntu-24.04 }
+          - { pkg: lumen, platform: x86_64-linux, runner: ubuntu-24.04 }
+          - { pkg: meshtop, platform: aarch64-darwin, runner: macos-26 }
+          - { pkg: meshtop, platform: x86_64-linux, runner: ubuntu-24.04 }
+          - { pkg: messages, platform: aarch64-darwin, runner: macos-26 }
+          - { pkg: messages, platform: x86_64-linux, runner: ubuntu-24.04 }
+          - { pkg: nil, platform: x86_64-linux, runner: ubuntu-24.04 }
+          - { pkg: pam_ssh_agent_auth, platform: aarch64-darwin, runner: macos-26 }
+          - { pkg: sbarlua, platform: aarch64-darwin, runner: macos-26 }
+          - { pkg: tmux-agent-sidebar, platform: aarch64-darwin, runner: macos-26 }
+          - { pkg: uxplay, platform: x86_64-linux, runner: ubuntu-24.04 }
+          - { pkg: wl-clip-persist, platform: x86_64-linux, runner: ubuntu-24.04 }
+          - { pkg: wl-gammarelay-rs, platform: x86_64-linux, runner: ubuntu-24.04 }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oras-project/setup-oras@v1
+      - name: Install fspec
+        run: cargo install --locked --git https://github.com/FormalStudio/formalspec fspec
+      - name: Build
+        run: fspec --spec spec.star build --pkg ${{ matrix.pkg }} --platform ${{ matrix.platform }} --out out
+      - name: Push
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          owner=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          echo "$TOKEN" | oras login ghcr.io -u "${{ github.actor }}" --password-stdin
+          cd out
+          oras push "ghcr.io/$owner/fspec-cache/${{ matrix.pkg }}:$(cat tag)" \
+            "${{ matrix.pkg }}-${{ matrix.platform }}.tar.zst:application/vnd.fspec.package.v1.tar+zstd"
