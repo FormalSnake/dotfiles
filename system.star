@@ -465,7 +465,8 @@ def _pkgs():
         pkg(
             "formalshell",
             source = git("https://github.com/FormalSnake/FormalShell", rev = "facc1a8641b37b64d16890ea52bb969dec7afd9a", image = "docker.io/library/debian:bookworm"),
-            build = ["sh", "-c", "WORK=\"$FSPEC_OUT.work\" bash \"$FSPEC_SRC/dev/tarball.sh\" \"$FSPEC_OUT.tar\" && tar -xzf \"$FSPEC_OUT.tar\"/formalshell-*-linux.tar.gz -C \"$FSPEC_OUT\" && rm -rf \"$FSPEC_OUT.work\" \"$FSPEC_OUT.tar\""],
+            # WORK holds the toolchain, downloads and target dirs, so in FSPEC_CACHE a rev bump builds incrementally.
+            build = ["sh", "-c", "WORK=\"$FSPEC_CACHE\" bash \"$FSPEC_SRC/dev/tarball.sh\" \"$FSPEC_OUT.tar\" && tar -xzf \"$FSPEC_OUT.tar\"/formalshell-*-linux.tar.gz -C \"$FSPEC_OUT\" && rm -rf \"$FSPEC_OUT.tar\""],
         ),
         pkg("herdr", version = "0.9.3", source = github("ogulcancelik/herdr", asset = "herdr-linux-*")),
         # helium-wrapper sets LD_LIBRARY_PATH to its own directory, so `helium` is the wrapper.
@@ -485,7 +486,7 @@ def _pkgs():
                 deps = ["cmake", "make", "gcc-c++", "pkgconf", "qt6-base-devel", "qt6-declarative-devel", "qt6-quickcontrols2-devel", "qt6-connectivity-devel", "qt6-tools-devel", "qt6-linguist-devel", "libopenssl-devel", "libpulse-devel"],
             ),
             patches = glob("patches/librepods-*.patch"),
-            build = ["sh", "-c", "cmake -S \"$FSPEC_SRC/daemon\" -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=\"$FSPEC_OUT\" && cmake --build build -j && cmake --install build"],
+            build = ["sh", "-c", "cmake -S \"$FSPEC_SRC/daemon\" -B \"$FSPEC_CACHE/build\" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=\"$FSPEC_OUT\" && cmake --build \"$FSPEC_CACHE/build\" -j && cmake --install \"$FSPEC_CACHE/build\""],
         ),
         # nvim's nil (tag 2026-07-23) publishes no Linux binaries; its build script asks nix for its
         # builtins. Tumbleweed's nix 2.35.3 segfaults in a container, even on --version, so this
