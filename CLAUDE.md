@@ -26,8 +26,6 @@ blanket `NOPASSWD: ALL` in sudoers, so ANY process running as that user sudos
 without a prompt, forwarded key or not. So Claude can rebuild ALL hosts
 without owner hand-off:
 - g815 (local): `sudo -n nixos-rebuild switch --flake .#g815`
-- e1504g: avoid building on e1504g itself (slow). Built on g815 and
-  pushed: `ssh -A g815 'cd ~/.config/nix && git pull && nixos-rebuild switch --flake .#e1504g --target-host e1504g --sudo'`
 - macbook: `ssh macbook 'cd ~/.config/nix && git pull && sudo -n /run/current-system/sw/bin/darwin-rebuild switch --flake .#macbook'`
   (absolute path: non-interactive fish on the mac has a minimal PATH).
 
@@ -89,12 +87,13 @@ Safe, non-building checks you MAY run:
   forces all module imports to resolve without building the system. (Avoid
   evaluating `home-manager.users.*` config paths: they can trigger IFD.)
 
-## Keep all three hosts in sync
+## Keep both nix hosts in sync
 
-All three hosts (macbook, g815, e1504g) must stay on the same commit with a
-clean tree: a change applied on one is expected to land on the other two, and
-none of them should carry local commits or uncommitted diffs the others
-don't have. When working from the **g815 (nixos laptop)**, the full flow is:
+Both nix hosts (macbook, g815) must stay on the same commit with a
+clean tree: a change applied on one is expected to land on the other, and
+neither should carry local commits or uncommitted diffs the others
+don't have. e1504g is not a nix host any more (see Overview). When working
+from the **g815 (nixos laptop)**, the full flow is:
 
 1. Rebuild on g815 (`nixos-rebuild` / the `just` recipe).
 2. `git push`.
@@ -103,12 +102,12 @@ don't have. When working from the **g815 (nixos laptop)**, the full flow is:
 
 Claude can drive all four steps non-interactively (see the sudo mesh above),
 so steps 3+4 collapse to the one-shot macbook command in the rebuild policy
-section. The e1504g follows the same flow, also in one shot. Only if sudo
+section. Only if sudo
 unexpectedly prompts (broken agent chain) does a step go back to the owner.
 
-**Before starting any task in this repo**, check all three hosts for drift:
+**Before starting any task in this repo**, check both hosts for drift:
 `git log -1 --oneline` and `git status --porcelain` locally and over
-`ssh g815`/`ssh e1504g`. A host behind `origin/main` needs a pull; a host with
+`ssh g815`. A host behind `origin/main` needs a pull; a host with
 local commits not on origin needs a push (rebase first if another host also
 pushed in the meantime); a host with an uncommitted diff needs the
 uncommitted-work check above, never a discard. If the same diff shows up on
@@ -118,20 +117,19 @@ it.
 
 ## Overview
 
-Declarative config for three machines via one flake (flake-parts):
+Declarative config for two machines via one flake (flake-parts):
 - **`macbook`** — `aarch64-darwin`, nix-darwin + home-manager. The development
   server, not a client: no desktop apps for general use (chat, media) go here.
 - **`g815`** — `x86_64-linux`, NixOS + home-manager. ASUS ROG laptop, a client
   and also the build machine (compiles for the e1504g); Hyprland +
   FormalShell desktop, everything on the NVIDIA dGPU (MUX), always on AC.
-- **`e1504g`** — `x86_64-linux`, NixOS + home-manager. ASUS Vivobook (8 GB,
-  Intel-only); same Hyprland + FormalShell desktop, none of the dGPU/asus
-  machinery. Its
-  nix builds all run on the g815 over Tailscale (LAN fallback). `max-jobs` is
-  0 (since 2026-10-02), so a build fails when the g815 is unreachable instead
-  of building locally.
+- **`e1504g`** is not configured here. It runs openSUSE Tumbleweed under
+  fspec: its config is `examples/kyan/` in `~/Developer/ecosystem/formalspec`,
+  and nothing in this repo (modules, `nixosConfigurations.e1504g`, the
+  rebuild commands) reaches it. ASUS Vivobook (8 GB, Intel-only), same
+  Hyprland + FormalShell desktop; g815 is its fspec `builder(...)`.
 
-The macbook is a development server. The two NixOS laptops are the clients and
+The macbook is a development server. The two Linux laptops are the clients and
 the general-use computers: they reach the mac over SSH/MOSH and remote desktop
 for dev work, and everyday apps (Discord, Signal, Beeper, browsers) live on
 them. A request to install a desktop app means the Linux hosts unless it says
@@ -151,21 +149,6 @@ Which shell owns the session is `kyan.desktop.shell` (enum `dms` |
 `formalshell`, the default since 2026-10-15 (the e1504g trialled it, the g815
 followed 2026-08-10). DMS stays installed but dormant on both, so rollback is
 flipping the host's `kyan.desktop.shell` line to `"dms"`. The theming section below still describes the DMS path.
-
-The g815 is the e1504g's only listed build host (since 2026-09-18): the
-macbook's rosetta builder was dropped from `/etc/nix/machines` because nix
-schedules on currentJobs / speedFactor, so the idle VM kept taking derivations
-whenever the g815 was busy. If the g815 goes down for a stretch, remember that
-`/etc/nix/machines` lists it twice (Tailscale, then LAN) and nix walks that
-list per derivation, so every e1504g build pays two SSH connect timeouts
-(measured 2026-08-04: 4m35s per derivation) and then fails, since `max-jobs`
-is 0 and nothing builds locally. Pin the mac as the only builder by hand
-instead (or add `--max-jobs 2` to build on the e1504g itself):
-
-```
-ssh e1504g 'cd ~/.config/nix && sudo -n /run/current-system/sw/bin/nixos-rebuild switch --flake .#e1504g \
-  --option builders "ssh-ng://builder@macbook-rosetta x86_64-linux /root/.ssh/nix-builder 6 3 big-parallel,benchmark - -"'
-```
 
 Secrets are agenix-encrypted (`secrets/`). The two hosts are wired in
 `systems/default.nix` (`darwinConfigurations.macbook`, `nixosConfigurations.g815`).

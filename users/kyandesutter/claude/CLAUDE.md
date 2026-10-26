@@ -351,12 +351,28 @@ history uses one. No body unless it closes an issue. Never claim co-authorship.
 in `~/.config/nix`. Always `git add` new files first; flakes only see
 git-tracked files. Details and the sudo mesh live in that repo's own CLAUDE.md.
 
-**Avoid building on e1504g.** It is slow (8 GB RAM, slow disk). Build its
-NixOS closure on g815 and push it over: from g815,
-`nixos-rebuild switch --flake .#e1504g --target-host e1504g --sudo`
-(`ssh -A g815` so the sudo mesh reaches e1504g), and keep heavy compiles on
-g815 when that is faster end to end. Running checks, tests and small builds
-on e1504g itself is fine.
+### e1504g is not NixOS
+
+e1504g runs openSUSE Tumbleweed managed by fspec, with fish as the login
+shell. No `nixos-rebuild`, no `/etc/static`, no NixOS modules: anything in
+`~/.config/nix` or a repo's `nixosModules` does not reach it. Its whole
+config is `examples/kyan/` in `~/Developer/ecosystem/formalspec` (`/etc`
+files, PAM included, in `system.star`); store packages live under
+`/opt/fspec`. Assume Debian or NixOS conventions are wrong there and check
+`/etc/os-release` before guessing.
+
+To ship a `git(...)` package such as FormalShell: push the repo, bump its
+`rev` in `system.star`, `fspec update -s examples/kyan/spec.star <pkg>`,
+commit and push, then
+`fspec apply --host e1504g -s examples/kyan/spec.star`. Don't wait on CI:
+g815 is e1504g's `builder(...)`, so the apply compiles there and ships the
+result. Never compile on e1504g itself (8 GB RAM, slow disk); checks and
+small commands there are fine. A full apply also rewrites every drifted
+managed file, so read `fspec plan --host e1504g` first.
+
+A fix made live on e1504g (`sudo install` over a file in `/etc`) is a
+stopgap until the same change is in `examples/kyan/`, or the next apply
+reverts it.
 
 ### Subagent model routing
 
