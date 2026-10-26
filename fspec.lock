@@ -424,10 +424,7 @@ oci = "ghcr.io/formalsnake/fspec-cache/formalshell@sha256:2066371b8ab0b0f88d7fd3
 [[pkg]]
 name = "fspec"
 source = "git:https://github.com/FormalStudio/formalspec@main"
-rev = "3ebc7c68732c34259f626f71e97714588829f5f7"
-
-[pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/fspec@sha256:7338d7c2027d5f1b25d12ebbd17bc221eedbf4ed7d42df8caed937b61011d12e"
+rev = "27caba195ddd473a2557c726b73bc0da4ddf77c9"
 
 [[pkg]]
 name = "fut"
