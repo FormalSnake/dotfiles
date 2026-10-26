@@ -200,6 +200,24 @@ def _services():
         ),
     ]
 
+# Apps patterns-kde-kde_plasma installs with no OnlyShowIn, so the Hyprland launcher lists them.
+# Each id gets a ~/.local/share/applications entry that shadows the system one and adds OnlyShowIn.
+KDE_ONLY = {
+    "konsolesu": ("Terminal - Super User Mode", 'konsole --profile "Root Shell"', "utilities-terminal_su"),
+    "org.kde.dolphin": ("Dolphin", "dolphin %u", "org.kde.dolphin"),
+    "org.kde.dolphinsu": ("File Manager - Super User Mode", '/usr/bin/xdg-su -c "dolphin %U"', "system-file-manager"),
+    "org.kde.drkonqi.coredump.gui": ("Crashed Processes Viewer", "drkonqi-coredump-gui", "tools-report-bug"),
+    "org.kde.konsole": ("Konsole", "konsole", "utilities-terminal"),
+    "org.kde.kwalletmanager": ("KWalletManager", "kwalletmanager5 %F", "kwalletmanager"),
+    "org.kde.plasma-systemmonitor": ("System Monitor", "plasma-systemmonitor", "utilities-system-monitor"),
+    "org.kde.qrca": ("Qrca", "qrca", "org.kde.qrca"),
+    "org.kde.xwaylandvideobridge": ("Xwayland Video Bridge", "xwaylandvideobridge", "org.kde.xwaylandvideobridge"),
+    "org.qt.qdbusviewer6": ("Qt 6 D-Bus Viewer", "qdbusviewer6", "qdbusviewer6"),
+}
+
+def _kde_only(id, name, exec, icon):
+    return file("~/.local/share/applications/%s.desktop" % id, content = "[Desktop Entry]\nType=Application\nName=%s\nExec=%s\nIcon=%s\nOnlyShowIn=KDE;\n" % (name, exec, icon))
+
 # mixins/desktop/kde.nix: the Plasma session's user side. kwin-outputs is per host (<host>/home).
 def _kde():
     kde = {"ConditionEnvironment": "XDG_CURRENT_DESKTOP=KDE", "PartOf": "graphical-session.target"}
@@ -244,7 +262,9 @@ def _kde():
         ),
         _autostart("discord-kde", BIN + "/discord", "Discord", unit = {"ConditionEnvironment": ["WAYLAND_DISPLAY", "XDG_CURRENT_DESKTOP=KDE"]}),
         file("~/Desktop/switch-to-hyprland.desktop", perms = "0755", content = "[Desktop Entry]\nType=Application\nName=Switch to Hyprland\nExec=/usr/local/bin/session-switch hyprland-uwsm\nIcon=hyprland\n"),
-    ]
+        # NotShowIn=KDE already keeps it out of Plasma, which has its own System Settings entry.
+        file("~/.local/share/applications/kdesystemsettings.desktop", content = "[Desktop Entry]\nType=Application\nName=KDE System Settings\nExec=systemsettings\nHidden=true\n"),
+    ] + [_kde_only(id, *entry) for id, entry in KDE_ONLY.items()]
 
 def _flatpaks():
     return [
