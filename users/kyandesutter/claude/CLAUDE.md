@@ -168,7 +168,7 @@ clean:
    `pgrep -fl claude` and `git log -1 --format=%cd` against the mtime of the
    dirty files.
 3. Another agent is in the tree: message it and work in your own worktree
-   (`git worktree add`). Its edits stay untouched, even the ones that look
+   (`git worktree add`, removed when you finish, per the worktree rules below). Its edits stay untouched, even the ones that look
    wrong or half-done.
 4. Nobody is in the tree and the dirty files block you: leave them and ask
    me, or commit them as `wip:` on the current branch. Both cost me one line
@@ -403,12 +403,27 @@ Haiku 4.5 (`claude-haiku-4-5-20251001`).
 
 `~/Developer/ecosystem/` holds my own stack (FormalShell, NativeDesktop,
 formalmusic, lynk, FormalSpec, messages, kopuz); anything else sits at
-`~/Developer/<repo>`. Extra worktrees and throwaway clones of a repo go in
-`<repo>-wt/<name>` next to the main checkout (`ecosystem/NativeDesktop-wt/rel-059`),
-never as a loose sibling in `~/Developer` or `~`. Use `git worktree add` from
-the main checkout so the worktree stays listed, and remove it with
-`git worktree remove` once its branch is merged. Scripts, logs and screenshots
-from a run go in that worktree, not in `~/Developer` or `~`.
+`~/Developer/<repo>`.
+
+### Worktrees: last resort, and you clean up
+
+Work in the main checkout. A worktree or throwaway clone is only for when the
+main checkout genuinely can't take the work: another agent is mid-edit there,
+or two builds would collide on the same files. "Keeping things tidy" or "a
+clean base" is not a reason. A compile check of one changed file is not a
+reason either; run it in the checkout you already have.
+
+When you do need one, it goes in `<repo>-wt/<name>` next to the main checkout
+(`ecosystem/NativeDesktop-wt/rel-059`), made with `git worktree add` from the
+main checkout so it stays listed, never as a loose sibling in `~/Developer` or
+`~`. Scripts, logs and screenshots from the run go inside it.
+
+Removing it is part of the same task, not a follow-up: once its commits are
+merged or pushed, `git worktree remove <path>`, then `git worktree prune`,
+then `rmdir` the `<repo>-wt` directory if it is empty, on whichever host you
+made it (g815 and macbook both). A worktree you made and are about to leave
+behind is a defect, the same as an uncommitted change. A worktree you did not
+make is someone's work in flight: leave it, per the uncommitted-work rule.
 
 ## Tooling
 
