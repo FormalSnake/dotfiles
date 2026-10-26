@@ -464,7 +464,7 @@ def _pkgs():
         # is upstream's release build: it installs its own deps on bookworm, whose glibc it targets.
         pkg(
             "formalshell",
-            source = git("https://github.com/FormalSnake/FormalShell", rev = "692c39612f14fc48b3ad55df8d80e819ec08769e", image = "docker.io/library/debian:bookworm"),
+            source = git("https://github.com/FormalSnake/FormalShell", rev = "facc1a8641b37b64d16890ea52bb969dec7afd9a", image = "docker.io/library/debian:bookworm"),
             build = ["sh", "-c", "WORK=\"$FSPEC_OUT.work\" bash \"$FSPEC_SRC/dev/tarball.sh\" \"$FSPEC_OUT.tar\" && tar -xzf \"$FSPEC_OUT.tar\"/formalshell-*-linux.tar.gz -C \"$FSPEC_OUT\" && rm -rf \"$FSPEC_OUT.work\" \"$FSPEC_OUT.tar\""],
         ),
         pkg("herdr", version = "0.9.3", source = github("ogulcancelik/herdr", asset = "herdr-linux-*")),

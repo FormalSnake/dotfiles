@@ -411,8 +411,8 @@ oci = "ghcr.io/formalstudio/fspec-cache/formalos-chime@sha256:7767887635a2136a1c
 
 [[pkg]]
 name = "formalshell"
-source = "git:https://github.com/FormalSnake/FormalShell@692c39612f14fc48b3ad55df8d80e819ec08769e"
-rev = "692c39612f14fc48b3ad55df8d80e819ec08769e"
+source = "git:https://github.com/FormalSnake/FormalShell@facc1a8641b37b64d16890ea52bb969dec7afd9a"
+rev = "facc1a8641b37b64d16890ea52bb969dec7afd9a"
 
 [[pkg]]
 name = "fspec"
