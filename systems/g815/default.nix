@@ -378,6 +378,10 @@
     # Caffeinated from login: the shell holds an idle inhibitor, so idle
     # never reaches the screensaver or the monitors' DPMS while rigs run.
     programs.formalshell.settings.caffeinate.onStartup = true;
+    # The wallpaper depth maps are made here and reach e1504g with the
+    # Syncthing wallpapers folder (its .depth/ directory), so the laptop
+    # never runs the model.
+    programs.formalshell.settings.wallpaper.depthGenerate = true;
 
     imports = [
       self.homeModules.kyandesutter
