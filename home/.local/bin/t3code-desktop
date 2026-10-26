@@ -1,0 +1,5 @@
+#!/bin/sh
+# The app rewrites com.t3tools.T3Code.desktop on every start with Exec set to
+# T3CODE_DESKTOP_LAUNCHER_PATH, so URL launches come back through here too.
+export T3CODE_HOME="$HOME/.t3-desktop" T3CODE_DESKTOP_LAUNCHER_PATH="$HOME/.local/bin/t3code-desktop"
+exec /opt/fspec/current/bin/t3code-desktop "$@"
