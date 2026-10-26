@@ -425,6 +425,13 @@ made it (g815 and macbook both). A worktree you made and are about to leave
 behind is a defect, the same as an uncommitted change. A worktree you did not
 make is someone's work in flight: leave it, per the uncommitted-work rule.
 
+Before making one because another agent is in the tree, message that agent
+(`ListAgents`, then `SendMessage`; under Herdr, its pane) and ask what it is
+touching and for how long. Often the answer makes the worktree unnecessary:
+it is about to commit, it is in other files, or the two of you can take
+turns. The same goes for a leftover worktree you find: ask the agent that
+owns it whether it still needs it, and remove it if it says no.
+
 ## Tooling
 
 `fd` instead of `find`, `rg` instead of `grep`, `jq` for JSON, `bunx` instead
