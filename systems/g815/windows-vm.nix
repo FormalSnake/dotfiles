@@ -8,12 +8,12 @@ let
   # overlay over a changed base is garbage.
   disk = "/dev/disk/by-id/nvme-WD_PC_SN5000S_SDEQNSJ-1T00-1002_25458D806996";
   state = "/var/lib/windows-vm";
-  # The overlay lives on the Steam library's USB SSD (ntfs3), not on root,
-  # which FormalSpec and nd builds share and which one WinUI build in the guest
-  # once took to 15G free. That disk is not the passed-through NVMe, so it
-  # stays mounted while the guest runs. TPM state, NVRAM, the ESP image and the
-  # sockets stay under state.
-  overlayDir = "/mnt/steamlib/windows-vm";
+  # The overlay lives on root next to TPM state, NVRAM, the ESP image and the
+  # sockets. Root is on the passed-through NVMe but in the Linux partition, so
+  # it stays mounted while the guest runs. It is shared with FormalSpec and nd
+  # builds, and one WinUI build in the guest once grew the overlay past 30G,
+  # hence the floor below.
+  overlayDir = "${state}/overlay";
   overlay = "${overlayDir}/overlay.qcow2";
   ovmf = pkgs.OVMFFull.fd;
 
@@ -22,8 +22,8 @@ let
   windowsMounts = [ "mnt-windows.mount" "mnt-games.mount" ];
   runFlag = "/run/windows-vm.running";
 
-  # Free space on the overlay's disk the guest may never take, so Steam keeps
-  # its 30G. The launcher wants 15G on top of this to start at all.
+  # Free space on root the guest may never take, so builds and the nix store
+  # keep 30G. The launcher wants 15G on top of this to start at all.
   minFreeGiB = 30;
   startFreeGiB = minFreeGiB + 15;
 
@@ -146,7 +146,7 @@ let
         -monitor unix:"$state/monitor.sock",server,nowait
       )
       # The overlay takes every guest write, and one WinUI build grew it past
-      # 30G, so power the guest off before it eats Steam's floor: ACPI first,
+      # 30G, so power the guest off before it eats root's floor: ACPI first,
       # then SIGINT (QEMU's quit) if it ignores that for a minute. $$ is QEMU
       # itself once the exec below has run.
       (
@@ -284,7 +284,6 @@ in
     # the mounts, which would stop the guest. The run flag makes those starts
     # skip instead (see the mount drop-in below).
     after = windowsMounts;
-    unitConfig.RequiresMountsFor = overlayDir;
     serviceConfig = {
       ExecStartPre = [
         "${pkgs.coreutils}/bin/touch ${runFlag}"
