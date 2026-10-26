@@ -168,7 +168,7 @@ clean:
    `pgrep -fl claude` and `git log -1 --format=%cd` against the mtime of the
    dirty files.
 3. Another agent is in the tree: message it and work in your own worktree
-   (`git worktree add`). Its edits stay untouched, even the ones that look
+   (`git worktree add`, removed when you finish, per the worktree rules below). Its edits stay untouched, even the ones that look
    wrong or half-done.
 4. Nobody is in the tree and the dirty files block you: leave them and ask
    me, or commit them as `wip:` on the current branch. Both cost me one line
@@ -338,8 +338,18 @@ not something to ask about. Do not commit half-done work, a checkpoint every
 few edits, or a tidy-up that touches nothing behaviourally, and squash into
 the existing commit rather than adding "fix typo" on top when the first one
 has not been pushed yet. One task, one commit, unless the change genuinely
-splits into independent pieces. Pushing is separate: never push unless I ask
-or the task is a handoff to another agent that needs the branch on the remote.
+splits into independent pieces.
+
+### Pushing, building and deploying
+
+Repos owned by CanaryCoders, FormalStudio, KangaCoders or me (`FormalSnake`)
+are yours to push once the commit is verified; don't wait for me. The same
+goes for the builds, rebuilds, CI runs, releases and deploys that ship that
+work to my own machines and services: carry a fix all the way to the place I
+hit the bug, then tell me it is live. Check the remote owner with
+`git remote get-url origin` before pushing; anything else (forks, upstream
+projects, third-party repos) still waits for me to ask. Force-pushing over
+commits that aren't yours stays a confirm-first action.
 
 Match the repo's existing style; read recent `git log` first. Default: short
 imperative lowercase subject, conventional prefix (`fix(scope): …`) when the
@@ -351,11 +361,28 @@ history uses one. No body unless it closes an issue. Never claim co-authorship.
 in `~/.config/nix`. Always `git add` new files first; flakes only see
 git-tracked files. Details and the sudo mesh live in that repo's own CLAUDE.md.
 
-**Never build on e1504g.** It is far too slow. Build its closure on g815 and
-push it over: from g815,
-`nixos-rebuild switch --flake .#e1504g --target-host e1504g --sudo`
-(`ssh -A g815` so the sudo mesh reaches e1504g). Never run `nixos-rebuild`
-or `nix build` on e1504g itself, not even through its remote builders.
+### e1504g is not NixOS
+
+e1504g runs openSUSE Tumbleweed managed by fspec, with fish as the login
+shell. No `nixos-rebuild`, no `/etc/static`, no NixOS modules: anything in
+`~/.config/nix` or a repo's `nixosModules` does not reach it. Its whole
+config is `examples/kyan/` in `~/Developer/ecosystem/formalspec` (`/etc`
+files, PAM included, in `system.star`); store packages live under
+`/opt/fspec`. Assume Debian or NixOS conventions are wrong there and check
+`/etc/os-release` before guessing.
+
+To ship a `git(...)` package such as FormalShell: push the repo, bump its
+`rev` in `system.star`, `fspec update -s examples/kyan/spec.star <pkg>`,
+commit and push, then
+`fspec apply --host e1504g -s examples/kyan/spec.star`. Don't wait on CI:
+g815 is e1504g's `builder(...)`, so the apply compiles there and ships the
+result. Never compile on e1504g itself (8 GB RAM, slow disk); checks and
+small commands there are fine. A full apply also rewrites every drifted
+managed file, so read `fspec plan --host e1504g` first.
+
+A fix made live on e1504g (`sudo install` over a file in `/etc`) is a
+stopgap until the same change is in `examples/kyan/`, or the next apply
+reverts it.
 
 ### Subagent model routing
 
@@ -371,6 +398,39 @@ prompt you wrote.
 When building AI features, default to the newest models: Fable 5
 (`claude-fable-5`), Opus 5 (`claude-opus-5`), Sonnet 5 (`claude-sonnet-5`),
 Haiku 4.5 (`claude-haiku-4-5-20251001`).
+
+## Where checkouts live
+
+`~/Developer/ecosystem/` holds my own stack (FormalShell, NativeDesktop,
+formalmusic, lynk, FormalSpec, messages, kopuz); anything else sits at
+`~/Developer/<repo>`.
+
+### Worktrees: last resort, and you clean up
+
+Work in the main checkout. A worktree or throwaway clone is only for when the
+main checkout genuinely can't take the work: another agent is mid-edit there,
+or two builds would collide on the same files. "Keeping things tidy" or "a
+clean base" is not a reason. A compile check of one changed file is not a
+reason either; run it in the checkout you already have.
+
+When you do need one, it goes in `<repo>-wt/<name>` next to the main checkout
+(`ecosystem/NativeDesktop-wt/rel-059`), made with `git worktree add` from the
+main checkout so it stays listed, never as a loose sibling in `~/Developer` or
+`~`. Scripts, logs and screenshots from the run go inside it.
+
+Removing it is part of the same task, not a follow-up: once its commits are
+merged or pushed, `git worktree remove <path>`, then `git worktree prune`,
+then `rmdir` the `<repo>-wt` directory if it is empty, on whichever host you
+made it (g815 and macbook both). A worktree you made and are about to leave
+behind is a defect, the same as an uncommitted change. A worktree you did not
+make is someone's work in flight: leave it, per the uncommitted-work rule.
+
+Before making one because another agent is in the tree, message that agent
+(`ListAgents`, then `SendMessage`; under Herdr, its pane) and ask what it is
+touching and for how long. Often the answer makes the worktree unnecessary:
+it is about to commit, it is in other files, or the two of you can take
+turns. The same goes for a leftover worktree you find: ask the agent that
+owns it whether it still needs it, and remove it if it says no.
 
 ## Tooling
 
