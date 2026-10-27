@@ -175,6 +175,8 @@ def _files(h):
         # buses need i2c-dev, which NixOS loaded through hardware.i2c.
         file("/etc/sysusers.d/i2c.conf", content = "g i2c - -\n"),
         file("/etc/modules-load.d/i2c-dev.conf", content = "i2c-dev\n"),
+        # 1Password only talks to browsers whose binary name is in its built-in list or this file.
+        file("/etc/1password/custom_allowed_browsers", content = "helium\n", perms = "0644"),
         file("/etc/udev/rules.d/70-kyan-devices.rules", content = """# dualsense-pad drives a virtual pointer; the session user writes the lightbar LEDs.
 KERNEL=="uinput", SUBSYSTEM=="misc", GROUP="uinput", MODE="0660", OPTIONS+="static_node=uinput"
 ACTION=="add", SUBSYSTEM=="leds", DRIVERS=="playstation", RUN+="/usr/local/libexec/dualsense-led-perms /sys%p"
