@@ -466,7 +466,7 @@ def _pkgs():
         # is upstream's release build: it installs its own deps on bookworm, whose glibc it targets.
         pkg(
             "formalshell",
-            source = git("https://github.com/FormalSnake/FormalShell", rev = "baa3e595ec051b101f1a4b601e6ef655c79d0cb5", image = "docker.io/library/debian:bookworm"),
+            source = git("https://github.com/FormalSnake/FormalShell", rev = "b590a06494f7e7f256c2a7ae1b0382cbfb504945", image = "docker.io/library/debian:bookworm"),
             # WORK holds the toolchain, downloads and target dirs, so in FSPEC_CACHE a rev bump builds incrementally.
             build = ["sh", "-c", "WORK=\"$FSPEC_CACHE\" bash \"$FSPEC_SRC/dev/tarball.sh\" \"$FSPEC_OUT.tar\" && tar -xzf \"$FSPEC_OUT.tar\"/formalshell-*-linux.tar.gz -C \"$FSPEC_OUT\" && rm -rf \"$FSPEC_OUT.tar\""],
         ),
