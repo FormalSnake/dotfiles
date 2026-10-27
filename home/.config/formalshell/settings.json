@@ -28,6 +28,9 @@
   "caffeinate": {
     "onStartup": true
   },
+  "desktopClock": {
+    "enabled": true
+  },
   "display": {
     "outputPriority": [
       "HDMI",
