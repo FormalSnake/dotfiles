@@ -166,6 +166,7 @@ def _files(h):
         _rootfs("etc/ssh/authorized_keys.d/kyandesutter"),
         _rootfs("etc/ssh/sshd_config.d/10-fspec.conf"),
         _rootfs("etc/sudoers.d/10-fspec", perms = "0440"),
+        _rootfs("etc/profile.d/fspec-store.sh"),
         # NixOS's programs.ssh.knownHosts had github; the hosts' keys stop the builder's first ssh
         # from failing host key verification.
         file("/etc/ssh/ssh_known_hosts", src = "ssh_known_hosts", perms = "0644"),
