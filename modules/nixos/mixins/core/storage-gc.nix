@@ -7,11 +7,15 @@ in
   # stale zig/cargo/swift/node build output under ~/Developer and the agent
   # worktree dirs, plus package-manager caches. Nix generations stay with
   # nix.gc (modules/nixos/mixins/core/nix.nix), the script skips them here. Below
-  # 30 GB free on / the script cuts every age cutoff to a quarter.
+  # 30 GB free on / the script cuts every age cutoff to a quarter and drops
+  # compiler output idle for 6 hours.
   #
   # The script runs from the repo checkout so cutoffs and scan roots tune
   # without a rebuild. The e1504g gets this unit through a closure built on the
   # g815; it only runs the script, nothing is built there.
+  #
+  # Hourly: a run costs seconds, and a day of agent builds can eat 35 GB, so
+  # the low-free pass has to land the same afternoon, not at midnight.
   #
   # Not persistent, with a boot run 30 minutes in: same reasoning as nix-gc.
   # A catch-up run right after boot walks ~/Developer while the login storm is
@@ -44,7 +48,7 @@ in
   systemd.timers.kyan-storage-gc = {
     wantedBy = [ "timers.target" ];
     timerConfig = {
-      OnCalendar = "daily";
+      OnCalendar = "hourly";
       OnBootSec = "30min";
       Persistent = false;
     };
