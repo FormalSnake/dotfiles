@@ -387,6 +387,9 @@
     # Syncthing wallpapers folder (its .depth/ directory), so the laptop
     # never runs the model.
     programs.formalshell.settings.wallpaper.depthGenerate = true;
+    # The clock on the wallpaper, behind its subject; e1504g sets the same key in
+    # the formalspec branch's home.star.
+    programs.formalshell.settings.desktopClock.enabled = true;
 
     imports = [
       self.homeModules.kyandesutter
