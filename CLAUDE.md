@@ -320,7 +320,9 @@ Roblox builds, BeamNG temp, temp dirs, driver installer leftovers, and with
 content cache or replays, or Minecraft instances: Windows is the gaming
 partition. The copy at `C:\Users\Kyan\.local\bin\storage-gc.ps1` runs
 daily at 12:00 from the `kyan-storage-gc` scheduled task (log in
-`C:\Users\Kyan\.local\state\storage-gc.log`). After editing the source,
+`C:\Users\Kyan\.local\state\storage-gc.log`). The task runs as S4U ("whether
+logged on or not") under `conhost.exe --headless`: an Interactive task pops a
+PowerShell window on every run, including the catch-up run at login. After editing the source,
 re-copy it: `scp scripts/storage-gc.ps1 'windows:C:/Users/Kyan/.local/bin/storage-gc.ps1'`.
 
 **Updating it from NixOS.** Windows cannot read the ext4 root, but NixOS
