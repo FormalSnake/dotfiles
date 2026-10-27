@@ -988,15 +988,15 @@ version = "2.1.6-1"
 [[pkg]]
 name = "t3"
 source = "github:pingdotgg/t3code"
-version = "0.1.2"
+version = "0.1.3"
 
 [pkg.aarch64-darwin]
-url = "https://github.com/pingdotgg/t3code/releases/download/v0.1.2/t3-0.1.2-linux-x64.tar.gz"
-hash = "sha256-eu1iXLlhk43xdMGgZ8DwUjU2CUC1PogqFkMSa3VNoWw="
+url = "https://github.com/pingdotgg/t3code/releases/download/v0.1.3/t3-0.1.3-linux-x64.tar.gz"
+hash = "sha256-Y80PBUfu9iu07OJ/p3m7+eK6hTHMaFQlaLqeeIONxoQ="
 
 [pkg.x86_64-linux]
-url = "https://github.com/pingdotgg/t3code/releases/download/v0.1.2/t3-0.1.2-linux-x64.tar.gz"
-hash = "sha256-eu1iXLlhk43xdMGgZ8DwUjU2CUC1PogqFkMSa3VNoWw="
+url = "https://github.com/pingdotgg/t3code/releases/download/v0.1.3/t3-0.1.3-linux-x64.tar.gz"
+hash = "sha256-Y80PBUfu9iu07OJ/p3m7+eK6hTHMaFQlaLqeeIONxoQ="
 
 [[pkg]]
 name = "t3-code"
@@ -1006,11 +1006,11 @@ version = "0.1.2"
 [[pkg]]
 name = "t3code-desktop"
 source = "github:pingdotgg/t3code"
-version = "0.1.2"
+version = "0.1.3"
 
 [pkg.x86_64-linux]
-url = "https://github.com/pingdotgg/t3code/releases/download/v0.1.2/T3-Code-0.1.2-x86_64.AppImage"
-hash = "sha256-zwHi0Wfv+dAcTBAE0xssDaniUizJQmLkFkTRyxXf21w="
+url = "https://github.com/pingdotgg/t3code/releases/download/v0.1.3/T3-Code-0.1.3-x86_64.AppImage"
+hash = "sha256-gBzOSC0ghdob+6HQ4wHAotdafI0O/SSGXCJhlINC3yE="
 
 [[pkg]]
 name = "tailscale"

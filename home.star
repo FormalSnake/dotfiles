@@ -419,8 +419,8 @@ def _t3code(h):
 def _tools():
     return [
         # The plugin's .tmux script falls back to tmux-agent-sidebar on PATH when its bin/ is empty.
-        pkg("t3", version = "0.1.2", source = github("pingdotgg/t3code", asset = "t3-*-linux-x64.tar.gz")),
-        pkg("t3code-desktop", version = "0.1.2", source = github("pingdotgg/t3code", asset = "T3-Code-*-x86_64.AppImage")),
+        pkg("t3", version = "0.1.3", source = github("pingdotgg/t3code", asset = "t3-*-linux-x64.tar.gz")),
+        pkg("t3code-desktop", version = "0.1.3", source = github("pingdotgg/t3code", asset = "T3-Code-*-x86_64.AppImage")),
         # Cargo.toml points at a NativeDesktop checkout beside the repo; the rev is the one its flake locks.
         # rust-toolchain.toml picks the compiler, so the build runs from the checkout.
         pkg(
