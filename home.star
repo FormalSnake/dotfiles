@@ -67,8 +67,9 @@ def _services():
         _autostart("beeper", PKG_BIN + "/beeper", "Beeper", needs = PKG_BIN + "/beeper"),
         _autostart("flare", "/usr/bin/flatpak run de.schmidhuberj.Flare", "Flare (Signal)"),
         _autostart("messages", PKG_BIN + "/messages", "Messages", needs = PKG_BIN + "/messages"),
-        # 1Password writes this entry itself, and it starts a second instance next to fspec-1password.service.
-        file("~/.config/autostart/com.onepassword.OnePassword.desktop", content = "[Desktop Entry]\nType=Application\nName=1Password\nHidden=true\n"),
+        # 1Password rewrites its XDG autostart entry on every launch, and the generated unit would start a
+        # second instance next to fspec-1password.service, so the generated unit is skipped instead.
+        file("~/.config/systemd/user/app-com.onepassword.OnePassword@autostart.service.d/10-fspec.conf", content = "[Unit]\nConditionPathExists=/nonexistent\n"),
         _gui("1password", "/usr/bin/1password --silent", "1Password (tray)", restart = "on_failure", needs = "/usr/bin/1password", extra = {"RestartSec": 2}),
         _gui("wl-clip-persist", PKG_BIN + "/wl-clip-persist --clipboard regular", "wl-clip-persist (keep regular clipboard alive)", hyprland_only = True, needs = PKG_BIN + "/wl-clip-persist"),
         _gui(
