@@ -93,16 +93,6 @@
             "command": "[ -f ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh ] && bash ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh claude session_start || true"
           }
         ]
-      },
-      {
-        "matcher": "^(startup|resume|clear|compact|fork)$",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ~/.claude/hooks/herdr-agent-state.sh session",
-            "timeout": 10
-          }
-        ]
       }
     ],
     "Stop": [
@@ -167,7 +157,7 @@
     "ralph-loop@claude-plugins-official": true,
     "security-guidance@claude-plugins-official": true,
     "skill-creator@claude-plugins-official": false,
-    "superpowers@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": false,
     "swift-lsp@claude-plugins-official": true,
     "tmux-agent-notifications@claude-plugin-tmux-notifications": true,
     "typescript-lsp@claude-plugins-official": true,

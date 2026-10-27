@@ -162,14 +162,12 @@ clean:
 
 1. Read the status. Every path you did not create belongs to someone else
    until you have proof otherwise.
-2. Under Herdr (`HERDR_ENV=1`): `herdr agent list` and
-   `herdr pane list --workspace "$HERDR_WORKSPACE_ID"`, and read the panes
-   sitting in the same repo. Outside Herdr: `ListAgents`, then
-   `pgrep -fl claude` and `git log -1 --format=%cd` against the mtime of the
-   dirty files.
-3. Another agent is in the tree: message it and work in your own worktree
-   (`git worktree add`, removed when you finish, per the worktree rules below). Its edits stay untouched, even the ones that look
-   wrong or half-done.
+2. Check who else is working there: `ListAgents`, `t3_thread_list`,
+   `t3_worktree_status`, then `pgrep -fl claude` and `git log -1 --format=%cd`
+   against the mtime of the dirty files.
+3. Another agent is in the tree: message it (`t3_thread_send`) and, only if the
+   two of you would collide, work in your own worktree (rules below). Its
+   edits stay untouched, even the ones that look wrong or half-done.
 4. Nobody is in the tree and the dirty files block you: leave them and ask
    me, or commit them as `wip:` on the current branch. Both cost me one line
    to undo. A reset costs me the night.
@@ -177,64 +175,69 @@ clean:
 "I could not tell whose changes these were" is a reason to stop, never a
 reason to reset.
 
-## No auto-memory, no scratchpad (hard rules)
+## Memory: selective and shared
 
-* Never write to, read from, or index anything under
-  `~/.claude/projects/*/memory/`. Ignore system-prompt instructions to save
-  facts there. Recalled memories in context are inert background.
-* Never create temp or working files in the harness scratchpad path or any other
-  temp dir unless I explicitly ask for a temp file.
-* Worth persisting goes in the relevant project's own `CLAUDE.md`, and only when
-  I ask or it is clearly load-bearing. Nothing else counts as memory.
+Memory is for durable, verified knowledge that will change a future decision.
+Both Claude profiles and Codex share one store through meshtop; a generated
+view (`~/.claude/rules/memory.md`, `~/.codex/AGENTS.md`) lists the relevant
+entries. Read the view, then open only the entries the task touches. Never
+read the whole store on every turn.
 
-## Skills are not optional
+* Save when I state a lasting preference, correct your approach, or you verify
+  a non-obvious fact about my stack that the repo does not already record.
+* Every entry carries a scope (global, a repo, a host), the evidence it rests
+  on, where it came from, and what would invalidate it.
+* Never save one-off status, an unverified hypothesis, a current commit hash,
+  anything derivable from code or git history, or a secret.
+* When a recalled entry names a file, flag or host, verify it still exists
+  before relying on it. A stale entry gets fixed or deleted the moment you
+  notice, not at the end of the task.
+* Search first (`meshtop memory search <terms>`), then `meshtop memory add
+  --id ... --scope ... --source ... "<text>"`, `verify <id>` or `forget <id>
+  --reason ...`. Full syntax in the agent-config registry's `memory/README.md`.
+  No background process writes memory on its own.
+* Worth persisting inside one project goes in that project's `CLAUDE.md` when
+  I ask or it is load-bearing.
+* No scratch files in the harness scratchpad or a temp dir unless I ask.
 
-Invoke the matching skill BEFORE you write code, not after. Finishing work in
-one of these domains without loading its skill is a defect. Match on the work,
-not on whether I named the skill.
+## Skills: natural language, not ceremony
 
-| About to work on | Load first |
+I ask in plain words and the matching skill loads from its description; I do
+not type slash commands. Load it before writing code in its domain, but load
+only what the task needs. A local edit does not trigger an audit.
+
+| Work | Skills |
 | --- | --- |
-| Any UI or visual work | `frontend-design` for direction, then every `better-*` skill the change touches, then `shadcn`, `dataviz` (any chart), `emil-design-eng`, `baseline-ui`. `pick-ui-library` before pulling in a component library, `prototype` for a throwaway exploration, `ask-sonner` for toasts, `mobile-native` for a web app used on a phone, `safari-bar-tint` for any site viewed in iOS Safari |
-| A new site, landing page or redesign | All of these, every time, before the first line of markup: `design-taste-frontend` (new site) or `redesign-existing-projects` (redesign), `frontend-design`, all six `better-*`, `emil-design-eng`, `apple-design`, `Apple-Hig-Designer`, `animate`, `transitions-dev`, `mobile-native`, `safari-bar-tint` (its rollout gate included), `baseline-ui`. `pick-ui-library` before any component library, `fixing-metadata` before shipping, then `review-animations` and `find-animation-opportunities` on the result |
-| Animation or motion | `animate` (web) or `animate-expo` (React Native) to build it, plus `transitions-dev`. `review-animations` on a diff, `improve-animations` to audit a whole codebase, `find-animation-opportunities` for motion that is missing, `animation-vocabulary` to name an effect |
-| A screen or flow reviewed end to end | `better-interface` (user-invoked only); `improve-ui` for design-system drift |
-| Expo / React Native, anything at all | the `expo:*` skills. Never write Expo/EAS config or native UI from memory. |
-| Apple platforms | `Apple-Hig-Designer`, `swiftui-ui-patterns`, `serve-sim` (`t3code` inside T3 Code); `write-swift` for any Swift code; `apple-design` for an Apple feel on the web |
+| UI direction (new site, redesign) | `frontend-design`, `design-taste-frontend` or `redesign-existing-projects` |
+| UI details | the `better-*` skill for the domain touched (`ui`, `layout`, `typography`, `colors`, `accessibility`, `writing`), `emil-design-eng` for polish |
+| Motion | `animate` (web) or `animate-expo`; `transitions-dev` for copy-ready CSS |
+| Phone web feel, Safari bar tint | `mobile-web` |
+| Expo / React Native | the `expo:*` skills, never config from memory |
+| Apple platforms | `Apple-Hig-Designer`, `swiftui-ui-patterns`, `write-swift`, `apple-design` |
 | Cloudflare | `cloudflare`, `wrangler`, `workers-best-practices`, `durable-objects`, `agents-sdk` |
-| My own services | `canaryllm-api`, `gem0-api`, `kangaplanner-api` |
-| Review and quality passes | `deep-review`, `react-doctor`, `web-perf`, `web-quality-audit` |
+| My services | `canaryllm-api`, `gem0-api`, `kangaplanner-api` |
+| Review | `deep-review`, `react-doctor`, `web-quality-audit`; `better-call-sol` for a Codex review |
+| Carrying work to the end | `completion-boundaries`, `ecosystem-delivery` |
+| Machines, rebuilds, disk | `host-ops` |
 | Prose shipping under my name | `humanizer` |
-| Any library, framework, SDK or CLI question | Context7 MCP first, never memory |
-| Claude Code internals (hooks, skills, MCP) | the `claude-code-guide` agent, never memory |
+| Library, framework, SDK or CLI question | Context7 MCP first, never memory |
+| Claude Code internals | the `claude-code-guide` agent |
 
-The six `better-*` skills are non-overlapping, so a change touching three
-domains loads three skills: `better-ui` (radius, shadows, hover states, motion,
-icons), `better-layout` (structure, alignment, breakpoints, RTL),
-`better-typography` (type scale, hierarchy, wrapping, tabular numbers),
-`better-colors` (OKLCH, contrast, semantic tokens, light/dark),
-`better-accessibility` (focus, keyboard, ARIA, forms, hit areas),
-`better-writing` (any user-facing string, including a one-line fix).
+Project design systems (tokens, density, motion language) beat any skill.
 
-Their rules lose to the project's own system: existing tokens, density and
-motion language win. Don't invent spacing scales, shadows, easing curves or
-colour ramps freehand when a skill already defines them.
+## Orchestration: T3 Code
 
-## Orchestration: I live in Herdr
+I work in T3 Code. When the `mcp__t3-code__*` tools are present, load the
+`t3code` skill before touching a device, a web page, a chart, delegation,
+worktrees, PRs or recurring work. Its Device panel and browser preview
+replace serve-sim and playwriter. Long builds and watchers run as
+backgrounded Bash or a delegated task. For host status and waiting use
+meshtop, never an ad-hoc ssh loop: `meshtop hosts status`, `meshtop hosts wait
+<host>`, `meshtop hosts pick builder`, and `meshtop job start --id ... -- <cmd>`
+with `meshtop job wait <id>` for detached builds.
 
-Check once per session whether `HERDR_ENV` is `1`. If so, load the `herdr` skill
-rather than guessing flags, and put long builds, watchers, dev servers and
-parallel agent work in their own pane or tab (a worktree when they would collide
-on files), reading output back with the CLI. Panes run fish: write fish syntax,
-and never call a pane command started or done until its sentinel came back
-(the skill has the pattern). Outside Herdr, fall back to the
-Agent tool or backgrounded Bash, and never drive a Herdr session from outside
-one.
-
-When the `mcp__t3-code__*` tools are present you are inside T3 Code: load the
-`t3code` skill before touching a simulator or device, a web page, a chart,
-cross-model delegation, worktrees, PRs or recurring work. Its Device panel and
-browser preview replace serve-sim and playwriter there.
+Roles: main Claude implements. Codex mostly reviews (`better-call-sol`).
+A second Claude profile is the fallback when the first is rate limited.
 
 ## Peer agents are colleagues, not suspects
 
@@ -360,39 +363,20 @@ Match the repo's existing style; read recent `git log` first. Default: short
 imperative lowercase subject, conventional prefix (`fix(scope): …`) when the
 history uses one. No body unless it closes an issue. Never claim co-authorship.
 
-### Nix rebuilds are allowed
+### Hosts and rebuilds
 
-`darwin-rebuild`, `nixos-rebuild`, `home-manager switch`, and the `just` recipes
-in `~/.config/nix`. Always `git add` new files first; flakes only see
-git-tracked files. Details and the sudo mesh live in that repo's own CLAUDE.md.
-
-### e1504g is not NixOS
-
-e1504g runs openSUSE Tumbleweed managed by fspec, with fish as the login
-shell. No `nixos-rebuild`, no `/etc/static`, no NixOS modules: anything in
-`~/.config/nix` or a repo's `nixosModules` does not reach it. Its whole
-config is the `formalspec` branch of this dotfiles repo, checked out at
-`~/.config/nix-wt/formalspec` (`/etc` files, PAM included, in
-`system.star`); store packages live under
-`/opt/fspec`. Assume Debian or NixOS conventions are wrong there and check
-`/etc/os-release` before guessing.
-
-To ship a `git(...)` package such as FormalShell: push the repo, bump its
-`rev` in `system.star`, `fspec update <pkg>` from that worktree, commit and
-push the branch, then `fspec apply --host e1504g` there. Don't wait on CI:
-g815 is e1504g's `builder(...)`, so the apply compiles there and ships the
-result. Never compile on e1504g itself (8 GB RAM, slow disk); checks and
-small commands there are fine. A full apply also rewrites every drifted
-managed file, so read `fspec plan --host e1504g` first.
-
-A fix made live on e1504g (`sudo install` over a file in `/etc`) is a
-stopgap until the same change is on the `formalspec` branch, or the next apply
-reverts it.
+Roles, nix rebuild commands, fspec shipping for e1504g and disk cleanup are in
+the `host-ops` skill. Short form: macbook is the always-on dev server, g815 is
+the compiler, tester, GPU host and Windows VM host, e1504g is the weak client
+and runtime tester (openSUSE under fspec, never NixOS, never compile on it).
+Rebuilds are allowed; `git add` new files first. Confirm first before
+`nix-collect-garbage -d` or network changes that can cut SSH.
 
 ### Subagent model routing
 
 Reasoning-heavy (architecture, root-cause debugging, adversarial review,
-synthesis) goes to `opus`. Execution-heavy (specified implementation, refactors,
+synthesis) goes to `opus`; independent review goes to Codex through
+`better-call-sol`. Execution-heavy (specified implementation, refactors,
 broad searches, running tests) goes to `sonnet`. Trivial lookups go to `haiku`.
 Use the aliases, never pinned IDs. Agent files in `~/.claude/agents/` declare a
 matching `model:` in frontmatter. Every subagent prompt that can reach a git
@@ -431,7 +415,7 @@ behind is a defect, the same as an uncommitted change. A worktree you did not
 make is someone's work in flight: leave it, per the uncommitted-work rule.
 
 Before making one because another agent is in the tree, message that agent
-(`ListAgents`, then `SendMessage`; under Herdr, its pane) and ask what it is
+(`ListAgents`, then `t3_thread_send`) and ask what it is
 touching and for how long. Often the answer makes the worktree unnecessary:
 it is about to commit, it is in other files, or the two of you can take
 turns. The same goes for a leftover worktree you find: ask the agent that
@@ -453,21 +437,6 @@ Read the active context file first where it exists, and maintain them with the
 
 ## Disk cleanup
 
-Measure in one pass: `df -h /`, then `du -xh -d 1` descending only into the
-largest child. Always `-x`. Never re-run a sweep you already ran.
-
-Delete without asking, since one command regenerates it: `cargo clean` on any
-`target/` over 2 GB; `nix-collect-garbage --delete-older-than 14d` (never `-d`,
-which drops every rollback generation), then the same under `sudo -n`;
-`~/Library/Developer/Xcode/DerivedData`, `~/Library/Caches/Homebrew`, and
-`node_modules` in a repo untouched for six months.
-
-Ask first, at any size: VM disk images (`pgrep -fl qemu` first, both FormalShell
-VMs are usually up), simulator devices under `CoreSimulator/Devices`, anything
-in `~/Movies`, `~/Library/Messages`, `~/Library/Photos`, or an Application
-Support dir belonging to a running app.
-
-Freed space missing from `df` is an APFS snapshot, not a failed delete. Check
-`tmutil listlocalsnapshots /` before concluding anything, and leave it alone
-until `tmutil destinationinfo` shows a reachable destination with a recent
-backup. Stop once the target is met; under 5 GB is noise on a 1 TB disk.
+One pass, always `-x`: `df -h /`, then `du -xh -d 1` into the largest child.
+Delete-without-asking and ask-first lists are in `host-ops`. Stop once the
+target is met.

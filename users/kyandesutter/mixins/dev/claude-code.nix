@@ -9,7 +9,8 @@ let
   # Second claude.ai subscription. CLAUDE_CONFIG_DIR keys the on-disk config
   # AND the macOS keychain entry, so the two logins never see each other; the
   # shared config below is symlinked back at the primary profile so both
-  # accounts get the same CLAUDE.md, agents, commands, hooks, rules and skills.
+  # accounts get the same CLAUDE.md, agents, commands, hooks, rules and skills
+  # (skills come from the registry, see the home.file note below).
   # plugins/ is shared as a whole directory: claude-code rewrites the metadata
   # files inside it with `mv`, which a directory symlink survives (a per-file
   # symlink would not), so both profiles see the same installed plugins.
@@ -150,25 +151,13 @@ in
     ".claude/commands".source = link "commands";
     ".claude/hooks".source    = link "hooks";
 
+    # skills/ is not declared here. ~/.claude/skills is a plain directory that
+    # `meshtop skills sync` fills from the agent-config registry, so editing or
+    # installing a skill never needs a rebuild. home-manager's claude-code module
+    # still installs its own claude-code-home-manager skill into it.
+
     # Plugin metadata (config.json, installed_plugins.json, cache/, data/, marketplaces/,
     # repos/, known_marketplaces.json) stays imperative (claude-code rewrites these via
     # `mv`, which breaks symlinks).
-  }
-  # skills/ can't be one whole-directory symlink anymore: home-manager's
-  # claude-code module (2026-07) installs its generated MCP plugin at
-  # ~/.claude/skills/claude-code-home-manager, so HM must own the directory
-  # and each repo skill is installed individually.
-  #
-  # These are STORE COPIES, not mkOutOfStoreSymlink (an out-of-store symlink
-  # here pointed ~/.claude/skills/<name> back at the repo, which HM then
-  # re-exported into its own generated store dir, a self-referential loop
-  # (repo <-> home-manager-files) that ELOOPs and corrupts the working tree).
-  # Copying into the store breaks the cycle; the trade-off is that editing a
-  # vendored skill now needs a rebuild.
-  // lib.mapAttrs' (
-    name: _: lib.nameValuePair ".claude/skills/${name}" { source = ../../claude/skills + "/${name}"; }
-  ) (lib.filterAttrs (name: type:
-        type == "directory"
-        && name != "claude-code-home-manager")
-      (builtins.readDir ../../claude/skills));
+  };
 }
