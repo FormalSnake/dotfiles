@@ -397,11 +397,8 @@ version = "latest"
 
 [[pkg]]
 name = "formalmusic"
-source = "git:https://github.com/FormalStudio/formalmusic@84e167a9d144ee9c2a9446747e381d7fd905ed00"
-rev = "84e167a9d144ee9c2a9446747e381d7fd905ed00"
-
-[pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/formalmusic@sha256:3e24f5a882ba10b85ff1bd6cb7697cf168f23777eaaf3c1ff133aee0d6e0a921"
+source = "git:https://github.com/FormalStudio/formalmusic@3313aec5e9abbac0e71e5301c8fd66fd4e2e5f7c"
+rev = "3313aec5e9abbac0e71e5301c8fd66fd4e2e5f7c"
 
 [[pkg]]
 name = "formalmusic"

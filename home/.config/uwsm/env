@@ -1,3 +1,6 @@
 export QS_ICON_THEME="Colloid-Dark"
 export QT_QPA_PLATFORMTHEME="qt6ct"
 export XDG_CONFIG_DIRS="$HOME/.local/share/kdeglobals-matugen${XDG_CONFIG_DIRS:+:$XDG_CONFIG_DIRS}"
+# uwsm's login shell runs openSUSE's /etc/profile, which resets PATH, and imports the result over
+# environment.d's, so the store bin dir is added again here for every service and app it starts.
+export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$HOME/.bun/bin:/opt/fspec/current/bin:$PATH"
