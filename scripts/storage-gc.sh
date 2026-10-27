@@ -377,6 +377,19 @@ for d in "${TMPDIR:-/tmp}"/nix-vm.*; do
   queue "nix-vm-scratch" "$d"
 done
 
+# Test runs and SwiftPM leave mkdtemp dirs in $TMPDIR behind (TemporaryDirectory.*,
+# xfs-*, playwright profiles): 100k of them on the mac in Oct 2026, and Finder
+# held $TMPDIR open and spun two cores re-enumerating it. Only empty ones go,
+# and rmdir refuses anything that gained an entry since the scan.
+tmp_root="${TMPDIR:-/tmp}"
+[[ "$OS" == Darwin ]] && tmp_root=$(getconf DARWIN_USER_TEMP_DIR)
+tmp_dirs=0
+while IFS= read -r -d '' d; do
+  if (( APPLY )); then rmdir -- "$d" 2>/dev/null || continue; fi
+  tmp_dirs=$(( tmp_dirs + 1 ))
+done < <("$FIND" "$tmp_root" -mindepth 1 -maxdepth 1 -type d -empty -mtime +1 -print0 2>/dev/null)
+(( tmp_dirs > 0 )) && plan+=("0|tmp-empty-dirs|$tmp_dirs empty temp dirs")
+
 ### 4. Package manager caches
 
 [[ "$OS" == Darwin ]] && run_cmd "homebrew" "$HOME/Library/Caches/Homebrew" brew cleanup -s --prune=all
