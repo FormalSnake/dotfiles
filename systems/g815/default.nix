@@ -10,6 +10,9 @@
     # The same Windows install as a KVM guest over a throwaway overlay.
     ./windows-vm.nix
 
+    # FormalShell's smoke rig: two slot users with a headless parent each.
+    ./formalshell-rig.nix
+
     # nixos-hardware: no profile exists for the G815 chassis, so compose generics.
     inputs.nixos-hardware.nixosModules.common-cpu-intel
     inputs.nixos-hardware.nixosModules.common-pc-laptop
