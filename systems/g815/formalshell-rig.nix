@@ -3,21 +3,40 @@
 # throwaway users, one per slot, so a run never shares a uid, runtime dir,
 # session bus or systemd user manager with the live session: the rig's
 # `pkill -x Hyprland` and scope cleanup cannot reach kyandesutter's.
-# Each user's lingering manager runs a headless sway on the Intel render
+# Each user's lingering manager runs a headless labwc on the Intel render
 # node, which advertises dmabuf, so dev/smoke.sh nests its Hyprland there
 # and nothing ever appears on a real output or reads a real input device.
 let
   slots = [ "fstest0" "fstest1" ];
 
-  swayConfig = pkgs.writeText "formalshell-rig-sway.conf" ''
-    output HEADLESS-1 resolution 1920x1080
-    default_border none
-    default_floating_border none
-    exec "systemctl --user import-environment WAYLAND_DISPLAY; systemctl --user set-environment WAYLAND_DISPLAY=$WAYLAND_DISPLAY"
+  # Hyprland 0.56's aquamarine binds xdg_wm_base at version 6, and sway
+  # 1.12 offers 5, which ends the connection with a protocol error. labwc
+  # offers 6.
+  #
+  # aquamarine 0.15.1 never flushes its first xdg_toplevel commit, so under
+  # a parent that sends nothing unprompted (labwc) the configure never comes
+  # and the nested session gets no monitor. Fixed upstream after 0.15.1
+  # (hyprwm/aquamarine#415); drop the patch once nixpkgs carries it.
+  # dev/remote.sh puts the slot user's own profile ahead of
+  # /run/wrappers/bin, so this Hyprland is the one dev/smoke.sh finds.
+  rigHyprland = pkgs.hyprland.override {
+    aquamarine = pkgs.aquamarine.overrideAttrs (old: {
+      patches = (old.patches or [ ]) ++ [
+        (pkgs.fetchpatch {
+          url = "https://github.com/hyprwm/aquamarine/commit/7bb8bdf4e8fedaf4dfae58512bc4c728671727df.patch";
+          hash = "sha256-tiCVGZ2xDlDQ91U/HPGTpMBRngXNnRcjOUhUefwhaiw=";
+        })
+      ];
+    });
+  };
+
+  exportDisplay = pkgs.writeShellScript "formalshell-rig-export-display" ''
+    systemctl --user import-environment WAYLAND_DISPLAY
+    systemctl --user set-environment WAYLAND_DISPLAY="$WAYLAND_DISPLAY"
   '';
 
   rigTools = with pkgs; [
-    git rsync just jq iproute2 imagemagick libnotify wl-clipboard wireplumber
+    rigHyprland git rsync just jq iproute2 imagemagick libnotify wl-clipboard wireplumber
     pulseaudio grim wtype foot wlsunset qrencode curl matugen cava
     ffmpeg-headless (mpv.override { scripts = [ mpvScripts.mpris ]; })
     (python3.withPackages (ps: [ ps.pygobject3 ]))
@@ -41,10 +60,9 @@ in
   # A global user unit, so the group condition keeps it out of every other
   # user's manager.
   systemd.user.services.formalshell-rig-parent = {
-    description = "headless sway the FormalShell smoke rig nests Hyprland in";
+    description = "headless labwc the FormalShell smoke rig nests Hyprland in";
     wantedBy = [ "default.target" ];
     unitConfig.ConditionGroup = "fstest";
-    path = [ pkgs.bash ];
     environment = {
       WLR_BACKENDS = "headless";
       WLR_RENDERER = "gles2";
@@ -52,7 +70,7 @@ in
       WLR_LIBINPUT_NO_DEVICES = "1";
     };
     serviceConfig = {
-      ExecStart = "${pkgs.sway}/bin/sway --config ${swayConfig}";
+      ExecStart = "${pkgs.labwc}/bin/labwc -s ${exportDisplay}";
       Restart = "on-failure";
     };
   };
