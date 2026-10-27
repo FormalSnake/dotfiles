@@ -777,11 +777,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793111170,
-        "narHash": "sha256-Dg+VCm/9HkDtZ3UVAFP8sqZg+hFIRdfctKoB/nuVEmI=",
+        "lastModified": 1793111822,
+        "narHash": "sha256-v3FzWV2NZbmQkzknOw24NzanZUDnq0rT0NLTCfjEbpA=",
         "owner": "FormalSnake",
         "repo": "meshtop",
-        "rev": "7570c5caf27c3f604adb3980bd5d50787da5a320",
+        "rev": "d344bdeeb648090fca369b08131e364d65a07090",
         "type": "github"
       },
       "original": {
