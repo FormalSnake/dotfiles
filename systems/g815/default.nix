@@ -255,6 +255,8 @@
   # UxPlay AirPlay receiver (mirroring window kept, shared in meetings).
   services.formalshell.iphone.enable = true;
   services.formalshell.airplay.enable = true;
+  # Steam's gamescope session in the greeter, Steam controller udev rules.
+  services.formalshell.gaming.enable = true;
   users.users.kyandesutter.extraGroups = [ "ancs4linux" "libvirtd" ];
 
   # libvirt and virt-manager for test VMs such as the FormalSpec installer ISO.
