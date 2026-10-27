@@ -9,3 +9,4 @@ Name=Helium
 Terminal=false
 Type=Application
 Version=1.5
+StartupWMClass=helium

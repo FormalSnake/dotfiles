@@ -374,7 +374,7 @@ hl.bind(mod .. " + SHIFT + F23", hl.dsp.exec_cmd("ghostty --working-directory=/h
 hl.bind(mod .. " + Q", hl.dsp.window.close())
 hl.bind(mod .. " + SHIFT + F", hl.dsp.window.fullscreen({ action = "toggle", mode = "fullscreen" }))
 hl.bind(mod .. " + V", hl.dsp.window.float({ action = "toggle" }))
-hl.bind(mod .. " + B", hl.dsp.exec_cmd("helium"))
+hl.bind(mod .. " + B", hl.dsp.exec_cmd("/opt/fspec/current/bin/helium"))
 
 -- Vim-style focus/move (aerospace alt-hjkl), mapped onto the scrolling
 -- tape's column model: H/L walk columns (layout-aware, so they wrap and
