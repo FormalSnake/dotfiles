@@ -67,9 +67,9 @@ let
   # runs its backend under Electron, which does not, so the backend dies on
   # start and the app never opens a window.
   #
-  # Pinned to 0.1.3 ahead of nixpkgs-unstable: the mobile app refuses 0.0.x
+  # Pinned to 0.1.2 ahead of nixpkgs-unstable: the mobile app refuses 0.0.x
   # servers. Drop the src/pnpmDeps override (and the rpath fixup, which
-  # nixpkgs master carries too) once pkgs.t3code reaches 0.1.3.
+  # nixpkgs master carries too) once pkgs.t3code reaches 0.1.2.
   #
   # The import patch appends CLI turns to a thread imported earlier; upstream
   # imports a session once and never follows it (t3code-cli-sync below).
@@ -78,16 +78,16 @@ let
     t3code-unwrapped = pkgs.t3code.unwrapped.overrideAttrs (
       finalAttrs: old:
       {
-        version = "0.1.3";
+        version = "0.1.2";
         src = old.src.override {
           tag = "v${finalAttrs.version}";
-          hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+          hash = "sha256-C5l7541kanlsukhswrAEu8GFpr/YpWDnofJ5dlg7+LM=";
         };
         pnpmDeps = pkgs.fetchPnpmDeps {
           inherit (finalAttrs) pname version src pnpmWorkspaces;
           pnpm = pkgs.pnpm_11;
           fetcherVersion = 4;
-          hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+          hash = "sha256-xRmOrOZbBljaF1IJr0JFUFzdhkld6+ehLIlpVOg/J3E=";
         };
         patches = (old.patches or [ ]) ++ [ ./t3code-import-new-turns.patch ];
       }
