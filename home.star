@@ -369,6 +369,8 @@ def _claude_pulse():
             perms = "0600",
             content = '{"mcpServers": {}, "projects": {"/home/kyandesutter/.config/nix": {"hasTrustDialogAccepted": true}}}\n',
         ),
+        # `meshtop skills sync` fills ~/.claude/skills from the agent-config registry.
+        file("~/.claude-pulse/skills", mode = "link", target = HOME + "/.claude/skills"),
     ]
 
 # T3 Code: the server runs on the g815 only. The desktop app always starts its own backend and

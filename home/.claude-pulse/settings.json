@@ -1,184 +1,5 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
-  "agentPushNotifEnabled": true,
-  "alwaysThinkingEnabled": true,
-  "autoCompactWindow": 200000,
-  "awaySummaryEnabled": false,
-  "effortLevel": "high",
-  "enabledPlugins": {
-    "accessibility-expert@claude-code-marketplace": false,
-    "ai-engineer@claude-code-marketplace": false,
-    "api-integration-specialist@claude-code-marketplace": false,
-    "api-tester@claude-code-marketplace": false,
-    "app-store-optimizer@claude-code-marketplace": false,
-    "audit@claude-code-marketplace": false,
-    "backend-architect@claude-code-marketplace": false,
-    "brand-guardian@claude-code-marketplace": false,
-    "bug-detective@claude-code-marketplace": false,
-    "bug-fix@claude-code-marketplace": false,
-    "canarycoders@canarycoders-skills": true,
-    "clangd-lsp@claude-plugins-official": true,
-    "claude-code-setup@claude-plugins-official": false,
-    "claude-md-management@claude-plugins-official": false,
-    "code-review@claude-plugins-official": false,
-    "code-simplifier@claude-plugins-official": false,
-    "codebase-documenter@claude-code-marketplace": false,
-    "context7@claude-plugins-official": false,
-    "desktop-notifications@claude-plugin-desktop-notifications": true,
-    "expo@expo-plugins": true,
-    "feature-dev@claude-plugins-official": false,
-    "frontend-design@claude-plugins-official": false,
-    "playwright@claude-plugins-official": true,
-    "pr-review-toolkit@claude-plugins-official": false,
-    "ralph-loop@claude-plugins-official": true,
-    "security-guidance@claude-plugins-official": true,
-    "skill-creator@claude-plugins-official": false,
-    "superpowers@claude-plugins-official": true,
-    "swift-lsp@claude-plugins-official": true,
-    "tmux-agent-notifications@claude-plugin-tmux-notifications": true,
-    "typescript-lsp@claude-plugins-official": true
-  },
-  "env": {
-    "SHELL": "/usr/bin/bash"
-  },
-  "extraKnownMarketplaces": {
-    "canarycoders-skills": {
-      "source": {
-        "repo": "CanaryCoders/skills",
-        "source": "github"
-      }
-    },
-    "expo-plugins": {
-      "source": {
-        "repo": "expo/skills",
-        "source": "github"
-      }
-    }
-  },
-  "feedbackSurveyState": {
-    "lastShownTime": 1754320637645
-  },
-  "hooks": {
-    "Notification": [
-      {
-        "hooks": [
-          {
-            "command": "[ -f ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh ] && bash ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh claude notification || true",
-            "type": "command"
-          }
-        ],
-        "matcher": ""
-      }
-    ],
-    "PostToolUse": [
-      {
-        "hooks": [
-          {
-            "command": "[ -f ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh ] && bash ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh claude tool_use || true",
-            "type": "command"
-          }
-        ],
-        "matcher": ""
-      }
-    ],
-    "PreToolUse": [
-      {
-        "hooks": [
-          {
-            "command": "sh ~/.claude/hooks/no-em-dash.sh",
-            "timeout": 10,
-            "type": "command"
-          }
-        ],
-        "matcher": "Write|Edit|NotebookEdit"
-      },
-      {
-        "hooks": [
-          {
-            "command": "sh ~/.claude/hooks/no-ai-attribution.sh",
-            "timeout": 10,
-            "type": "command"
-          }
-        ],
-        "matcher": "Bash"
-      }
-    ],
-    "SessionEnd": [
-      {
-        "hooks": [
-          {
-            "command": "[ -f ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh ] && bash ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh claude session_end || true",
-            "type": "command"
-          }
-        ],
-        "matcher": ""
-      }
-    ],
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "command": "[ -f ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh ] && bash ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh claude session_start || true",
-            "type": "command"
-          }
-        ],
-        "matcher": ""
-      },
-      {
-        "hooks": [
-          {
-            "command": "bash ~/.claude/hooks/herdr-reap-session.sh",
-            "timeout": 10,
-            "type": "command"
-          }
-        ],
-        "matcher": "*"
-      },
-      {
-        "hooks": [
-          {
-            "command": "bash ~/.claude/hooks/herdr-agent-state.sh session",
-            "timeout": 10,
-            "type": "command"
-          }
-        ],
-        "matcher": "^(startup|resume|clear|compact|fork)$"
-      }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "command": "[ -f ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh ] && bash ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh claude stop || true",
-            "type": "command"
-          }
-        ],
-        "matcher": ""
-      }
-    ],
-    "SubagentStop": [
-      {
-        "hooks": [
-          {
-            "command": "[ -f ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh ] && bash ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh claude stop || true",
-            "type": "command"
-          }
-        ],
-        "matcher": ""
-      }
-    ],
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "command": "[ -f ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh ] && bash ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh claude prompt_submit || true",
-            "type": "command"
-          }
-        ],
-        "matcher": ""
-      }
-    ]
-  },
   "model": "opus",
   "permissions": {
     "defaultMode": "bypassPermissions",
@@ -207,8 +28,172 @@
       "Bash(gh auth logout*)"
     ]
   },
-  "skipAutoPermissionPrompt": true,
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -f ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh ] && bash ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh claude notification || true"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -f ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh ] && bash ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh claude tool_use || true"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh ~/.claude/hooks/no-em-dash.sh",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh ~/.claude/hooks/no-ai-attribution.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -f ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh ] && bash ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh claude session_end || true"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -f ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh ] && bash ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh claude session_start || true"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -f ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh ] && bash ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh claude stop || true"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -f ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh ] && bash ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh claude stop || true"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -f ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh ] && bash ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh claude prompt_submit || true"
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "accessibility-expert@claude-code-marketplace": false,
+    "ai-engineer@claude-code-marketplace": false,
+    "api-integration-specialist@claude-code-marketplace": false,
+    "api-tester@claude-code-marketplace": false,
+    "app-store-optimizer@claude-code-marketplace": false,
+    "audit@claude-code-marketplace": false,
+    "backend-architect@claude-code-marketplace": false,
+    "brand-guardian@claude-code-marketplace": false,
+    "bug-detective@claude-code-marketplace": false,
+    "bug-fix@claude-code-marketplace": false,
+    "canarycoders@canarycoders-skills": true,
+    "clangd-lsp@claude-plugins-official": true,
+    "claude-code-setup@claude-plugins-official": false,
+    "claude-md-management@claude-plugins-official": false,
+    "code-review@claude-plugins-official": false,
+    "code-simplifier@claude-plugins-official": false,
+    "codebase-documenter@claude-code-marketplace": false,
+    "context7@claude-plugins-official": false,
+    "desktop-notifications@claude-plugin-desktop-notifications": true,
+    "expo@expo-plugins": true,
+    "feature-dev@claude-plugins-official": false,
+    "frontend-design@claude-plugins-official": false,
+    "playwright@claude-plugins-official": true,
+    "pr-review-toolkit@claude-plugins-official": false,
+    "ralph-loop@claude-plugins-official": true,
+    "security-guidance@claude-plugins-official": true,
+    "skill-creator@claude-plugins-official": false,
+    "superpowers@claude-plugins-official": false,
+    "swift-lsp@claude-plugins-official": true,
+    "tmux-agent-notifications@claude-plugin-tmux-notifications": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "cloudflare@cloudflare": true
+  },
+  "extraKnownMarketplaces": {
+    "expo-plugins": {
+      "source": {
+        "source": "github",
+        "repo": "expo/skills"
+      }
+    },
+    "canarycoders-skills": {
+      "source": {
+        "source": "github",
+        "repo": "CanaryCoders/skills"
+      }
+    },
+    "cloudflare": {
+      "source": {
+        "repo": "cloudflare/skills",
+        "source": "github"
+      }
+    }
+  },
+  "alwaysThinkingEnabled": true,
+  "effortLevel": "high",
+  "autoCompactWindow": 200000,
+  "tui": "fullscreen",
+  "awaySummaryEnabled": false,
   "skipDangerousModePermissionPrompt": true,
+  "agentPushNotifEnabled": true,
+  "skipAutoPermissionPrompt": true,
+  "feedbackSurveyState": {
+    "lastShownTime": 1754320637645
+  },
   "spinnerVerbs": {
     "mode": "append",
     "verbs": [
@@ -216,5 +201,11 @@
       "Jorking it"
     ]
   },
-  "tui": "fullscreen"
+  "statusLine": {
+    "type": "command",
+    "command": "sh \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/statusline-usage.sh\""
+  },
+  "env": {
+    "SHELL": "/usr/bin/bash"
+  }
 }

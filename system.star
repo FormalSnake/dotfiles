@@ -474,7 +474,7 @@ def _pkgs():
         # helium-wrapper sets LD_LIBRARY_PATH to its own directory, so `helium` is the wrapper.
         pkg("helium", version = "0.19.4.1", source = github("imputnet/helium-linux", asset = "helium-*_linux.tar.xz"), links = {"helium": "helium-wrapper"}),
         pkg("matugen", version = "4.2.0", source = github("InioX/matugen", asset = "matugen-*-x86_64.tar.gz")),
-        pkg("meshtop", source = git("https://github.com/FormalSnake/meshtop", rev = "ca70d10d27e8fc1a0f0afc5c7d691887cb2c4020")),
+        pkg("meshtop", source = git("https://github.com/FormalSnake/meshtop", rev = "187b76fde9253de8667a72639814f9e559aba537")),
         pkg("wl-clip-persist", source = git("https://github.com/Linus789/wl-clip-persist", rev = "v0.5.0")),
         pkg("wl-gammarelay-rs", source = git("https://github.com/MaxVerevkin/wl-gammarelay-rs", rev = "v1.0.1")),
         # omarchy-pods 1.0.2 (the commit its annotated tag points at) with the three patches the nix

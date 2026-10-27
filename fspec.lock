@@ -723,14 +723,8 @@ hash = "sha256-ouO1DkntZDmZm6PCUu0E+r2Y7k6dEuXl3/LmY3BWl1E="
 
 [[pkg]]
 name = "meshtop"
-source = "git:https://github.com/FormalSnake/meshtop@ca70d10d27e8fc1a0f0afc5c7d691887cb2c4020"
-rev = "ca70d10d27e8fc1a0f0afc5c7d691887cb2c4020"
-
-[pkg.aarch64-darwin]
-oci = "ghcr.io/formalsnake/fspec-cache/meshtop@sha256:f8db7e5038bffcd73cda008cddee5cd20451d4226cc981135bb87919e68bf7b3"
-
-[pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/meshtop@sha256:674d4ce55789a2a9f4b926c11e0433096623204fd871f60a299ff4bd46cf5bf3"
+source = "git:https://github.com/FormalSnake/meshtop@187b76fde9253de8667a72639814f9e559aba537"
+rev = "187b76fde9253de8667a72639814f9e559aba537"
 
 [[pkg]]
 name = "messages"
