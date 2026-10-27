@@ -65,7 +65,7 @@ local WS = {
 
 -- number \t isCurrent \t total-window-count, one row per workspace.
 local WS_CMD = OMNIWMCTL .. " query workspaces --format json"
-  .. " | jq -r '.result.payload.workspaces[] | [.number, .isCurrent, .counts.total] | @tsv'"
+  .. " | jq -r '.result.payload.workspaces[]? | [.number, .isCurrent, .counts.total] | @tsv'"
 
 sbar.begin_config()
 
@@ -194,6 +194,10 @@ end
 local function redraw_spaces()
   sbar.exec(WS_CMD, function(out)
     if type(out) ~= "string" then return end
+    if out == "" then
+      for _, sp in ipairs(spaces) do sp:set({ drawing = false }) end
+      return
+    end
     for num, current, total in out:gmatch("(%d+)\t(%a+)\t(%d+)") do
       local sp = spaces[tonumber(num)]
       if sp then

@@ -178,26 +178,9 @@
       if test -f /opt/homebrew/bin/brew
           /opt/homebrew/bin/brew shellenv | source
       end
+      # shellenv prepends Brew; restore the same user/Nix priority as SSH.
+      fish_add_path --path --move ~/.local/bin ~/.bun/bin ~/.cargo/bin /run/current-system/sw/bin /etc/profiles/per-user/kyandesutter/bin /nix/var/nix/profiles/default/bin
       ''}
-      # Nix itself (Determinate owns the install). nix-darwin's set-environment
-      # adds this for zsh/bash but fish builds PATH by hand, so source the
-      # official profile script, which sets PATH, NIX_PROFILES, NIX_SSL_CERT_FILE.
-      if test -f /nix/var/nix/profiles/default/etc/profile.d/nix.fish
-          source /nix/var/nix/profiles/default/etc/profile.d/nix.fish
-      end
-
-      # Home-manager user profile (declared `home.packages`, e.g. `just`).
-      fish_add_path /etc/profiles/per-user/kyandesutter/bin
-      fish_add_path /run/current-system/sw/bin
-      if test -d /run/wrappers/bin
-        fish_add_path /run/wrappers/bin
-      end
-
-      # User paths
-      fish_add_path ~/.cargo/bin
-      fish_add_path ~/.bun/bin
-      fish_add_path ~/.local/bin
-
       ${lib.optionalString pkgs.stdenv.hostPlatform.isDarwin ''
       # OrbStack shell integration
       if test -f ~/.orbstack/shell/init2.fish
@@ -209,6 +192,21 @@
     # Runs for ALL fish sessions (including non-interactive). Secrets and env
     # vars that scripts/subshells need belong here, not in interactiveShellInit.
     shellInit = ''
+      # SSH commands are noninteractive: initialize Nix there too. The official
+      # script exits if sourced twice, so guard inherited initialization.
+      if not set -q __ETC_PROFILE_NIX_SOURCED; and test -f /nix/var/nix/profiles/default/etc/profile.d/nix.fish
+          source /nix/var/nix/profiles/default/etc/profile.d/nix.fish
+      end
+
+      ${lib.optionalString pkgs.stdenv.hostPlatform.isDarwin ''
+      # Brew owns Codex and other native tools. Static paths avoid invoking
+      # brew for every SSH command; keep Nix and user tools ahead of Brew.
+      fish_add_path --path --append /opt/homebrew/bin /opt/homebrew/sbin
+      ''}
+      # Preserve interactive priority without relying on persisted universal
+      # fish_user_paths from a previous login. --path changes this process only.
+      fish_add_path --path --move ~/.local/bin ~/.bun/bin ~/.cargo/bin /run/wrappers/bin /run/current-system/sw/bin /etc/profiles/per-user/kyandesutter/bin /nix/var/nix/profiles/default/bin
+
       # Agenix-decrypted secrets (mounted by nix-darwin at /run/agenix/<name>).
       function __load_agenix_secret -a env_name file
           if test -r "/run/agenix/$file"

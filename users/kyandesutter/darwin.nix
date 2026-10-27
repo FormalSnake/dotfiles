@@ -8,11 +8,8 @@
     # ./mixins/macos/aerospace.nix
     ./mixins/cli/direnv-apple-toolchain.nix
     ./mixins/apps/discord.nix
-    ./mixins/macos/hammerspoon.nix
     ./mixins/devices/kyan-drive.nix
     ./mixins/apps/lynk-browser.nix
-    ./mixins/macos/omniwm.nix
-    ./mixins/macos/sketchybar.nix
   ];
 
   # macOS rebuild shortcut: the darwin counterpart to the g815 `rebuild`

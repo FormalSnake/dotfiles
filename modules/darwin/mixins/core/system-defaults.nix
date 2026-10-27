@@ -3,9 +3,7 @@
     NSGlobalDomain = {
       AppleInterfaceStyle = "Dark";
       AppleShowAllExtensions = true;
-      # Auto-hide the macOS menu bar: sketchybar owns the top edge now
-      # (users/kyandesutter/mixins/macos/sketchybar.nix). The native bar still reveals
-      # on hover into the notch region.
+      # Keep the native menu bar hidden on this unattended development server.
       _HIHideMenuBar = true;
       KeyRepeat = 2;
       ApplePressAndHoldEnabled = false;

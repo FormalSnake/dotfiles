@@ -6,6 +6,21 @@ let
   # homebrew.nix. The Lua side (interpreter + sbarlua module) stays on nix.
   sketchybarBin = "/opt/homebrew/bin/sketchybar";
   omniwmctl = "/Applications/OmniWM.app/Contents/MacOS/omniwmctl";
+  # OmniWM 0.7.6 IPCSocketPath uses Application Support, not the legacy cache.
+  omniwmSocket = "${config.home.homeDirectory}/Library/Application Support/com.barut.OmniWM/ipc.sock";
+  # PathState wakes this on socket creation, but a stale socket is not readiness.
+  # Probe the real protocol with a deadline and back off after failed connects.
+  workspaceWatch = pkgs.writeShellScript "omniwm-sketchybar-watch" ''
+    while [ -S ${lib.escapeShellArg omniwmSocket} ]; do
+      if ${pkgs.coreutils}/bin/timeout 5 ${omniwmctl} ping >/dev/null 2>&1; then
+        ${omniwmctl} watch active-workspace,windows-changed,layout-changed \
+          --exec ${sketchybarBin} --trigger omniwm_update || true
+        ${sketchybarBin} --trigger omniwm_update
+      fi
+      [ -S ${lib.escapeShellArg omniwmSocket} ] || exit 0
+      /bin/sleep 30
+    done
+  '';
 
   # SbarLua is a native Lua module; nixpkgs builds it against Lua 5.5, so the
   # config runs under that exact interpreter and finds sketchybar.so via LUA_CPATH.
@@ -57,21 +72,13 @@ in
   };
 
   # Push OmniWM workspace/window/layout changes into the bar. `omniwmctl watch`
-  # exits if IPC is down (OmniWM not up yet); KeepAlive + ThrottleInterval respawn
-  # it until the socket exists, so login ordering doesn't matter.
+  # exits if IPC is down. Only keep it alive while the socket exists: otherwise
+  # an absent OmniWM causes a failed process launch every five seconds.
   launchd.agents.omniwm-sketchybar-watch = {
     enable = true;
     config = {
-      ProgramArguments = [
-        omniwmctl
-        "watch"
-        "active-workspace,windows-changed,layout-changed"
-        "--exec"
-        sketchybarBin
-        "--trigger"
-        "omniwm_update"
-      ];
-      KeepAlive = true;
+      ProgramArguments = [ "${workspaceWatch}" ];
+      KeepAlive.PathState."${omniwmSocket}" = true;
       RunAtLoad = true;
       ThrottleInterval = 5;
       EnvironmentVariables.PATH = binPath;

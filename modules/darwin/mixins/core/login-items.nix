@@ -10,9 +10,7 @@ let
   # bombarding you with windows on login.
   apps = [
     # aerospace is launched via programs.aerospace.launchd (currently disabled, see users/kyandesutter/mixins/macos/aerospace.nix)
-    { id = "omniwm";        path = "/Applications/OmniWM.app"; }
     { id = "nordvpn";       path = "/Applications/NordVPN.app"; }
-    { id = "tinycast";      path = "/Applications/Tinycast.app"; }
     { id = "aldente";       path = "/Applications/AlDente.app"; }
     { id = "orbstack";      path = "/Applications/OrbStack.app"; }
     { id = "betterdisplay"; path = "/Applications/BetterDisplay.app"; }

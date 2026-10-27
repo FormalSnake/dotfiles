@@ -4,9 +4,6 @@
     # exactly the Brewfile's `trusted:` entries on every run, so a manual
     # `brew trust` never survives an activation. Trust must be declared here.
     taps = [
-      { name = "abue-ammar/tinycast"; trusted = true; }
-      { name = "barutsrb/tap"; trusted = true; }
-      { name = "felixkratz/formulae"; trusted = true; } # sketchybar
       { name = "jnsahaj/lumen"; trusted = true; }
       { name = "pluk-inc/tap"; trusted = true; }
     ];
@@ -15,7 +12,6 @@
     # Everything else moved to nix/home-manager: see users/kyandesutter/programs.nix.
     brews = [
       "libadwaita" # NativeDesktop's GTK-on-macOS dev loop links brew GTK; cleanup="uninstall" kept wiping the imperative install
-      "sketchybar" # felixkratz/formulae: nixpkgs' build crashes the cctools linker; drives the OmniWM bar (users/kyandesutter/mixins/macos/sketchybar.nix)
       "terminal-notifier" # nixpkgs 26.11 crashes in the Darwin linker (SIGTRAP)
       "watchman" # nixpkgs build pulls folly, which fails to compile on darwin
       "wireguard-tools"
@@ -32,17 +28,15 @@
 
     casks = [
       # (previously-declared casks)
-      "alcove"
       "betterdisplay"
       "bluebubbles" # BlueBubbles Server (iMessage bridge): macOS-only, this Mac is the host
       "clop"
+      "codex" # agents call it over SSH; undeclared, cleanup="uninstall" would remove it
       "ghostty"
       "gstreamer-runtime"
       "nordvpn"
       "orbstack"
-      "stats"
       "terminal-browser" # zenbu-labs: chromium in the terminal over the kitty graphics protocol; the Linux hosts take the release tarball (users/kyandesutter/mixins/cli/terminal-browser.nix)
-      "thaw"
       "the-unarchiver"
 
       # (newly imported from /Applications; previously imperative)
@@ -67,15 +61,6 @@
       # ~/Library/Fonts where font casks normally go.
       "font-sf-pro"
 
-      # (tiling WM; mirrors the g815 niri setup)
-      "omniwm"             # barutsrb/tap: niri-style tiler (tap trusted automatically, see modules/darwin/mixins/core/homebrew.nix)
-      "karabiner-elements" # remaps Right Command → the OmniWM "Super" chord (Ctrl+Opt+Cmd)
-
-      # (launcher)
-      # Replaced Raycast Beta, which was a manual /Applications install. The
-      # arm64 cask needs macOS 26+; it strips the quarantine flag itself since
-      # the app is self-signed. Started at login by modules/darwin/mixins/core/login-items.nix.
-      "tinycast"           # abue-ammar/tinycast
     ];
 
     # Mac App Store auto-install disabled: `mas install` is broken at the OS level (https://github.com/orgs/Homebrew/discussions/6550). Apps remain installed manually.

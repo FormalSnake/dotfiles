@@ -62,13 +62,19 @@ in
   # and rejects /nix/store (group-writable), so activation installs a real
   # root-owned copy outside the store for it. noninteractive_auth makes
   # `sudo -n` actually try PAM: without it sudo assumes PAM means "will
-  # prompt" and gives up before the agent module ever runs.
+  # prompt" and gives up before the agent module ever runs. The flip side:
+  # any sudo that still reaches PAM (Apple's /etc/pam.d/sudo carries pam_tid)
+  # opens a SecurityAgent password dialog and hangs a headless shell.
+  # `sudo -v` and `sudo -l` default to verifypw/listpw=all, which only skips
+  # auth when every matching rule is NOPASSWD, and %admin's isn't; `any`
+  # lets the NOPASSWD line below satisfy them.
   security.pam.services.sudo_local.text = ''
     auth       sufficient     ${pam_ssh_agent_auth}/libexec/pam_ssh_agent_auth.so file=/etc/ssh/sudo_authorized_keys
   '';
   security.sudo.extraConfig = ''
     Defaults env_keep+=SSH_AUTH_SOCK
     Defaults noninteractive_auth
+    Defaults verifypw=any, listpw=any
     kyandesutter ALL=(ALL) NOPASSWD: ALL
   '';
 
