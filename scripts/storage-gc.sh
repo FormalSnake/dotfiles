@@ -383,12 +383,30 @@ done
 # and rmdir refuses anything that gained an entry since the scan.
 tmp_root="${TMPDIR:-/tmp}"
 [[ "$OS" == Darwin ]] && tmp_root=$(getconf DARWIN_USER_TEMP_DIR)
+tmp_root=${tmp_root%/}
 tmp_dirs=0
 while IFS= read -r -d '' d; do
   if (( APPLY )); then rmdir -- "$d" 2>/dev/null || continue; fi
   tmp_dirs=$(( tmp_dirs + 1 ))
-done < <("$FIND" "$tmp_root" -mindepth 1 -maxdepth 1 -type d -empty -mtime +1 -print0 2>/dev/null)
+done < <("$FIND" "$tmp_root" -mindepth 1 -maxdepth 1 -type d -empty -mtime +0 -print0 2>/dev/null)
 (( tmp_dirs > 0 )) && plan+=("0|tmp-empty-dirs|$tmp_dirs empty temp dirs")
+
+# Chromium and CEF (ndshell's cefdev) leave a SingletonSocket dir per launch and
+# never remove it when killed: 3.4k of them in Oct 2026. A dir is stale once no
+# process holds its socket.
+live_sockets=$(lsof -U -Fn 2>/dev/null | sed -n 's/^n//p')
+singleton_dirs=0
+while IFS= read -r -d '' sock; do
+  d=${sock%/SingletonSocket}
+  grep -qxF -- "$sock" <<<"$live_sockets" && continue
+  grep -qxF -- "/private$sock" <<<"$live_sockets" && continue
+  if (( APPLY )); then
+    rm -f -- "$sock" "$d/SingletonCookie" "$d/SingletonLock"
+    rmdir -- "$d" 2>/dev/null || continue
+  fi
+  singleton_dirs=$(( singleton_dirs + 1 ))
+done < <("$FIND" "$tmp_root" -mindepth 2 -maxdepth 2 -name SingletonSocket -type s -mtime +0 -print0 2>/dev/null)
+(( singleton_dirs > 0 )) && plan+=("0|tmp-singleton-dirs|$singleton_dirs stale Chromium singleton dirs")
 
 ### 4. Package manager caches
 
