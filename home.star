@@ -468,7 +468,7 @@ def _apps():
         # rookie's build script shells out to git, and a C++ dependency builds through cc-rs.
         pkg(
             "kopuzd",
-            source = git("https://github.com/Kopuz-org/kopuz", rev = "23db9b35fe45bd773e3cdcdf0d6584b13ae5b8cc", image = TUMBLEWEED, deps = ["rustup", "gcc", "cmake", "make", "pkgconf", "alsa-devel", "dbus-1-devel", "libopenssl-devel", "git-core", "gcc-c++"]),
+            source = git("https://github.com/Kopuz-org/kopuz", rev = "735a22898992c4b09de2a65323039220db32750b", image = TUMBLEWEED, deps = ["rustup", "gcc", "cmake", "make", "pkgconf", "alsa-devel", "dbus-1-devel", "libopenssl-devel", "git-core", "gcc-c++"]),
             build_flags = ["-p", "kopuz-kopuzd", "-p", "kopuz-ctl"],
             bins = ["kopuzd", "kopuzctl"],
         ),
@@ -477,6 +477,14 @@ def _apps():
             "formalmusic",
             source = git("https://github.com/FormalStudio/formalmusic", rev = "84e167a9d144ee9c2a9446747e381d7fd905ed00", image = TUMBLEWEED, deps = ["cargo"] + NATIVEDESKTOP_DEPS),
             build = ["sh", "-c", "set -e; w=$(mktemp -d); git clone -q https://github.com/FormalStudio/NativeDesktop $w/nativedesktop; git -C $w/nativedesktop checkout -q 7ad936d8bcf2ef7c7d026798cb63044b9c088b71; cp -r $FSPEC_SRC $w/formalmusic; curl -fsSL https://ziglang.org/download/0.16.0/zig-x86_64-linux-0.16.0.tar.xz | tar -xJ -C $w; PATH=$w/zig-x86_64-linux-0.16.0:$PATH cargo build --release --locked --manifest-path $w/formalmusic/Cargo.toml --package formalmusic; install -Dm755 $w/formalmusic/target/release/formalmusic $FSPEC_OUT/bin/formalmusic"],
+        ),
+        # Private repo: CI fetches it with the FSPEC_GIT_TOKEN secret. kopuzd above sits at the
+        # kopuz-api rev its Cargo.lock pins.
+        pkg(
+            "kopuz-gpui",
+            source = git("https://github.com/Kopuz-org/kopuz-gpui", rev = "877eb8cf1049cc0b925b4dd34ac9a462048e2e72", image = TUMBLEWEED, deps = ["rustup", "cmake"] + NATIVEDESKTOP_DEPS),
+            build_flags = ["-p", "kopuz-gpui"],
+            bins = ["kopuz-gpui"],
         ),
         pkg("fast", source = git("https://github.com/maaslalani/fast", rev = "26d8fc9c189ba748c68f8930af11dee5c2467f7e")),
         pkg("fetch", source = git("https://github.com/areofyl/fetch", rev = "7b19d22c2d8e4b7b2295cc625c9fdf87adcabbcd")),
