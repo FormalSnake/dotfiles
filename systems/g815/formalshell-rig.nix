@@ -33,6 +33,9 @@ let
   exportDisplay = pkgs.writeShellScript "formalshell-rig-export-display" ''
     systemctl --user import-environment WAYLAND_DISPLAY
     systemctl --user set-environment WAYLAND_DISPLAY="$WAYLAND_DISPLAY"
+    # A nested Hyprland imports its own WAYLAND_DISPLAY into this manager's
+    # environment, so dev/remote.sh reads labwc's socket from here instead.
+    printf %s "$WAYLAND_DISPLAY" > "$XDG_RUNTIME_DIR/formalshell-rig-display"
     systemctl --user start --no-block formalshell-rig-pointer.service
   '';
 
@@ -63,8 +66,9 @@ let
         return obj, word & 0xFFFF, buf[8:size], buf[size:]
 
 
-    env = os.environ
-    path = os.path.join(env["XDG_RUNTIME_DIR"], env["WAYLAND_DISPLAY"])
+    runtime = os.environ["XDG_RUNTIME_DIR"]
+    with open(os.path.join(runtime, "formalshell-rig-display")) as f:
+        path = os.path.join(runtime, f.read())
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     sock.connect(path)
     send(sock, 1, 1, struct.pack("<I", 2))
