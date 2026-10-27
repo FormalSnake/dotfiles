@@ -51,7 +51,8 @@ def _helium():
             "helium",
             peers = PAIR,
             paths = ["~/.config/net.imput.helium/"],
-            exclude = ["Cache", "Code Cache", "GPUCache", "DawnGraphiteCache", "DawnWebGPUCache", "WidevineCdm"],
+            # Per-host extension state: a copied Service Worker registry or 1Password pairing leaves its popup spinning forever.
+            exclude = ["Cache", "Code Cache", "GPUCache", "DawnGraphiteCache", "DawnWebGPUCache", "WidevineCdm", "Service Worker", "Extension State", "aeblfdkhhhdcdjpifhhbdiojplfjncoa", "chrome-extension_aeblfdkhhhdcdjpifhhbdiojplfjncoa_0.indexeddb.leveldb"],
             mode = "seed",
             unless_running = ["helium"],
         ),
