@@ -201,15 +201,18 @@
     battery_detection = false;
   };
 
-  # Root is only 256 GB (Windows has the rest of the NVMe), and agent builds
-  # can eat 25 GB of store garbage between daily nix-gc runs. Chromium's
+  # Root is only 256 GB (Windows has the rest of the NVMe). Chromium's
   # storage-pressure bubble ("Free up space to continue") fires once free space
-  # drops under 15% (38 GB here), so the daemon collects garbage during a
-  # build whenever free space falls under 45 GB, until 70 GB are free.
+  # drops under 15% (38 GB here), so storage-gc treats anything under 45 GB as
+  # low and reaps cargo output idle for 6 hours. Most of the growth is target/
+  # dirs, not the store: a min-free the store alone cannot satisfy makes the
+  # daemon re-run auto-GC every few seconds mid-build and delete paths the
+  # build is about to use, so the daemon only steps in near a full disk.
   nix.settings = {
-    min-free = 45 * 1024 * 1024 * 1024;
-    max-free = 70 * 1024 * 1024 * 1024;
+    min-free = 10 * 1024 * 1024 * 1024;
+    max-free = 25 * 1024 * 1024 * 1024;
   };
+  systemd.services.kyan-storage-gc.environment.LOW_FREE_GB = "45";
 
   # Profiles (enable the desktop stack for this host).
   kyan.profiles.desktop.enable = true;
