@@ -564,11 +564,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793124430,
-        "narHash": "sha256-AAgNmiKrBBYtuGbnVY5c8my3uTeizZPC9NLzsZ3L0Dw=",
+        "lastModified": 1793126562,
+        "narHash": "sha256-KoapA6qOQhlgbmunObjTVF73GBdWEAdumOm4qgaPVec=",
         "owner": "FormalSnake",
         "repo": "FormalShell",
-        "rev": "8e057548362da76f0bee17196cda9736a721ffb1",
+        "rev": "e590c2915da572bc4f6f028779f1852b6ed64b95",
         "type": "github"
       },
       "original": {
