@@ -28,6 +28,8 @@ in
       {
         name = "e1504g";
         role = "client";
+        # openSUSE under fspec, so no nix profile to find meshtop in.
+        command = "/opt/fspec/current/bin/meshtop";
       }
     ];
     # Messages on the Linux hosts talks to BlueBubbles on the mac.
