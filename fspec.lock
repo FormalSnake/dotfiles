@@ -587,11 +587,8 @@ hash = "sha256-b9IHn0mn6cj7hdOb4ZRzObAwTmngqLqZUpzfAMC4cus="
 
 [[pkg]]
 name = "kopuz-gpui"
-source = "git:https://github.com/Kopuz-org/kopuz-gpui@54aa0a29a62b90fc1feb591ea2e02ee6f93c179b"
-rev = "54aa0a29a62b90fc1feb591ea2e02ee6f93c179b"
-
-[pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/kopuz-gpui@sha256:0fa9719330752b851a497ebe9de874c07f2de2fbd62668ae506b85c4b0797427"
+source = "git:https://github.com/Kopuz-org/kopuz-gpui@5dbd94a282c60e3bb3ea0f120ddb70b6718ac2ec"
+rev = "5dbd94a282c60e3bb3ea0f120ddb70b6718ac2ec"
 
 [[pkg]]
 name = "kopuzd"
