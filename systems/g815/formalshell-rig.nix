@@ -33,6 +33,59 @@ let
   exportDisplay = pkgs.writeShellScript "formalshell-rig-export-display" ''
     systemctl --user import-environment WAYLAND_DISPLAY
     systemctl --user set-environment WAYLAND_DISPLAY="$WAYLAND_DISPLAY"
+    systemctl --user start --no-block formalshell-rig-pointer.service
+  '';
+
+  # Headless labwc has no input devices, so its seat offers no pointer and
+  # neither does the Hyprland nested in it: a client's wl_pointer existed
+  # only while some virtual pointer did, and wlrctl's exits before the shell
+  # binds the one its own device brought. Holding one virtual pointer on
+  # labwc gives the nested session a pointer for the slot's whole life.
+  holdPointer = pkgs.writers.writePython3 "formalshell-rig-pointer" { } ''
+    import os
+    import socket
+    import struct
+
+
+    def send(sock, obj, op, payload=b""):
+        size = 8 + len(payload)
+        sock.sendall(struct.pack("<II", obj, (size << 16) | op) + payload)
+
+
+    def recv(sock, buf):
+        while len(buf) < 8 or len(buf) < struct.unpack_from("<I", buf, 4)[0] >> 16:
+            chunk = sock.recv(65536)
+            if not chunk:
+                raise SystemExit("labwc closed the connection")
+            buf += chunk
+        obj, word = struct.unpack_from("<II", buf)
+        size = word >> 16
+        return obj, word & 0xFFFF, buf[8:size], buf[size:]
+
+
+    path = os.path.join(os.environ["XDG_RUNTIME_DIR"], os.environ["WAYLAND_DISPLAY"])
+    sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    sock.connect(path)
+    send(sock, 1, 1, struct.pack("<I", 2))
+    send(sock, 1, 0, struct.pack("<I", 3))
+    buf, manager = b"", None
+    while True:
+        obj, op, body, buf = recv(sock, buf)
+        if obj == 2 and op == 0:
+            name, n = struct.unpack_from("<II", body)
+            if body[8:8 + n - 1] == b"zwlr_virtual_pointer_manager_v1":
+                manager = name
+        elif obj == 3:
+            break
+    if manager is None:
+        raise SystemExit("labwc offers no zwlr_virtual_pointer_manager_v1")
+    iface = b"zwlr_virtual_pointer_manager_v1\0"
+    iface += b"\0" * (-len(iface) % 4)
+    bind = struct.pack("<II", manager, 32) + iface + struct.pack("<II", 1, 4)
+    send(sock, 2, 0, bind)
+    send(sock, 4, 0, struct.pack("<II", 0, 5))
+    while sock.recv(65536):
+        pass
   '';
 
   rigTools = with pkgs; [
@@ -72,6 +125,17 @@ in
     serviceConfig = {
       ExecStart = "${pkgs.labwc}/bin/labwc -s ${exportDisplay}";
       Restart = "on-failure";
+    };
+  };
+
+  systemd.user.services.formalshell-rig-pointer = {
+    description = "virtual pointer held on the FormalShell rig's headless labwc";
+    unitConfig.ConditionGroup = "fstest";
+    partOf = [ "formalshell-rig-parent.service" ];
+    serviceConfig = {
+      ExecStart = holdPointer;
+      Restart = "on-failure";
+      RestartSec = 2;
     };
   };
 }
