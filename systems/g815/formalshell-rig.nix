@@ -63,7 +63,8 @@ let
         return obj, word & 0xFFFF, buf[8:size], buf[size:]
 
 
-    path = os.path.join(os.environ["XDG_RUNTIME_DIR"], os.environ["WAYLAND_DISPLAY"])
+    env = os.environ
+    path = os.path.join(env["XDG_RUNTIME_DIR"], env["WAYLAND_DISPLAY"])
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     sock.connect(path)
     send(sock, 1, 1, struct.pack("<I", 2))
