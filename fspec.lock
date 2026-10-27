@@ -586,6 +586,11 @@ url = "https://github.com/Kopuz-org/kopuz/releases/download/v0.22.0/kopuz_v0.22.
 hash = "sha256-b9IHn0mn6cj7hdOb4ZRzObAwTmngqLqZUpzfAMC4cus="
 
 [[pkg]]
+name = "kopuz-gpui"
+source = "git:https://github.com/Kopuz-org/kopuz-gpui@877eb8cf1049cc0b925b4dd34ac9a462048e2e72"
+rev = "877eb8cf1049cc0b925b4dd34ac9a462048e2e72"
+
+[[pkg]]
 name = "kopuzd"
 source = "git:https://github.com/Kopuz-org/kopuz@23db9b35fe45bd773e3cdcdf0d6584b13ae5b8cc"
 rev = "23db9b35fe45bd773e3cdcdf0d6584b13ae5b8cc"
@@ -595,6 +600,11 @@ oci = "ghcr.io/formalsnake/fspec-cache/kopuzd@sha256:09639b543eb2f9068a185efd972
 
 [pkg.x86_64-linux]
 oci = "ghcr.io/formalsnake/fspec-cache/kopuzd@sha256:feef7bdb5bd4bb94ef8f1d604853d308c02f7fdef6438cdef64a17251fd55bc2"
+
+[[pkg]]
+name = "kopuzd"
+source = "git:https://github.com/Kopuz-org/kopuz@735a22898992c4b09de2a65323039220db32750b"
+rev = "735a22898992c4b09de2a65323039220db32750b"
 
 [[pkg]]
 name = "lazydocker"
