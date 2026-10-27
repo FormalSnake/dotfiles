@@ -397,13 +397,13 @@ version = "latest"
 
 [[pkg]]
 name = "formalmusic"
-source = "git:https://github.com/FormalStudio/formalmusic@3313aec5e9abbac0e71e5301c8fd66fd4e2e5f7c"
-rev = "3313aec5e9abbac0e71e5301c8fd66fd4e2e5f7c"
+source = "git:https://github.com/FormalStudio/formalmusic@9a9d93af0fbb75594f3e91f087cf77e6c8a7f576"
+rev = "9a9d93af0fbb75594f3e91f087cf77e6c8a7f576"
 
 [[pkg]]
 name = "formalmusic"
-source = "git:https://github.com/FormalStudio/formalmusic@9a9d93af0fbb75594f3e91f087cf77e6c8a7f576"
-rev = "9a9d93af0fbb75594f3e91f087cf77e6c8a7f576"
+source = "git:https://github.com/FormalStudio/formalmusic@bf502f9a7699733f428d30e1b2e5299ac530b030"
+rev = "bf502f9a7699733f428d30e1b2e5299ac530b030"
 
 [[pkg]]
 name = "formalos-chime"
