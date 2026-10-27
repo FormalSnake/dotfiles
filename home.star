@@ -482,7 +482,7 @@ def _apps():
         # kopuz-api rev its Cargo.lock pins.
         pkg(
             "kopuz-gpui",
-            source = git("https://github.com/Kopuz-org/kopuz-gpui", rev = "877eb8cf1049cc0b925b4dd34ac9a462048e2e72", image = TUMBLEWEED, deps = ["rustup", "cmake"] + NATIVEDESKTOP_DEPS),
+            source = git("https://github.com/Kopuz-org/kopuz-gpui", rev = "ddf5eda3d4211e4a493cb339f8e52b2166389469", image = TUMBLEWEED, deps = ["rustup", "cmake"] + NATIVEDESKTOP_DEPS),
             build_flags = ["-p", "kopuz-gpui"],
             bins = ["kopuz-gpui"],
         ),

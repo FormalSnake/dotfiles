@@ -584,8 +584,8 @@ hash = "sha256-b9IHn0mn6cj7hdOb4ZRzObAwTmngqLqZUpzfAMC4cus="
 
 [[pkg]]
 name = "kopuz-gpui"
-source = "git:https://github.com/Kopuz-org/kopuz-gpui@877eb8cf1049cc0b925b4dd34ac9a462048e2e72"
-rev = "877eb8cf1049cc0b925b4dd34ac9a462048e2e72"
+source = "git:https://github.com/Kopuz-org/kopuz-gpui@ddf5eda3d4211e4a493cb339f8e52b2166389469"
+rev = "ddf5eda3d4211e4a493cb339f8e52b2166389469"
 
 [[pkg]]
 name = "kopuzd"
