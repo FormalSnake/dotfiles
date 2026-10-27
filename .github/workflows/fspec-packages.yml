@@ -37,6 +37,7 @@ jobs:
           - { pkg: formalos-chime, platform: x86_64-linux, runner: ubuntu-24.04 }
           - { pkg: formalshell, platform: x86_64-linux, runner: ubuntu-24.04 }
           - { pkg: fspec, platform: x86_64-linux, runner: ubuntu-24.04 }
+          - { pkg: kopuz-gpui, platform: x86_64-linux, runner: ubuntu-24.04 }
           - { pkg: kopuzd, platform: aarch64-darwin, runner: macos-26 }
           - { pkg: kopuzd, platform: x86_64-linux, runner: ubuntu-24.04 }
           - { pkg: librepods, platform: x86_64-linux, runner: ubuntu-24.04 }
@@ -58,7 +59,14 @@ jobs:
       - name: Install fspec
         run: cargo install --locked --git https://github.com/FormalStudio/formalspec fspec
       - name: Build
-        run: fspec --spec spec.star build --pkg ${{ matrix.pkg }} --platform ${{ matrix.platform }} --out out
+        env:
+          # GITHUB_TOKEN reads only this repository; a git(...) source in another private one needs this.
+          FSPEC_GIT_TOKEN: ${{ secrets.FSPEC_GIT_TOKEN }}
+        run: |
+          if [ -n "$FSPEC_GIT_TOKEN" ]; then
+            git config --global url."https://x-access-token:$FSPEC_GIT_TOKEN@github.com/".insteadOf https://github.com/
+          fi
+          fspec --spec spec.star build --pkg ${{ matrix.pkg }} --platform ${{ matrix.platform }} --out out
       - name: Push
         env:
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
