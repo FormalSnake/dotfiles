@@ -564,11 +564,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793052133,
-        "narHash": "sha256-BidiYocXweGtvmEr7lgasJSY11A5D1TlHLUQn8slK4M=",
+        "lastModified": 1793100470,
+        "narHash": "sha256-psmombkYGw87H/3rOQQYSnEUdbINw7rqqq0G11SOAzU=",
         "owner": "FormalSnake",
         "repo": "FormalShell",
-        "rev": "baa3e595ec051b101f1a4b601e6ef655c79d0cb5",
+        "rev": "b590a06494f7e7f256c2a7ae1b0382cbfb504945",
         "type": "github"
       },
       "original": {
@@ -731,16 +731,16 @@
         "rust-overlay": "rust-overlay_3"
       },
       "locked": {
-        "lastModified": 1792507774,
-        "narHash": "sha256-ZyZt6yThD+uTiggW4tcf2NggADq1ivHtqrUIgTN8ZJA=",
+        "lastModified": 1793044979,
+        "narHash": "sha256-5Rnfs0HeOwiXmguZuyDEcM2e4nWluCsj61xmZ+h0ZIY=",
         "owner": "Kopuz-org",
         "repo": "kopuz",
-        "rev": "23db9b35fe45bd773e3cdcdf0d6584b13ae5b8cc",
+        "rev": "7c25238faece34ac40196affaa3340e83c6a77cc",
         "type": "github"
       },
       "original": {
         "owner": "Kopuz-org",
-        "ref": "v0.22.0",
+        "ref": "v0.67.0",
         "repo": "kopuz",
         "type": "github"
       }
