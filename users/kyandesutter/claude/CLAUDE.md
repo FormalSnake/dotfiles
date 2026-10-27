@@ -238,6 +238,8 @@ with `meshtop job wait <id>` for detached builds.
 
 Roles: main Claude implements. Codex mostly reviews (`better-call-sol`).
 A second Claude profile is the fallback when the first is rate limited.
+When Codex is out of credits or rate limited, review goes to provider
+instance `claude-pulse` (ClaudePulse, a second Claude profile) instead.
 
 ## Peer agents are colleagues, not suspects
 
@@ -376,7 +378,7 @@ Rebuilds are allowed; `git add` new files first. Confirm first before
 
 Reasoning-heavy (architecture, root-cause debugging, adversarial review,
 synthesis) goes to `opus`; independent review goes to Codex through
-`better-call-sol`. Execution-heavy (specified implementation, refactors,
+`better-call-sol` (`claude-pulse` when Codex hits limits). Execution-heavy (specified implementation, refactors,
 broad searches, running tests) goes to `sonnet`. Trivial lookups go to `haiku`.
 Use the aliases, never pinned IDs. Agent files in `~/.claude/agents/` declare a
 matching `model:` in frontmatter. Every subagent prompt that can reach a git
