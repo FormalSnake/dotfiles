@@ -1,5 +1,5 @@
 [Added Associations]
-x-scheme-handler/beeper=beepertexts.desktop
+x-scheme-handler/beeper=Beeper.desktop
 x-scheme-handler/t3code=com.t3tools.T3Code.desktop
 
 [Default Applications]
