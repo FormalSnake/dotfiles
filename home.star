@@ -146,7 +146,6 @@ def _services():
             systemd = {
                 "Type": "forking",
                 "ExecStop": [HOME + "/.config/tmux/plugins/tmux-resurrect/scripts/save.sh", "/usr/bin/tmux kill-server"],
-                "KillMode": "none",
                 "install": {"WantedBy": "default.target"},
             },
         ),
