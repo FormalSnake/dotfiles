@@ -155,7 +155,7 @@ def _asus():
 
 def _gaming():
     return [
-        pkg("proton-ge", version = "GE-Proton11-7", source = github("GloriousEggroll/proton-ge-custom", asset = "GE-Proton*-x86_64.tar.gz"), share = {"steam/compatibilitytools.d/GE-Proton11-7": "GE-Proton11-7"}),
+        pkg("proton-ge", version = "GE-Proton11-7", source = github("GloriousEggroll/proton-ge-custom", asset = "GE-Proton*-x86_64.tar.gz"), share = {"steam/compatibilitytools.d/GE-Proton11-7": "GE-Proton11-7-x86_64"}),
         # mixins/gaming/minecraft.nix: the Modrinth App, its release AppImage. Its WebKit draws
         # nothing with the DMA-BUF renderer on NVIDIA.
         # FormalShell's AirPlay receiver (services.formalshell.airplay) runs uxplay, nixpkgs' v1.73.7,
