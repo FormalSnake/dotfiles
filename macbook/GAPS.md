@@ -6,10 +6,8 @@ from `spec.star`: `fspec plan --host macbook --local`, run from the spec.
 
 ## Not verified
 
-- The pam_ssh_agent_auth, sbarlua, Messages and FormalMusic `git()` recipes have not been
-  built: they run on the macos-26 CI runner. pam_ssh_agent_auth follows nixpkgs' recipe (its four patches in
-  `patches/`, ed25519-donna at `8757bd4`, autoreconf, OpenSSL 3 from Homebrew) plus the
-  `-std=gnu99 -D_FORTIFY_SOURCE=0` the nix override adds for OpenPAM.
+- The pam_ssh_agent_auth, sbarlua, Messages and FormalMusic `git()` packages are built by CI and
+  locked, but nothing has applied them on the macbook yet.
 
 ## Not in sync.star yet
 
@@ -59,8 +57,7 @@ Secret-carrying state `fspec sync` can carry, still to be declared with the macb
   now does through `LSEnvironment` (`/opt/homebrew/bin` first).
 - Secrets decrypt to `/var/run/fspec/secrets/<name>` (was `/run/agenix`); fish, wgtunnel and the
   LiveSync daemon read them there, and `fspec-secrets` decrypts them again at boot.
-- `livesync-passphrase` is macbook-only, so its `.age` file sits in `macbook/secrets/`; it still
-  needs an entry in `secrets.star` for `fspec secret edit` and `rekey`.
+- `livesync-passphrase` is macbook-only, so its `.age` file sits in `macbook/secrets/`.
 - The launchd helper scripts (storage-gc, dev-vm-reaper, the Obsidian watchers) are copies in
   `~/.local/bin` instead of running from `~/.config/nix/scripts`.
 - Jobs are `fspec.<name>` (were `kyan.<name>` and `org.nix-community.home.<name>`).
