@@ -416,10 +416,18 @@ name = "formalshell"
 source = "git:https://github.com/FormalSnake/FormalShell@6fd4a4868109785313300ee0c6282e740d762135"
 rev = "6fd4a4868109785313300ee0c6282e740d762135"
 
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/formalshell@sha256:a285b7117fede5cae6edfeec744ba7efffa4a69201524ab3a6aa24f5204deaab"
+build = "2ab3a7b7"
+
 [[pkg]]
 name = "fspec"
 source = "git:https://github.com/FormalStudio/formalspec@main"
 rev = "b488a814d7ddafc488b2f767a337eadcaa612727"
+
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/fspec@sha256:9bb63384529440e85f6333e150a90a2c8f5a545981f0fbaf87ace2a32e6ebfa4"
+build = "82c2c457"
 
 [[pkg]]
 name = "fut"
