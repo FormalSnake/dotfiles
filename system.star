@@ -78,8 +78,8 @@ CLI = [
     # nvim: npm-sourced language servers run on node and install with npm; nvim-treesitter compiles
     # its parsers with gcc; snacks converts PDFs with ghostscript. Tumbleweed's rust-src pulls in the
     # distro toolchain, which conflicts with rustup; rust-analyzer reads the toolchain's own rust-src
-    # component instead.
-    "nodejs24", "npm24", "gcc", "ghostscript", "gopls",
+    # component instead. neovim requires the tree-sitter rpm; home.star's newer CLI comes first on PATH.
+    "nodejs24", "npm24", "gcc", "ghostscript", "gopls", "tree-sitter",
     # programs.nix: node-gyp builds, plain `make`, and cargo in repos without a dev.star.
     "make", "pkgconf", "rustup",
 ]
