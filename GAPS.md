@@ -128,7 +128,6 @@ the FAT inside p1 grows. Every step keeps the g815 on Wi-Fi, ssh and tailscale.
 ### Version differences from NixOS
 
 - NVIDIA G07 from NVIDIA's openSUSE repo is 595.x; NixOS runs 615.71.09 and nvidia-settings.
-- godot-mcp is the npm release 0.1.1; nixpkgs builds the 2026-01-30 git snapshot.
 
 ### Dropped
 

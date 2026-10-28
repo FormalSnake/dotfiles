@@ -307,14 +307,6 @@ source = "brew"
 version = "0.15.0"
 
 [[pkg]]
-name = "dotnet-sdk-8"
-source = "url:https://builds.dotnet.microsoft.com/dotnet/Sdk/8.0.425/dotnet-sdk-8.0.425-linux-x64.tar.gz"
-
-[pkg.any]
-url = "https://builds.dotnet.microsoft.com/dotnet/Sdk/8.0.425/dotnet-sdk-8.0.425-linux-x64.tar.gz"
-hash = "sha256-7CxVc486oWxYssDFZc4QrW/qg5JVdKbwjJILpio5cSs="
-
-[[pkg]]
 name = "efibootmgr"
 source = "zypper:"
 
@@ -482,24 +474,6 @@ version = "3.8.1"
 name = "go"
 source = "brew"
 version = "1.27.3"
-
-[[pkg]]
-name = "godot-mcp"
-source = "npm:@coding-solo/godot-mcp"
-version = "0.1.1"
-
-[pkg.any]
-url = "https://registry.npmjs.org/@coding-solo/godot-mcp/-/godot-mcp-0.1.1.tgz"
-hash = "sha512-tSwmKN5D3JWGfnyPFxijxjdsT+GKIQrf9g6zYNefLvOVYx2UTC9PhyFFHc9vphtjyFrtjYf1n5Vq1zRNN3UXBA=="
-
-[[pkg]]
-name = "godot-mono"
-source = "github:godotengine/godot-builds"
-version = "4.7.2-stable"
-
-[pkg.x86_64-linux]
-url = "https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_mono_linux_x86_64.zip"
-hash = "sha256-Ep+C23uv1UrhS7W7KEBBxzhg6MegCaOgJspelGy/8kc="
 
 [[pkg]]
 name = "google-chrome"

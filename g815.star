@@ -441,21 +441,5 @@ net.ipv4.conf.default.forwarding = 1
         firewall_zone(FIREWALL_TCP + [443, 27036, 27037, 27040], FIREWALL_UDP + [1194, 10400, 10401, 27036], udp_ranges = ["27031-27035"]),
     ]
 
-# mixins/dev/godot.nix, gated on the NVIDIA dGPU: Godot's .NET editor, the SDK its C# template
-# targets (net8.0), and the MCP server Claude Code drives it through.
-GODOT = PKG_BIN + "/godot4-mono"
-
-def _godot():
-    return [
-        pkg("godot-mono", version = "4.7.2-stable", source = github("godotengine/godot-builds", asset = "Godot_v*-stable_mono_linux_x86_64.zip"), links = {
-            "godot4-mono": "Godot_v4.7.2-stable_mono_linux.x86_64",
-        }),
-        pkg("dotnet-sdk-8", source = url("https://builds.dotnet.microsoft.com/dotnet/Sdk/8.0.425/dotnet-sdk-8.0.425-linux-x64.tar.gz"), links = {"dotnet": "dotnet"}),
-        pkg("godot-mcp", version = "0.1.1", source = npm("@coding-solo/godot-mcp")),
-        file("~/.claude.json", mode = "patch", owns = {
-            "mcpServers.godot": {"command": PKG_BIN + "/godot-mcp", "env": {"GODOT_PATH": GODOT}},
-        }),
-    ]
-
 def g815(h):
-    return _nvidia() + _asus() + _gaming() + _windows() + _macos_vm() + _godot() + _virt() + _rig() + _host()
+    return _nvidia() + _asus() + _gaming() + _windows() + _macos_vm() + _virt() + _rig() + _host()
