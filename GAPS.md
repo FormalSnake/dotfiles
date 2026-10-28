@@ -95,6 +95,8 @@ the FAT inside p1 grows. Every step keeps the g815 on Wi-Fi, ssh and tailscale.
 6. Mount `@tumbleweed`, install the static fspec at `usr/local/bin/fspec` in it and a
    `etc/sudoers.d/49-first-apply` with `kyandesutter ALL=(ALL) NOPASSWD: ALL`: the inherited wheel
    rule asks for a password, and pam_ssh_agent_auth only arrives with the first apply.
+   Copy `/var/lib/bluetooth` from `@nixos` too: the pairings are the only system state worth
+   keeping that `--inherit` does not carry (Wi-Fi and tailscale it does).
 7. `bootctl set-oneshot` the `tumbleweed-*+3.conf` entry and reboot, so a failed boot lands in
    NixOS again. Check ssh, tailscale and the Windows entry, then `fspec apply --host g815` from the
    macbook and delete `49-first-apply`.
