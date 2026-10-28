@@ -76,9 +76,10 @@ CLI = [
     "direnv", "just", "fastfetch", "lsd", "lazygit", "yazi", "mosh", "wget", "ImageMagick", "chafa",
     "lua54", "bun", "python313-uv",
     # nvim: npm-sourced language servers run on node and install with npm; nvim-treesitter compiles
-    # its parsers with tree-sitter and gcc; snacks converts PDFs with ghostscript; rust-analyzer reads
-    # rust-src; astro-ls takes its TypeScript SDK from typescript.
-    "nodejs24", "npm24", "gcc", "tree-sitter", "ghostscript", "rust-src", "taplo", "gopls",
+    # its parsers with tree-sitter and gcc; snacks converts PDFs with ghostscript; astro-ls takes its
+    # TypeScript SDK from typescript. Tumbleweed's rust-src pulls in the distro toolchain, which
+    # conflicts with rustup; rust-analyzer reads the toolchain's own rust-src component instead.
+    "nodejs24", "npm24", "gcc", "tree-sitter", "ghostscript", "taplo", "gopls",
     "lua-language-server", "typescript",
     # programs.nix: node-gyp builds, plain `make`, and cargo in repos without a dev.star.
     "make", "pkgconf", "rustup",
