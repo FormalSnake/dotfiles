@@ -137,6 +137,19 @@ def _services():
             },
         ),
         _gui("power-saver-dim", BIN + "/power-saver-dim", "Dim backlight while the power-saver profile is active", restart = "always", extra = {"RestartSec": 2}),
+        # The detached session remote shells attach to; tmux-resurrect saves it on the way down.
+        service(
+            "tmux",
+            exec = "/usr/bin/tmux new-session -d",
+            user = True,
+            description = "tmux default session (detached)",
+            systemd = {
+                "Type": "forking",
+                "ExecStop": [HOME + "/.config/tmux/plugins/tmux-resurrect/scripts/save.sh", "/usr/bin/tmux kill-server"],
+                "KillMode": "none",
+                "install": {"WantedBy": "default.target"},
+            },
+        ),
         service(
             "gtk-session-css",
             exec = BIN + "/gtk-session-css",
@@ -371,6 +384,7 @@ def _claude_pulse():
         ),
         # `meshtop skills sync` fills ~/.claude/skills from the agent-config registry.
         file("~/.claude-pulse/skills", mode = "link", target = HOME + "/.claude/skills"),
+        file("~/.claude-pulse/plugins", mode = "link", target = HOME + "/.claude/plugins"),
     ]
 
 # T3 Code: the server runs on the g815 only. The desktop app always starts its own backend and
