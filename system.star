@@ -168,6 +168,9 @@ def _files(h):
         _rootfs("etc/ssh/authorized_keys.d/kyandesutter"),
         _rootfs("etc/ssh/sshd_config.d/10-fspec.conf"),
         _rootfs("etc/sudoers.d/10-fspec", perms = "0440"),
+        # Tumbleweed's snapper config with the last 5 snapshots kept and no hourly ones.
+        # snapper-cleanup.timer is on by the distro preset.
+        _rootfs("etc/snapper/configs/root"),
         _rootfs("etc/profile.d/fspec-store.sh"),
         # NixOS's programs.ssh.knownHosts had github; the hosts' keys stop the builder's first ssh
         # from failing host key verification.
