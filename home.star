@@ -529,7 +529,6 @@ def _apps():
             build = ["sh", "-c", "install -Dm755 $FSPEC_SRC/clipssh $FSPEC_OUT/bin/clipssh"],
             bins = ["clipssh"],
         ),
-        pkg("dcal", version = "1.6.1", source = github("AvengeMedia/dankcalendar", asset = "dcal-linux-amd64.tar.gz"), links = {"dcal": "dcal-linux-amd64"}),
     ]
 
 # Called with the host facts when listed in host(modules = [home]).

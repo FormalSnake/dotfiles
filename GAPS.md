@@ -7,12 +7,6 @@ earlier Fedora Atomic image and nothing loads it.
 
 ## Both Linux hosts
 
-### Needs Kyan
-
-- quickshell, which dcal's UI runs on: no Tumbleweed package and no release binary, so it would be
-  a Qt 6 source build (`git()` on the Tumbleweed image, its QML modules found outside the store
-  prefix). dcal's daemon runs without it. Build it, or keep dcal UI-less.
-
 ### Not verified
 
 - uxplay and colloid-icon-theme run as `fspec-packages.yml` jobs; nothing has applied them yet.
@@ -42,6 +36,8 @@ earlier Fedora Atomic image and nothing loads it.
 - nix-daemon builder key and `/etc/nix/machines`: `host(builders = [builder("g815", ...)])`.
 - tzupdate: the zone is fixed.
 - DankMaterialShell, `dms.service`, `flexoki-pin.service`: replaced by FormalShell.
+- dcal (DankCalendar) and the quickshell its UI needs: FormalShell reads local `.ics` directories
+  and cannot read dcal's IPC, so NixOS already had its service forced off.
 - `tray.target`, `.keep` placeholders: Home Manager and NixOS only.
 - `.config/net.imput.helium/WidevineCdm`: Helium's component updater fetches it.
 - matugen `aura` template: the ASUS Aura repaint is a NixOS module; `asus-aura` seeds the keyboard.
@@ -74,11 +70,13 @@ Nothing beyond the shared list.
 
 ## g815
 
-### Needs Kyan
+### Port
 
-- The root is ext4, so the install needs `fspec disk` to carve the Tumbleweed root before
-  `fspec switch --beside`.
-- The 16G swapfile tier: it goes on the disk layout `fspec disk` makes.
+- The root is ext4: `fspec disk migrate --stage` converts it to btrfs in place, keeping NixOS in
+  `@nixos`, then `fspec switch --beside tumbleweed` installs the Tumbleweed root next to it. The
+  partition table and Windows' partitions are not touched.
+- Swap is zram while `@nixos` exists, since Tumbleweed would overwrite the swapfile of a hibernated
+  NixOS. The 16G swapfile in `@swap` comes back after `fspec forget nixos`.
 - macos-vm (macOS 10.9 guest): its OpenCore EFI is a nix build. Port it as a `git()` OpenCore
   build, or drop it.
 
