@@ -2,7 +2,7 @@ name: fspec packages
 
 on:
   push:
-    branches: [formalspec]
+    branches: [main]
     paths: ["fspec.lock", "patches/**"]
   pull_request:
     paths: ["fspec.lock", "patches/**"]
@@ -88,7 +88,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: formalspec
+          ref: main
       - uses: oras-project/setup-oras@v1
       - name: Install fspec
         run: cargo install --locked --git https://github.com/FormalStudio/formalspec fspec
@@ -104,4 +104,4 @@ jobs:
         with:
           commit_message: "chore: record the cache digests"
           file_pattern: fspec.lock
-          branch: formalspec
+          branch: main

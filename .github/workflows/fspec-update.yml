@@ -1,7 +1,6 @@
 name: fspec update
 
-# GitHub runs schedules from the default branch only, and this spec lives on `formalspec`, so it
-# runs on demand: `gh workflow run fspec-update.yml --ref formalspec`.
+# Runs on demand: `gh workflow run fspec-update.yml`.
 on:
   workflow_dispatch:
 

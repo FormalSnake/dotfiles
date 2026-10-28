@@ -376,7 +376,7 @@ def _claude_pulse():
             "~/.claude-pulse/.claude.json",
             mode = "seed",
             perms = "0600",
-            content = '{"mcpServers": {}, "projects": {"/home/kyandesutter/.config/nix": {"hasTrustDialogAccepted": true}}}\n',
+            content = '{"mcpServers": {}, "projects": {"/home/kyandesutter/.config/formalspec": {"hasTrustDialogAccepted": true}}}\n',
         ),
         # `meshtop skills sync` fills ~/.claude/skills from the agent-config registry.
         file("~/.claude-pulse/skills", mode = "link", target = HOME + "/.claude/skills"),

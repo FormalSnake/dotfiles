@@ -209,7 +209,7 @@ def _home():
             "~/.claude-pulse/.claude.json",
             mode = "seed",
             perms = "0600",
-            content = '{"mcpServers": {}, "projects": {"' + HOME + '/.config/nix": {"hasTrustDialogAccepted": true}}}\n',
+            content = '{"mcpServers": {}, "projects": {"' + HOME + '/.config/formalspec": {"hasTrustDialogAccepted": true}}}\n',
         ),
     ]
     return out

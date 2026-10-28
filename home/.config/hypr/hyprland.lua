@@ -370,7 +370,7 @@ hl.bind(mod .. " + Return", hl.dsp.exec_cmd(terminal))
 -- Reclaim the laptop's Copilot key: it launches Claude, not Copilot.
 -- Microsoft's spec (which ASUS honours) has the key emit Meta+Shift+F23;
 -- this drops a fresh local ghostty into `claude`, cwd'd at the nix config.
-hl.bind(mod .. " + SHIFT + F23", hl.dsp.exec_cmd("ghostty --working-directory=/home/kyandesutter/.config/nix -e claude"))
+hl.bind(mod .. " + SHIFT + F23", hl.dsp.exec_cmd("ghostty --working-directory=/home/kyandesutter/.config/formalspec -e claude"))
 hl.bind(mod .. " + Q", hl.dsp.window.close())
 hl.bind(mod .. " + SHIFT + F", hl.dsp.window.fullscreen({ action = "toggle", mode = "fullscreen" }))
 hl.bind(mod .. " + V", hl.dsp.window.float({ action = "toggle" }))
