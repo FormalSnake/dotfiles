@@ -1,5 +1,5 @@
 load("//boot.star", "limine_entry")
-load("//system.star", "FIREWALL_TCP", "FIREWALL_UDP", "GREETER_SESSIONS", "LIBEXEC", "PKG_BIN", "firewall_zone")
+load("//system.star", "FIREWALL_TCP", "FIREWALL_UDP", "GREETER_SESSIONS", "LIBEXEC", "PKG_BIN", "firewall_zone", "swapfile")
 
 # The g815's own layer on top of system.star and home.star: the RTX 5070 and the ASUS MUX, asusd,
 # the gaming stack, the Windows install it dual-boots and runs as a guest, and the tuning for a
@@ -407,6 +407,7 @@ net.ipv4.conf.default.forwarding = 1
 """),
         # zram at half of the 32 GB, as mixins/core/boot.nix gives this host.
         file("/etc/systemd/zram-generator.conf", content = "[zram0]\nzram-size = ram / 2\ncompression-algorithm = zstd\nswap-priority = 5\n"),
+        swapfile("04b474c9-4caf-4bd4-969e-233bba3134c6"),
         # Always on the barrel charger: performance, no battery variant.
         file("/etc/tuned/ppd.conf", content = "[main]\ndefault=performance\nbattery_detection=false\nsysfs_acpi_monitor=false\n\n[profiles]\npower-saver=powersave\nbalanced=balanced\nperformance=throughput-performance\n\n[battery]\nbalanced=balanced-battery\n"),
         # It runs unattended test rigs and the nvidia driver does not survive a resume here: no

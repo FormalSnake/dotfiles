@@ -315,6 +315,15 @@ RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
     ] + _firewall(h) + _kde(h) + _formalshell_files(h)
 
 # The e1504g's own hardware: its disk, swap, power caps and quirks.
+def swapfile(uuid):
+    """The 16 GB swapfile in @swap (NOCOW) on the btrfs `uuid`, at priority 1 under zram's 5."""
+    return [
+        file("/etc/systemd/system/swap.mount", content = "[Unit]\nDescription=The @swap subvolume\n\n[Mount]\nWhat=UUID=" + uuid + "\nWhere=/swap\nType=btrfs\nOptions=subvol=@swap,noatime\n\n[Install]\nWantedBy=local-fs.target\n"),
+        file("/etc/systemd/system/swap-swapfile.swap", content = "[Unit]\nDescription=Swapfile in @swap\nRequires=swap.mount\nAfter=swap.mount\n\n[Swap]\nWhat=/swap/swapfile\nPriority=1\n\n[Install]\nWantedBy=swap.target\n"),
+        service("swap.mount"),
+        service("swap-swapfile.swap"),
+    ]
+
 def _e1504g_files():
     return [
         _rootfs("etc/sysctl.d/90-fspec.conf"),
@@ -331,9 +340,8 @@ exit 0
         # The NixOS root passed these as kernel arguments (modprobe.blacklist=...).
         # The initrd loads both before this file applies; module_blacklist= on the cmdline covers that.
         file("/etc/modprobe.d/90-e1504g.conf", content = "blacklist ucsi_acpi\ninstall ucsi_acpi /bin/false\nblacklist intel_ish_ipc\ninstall intel_ish_ipc /bin/false\n"),
-        # NixOS's 16 GB swapfile in @swap (NOCOW), behind zram: priority 1 under zram's 5.
-        file("/etc/systemd/system/swap.mount", content = "[Unit]\nDescription=The @swap subvolume\n\n[Mount]\nWhat=UUID=1a10e345-3d66-4bde-9f6b-55d43e6f7e0d\nWhere=/swap\nType=btrfs\nOptions=subvol=@swap,noatime\n\n[Install]\nWantedBy=local-fs.target\n"),
-        file("/etc/systemd/system/swap-swapfile.swap", content = "[Unit]\nDescription=Swapfile in @swap\nRequires=swap.mount\nAfter=swap.mount\n\n[Swap]\nWhat=/swap/swapfile\nPriority=1\n\n[Install]\nWantedBy=swap.target\n"),
+        # NixOS's 16 GB swapfile in @swap (NOCOW), behind zram.
+        swapfile("1a10e345-3d66-4bde-9f6b-55d43e6f7e0d"),
         # mixins/core/networking.nix: Google DNS for every connection, over what DHCP hands out.
         # The g815 runs systemd-resolved instead (g815.star).
         file("/etc/NetworkManager/conf.d/90-kyan-dns.conf", content = "[global-dns-domain-*]\nservers=8.8.8.8,8.8.4.4\n"),
@@ -617,8 +625,6 @@ def _services(h):
 
 def _e1504g_services():
     return [
-        service("swap.mount"),
-        service("swap-swapfile.swap"),
         service("systemd-oomd"),
         service(
             "power-cap",
