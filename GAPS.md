@@ -79,11 +79,14 @@ Nothing beyond the shared list.
 Windows (p2, p3, p4, p6) and the partition table are never touched; only p5 is converted and only
 the FAT inside p1 grows. Every step keeps the g815 on Wi-Fi, ssh and tailscale.
 
-1. `dd` p1 whole to `/root/esp-p1.img` and to the external disk, then grow its FAT32 (446 MiB) to
-   fill the 1 GiB partition with `fatresize`. Delete the stale `/boot/limine/kernels`.
+1. `umount /boot`, `dd` p1 whole to `/root/esp-p1.img` and to the external disk, grow its FAT32
+   (446 MiB) to fill the 1 GiB partition with `fatresize`, `fsck.fat -n` it and `mount /boot`.
 2. In `~/.config/nix`, point `.#g815` at systemd-boot (the bootloader block of
    `systems/g815/fspec-migration.nix`), `nixos-rebuild boot`, reboot, and check `bootctl status`
-   lists Windows Boot Manager. Boot Windows once from the menu.
+   lists Windows Boot Manager. Boot Windows once from the menu. Only then delete
+   `/boot/limine`, which the Limine menu booted until now, and `dd` p1 again to
+   `/root/esp-p1-sdboot.img` and the external disk: it holds the `EFI/nixos` kernels the new
+   entries load, which a rollback after `forget nixos` needs. Keep both images.
 3. Static fspec to `/usr/local/bin/fspec` (the ISO build's musl binary); the ISO from
    `installer/iso/build.sh --release`.
 4. `tar` of `/` without `/nix` to the external disk, then
@@ -93,13 +96,14 @@ the FAT inside p1 grows. Every step keeps the g815 on Wi-Fi, ssh and tailscale.
 5. In `@nixos`: fold `fspec-migration.nix` into `.#g815` before any rebuild, then
    `fspec switch --beside tumbleweed --inherit @nixos`.
 6. Mount `@tumbleweed`, install the static fspec at `usr/local/bin/fspec` in it and a
-   `etc/sudoers.d/49-first-apply` with `kyandesutter ALL=(ALL) NOPASSWD: ALL`: the inherited wheel
-   rule asks for a password, and pam_ssh_agent_auth only arrives with the first apply.
+   `etc/sudoers.d/99-first-apply` with `kyandesutter ALL=(ALL) NOPASSWD: ALL`: the inherited wheel
+   rule (`50-fspec-inherit`) asks for a password and sudoers lets the later file win, and
+   pam_ssh_agent_auth only arrives with the first apply.
    Copy `/var/lib/bluetooth` from `@nixos` too: the pairings are the only system state worth
    keeping that `--inherit` does not carry (Wi-Fi and tailscale it does).
-7. `bootctl set-oneshot` the `tumbleweed-*+3.conf` entry and reboot, so a failed boot lands in
+7. `bootctl set-oneshot tumbleweed-<kernel>.conf`, the id `bootctl list` shows (no `+3`), and reboot, so a failed boot lands in
    NixOS again. Check ssh, tailscale and the Windows entry, then `fspec apply --host g815` from the
-   macbook and delete `49-first-apply`.
+   macbook and delete `99-first-apply`.
 8. The first apply writes Limine with `preferred tumbleweed-*`. `--adopt-boot` does not cover a
    root installed with `--beside`, so check `loader.conf` names no NixOS entry and Tumbleweed has
    its own entries, reboot, then `fspec forget nixos`.
