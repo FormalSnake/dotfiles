@@ -419,6 +419,9 @@ net.ipv4.conf.default.forwarding = 1
         swapfile("04b474c9-4caf-4bd4-969e-233bba3134c6"),
         # Always on the barrel charger: performance, no battery variant.
         file("/etc/tuned/ppd.conf", content = "[main]\ndefault=performance\nbattery_detection=false\nsysfs_acpi_monitor=false\n\n[profiles]\npower-saver=powersave\nbalanced=balanced\nperformance=throughput-performance\n\n[battery]\nbalanced=balanced-battery\n"),
+        # tuned-ppd boots into the saved base profile, else `tuned-adm recommend` (balanced here),
+        # and only then ppd.conf's default, so the default above never wins without this.
+        file("/etc/tuned/ppd_base_profile", content = "performance\n"),
         # It runs unattended test rigs and the nvidia driver does not survive a resume here: no
         # sleep, the lid does nothing, a dead battery powers off, and the iTCO watchdog reboots a
         # hard lockup.
