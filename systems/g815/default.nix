@@ -28,6 +28,10 @@
 
   networking.hostName = "g815";
 
+  # iwd stopped completing PSK joins here after the btrfs migration (connect-failed
+  # status 1 on every network, other devices fine), the e1504g's failure.
+  networking.networkmanager.wifi.backend = "wpa_supplicant";
+
   # Intel Core Ultra 9 275HX (Arrow Lake-HX).
   hardware.cpu.intel.updateMicrocode = true;
 
