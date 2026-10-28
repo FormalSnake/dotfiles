@@ -2,18 +2,18 @@ history = 120
 interval = 1
 
 [[hosts]]
-command = "/etc/profiles/per-user/kyandesutter/bin/meshtop"
+command = "/opt/fspec/current/bin/meshtop"
 hostname = "MacBook-Pro-2"
 name = "macbook"
 role = "dev"
 
 [[hosts]]
-command = "/etc/profiles/per-user/kyandesutter/bin/meshtop"
+command = "/opt/fspec/current/bin/meshtop"
 name = "g815"
 role = "builder"
 
 [[hosts]]
-command = "/etc/profiles/per-user/kyandesutter/bin/meshtop"
+command = "/opt/fspec/current/bin/meshtop"
 name = "e1504g"
 role = "client"
 

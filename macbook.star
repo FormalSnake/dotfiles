@@ -128,10 +128,9 @@ def _store():
         pkg("fut", version = "0.24", source = github("mikker/fut", asset = "fut-macos-arm64.tar.gz")),
         # Upstream releases ship Linux binaries only.
         pkg("tmux-agent-sidebar", source = git("https://github.com/hiroppy/tmux-agent-sidebar", rev = "2cff1cb955363394f8dd9c52d040d027536cfbd8")),
-        pkg("t3", version = "0.1.2", source = github("pingdotgg/t3code", asset = "t3-*-darwin-arm64.tar.gz")),
+        pkg("t3", version = "0.1.3", source = github("pingdotgg/t3code", asset = "t3-*-darwin-arm64.tar.gz")),
         pkg("pi", version = "1.1.0", source = github("badlogic/pi-mono", asset = "pi-darwin-arm64.tar.gz")),
         pkg("stripe", version = "1.43.2", source = github("stripe/stripe-cli", asset = "stripe_*_mac-os_arm64.tar.gz")),
-        pkg("usbfluxd", version = "1.0", source = github("corellium/usbfluxd", asset = "usbfluxd-macho-arm64.tar.gz")),
         # The platform tarball holds the real binary; the main npm package's bin is a stub its
         # postinstall replaces. Claude Code updates itself from there.
         pkg("claude", source = url("https://registry.npmjs.org/@anthropic-ai/claude-code-darwin-arm64/-/claude-code-darwin-arm64-2.1.310.tgz"), mode = "self_managed"),
@@ -162,6 +161,24 @@ def _store():
         # The sudo mesh's PAM module, which no package manager builds for macOS: nixpkgs' recipe
         # and patches, against the system OpenPAM. Modern autoconf picks gnu23, which breaks the
         # K&R code in openbsd-compat, and the SDK's fortify macros collide with its replacements.
+        # The macOS release asset carries only usbfluxctl. Built as nixpkgs does: libplist from
+        # Homebrew, linked dynamically, with the plist format constants libplist 2.3 renamed.
+        pkg(
+            "usbfluxd",
+            source = git("https://github.com/corellium/usbfluxd", rev = "422734fd2b01ad4fefeefb9c8c4e65a5abd69f0f"),
+            build = ["sh", "-c", " && ".join([
+                "set -e",
+                "cd \"$FSPEC_SRC\"",
+                "brew install -q autoconf automake libtool pkgconf libplist",
+                "sed -i '' 's/with_static_libplist=yes/with_static_libplist=no/' configure.ac",
+                "sed -i '' -e 's|PLIST_FORMAT_BINARY|//PLIST_FORMAT_BINARY|' -e 's|PLIST_FORMAT_XML,|NOT_PLIST_FORMAT_XML,|' usbfluxd/utils.h",
+                "autoreconf -fi",
+                "./configure",
+                "make",
+                "mkdir -p \"$FSPEC_OUT/bin\"",
+                "install -m755 usbfluxd/usbfluxd tools/usbfluxctl \"$FSPEC_OUT/bin/\"",
+            ])],
+        ),
         pkg(
             "pam_ssh_agent_auth",
             source = git("https://github.com/jbeverly/pam_ssh_agent_auth", rev = "7ff785809f6ecad45051e333c0ffa72e15ba4f2a"),
@@ -381,10 +398,10 @@ def _services():
         ),
         service(
             "couchdb",
-            exec = "/opt/homebrew/opt/couchdb/bin/couchdb",
+            exec = "/bin/bash " + HOME + "/.local/bin/couchdb-start.sh",
             user = True,
             restart = "always",
-            launchd = {"LimitLoadToSessionType": ["Aqua", "Background", "LoginWindow", "StandardIO", "System"]},
+            launchd = _logs("couchdb", {"LimitLoadToSessionType": ["Aqua", "Background", "LoginWindow", "StandardIO", "System"]}),
         ),
         service(
             "t3code",

@@ -6,9 +6,9 @@ from `spec.star`: `fspec plan --host macbook --local`, run from the spec.
 
 ## Not verified
 
-- The pam_ssh_agent_auth `git()` package is built by CI and locked, but nothing has applied it on
-  the macbook yet. Messages 29ac1ee, FormalMusic ddf544d and meshtop 69f954d are locked without a
-  CI build yet.
+- pam_ssh_agent_auth is applied and PAM loads it, but `kyandesutter ALL=(ALL) NOPASSWD: ALL` in
+  `10-fspec` means sudo never asks it to authenticate, so the agent path is untested.
+- `ssh windows`: the PC was offline in tailscale during the cutover.
 
 ## Not in sync.star yet
 
@@ -76,58 +76,55 @@ Secret-carrying state `fspec sync` can carry, still to be declared with the macb
 
 ## Cutover
 
-Found by comparing the plan with the live machine (2026-10-28). Not fixed in the spec:
+Run on 2026-10-28. Applied: everything in `macbook.star`. The nix jobs it replaces are booted out
+and their plists are in `~/.local/state/nix-launchd-backup/{user,system}`; the Home Manager links
+fspec replaced are listed in `removed-hm-links.map` there.
 
-- **fspec itself.** `service:secrets` runs `/usr/local/bin/fspec`, which does not exist; the binary
-  is `~/.cargo/bin/fspec` and the engine never links itself on macOS. Install it first.
-- **Homebrew is nix-homebrew's.** `/opt/homebrew/bin/brew` and `Library/Homebrew` are symlinks into
-  `/nix/store`, `.managed_by_nix_darwin` is set, and only the jnsahaj and pluk-inc taps are real.
-  Removing `/nix` leaves no `brew`, so every `brew:` package breaks. Re-home Homebrew before the
-  uninstall (official installer over the existing prefix; untested here, try it with `HOMEBREW_PREFIX`
-  backed up first). fspec cannot do this itself.
-- **`t3code-cli-sync`** (`org.nix-community.home.t3code-cli-sync`) has no replacement. It needs
-  `t3code-cli-sync.mjs` from `~/.config/nix/users/kyandesutter/mixins/dev/` and the nix-patched
-  `t3` 0.1.3 (the spec ships upstream 0.1.2 with no import patch). Dropped until the patch lands.
-- **`sh.brew.couchdb`** (a `brew services` plist, not nix) listens on 5984 like `fspec.couchdb`.
-  Boot it out in the same step as the nix jobs.
-- **`~/.config/age/keys.txt`** and `~/.ssh` keys stay as they are; `fspec` decrypts with them.
-- Leftover dead links with no owner in the spec, left to rot or `rm`: `~/Sync/zen-profile/{user.js,
-  containers.json,chrome/*}`, `~/.vscode/extensions/*`, `~/.config/aerospace 19.21.48`,
-  `~/Library/Application Support/go/env`, `~/.config/{nixpkgs,git_nix,nix-themes/current}`,
-  `~/.local/state/mac-server-optimization-2026-10-27`, `.direnv/flake-profile-*` in ~/Developer.
-- `/etc/zshenv`, `/etc/bashrc`, `/etc/zshrc`, `/etc/zprofile`, `/etc/static` are nix-darwin's; its
-  uninstaller restores the `*.before-nix-darwin` copies. The login shell is set by `user()`
-  (`/opt/homebrew/bin/fish`, already in `/etc/shells`; the nix fish entry stays harmless).
-  `/etc/synthetic.conf` (`nix`, `run`) and the `/nix` line in `/etc/fstab` go with the installer.
-- sshd keeps four dead links to `/etc/static` after the uninstall: `099-host-keys.conf`,
-  `100-kyan.conf`, `100-nix-darwin.conf`, `101-authorized-keys.conf`. The host keys are real files
-  and `100-fspec.conf` replaces the rest. Remove the links (step 7).
+Found on the way:
 
-### Order
+- **First apply on a Mac needs `oras` and `openssl@3` from Homebrew before it starts.** The system
+  scope runs before the user scope that installs formulae, so it cannot pull CI-built packages
+  without `oras`, and `/etc/pam.d/sudo_local` loads `pam_ssh_agent_auth.so`, which links
+  `/opt/homebrew/opt/openssl@3/lib/libcrypto.3.dylib`. Without openssl, PAM fails to initialise and
+  every `sudo` fails ("unable to initialize PAM"). Uninstalling `openssl@3` does the same; sudo then
+  needs a root shell or Recovery to fix.
+- Home Manager linked whole directories (`~/.config/tmux/plugins/*`) into the read-only store, so
+  fspec writing a file under them fails. Those links, and every other link at a path the spec
+  manages, were removed before the apply.
+- Apps installed outside Homebrew block their cask: `/Applications/Kopuz.app` (0.6.0, manual) went
+  to the Trash; Discord was taken over with `brew install --cask --adopt`.
+- `usbfluxd` is a source build now: the release's macOS tarball carries only `usbfluxctl`.
 
-Each command is run by hand, in this order, with the check after it. Nothing here has been run.
+### Not ported
 
-1. Install the engine: `install -m755 ~/.cargo/bin/fspec /usr/local/bin/fspec`.
-2. `cd ~/.config/nix-wt/formalspec && fspec plan --host macbook --local`, then
-   `fspec apply --host macbook --local` (user scope; it hands the system scope to sudo).
-3. Unload the nix jobs. User domain, `for l in kyan.dev-vm-reaper kyan.login.aldente
-   kyan.login.betterdisplay kyan.login.nordvpn kyan.login.orbstack kyan.nix-weekly-update
-   kyan.obsidian-livesync-daemon kyan.obsidian-livesync-serve kyan.obsidian-note-watcher
-   kyan.obsidian-scan-watcher kyan.storage-gc org.nix-community.home.meshtop-web
-   org.nix-community.home.meshtop-web-serve org.nix-community.home.t3code
-   org.nix-community.home.t3code-cli-sync org.nix-community.home.t3code-serve
-   es.canarycoders.messages.agent sh.brew.couchdb; do launchctl bootout gui/502/$l; done`.
-4. System domain, `for l in kyan.caffeinate kyan.portless-proxy kyan.usbfluxd
-   com.tailscale.tailscaled org.nixos.activate-agenix org.nixos.activate-system
-   org.nixos.rosetta-builderd org.nixos.nix-optimise; do sudo launchctl bootout system/$l; done`.
-   Leave `org.nixos.nix-daemon` and `systems.determinate.*` for the installer.
-5. Check: `launchctl list | rg 'fspec\.'` shows every service in the plan, none `kyan.*` or
-   `org.nix*` remain, `fspec plan --host macbook --local` reports no changes, `sudo -k; sudo true`
-   authenticates through the agent, `ssh macbook true` from the g815, `curl -s 127.0.0.1:5984`,
-   `meshtop --version` resolves under `/opt/fspec/current/bin`, a new fish shell starts with no
-   `/nix` in `$PATH`.
-6. Uninstall nix-darwin: `sudo nix run nix-darwin#darwin-uninstaller`. Then re-home Homebrew (see
-   above) and check `brew --version` and `brew list` before going on.
-7. `sudo rm /etc/ssh/sshd_config.d/{099-host-keys,100-kyan,100-nix-darwin,101-authorized-keys}.conf`
-   and confirm `sudo sshd -t`.
-8. `sudo /nix/nix-installer uninstall`, then reboot and repeat the step 5 checks.
+- **`t3code-cli-sync`** (`org.nix-community.home.t3code-cli-sync`): needs `t3code-cli-sync.mjs` and
+  the nix-patched `t3`; the spec runs upstream 0.1.3. Dropped until the patch lands upstream.
+- `dev.formalsnake.nd-resume` in `~/Library/LaunchAgents` is a one-shot another session left; its
+  PATH names nix profile dirs. Not the spec's.
+- Dead links into the store with no owner, deleted by the cutover script below: `~/Sync/zen-profile/*`,
+  `~/.vscode/extensions/*`, `~/.config/aerospace 19.21.48`, `~/.local/state/mac-server-optimization-2026-10-27/*`,
+  the meshtop skill backups, `~/.local/share/devenv/gc/*`.
+
+### The last step
+
+`t3code`, `tailscaled` and `meshtop-web` replace jobs that host the running T3 Code session and its
+tailscale route, and removing `/nix` takes the shell that session runs in. So the swap and the
+uninstall run as one launchd job, `~/.local/state/fspec-cutover/cutover.sh`:
+
+```
+sudo launchctl submit -l fspec.cutover -- /bin/bash /Users/kyandesutter/.local/state/fspec-cutover/cutover.sh
+```
+
+It boots out the nix t3code, t3code-cli-sync, meshtop-web and tailscaled jobs, applies the spec,
+waits for 3773 and `tailscale status`, removes nix-darwin's `/etc/static` links and restores the
+`*.before-nix-darwin` files, runs `/nix/nix-installer uninstall --no-confirm`, removes the per-user
+nix state and dead links, and logs checks to `~/Library/Logs/fspec-cutover.log`.
+Homebrew was re-homed before it: `/opt/homebrew` is a git checkout of Homebrew/brew (stable,
+7.0.11) running its own portable Ruby; nix-homebrew's two links are in
+`~/.local/state/nix-launchd-backup/homebrew/links.txt`.
+
+- CouchDB lost its LiveSync settings and admin when Homebrew upgraded it to 3.5.3 (Oct 13): the
+  formula keeps `local.ini` in the keg. `couchdb-start.sh` now keeps it at
+  `/opt/homebrew/var/couchdb/local.ini`; the server uuid is new, so LiveSync clients re-check once.
+- `fish_user_paths` (a universal variable) held `/run/current-system/sw/bin` and
+  `/etc/profiles/per-user/kyandesutter/bin`; both are gone from it.

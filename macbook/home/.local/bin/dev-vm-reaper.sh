@@ -77,5 +77,5 @@ done < <(pgrep -U "$(id -u)" -f '/qemu-system-' || true)
 for stamp in "$state_dir"/*; do
   [[ -e $stamp ]] || continue
   pid=${stamp##*/}
-  [[ " ${live[*]} " == *" $pid "* ]] || rm -f "$stamp"
+  [[ " ${live[*]-} " == *" $pid "* ]] || rm -f "$stamp"
 done
