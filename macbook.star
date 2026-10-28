@@ -33,7 +33,6 @@ LINKED_FILES = [
 ]
 
 # The second Claude Code profile shares the primary's config and plugins; it signs in separately.
-# `meshtop skills sync` fills ~/.claude/skills from the agent-config registry.
 PULSE = ["CLAUDE.md", "AGENTS.md", "settings.json", "agents", "commands", "hooks", "rules", "skills", "plugins"]
 
 # Media and the big caches live on the external SSD; the links dangle while it is unmounted.
