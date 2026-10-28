@@ -22,6 +22,10 @@ in
     configurationLimit = 3;
   };
 
+  # `fspec switch --beside tumbleweed` runs zypper in the Tumbleweed container
+  # through podman; docker alone does not do.
+  virtualisation.podman.enable = true;
+
   fileSystems."/" = subvol "@nixos";
   fileSystems."/home" = subvol "@home";
   fileSystems."/swap" = subvol "@swap";
