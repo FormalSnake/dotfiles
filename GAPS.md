@@ -82,13 +82,15 @@ the FAT inside p1 grows. Every step keeps the g815 on Wi-Fi, ssh and tailscale.
 1. `umount /boot`, `dd` p1 whole to `/root/esp-p1.img` and to the external disk, grow its FAT32
    (446 MiB) to fill the 1 GiB partition with `fatresize`, `fsck.fat -n` it and `mount /boot`.
 2. In `~/.config/nix`, point `.#g815` at systemd-boot (the bootloader block of
-   `systems/g815/fspec-migration.nix`), `nixos-rebuild boot`, reboot, and check `bootctl status`
-   lists Windows Boot Manager, that `EFI/Microsoft/Boot/bootmgfw.efi` hashes as it did before
-   step 1 and that `efibootmgr` still has the firmware's Windows Boot Manager entry. Booting
-   Windows to check would strand the g815 there, out of reach. Only then delete
-   `/boot/limine`, which the Limine menu booted until now, and `dd` p1 again to
-   `/root/esp-p1-sdboot.img` and the external disk: it holds the `EFI/nixos` kernels the new
-   entries load, which a rollback after `forget nixos` needs. Keep both images.
+   `systems/g815/fspec-migration.nix`), `nixos-rebuild boot --install-bootloader` (systemd-boot is
+   already on the ESP behind Limine, and a plain rebuild would not move it to the front), reboot,
+   and require `bootctl status` to show `Product: systemd-boot` as the current boot loader. Check it
+   lists Windows Boot Manager, that `EFI/Microsoft/Boot/bootmgfw.efi` hashes as it did before step
+   1 and that `efibootmgr` still has the firmware's Windows Boot Manager entry. Booting Windows to
+   check would strand the g815 there, out of reach. Only then delete `/boot/limine`, which the
+   Limine menu booted until now. `umount /boot`, `dd` p1 again to `/root/esp-p1-sdboot.img` and
+   the external disk, `mount /boot`: it holds the `EFI/nixos` kernels the new entries load, which a
+   rollback after `forget nixos` needs. Keep both images.
 3. Static fspec to `/usr/local/bin/fspec` (the ISO build's musl binary); the ISO from
    `installer/iso/build.sh --release`.
 4. `tar` of `/` without `/nix` to the external disk, then
