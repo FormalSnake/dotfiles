@@ -221,6 +221,17 @@ KDE_ONLY = {
     "org.qt.qdbusviewer6": ("Qt 6 D-Bus Viewer", "qdbusviewer6", "qdbusviewer6"),
 }
 
+# Launcher entries Tumbleweed's patterns and their recommends install that nothing here asked for.
+# kdesystemsettings has NotShowIn=KDE, and Plasma has its own System Settings entry.
+HIDDEN_APPS = [
+    "kdesystemsettings", "org.opensuse.YaST", "org.opensuse.yast.Packager", "ipython-3.13", "jupyterlab",
+    "jupyter-nbclassic", "jupyter-notebook", "org.alacritty.Alacritty", "org.gnome.Evince",
+    "org.gnome.ColorProfileViewer", "uuctl", "winetricks",
+]
+
+def hide_app(id):
+    return file("~/.local/share/applications/%s.desktop" % id, content = "[Desktop Entry]\nType=Application\nName=%s\nHidden=true\n" % id)
+
 def _kde_only(id, name, exec, icon):
     return file("~/.local/share/applications/%s.desktop" % id, content = "[Desktop Entry]\nType=Application\nName=%s\nExec=%s\nIcon=%s\nOnlyShowIn=KDE;\n" % (name, exec, icon))
 
@@ -268,9 +279,7 @@ def _kde():
         ),
         _autostart("discord-kde", BIN + "/discord", "Discord", unit = {"ConditionEnvironment": ["WAYLAND_DISPLAY", "XDG_CURRENT_DESKTOP=KDE"]}),
         file("~/Desktop/switch-to-hyprland.desktop", perms = "0755", content = "[Desktop Entry]\nType=Application\nName=Switch to Hyprland\nExec=/usr/local/bin/session-switch hyprland-uwsm\nIcon=hyprland\n"),
-        # NotShowIn=KDE already keeps it out of Plasma, which has its own System Settings entry.
-        file("~/.local/share/applications/kdesystemsettings.desktop", content = "[Desktop Entry]\nType=Application\nName=KDE System Settings\nExec=systemsettings\nHidden=true\n"),
-    ] + [_kde_only(id, *entry) for id, entry in KDE_ONLY.items()]
+    ] + [_kde_only(id, *entry) for id, entry in KDE_ONLY.items()] + [hide_app(id) for id in HIDDEN_APPS]
 
 def _flatpaks():
     return [

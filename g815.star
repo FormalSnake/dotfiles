@@ -1,4 +1,5 @@
 load("//boot.star", "limine_entry")
+load("//home.star", "hide_app")
 load("//system.star", "FIREWALL_TCP", "FIREWALL_UDP", "GREETER_SESSIONS", "LIBEXEC", "PKG_BIN", "firewall_zone", "swapfile")
 
 # The g815's own layer on top of system.star and home.star: the RTX 5070 and the ASUS MUX, asusd,
@@ -394,7 +395,8 @@ RestartSec=2
             file("/var/lib/systemd/linger/" + u, content = ""),
             file("/etc/ssh/authorized_keys.d/" + u, content = RIG_KEY + "\n"),
         ]
-    return out
+    # The rig's switcher, spaces and headset legs drive foot windows; Kyan's own terminal is Ghostty.
+    return out + [hide_app(id) for id in ["foot", "footclient", "foot-server"]]
 
 def _host():
     return [
