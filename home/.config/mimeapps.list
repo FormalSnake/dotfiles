@@ -1,6 +1,6 @@
 [Added Associations]
 x-scheme-handler/beeper=Beeper.desktop
-x-scheme-handler/t3code=com.t3tools.T3Code.desktop
+x-scheme-handler/t3code=com.t3tools.T3Code.desktop;
 
 [Default Applications]
 application/pdf=org.gnome.Papers.desktop
@@ -36,5 +36,6 @@ x-scheme-handler/http=helium.desktop
 x-scheme-handler/https=helium.desktop
 x-scheme-handler/unknown=helium.desktop
 x-scheme-handler/beeper=Beeper.desktop
+x-scheme-handler/t3code=com.t3tools.T3Code.desktop
 
 [Removed Associations]
