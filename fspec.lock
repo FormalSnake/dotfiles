@@ -408,7 +408,7 @@ source = "git:https://github.com/FormalSnake/FormalShell@90fbd2ce0acd11210ea6c65
 rev = "90fbd2ce0acd11210ea6c6508fa01a899f102081"
 
 [pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/formalshell@sha256:8d5df153a7676aad7d31387b05da1887f465bd983bd84b2d9000314d7ac4624a"
+oci = "ghcr.io/formalsnake/fspec-cache/formalshell@sha256:9cf86d4166352436c4a336d3deb505f3012c38479f107d87ac670bb77c2fc84a"
 
 [[pkg]]
 name = "fspec"
@@ -826,7 +826,7 @@ rev = "7ff785809f6ecad45051e333c0ffa72e15ba4f2a"
 patches = "sha256-ovQrzhqdk4eXj+xFd1ZI8LNIPMdjPo+ufm4WzSNbSvg="
 
 [pkg.aarch64-darwin]
-oci = "ghcr.io/formalsnake/fspec-cache/pam_ssh_agent_auth@sha256:fd0e3aa55dcda4221a392fd312fc9ed7026a3a670a8b55536a6f00142bfa454b"
+oci = "ghcr.io/formalsnake/fspec-cache/pam_ssh_agent_auth@sha256:75cae5668eaadf574a90d86b53c968392ccb0d4dbcdc651181bfdbac6dcf513c"
 
 [[pkg]]
 name = "parsec"
@@ -1027,7 +1027,7 @@ source = "git:https://github.com/hiroppy/tmux-agent-sidebar@2cff1cb955363394f8dd
 rev = "2cff1cb955363394f8dd9c52d040d027536cfbd8"
 
 [pkg.aarch64-darwin]
-oci = "ghcr.io/formalsnake/fspec-cache/tmux-agent-sidebar@sha256:369751ba242abff83a8330b04dc151e8dbf99aba9d2efb3434e9183e6f42c516"
+oci = "ghcr.io/formalsnake/fspec-cache/tmux-agent-sidebar@sha256:f2a1704b3ccce9f85e329996d6d581fc54a07e99e3a8bfbfa223898d1e4466db"
 
 [[pkg]]
 name = "tmux-agent-sidebar"
