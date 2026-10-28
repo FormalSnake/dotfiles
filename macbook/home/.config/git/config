@@ -10,11 +10,11 @@
 
 [credential "https://gist.github.com"]
 	helper = ""
-	helper = "/opt/fspec/current/bin/gh auth git-credential"
+	helper = "/opt/homebrew/bin/gh auth git-credential"
 
 [credential "https://github.com"]
 	helper = ""
-	helper = "/opt/fspec/current/bin/gh auth git-credential"
+	helper = "/opt/homebrew/bin/gh auth git-credential"
 
 [diff "lockb"]
 	binary = true
