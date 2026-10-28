@@ -228,6 +228,9 @@ def _windows():
         service("mnt-windows.mount"),
         service("mnt-games.mount"),
         service("mnt-steamlib.automount"),
+        # Tumbleweed blacklists ntfs3 and only lifts it when a person answers the unblacklist
+        # prompt; an empty file of the vendor file's name masks it.
+        file("/etc/modprobe.d/60-blacklist_fs-ntfs3.conf", content = ""),
         # ntfs3 refuses a volume with its dirty flag set; this clears a stale one, only after
         # ntfsfix's read-only pass agrees the volume is consistent, ahead of every mount.
         _libexec("clear-ntfs-dirty"),
