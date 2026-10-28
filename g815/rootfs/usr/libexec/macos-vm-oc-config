@@ -1,0 +1,89 @@
+import plistlib, sys
+
+src, dst, product, resolution, boot_args = sys.argv[1:6]
+with open(src, "rb") as f:
+    d = plistlib.load(f)
+
+
+def falsify(section):
+    for k, v in section.items():
+        if isinstance(v, bool):
+            section[k] = False
+
+
+# No kexts, no ACPI patching, no extra boot entries: a VM needs none of it,
+# and Sample.plist ships enabled example entries that would halt the boot.
+d["ACPI"]["Add"] = d["ACPI"]["Delete"] = d["ACPI"]["Patch"] = []
+d["Kernel"]["Add"] = d["Kernel"]["Block"] = d["Kernel"]["Patch"] = []
+d["Misc"]["Entries"] = d["Misc"]["Tools"] = []
+d["UEFI"]["ReservedMemory"] = []
+d["DeviceProperties"]["Add"] = {}
+d["DeviceProperties"]["Delete"] = {}
+
+falsify(d["Booter"]["Quirks"])
+d["Booter"]["Quirks"].update(
+    AvoidRuntimeDefrag=True,
+    EnableWriteUnprotector=True,
+)
+
+falsify(d["Kernel"]["Quirks"])
+d["Kernel"]["Quirks"].update(
+    ForceSecureBootScheme=True,
+    ProvideCurrentCpuInfo=True,
+)
+
+d["Misc"]["Boot"].update(PickerMode="Builtin", ShowPicker=True, Timeout=3)
+d["Misc"]["Security"].update(
+    AllowSetDefault=True,
+    # The default model is j137, which refuses anything older than 10.13.2.
+    SecureBootModel="Disabled",
+    ScanPolicy=0,
+    Vault="Optional",
+)
+
+d["PlatformInfo"].update(Automatic=True, UpdateSMBIOS=True, UpdateSMBIOSMode="Create")
+# The OS X installer gates on board-id, so the SMBIOS has to name a Mac that
+# shipped with 10.9; OpenCore derives the board-id from the model name.
+# Serials are deliberate placeholders: no iServices, which Mavericks has
+# lost anyway.
+d["PlatformInfo"]["Generic"].update(
+    MLB="M0000000000000001",
+    ROM=b"\x11\x22\x33\x44\x55\x66",
+    SpoofVendor=True,
+    SystemProductName=product,
+    SystemSerialNumber="W00000000001",
+    SystemUUID="00000000-0000-0000-0000-000000000000",
+)
+
+# OVMF has no Apple filesystem driver, so OpenHfsPlus.efi is what lets the
+# firmware see an HFS+ volume at all. OpenPartitionDxe.efi adds the Apple
+# Partition Map on top of OVMF's GPT/MBR-only driver, for a guest disk
+# partitioned that way.
+d["UEFI"]["Drivers"] = [
+    {
+        "Arguments": "",
+        "Comment": p,
+        "Enabled": True,
+        "LoadEarly": False,
+        "Path": p,
+    }
+    for p in ("OpenRuntime.efi", "OpenHfsPlus.efi", "OpenPartitionDxe.efi")
+]
+d["UEFI"]["APFS"].update(MinDate=-1, MinVersion=-1)
+d["UEFI"]["Input"]["KeySupport"] = True
+d["UEFI"]["Output"].update(
+    ProvideConsoleGop=True, Resolution=resolution, TextRenderer="BuiltinGraphics"
+)
+# Pre-10.10 boot.efi mixes text into graphics mode and emits tabs the
+# builtin renderer cannot place.
+d["UEFI"]["Quirks"].update(
+    IgnoreTextInGraphics=True,
+    ReplaceTabWithSpace=True,
+    RequestBootVarRouting=True,
+    SanitiseClearScreen=True,
+)
+
+d["NVRAM"]["Add"]["7C436110-AB2A-4BBB-A880-FE41995C9F82"]["boot-args"] = boot_args
+
+with open(dst, "wb") as f:
+    plistlib.dump(d, f)

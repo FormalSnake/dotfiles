@@ -199,15 +199,6 @@ source = "brew"
 version = "3.5.3"
 
 [[pkg]]
-name = "dcal"
-source = "github:AvengeMedia/dankcalendar"
-version = "1.6.1"
-
-[pkg.x86_64-linux]
-url = "https://github.com/duxlabs-dev/dux-calendar/releases/download/v1.6.1/dcal-linux-amd64.tar.gz"
-hash = "sha256-9Y/AUBlUx3ybvApqPdjQiL6eRCEKv9SXPaQxCNoA4l4="
-
-[[pkg]]
 name = "deno"
 source = "brew"
 version = "2.9.8"
@@ -834,6 +825,15 @@ source = "brew:cask:barutsrb/tap"
 name = "opencode"
 source = "brew"
 version = "2.2.0"
+
+[[pkg]]
+name = "opencore"
+source = "github:acidanthera/OpenCorePkg"
+version = "1.0.7"
+
+[pkg.x86_64-linux]
+url = "https://github.com/acidanthera/OpenCorePkg/releases/download/1.0.7/OpenCore-1.0.7-RELEASE.zip"
+hash = "sha256-L/q26/WMeu+wvLOho4XSB3RoI9bdh9RL1mbhKGk5lD4="
 
 [[pkg]]
 name = "openssl@3"

@@ -1,0 +1,151 @@
+#!/bin/bash
+set -o errexit
+set -o nounset
+set -o pipefail
+
+# macOS 10.9 guest. 10.9 predates Apple Secure Boot, APFS and every kext a
+# modern hackintosh needs: isa-applesmc gives the guest a real AppleSMC,
+# e1000-82545em matches the in-box AppleIntel8254XEthernet driver and usb-audio
+# matches AppleUSBAudio, so the OpenCore EFI carries zero kexts.
+
+libexec=/usr/local/libexec
+opencore=/usr/local/share/macos-vm/opencore
+state="$HOME/.local/share/macos-vm"
+
+memory=${MACOS_VM_MEMORY:-8192}
+cores=${MACOS_VM_CORES:-4}
+# P-cores on Arrow Lake-HX. Mavericks has no idea what an E-core is, and with
+# no guest graphics driver the framebuffer is composited on the CPU, so a vCPU
+# landing on a 4.7GHz E-core shows up as UI stutter.
+cpuset=${MACOS_VM_CPUSET:-0-7}
+disk_size=${MACOS_VM_DISK_SIZE:-64G}
+# Framebuffer mode OpenCore sets before handing off. There is no guest graphics
+# driver, so this is fixed for the session and macOS offers no other
+# resolution. Higher costs real UI smoothness: every pixel is composited on
+# the CPU.
+resolution=${MACOS_VM_RESOLUTION:-Max}
+# Must be a Mac that shipped with 10.9.
+product=${MACOS_VM_PRODUCT:-iMac14,2}
+# Verbose by default: on a driverless framebuffer a panic is otherwise a black
+# screen with nothing to read.
+boot_args=${MACOS_VM_BOOT_ARGS:--v}
+# Apple SMC unlock key handed to isa-applesmc. macOS reads it during boot and
+# halts without it.
+osk='ourhardworkbythesewordsguardedpleasedontsteal(c)AppleComputerInc'
+
+mkdir -p "$state"
+
+# One instance only. A second QEMU would fail on the disk's write lock
+# anyway, but not before replacing the first one's monitor socket, which
+# leaves the running guest undrivable.
+exec 9>"$state/.lock"
+if ! flock -n 9; then
+  echo "macos-vm is already running" >&2
+  exit 1
+fi
+
+# A raw FAT32 ESP holding OpenCore, rebuilt whenever the release, the settings
+# or the config script change. Handed to QEMU with snapshot=on, so the image
+# stays pristine and OpenCore's NVRAM writes land in OVMF_VARS.
+stamp=$(printf '%s\n' "$(readlink -f "$opencore")" "$product" "$resolution" "$boot_args" \
+  | cat - "$libexec/macos-vm-oc-config" | sha256sum | cut -d' ' -f1)
+if [ ! -f "$state/esp.img" ] || [ "$(cat "$state/esp.stamp" 2>/dev/null || true)" != "$stamp" ]; then
+  work=$(mktemp -d)
+  trap 'rm -rf "$work"' EXIT
+  mkdir -p "$work/esp/EFI"
+  cp -r "$opencore/X64/EFI/BOOT" "$opencore/X64/EFI/OC" "$work/esp/EFI/"
+  chmod -R u+w "$work/esp"
+  python3.13 -I "$libexec/macos-vm-oc-config" "$opencore/Docs/Sample.plist" \
+    "$work/esp/EFI/OC/config.plist" "$product" "$resolution" "$boot_args"
+  for driver in OpenRuntime.efi OpenHfsPlus.efi OpenPartitionDxe.efi; do
+    test -f "$work/esp/EFI/OC/Drivers/$driver"
+  done
+  truncate -s 64M "$work/esp.img"
+  # Fixed volume id: mkfs.vfat would otherwise stamp the build time.
+  mkfs.vfat -F 32 -i cafe1e57 -n OPENCORE "$work/esp.img" >/dev/null
+  mcopy -s -i "$work/esp.img" "$work/esp/EFI" ::/
+  mv "$work/esp.img" "$state/esp.img"
+  echo "$stamp" > "$state/esp.stamp"
+  rm -rf "$work"
+  trap - EXIT
+fi
+
+# OVMF's variable store has to be writable; OpenCore persists its boot
+# selection there.
+if [ ! -f "$state/OVMF_VARS.fd" ]; then
+  install -m 0644 /usr/share/qemu/ovmf-x86_64-4m-vars.bin "$state/OVMF_VARS.fd"
+fi
+if [ ! -f "$state/disk.img" ]; then
+  qemu-img create -f raw "$state/disk.img" "$disk_size"
+fi
+
+# shellcheck disable=SC2054  # QEMU flags carry their own commas
+args=(
+  -enable-kvm
+  -machine q35
+  -m "$memory"
+  # Penryn keeps macOS on legacy power management instead of XCPM, which is
+  # the CPU model old macOS argues with least. Arrow Lake has every
+  # feature listed, so `check` is a real assertion here.
+  -cpu Penryn,kvm=on,vendor=GenuineIntel,+invtsc,vmware-cpuid-freq=on,+ssse3,+sse4.2,+popcnt,+avx,+aes,+xsave,+xsaveopt,check
+  -smp "$cores,cores=$cores,sockets=1"
+  -device "isa-applesmc,osk=$osk"
+  -smbios type=2
+  -drive if=pflash,format=raw,readonly=on,file=/usr/share/qemu/ovmf-x86_64-4m-code.bin
+  -drive if=pflash,format=raw,file="$state/OVMF_VARS.fd"
+
+  # 10.9 has no virtio drivers, so everything hangs off AHCI, USB or e1000.
+  -device ich9-ahci,id=sata
+  -drive id=oc,if=none,snapshot=on,format=raw,file="$state/esp.img"
+  -device ide-hd,bus=sata.0,drive=oc
+  -drive id=hdd,if=none,format=raw,cache=none,aio=io_uring,discard=unmap,file="$state/disk.img"
+  -device ide-hd,bus=sata.1,drive=hdd
+
+  # Input hangs off UHCI, not XHCI: 10.9's AppleUSBXHCI only matches real
+  # Intel/NEC controllers, so on qemu-xhci the entire USB bus stays dead
+  # (no keyboard, no pointer). AppleUSBUHCI matches the ICH9 function.
+  # usb-mouse, not usb-tablet: 10.9 ignores the tablet's absolute HID
+  # report descriptor (keyboard on the same bus works, the pointer never
+  # moves), so the pointer is relative and needs Ctrl+Alt+G to capture.
+  -device ich9-usb-uhci1,id=uhci
+  -device usb-kbd,bus=uhci.0
+  -device usb-mouse,bus=uhci.0
+  # Audio sits on the same UHCI bus: QEMU's usb-audio is a full-speed
+  # device, so EHCI refuses it. Stereo 48kHz fits in 12Mbps, and 10.9
+  # drives it with in-box AppleUSBAudio.
+  -audiodev pipewire,id=snd
+  -device usb-audio,bus=uhci.0,audiodev=snd
+
+  -netdev user,id=net0
+  -device e1000-82545em,netdev=net0,mac=52:54:00:c9:18:27
+
+  -device vmware-svga
+  # Deliberately windowed and ungrabbed: QEMU's own -full-screen turns on
+  # an input grab that swallows its own Ctrl+Alt+Q accelerator, which
+  # leaves no way out. Hyprland's fullscreen binding does the same job
+  # without touching the keyboard. Ctrl+Alt+G grabs on demand.
+  # zoom-to-fit scales the guest framebuffer into the window instead of
+  # cropping it. The guest resolution is fixed at boot and macOS offers no
+  # other mode, so without this a window smaller than `resolution` hides
+  # the bottom of the screen.
+  #
+  # The menubar stays visible on purpose: QEMU hangs Ctrl+Alt+G (grab) and
+  # Ctrl+Alt+Q (quit) off its menu items, so show-menubar=off silently
+  # kills both accelerators and leaves no way to capture the pointer or
+  # close the window.
+  -display "${MACOS_VM_DISPLAY:-gtk,zoom-to-fit=on}"
+  -monitor "unix:$state/monitor.sock,server,nowait"
+)
+
+# The installer is two volumes: basesystem boots, esd carries Packages.
+if [ -f "$state/basesystem.gpt" ] && [ -f "$state/esd.gpt" ]; then
+  # shellcheck disable=SC2054
+  args+=(
+    -drive id=bs,if=none,format=raw,file="$state/basesystem.img"
+    -device ide-hd,bus=sata.2,drive=bs
+    -drive id=esd,if=none,format=raw,file="$state/esd.img"
+    -device ide-hd,bus=sata.3,drive=esd
+  )
+fi
+
+exec taskset -c "$cpuset" qemu-system-x86_64 "${args[@]}" "$@"

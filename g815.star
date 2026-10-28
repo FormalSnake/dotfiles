@@ -20,6 +20,9 @@ PACKAGES = [
     "prismlauncher", "java-21-openjdk", "xwayland-satellite", "cage",
     # windows-vm.nix and windows-dualboot.nix.
     "qemu-x86", "qemu-ovmf-x86_64", "swtpm", "mtools", "socat", "ntfs-3g", "hivex", "xxd", "efibootmgr",
+    # macos-vm: qemu-img and the dmg reader for macos-vm-fetch, the GTK window and PipeWire audio
+    # the launcher asks for, mkfs.vfat for the OpenCore ESP and sgdisk for the installer disks.
+    "qemu-tools", "qemu-block-dmg", "qemu-ui-gtk", "qemu-audio-pipewire", "dosfstools", "gptfdisk",
     # NetworkManager's Wi-Fi backend here, and per-link DNS so tailscaled owns only *.ts.net.
     "iwd", "systemd-resolved",
     # UxPlay's runtime: Avahi's dns_sd and the H.264/AAC decoders it plays through.
@@ -289,6 +292,34 @@ WantedBy=windows-vm.service
         service("windows-vm-prep"),
     ]
 
+def _macos_vm():
+    return [
+        # mixins/services/macos-vm.nix: the OS X 10.9 guest. OpenCore is upstream's release zip;
+        # macos-vm renders its config.plist from Sample.plist and builds the ESP on first start,
+        # under ~/.local/share/macos-vm. macos-vm-fetch pulls the installer from Apple.
+        pkg("opencore", version = "1.0.7", source = github("acidanthera/OpenCorePkg", asset = "OpenCore-*-RELEASE.zip"), share = {"macos-vm/opencore": "."}),
+        _libexec("macos-vm"),
+        _libexec("macos-vm-fetch"),
+        _libexec("macos-vm-oc-config"),
+        _libexec("macos-vm-osrecovery"),
+        _libexec("macos-vm-apm-geometry"),
+        _libexec("macos-vm-install-mavericks"),
+        file("/usr/local/bin/macos-vm", mode = "link", target = LIBEXEC + "/macos-vm"),
+        file("/usr/local/bin/macos-vm-fetch", mode = "link", target = LIBEXEC + "/macos-vm-fetch"),
+        # Launched from the app grid it comes up fullscreen on its own workspace, which is most of
+        # what "not living in a window" means here.
+        file("~/.local/share/applications/macos-vm.desktop", content = """[Desktop Entry]
+Type=Application
+Name=macOS Mavericks
+Comment=OS X 10.9 guest (QEMU/KVM)
+Exec=/usr/local/bin/macos-vm
+Icon=computer
+Terminal=false
+Categories=System;
+StartupWMClass=qemu-system-x86_64
+"""),
+    ]
+
 def _host():
     return [
         # systems/g815: swap tuning for a browser, three Electron apps and a JVM heap that come
@@ -358,4 +389,4 @@ def _godot():
     ]
 
 def g815(h):
-    return _nvidia() + _asus() + _gaming() + _windows() + _godot() + _host()
+    return _nvidia() + _asus() + _gaming() + _windows() + _macos_vm() + _godot() + _host()

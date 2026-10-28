@@ -1,0 +1,100 @@
+#!/bin/bash
+set -o errexit
+set -o nounset
+set -o pipefail
+
+# Downloads Apple's Mavericks InstallESD.dmg and prepares two bootable raw
+# disks from it. Needs qemu-block-dmg, gptfdisk and passwordless sudo for the
+# HFS+ mounts.
+
+libexec=/usr/local/libexec
+state="$HOME/.local/share/macos-vm"
+mkdir -p "$state"
+cd "$state"
+
+esd_sha256=c861fd59e82bf777496809a0d2a9b58f66691ee56738031f55874a3fe1d7c3ff
+
+if [ ! -f InstallESD.dmg ]; then
+  mapfile -t asset < <(python3.13 -I "$libexec/macos-vm-osrecovery")
+  echo "Downloading ${asset[0]}"
+  curl -f --progress-bar "${asset[0]}" -H "Cookie: AssetToken=${asset[1]}" \
+    -o InstallESD.dmg.part
+  # Apple serves the asset over plain HTTP, so this checksum is the only
+  # integrity check there is.
+  if [ "$(sha256sum InstallESD.dmg.part | cut -d' ' -f1)" != "$esd_sha256" ]; then
+    rm -f InstallESD.dmg.part
+    echo "InstallESD.dmg checksum mismatch" >&2
+    exit 1
+  fi
+  mv InstallESD.dmg.part InstallESD.dmg
+fi
+
+# InstallESD.dmg is directly bootable: the volume carries boot.efi,
+# mach_kernel and Packages, so the VM needs the raw HFS+ image and not a
+# createinstallmedia clone (which would need a Mac to build).
+# esd.img carries the install payload (Packages), and BaseSystem.dmg
+# nested inside it is the only bootable half: 10.9's InstallESD volume has
+# no boot.efi of its own.
+if [ ! -f esd.img ]; then
+  echo "Converting InstallESD.dmg to a raw disk"
+  qemu-img convert -p -f dmg -O raw InstallESD.dmg esd.img.part
+  mv esd.img.part esd.img
+fi
+if [ ! -f esd.geometry ]; then
+  python3.13 -I "$libexec/macos-vm-apm-geometry" esd.img > esd.geometry
+fi
+
+if [ ! -f basesystem.img ]; then
+  mnt=$(mktemp -d)
+  # HFS+ needs a kernel mount either way, and the symlinks below have to
+  # be written as root to keep root:wheel ownership.
+  trap 'sudo -n umount "$mnt" 2>/dev/null || true; rmdir "$mnt" 2>/dev/null || true' EXIT
+
+  read -r esd_offset esd_size < esd.geometry
+  sudo -n mount -o "ro,loop,offset=$esd_offset,sizelimit=$esd_size" -t hfsplus esd.img "$mnt"
+  cp "$mnt/BaseSystem.dmg" BaseSystem.dmg
+  sudo -n umount "$mnt"
+
+  echo "Converting BaseSystem.dmg to a raw disk"
+  qemu-img convert -p -f dmg -O raw BaseSystem.dmg basesystem.img.part
+  mv basesystem.img.part basesystem.img
+  rm -f BaseSystem.dmg
+  python3.13 -I "$libexec/macos-vm-apm-geometry" basesystem.img > basesystem.geometry
+
+  # BaseSystem ships /System/Installation/Packages as a symlink to
+  # PackagesLink, which only exists on Apple's own install media. Pointing
+  # it (and the two BaseSystem files the installer expects beside it) at
+  # the mounted ESD volume is the whole merge that createinstallmedia does
+  # by copying 5GB around.
+  read -r bs_offset bs_size < basesystem.geometry
+  sudo -n mount -o "rw,loop,offset=$bs_offset,sizelimit=$bs_size" -t hfsplus basesystem.img "$mnt"
+  for payload in Packages BaseSystem.dmg BaseSystem.chunklist; do
+    sudo -n rm -rf "$mnt/System/Installation/$payload"
+    sudo -n ln -s "/Volumes/OS X Install ESD/$payload" "$mnt/System/Installation/$payload"
+  done
+  sudo -n install -m 0755 "$libexec/macos-vm-install-mavericks" "$mnt/install-mavericks"
+  sudo -n umount "$mnt"
+  rmdir "$mnt"
+  trap - EXIT
+fi
+
+# Re-wrap each volume in a GPT, in place: the HFS+ volume already starts at
+# LBA 64, which leaves room for the primary GPT, and only the trailing
+# backup header needs the file to grow. Both consumers understand GPT --
+# OVMF finds boot.efi through OpenHfsPlus, and XNU's
+# IOGUIDPartitionScheme publishes the IOMedia the kernel roots from.
+for image in basesystem esd; do
+  if [ -f "$image.gpt" ]; then
+    continue
+  fi
+  read -r offset size < "$image.geometry"
+  first=$((offset / 512))
+  last=$((first + size / 512 - 1))
+  truncate -s $(((last + 2048) * 512)) "$image.img"
+  sgdisk --zap-all "$image.img" > /dev/null
+  sgdisk --set-alignment=1 --new="1:$first:$last" --typecode=1:AF00 \
+    --change-name="1:$image" "$image.img" > /dev/null
+  touch "$image.gpt"
+done
+
+echo "Installer ready: $state/basesystem.img + $state/esd.img"

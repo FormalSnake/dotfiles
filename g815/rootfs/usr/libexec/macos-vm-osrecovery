@@ -1,0 +1,38 @@
+# Port of the download half of https://mavericksforever.com/get.sh (by
+# Wowfunhappy): the osrecovery handshake needs the board serial, board id and
+# ROM of a Mavericks-era Mac to mint an asset token. Prints the asset URL and
+# the token, one per line.
+import hashlib, os, urllib.request
+
+BOARD_SERIAL = "C0243070168G3M91F"
+BOARD_ID = "Mac-3CBD00234E554E41"
+ROM = bytes.fromhex("003EE1E6AC14")
+
+session = urllib.request.urlopen("http://osrecovery.apple.com/")
+server_id = session.headers["Set-Cookie"].split("session=")[1].split(";")[0].strip('"')
+
+client_id = os.urandom(8).hex().upper()
+key = (
+    hashlib.sha256(
+        bytes.fromhex(client_id)
+        + bytes.fromhex(server_id.split("~")[1])
+        + ROM
+        + hashlib.sha256((BOARD_SERIAL + BOARD_ID).encode()).digest()
+        + b"\xcc" * 10
+    )
+    .hexdigest()
+    .upper()
+)
+
+payload = urllib.request.urlopen(
+    urllib.request.Request(
+        "http://osrecovery.apple.com/InstallationPayload/OSInstaller",
+        data=f"cid={client_id}\nsn={BOARD_SERIAL}\nbid={BOARD_ID}\nk={key}".encode(),
+        headers={"Content-Type": "text/plain", "Cookie": f"session={server_id}"},
+        method="POST",
+    )
+).read().decode()
+
+fields = dict(line.split(": ", 1) for line in payload.splitlines() if ": " in line)
+print(fields["AU"])
+print(fields["AT"])

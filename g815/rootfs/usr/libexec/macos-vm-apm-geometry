@@ -1,0 +1,24 @@
+# Both DMGs are optical-media images: an Apple Partition Map with 2048-byte
+# blocks wrapping one HFS+ volume. Nothing in the boot path reads that layout
+# (no UEFI partition driver parses a 2048-byte-block map on a 512-byte disk,
+# and XNU then finds no IOMedia to match boot-uuid against), so the volume is
+# located once here and re-wrapped in a GPT by macos-vm-fetch. Prints the byte
+# offset and size of the Apple_HFS partition.
+import struct, sys
+
+with open(sys.argv[1], "rb") as f:
+    sig, block_size = struct.unpack(">HH", f.read(4))
+    assert sig == 0x4552, "not an Apple Partition Map"
+
+    index = 1
+    while True:
+        f.seek(block_size * index)
+        entry = f.read(136)
+        assert entry[:2] == b"PM", "partition map entry %d missing" % index
+        count, start, size = struct.unpack(">III", entry[4:16])
+        kind = entry[48:80].split(b"\0")[0].decode()
+        if kind == "Apple_HFS":
+            print(start * block_size, size * block_size)
+            break
+        assert index < count, "no Apple_HFS partition"
+        index += 1

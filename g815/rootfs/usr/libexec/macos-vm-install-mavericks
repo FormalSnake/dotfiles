@@ -1,0 +1,24 @@
+#!/bin/sh
+# The GUI installer on this media is the App Store *downloader* stub: it asks
+# for an Apple ID because it wants to fetch an installer we already have. This
+# drives the payload directly instead, and works around two things that only
+# bite when booting the raw BaseSystem volume rather than createinstallmedia
+# media: the migration step needs "Recovered Items" to already exist, and the
+# boot volume owns the /Volumes/OS X Base System name that BaseSystem.dmg
+# needs when the installer mounts it for BaseSystemResources.pkg.
+# Runs inside the guest; macos-vm-fetch copies it to the volume root.
+set -e
+
+target="${1:-/Volumes/Mavericks}"
+if [ ! -d "$target" ]; then
+  echo "usage: $0 /Volumes/<target volume>" >&2
+  echo "erase one first, e.g.: diskutil eraseVolume JHFS+ Mavericks disk3s2" >&2
+  exit 1
+fi
+
+mkdir -p "$target/Recovered Items/System/Library/Caches"
+rm -f "/Volumes/OS X Base System"
+hdiutil attach "/Volumes/OS X Install ESD/BaseSystem.dmg" -readonly -noverify
+
+installer -verbose -pkg /System/Installation/Packages/OSInstall.mpkg -target "$target"
+echo "Done. Reboot and pick $target in the OpenCore picker."
