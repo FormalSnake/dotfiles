@@ -3,9 +3,9 @@ name: fspec packages
 on:
   push:
     branches: [main]
-    paths: ["fspec.lock", "patches/**"]
+    paths: ["fspec.lock", "patches/**", "**.star"]
   pull_request:
-    paths: ["fspec.lock", "patches/**"]
+    paths: ["fspec.lock", "patches/**", "**.star"]
   workflow_dispatch:
 
 permissions:
@@ -56,23 +56,27 @@ jobs:
       - uses: oras-project/setup-oras@v1
       - name: Install fspec
         run: cargo install --locked --git https://github.com/FormalStudio/formalspec fspec
-      - name: Build
+      - name: Build and push
         env:
           # GITHUB_TOKEN reads only this repository; a git(...) source in another private one needs this.
           FSPEC_GIT_TOKEN: ${{ secrets.FSPEC_GIT_TOKEN }}
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [ -n "$FSPEC_GIT_TOKEN" ]; then
             git config --global url."https://x-access-token:$FSPEC_GIT_TOKEN@github.com/".insteadOf https://github.com/
           fi
-          fspec --spec spec.star build --pkg ${{ matrix.pkg }} --platform ${{ matrix.platform }} --out out
-      - name: Push
-        env:
-          TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
           owner=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
           echo "$TOKEN" | oras login ghcr.io -u "${{ github.actor }}" --password-stdin
+          # The tag names the commit, patches and recipe, so a build already pushed is skipped.
+          repo="ghcr.io/$owner/fspec-cache/${{ matrix.pkg }}"
+          tag=$(fspec --spec spec.star build --pkg ${{ matrix.pkg }} --platform ${{ matrix.platform }} --out out --tag)
+          if oras manifest fetch --descriptor "$repo:$tag" >/dev/null 2>&1; then
+            echo "$repo:$tag is already built"
+            exit 0
+          fi
+          fspec --spec spec.star build --pkg ${{ matrix.pkg }} --platform ${{ matrix.platform }} --out out
           cd out
-          oras push "ghcr.io/$owner/fspec-cache/${{ matrix.pkg }}:$(cat tag)" \
+          oras push "$repo:$(cat tag)" \
             "${{ matrix.pkg }}-${{ matrix.platform }}.tar.zst:application/vnd.fspec.package.v1.tar+zstd"
 
   record:

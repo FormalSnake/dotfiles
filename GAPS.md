@@ -57,9 +57,6 @@ earlier Fedora Atomic image and nothing loads it.
 - Units are `fspec-<name>.service` and exec directly instead of `bash -lc`.
 - ananicy-cpp and asusd run from a `service()` with the store path, since their upstream units
   name `/usr/bin`; asusd's dbus policy is linked from its package with `etc`.
-- ananicy-cpp still runs the netlink listener, not BPF: the CI cache is keyed by `<rev>-<platform>`
-  only, so the `-DUSE_BPF_PROC_IMPL=ON` added without a rev bump installs the build CI made before it.
-  Needs the engine to key the cache (tag and locked artifact) by the recipe as well.
 - dconf loads through `fspec-dconf-load` and `.Xresources` through `fspec-xrdb-merge` at login.
 - nvim plugins come from `vim.pack` pinned by `nvim-pack-lock.json`; nvim-treesitter compiles its
   parsers on first start.
