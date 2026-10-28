@@ -137,18 +137,6 @@ def _services():
             },
         ),
         _gui("power-saver-dim", BIN + "/power-saver-dim", "Dim backlight while the power-saver profile is active", restart = "always", extra = {"RestartSec": 2}),
-        # The detached session remote shells attach to; tmux-resurrect saves it on the way down.
-        service(
-            "tmux",
-            exec = "/usr/bin/tmux new-session -d",
-            user = True,
-            description = "tmux default session (detached)",
-            systemd = {
-                "Type": "forking",
-                "ExecStop": [HOME + "/.config/tmux/plugins/tmux-resurrect/scripts/save.sh", "/usr/bin/tmux kill-server"],
-                "install": {"WantedBy": "default.target"},
-            },
-        ),
         service(
             "gtk-session-css",
             exec = BIN + "/gtk-session-css",
