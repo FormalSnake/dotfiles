@@ -36,7 +36,8 @@ source = "git:https://gitlab.com/ananicy-cpp/ananicy-cpp@3554447c1ca495478bd00e0
 rev = "3554447c1ca495478bd00e002078847dfd2205d6"
 
 [pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/ananicy-cpp@sha256:f1975e724326193194f7e72ff6a9eb76194ec4b2b8c61a37436ce5540f0d11fc"
+oci = "ghcr.io/formalsnake/fspec-cache/ananicy-cpp@sha256:85058244d9013042e64b245bf085c54b9e3b2d64a215f5aed58b03aaa686c25e"
+build = "265747c3"
 
 [[pkg]]
 name = "ananicy-rules"
@@ -53,7 +54,8 @@ rev = "138451721ff10d3c8634b32656ae3d38a99b9163"
 patches = "sha256-fMZ2hbqA0i+EUk2vaRppPoxZT3pSeOu/5hqhmPRpOnQ="
 
 [pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/ancs4linux@sha256:956df2fafc56947cbd30d9a3bc3f74a66466076518c157ae07674c743dee5472"
+oci = "ghcr.io/formalsnake/fspec-cache/ancs4linux@sha256:6698f0ce8d71447beaba636123d42c02dedde6c47a58d641a32a4b89dbabeaff"
+build = "4ef3a078"
 
 [[pkg]]
 name = "android-studio"
@@ -158,7 +160,8 @@ rev = "c7f4e8ddcf102302c6375ba51534c7505ddc2616"
 oci = "ghcr.io/formalsnake/fspec-cache/clipssh@sha256:7f63d2f465b6d94c206afca75d316579afcde28b5ae757492197c08687b6e6e1"
 
 [pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/clipssh@sha256:df7893cec999b0dd7efb20f018d4480533b312508c8e3449614b365b8d7a1089"
+oci = "ghcr.io/formalsnake/fspec-cache/clipssh@sha256:1c6abc7c9b383e8fae2466c842dae6a4132a12f50d90408759e37a1a4af393d4"
+build = "ffe3f20b"
 
 [[pkg]]
 name = "clop"
@@ -186,7 +189,8 @@ source = "git:https://github.com/vinceliuice/Colloid-icon-theme@e3a8f89fac888af7
 rev = "e3a8f89fac888af715233f8f8ef0a5b1e350f0dd"
 
 [pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/colloid-icon-theme@sha256:f2453456c50536f09ead06018438227d6f34fa964f0cca51d4e077d3ae867d25"
+oci = "ghcr.io/formalsnake/fspec-cache/colloid-icon-theme@sha256:b7a6050f6a061ed14b685415c9878d06af343a4d49f66cf42a9a815764a636cc"
+build = "4c44efd0"
 
 [[pkg]]
 name = "coreutils"
@@ -327,7 +331,8 @@ rev = "26d8fc9c189ba748c68f8930af11dee5c2467f7e"
 oci = "ghcr.io/formalsnake/fspec-cache/fast@sha256:f30c222a379b7a2e41a39dccf9f62f2107c9f7459badea14c00c81b1c01e0080"
 
 [pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/fast@sha256:11fb9f45b6151a57b5bd0e5346f0b347fd8767a5d5ecb4462717643247bb6097"
+oci = "ghcr.io/formalsnake/fspec-cache/fast@sha256:973f61f083976c8a8ae65a864ee8fa7b597faa3f76300da5bcac8adcb93719d8"
+build = "6f8d953f"
 
 [[pkg]]
 name = "fastfetch"
@@ -350,10 +355,12 @@ source = "git:https://github.com/areofyl/fetch@7b19d22c2d8e4b7b2295cc625c9fdf87a
 rev = "7b19d22c2d8e4b7b2295cc625c9fdf87adcabbcd"
 
 [pkg.aarch64-darwin]
-oci = "ghcr.io/formalsnake/fspec-cache/fetch@sha256:70946cfb46c7d9afd49c68e5f4ffeaf36441f8c6eaba68f33c96a90b438b4edf"
+oci = "ghcr.io/formalsnake/fspec-cache/fetch@sha256:40d3b5fc93abed35f8f9079e229c3321b8b402b46654acfe0797ebe17c77d02f"
+build = "b3e44545"
 
 [pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/fetch@sha256:28f0a05cef5e2fb6f3f4ad95c8a349ac3ac82af8843bafa5060d9843ed69713b"
+oci = "ghcr.io/formalsnake/fspec-cache/fetch@sha256:69e700ea12485671a06849b1933b06591ade3e750859cb06fea0f8ddc7ae0dd2"
+build = "b3e44545"
 
 [[pkg]]
 name = "ffmpeg"
@@ -384,7 +391,8 @@ source = "git:https://github.com/FormalStudio/formalmusic@bf502f9a7699733f428d30
 rev = "bf502f9a7699733f428d30e1b2e5299ac530b030"
 
 [pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/formalmusic@sha256:17e9989a007dfcae16719ecf67bfceb9bb669f19eaf06f4d17e1e55f2b137c1f"
+oci = "ghcr.io/formalsnake/fspec-cache/formalmusic@sha256:e1b9c73b8e6b50397ecc5f750bf5b35fef4356967e79d98bde996f4b4938c833"
+build = "3dd539d0"
 
 [[pkg]]
 name = "formalmusic"
@@ -400,7 +408,8 @@ source = "git:https://github.com/FormalSnake/dotfiles@98ca1b6c069b2eb1029cc9b816
 rev = "98ca1b6c069b2eb1029cc9b816b735bcc3251202"
 
 [pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/formalos-chime@sha256:6f499675bdb51caa1d6ac96554ea1121b206b516a31e94e5c1750c9bd754e366"
+oci = "ghcr.io/formalsnake/fspec-cache/formalos-chime@sha256:cfa68c35f3169304a1d75b4a0bd75997ff70a11b00c38ab7aefd661614e77fc6"
+build = "67889dec"
 
 [[pkg]]
 name = "formalshell"
@@ -562,7 +571,8 @@ source = "git:https://github.com/Kopuz-org/kopuz@735a22898992c4b09de2a6532303922
 rev = "735a22898992c4b09de2a65323039220db32750b"
 
 [pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/kopuzd@sha256:ed57b6c7c42c1f1d6cb42e20387d24ad7846f9c1dc9fe11a74ef4dca37adf87d"
+oci = "ghcr.io/formalsnake/fspec-cache/kopuzd@sha256:3f9961e5acb39e17e84debcb95ff83789cef8db4e0b3055dd9ba50912d971300"
+build = "353c61d9"
 
 [[pkg]]
 name = "lazydocker"
@@ -600,7 +610,8 @@ rev = "307c5a6d2109f088d8e6a558c933ebe4f6b1db01"
 patches = "sha256-qRVO6tEfvfFCA2wQSyqn09rT8wVq8+WN6pQOhpJepkg="
 
 [pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/librepods@sha256:7896bd5d29b0e1dde05700b2f06e91a0172e98997ac781561d157efe0ba954d9"
+oci = "ghcr.io/formalsnake/fspec-cache/librepods@sha256:a936269ce24cb44d2550c62f0b501f127ea3b1ee0c1b224a9e1016c4f0274154"
+build = "0b5d3e53"
 
 [[pkg]]
 name = "limine"
@@ -637,7 +648,8 @@ source = "git:https://github.com/jnsahaj/lumen@4ad27231c3614e3f2acbc07bc794a4e8f
 rev = "4ad27231c3614e3f2acbc07bc794a4e8fde06fbf"
 
 [pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/lumen@sha256:9cce1d2b7222fb7766dc4057dc15c51d7509eb2d8e0a593029e2b1611aab8541"
+oci = "ghcr.io/formalsnake/fspec-cache/lumen@sha256:88c4c3cc2e0ad3d78f0ed79b00706d4fba270641bcd937ca5cf78f4b51cb41ec"
+build = "b399cbba"
 
 [[pkg]]
 name = "mangohud-vulkan-layer"
@@ -686,10 +698,12 @@ source = "git:https://github.com/FormalSnake/meshtop@69f954dca8ac24b7e5b269f486f
 rev = "69f954dca8ac24b7e5b269f486f3dae3fc2ec7b5"
 
 [pkg.aarch64-darwin]
-oci = "ghcr.io/formalsnake/fspec-cache/meshtop@sha256:887234168c3b367abe628cc2c20036789cbefd0c2054f37df9a87c6049f149c1"
+oci = "ghcr.io/formalsnake/fspec-cache/meshtop@sha256:92284f8c453745aae272fea89f90d49261be3ec107a1649f03340f46a38048e4"
+build = "baedf5de"
 
 [pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/meshtop@sha256:4362f1b247d36f30fbd79bfb53f4b529c2fa4583ff8b408a3b6509e57d170687"
+oci = "ghcr.io/formalsnake/fspec-cache/meshtop@sha256:5d8762acab22ac9dbe137419032bb12c8c3a97b9f5267ea13a8f41494de868e1"
+build = "baedf5de"
 
 [[pkg]]
 name = "messages"
@@ -697,7 +711,8 @@ source = "git:https://github.com/FormalStudio/messages@097b732d57198bbaa2386b6e0
 rev = "097b732d57198bbaa2386b6e072416f9e6c0184e"
 
 [pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/messages@sha256:c66b8a09c06b64c1d627aa43dd2ec777bd6a72f5d604acbcfe8267b946002498"
+oci = "ghcr.io/formalsnake/fspec-cache/messages@sha256:32e7cc7867932870d49568c6919ba26fd6a3db6621ba2499f64d0ae6cbbf5cfe"
+build = "a9e3e522"
 
 [[pkg]]
 name = "messages"
@@ -732,7 +747,8 @@ source = "git:https://github.com/oxalica/nil@dbbb5c24f9215476992aa1bd305f8e5398e
 rev = "dbbb5c24f9215476992aa1bd305f8e5398e89654"
 
 [pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/nil@sha256:babdda83667b4d171a5640cb4b88b5ea248887a4328ca28106d5909c1d484e53"
+oci = "ghcr.io/formalsnake/fspec-cache/nil@sha256:3fb2d5272e3e9733f3f8ab4d2c9546f6ee18bfc2270f9db0abf571e26df24f13"
+build = "7d8cd1ae"
 
 [[pkg]]
 name = "nixfmt"
@@ -830,7 +846,8 @@ rev = "7ff785809f6ecad45051e333c0ffa72e15ba4f2a"
 patches = "sha256-ovQrzhqdk4eXj+xFd1ZI8LNIPMdjPo+ufm4WzSNbSvg="
 
 [pkg.aarch64-darwin]
-oci = "ghcr.io/formalsnake/fspec-cache/pam_ssh_agent_auth@sha256:99edcd5d87fb2b865dff3a7cb4cb4bfc3e9a90a9e6d274d72196632ecd1cf2f4"
+oci = "ghcr.io/formalsnake/fspec-cache/pam_ssh_agent_auth@sha256:2c9592c2a820bba0941a91243ac593437feef543f31332422ff85dc333887506"
+build = "7a5fcabe"
 
 [[pkg]]
 name = "parsec"
@@ -1049,7 +1066,8 @@ source = "git:https://github.com/hiroppy/tmux-agent-sidebar@2cff1cb955363394f8dd
 rev = "2cff1cb955363394f8dd9c52d040d027536cfbd8"
 
 [pkg.aarch64-darwin]
-oci = "ghcr.io/formalsnake/fspec-cache/tmux-agent-sidebar@sha256:563717e7d18c26ca2d3e8a11cfb70ce534112ebf641d54722bfa9527b02f4490"
+oci = "ghcr.io/formalsnake/fspec-cache/tmux-agent-sidebar@sha256:adaefe3d34819ea0425b597a96dcd1124810936d53622b3fbdf3c6f2687f4116"
+build = "5926442c"
 
 [[pkg]]
 name = "tmux-agent-sidebar"
@@ -1110,7 +1128,8 @@ source = "git:https://github.com/FDH2/UxPlay@df67c212a433cf6dda3676dd40c097900d2
 rev = "df67c212a433cf6dda3676dd40c097900d24e645"
 
 [pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/uxplay@sha256:1369e6b55fb843b3c11b44625fd5233fbd5d27553c67a07990bdd723e9105bbd"
+oci = "ghcr.io/formalsnake/fspec-cache/uxplay@sha256:253caa6997a06e820905a5d066830b9099c9dd0bef39110dfc5fc4317ea952ea"
+build = "51a3c855"
 
 [[pkg]]
 name = "vscode-langservers-extracted"
@@ -1161,7 +1180,8 @@ source = "git:https://github.com/Linus789/wl-clip-persist@v0.5.0"
 rev = "e26fde01c13922e3a65049dafb7d5adfbc52626e"
 
 [pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/wl-clip-persist@sha256:d6962069334405537c759962a1a0fc305ce3d0a9855592846687b62fd995a583"
+oci = "ghcr.io/formalsnake/fspec-cache/wl-clip-persist@sha256:9b14a0f3c2e4c0cb3955308db5737a8faf7ed41070cc95dea9b45f42e7796e99"
+build = "c91ec78c"
 
 [[pkg]]
 name = "wl-gammarelay-rs"
@@ -1169,7 +1189,8 @@ source = "git:https://github.com/MaxVerevkin/wl-gammarelay-rs@v1.0.1"
 rev = "1dde760b03a5afd4761af17d8c49b7058cbd800d"
 
 [pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/wl-gammarelay-rs@sha256:08b71321695008d9df7ababfa832762377d69a5ab5be48639dfc616422efc8dc"
+oci = "ghcr.io/formalsnake/fspec-cache/wl-gammarelay-rs@sha256:30a99e40efd73e47dbe1c0a37e34aea64b1c2447e63fda7b7eefeda59b7d9e09"
+build = "4e782afc"
 
 [[pkg]]
 name = "xcbeautify"
