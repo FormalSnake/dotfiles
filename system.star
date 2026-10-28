@@ -425,6 +425,8 @@ export HOME=/var/lib/formalshell-greeter
 unset XDG_CONFIG_HOME XDG_STATE_HOME XDG_CACHE_HOME XDG_DATA_HOME
 export XDG_SESSION_TYPE=wayland
 printf 'output * bg #000000 solid_color\\ninput type:keyboard {\\n  xkb_layout """ + KEYBOARD["layout"] + """\\n  xkb_options """ + KEYBOARD["options"] + """\\n}\\n' > "$HOME/sway.conf"
+# A compositor killed with greetd leaves its socket; the wait below would take it.
+rm -f "$XDG_RUNTIME_DIR"/wayland-*
 sway --config "$HOME/sway.conf" &
 compositor=$!
 for _ in $(seq 100); do
