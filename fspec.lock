@@ -399,6 +399,9 @@ name = "formalmusic"
 source = "git:https://github.com/FormalStudio/formalmusic@ddf544d6228105dfd84c059d28d36f9cc147f59a"
 rev = "ddf544d6228105dfd84c059d28d36f9cc147f59a"
 
+[pkg.aarch64-darwin]
+oci = "ghcr.io/formalsnake/fspec-cache/formalmusic@sha256:dc774b9d02f05c297655b2e13d9ec533345a944238f7c0996e64b90c46ff214b"
+
 [[pkg]]
 name = "formalos-chime"
 source = "git:https://github.com/FormalSnake/dotfiles@98ca1b6c069b2eb1029cc9b816b735bcc3251202"
@@ -411,6 +414,9 @@ oci = "ghcr.io/formalsnake/fspec-cache/formalos-chime@sha256:df888855ac5425370fe
 name = "formalshell"
 source = "git:https://github.com/FormalSnake/FormalShell@e590c2915da572bc4f6f028779f1852b6ed64b95"
 rev = "e590c2915da572bc4f6f028779f1852b6ed64b95"
+
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/formalshell@sha256:316e690b69bfd92722ab31d083bbbbd5baf751f930ebd7690848154ffb673cd9"
 
 [[pkg]]
 name = "fspec"
@@ -576,6 +582,9 @@ name = "kopuz-gpui"
 source = "git:https://github.com/Kopuz-org/kopuz-gpui@535a6a597c72549d4bc2e64c2b0301b6917354ac"
 rev = "535a6a597c72549d4bc2e64c2b0301b6917354ac"
 
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/kopuz-gpui@sha256:7ea04354d3c80c5d11cbec778dc61e6487770f06d9cb68426a1457c6c3aa57f1"
+
 [[pkg]]
 name = "kopuzd"
 source = "git:https://github.com/Kopuz-org/kopuz@23db9b35fe45bd773e3cdcdf0d6584b13ae5b8cc"
@@ -706,6 +715,12 @@ name = "meshtop"
 source = "git:https://github.com/FormalSnake/meshtop@69f954dca8ac24b7e5b269f486f3dae3fc2ec7b5"
 rev = "69f954dca8ac24b7e5b269f486f3dae3fc2ec7b5"
 
+[pkg.aarch64-darwin]
+oci = "ghcr.io/formalsnake/fspec-cache/meshtop@sha256:509fd1495bcaeb767a5d478a2188ef0c0db5fed776c4cc4d706a0259beb95ae9"
+
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/meshtop@sha256:742ef0f44a4565c5b33abaeb90a42f0c3464848aef9d91b589220dbf1d136651"
+
 [[pkg]]
 name = "messages"
 source = "git:https://github.com/FormalStudio/messages@097b732d57198bbaa2386b6e072416f9e6c0184e"
@@ -718,6 +733,9 @@ oci = "ghcr.io/formalsnake/fspec-cache/messages@sha256:0fc4bd28d31a00b36f1e08ee3
 name = "messages"
 source = "git:https://github.com/FormalStudio/messages@29ac1eeedd10745377486851075691e0ec45800e"
 rev = "29ac1eeedd10745377486851075691e0ec45800e"
+
+[pkg.aarch64-darwin]
+oci = "ghcr.io/formalsnake/fspec-cache/messages@sha256:41dfe69b25a4ea2e0e8010b83744da9402333d327715d3a409e3d42109cec5e2"
 
 [[pkg]]
 name = "modrinth-app"
