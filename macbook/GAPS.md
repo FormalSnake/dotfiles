@@ -101,7 +101,9 @@ Found on the way:
   the nix-patched `t3`; the spec runs upstream 0.1.3. Dropped until the patch lands upstream.
 - `dev.formalsnake.nd-resume` in `~/Library/LaunchAgents` is a one-shot another session left; its
   PATH names nix profile dirs. Not the spec's.
-- Dead links into the store with no owner, deleted by the cutover script below: `~/Sync/zen-profile/*`,
+- `~/Sync/zen-profile/*` links into the store and dangles once `/nix` is gone. Left alone: it is a
+  Syncthing folder, and deleting there deletes on every peer.
+- Dead links into the store with no owner, deleted by the cutover script below:
   `~/.vscode/extensions/*`, `~/.config/aerospace 19.21.48`, `~/.local/state/mac-server-optimization-2026-10-27/*`,
   the meshtop skill backups, `~/.local/share/devenv/gc/*`.
 
