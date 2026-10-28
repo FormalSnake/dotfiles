@@ -7,6 +7,12 @@ earlier Fedora Atomic image and nothing loads it.
 
 ## Both Linux hosts
 
+### To drop
+
+- dcal (DankCalendar) and the quickshell its UI needs: FormalShell reads local `.ics` directories
+  and cannot read dcal's IPC, so NixOS already had its service forced off. The spec still installs
+  dcal.
+
 ### Not verified
 
 - uxplay and colloid-icon-theme run as `fspec-packages.yml` jobs; nothing has applied them yet.
@@ -36,8 +42,6 @@ earlier Fedora Atomic image and nothing loads it.
 - nix-daemon builder key and `/etc/nix/machines`: `host(builders = [builder("g815", ...)])`.
 - tzupdate: the zone is fixed.
 - DankMaterialShell, `dms.service`, `flexoki-pin.service`: replaced by FormalShell.
-- dcal (DankCalendar) and the quickshell its UI needs: FormalShell reads local `.ics` directories
-  and cannot read dcal's IPC, so NixOS already had its service forced off.
 - `tray.target`, `.keep` placeholders: Home Manager and NixOS only.
 - `.config/net.imput.helium/WidevineCdm`: Helium's component updater fetches it.
 - matugen `aura` template: the ASUS Aura repaint is a NixOS module; `asus-aura` seeds the keyboard.
@@ -77,8 +81,9 @@ Nothing beyond the shared list.
   partition table and Windows' partitions are not touched.
 - Swap is zram while `@nixos` exists, since Tumbleweed would overwrite the swapfile of a hibernated
   NixOS. The 16G swapfile in `@swap` comes back after `fspec forget nixos`.
-- macos-vm (macOS 10.9 guest): its OpenCore EFI is a nix build. Port it as a `git()` OpenCore
-  build, or drop it.
+- macos-vm (macOS 10.9 guest): to port. OpenCore 1.0.7 is a release zip, not a nix build, so it
+  becomes a `github(...)` package, and the config.plist render and ESP image move into the launcher,
+  cached under `~/.local/share/macos-vm`.
 
 ### Version differences from NixOS
 

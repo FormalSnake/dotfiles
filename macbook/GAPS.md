@@ -9,6 +9,11 @@ from `spec.star`: `fspec plan --host macbook --local`, run from the spec.
 - The pam_ssh_agent_auth, sbarlua, Messages and FormalMusic `git()` packages are built by CI and
   locked, but nothing has applied them on the macbook yet.
 
+## To change
+
+- `macbook/home/.claude/skills` copies 592 files that `meshtop skills sync` already installs from
+  the agent-config registry, as on the e1504g. They leave the spec.
+
 ## Not in sync.star yet
 
 Secret-carrying state `fspec sync` can carry, still to be declared with the macbook as a peer
