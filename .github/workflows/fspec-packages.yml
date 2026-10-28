@@ -47,7 +47,6 @@ jobs:
           - { pkg: messages, platform: x86_64-linux, runner: ubuntu-24.04 }
           - { pkg: nil, platform: x86_64-linux, runner: ubuntu-24.04 }
           - { pkg: pam_ssh_agent_auth, platform: aarch64-darwin, runner: macos-26 }
-          - { pkg: sbarlua, platform: aarch64-darwin, runner: macos-26 }
           - { pkg: tmux-agent-sidebar, platform: aarch64-darwin, runner: macos-26 }
           - { pkg: uxplay, platform: x86_64-linux, runner: ubuntu-24.04 }
           - { pkg: wl-clip-persist, platform: x86_64-linux, runner: ubuntu-24.04 }
@@ -75,3 +74,34 @@ jobs:
           cd out
           oras push "ghcr.io/$owner/fspec-cache/${{ matrix.pkg }}:$(cat tag)" \
             "${{ matrix.pkg }}-${{ matrix.platform }}.tar.zst:application/vnd.fspec.package.v1.tar+zstd"
+
+  record:
+    # Without the digests in the lock a host compiles what CI already built. A push made with
+    # GITHUB_TOKEN starts no workflow, so this commit does not rebuild the cache.
+    needs: build
+    if: always() && github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    concurrency: fspec-record
+    permissions:
+      contents: write
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: formalspec
+      - uses: oras-project/setup-oras@v1
+      - name: Install fspec
+        run: cargo install --locked --git https://github.com/FormalStudio/formalspec fspec
+      - name: Record the digests
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "$TOKEN" | oras login ghcr.io -u "${{ github.actor }}" --password-stdin
+          # A failed build leaves its tag missing and the command failing; the digests that did
+          # resolve are still saved.
+          fspec --spec spec.star update --cache || true
+      - uses: stefanzweifel/git-auto-commit-action@d0b01107b5db882071f96de5dd4b54961ea93f4c # v7.2.1
+        with:
+          commit_message: "chore: record the cache digests"
+          file_pattern: fspec.lock
+          branch: formalspec
