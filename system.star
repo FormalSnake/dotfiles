@@ -248,9 +248,10 @@ session  optional       pam_keyinit.so force revoke
 session  include        common-session
 session  optional       pam_gnome_keyring.so auto_start
 """),
-        # Tumbleweed's /usr/lib/pam.d/sudo with pam_ssh_agent_auth first, as on the NixOS root.
+        # Tumbleweed's /usr/lib/pam.d/sudo with pam_ssh_agent_auth first, as on the NixOS root. The
+        # module expands %u to sudo's target user (root), so the file names the user outright.
         file("/etc/pam.d/sudo", content = """#%PAM-1.0
-auth     sufficient     pam_ssh_agent_auth.so file=/etc/ssh/authorized_keys.d/%u
+auth     sufficient     pam_ssh_agent_auth.so file=/etc/ssh/authorized_keys.d/kyandesutter
 auth     include        common-auth
 account  include        common-account
 password include        common-password
