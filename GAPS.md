@@ -76,11 +76,33 @@ Nothing beyond the shared list.
 
 ### Port
 
-- The root is ext4: `fspec disk migrate --stage` converts it to btrfs in place, keeping NixOS in
-  `@nixos`, then `fspec switch --beside tumbleweed` installs the Tumbleweed root next to it. The
-  partition table and Windows' partitions are not touched.
-- Swap is zram while `@nixos` exists, since Tumbleweed would overwrite the swapfile of a hibernated
-  NixOS. The 16G swapfile in `@swap` comes back after `fspec forget nixos`.
+Windows (p2, p3, p4, p6) and the partition table are never touched; only p5 is converted and only
+the FAT inside p1 grows. Every step keeps the g815 on Wi-Fi, ssh and tailscale.
+
+1. `dd` p1 whole to `/root/esp-p1.img` and to the external disk, then grow its FAT32 (446 MiB) to
+   fill the 1 GiB partition with `fatresize`. Delete the stale `/boot/limine/kernels`.
+2. In `~/.config/nix`, point `.#g815` at systemd-boot (the bootloader block of
+   `systems/g815/fspec-migration.nix`), `nixos-rebuild boot`, reboot, and check `bootctl status`
+   lists Windows Boot Manager. Boot Windows once from the menu.
+3. Static fspec to `/usr/local/bin/fspec` (the ISO build's musl binary); the ISO from
+   `installer/iso/build.sh --release`.
+4. `tar` of `/` without `/nix` to the external disk, then
+   `fspec disk migrate --stage <iso> --nixos-system <g815-btrfs> --backup <tar> --overlay
+   /root/g815-overlay.tar` and reboot. The overlay carries the Wi-Fi connections, tailscale state,
+   root's authorized keys and a guard that needs tailscale online.
+5. In `@nixos`: fold `fspec-migration.nix` into `.#g815` before any rebuild, then
+   `fspec switch --beside tumbleweed --inherit @nixos`.
+6. Mount `@tumbleweed`, install the static fspec at `usr/local/bin/fspec` in it and a
+   `etc/sudoers.d/49-first-apply` with `kyandesutter ALL=(ALL) NOPASSWD: ALL`: the inherited wheel
+   rule asks for a password, and pam_ssh_agent_auth only arrives with the first apply.
+7. `bootctl set-oneshot` the `tumbleweed-*+3.conf` entry and reboot, so a failed boot lands in
+   NixOS again. Check ssh, tailscale and the Windows entry, then `fspec apply --host g815` from the
+   macbook and delete `49-first-apply`.
+8. The first apply writes Limine with `preferred tumbleweed-*`. `--adopt-boot` does not cover a
+   root installed with `--beside`, so check `loader.conf` names no NixOS entry and Tumbleweed has
+   its own entries, reboot, then `fspec forget nixos`.
+9. Declare the 16G swapfile in `@swap` in `g815.star` and apply: zram covers swap until then,
+   since Tumbleweed would overwrite the swapfile of a hibernated NixOS.
 
 ### Not verified
 
