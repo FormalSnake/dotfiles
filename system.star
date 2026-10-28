@@ -24,7 +24,7 @@ DESKTOP = [
     "cava", "playerctl", "mpv", "qrencode", "wtype", "tesseract-ocr", "tesseract-ocr-traineddata-eng",
     "xdg-utils", "evolution-data-server", "geoclue2", "libgtk-4-1", "libadwaita-1-0", "python313-gobject",
     "hyprlock", "hypridle", "hyprpicker", "ghostty", "adwaita-icon-theme", "libhidapi-hidraw0",
-    "python313-evdev", "python313-FontTools", "python313-Pillow", "python313-streamdeck", "xrdb",
+    "python313-evdev", "python313-FontTools", "python313-Pillow", "xrdb",
     "gnome-keyring", "gnome-keyring-pam", "hyprland-guiutils", "apparmor-abstractions", "gvfs", "tumbler", "nautilus", "qt6ct", "qt5ct", "dconf", "gsettings-backend-dconf", "glib2-tools",
     "adwaita-fonts", "google-noto-sans-symbols2-fonts", "google-noto-coloremoji-fonts",
     "google-noto-sans-cjk-fonts", "liberation-fonts", "easyeffects", "pipewire-tools", "wvkbd",
@@ -42,7 +42,7 @@ DESKTOP = [
     # mixins/desktop/kde: Plasma next to Hyprland, kscreen-doctor for kwin-outputs, kwriteconfig6.
     "patterns-kde-kde_plasma", "kscreen6", "kf6-kconfig",
     # ancs4linux's runtime, and the libraries the ananicy-cpp build links.
-    "python313-dasbus", "python313-typer", "libfmt12", "libspdlog1_17", "libpcre2-8-0",
+    "python313-dasbus", "python313-typer", "libfmt12", "libspdlog1_17", "libpcre2-8-0", "libbpf1", "libelf1",
 ]
 
 SYSTEM = [
@@ -74,13 +74,12 @@ SYSTEM = [
 CLI = [
     "neovim", "ripgrep", "fd", "bat", "btop", "zoxide", "fzf", "git", "git-lfs", "gh", "jq", "tmux",
     "direnv", "just", "fastfetch", "lsd", "lazygit", "yazi", "mosh", "wget", "ImageMagick", "chafa",
-    "lua54", "bun", "python313-uv",
+    "lua54", "bun",
     # nvim: npm-sourced language servers run on node and install with npm; nvim-treesitter compiles
-    # its parsers with tree-sitter and gcc; snacks converts PDFs with ghostscript; astro-ls takes its
-    # TypeScript SDK from typescript. Tumbleweed's rust-src pulls in the distro toolchain, which
-    # conflicts with rustup; rust-analyzer reads the toolchain's own rust-src component instead.
-    "nodejs24", "npm24", "gcc", "tree-sitter", "ghostscript", "taplo", "gopls",
-    "lua-language-server", "typescript",
+    # its parsers with gcc; snacks converts PDFs with ghostscript. Tumbleweed's rust-src pulls in the
+    # distro toolchain, which conflicts with rustup; rust-analyzer reads the toolchain's own rust-src
+    # component instead.
+    "nodejs24", "npm24", "gcc", "ghostscript", "gopls",
     # programs.nix: node-gyp builds, plain `make`, and cargo in repos without a dev.star.
     "make", "pkgconf", "rustup",
 ]
@@ -464,6 +463,9 @@ def _pkgs():
             source = zypper(repo = "nordvpn"),
             services = [service("nordvpnd.socket"), service("nordvpnd"), service("nordvpnd-killswitch")],
         ),
+        # 0.10.0 is the first release with the Stream Deck Mini Discord Edition (PID 0x00b3);
+        # Tumbleweed ships 0.9.8. streamdeck-keys puts the share link on sys.path.
+        pkg("python-streamdeck", source = url("https://files.pythonhosted.org/packages/e9/c2/f6ffbad24afae8a19692edf68011cad105832f7b8a460be051fec9455c20/streamdeck-0.10.0.tar.gz"), share = {"python/streamdeck": "streamdeck-0.10.0/src"}),
         # Data-only: the cursor theme and the font streamdeck-keys draws with.
         pkg("bibata", version = "2.0.7", source = github("ful1e5/Bibata_Cursor", asset = "Bibata-Modern-Classic.tar.xz"), share = {"icons/Bibata-Modern-Classic": "Bibata-Modern-Classic"}),
         # session.nix's icon theme, nixpkgs' tag 2026-08-10. No release ships the built tree; the
@@ -521,8 +523,9 @@ def _pkgs():
         # Past v1.2.0: that tag misses the headers glibc 2.42 no longer pulls in.
         pkg(
             "ananicy-cpp",
-            source = git("https://gitlab.com/ananicy-cpp/ananicy-cpp", rev = "3554447c1ca495478bd00e002078847dfd2205d6", image = TUMBLEWEED, deps = ["cmake", "make", "gcc-c++", "pkgconf", "fmt-devel", "spdlog-devel", "nlohmann_json-devel", "systemd-devel", "pcre2-devel"]),
-            build_flags = ["-DENABLE_SYSTEMD=ON", "-DENABLE_REGEX_SUPPORT=ON", "-DUSE_EXTERNAL_FMTLIB=ON", "-DUSE_EXTERNAL_JSON=ON", "-DUSE_EXTERNAL_SPDLOG=ON", "-DVERSION=1.2.0"],
+            source = git("https://gitlab.com/ananicy-cpp/ananicy-cpp", rev = "3554447c1ca495478bd00e002078847dfd2205d6", image = TUMBLEWEED, deps = ["cmake", "make", "gcc-c++", "pkgconf", "fmt-devel", "spdlog-devel", "nlohmann_json-devel", "systemd-devel", "pcre2-devel", "clang", "bpftool", "libbpf-devel", "libelf-devel", "zlib-devel"]),
+            # nixpkgs' process listener: sched tracepoints over BPF instead of the netlink proc connector.
+            build_flags = ["-DUSE_BPF_PROC_IMPL=ON", "-DBPF_BUILD_LIBBPF=OFF", "-DENABLE_SYSTEMD=ON", "-DENABLE_REGEX_SUPPORT=ON", "-DUSE_EXTERNAL_FMTLIB=ON", "-DUSE_EXTERNAL_JSON=ON", "-DUSE_EXTERNAL_SPDLOG=ON", "-DVERSION=1.2.0"],
             bins = ["ananicy-cpp"],
         ),
         pkg("ananicy-rules", source = url("https://github.com/CachyOS/ananicy-rules/archive/03ef03fbf7e834385377432ccecaedd32e3414bb.tar.gz"), share = {"ananicy-rules/cachyos": "ananicy-rules-03ef03fbf7e834385377432ccecaedd32e3414bb"}),

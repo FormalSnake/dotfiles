@@ -443,14 +443,19 @@ def _tools():
             source = git("https://github.com/FormalStudio/messages", rev = "097b732d57198bbaa2386b6e072416f9e6c0184e", image = TUMBLEWEED, deps = ["rustup"] + NATIVEDESKTOP_DEPS),
             build = ["sh", "-c", "set -e; nd=\"$FSPEC_SRC/../nativedesktop-wt-msg-linux\"; git init -q \"$nd\"; git -C \"$nd\" fetch -q --depth 1 https://github.com/FormalStudio/NativeDesktop 7ad936d8bcf2ef7c7d026798cb63044b9c088b71; git -C \"$nd\" checkout -q FETCH_HEAD; cd \"$FSPEC_SRC\"; cargo build --release --locked -p messages; install -Dm755 target/release/messages \"$FSPEC_OUT/bin/messages\""],
         ),
+        pkg("uv", version = "0.13.6", source = aqua("astral-sh/uv")),
         pkg("tmux-agent-sidebar", version = "0.13.0", source = github("hiroppy/tmux-agent-sidebar", asset = "tmux-agent-sidebar-linux-*")),
     ]
 
 # The language servers and formatters the NixOS neovim wrapper put on PATH that Tumbleweed lacks.
-# taplo, gopls, lua-language-server, tree-sitter and typescript are Tumbleweed packages; nil is a
-# source build in system.star.
+# gopls is a Tumbleweed package (upstream ships no binary); nil is a source build in system.star.
 def _nvim():
     return [
+        pkg("lua-language-server", version = "3.19.2", source = aqua("LuaLS/lua-language-server")),
+        pkg("tree-sitter", version = "0.27.1", source = aqua("tree-sitter/tree-sitter")),
+        pkg("taplo", version = "0.10.0", source = aqua("tamasfe/taplo")),
+        # The SDK astro-ls falls back to (init.lua sets vim.g.tsdk from it); 7.x dropped tsserverlibrary.js.
+        pkg("typescript", version = "5.9.3", source = npm("typescript")),
         pkg("rust-analyzer", version = "2026-09-28", source = aqua("rust-lang/rust-analyzer")),
         pkg("marksman", version = "2026-02-08", source = aqua("artempyanykh/marksman")),
         pkg("nixfmt", version = "1.5.0", source = github("NixOS/nixfmt", asset = "nixfmt")),

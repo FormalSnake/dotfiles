@@ -413,10 +413,7 @@ oci = "ghcr.io/formalsnake/fspec-cache/formalshell@sha256:9cf86d4166352436c4a336
 [[pkg]]
 name = "fspec"
 source = "git:https://github.com/FormalStudio/formalspec@main"
-rev = "4d5dfa7fd9ac7f5a471658b5a6bd76290edde996"
-
-[pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/fspec@sha256:7631f7f3a7592221433aacfe30e86fe68522651d380664606824b0bb4d888e97"
+rev = "328da66e1774babf0050dc26d4692ae3db40999e"
 
 [[pkg]]
 name = "fut"
@@ -621,6 +618,16 @@ version = "1.2.0"
 name = "lua"
 source = "brew"
 version = "5.5.1"
+
+[[pkg]]
+name = "lua-language-server"
+source = "aqua:LuaLS/lua-language-server"
+version = "3.19.2"
+
+[pkg.x86_64-linux]
+url = "https://github.com/LuaLS/lua-language-server/releases/download/3.19.2/lua-language-server-3.19.2-linux-x64.tar.gz"
+hash = "sha256-k60yaxD2wAkR3YxFD6CYMy29j59F0QUvVjai1UR5uUc="
+bins = ["bin/lua-language-server"]
 
 [[pkg]]
 name = "lua-language-server"
@@ -891,6 +898,14 @@ url = "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-
 hash = "sha256-xUSLdqIwOE4te8a+tcy5e6+34sO2xSfLA6GlRrvLAKA="
 
 [[pkg]]
+name = "python-streamdeck"
+source = "url:https://files.pythonhosted.org/packages/e9/c2/f6ffbad24afae8a19692edf68011cad105832f7b8a460be051fec9455c20/streamdeck-0.10.0.tar.gz"
+
+[pkg.any]
+url = "https://files.pythonhosted.org/packages/e9/c2/f6ffbad24afae8a19692edf68011cad105832f7b8a460be051fec9455c20/streamdeck-0.10.0.tar.gz"
+hash = "sha256-+v6pGkro5xDg5fWHjTySPnQNh+Qxavgl/3osqSlI5qQ="
+
+[[pkg]]
 name = "python@3.14"
 source = "brew"
 version = "3.14.10"
@@ -998,6 +1013,16 @@ hash = "sha512-ko2xr4nlFIkqwJFnnw7hfdpjbsnK0DOk+QEEI51tvKOCF97OG0RU59iGfadoaOoY6
 
 [[pkg]]
 name = "taplo"
+source = "aqua:tamasfe/taplo"
+version = "0.10.0"
+
+[pkg.x86_64-linux]
+url = "https://github.com/tamasfe/taplo/releases/download/0.10.0/taplo-linux-x86_64.gz"
+hash = "sha256-j+GWuJTM+QcvmNThAToYAwbhfSRIMLA5hu5ejqvrYVY="
+bins = ["taplo"]
+
+[[pkg]]
+name = "taplo"
 source = "brew"
 version = "0.10.0"
 
@@ -1039,6 +1064,16 @@ url = "https://github.com/hiroppy/tmux-agent-sidebar/releases/download/v0.13.0/t
 hash = "sha256-4GSVoyegdMbjjD12l/BhvbbRnwS2fZ/DATfTTZMY40Q="
 
 [[pkg]]
+name = "tree-sitter"
+source = "aqua:tree-sitter/tree-sitter"
+version = "0.27.1"
+
+[pkg.x86_64-linux]
+url = "https://github.com/tree-sitter/tree-sitter/releases/download/v0.27.1/tree-sitter-linux-x64.gz"
+hash = "sha256-0BBC+Uuj1oJ93JeI4jX3XYNmQxvkK9+QreU02WDJi30="
+bins = ["tree-sitter"]
+
+[[pkg]]
 name = "tree-sitter-cli"
 source = "brew"
 version = "0.27.1"
@@ -1060,6 +1095,16 @@ version = "1.0"
 [pkg.aarch64-darwin]
 url = "https://github.com/corellium/usbfluxd/releases/download/v1.0/usbfluxd-macho-arm64.tar.gz"
 hash = "sha256-uB2sr7MvdtLFRxskBFr/vlqAuPOMSfHHB5FswL7CpHw="
+
+[[pkg]]
+name = "uv"
+source = "aqua:astral-sh/uv"
+version = "0.13.6"
+
+[pkg.x86_64-linux]
+url = "https://github.com/astral-sh/uv/releases/download/0.13.6/uv-x86_64-unknown-linux-musl.tar.gz"
+hash = "sha256-XWHya2xyE3ee2pDtxpceprC3lr+41JpXTIrWm1mDhUg="
+bins = ["uv-x86_64-unknown-linux-musl/uv", "uv-x86_64-unknown-linux-musl/uvx"]
 
 [[pkg]]
 name = "uv"

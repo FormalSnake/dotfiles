@@ -17,13 +17,10 @@ earlier Fedora Atomic image and nothing loads it.
 
 ### Version differences from NixOS
 
-- vscode-langservers-extracted 4.10.0 from npm; NixOS packages 1.126.04524, not published to npm.
-- gopls, lua-language-server, tree-sitter, typescript and uv are Tumbleweed's versions, not
-  nixpkgs'. taplo comes from Tumbleweed (aqua resolves `tamasfe/taplo` ambiguously against
-  `tamasfe/taplo/full`, an fspec bug).
-- python313-streamdeck 0.9.8 lacks the Stream Deck PID 0x00b3 that NixOS's git build
-  (ac67de1f70) has.
-- ananicy-cpp 1.2.0 is built without the BPF process backend.
+- vscode-langservers-extracted 4.10.0 from npm, its newest release; NixOS packages 1.126.04524,
+  built from the VS Code tree and not published to npm.
+- typescript is 5.9.3 from npm, the newest 5.x: astro-ls needs tsserverlibrary.js, which 7.x
+  dropped. NixOS put 7.0.2 on PATH and used its typescript_5 for the same SDK.
 
 ### Dropped
 
