@@ -58,6 +58,9 @@ def _services():
         # since formalshell-watchdog and the shell's IPC restart formalshell.service by name.
         service("formalshell.service", user = True),
         service("formalshell-watchdog.timer", user = True),
+        # fspec try only expires its cached ISOs when it runs; the user systemd-tmpfiles-clean.timer
+        # (on by default) expires them when it does not. Aged by atime and mtime, as fspec try ages them.
+        file("~/.config/user-tmpfiles.d/fspec-try.conf", content = "e %C/fspec/try/iso - - - am:7d\n"),
         _autostart("discord", BIN + "/discord --start-minimized", "Discord (minimized to tray)", hyprland_only = True),
         # patterns-kde-kde_plasma pulls it in; its autostart has no OnlyShowIn, so Hyprland maps its window.
         file("~/.config/autostart/org.kde.xwaylandvideobridge.desktop", content = "[Desktop Entry]\nType=Application\nName=Xwayland Video Bridge\nExec=xwaylandvideobridge --autostart\nOnlyShowIn=KDE;\n"),
