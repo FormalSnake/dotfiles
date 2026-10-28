@@ -6,6 +6,7 @@
 
     # systemd-boot instead of Limine, for the fspec migration.
     ./fspec-boot.nix
+    ./fspec-migration.nix
 
     # Windows 11 dual-boot (chainload entry, reboot-to-windows one-shot).
     ./windows-dualboot.nix

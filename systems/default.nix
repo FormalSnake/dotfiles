@@ -19,15 +19,6 @@
       ];
     };
 
-    g815-btrfs = inputs.nixpkgs.lib.nixosSystem {
-      specialArgs = { inherit inputs self; };
-      modules = [
-        self.nixosModules.default
-        ./g815
-        ./g815/fspec-migration.nix
-      ];
-    };
-
     e1504g = inputs.nixpkgs.lib.nixosSystem {
       specialArgs = { inherit inputs self; };
       modules = [

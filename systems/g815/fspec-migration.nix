@@ -1,7 +1,5 @@
-# The g815 as `fspec disk migrate --nixos-system` needs it: built as
-# nixosConfigurations.g815-btrfs while p5 is still ext4, booted only after the
-# conversion. Once it has run, this moves into hardware-configuration.nix and
-# default.nix the way the e1504g's did, and the second configuration goes.
+# p5 after `fspec disk migrate`: btrfs with NixOS in @nixos beside the other
+# roots. Goes with NixOS at `fspec forget nixos`.
 { lib, ... }:
 let
   # p5: btrfs-convert --uuid copy keeps the ext4 UUID.
