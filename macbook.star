@@ -33,6 +33,7 @@ LINKED_FILES = [
 ]
 
 # The second Claude Code profile shares the primary's config and plugins; it signs in separately.
+# `meshtop skills sync` fills ~/.claude/skills from the agent-config registry.
 PULSE = ["CLAUDE.md", "AGENTS.md", "settings.json", "agents", "commands", "hooks", "rules", "skills", "plugins"]
 
 # Media and the big caches live on the external SSD; the links dangle while it is unmounted.
@@ -444,6 +445,24 @@ def _services():
             restart = "always",
             env = {"PATH": PATH},
             launchd = _logs("obsidian-livesync-daemon", {"ThrottleInterval": 30}),
+        ),
+        service(
+            "meshtop-web",
+            exec = STORE + "/meshtop serve --listen 127.0.0.1:7314 --allow-host macbook-pro-2.tailb24294.ts.net",
+            user = True,
+            restart = "always",
+            env = {"PATH": PATH},
+            launchd = _logs("meshtop-web", {"ThrottleInterval": 30}),
+        ),
+        _poll("meshtop-web-serve", BREW + "/tailscale serve --bg --https=8314 http://127.0.0.1:7314", 300, env = {}),
+        # The Messages bridge runs from its checkout; the plist it replaces pointed at nix's bun.
+        service(
+            "messages-agent",
+            exec = BREW + "/bun " + HOME + "/Developer/ecosystem/messages/apps/mac-agent/src/agent.ts",
+            user = True,
+            restart = "always",
+            env = {"PATH": PATH},
+            launchd = _logs("messages/agent", {"WorkingDirectory": HOME + "/Developer/ecosystem/messages/apps/mac-agent"}),
         ),
         _poll("t3code-serve", BREW + "/tailscale serve --bg --https=8773 http://127.0.0.1:3773", 300, env = {}),
         # tailscale serve run from a dev session replaces the / handler on 443 and every device's
