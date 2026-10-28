@@ -53,7 +53,7 @@ rev = "138451721ff10d3c8634b32656ae3d38a99b9163"
 patches = "sha256-fMZ2hbqA0i+EUk2vaRppPoxZT3pSeOu/5hqhmPRpOnQ="
 
 [pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/ancs4linux@sha256:4dd6b78d6378caeb4207ebeee7bb7d1548ac2da9c3fb4c8ca8dd9336cfc8e279"
+oci = "ghcr.io/formalsnake/fspec-cache/ancs4linux@sha256:34904786db0a5095fa2a5b2b2a60e230a4f0baf30e3aa91238b73e5333d2ebce"
 
 [[pkg]]
 name = "android-studio"
@@ -158,7 +158,7 @@ rev = "c7f4e8ddcf102302c6375ba51534c7505ddc2616"
 oci = "ghcr.io/formalsnake/fspec-cache/clipssh@sha256:29bdee54889b237a1588891c76abebd90241ac7077ebbd36df8b7e9b0b273efe"
 
 [pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/clipssh@sha256:269b181cd09666c3ffac49804597bcc35993b653a2eceb70a0b19b01ba99a40f"
+oci = "ghcr.io/formalsnake/fspec-cache/clipssh@sha256:d2b924e140fedd3c993956ee625be7c7b8005415e973d99235e60f402d852cf1"
 
 [[pkg]]
 name = "clop"
@@ -186,7 +186,7 @@ source = "git:https://github.com/vinceliuice/Colloid-icon-theme@e3a8f89fac888af7
 rev = "e3a8f89fac888af715233f8f8ef0a5b1e350f0dd"
 
 [pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/colloid-icon-theme@sha256:92a75e8fc7b7588945a87e84a7253f6b48e93fbe0e8128f4768f5eb56f67a6ee"
+oci = "ghcr.io/formalsnake/fspec-cache/colloid-icon-theme@sha256:95945bb5d99ab6b1426a003281bfd7a918850be8df3eb2f82affafdc9ab5c10e"
 
 [[pkg]]
 name = "coreutils"
@@ -361,7 +361,7 @@ rev = "7b19d22c2d8e4b7b2295cc625c9fdf87adcabbcd"
 oci = "ghcr.io/formalsnake/fspec-cache/fetch@sha256:297d1a23120b500ae6d058742182493cece9c8adb487eb6bf33bf62d54c51f51"
 
 [pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/fetch@sha256:cdf4b57a5e23f9697405b35ab0adb1483d256a4628f08a51d909ca87bb732b4c"
+oci = "ghcr.io/formalsnake/fspec-cache/fetch@sha256:e613a27e4476bdf6bddaf8f7620617bfb9cc3be2d41cc4c9294ccbee8b305766"
 
 [[pkg]]
 name = "ffmpeg"
@@ -408,7 +408,7 @@ source = "git:https://github.com/FormalSnake/dotfiles@98ca1b6c069b2eb1029cc9b816
 rev = "98ca1b6c069b2eb1029cc9b816b735bcc3251202"
 
 [pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/formalos-chime@sha256:f7dc7cdc1a4578fbb7ea7fd3e5c5c96e46dd43589af55d393855c7ef382c0869"
+oci = "ghcr.io/formalsnake/fspec-cache/formalos-chime@sha256:e5689aa662543d163097d59f4a1305229668b7797add0be746dca431820283fc"
 
 [[pkg]]
 name = "formalshell"
@@ -748,7 +748,7 @@ source = "git:https://github.com/oxalica/nil@dbbb5c24f9215476992aa1bd305f8e5398e
 rev = "dbbb5c24f9215476992aa1bd305f8e5398e89654"
 
 [pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/nil@sha256:897aef7776a03d7c989295ba9c9bdc3ef3e189862ec72fc26a9ec4fe752f3f8f"
+oci = "ghcr.io/formalsnake/fspec-cache/nil@sha256:f2d4aad6686295f04a7f60877b822cfb1bbffa291af24575db39e9b1759dc8d6"
 
 [[pkg]]
 name = "nixfmt"
@@ -1092,7 +1092,7 @@ source = "git:https://github.com/FDH2/UxPlay@df67c212a433cf6dda3676dd40c097900d2
 rev = "df67c212a433cf6dda3676dd40c097900d24e645"
 
 [pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/uxplay@sha256:46e1fda77b72286bc251cd358945faf838c9bb3f34f78ff05bce06b93e597787"
+oci = "ghcr.io/formalsnake/fspec-cache/uxplay@sha256:923d9517781149a191cad83fd2e8acfb34192540da393cee5a088c3ecccdd24d"
 
 [[pkg]]
 name = "vscode-langservers-extracted"
@@ -1143,7 +1143,7 @@ source = "git:https://github.com/Linus789/wl-clip-persist@v0.5.0"
 rev = "e26fde01c13922e3a65049dafb7d5adfbc52626e"
 
 [pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/wl-clip-persist@sha256:db04059c62d721a10eec0c4c40442e6ed0a42ed45d771ab6147374a59800a55a"
+oci = "ghcr.io/formalsnake/fspec-cache/wl-clip-persist@sha256:7d19bee15f71e9bc6f640af67945dd124824d1e08110e0ec526e19691e98a292"
 
 [[pkg]]
 name = "wl-gammarelay-rs"
