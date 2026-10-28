@@ -257,6 +257,9 @@ password include        common-password
 session  optional       pam_keyinit.so revoke
 session  include        common-session-nonlogin
 """),
+        # The passwordless grant a migration runbook writes for the first apply, before the line
+        # above and the base packages' pam_ssh_agent_auth authenticate sudo.
+        file("/etc/sudoers.d/99-first-apply", mode = "absent"),
         # users.users.kyandesutter.linger: the user manager (t3code, the timers) runs without a login.
         file("/var/lib/systemd/linger/kyandesutter", content = ""),
         # mixins/tuning/scx.nix: scx_bpfland (scx_lavd busy-loops a core on Arrow Lake-HX).

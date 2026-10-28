@@ -104,7 +104,7 @@ the FAT inside p1 grows. Every step keeps the g815 on Wi-Fi, ssh and tailscale.
    keeping that `--inherit` does not carry (Wi-Fi and tailscale it does).
 7. `bootctl set-oneshot tumbleweed-<kernel>.conf`, the id `bootctl list` shows (no `+3`), and reboot, so a failed boot lands in
    NixOS again. Check ssh, tailscale and the Windows entry, then `fspec apply --host g815` from the
-   macbook and delete `99-first-apply`.
+   macbook, which deletes `99-first-apply` (`system.star` declares it absent).
 8. The first apply writes Limine with `preferred tumbleweed-*`. `--adopt-boot` does not cover a
    root installed with `--beside`, so check `loader.conf` names no NixOS entry and Tumbleweed has
    its own entries, reboot, then `fspec forget nixos`.

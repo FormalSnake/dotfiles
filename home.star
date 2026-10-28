@@ -445,6 +445,9 @@ def _tools():
         ),
         pkg("uv", version = "0.13.6", source = aqua("astral-sh/uv")),
         pkg("tmux-agent-sidebar", version = "0.13.0", source = github("hiroppy/tmux-agent-sidebar", asset = "tmux-agent-sidebar-linux-*")),
+        # The distro's rustup starts with no default, so cargo outside a pinned project fails until
+        # one is set; rustup installs the toolchain on first use.
+        file("~/.rustup/settings.toml", mode = "patch", owns = {"default_toolchain": "stable-x86_64-unknown-linux-gnu"}),
     ]
 
 # The language servers and formatters the NixOS neovim wrapper put on PATH that Tumbleweed lacks.
