@@ -32,6 +32,8 @@ PACKAGES = [
     "libdns_sd", "gstreamer-plugins-ugly",
     # libvirt and virt-manager for test VMs such as the FormalSpec installer ISO.
     "libvirt-daemon-qemu", "virt-manager", "system-group-libvirt",
+    # fspec try: virtio-gpu with GL in its GTK window.
+    "qemu-ui-opengl", "qemu-hw-display-virtio-vga", "qemu-hw-display-virtio-gpu-pci",
     # What the FormalShell smoke rig's slot users run besides the shared desktop packages.
     "labwc", "foot", "rsync", "mpv-mpris", "libnotify-tools", "pulseaudio-utils",
     # The compiler host builds FormalShell: what its dev.star asks the system for.
