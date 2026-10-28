@@ -242,6 +242,8 @@ def _rootfs():
         f("etc/sudoers.d/10-fspec", perms = "0440"),
         # /etc/pam.d/sudo includes sudo_local, so an agent holding a machine key authenticates sudo.
         file("/etc/pam.d/sudo_local", content = "auth       sufficient     /opt/fspec/current/pkgs/pam_ssh_agent_auth/lib/pam_ssh_agent_auth.so file=/etc/ssh/sudo_authorized_keys\n"),
+        # MagicDNS for *.ts.net. The open-source tailscaled does not write it; nix-darwin did.
+        file("/etc/resolver/ts.net", content = "nameserver 100.100.100.100\n"),
         f("Library/Fonts/MEK-Mono.otf"),
         f("Library/Fonts/MEKSans-Regular.otf"),
         f("Library/Fonts/GROUT-Display.otf"),
