@@ -1,13 +1,14 @@
 # Not ported from nix-darwin
 
-Source: `darwinConfigurations.macbook` in ~/.config/nix at 98ca1b6c and the live machine (Home
+Source: `darwinConfigurations.macbook` in ~/.config/nix at 98ca1b6c, brought up to 244dbeca, and the live machine (Home
 Manager generation `pvy93i9lkhxfxz0byv8n80y0h2zmi7sz`). The spec is `../macbook.star`, loaded
 from `spec.star`: `fspec plan --host macbook --local`, run from the spec.
 
 ## Not verified
 
-- The pam_ssh_agent_auth, sbarlua, Messages and FormalMusic `git()` packages are built by CI and
-  locked, but nothing has applied them on the macbook yet.
+- The pam_ssh_agent_auth `git()` package is built by CI and locked, but nothing has applied it on
+  the macbook yet. Messages 29ac1ee, FormalMusic ddf544d and meshtop 69f954d are locked without a
+  CI build yet.
 
 ## Not in sync.star yet
 
@@ -49,10 +50,13 @@ Secret-carrying state `fspec sync` can carry, still to be declared with the macb
 - Moonlight in Discord: the cask runs without it, and its stable.json render with it.
 - `nil` (no Homebrew formula, no release binaries for macOS).
 - The `jnsahaj/lumen` tap: nothing installs lumen on the macbook.
-- Hammerspoon's config is ported, the app is not installed (nix never installed it either).
+- fastfetch's background-refreshed pkgs count: it works around `nix-store` stalls on a busy nix
+  daemon.
 
 ## Changed behaviour
 
+- T3 Code's device hub keys are owned by the spec, so turning it off in the UI lasts until the
+  next apply; nix set them once and left them to the UI.
 - `~/.claude/skills` is no longer in the spec: `meshtop skills sync` fills it from the agent-config
   registry, as on the e1504g. `~/.claude-pulse/skills` still links to it.
 - `meshtop-web` (127.0.0.1:7314), its tailscale serve poll (8314) and the Messages bridge
@@ -84,8 +88,6 @@ Found by comparing the plan with the live machine (2026-10-28). Not fixed in the
 - **`t3code-cli-sync`** (`org.nix-community.home.t3code-cli-sync`) has no replacement. It needs
   `t3code-cli-sync.mjs` from `~/.config/nix/users/kyandesutter/mixins/dev/` and the nix-patched
   `t3` 0.1.3 (the spec ships upstream 0.1.2 with no import patch). Dropped until the patch lands.
-- **`org.nixos.start_karabiner_daemons`, `setsuid_karabiner_session_monitor`** are nix-darwin's.
-  The `karabiner-elements` cask ships its own; re-approve its driver and daemons in System Settings.
 - **`sh.brew.couchdb`** (a `brew services` plist, not nix) listens on 5984 like `fspec.couchdb`.
   Boot it out in the same step as the nix jobs.
 - **`~/.config/age/keys.txt`** and `~/.ssh` keys stay as they are; `fspec` decrypts with them.

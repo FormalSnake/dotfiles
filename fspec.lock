@@ -26,11 +26,6 @@ url = "https://github.com/lassekongo83/adw-gtk3/releases/download/v6.5/adw-gtk3v
 hash = "sha256-qBeA+t/EMr4Pw9icTrtBqijk8DLULDb5eJxX3RDPpBw="
 
 [[pkg]]
-name = "alcove"
-source = "brew:cask"
-version = "1.7.7"
-
-[[pkg]]
 name = "aldente"
 source = "brew:cask"
 version = "1.40"
@@ -179,6 +174,11 @@ version = "4.4.4"
 name = "cocoapods"
 source = "brew"
 version = "1.17.0"
+
+[[pkg]]
+name = "codex"
+source = "brew:cask"
+version = "0.165.0"
 
 [[pkg]]
 name = "colloid-icon-theme"
@@ -388,16 +388,16 @@ version = "latest"
 
 [[pkg]]
 name = "formalmusic"
-source = "git:https://github.com/FormalStudio/formalmusic@9a9d93af0fbb75594f3e91f087cf77e6c8a7f576"
-rev = "9a9d93af0fbb75594f3e91f087cf77e6c8a7f576"
-
-[[pkg]]
-name = "formalmusic"
 source = "git:https://github.com/FormalStudio/formalmusic@bf502f9a7699733f428d30e1b2e5299ac530b030"
 rev = "bf502f9a7699733f428d30e1b2e5299ac530b030"
 
 [pkg.x86_64-linux]
 oci = "ghcr.io/formalsnake/fspec-cache/formalmusic@sha256:f417984cccc986fd4719b441537c4ff5bb6c232778c16044afed04b0468f1097"
+
+[[pkg]]
+name = "formalmusic"
+source = "git:https://github.com/FormalStudio/formalmusic@ddf544d6228105dfd84c059d28d36f9cc147f59a"
+rev = "ddf544d6228105dfd84c059d28d36f9cc147f59a"
 
 [[pkg]]
 name = "formalos-chime"
@@ -559,11 +559,6 @@ source = "brew"
 version = "1.59.0"
 
 [[pkg]]
-name = "karabiner-elements"
-source = "brew:cask"
-version = "16.3.0"
-
-[[pkg]]
 name = "kopuz"
 source = "github:Kopuz-org/kopuz"
 version = "0.22.0"
@@ -708,17 +703,6 @@ hash = "sha256-ouO1DkntZDmZm6PCUu0E+r2Y7k6dEuXl3/LmY3BWl1E="
 
 [[pkg]]
 name = "meshtop"
-source = "git:https://github.com/FormalSnake/meshtop@187b76fde9253de8667a72639814f9e559aba537"
-rev = "187b76fde9253de8667a72639814f9e559aba537"
-
-[pkg.aarch64-darwin]
-oci = "ghcr.io/formalsnake/fspec-cache/meshtop@sha256:102ef382a155e9dc252fbffaa7f73aae9cd960fe8ed446667cff917a19c42ab2"
-
-[pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/meshtop@sha256:44c5000f0bc124180d5483e78f832c09df7469e939117ed54081090cc1dd4a3c"
-
-[[pkg]]
-name = "meshtop"
 source = "git:https://github.com/FormalSnake/meshtop@69f954dca8ac24b7e5b269f486f3dae3fc2ec7b5"
 rev = "69f954dca8ac24b7e5b269f486f3dae3fc2ec7b5"
 
@@ -732,8 +716,8 @@ oci = "ghcr.io/formalsnake/fspec-cache/messages@sha256:0fc4bd28d31a00b36f1e08ee3
 
 [[pkg]]
 name = "messages"
-source = "git:https://github.com/FormalStudio/messages@e9455505f88f101897d001f4a61ab9c82b0232c7"
-rev = "e9455505f88f101897d001f4a61ab9c82b0232c7"
+source = "git:https://github.com/FormalStudio/messages@29ac1eeedd10745377486851075691e0ec45800e"
+rev = "29ac1eeedd10745377486851075691e0ec45800e"
 
 [[pkg]]
 name = "modrinth-app"
@@ -821,10 +805,6 @@ version = "1.14.5"
 
 [pkg.any]
 commit = "f9ddd9841b28bbee08595acc220b813b38f6af2dc7512409880bb157aa8cc228"
-
-[[pkg]]
-name = "omniwm"
-source = "brew:cask:barutsrb/tap"
 
 [[pkg]]
 name = "opencode"
@@ -952,29 +932,12 @@ source = "brew"
 version = "2026-10-26"
 
 [[pkg]]
-name = "sbarlua"
-source = "git:https://github.com/FelixKratz/SbarLua@dba9cc421b868c918d5c23c408544a28aadf2f2f"
-rev = "dba9cc421b868c918d5c23c408544a28aadf2f2f"
-
-[pkg.aarch64-darwin]
-oci = "ghcr.io/formalsnake/fspec-cache/sbarlua@sha256:5f1ec3fe2ac5dffe1e82d334324cf74bd1c4e5b927a2e74ed38de56eca8739b5"
-
-[[pkg]]
-name = "sketchybar"
-source = "brew:felixkratz/formulae"
-
-[[pkg]]
 name = "sober"
 source = "flatpak:org.vinegarhq.Sober"
 version = "1.8.0"
 
 [pkg.any]
 commit = "7b6430c703e8178baa536062099fc5a1e0c7cf213c0789695fa7660b62cb9d26"
-
-[[pkg]]
-name = "stats"
-source = "brew:cask"
-version = "3.0.23"
 
 [[pkg]]
 name = "steamed"
@@ -1065,18 +1028,9 @@ source = "brew"
 version = "3.1.0"
 
 [[pkg]]
-name = "thaw"
-source = "brew:cask"
-version = "2.1.0"
-
-[[pkg]]
 name = "the-unarchiver"
 source = "brew:cask"
 version = "4.3.9,147,1742287964"
-
-[[pkg]]
-name = "tinycast"
-source = "brew:cask:abue-ammar/tinycast"
 
 [[pkg]]
 name = "tmux"

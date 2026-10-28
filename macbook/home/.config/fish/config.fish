@@ -13,6 +13,11 @@ set -gx ANDROID_HOME ~/Library/Android/sdk
 set -gx JAVA_HOME /Library/Java/JavaVirtualMachines/zulu-21.jdk/Contents/Home
 fish_add_path --append $ANDROID_HOME/platform-tools $ANDROID_HOME/emulator $ANDROID_HOME/cmdline-tools/latest/bin
 
+# SSH commands are noninteractive, so Homebrew's paths are static here instead of `brew shellenv`
+# per command, behind the user and store tools. --path changes this process only.
+fish_add_path --path --append /opt/homebrew/bin /opt/homebrew/sbin
+fish_add_path --path --move ~/.local/bin ~/.bun/bin ~/.cargo/bin /opt/fspec/current/bin
+
 # Secrets written by fspec at /var/run/fspec/secrets/<name>.
 function __load_fspec_secret -a env_name file
     if test -r "/var/run/fspec/secrets/$file"
@@ -87,13 +92,8 @@ status is-interactive; and begin
         /opt/homebrew/bin/brew shellenv | source
     end
 
-    # Tools from the fspec store.
-    fish_add_path /opt/fspec/current/bin
-
-    # User paths
-    fish_add_path ~/.cargo/bin
-    fish_add_path ~/.bun/bin
-    fish_add_path ~/.local/bin
+    # shellenv prepends Homebrew; the user and store tools go back in front.
+    fish_add_path --path --move ~/.local/bin ~/.bun/bin ~/.cargo/bin /opt/fspec/current/bin
 
     # OrbStack shell integration
     if test -f ~/.orbstack/shell/init2.fish

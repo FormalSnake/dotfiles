@@ -1,6 +1,13 @@
 [core]
 	precomposeUnicode = true
 
+# Homebrew's git sets credential.helper=osxkeychain, an ad-hoc signed helper: every git upgrade is a
+# new binary to the keychain ACL, and the next read pops an "allow" dialog that hangs an agent
+# shell. Apple's copy is anchor-apple signed and stays trusted.
+[credential]
+	helper = ""
+	helper = "/Library/Developer/CommandLineTools/usr/libexec/git-core/git-credential-osxkeychain"
+
 [credential "https://gist.github.com"]
 	helper = ""
 	helper = "/opt/fspec/current/bin/gh auth git-credential"

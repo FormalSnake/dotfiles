@@ -12,9 +12,7 @@ PATH = ":".join([HOME + "/.local/bin", STORE, BREW, "/opt/homebrew/opt/node@24/b
 
 # What apps or Kyan edit in place: symlinks into the repo, so the edit lands here.
 LINKED_DIRS = [
-    ".config/sketchybar",
     ".config/lynk-browser",
-    ".hammerspoon",
     ".pi/agent/extensions/mcp-bridge",
     ".pi/agent/extensions/mode-cycle",
     ".claude/agents",
@@ -22,8 +20,6 @@ LINKED_DIRS = [
     ".claude/hooks",
 ]
 LINKED_FILES = [
-    ".config/karabiner/karabiner.json",
-    ".config/omniwm/settings.toml",
     ".pi/agent/settings.json",
     ".pi/agent/keybindings.json",
     ".claude/CLAUDE.md",
@@ -65,18 +61,15 @@ FORMULAE = [
 ]
 
 CASKS = [
-    "1password", "1password-cli", "alcove", "aldente", "android-studio", "betterdisplay", "bluebubbles",
-    "clop", "discord", "font-sf-pro", "ghostty", "google-chrome", "gstreamer-runtime", "jump-desktop-connect",
-    "karabiner-elements", "nordvpn", "orbstack", "parsec", "stats", "syncthing-app", "t3-code",
-    "terminal-browser", "thaw", "the-unarchiver", "zulu@21",
+    "1password", "1password-cli", "aldente", "android-studio", "betterdisplay", "bluebubbles",
+    "clop", "codex", "discord", "font-sf-pro", "ghostty", "google-chrome", "gstreamer-runtime",
+    "jump-desktop-connect", "nordvpn", "orbstack", "parsec", "syncthing-app", "t3-code",
+    "terminal-browser", "the-unarchiver", "zulu@21",
 ]
 
 # From third-party taps: (name, tap, cask).
 TAPPED = [
-    ("omniwm", "barutsrb/tap", True),
-    ("tinycast", "abue-ammar/tinycast", True),
     ("markdown-preview", "pluk-inc/tap", True),
-    ("sketchybar", "felixkratz/formulae", False),
 ]
 
 def _brew():
@@ -148,7 +141,7 @@ def _store():
         pkg("astro-ls", version = "2.16.10", source = npm("@astrojs/language-server")),
         pkg("docker-compose-langserver", version = "0.2.0", source = npm("@microsoft/compose-language-service")),
         # Source builds at the revisions ~/.config/nix's flake.lock pins; CI builds them on macos-26.
-        pkg("meshtop", source = git("https://github.com/FormalSnake/meshtop", rev = "187b76fde9253de8667a72639814f9e559aba537")),
+        pkg("meshtop", source = git("https://github.com/FormalSnake/meshtop", rev = "69f954dca8ac24b7e5b269f486f3dae3fc2ec7b5")),
         pkg("fetch", source = git("https://github.com/areofyl/fetch", rev = "7b19d22c2d8e4b7b2295cc625c9fdf87adcabbcd")),
         pkg("fast", source = git("https://github.com/maaslalani/fast", rev = "26d8fc9c189ba748c68f8930af11dee5c2467f7e", deps = ["go"])),
         pkg(
@@ -158,19 +151,13 @@ def _store():
             bins = ["clipssh"],
         ),
         pkg("kopuz", version = "0.22.0", source = github("Kopuz-org/kopuz", asset = "Kopuz_*_aarch64.dmg"), apps = ["Kopuz.app"]),
-        _nd_app("messages", "Messages", "FormalStudio/messages", "e9455505f88f101897d001f4a61ab9c82b0232c7", "packaging/linux/dev.formalsnake.messages.png"),
-        _nd_app("formalmusic", "FormalMusic", "FormalStudio/formalmusic", "9a9d93af0fbb75594f3e91f087cf77e6c8a7f576", "packaging/icon.png"),
+        _nd_app("messages", "Messages", "FormalStudio/messages", "29ac1eeedd10745377486851075691e0ec45800e", "packaging/linux/dev.formalsnake.messages.png"),
+        _nd_app("formalmusic", "FormalMusic", "FormalStudio/formalmusic", "ddf544d6228105dfd84c059d28d36f9cc147f59a", "packaging/icon.png"),
         pkg(
             "kopuzd",
             source = git("https://github.com/Kopuz-org/kopuz", rev = "23db9b35fe45bd773e3cdcdf0d6584b13ae5b8cc"),
             build_flags = ["-p", "kopuz-kopuzd", "-p", "kopuz-ctl"],
             bins = ["kopuzd", "kopuzctl"],
-        ),
-        # sketchybar's Lua config loads this module through LUA_CPATH.
-        pkg(
-            "sbarlua",
-            source = git("https://github.com/FelixKratz/SbarLua", rev = "dba9cc421b868c918d5c23c408544a28aadf2f2f"),
-            build = ["sh", "-c", "cd \"$FSPEC_SRC\" && make install INSTALL_DIR=\"$FSPEC_OUT/lib/lua/5.5\""],
         ),
         # The sudo mesh's PAM module, which no package manager builds for macOS: nixpkgs' recipe
         # and patches, against the system OpenPAM. Modern autoconf picks gnu23, which breaks the
@@ -268,7 +255,7 @@ DEFAULTS = {
     "NSGlobalDomain": {
         "AppleInterfaceStyle": "Dark",
         "AppleShowAllExtensions": True,
-        # sketchybar owns the top edge.
+        # The native menu bar stays hidden on this unattended development server.
         "_HIHideMenuBar": True,
         "KeyRepeat": 2,
         "ApplePressAndHoldEnabled": False,
@@ -290,7 +277,6 @@ DEFAULTS = {
         "largesize": 57,
         "minimize-to-application": True,
         "persistent-apps": [_dock_tile(a) for a in [
-            "/Applications/LaunchOS.app",
             "/Applications/Helium.app",
             "/Applications/Ghostty.app",
             "/Applications/OrbStack.app",
@@ -352,8 +338,7 @@ def _logs(name, extra = {}):
 
 # Menu-bar apps started hidden at login.
 LOGIN_APPS = {
-    "omniwm": "OmniWM", "nordvpn": "NordVPN", "tinycast": "Tinycast", "aldente": "AlDente",
-    "orbstack": "OrbStack", "betterdisplay": "BetterDisplay",
+    "nordvpn": "NordVPN", "aldente": "AlDente", "orbstack": "OrbStack", "betterdisplay": "BetterDisplay",
 }
 
 def _poll(name, exec, interval, env = {"PATH": PATH}, extra = {}):
@@ -402,27 +387,6 @@ def _services():
             launchd = {"LimitLoadToSessionType": ["Aqua", "Background", "LoginWindow", "StandardIO", "System"]},
         ),
         service(
-            "sketchybar",
-            exec = BREW + "/sketchybar",
-            user = True,
-            restart = "always",
-            env = {"PATH": PATH, "LUA_CPATH": "/opt/fspec/current/pkgs/sbarlua/lib/lua/5.5/?.so;;"},
-            launchd = {
-                "ProcessType": "Interactive",
-                "StandardOutPath": HOME + "/.cache/sketchybar/out.log",
-                "StandardErrorPath": HOME + "/.cache/sketchybar/err.log",
-            },
-        ),
-        # omniwmctl exits while OmniWM's IPC is down, so it respawns until the socket exists.
-        service(
-            "omniwm-sketchybar-watch",
-            exec = "/Applications/OmniWM.app/Contents/MacOS/omniwmctl watch active-workspace,windows-changed,layout-changed --exec %s/sketchybar --trigger omniwm_update" % BREW,
-            user = True,
-            restart = "always",
-            env = {"PATH": PATH},
-            launchd = {"ThrottleInterval": 5},
-        ),
-        service(
             "t3code",
             exec = STORE + "/t3 serve --host 127.0.0.1 --port 3773 " + HOME + "/Developer",
             user = True,
@@ -430,13 +394,19 @@ def _services():
             env = {"PATH": PATH, "SHELL": BREW + "/fish"},
             launchd = _logs("t3code", {"WorkingDirectory": HOME}),
         ),
-        # The second Claude account as its own T3 Code provider (home.star has the Linux side).
-        file("~/.t3/userdata/settings.json", mode = "patch", owns = {"providerInstances.claude-pulse": {
-            "driver": "claudeAgent",
-            "displayName": "Claude Pulse",
-            "enabled": True,
-            "config": {"homePath": HOME + "/.claude-pulse"},
-        }}),
+        # The second Claude account as its own T3 Code provider (home.star has the Linux side), and
+        # the device hub for the iOS simulators, through xcrun.
+        file("~/.t3/userdata/settings.json", mode = "patch", owns = {
+            "providerInstances.claude-pulse": {
+                "driver": "claudeAgent",
+                "displayName": "Claude Pulse",
+                "enabled": True,
+                "config": {"homePath": HOME + "/.claude-pulse"},
+            },
+            "enableDeviceSupport": True,
+            "deviceOnboardingCompleted": True,
+            "enableAgentDeviceAccess": True,
+        }),
         # Keeps ~/Notes current off CouchDB's _changes feed without the Obsidian app open.
         service(
             "obsidian-livesync-daemon",

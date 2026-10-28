@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "agentPushNotifEnabled": true,
   "alwaysThinkingEnabled": true,
-  "autoCompactWindow": 200000,
+  "autoCompactWindow": 400000,
   "awaySummaryEnabled": false,
   "effortLevel": "high",
   "enabledPlugins": {
@@ -33,10 +33,11 @@
     "ralph-loop@claude-plugins-official": true,
     "security-guidance@claude-plugins-official": true,
     "skill-creator@claude-plugins-official": false,
-    "superpowers@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": false,
     "swift-lsp@claude-plugins-official": true,
     "tmux-agent-notifications@claude-plugin-tmux-notifications": true,
-    "typescript-lsp@claude-plugins-official": true
+    "typescript-lsp@claude-plugins-official": true,
+    "cloudflare@cloudflare": true
   },
   "env": {
     "SHELL": "/bin/zsh"
@@ -51,6 +52,12 @@
     "expo-plugins": {
       "source": {
         "repo": "expo/skills",
+        "source": "github"
+      }
+    },
+    "cloudflare": {
+      "source": {
+        "repo": "cloudflare/skills",
         "source": "github"
       }
     }
@@ -123,16 +130,6 @@
           }
         ],
         "matcher": ""
-      },
-      {
-        "hooks": [
-          {
-            "command": "bash ~/.claude/hooks/herdr-agent-state.sh session",
-            "timeout": 10,
-            "type": "command"
-          }
-        ],
-        "matcher": "^(startup|resume|clear|compact|fork)$"
       }
     ],
     "Stop": [
@@ -206,5 +203,9 @@
       "Jorking it"
     ]
   },
-  "tui": "fullscreen"
+  "tui": "fullscreen",
+  "statusLine": {
+    "type": "command",
+    "command": "sh \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/statusline-usage.sh\""
+  }
 }

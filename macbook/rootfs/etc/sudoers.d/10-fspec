@@ -1,3 +1,6 @@
 Defaults env_keep+=SSH_AUTH_SOCK
 Defaults noninteractive_auth
+# sudo -v and -l skip auth only when every matching rule is NOPASSWD, and %admin's is not; any
+# lets the line below satisfy them instead of opening a SecurityAgent dialog.
+Defaults verifypw=any, listpw=any
 kyandesutter ALL=(ALL) NOPASSWD: ALL
