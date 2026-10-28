@@ -25,8 +25,8 @@ PACKAGES = [
     # macos-vm: qemu-img and the dmg reader for macos-vm-fetch, the GTK window and PipeWire audio
     # the launcher asks for, mkfs.vfat for the OpenCore ESP and sgdisk for the installer disks.
     "qemu-tools", "qemu-block-dmg", "qemu-ui-gtk", "qemu-audio-pipewire", "dosfstools", "gptfdisk",
-    # NetworkManager's Wi-Fi backend here, and per-link DNS so tailscaled owns only *.ts.net.
-    "iwd", "systemd-resolved",
+    # Per-link DNS, so tailscaled owns only *.ts.net.
+    "systemd-resolved",
     # UxPlay's runtime: Avahi's dns_sd and the H.264/AAC decoders it plays through.
     "libdns_sd", "gstreamer-plugins-ugly",
     # libvirt and virt-manager for test VMs such as the FormalSpec installer ISO.
@@ -413,9 +413,10 @@ net.ipv4.conf.default.forwarding = 1
         file("/etc/systemd/logind.conf.d/10-g815.conf", content = "[Login]\nHandleLidSwitch=ignore\nHandleLidSwitchExternalPower=ignore\n"),
         file("/etc/systemd/system.conf.d/10-g815-watchdog.conf", content = "[Manager]\nRuntimeWatchdogSec=60s\n"),
         file("/etc/UPower/UPower.conf.d/10-g815.conf", content = "[UPower]\nCriticalPowerAction=PowerOff\n"),
-        # Intel BE200: iwd, no power save (latency spikes), and resolved for per-link DNS with
-        # Google's servers globally, so tailscale0's routing domain still takes *.ts.net first.
-        file("/etc/NetworkManager/conf.d/90-g815.conf", content = "[device]\nwifi.backend=iwd\n\n[connection]\nwifi.powersave=2\n\n[main]\ndns=systemd-resolved\n"),
+        # Intel BE200: NetworkManager's default wpa_supplicant (iwd fails every PSK join on this
+        # card), no power save (latency spikes), and resolved for per-link DNS with Google's servers
+        # globally, so tailscale0's routing domain still takes *.ts.net first.
+        file("/etc/NetworkManager/conf.d/90-g815.conf", content = "[connection]\nwifi.powersave=2\n\n[main]\ndns=systemd-resolved\n"),
         file("/etc/systemd/resolved.conf.d/10-kyan.conf", content = "[Resolve]\nDNS=8.8.8.8 8.8.4.4\n"),
         service("systemd-resolved"),
         file("/etc/resolv.conf", mode = "link", target = "/run/systemd/resolve/stub-resolv.conf"),
