@@ -718,6 +718,11 @@ oci = "ghcr.io/formalsnake/fspec-cache/meshtop@sha256:102ef382a155e9dc252fbffaa7
 oci = "ghcr.io/formalsnake/fspec-cache/meshtop@sha256:44c5000f0bc124180d5483e78f832c09df7469e939117ed54081090cc1dd4a3c"
 
 [[pkg]]
+name = "meshtop"
+source = "git:https://github.com/FormalSnake/meshtop@69f954dca8ac24b7e5b269f486f3dae3fc2ec7b5"
+rev = "69f954dca8ac24b7e5b269f486f3dae3fc2ec7b5"
+
+[[pkg]]
 name = "messages"
 source = "git:https://github.com/FormalStudio/messages@097b732d57198bbaa2386b6e072416f9e6c0184e"
 rev = "097b732d57198bbaa2386b6e072416f9e6c0184e"

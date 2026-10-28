@@ -6,7 +6,7 @@ set -o pipefail
 
 state=/var/lib/windows-vm
 disk=$(readlink -f /dev/disk/by-id/nvme-WD_PC_SN5000S_SDEQNSJ-1T00-1002_25458D806996)
-mkdir -p "$state/tpm" /mnt/steamlib/windows-vm
+mkdir -p "$state/tpm" "$state/overlay"
 
 # Every Windows partition on the disk must be unmounted, or the guest
 # boots from a volume the host is changing underneath it.
@@ -28,15 +28,15 @@ done
 
 # The last session's overlay is garbage now, and must not count against
 # the free-space check below.
-rm -f /mnt/steamlib/windows-vm/overlay.qcow2
+rm -f "$state/overlay/overlay.qcow2"
 
-avail=$(df --output=avail -B1G /mnt/steamlib/windows-vm | tail -1)
+avail=$(df --output=avail -B1G "$state/overlay" | tail -1)
 if [ "$avail" -lt 45 ]; then
-  echo "only ${avail}G free under /mnt/steamlib/windows-vm, refusing to start (needs 45G)" >&2
+  echo "only ${avail}G free under $state/overlay, refusing to start (needs 45G)" >&2
   exit 1
 fi
 
-qemu-img create -q -f qcow2 -F raw -b "$disk" /mnt/steamlib/windows-vm/overlay.qcow2
+qemu-img create -q -f qcow2 -F raw -b "$disk" "$state/overlay/overlay.qcow2"
 
 # The shared ESP's \EFI\BOOT\BOOTX64.EFI is not the Windows loader, and an
 # empty OVMF NVRAM only tries that fallback path. A throwaway ESP whose
@@ -91,7 +91,7 @@ args=(
   -blockdev driver=host_device,node-name=base,filename="$disk",read-only=on,cache.direct=on,aio=native
   # ntfs3 does not punch holes, so guest TRIM only lets qcow2 reuse
   # freed clusters; the file never shrinks before the stop deletes it.
-  -blockdev driver=file,node-name=ovl,filename=/mnt/steamlib/windows-vm/overlay.qcow2,discard=unmap
+  -blockdev driver=file,node-name=ovl,filename="$state/overlay/overlay.qcow2",discard=unmap
   -blockdev driver=qcow2,node-name=win,file=ovl,backing=base,discard=unmap,detect-zeroes=unmap
   # Emulated NVMe binds Windows' inbox stornvme, the driver it already
   # boots from on bare metal (no VMD on this laptop).
@@ -110,14 +110,14 @@ args=(
   -monitor unix:"$state/monitor.sock",server,nowait
 )
 # The overlay takes every guest write, and one WinUI build grew it past
-# 30G, so power the guest off before it eats Steam's floor: ACPI first,
+# 30G, so power the guest off before it eats root's floor: ACPI first,
 # then SIGINT (QEMU's quit) if it ignores that for a minute. $$ is QEMU
 # itself once the exec below has run.
 (
   while sleep 10 && kill -0 $$ 2>/dev/null; do
-    avail=$(df --output=avail -B1G /mnt/steamlib/windows-vm | tail -1)
+    avail=$(df --output=avail -B1G "$state/overlay" | tail -1)
     [ "$avail" -lt 30 ] || continue
-    echo "only ${avail}G left under /mnt/steamlib/windows-vm, powering the guest off" >&2
+    echo "only ${avail}G left under $state/overlay, powering the guest off" >&2
     echo system_powerdown | socat - unix-connect:"$state/monitor.sock" >/dev/null || true
     sleep 60
     kill -INT $$ 2>/dev/null || true

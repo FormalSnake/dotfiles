@@ -16,6 +16,8 @@ NTFS_OPTIONS = "rw,uid=1000,gid=100,umask=022,windows_names,noatime,nofail"
 PACKAGES = [
     # mixins/gaming: Steam (non-oss), gamemode, gamescope, MangoHud, Heroic for the Epic library.
     "steam", "gamemode", "gamescope", "mangohud", "heroic-games-launcher", "protontricks",
+    # FormalShell's gaming module: Steam's gamescope session and the Steam controller udev rules.
+    "gamescope-session-steam", "steam-devices",
     # mixins/gaming/waylandcraft.nix: Prism Launcher on Java 21 under cage.
     "prismlauncher", "java-21-openjdk", "xwayland-satellite", "cage",
     # windows-vm.nix and windows-dualboot.nix.
@@ -27,7 +29,16 @@ PACKAGES = [
     "iwd", "systemd-resolved",
     # UxPlay's runtime: Avahi's dns_sd and the H.264/AAC decoders it plays through.
     "libdns_sd", "gstreamer-plugins-ugly",
+    # libvirt and virt-manager for test VMs such as the FormalSpec installer ISO.
+    "libvirt-daemon-qemu", "virt-manager", "system-group-libvirt",
+    # What the FormalShell smoke rig's slot users run besides the shared desktop packages.
+    "labwc", "foot", "rsync", "mpv-mpris", "libnotify-tools", "pulseaudio-utils",
 ]
+
+# FormalShell's smoke rig (dev/remote.sh in that repo) runs as these throwaway users, one per slot,
+# so a run never shares a uid, runtime dir, session bus or user manager with the live session.
+RIG_USERS = ["fstest0", "fstest1"]
+RIG_KEY = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJi88WllIdjMaW5UJYbT7+NRYzSCrnKKYjGR7wL4n4io macbook"
 
 # windows-dualboot.nix's limine extraEntries. Windows shares the ESP, so boot():/ finds it.
 WINDOWS_BOOT = limine_entry("Windows 11", "Chainload the Windows Boot Manager", "boot():///EFI/Microsoft/Boot/bootmgfw.efi")
@@ -190,6 +201,8 @@ Categories=Game;
         # mixins/gaming/waylandcraft.nix: a login session that is only Minecraft.
         _libexec("waylandcraft-session"),
         file(GREETER_SESSIONS + "/waylandcraft.desktop", content = "[Desktop Entry]\nName=Waylandcraft\nComment=Minecraft as the desktop, hosted by cage\nExec=" + LIBEXEC + "/waylandcraft-session\nType=Application\n"),
+        # nixpkgs' programs.steam.gamescopeSession, offered by the greeter.
+        file(GREETER_SESSIONS + "/gamescope-session-steam.desktop", content = "[Desktop Entry]\nName=Steam Big Picture\nComment=Steam Big Picture session\nExec=/usr/bin/gamescope-session-plus steam\nType=Application\nDesktopNames=gamescope\n"),
         # The KDE session is the gaming desktop: Steam opens with it.
         service(
             "steam",
@@ -256,20 +269,19 @@ ExecStart=""" + LIBEXEC + """/clear-ntfs-dirty
 """),
         # Windows reads the RTC as local time.
         file("/etc/adjtime", content = "0.0 0 0.0\n0\nLOCAL\n"),
-        # windows-vm.nix: the same Windows install as a KVM guest over a throwaway overlay, with the
-        # host's mounts of its volumes stopped while it runs.
+        # windows-vm.nix: the same Windows install as a KVM guest over a throwaway overlay on root, with
+        # the host's mounts of its volumes stopped while it runs.
         _libexec("windows-vm"),
         _libexec("windows-vm-prep"),
         file("/etc/systemd/system/windows-vm.service", content = """[Unit]
 Description=Bare-metal Windows 11 as a KVM guest over a throwaway overlay
 After=mnt-windows.mount mnt-games.mount
-RequiresMountsFor=/mnt/steamlib/windows-vm
 
 [Service]
 ExecStartPre=/usr/bin/touch /run/windows-vm.running
 ExecStartPre=/usr/bin/systemctl stop mnt-windows.mount mnt-games.mount
 ExecStart=""" + LIBEXEC + """/windows-vm
-ExecStopPost=/usr/bin/rm -f /run/windows-vm.running /mnt/steamlib/windows-vm/overlay.qcow2
+ExecStopPost=/usr/bin/rm -f /run/windows-vm.running /var/lib/windows-vm/overlay/overlay.qcow2
 ExecStopPost=-/usr/bin/systemctl start --no-block mnt-windows.mount mnt-games.mount
 KillSignal=SIGINT
 KillMode=mixed
@@ -319,6 +331,62 @@ Categories=System;
 StartupWMClass=qemu-system-x86_64
 """),
     ]
+
+def _virt():
+    return [
+        # Tumbleweed's modular libvirt daemons, which its preset enables on install.
+        service("virtqemud"),
+        service("virtnetworkd.socket"),
+        service("virtstoraged.socket"),
+    ]
+
+# Each slot user's lingering manager runs a headless labwc on the Intel render node, which
+# advertises dmabuf, so dev/smoke.sh nests its Hyprland there and nothing reaches a real output or
+# input. The units are global user units; ConditionGroup keeps them out of every other manager.
+def _rig():
+    out = [
+        _libexec("formalshell-rig-export-display"),
+        _libexec("formalshell-rig-pointer"),
+        _libexec("formalshell-rig-passwords"),
+        service(
+            "formalshell-rig-passwords",
+            exec = LIBEXEC + "/formalshell-rig-passwords",
+            description = "Set the FormalShell rig users' lock-screen password",
+            systemd = {"Type": "oneshot", "RemainAfterExit": True},
+        ),
+        file("/etc/systemd/user/formalshell-rig-parent.service", content = """[Unit]
+Description=headless labwc the FormalShell smoke rig nests Hyprland in
+ConditionGroup=fstest
+
+[Service]
+Environment=WLR_BACKENDS=headless
+Environment=WLR_RENDERER=gles2
+Environment=WLR_RENDER_DRM_DEVICE=/dev/dri/by-path/pci-0000:00:02.0-render
+Environment=WLR_LIBINPUT_NO_DEVICES=1
+ExecStart=/usr/bin/labwc -s """ + LIBEXEC + """/formalshell-rig-export-display
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
+"""),
+        file("/etc/systemd/user/default.target.wants/formalshell-rig-parent.service", mode = "link", target = "/etc/systemd/user/formalshell-rig-parent.service"),
+        file("/etc/systemd/user/formalshell-rig-pointer.service", content = """[Unit]
+Description=virtual pointer held on the FormalShell rig's headless labwc
+ConditionGroup=fstest
+PartOf=formalshell-rig-parent.service
+
+[Service]
+ExecStart=""" + LIBEXEC + """/formalshell-rig-pointer
+Restart=on-failure
+RestartSec=2
+"""),
+    ]
+    for u in RIG_USERS:
+        out += [
+            file("/var/lib/systemd/linger/" + u, content = ""),
+            file("/etc/ssh/authorized_keys.d/" + u, content = RIG_KEY + "\n"),
+        ]
+    return out
 
 def _host():
     return [
@@ -389,4 +457,4 @@ def _godot():
     ]
 
 def g815(h):
-    return _nvidia() + _asus() + _gaming() + _windows() + _macos_vm() + _godot() + _host()
+    return _nvidia() + _asus() + _gaming() + _windows() + _macos_vm() + _godot() + _virt() + _rig() + _host()

@@ -1,0 +1,7 @@
+#!/bin/sh
+systemctl --user import-environment WAYLAND_DISPLAY
+systemctl --user set-environment WAYLAND_DISPLAY="$WAYLAND_DISPLAY"
+# A nested Hyprland imports its own WAYLAND_DISPLAY into this manager's
+# environment, so dev/remote.sh reads labwc's socket from here instead.
+printf %s "$WAYLAND_DISPLAY" > "$XDG_RUNTIME_DIR/formalshell-rig-display"
+systemctl --user start --no-block formalshell-rig-pointer.service

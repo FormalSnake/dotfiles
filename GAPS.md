@@ -37,6 +37,10 @@ earlier Fedora Atomic image and nothing loads it.
 - formalmusic-maintenance: deploys through the nix flake.
 - nix-daemon builder key and `/etc/nix/machines`: `host(builders = [builder("g815", ...)])`.
 - tzupdate: the zone is fixed.
+- fastfetch's background-refreshed pkgs count: it works around `nix-store` queries stalling on a
+  busy nix daemon, which Tumbleweed does not have.
+- `t3code-cli-sync`: it needs `t3code-cli-sync.mjs` and a `t3` built with nix's
+  `t3code-import-new-turns.patch`; the spec ships upstream's 0.1.3 release.
 - DankMaterialShell, `dms.service`, `flexoki-pin.service`: replaced by FormalShell.
 - `tray.target`, `.keep` placeholders: Home Manager and NixOS only.
 - `.config/net.imput.helium/WidevineCdm`: Helium's component updater fetches it.
@@ -84,6 +88,10 @@ Nothing beyond the shared list.
   config.plist render and ESP image in the `macos-vm` launcher (cached under
   `~/.local/share/macos-vm`), `macos-vm-fetch` and the guest installer. Built from the nix module
   but never run on the g815.
+- libvirt (virtqemud and the network and storage sockets), Steam's gamescope session in the greeter
+  and the FormalShell smoke rig users: not applied yet.
+- The rig nests Tumbleweed's Hyprland, whose aquamarine 0.15.1 lacks hyprwm/aquamarine#415 that
+  NixOS patches in, so the nested session gets no monitor until Tumbleweed ships a newer one.
 
 ### Version differences from NixOS
 
@@ -93,6 +101,8 @@ Nothing beyond the shared list.
 ### Dropped
 
 - `checkReversePath = false`: no longer in the nix config. Tumbleweed's IPv4 rp_filter is loose.
+- aarch64-linux binfmt emulation and nix's min-free/max-free: they only serve nix builds.
+- gamescope's `cap_sys_nice`: fspec has no file capabilities and Tumbleweed's gamescope ships none.
 
 ## macbook
 

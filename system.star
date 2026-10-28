@@ -80,6 +80,8 @@ CLI = [
     # rust-src; astro-ls takes its TypeScript SDK from typescript.
     "nodejs24", "npm24", "gcc", "tree-sitter", "ghostscript", "rust-src", "taplo", "gopls",
     "lua-language-server", "typescript",
+    # programs.nix: node-gyp builds, plain `make`, and cargo in repos without a dev.star.
+    "make", "pkgconf", "rustup",
 ]
 
 PACKAGES = DESKTOP + SYSTEM + CLI
@@ -475,7 +477,7 @@ def _pkgs():
         # helium-wrapper sets LD_LIBRARY_PATH to its own directory, so `helium` is the wrapper.
         pkg("helium", version = "0.19.4.1", source = github("imputnet/helium-linux", asset = "helium-*_linux.tar.xz"), links = {"helium": "helium-wrapper"}),
         pkg("matugen", version = "4.2.0", source = github("InioX/matugen", asset = "matugen-*-x86_64.tar.gz")),
-        pkg("meshtop", source = git("https://github.com/FormalSnake/meshtop", rev = "187b76fde9253de8667a72639814f9e559aba537")),
+        pkg("meshtop", source = git("https://github.com/FormalSnake/meshtop", rev = "69f954dca8ac24b7e5b269f486f3dae3fc2ec7b5")),
         pkg("wl-clip-persist", source = git("https://github.com/Linus789/wl-clip-persist", rev = "v0.5.0")),
         pkg("wl-gammarelay-rs", source = git("https://github.com/MaxVerevkin/wl-gammarelay-rs", rev = "v1.0.1")),
         # omarchy-pods 1.0.2 (the commit its annotated tag points at) with the three patches the nix
@@ -599,7 +601,16 @@ def _services(h):
         timer("docker-prune", exec = "/usr/bin/docker system prune -f --all --filter until=72h", schedule = "0 0 * * *"),
         # nix.gc's daily run, for fspec's own generations and store.
         timer("fspec-gc", exec = "/usr/local/bin/fspec gc --older-than 14d", schedule = "30 0 * * *"),
-        timer("storage-gc", exec = LIBEXEC + "/storage-gc --apply --prune-worktrees", schedule = "0 12 * * *", user = True),
+        # Hourly: a day of agent builds can eat 35 GB, so the low-free pass has to land the same
+        # afternoon. The g815's 256 GB root counts as low under 45 GB, where Chromium's
+        # storage-pressure bubble starts.
+        timer(
+            "storage-gc",
+            exec = LIBEXEC + "/storage-gc --apply --prune-worktrees",
+            schedule = "0 * * * *",
+            user = True,
+            env = {"LOW_FREE_GB": "45"} if h.name == "g815" else {},
+        ),
     ]
 
 def _e1504g_services():

@@ -44,11 +44,14 @@
 # away.
 #
 # Low-free-space mode: when / has less than LOW_FREE_GB free (default 30), every
-# cutoff is divided by 4 (minimum 1 day) so a full disk is cleared in one pass.
+# cutoff is divided by 4 (minimum 1 day) so a full disk is cleared in one pass,
+# and compiler output (target/, worktree build dirs, fspec builds) goes once it
+# sat idle for PRESSURE_HOURS. Day-based cutoffs never fire during active work:
+# Oct 2026, four kopuz-gpui worktrees built 26 GB of target/ in one day.
 #
 # Env: ROOTS (space-separated scan roots), AGE_DAYS, TARGET_AGE_DAYS,
 # WORKTREE_AGE_DAYS, WORKTREE_PRUNE_AGE_DAYS, RUNS_AGE_DAYS, INSTALL_AGE_DAYS,
-# NIX_KEEP, LOW_FREE_GB.
+# NIX_KEEP, LOW_FREE_GB, PRESSURE_HOURS.
 # Callable from a launchd user agent (mac) or a systemd service (NixOS); logs
 # to stdout/stderr.
 
@@ -73,6 +76,7 @@ WORKTREE_PRUNE_AGE_DAYS="${WORKTREE_PRUNE_AGE_DAYS:-14}"
 RUNS_AGE_DAYS="${RUNS_AGE_DAYS:-7}"
 NIX_KEEP="${NIX_KEEP:-14d}"
 LOW_FREE_GB="${LOW_FREE_GB:-30}"
+PRESSURE_HOURS="${PRESSURE_HOURS:-6}"
 OS=$(uname -s)
 APPLY=0
 DEEP=0
@@ -102,6 +106,12 @@ if (( free_gb < LOW_FREE_GB )); then
     printf -v "$v" '%s' "$n"
   done
 fi
+TARGET_CUT_H=$(( TARGET_AGE_DAYS * 24 ))
+WORKTREE_CUT_H=$(( WORKTREE_AGE_DAYS * 24 ))
+if (( LOW_FREE )); then
+  TARGET_CUT_H=$PRESSURE_HOURS
+  WORKTREE_CUT_H=$PRESSURE_HOURS
+fi
 
 # ~/Developer is the real project tree; the two worktree dirs are where Herdr
 # and Claude check out throwaway branches, and they accumulate their own
@@ -114,7 +124,9 @@ fi
 if [[ -n "${ROOTS:-}" ]]; then
   read -r -a SCAN_ROOTS <<<"$ROOTS"
 else
-  SCAN_ROOTS=("$HOME/Developer" "$HOME/.herdr/worktrees" "$HOME/.claude-worktrees")
+  # ~/build is where agents point CARGO_TARGET_DIR and drop screenshot runs;
+  # fspec's per-package build dirs hold a cargo target each.
+  SCAN_ROOTS=("$HOME/Developer" "$HOME/.herdr/worktrees" "$HOME/.claude-worktrees" "$HOME/build" "${XDG_CACHE_HOME:-$HOME/.cache}/fspec/build")
   [[ "$OS" == Darwin ]] && SCAN_ROOTS+=("/Volumes/Kyan Drive/dev-cache.noindex")
 fi
 WORKTREE_PATH='/\.claude/worktrees/|/\.herdr/worktrees/|/\.claude-worktrees/'
@@ -160,11 +172,17 @@ dir_kb() { "$DU" -sxk "$1" 2>/dev/null | awk '{print $1}'; }
 # Age of the most recently touched depth-1 entry. A build always writes a child
 # (target/debug, node_modules/.package-lock.json), while the parent's own mtime
 # can sit unchanged for months, so the parent alone is not a usable signal.
-newest_age_days() {
+newest_age_hours() {
   local newest
   newest=$("$FIND" "$1" -maxdepth 1 -exec "$STAT" "${STAT_MTIME[@]}" {} + 2>/dev/null | sort -rn | head -1)
-  [[ "$newest" =~ ^[0-9]+$ ]] || { echo 99999; return; }
-  echo $(( (NOW - newest) / 86400 ))
+  [[ "$newest" =~ ^[0-9]+$ ]] || { echo 999999; return; }
+  echo $(( (NOW - newest) / 3600 ))
+}
+newest_age_days() { echo $(( $(newest_age_hours "$1") / 24 )); }
+
+# cargo writes this tag into every target dir it creates.
+is_cachedir() {
+  head -c 43 "$1/CACHEDIR.TAG" 2>/dev/null | grep -q '^Signature: 8a477f597d28d172789f06886806bc55'
 }
 
 # 0 = ignored, 1 = tracked or visible to git, 2 = not a repo at all.
@@ -211,7 +229,7 @@ run_cmd() {
 }
 
 echo
-echo "storage-gc ($OS) — $( ((APPLY)) && echo APPLY || echo 'dry run, pass --apply to delete')$( ((LOW_FREE)) && echo " | LOW FREE (${free_gb} GB < ${LOW_FREE_GB} GB), cutoffs cut to a quarter") | stale after ${AGE_DAYS}d, target ${TARGET_AGE_DAYS}d, worktrees ${WORKTREE_AGE_DAYS}d, installs ${INSTALL_AGE_DAYS}d"
+echo "storage-gc ($OS) — $( ((APPLY)) && echo APPLY || echo 'dry run, pass --apply to delete')$( ((LOW_FREE)) && echo " | LOW FREE (${free_gb} GB < ${LOW_FREE_GB} GB), cutoffs cut to a quarter") | stale after ${AGE_DAYS}d, target ${TARGET_CUT_H}h, worktrees ${WORKTREE_CUT_H}h, installs ${INSTALL_AGE_DAYS}d"
 df -h / | tail -1 | awk '{printf "before: %s used of %s, %s free\n", $3, $2, $4}'
 echo
 
@@ -226,14 +244,15 @@ for root in "${SCAN_ROOTS[@]}"; do
     case $rc in
       0) ;;                                             # git-ignored: fair game
       1) continue ;;                                    # git can see it: leave it
-      2) [[ "$name" =~ ^(${ALWAYS_SAFE})$ ]] || continue ;;
+      2) [[ "$name" =~ ^(${ALWAYS_SAFE})$ ]] || is_cachedir "$dir" || continue ;;
     esac
 
     # A bare `target`, `.build` or `zig-out` outside its build system is
-    # somebody else's output directory.
+    # somebody else's output directory, unless cargo tagged it (a relocated
+    # CARGO_TARGET_DIR, fspec's build/).
     parent=$(dirname "$dir")
     case "$name" in
-      target) [[ -f "$parent/Cargo.toml" ]] || continue ;;
+      target) [[ -f "$parent/Cargo.toml" ]] || is_cachedir "$dir" || continue ;;
       .build) [[ -f "$parent/Package.swift" ]] || continue ;;
       .zig-cache|zig-out) [[ -f "$parent/build.zig" ]] || continue ;;
     esac
@@ -243,14 +262,15 @@ for root in "${SCAN_ROOTS[@]}"; do
       .linux-builder|.testvm) pgrep -f "$dir" >/dev/null 2>&1 && continue ;;
     esac
 
-    cutoff=$AGE_DAYS
-    [[ "$name" == node_modules || "$name" == Pods ]] && cutoff=$INSTALL_AGE_DAYS
-    [[ "$name" == target || "$name" == .build || "$name" == .zig-cache || "$name" == zig-out ]] && cutoff=$TARGET_AGE_DAYS
-    [[ "$dir" =~ $WORKTREE_PATH ]] && cutoff=$WORKTREE_AGE_DAYS
-    (( $(newest_age_days "$dir") >= cutoff )) || continue
+    cutoff=$(( AGE_DAYS * 24 ))
+    [[ "$name" == node_modules || "$name" == Pods ]] && cutoff=$(( INSTALL_AGE_DAYS * 24 ))
+    [[ "$name" == target || "$name" == .build || "$name" == .zig-cache || "$name" == zig-out ]] && cutoff=$TARGET_CUT_H
+    is_cachedir "$dir" && cutoff=$TARGET_CUT_H
+    [[ "$dir" =~ $WORKTREE_PATH ]] && cutoff=$WORKTREE_CUT_H
+    (( $(newest_age_hours "$dir") >= cutoff )) || continue
     queue "$name" "$dir"
   done < <(
-    "$FIND" "$root" \
+    "$FIND" "$root" -mindepth 1 \
       -type d -name .git -prune -o \
       -type d \( -name node_modules -o -name target -o -name build \
                  -o -name .next -o -name .turbo -o -name .expo -o -name Pods \
@@ -267,13 +287,13 @@ for root in "${SCAN_ROOTS[@]}"; do
   # The named dirs above are pruned from this walk so nothing queues twice.
   while IFS= read -r -d '' tag; do
     dir=$(dirname "$tag")
-    head -c 43 "$tag" 2>/dev/null | grep -q '^Signature: 8a477f597d28d172789f06886806bc55' || continue
+    is_cachedir "$dir" || continue
     rc=0; git_ignored "$dir" || rc=$?
     (( rc == 1 )) && continue
-    (( $(newest_age_days "$dir") >= TARGET_AGE_DAYS )) || continue
+    (( $(newest_age_hours "$dir") >= TARGET_CUT_H )) || continue
     queue "cachedir-tag" "$dir"
   done < <(
-    "$FIND" "$root" \
+    "$FIND" "$root" -mindepth 1 \
       -type d \( -name .git -o -name node_modules -o -name target -o -name build \
                  -o -name .next -o -name .turbo -o -name .expo -o -name Pods \
                  -o -name DerivedData -o -name .gradle -o -name .venv \
@@ -377,6 +397,37 @@ for d in "${TMPDIR:-/tmp}"/nix-vm.*; do
   queue "nix-vm-scratch" "$d"
 done
 
+# Test runs and SwiftPM leave mkdtemp dirs in $TMPDIR behind (TemporaryDirectory.*,
+# xfs-*, playwright profiles): 100k of them on the mac in Oct 2026, and Finder
+# held $TMPDIR open and spun two cores re-enumerating it. Only empty ones go,
+# and rmdir refuses anything that gained an entry since the scan.
+tmp_root="${TMPDIR:-/tmp}"
+[[ "$OS" == Darwin ]] && tmp_root=$(getconf DARWIN_USER_TEMP_DIR)
+tmp_root=${tmp_root%/}
+tmp_dirs=0
+while IFS= read -r -d '' d; do
+  if (( APPLY )); then rmdir -- "$d" 2>/dev/null || continue; fi
+  tmp_dirs=$(( tmp_dirs + 1 ))
+done < <("$FIND" "$tmp_root" -mindepth 1 -maxdepth 1 -type d -empty -mtime +0 -print0 2>/dev/null)
+(( tmp_dirs > 0 )) && plan+=("0|tmp-empty-dirs|$tmp_dirs empty temp dirs")
+
+# Chromium and CEF (ndshell's cefdev) leave a SingletonSocket dir per launch and
+# never remove it when killed: 3.4k of them in Oct 2026. A dir is stale once no
+# process holds its socket.
+live_sockets=$(lsof -U -Fn 2>/dev/null | sed -n 's/^n//p' || true)
+singleton_dirs=0
+while IFS= read -r -d '' sock; do
+  d=${sock%/SingletonSocket}
+  grep -qxF -- "$sock" <<<"$live_sockets" && continue
+  grep -qxF -- "/private$sock" <<<"$live_sockets" && continue
+  if (( APPLY )); then
+    rm -f -- "$sock" "$d/SingletonCookie" "$d/SingletonLock"
+    rmdir -- "$d" 2>/dev/null || continue
+  fi
+  singleton_dirs=$(( singleton_dirs + 1 ))
+done < <("$FIND" "$tmp_root" -mindepth 2 -maxdepth 2 -name SingletonSocket -type s -mtime +0 -print0 2>/dev/null)
+(( singleton_dirs > 0 )) && plan+=("0|tmp-singleton-dirs|$singleton_dirs stale Chromium singleton dirs")
+
 ### 4. Package manager caches
 
 [[ "$OS" == Darwin ]] && run_cmd "homebrew" "$HOME/Library/Caches/Homebrew" brew cleanup -s --prune=all
@@ -417,7 +468,7 @@ else
   # The native-desktop CLI builds its host crates here; same regrowth as any
   # cargo target/, so it follows the target cutoff.
   nd_target="${XDG_CACHE_HOME:-$HOME/.cache}/nd-build/target"
-  if [[ -d "$nd_target" ]] && (( $(newest_age_days "$nd_target") >= TARGET_AGE_DAYS )); then
+  if [[ -d "$nd_target" ]] && (( $(newest_age_hours "$nd_target") >= TARGET_CUT_H )); then
     queue "nd-build-target" "$nd_target"
   fi
   # The CEF runtime nativedesktop downloads on first launch, 1.5 GB per copy.
