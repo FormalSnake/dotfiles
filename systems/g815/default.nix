@@ -4,6 +4,9 @@
     # Generated on first boot with `nixos-generate-config` (placeholder for now).
     ./hardware-configuration.nix
 
+    # systemd-boot instead of Limine, for the fspec migration.
+    ./fspec-boot.nix
+
     # Windows 11 dual-boot (chainload entry, reboot-to-windows one-shot).
     ./windows-dualboot.nix
 
