@@ -369,7 +369,7 @@ def _rig():
                 "https://github.com/hyprwm/aquamarine",
                 rev = "f31c47a1b9d300847d8fc3108ad959448103dfc1",
                 image = TUMBLEWEED,
-                deps = ["cmake", "make", "gcc-c++", "pkgconf", "hyprwayland-scanner", "pkgconfig(libseat)", "pkgconfig(libinput)", "pkgconfig(wayland-client)", "pkgconfig(wayland-protocols)", "pkgconfig(hyprutils)", "pkgconfig(pixman-1)", "pkgconfig(libdrm)", "pkgconfig(gbm)", "pkgconfig(libudev)", "pkgconfig(libdisplay-info)", "pkgconfig(hwdata)", "pkgconfig(egl)", "pkgconfig(glesv2)", "Mesa-libGLESv3-devel"],
+                deps = ["cmake", "make", "gcc-c++", "pkgconf", "hyprwayland-scanner", "pkgconfig(libseat)", "pkgconfig(libinput)", "pkgconfig(wayland-client)", "pkgconfig(wayland-protocols)", "pkgconfig(hyprutils)", "pkgconfig(pixman-1)", "pkgconfig(libdrm)", "pkgconfig(gbm)", "pkgconfig(libudev)", "pkgconfig(libdisplay-info)", "pkgconfig(hwdata)", "pkgconfig(egl)", "pkgconfig(glesv2)", "Mesa-libGLESv3-devel", "pkgconfig(gl)"],
             ),
             patches = ["patches/aquamarine-wayland-configure.patch"],
             build_flags = ["-DCMAKE_INSTALL_LIBDIR=lib"],
