@@ -409,6 +409,10 @@ name = "formalshell"
 source = "git:https://github.com/FormalStudio/FormalShell@3628805a05da558071cdbc2fb29268ca0c9972f1"
 rev = "3628805a05da558071cdbc2fb29268ca0c9972f1"
 
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/formalshell@sha256:02a44e8b5cca541092a4c6e7f887be366c740f02b350249a99791433f740edfd"
+build = "a43ebaad"
+
 [[pkg]]
 name = "fspec"
 source = "git:https://github.com/FormalStudio/formalspec@main"
