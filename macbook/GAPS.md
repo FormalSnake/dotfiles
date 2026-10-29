@@ -24,7 +24,7 @@ Secret-carrying state `fspec sync` can carry, still to be declared with the macb
 ## Version differences from nix
 
 - Homebrew ships its current versions: herdr 0.9.5 (nix 0.9.3), opencode 2.1.2 (1.18.35), go
-  1.27.3 (1.26.8), zig 0.17.0 (0.16.0), node 24.22.1 (24.21.0), Discord 0.0.418 (0.0.414),
+  1.27.3 (1.26.8), zig 0.17.0 (0.16.0), node 24.22.1 (24.21.0),
   T3 Code app 0.1.1 (0.1.0), gopls 0.24.0, typescript stays 5.9.3 from npm.
 - Claude Code is `self_managed` at 2.1.310 and updates itself.
 - nvim plugins are the same revisions nix pinned, through `vim.pack` and
@@ -47,7 +47,6 @@ Secret-carrying state `fspec sync` can carry, still to be declared with the macb
   workarounds for sshd and PAM refusing `/nix/store` symlinks. fspec writes real files, so sshd
   reads `/etc/ssh/authorized_keys.d/%u` through `AuthorizedKeysFile`.
 - The ghostty terminfo `tic` step: the compiled entry is `~/.terminfo/78/xterm-ghostty`.
-- Moonlight in Discord: the cask runs without it, and its stable.json render with it.
 - `nil` (no Homebrew formula, no release binaries for macOS).
 - The `jnsahaj/lumen` tap: nothing installs lumen on the macbook.
 - fastfetch's background-refreshed pkgs count: it works around `nix-store` stalls on a busy nix
