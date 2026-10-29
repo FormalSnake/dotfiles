@@ -1,1 +1,4 @@
+# The apply runs fspec through sudo, and fspec reaches the g815 builder through sudo -u again, with
+# the agent the apply forwards: the guest user has no key of its own.
+Defaults env_keep += "SSH_AUTH_SOCK"
 kyan ALL=(ALL) NOPASSWD: ALL
