@@ -1,3 +1,4 @@
+load("//lib/launchd.star", "BREW")
 load("//lib/paths.star", "TUMBLEWEED")
 
 # The tools every host has, each declared once. Where the platforms get one differently, on(linux,
@@ -32,6 +33,7 @@ def tools(host):
         return pkg(name, source = brew(cask = cask)) if mac else linux
 
     apps = [
+        on(service("tailscaled"), service("tailscaled", exec = BREW + "/tailscaled", restart = "always")),
         # The CLI's %post runs groupadd, so it installs after shadow.
         brew_or("1password", pkg("1password", source = zypper(repo = "1password")), cask = True),
         brew_or("1password-cli", pkg("1password-cli", source = zypper(repo = "1password")), cask = True),

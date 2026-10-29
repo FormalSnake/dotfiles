@@ -3,7 +3,7 @@ load("//lib/tree.star", "tree")
 load("//modules/fastfetch/fastfetch.star", "fastfetch")
 load("//modules/home/home.star", "home")
 load("//modules/secrets.star", "secrets")
-load("//modules/t3code/t3code.star", "agents")
+load("//modules/storage-gc/storage-gc.star", "storage_gc")
 load("//modules/tools.star", "tools")
 load("//hosts/macbook/defaults.star", "SYSTEM")
 load("//hosts/macbook/packages.star", "BREW", "STORE")
@@ -36,7 +36,7 @@ ON_DRIVE = {"Movies": "Movies", ".gradle": "gradle", "Library/Developer/CoreSimu
 HOME_FILES = [file("~/" + p, mode = "link", target = DRIVE + "/" + sub) for p, sub in ON_DRIVE.items()] + [
     # The shared ssh config names the agent by the path 1Password uses on Linux.
     file("~/.1password/agent.sock", mode = "link", target = "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"),
-] + agents("macbook")
+]
 
 ROOT_FILES = tree([ROOT + "rootfs/"], perms = {"/etc/sudoers.d/10-fspec": "0440"}) + [
     file("/etc/ssh/authorized_keys.d/kyandesutter", content = AUTHORIZED_KEYS, perms = "0644"),
@@ -62,5 +62,5 @@ macbook = host(
     name = "macbook",
     platform = "aarch64-darwin",
     users = [user("kyandesutter", uid = 502, shell = "/opt/homebrew/bin/fish")],
-    modules = [tools, BREW, STORE, home(linked = LINKED), HOME_FILES, fastfetch("macbook"), ROOT_FILES, SECRETS, SYSTEM, SERVICES],
+    modules = [tools, BREW, STORE, home(linked = LINKED), HOME_FILES, fastfetch("macbook"), ROOT_FILES, SECRETS, SYSTEM, SERVICES, storage_gc()],
 )

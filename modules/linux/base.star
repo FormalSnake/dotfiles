@@ -51,7 +51,7 @@ FILES = [
 ]
 
 SERVICES = [service(s) for s in [
-    "tailscaled", "sshd", "bluetooth", "chronyd", "irqbalance", "avahi-daemon", "cups-browsed",
+    "sshd", "bluetooth", "chronyd", "irqbalance", "avahi-daemon", "cups-browsed",
     "earlyoom", "firewalld", "scx", "usbflux-export.socket", "formalshell-greeter-mirror.path",
     "tuned", "tuned-ppd", "docker.socket", "syncthing@kyandesutter",
 ]] + [
@@ -110,12 +110,6 @@ SERVICES = [service(s) for s in [
     timer("docker-prune", exec = "/usr/bin/docker system prune -f --all --filter until=72h", schedule = "0 0 * * *"),
     timer("fspec-gc", exec = "/usr/local/bin/fspec gc --older-than 14d", schedule = "30 0 * * *"),
 ]
-
-# Hourly, since a day of agent builds can eat 35 GB. `low_free_gb` is where Chromium's
-# storage-pressure bubble starts on a small root.
-def storage_gc(low_free_gb = None):
-    env = {"LOW_FREE_GB": str(low_free_gb)} if low_free_gb else {}
-    return timer("storage-gc", exec = LIBEXEC + "/storage-gc --apply --prune-worktrees", schedule = "0 * * * *", user = True, env = env)
 
 def swapfile():
     """The 16 GB swapfile in @swap behind zram; swap.mount is per host."""

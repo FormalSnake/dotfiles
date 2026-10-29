@@ -34,9 +34,12 @@ modules/
   t3code/              T3 Code servers and the desktop app, and t3-agents for every server
   boot/                the FormalOS boot theme and its assets
   fastfetch/           one config for every host and each host's logo
+  storage-gc/          the build-output and worktree pruner every host runs
+  tools.star           the tools every host has, each sourced per platform
+  tailscale.star       serve(): keeps a tailscale serve handler up
   secrets.star         decrypts secrets.star and writes fish's exports
   sync.star            app data `fspec sync` moves between the Linux pair
-lib/                   helpers: paths, keys, tree(), unit shorthands
+lib/                   helpers: paths, keys, tree(), systemd and launchd shorthands
 patches/               patches for store packages
 docs/                  what the nix config had that this one does not
 ```

@@ -1,4 +1,6 @@
-load("//lib/paths.star", "BIN", "HOME", "STORE")
+load("//lib/launchd.star", "BREW", "PATH", "agent")
+load("//lib/paths.star", "BIN", "STORE", "home_of")
+load("//modules/tailscale.star", "serve")
 
 # The desktop app always starts its own backend and refuses a data directory a server owns, so it
 # gets ~/.t3-desktop and reaches every server over ssh. saved-environments.json is read once, to
@@ -30,28 +32,37 @@ def agents(host):
         return []
     return [file("~/.local/bin/t3-agents", src = "modules/t3code/t3-agents", perms = "0755")]
 
+# The macbook's server drives its iOS simulators and devices.
+DEVICES = {"enableDeviceSupport": True, "deviceOnboardingCompleted": True, "enableAgentDeviceAccess": True}
+
 def t3code(host):
-    pulse = {"providerInstances.claude-pulse": pulse_provider(HOME)}
-    out = [
-        file("~/.t3-desktop/userdata/settings.json", mode = "patch", owns = pulse),
-        file("~/.t3-desktop/userdata/saved-environments.json", mode = "seed", perms = "0600", content = {
-            "version": 1,
-            "records": [_environment(name, s) for name, s in SERVERS.items()],
-        }),
-    ]
-    if host in SERVERS:
+    """The desktop app on Linux, and the server on each host in SERVERS."""
+    mac = host.platform.is_darwin
+    home = home_of(host)
+    pulse = {"providerInstances.claude-pulse": pulse_provider(home)}
+    out = []
+    if not mac:
         out += [
-            file("~/.t3/userdata/settings.json", mode = "patch", owns = pulse),
-            service(
+            file("~/.t3-desktop/userdata/settings.json", mode = "patch", owns = pulse),
+            file("~/.t3-desktop/userdata/saved-environments.json", mode = "seed", perms = "0600", content = {
+                "version": 1,
+                "records": [_environment(name, s) for name, s in SERVERS.items()],
+            }),
+        ]
+    if host.name in SERVERS:
+        exec = STORE + "/t3 serve --host 127.0.0.1 --port 3773 " + home + "/Developer"
+        out += [
+            file("~/.t3/userdata/settings.json", mode = "patch", owns = dict(pulse, **DEVICES) if mac else pulse),
+            agent("t3code", exec, env = {"PATH": PATH, "SHELL": BREW + "/fish"}, WorkingDirectory = home) if mac else service(
                 "t3code",
-                exec = STORE + "/t3 serve --host 127.0.0.1 --port 3773 " + HOME + "/Developer",
+                exec = exec,
                 user = True,
                 restart = "always",
                 after = ["network"],
                 description = "T3 Code server",
-                env = {"PATH": BIN + ":" + STORE + ":" + HOME + "/.bun/bin:/usr/bin:/bin", "SHELL": "/usr/bin/fish"},
-                systemd = {"RestartSec": 5, "WorkingDirectory": HOME, "unit": {"ConditionPathExists": STORE + "/t3"}},
+                env = {"PATH": BIN + ":" + STORE + ":" + home + "/.bun/bin:/usr/bin:/bin", "SHELL": "/usr/bin/fish"},
+                systemd = {"RestartSec": 5, "WorkingDirectory": home, "unit": {"ConditionPathExists": STORE + "/t3"}},
             ),
-            timer("t3code-serve", exec = "/usr/bin/tailscale serve --bg --https=8773 http://127.0.0.1:3773", schedule = "*/5 * * * *", user = True),
+            serve("t3code-serve", 8773, "http://127.0.0.1:3773"),
         ]
-    return out + agents(host)
+    return out + agents(host.name)

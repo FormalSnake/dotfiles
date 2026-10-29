@@ -23,9 +23,9 @@ def home(linked = []):
         dests = {src: _dest(roots, src) for src in linked}
         files = tree(roots, dest = "~/", skip = dests.values(), rename = {} if linux else DARWIN_PATHS)
         files += [file("~/" + d, src = src, mode = "link") for src, d in dests.items()]
-        files += claude(host)
+        files += claude(host) + t3code(host)
         if linux:
-            files += SERVICES + KDE + FLATPAKS + DISCORD + t3code(host.name) + TOOLS
+            files += SERVICES + KDE + FLATPAKS + DISCORD + TOOLS
         return files
     return module
 
