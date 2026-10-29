@@ -402,7 +402,7 @@ rev = "aebbf05dd5a629d81930fc9f84db8c046ff85587"
 [[pkg]]
 name = "fspec"
 source = "git:https://github.com/FormalStudio/formalspec@main"
-rev = "9dea1420e555b71f9f72e42754bc650f02587119"
+rev = "dc8d03498a2e1ec485899d5c82f551cb920ddd97"
 
 [pkg.x86_64-linux]
 oci = "ghcr.io/formalsnake/fspec-cache/fspec@sha256:81c58aa82a5592528f8f9cfd71d0caa81c9fb73138244ba9701a9cdff1424129"
