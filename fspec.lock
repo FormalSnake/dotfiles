@@ -71,6 +71,12 @@ version = "3.5"
 commit = "eebf714c88801c14b0c5bd343088f8a6cbadad29de22c61d345a7a47c795917a"
 
 [[pkg]]
+name = "aquamarine-rig"
+source = "git:https://github.com/hyprwm/aquamarine@f31c47a1b9d300847d8fc3108ad959448103dfc1"
+rev = "f31c47a1b9d300847d8fc3108ad959448103dfc1"
+patches = "sha256-y8Oysf+wH6P9PKZ9HysqvWCFn95eUH50UJ4gEFqYDiE="
+
+[[pkg]]
 name = "astro-ls"
 source = "npm:@astrojs/language-server"
 version = "2.16.10"

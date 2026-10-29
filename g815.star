@@ -358,6 +358,27 @@ def _virt():
 # input. The units are global user units; ConditionGroup keeps them out of every other manager.
 def _rig():
     out = [
+        # aquamarine 0.15.1 never flushes its first xdg_toplevel commit, so under a parent that
+        # sends nothing unprompted (labwc) the configure never comes and the nested Hyprland gets
+        # no monitor. Fixed after 0.15.1 (hyprwm/aquamarine#415); drop this once Tumbleweed carries
+        # a release with it. Only the rig's Hyprland loads it, through the wrapper below, which
+        # dev/remote.sh puts first on a slot user's PATH.
+        pkg(
+            "aquamarine-rig",
+            source = git(
+                "https://github.com/hyprwm/aquamarine",
+                rev = "f31c47a1b9d300847d8fc3108ad959448103dfc1",
+                image = TUMBLEWEED,
+                deps = ["cmake", "make", "gcc-c++", "pkgconf", "hyprwayland-scanner", "pkgconfig(libseat)", "pkgconfig(libinput)", "pkgconfig(wayland-client)", "pkgconfig(wayland-protocols)", "pkgconfig(hyprutils)", "pkgconfig(pixman-1)", "pkgconfig(libdrm)", "pkgconfig(gbm)", "pkgconfig(libudev)", "pkgconfig(libdisplay-info)", "pkgconfig(hwdata)", "pkgconfig(egl)", "pkgconfig(glesv2)", "Mesa-libGLESv3-devel"],
+            ),
+            patches = ["patches/aquamarine-wayland-configure.patch"],
+            build_flags = ["-DCMAKE_INSTALL_LIBDIR=lib"],
+            share = {"formalshell-rig/aquamarine": "lib"},
+        ),
+        file(LIBEXEC + "/formalshell-rig/Hyprland", perms = "0755", content = """#!/bin/sh
+export LD_LIBRARY_PATH=/usr/local/share/formalshell-rig/aquamarine${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+exec /usr/bin/Hyprland "$@"
+"""),
         _libexec("formalshell-rig-export-display"),
         _libexec("formalshell-rig-pointer"),
         _libexec("formalshell-rig-passwords"),
