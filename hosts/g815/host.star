@@ -1,6 +1,7 @@
 load("//lib/paths.star", "USER")
 load("//modules/boot/boot.star", "boot")
 load("//modules/fastfetch/fastfetch.star", "fastfetch")
+load("//modules/fspec.star", "fspec")
 load("//modules/home/home.star", "home")
 load("//modules/linux/base.star", "GROUPS", "firewall", "swapfile")
 load("//modules/linux/linux.star", "linux")
@@ -70,6 +71,7 @@ g815 = host(
         sync_items(),
         home(),
         tools,
+        fspec,
         fastfetch,
         boot(entries = [WINDOWS_BOOT]),
     ],

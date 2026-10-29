@@ -37,6 +37,7 @@ modules/
   storage-gc/          the build-output and worktree pruner every host runs
   tools.star           the tools every host has, each sourced per platform
   tailscale.star       serve(): keeps a tailscale serve handler up
+  fspec.star           /etc/fspec/host, so a machine knows which host it is
   secrets.star         decrypts secrets.star and writes fish's exports
   sync.star            app data `fspec sync` moves between the Linux pair
 lib/                   helpers: paths, keys, tree(), systemd and launchd shorthands
