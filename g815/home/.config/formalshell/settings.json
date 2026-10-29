@@ -68,5 +68,11 @@
   },
   "wallpaper": {
     "depthGenerate": true
+  },
+  "workspaces": {
+    "agentHosts": [
+      "macbook",
+      "g815"
+    ]
   }
 }
