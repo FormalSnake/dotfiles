@@ -57,5 +57,13 @@ fspec secret show openai      # print it
 fspec secret rekey            # re-encrypt everything after a recipient change
 ```
 
+The decrypting identity is `~/.config/age/keys.txt`. Its private key is backed up in 1Password
+(item "Agenix (NIX KEY)", field `private key`). To restore it on a new host, run this on the macbook:
+
+```sh
+op read "op://Personal/cvynwukplablhw7oc3ouzcma3u/private key" </dev/null \
+  | ssh <host> 'umask 077; mkdir -p ~/.config/age; cat > ~/.config/age/keys.txt'
+```
+
 To add one: list it in `secrets.star` (under `ENV` to export it), run `fspec secret edit <name>`,
 commit the `.age` file and apply.
