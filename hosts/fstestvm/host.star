@@ -85,7 +85,7 @@ def _services():
         service("bluetooth"),
         service("upower"),
         service("power-profiles-daemon"),
-        service("seatd"),
+        # Tumbleweed's seatd ships no unit and no seat group; libseat goes through logind.
         service("greetd", display_manager = True),
     ]
 
@@ -106,7 +106,7 @@ fstestvm = [
         platform = "x86_64-linux",
         # e1504g's and the g815's quiet boot, so the splash is all that shows.
         system = tumbleweed(packages = PACKAGES, kernel_args = ["quiet", "splash", "loglevel=3", "udev.log_level=3"]),
-        users = [user(VM_USER, uid = 1000, shell = "bash", groups = ["wheel", "video", "render", "input", "audio", "seat"])],
+        users = [user(VM_USER, uid = 1000, shell = "bash", groups = ["wheel", "video", "render", "input", "audio"])],
         builders = [builder("g815")],
         vm = vm("g815", port = 2222 + n, cpus = 6, memory_gib = 8, disk_gib = 40, authorized_keys = KEYS),
         modules = [_fstestvm],
