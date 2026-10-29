@@ -140,8 +140,10 @@ fstestvm = [
         system = tumbleweed(packages = PACKAGES, kernel_args = ["quiet", "splash", "loglevel=3", "udev.log_level=3"]),
         users = [user(VM_USER, uid = 1000, shell = "bash", groups = ["wheel", "video", "render", "input", "audio"])],
         builders = [builder("g815")],
-        vm = vm("g815", port = 2222 + n, cpus = 6, memory_gib = 8, disk_gib = 40, authorized_keys = KEYS),
+        # A leg's session holds about 550 MB; four slots this size leave the g815's desktop its
+        # memory, and KSM there merges what the four guests share.
+        vm = vm("g815", port = 2222 + n, cpus = 4, memory_gib = 3, disk_gib = 40, authorized_keys = KEYS),
         modules = [_fstestvm],
     )
-    for n in [0, 1]
+    for n in range(4)
 ]

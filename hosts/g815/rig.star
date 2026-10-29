@@ -35,6 +35,8 @@ RIG = [
         share = {"formalshell-rig/aquamarine": "lib"},
     ),
     oneshot("formalshell-rig-passwords", LIBEXEC + "/formalshell-rig-passwords", "Set the FormalShell rig users' lock-screen password"),
+    # The fstestvm slots boot the same system; KSM shares the pages they hold alike.
+    oneshot("ksm", "/bin/sh -c 'echo 1 > /sys/kernel/mm/ksm/run'", "Merge the identical pages of the fstestvm guests"),
     file("/etc/systemd/user/default.target.wants/formalshell-rig-parent.service", mode = "link", target = "/etc/systemd/user/formalshell-rig-parent.service"),
 ] + [
     f
