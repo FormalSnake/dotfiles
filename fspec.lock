@@ -219,11 +219,6 @@ version = "2.38.2"
 
 [[pkg]]
 name = "discord"
-source = "brew:cask"
-version = "0.0.420"
-
-[[pkg]]
-name = "discord"
 source = "url:https://stable.dl2.discordapp.net/distro/app/stable/linux/x64/1.0.160/full.distro"
 patches = "sha256-h5kLBXOpZFR852BGy6PYPXtdONO5P/i/RwMqZ6JkVT0="
 
@@ -386,23 +381,6 @@ source = "brew:cask"
 version = "latest"
 
 [[pkg]]
-name = "formalmusic"
-source = "git:https://github.com/FormalStudio/formalmusic@bf502f9a7699733f428d30e1b2e5299ac530b030"
-rev = "bf502f9a7699733f428d30e1b2e5299ac530b030"
-
-[pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/formalmusic@sha256:e1b9c73b8e6b50397ecc5f750bf5b35fef4356967e79d98bde996f4b4938c833"
-build = "3dd539d0"
-
-[[pkg]]
-name = "formalmusic"
-source = "git:https://github.com/FormalStudio/formalmusic@ddf544d6228105dfd84c059d28d36f9cc147f59a"
-rev = "ddf544d6228105dfd84c059d28d36f9cc147f59a"
-
-[pkg.aarch64-darwin]
-oci = "ghcr.io/formalsnake/fspec-cache/formalmusic@sha256:dc774b9d02f05c297655b2e13d9ec533345a944238f7c0996e64b90c46ff214b"
-
-[[pkg]]
 name = "formalos-chime"
 source = "git:https://github.com/FormalSnake/dotfiles@98ca1b6c069b2eb1029cc9b816b735bcc3251202"
 rev = "98ca1b6c069b2eb1029cc9b816b735bcc3251202"
@@ -413,12 +391,8 @@ build = "67889dec"
 
 [[pkg]]
 name = "formalshell"
-source = "git:https://github.com/FormalStudio/FormalShell@6fd4a4868109785313300ee0c6282e740d762135"
-rev = "6fd4a4868109785313300ee0c6282e740d762135"
-
-[pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/formalshell@sha256:e7e072ad2bc0859c74b1c4d5955be98aa344ca3d064eef7d437441a9ec885823"
-build = "2ab3a7b7"
+source = "git:https://github.com/FormalStudio/FormalShell@aebbf05dd5a629d81930fc9f84db8c046ff85587"
+rev = "aebbf05dd5a629d81930fc9f84db8c046ff85587"
 
 [[pkg]]
 name = "fspec"
