@@ -1171,6 +1171,11 @@ oci = "ghcr.io/formalsnake/fspec-cache/wl-gammarelay-rs@sha256:30a99e40efd73e47d
 build = "4e782afc"
 
 [[pkg]]
+name = "wlrctl"
+source = "git:https://git.sr.ht/~brocellous/wlrctl@afe60da062ea315b92f2a9857e50b77e0b3a4b7e"
+rev = "afe60da062ea315b92f2a9857e50b77e0b3a4b7e"
+
+[[pkg]]
 name = "xcbeautify"
 source = "brew"
 version = "3.2.1"
