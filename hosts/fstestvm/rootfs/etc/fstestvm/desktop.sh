@@ -5,8 +5,10 @@
 card=
 for c in /sys/class/drm/card*; do
   case ${c##*/} in *-*) continue ;; esac
-  # The card's device is the PCI function; virtio_gpu drives the virtio device under it.
-  case $(readlink -f "$c"/device/virtio*/driver) in */virtio_gpu) card=/dev/dri/${c##*/}; break ;; esac
+  # vkms is the smoke rig's card; the other one is the VM's display.
+  case $(readlink -f "$c"/device) in */vkms*) continue ;; esac
+  card=/dev/dri/${c##*/}
+  break
 done
 [ -n "$card" ] && export AQ_DRM_DEVICES=$card
 # libseat would try fstestvm-seatd first; this session is logind's, on seat0.

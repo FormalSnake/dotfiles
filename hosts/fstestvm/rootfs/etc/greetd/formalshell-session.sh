@@ -1,6 +1,6 @@
 #!/bin/sh
 # greetd's default_session, as the real hosts run it, on the VM's display: sway in software
-# (virtio-gpu has no GL here), the session log dev/smoke-greeter.sh reads, and a grim frame after
+# (the VGA card has no GL), the session log dev/smoke-greeter.sh reads, and a grim frame after
 # the greeter exits. The keymap stays us, the layout `fspec vm type` types through.
 exec >>/tmp/formalshell-greeter-session.log 2>&1
 set -x
@@ -12,8 +12,10 @@ export XDG_SESSION_TYPE=wayland WLR_RENDERER=pixman LIBSEAT_BACKEND=logind
 card=
 for c in /sys/class/drm/card*; do
   case ${c##*/} in *-*) continue ;; esac
-  # The card's device is the PCI function; virtio_gpu drives the virtio device under it.
-  case $(readlink -f "$c"/device/virtio*/driver) in */virtio_gpu) card=/dev/dri/${c##*/}; break ;; esac
+  # vkms is the smoke rig's card; the other one is the VM's display.
+  case $(readlink -f "$c"/device) in */vkms*) continue ;; esac
+  card=/dev/dri/${c##*/}
+  break
 done
 if [ -n "$card" ]; then
   export WLR_DRM_DEVICES=$card
