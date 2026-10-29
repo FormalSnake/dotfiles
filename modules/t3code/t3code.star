@@ -23,6 +23,13 @@ def _environment(name, s):
         "desktopSsh": {"alias": s["alias"], "hostname": s["alias"], "username": None, "port": None},
     }
 
+# Every server prints its thread state for the Linux hosts' Stream Deck, DualSense lightbar and
+# FormalShell badges, which poll it over ssh.
+def agents(host):
+    if host not in SERVERS:
+        return []
+    return [file("~/.local/bin/t3-agents", src = "modules/t3code/t3-agents", perms = "0755")]
+
 def t3code(host):
     pulse = {"providerInstances.claude-pulse": pulse_provider(HOME)}
     out = [
@@ -47,4 +54,4 @@ def t3code(host):
             ),
             timer("t3code-serve", exec = "/usr/bin/tailscale serve --bg --https=8773 http://127.0.0.1:3773", schedule = "*/5 * * * *", user = True),
         ]
-    return out
+    return out + agents(host)

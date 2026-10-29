@@ -27,7 +27,8 @@ hosts/<host>/
   home/                files for this host only, at their path under ~
 modules/
   linux/               what both Tumbleweed hosts share: packages, store, services
-  home/                the Linux user layer: services, apps, KDE, T3 Code, Discord
+  home/                the Linux user layer: services, apps, KDE, Discord
+  t3code/              T3 Code servers and the desktop app, and t3-agents for every server
   boot/                the FormalOS boot theme and its assets
   secrets.star         decrypts secrets.star and writes fish's exports
   sync.star            app data `fspec sync` moves between the Linux pair

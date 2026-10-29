@@ -2,6 +2,7 @@ load("//lib/tree.star", "tree")
 load("//modules/fastfetch/fastfetch.star", "fastfetch")
 load("//modules/home/apps.star", "claude_pulse")
 load("//modules/secrets.star", "secrets")
+load("//modules/t3code/t3code.star", "agents")
 load("//hosts/macbook/defaults.star", "SYSTEM")
 load("//hosts/macbook/packages.star", "BREW", "STORE")
 load("//hosts/macbook/services.star", "HOME", "SERVICES")
@@ -38,10 +39,8 @@ HOME_FILES = (
     [file("~/" + p, src = ROOT + "home/" + p, mode = "link") for p in LINKED] +
     [file("~/.claude-pulse/" + p, mode = "link", target = "~/.claude/" + p) for p in PULSE] +
     [file("~/" + p, mode = "link", target = DRIVE + "/" + sub) for p, sub in ON_DRIVE.items()] +
-    claude_pulse(HOME) + [
+    claude_pulse(HOME) + agents("macbook") + [
         file("~/.pi/agent/CLAUDE.md", src = ROOT + "home/.claude/CLAUDE.md", mode = "link"),
-        # The Linux hosts' Stream Deck, DualSense and FormalShell read T3 Code state from here.
-        file("~/.local/bin/t3-agents", src = "home/.local/bin/t3-agents", perms = "0755"),
     ]
 )
 

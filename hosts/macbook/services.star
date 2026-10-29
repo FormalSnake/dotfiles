@@ -1,4 +1,4 @@
-load("//modules/home/t3code.star", "pulse_provider")
+load("//modules/t3code/t3code.star", "pulse_provider")
 
 HOME = "/Users/kyandesutter"
 BIN = HOME + "/.local/bin"
