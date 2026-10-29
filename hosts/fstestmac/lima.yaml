@@ -29,14 +29,15 @@ ssh:
   loadDotSSHPubKeys: true
   forwardAgent: false
 provision:
-# fspec is not packaged; the first apply needs one on the guest's PATH, and from then on the spec
+# fspec is not packaged; the first apply needs one on the guest's PATH, and podman for the store
+# builds it runs before any package lands. From then on the spec
 # keeps it at the locked rev.
 - mode: system
   script: |
     #!/bin/bash
     set -eux
     command -v fspec >/dev/null && exit 0
-    zypper -n --gpg-auto-import-keys install -y rustup gcc git-core tar zstd
+    zypper -n --gpg-auto-import-keys install -y rustup gcc git-core tar zstd podman
     export RUSTUP_HOME=/opt/rustup CARGO_HOME=/opt/cargo
     rustup default stable
     cargo install --locked --root /usr/local --git https://github.com/FormalStudio/formalspec fspec
