@@ -25,6 +25,8 @@ SOUNDBOARD_PINS = []
 T3_SERVERS = ["macbook", "g815"]
 SSH = ["/usr/bin/ssh", "-o", "BatchMode=yes", "-o", "ClearAllForwardings=yes", "-o", "ConnectTimeout=10"]
 WPCTL = "/usr/bin/wpctl"
+HYPRCTL = "/usr/bin/hyprctl"
+WTYPE = "/usr/bin/wtype"
 LOCK = ["/opt/fspec/current/bin/formalshell", "ipc", "--any-display", "call", "lock", "lock"]
 SCREENSHOT = ["/opt/fspec/current/bin/formalshell", "ipc", "--any-display", "call", "screenshot", "pick", "smart", "default"]
 PLAY_PAUSE = ["/opt/fspec/current/bin/formalshell", "ipc", "--any-display", "call", "media", "playPause"]
@@ -185,9 +187,31 @@ def watch_audio():
 
 
 # The desktop app hands a t3code:// argv to its running instance, which
-# opens that thread or a new one.
+# opens that thread, or with none just raises its window.
 def t3(*urls):
     spawn([T3_APP, *urls])
+
+
+def t3_focused():
+    out = subprocess.run([HYPRCTL, "activewindow", "-j"], capture_output=True, text=True, check=False).stdout
+    try:
+        return json.loads(out).get("class") == "com.t3tools.T3Code"
+    except ValueError:
+        return False
+
+
+# t3code://new opens nothing without a prompt, so a blank thread goes through
+# the app's own chat.new binding (Ctrl+N), once its window has focus.
+def new_thread():
+    def run():
+        subprocess.Popen([T3_APP], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        for _ in range(50):
+            if t3_focused():
+                subprocess.run([WTYPE, "-M", "ctrl", "n", "-m", "ctrl"], check=False)
+                return
+            time.sleep(0.1)
+
+    threading.Thread(target=run, daemon=True).start()
 
 
 PAGES = ["agents", "system", "discord"]
@@ -224,7 +248,7 @@ def layout():
             jump_key(agents, "blocked", "blocked"),
             jump_key(agents, "done", "done"),
             jump_key(agents, "working", "working"),
-            ("md-tab_plus", "new thread", FG, BG, lambda: t3("t3code://new")),
+            ("md-tab_plus", "new thread", FG, BG, new_thread),
             ("md-console", "t3 code", BLUE, BG, lambda: t3()),
             page_key(page, blocked),
         ]
