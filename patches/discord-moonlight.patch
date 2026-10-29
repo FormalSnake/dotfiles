@@ -12,6 +12,11 @@ diff --git a/files/resources/app/injector.js b/files/resources/app/injector.js
 new file mode 100644
 --- /dev/null
 +++ b/files/resources/app/injector.js
-@@ -0,0 +1,2 @@
+@@ -0,0 +1,7 @@
++const fs = require("fs");
++const os = require("os");
 +const path = require("path");
-+require(path.join(__dirname, "../../../moonlight/injector.js")).inject(path.join(__dirname, "../_app.asar"));
++// The launcher keeps a writable moonlight here so moonbase can update it; the packaged one is the fallback.
++const home = path.join(process.env.XDG_DATA_HOME || path.join(os.homedir(), ".local/share"), "moonlight-mod/dist/injector.js");
++const injector = fs.existsSync(home) ? home : path.join(__dirname, "../../../moonlight/injector.js");
++require(injector).inject(path.join(__dirname, "../_app.asar"));

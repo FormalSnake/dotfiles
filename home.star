@@ -319,6 +319,30 @@ for m in %s/modules/*; do
 	ln -sn "$m/files" "$mods/${m##*/}"
 done
 printf '%%s' '%s' >"$mods/installed.json"
+
+# moonlight runs from a writable copy, so moonbase can update it in place and this keeps it on
+# the latest release. The packaged dist seeds it and covers a start without network.
+dist="${XDG_DATA_HOME:-$HOME/.local/share}/moonlight-mod/dist"
+if [ ! -e "$dist/injector.js" ]; then
+	mkdir -p "$dist"
+	cp -r %s/moonlight/. "$dist"
+fi
+tag=$(curl -fsSm 3 https://api.github.com/repos/moonlight-mod/moonlight/releases/latest |
+	python3 -c 'import json, sys; print(json.load(sys.stdin)["tag_name"])' 2>/dev/null)
+if [ -n "$tag" ] && [ "$tag" != "$(cat "$dist/.tag" 2>/dev/null)" ]; then
+	rm -rf "$dist.new"
+	mkdir -p "$dist.new"
+	if curl -fsSLm 30 "https://github.com/moonlight-mod/moonlight/releases/download/$tag/dist.tar.gz" |
+		tar -xz -C "$dist.new"; then
+		printf '%%s' "$tag" >"$dist.new/.tag"
+		rm -rf "$dist.old"
+		mv "$dist" "$dist.old"
+		mv "$dist.new" "$dist"
+		rm -rf "$dist.old"
+	fi
+	rm -rf "$dist.new"
+fi
+
 python3 - "$conf/settings.json" <<'PY'
 import json, sys
 path = sys.argv[1]
@@ -336,6 +360,7 @@ exec %s/files/Discord ${WAYLAND_DISPLAY:+--ozone-platform=wayland --enable-featu
     DISCORD_VERSION,
     DISCORD,
     "{" + ",".join(['"%s":{"installedVersion":%d}' % (m, v) for m, v in DISCORD_MODULES.items()]) + "}",
+    DISCORD,
     DISCORD,
 )
 

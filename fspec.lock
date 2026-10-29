@@ -225,7 +225,7 @@ version = "0.0.420"
 [[pkg]]
 name = "discord"
 source = "url:https://stable.dl2.discordapp.net/distro/app/stable/linux/x64/1.0.160/full.distro"
-patches = "sha256-J5zsIg11XpaOjkTSW2oKhIRzbfuzKpwUuQsdLCDcuTg="
+patches = "sha256-h5kLBXOpZFR852BGy6PYPXtdONO5P/i/RwMqZ6JkVT0="
 
 [pkg.parts."modules/discord_cloudsync"]
 url = "https://stable.dl2.discordapp.net/distro/app/stable/linux/x64/1.0.160/discord_cloudsync/1/full.distro"
