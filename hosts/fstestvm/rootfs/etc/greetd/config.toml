@@ -1,0 +1,6 @@
+[terminal]
+vt = 1
+
+[default_session]
+command = "/etc/greetd/formalshell-session.sh"
+user = "greeter"

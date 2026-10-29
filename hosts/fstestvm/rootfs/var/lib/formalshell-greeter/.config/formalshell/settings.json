@@ -1,0 +1,10 @@
+{
+  "greeter": {
+    "sessionDirs": [
+      "/etc/fstestvm/wayland-sessions"
+    ],
+    "sessionCommand": [
+      "/etc/fstestvm/desktop.sh"
+    ]
+  }
+}

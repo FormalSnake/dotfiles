@@ -1224,5 +1224,11 @@ version = "21.0.13,21.54.107"
 [zypper.e1504g]
 snapshot = "20261024"
 
+[zypper.fstestvm0]
+snapshot = "20261024"
+
+[zypper.fstestvm1]
+snapshot = "20261024"
+
 [zypper.g815]
 snapshot = "20261024"

@@ -26,6 +26,17 @@ STEAMED = "Steamed-14e8a1c0db188870ab3ac2059dbf941fad9c3065"
 def sh(script):
     return ["sh", "-c", script]
 
+# dev/tarball.sh is upstream's release build. WORK in the cache keeps rev bumps incremental.
+FORMALSHELL = pkg(
+    "formalshell",
+    source = git(
+        "https://github.com/FormalStudio/FormalShell",
+        rev = "aebbf05dd5a629d81930fc9f84db8c046ff85587",
+        image = "docker.io/library/debian:bookworm",
+    ),
+    build = sh('WORK="$FSPEC_CACHE" bash "$FSPEC_SRC/dev/tarball.sh" "$FSPEC_OUT.tar" && tar -xzf "$FSPEC_OUT.tar"/formalshell-*-linux.tar.gz -C "$FSPEC_OUT" && rm -rf "$FSPEC_OUT.tar"'),
+)
+
 STORE = [
     # The CLI's %post runs groupadd, so it installs after shadow.
     pkg("1password", source = zypper(repo = "1password")),
@@ -71,16 +82,7 @@ STORE = [
         source = github("ryanoasis/nerd-fonts", asset = "GeistMono.tar.xz"),
         share = {"fonts/GeistMonoNerdFont": "."},
     ),
-    # dev/tarball.sh is upstream's release build. WORK in the cache keeps rev bumps incremental.
-    pkg(
-        "formalshell",
-        source = git(
-            "https://github.com/FormalStudio/FormalShell",
-            rev = "aebbf05dd5a629d81930fc9f84db8c046ff85587",
-            image = "docker.io/library/debian:bookworm",
-        ),
-        build = sh('WORK="$FSPEC_CACHE" bash "$FSPEC_SRC/dev/tarball.sh" "$FSPEC_OUT.tar" && tar -xzf "$FSPEC_OUT.tar"/formalshell-*-linux.tar.gz -C "$FSPEC_OUT" && rm -rf "$FSPEC_OUT.tar"'),
-    ),
+    FORMALSHELL,
     pkg("herdr", version = "0.9.3", source = github("ogulcancelik/herdr", asset = "herdr-linux-*")),
     # helium-wrapper sets LD_LIBRARY_PATH to its own directory.
     pkg(

@@ -1,0 +1,5 @@
+// The VM has no seat a polkit session could be active on, so NetworkManager's own allow_active
+// rules never apply.
+polkit.addRule(function(action, subject) {
+  if (action.id.indexOf("org.freedesktop.NetworkManager.") === 0) return polkit.Result.YES;
+});

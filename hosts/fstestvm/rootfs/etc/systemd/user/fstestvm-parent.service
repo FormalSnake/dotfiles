@@ -1,0 +1,13 @@
+[Unit]
+Description=headless sway the FormalShell smoke rig nests Hyprland in
+ConditionUser=kyan
+
+[Service]
+Environment=WLR_BACKENDS=headless
+Environment=WLR_RENDERER=pixman
+Environment=WLR_LIBINPUT_NO_DEVICES=1
+ExecStart=/usr/bin/sway --config /etc/fstestvm/sway-parent.conf
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
