@@ -49,6 +49,12 @@ ROOTFS = tree(["hosts/fstestvm/rootfs/"], perms = {
 # an ExecStart is systemd's variable expansion, hence the $$ in the password hash.
 def _services():
     return [
+        # modules-load.d only runs at boot, so a fresh disk's first apply loads the radios itself.
+        oneshot(
+            "fstestvm-modules",
+            "/bin/sh -c '/usr/lib/systemd/systemd-modules-load && udevadm settle'",
+            "Load the rig's kernel modules without a reboot",
+        ),
         oneshot(
             "fstestvm-eap-cert",
             "/bin/sh -c 'test -s " + EAP + "/server.pem || { mkdir -p " + EAP + " && openssl req -x509 -newkey rsa:2048 -nodes -keyout " + EAP + "/server.key -out " + EAP + "/server.pem -days 3650 -subj /CN=formaltest-eap; }'",
@@ -62,8 +68,9 @@ def _services():
             description = "hostapd on the hwsim radio " + w,
             systemd = {"unit": {
                 "BindsTo": "sys-subsystem-net-devices-" + w + ".device",
-                "After": ["sys-subsystem-net-devices-" + w + ".device", "fspec-fstestvm-eap-cert.service"],
+                "After": ["sys-subsystem-net-devices-" + w + ".device", "fspec-fstestvm-eap-cert.service", "fspec-fstestvm-modules.service"],
                 "Wants": "fspec-fstestvm-eap-cert.service",
+                "Requires": "fspec-fstestvm-modules.service",
             }},
         )
         for w in ["wlan1", "wlan2"]
