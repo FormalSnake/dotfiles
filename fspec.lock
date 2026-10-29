@@ -381,6 +381,11 @@ source = "brew:cask"
 version = "latest"
 
 [[pkg]]
+name = "formalmusic"
+source = "git:https://github.com/FormalStudio/formalmusic@4aeef799e584f6a69a40eef9fb69d92f73b1611d"
+rev = "4aeef799e584f6a69a40eef9fb69d92f73b1611d"
+
+[[pkg]]
 name = "formalos-chime"
 source = "git:https://github.com/FormalSnake/dotfiles@98ca1b6c069b2eb1029cc9b816b735bcc3251202"
 rev = "98ca1b6c069b2eb1029cc9b816b735bcc3251202"
