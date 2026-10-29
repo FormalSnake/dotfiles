@@ -564,6 +564,10 @@ name = "kopuzd"
 source = "git:https://github.com/Kopuz-org/kopuz@v0.67.0"
 rev = "7c25238faece34ac40196affaa3340e83c6a77cc"
 
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/kopuzd@sha256:9d8508b1689b4640f11af150b2f4ae6df348dfb5e34274ce62c9fc29e319c7ee"
+build = "5e2225d2"
+
 [[pkg]]
 name = "lazydocker"
 source = "aqua:jesseduffield/lazydocker"
@@ -699,6 +703,10 @@ build = "baedf5de"
 name = "messages"
 source = "git:https://github.com/FormalStudio/messages@52c563b95cac01962e30a0c5c9a56bcf808094ce"
 rev = "52c563b95cac01962e30a0c5c9a56bcf808094ce"
+
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/messages@sha256:256e9fdde7174272c547be8ee90f28febf9b47db469f5684a807d94d50a4204d"
+build = "c4df8fd4"
 
 [[pkg]]
 name = "modrinth-app"
