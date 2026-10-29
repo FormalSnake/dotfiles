@@ -1,4 +1,5 @@
 load("//lib/tree.star", "tree")
+load("//modules/fastfetch/fastfetch.star", "fastfetch")
 load("//modules/home/apps.star", "claude_pulse")
 load("//modules/secrets.star", "secrets")
 load("//hosts/macbook/defaults.star", "SYSTEM")
@@ -70,5 +71,5 @@ macbook = host(
     name = "macbook",
     platform = "aarch64-darwin",
     users = [user("kyandesutter", uid = 502, shell = "/opt/homebrew/bin/fish")],
-    modules = [BREW, STORE, HOME_FILES, ROOT_FILES, SECRETS, SYSTEM, SERVICES],
+    modules = [BREW, STORE, HOME_FILES, fastfetch("macbook"), ROOT_FILES, SECRETS, SYSTEM, SERVICES],
 )

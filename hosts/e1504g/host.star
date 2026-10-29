@@ -1,5 +1,6 @@
 load("//lib/paths.star", "LIBEXEC", "USER")
 load("//modules/boot/boot.star", "boot")
+load("//modules/fastfetch/fastfetch.star", "fastfetch")
 load("//modules/home/home.star", "home")
 load("//modules/linux/base.star", "GROUPS", "swapfile")
 load("//modules/linux/linux.star", "linux")
@@ -43,6 +44,7 @@ e1504g = host(
         linux_secrets("e1504g"),
         sync_items(),
         home("e1504g"),
+        fastfetch("e1504g"),
         boot(),
     ],
 )

@@ -1,5 +1,6 @@
 load("//lib/paths.star", "USER")
 load("//modules/boot/boot.star", "boot")
+load("//modules/fastfetch/fastfetch.star", "fastfetch")
 load("//modules/home/home.star", "home")
 load("//modules/linux/base.star", "GROUPS", "firewall", "swapfile")
 load("//modules/linux/linux.star", "linux")
@@ -67,6 +68,7 @@ g815 = host(
         linux_secrets("g815"),
         sync_items(),
         home("g815"),
+        fastfetch("g815"),
         boot(entries = [WINDOWS_BOOT]),
     ],
 )
