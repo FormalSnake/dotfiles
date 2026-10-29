@@ -36,6 +36,7 @@ modules/
   fastfetch/           one config for every host and each host's logo
   storage-gc/          the build-output and worktree pruner every host runs
   tools.star           the tools every host has, each sourced per platform
+  my_apps.star         the apps I make (Messages, FormalMusic, Kopuz, meshtop), one version for all
   tailscale.star       serve(): keeps a tailscale serve handler up
   fspec.star           /etc/fspec/host, so a machine knows which host it is
   secrets.star         decrypts secrets.star and writes fish's exports

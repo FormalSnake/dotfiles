@@ -79,7 +79,6 @@ def tools(host):
         pkg("fut", version = "0.24", source = on(github("mikker/fut"), github("mikker/fut", asset = "fut-macos-arm64.tar.gz"))),
         pkg("fast", source = git("https://github.com/maaslalani/fast", rev = "26d8fc9c189ba748c68f8930af11dee5c2467f7e", **on({}, {"deps": ["go"]}))),
         pkg("fetch", source = git("https://github.com/areofyl/fetch", rev = "7b19d22c2d8e4b7b2295cc625c9fdf87adcabbcd")),
-        pkg("meshtop", source = git("https://github.com/FormalSnake/meshtop", rev = "69f954dca8ac24b7e5b269f486f3dae3fc2ec7b5")),
         pkg(
             "clipssh",
             source = git("https://github.com/samuellawrentz/clipssh", rev = "c7f4e8ddcf102302c6375ba51534c7505ddc2616"),
@@ -93,19 +92,6 @@ def tools(host):
         on(
             pkg("tmux-agent-sidebar", version = "0.13.0", source = github("hiroppy/tmux-agent-sidebar", asset = "tmux-agent-sidebar-linux-*")),
             pkg("tmux-agent-sidebar", source = git("https://github.com/hiroppy/tmux-agent-sidebar", rev = "2cff1cb955363394f8dd9c52d040d027536cfbd8")),
-        ),
-        pkg(
-            "kopuzd",
-            source = git(
-                "https://github.com/Kopuz-org/kopuz",
-                rev = "735a22898992c4b09de2a65323039220db32750b",
-                **on({
-                    "image": TUMBLEWEED,
-                    "deps": ["rustup", "gcc", "cmake", "make", "pkgconf", "alsa-devel", "dbus-1-devel", "libopenssl-devel", "git-core", "gcc-c++"],
-                }, {})
-            ),
-            build_flags = ["-p", "kopuz-kopuzd", "-p", "kopuz-ctl"],
-            bins = ["kopuzd", "kopuzctl"],
         ),
     ]
 

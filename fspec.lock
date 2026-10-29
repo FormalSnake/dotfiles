@@ -551,22 +551,14 @@ version = "0.67.0"
 url = "https://github.com/Kopuz-org/kopuz/releases/download/v0.67.0/Kopuz_0.67.0_aarch64.dmg"
 hash = "sha256-lma4Lifukg9JJZ8QUCWkdoGieFUqqy/Ema6/qceF6e4="
 
-[[pkg]]
-name = "kopuz"
-source = "url:https://github.com/Kopuz-org/kopuz/releases/download/v0.67.0/Kopuz_0.67.0_x86_64.AppImage"
-
-[pkg.any]
+[pkg.x86_64-linux]
 url = "https://github.com/Kopuz-org/kopuz/releases/download/v0.67.0/Kopuz_0.67.0_x86_64.AppImage"
 hash = "sha256-a4EzyKPiHIs69YiyP8axrWUBfHuFx76Q4RYY80b1ITs="
 
 [[pkg]]
 name = "kopuzd"
-source = "git:https://github.com/Kopuz-org/kopuz@735a22898992c4b09de2a65323039220db32750b"
-rev = "735a22898992c4b09de2a65323039220db32750b"
-
-[pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/kopuzd@sha256:3f9961e5acb39e17e84debcb95ff83789cef8db4e0b3055dd9ba50912d971300"
-build = "353c61d9"
+source = "git:https://github.com/Kopuz-org/kopuz@v0.67.0"
+rev = "7c25238faece34ac40196affaa3340e83c6a77cc"
 
 [[pkg]]
 name = "lazydocker"
@@ -701,20 +693,8 @@ build = "baedf5de"
 
 [[pkg]]
 name = "messages"
-source = "git:https://github.com/FormalStudio/messages@097b732d57198bbaa2386b6e072416f9e6c0184e"
-rev = "097b732d57198bbaa2386b6e072416f9e6c0184e"
-
-[pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/messages@sha256:32e7cc7867932870d49568c6919ba26fd6a3db6621ba2499f64d0ae6cbbf5cfe"
-build = "a9e3e522"
-
-[[pkg]]
-name = "messages"
-source = "git:https://github.com/FormalStudio/messages@29ac1eeedd10745377486851075691e0ec45800e"
-rev = "29ac1eeedd10745377486851075691e0ec45800e"
-
-[pkg.aarch64-darwin]
-oci = "ghcr.io/formalsnake/fspec-cache/messages@sha256:41dfe69b25a4ea2e0e8010b83744da9402333d327715d3a409e3d42109cec5e2"
+source = "git:https://github.com/FormalStudio/messages@52c563b95cac01962e30a0c5c9a56bcf808094ce"
+rev = "52c563b95cac01962e30a0c5c9a56bcf808094ce"
 
 [[pkg]]
 name = "modrinth-app"
