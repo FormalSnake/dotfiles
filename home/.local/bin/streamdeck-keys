@@ -22,7 +22,7 @@ FONT = "/usr/local/share/fonts/GeistMonoNerdFont/GeistMonoNerdFont-Regular.otf"
 EMOJI_FONT = "/usr/share/fonts/truetype/NotoColorEmoji.ttf"
 DISCORD_SOCKET = os.path.join(os.environ.get("XDG_RUNTIME_DIR", "/tmp"), "discord-streamdeck.sock")
 SOUNDBOARD_PINS = []
-HERDR = "/etc/profiles/per-user/kyandesutter/bin/herdr"
+HERDR = "/opt/homebrew/bin/herdr"
 SSH = ["/usr/bin/ssh", "-o", "BatchMode=yes", "-o", "ClearAllForwardings=yes", "-o", "ConnectTimeout=10"]
 WPCTL = "/usr/bin/wpctl"
 LOCK = ["/opt/fspec/current/bin/formalshell", "ipc", "--any-display", "call", "lock", "lock"]
