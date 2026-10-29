@@ -391,6 +391,10 @@ name = "formalmusic"
 source = "git:https://github.com/FormalStudio/formalmusic@4aeef799e584f6a69a40eef9fb69d92f73b1611d"
 rev = "4aeef799e584f6a69a40eef9fb69d92f73b1611d"
 
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/formalmusic@sha256:d721c0ed9d7b4ad8d1d8eb057ded3baeda5f7f86217d60a1cd85d6ef3f8cd20a"
+build = "fd1e3c38"
+
 [[pkg]]
 name = "formalos-chime"
 source = "git:https://github.com/FormalSnake/dotfiles@98ca1b6c069b2eb1029cc9b816b735bcc3251202"
@@ -405,10 +409,18 @@ name = "formalshell"
 source = "git:https://github.com/FormalStudio/FormalShell@aebbf05dd5a629d81930fc9f84db8c046ff85587"
 rev = "aebbf05dd5a629d81930fc9f84db8c046ff85587"
 
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/formalshell@sha256:d445db52c8949812eb59910e1b8217adf1f858ede1b1056750f55475e63460a7"
+build = "e5028409"
+
 [[pkg]]
 name = "fspec"
 source = "git:https://github.com/FormalStudio/formalspec@main"
 rev = "f75c80fdb70fc541fc8f36c78eb2b6b8c69682cf"
+
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/fspec@sha256:66605f85c4ac22a77df20e513b0e1c73e25f5329c312b091fe646265d8362c0b"
+build = "22bd115e"
 
 [[pkg]]
 name = "fut"
