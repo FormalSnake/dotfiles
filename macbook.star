@@ -220,6 +220,8 @@ def _home():
     out += [file("~/" + p, mode = "link", target = DRIVE + "/" + sub) for p, sub in ON_DRIVE.items()]
     out += [
         file("~/.pi/agent/CLAUDE.md", src = MB + "home/.claude/CLAUDE.md", mode = "link"),
+        # The Linux hosts' Stream Deck, DualSense and FormalShell read T3 Code state from here over ssh.
+        file("~/.local/bin/t3-agents", src = "home/.local/bin/t3-agents", perms = "0755"),
         # claude-code rewrites this on nearly every turn; the second profile only needs the trust
         # flag for the config repo.
         file(

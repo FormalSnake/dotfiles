@@ -114,10 +114,10 @@ def _services():
             needs = "/usr/bin/dualsensectl",
             extra = {"RestartSec": 5},
         ),
-        _gui("dualsense-herdr", BIN + "/dualsense-herdr", "Mirror herdr agent state onto the DualSense lightbar", restart = "always", extra = {"RestartSec": 30}),
+        _gui("dualsense-agents", BIN + "/dualsense-agents", "Mirror T3 Code agent state onto the DualSense lightbar", restart = "always", extra = {"RestartSec": 30}),
         _gui("dualsense-pad", BIN + "/dualsense-pad", "DualSense D-pad as a window and workspace remote", restart = "always", extra = {"RestartSec": 5}),
         timer("dualsense-battery", exec = BIN + "/dualsense-sync", schedule = "*/2 * * * *", user = True),
-        _gui("streamdeck-keys", BIN + "/streamdeck-keys", "Stream Deck keys for Herdr agents, system and Discord controls", restart = "always", extra = {"RestartSec": 5}),
+        _gui("streamdeck-keys", BIN + "/streamdeck-keys", "Stream Deck keys for T3 Code agents, system and Discord controls", restart = "always", extra = {"RestartSec": 5}),
         _gui(
             "swayidle",
             "/usr/bin/swayidle -w timeout 900 " + BIN + "/idle-lock",
