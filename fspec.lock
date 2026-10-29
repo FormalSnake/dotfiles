@@ -392,7 +392,7 @@ source = "git:https://github.com/FormalStudio/formalmusic@4aeef799e584f6a69a40ee
 rev = "4aeef799e584f6a69a40eef9fb69d92f73b1611d"
 
 [pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/formalmusic@sha256:4cf231d8101b51b9911c9217832d7e038e7e810396cd6772f4dac0318698d71a"
+oci = "ghcr.io/formalsnake/fspec-cache/formalmusic@sha256:f470dc3d7d35e1ee5c2627d65e1168c6284d0772630fb73d808dd5500523938a"
 build = "7272611d"
 
 [[pkg]]
