@@ -28,7 +28,7 @@ PACKAGES = [
     "NetworkManager", "wpa_supplicant", "hostapd", "dnsmasq", "iw", "iproute2", "openssl",
     "bluez", "upower", "power-profiles-daemon", "polkit", "geoclue2",
     "pipewire", "pipewire-pulseaudio", "wireplumber", "pulseaudio-utils", "pipewire-tools",
-    "seatd", "greetd", "sway", "hyprland", "foot", "grim", "slurp", "wtype", "wl-clipboard", "wlrctl",
+    "seatd", "greetd", "sway", "hyprland", "hyprland-guiutils", "foot", "grim", "slurp", "wtype", "wl-clipboard", "wlrctl",
     "wf-recorder", "wlsunset", "brightnessctl", "ddcutil", "libnotify-tools", "dbus-1-daemon",
     "mpv", "mpv-mpris", "ffmpeg-8", "cava", "qrencode", "ImageMagick", "tesseract-ocr",
     "tesseract-ocr-traineddata-eng", "python313", "python313-gobject", "python313-evdev",
@@ -95,7 +95,14 @@ def _services():
         service("bluetooth"),
         service("upower"),
         service("power-profiles-daemon"),
-        # Tumbleweed's seatd ships no unit and no seat group; libseat goes through logind.
+        # An ssh login holds no logind seat, so the smoke rig's Hyprland opens the vkms card through
+        # seatd, which Tumbleweed ships with no unit. The greeter and the desktop stay on logind.
+        service(
+            "fstestvm-seatd",
+            exec = "/usr/bin/seatd -g video",
+            restart = "on_failure",
+            description = "seatd for the smoke rig's Hyprland on the vkms card",
+        ),
         service("greetd", display_manager = True),
     ]
 

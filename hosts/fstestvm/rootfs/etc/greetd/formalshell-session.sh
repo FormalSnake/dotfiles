@@ -7,7 +7,8 @@ set -x
 export XDG_RUNTIME_DIR=/run/formalshell-greeter
 export HOME=/var/lib/formalshell-greeter
 unset XDG_CONFIG_HOME XDG_STATE_HOME XDG_CACHE_HOME XDG_DATA_HOME
-export XDG_SESSION_TYPE=wayland WLR_RENDERER=pixman
+# libseat would try fstestvm-seatd first; this session is logind's, on seat0.
+export XDG_SESSION_TYPE=wayland WLR_RENDERER=pixman LIBSEAT_BACKEND=logind
 card=
 for c in /sys/class/drm/card*; do
   case ${c##*/} in *-*) continue ;; esac
