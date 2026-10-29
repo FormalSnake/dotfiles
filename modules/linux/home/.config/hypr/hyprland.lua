@@ -477,6 +477,8 @@ hl.window_rule({ match = { class = "^([Oo]bsidian)$" }, workspace = "5" })
 hl.window_rule({ match = { class = "^([Cc]laude)$" }, workspace = "7" })
 hl.window_rule({ match = { class = "^([Kk]opuz)$" }, workspace = "8" })
 hl.window_rule({ match = { class = "^(dev.formalsnake.formalmusic)$" }, workspace = "8" })
+-- Sober sends no content type, so vrr = 3 outputs never switch VRR on for it.
+hl.window_rule({ match = { class = "^(org.vinegarhq.Sober)$" }, content = "game" })
 -- YouTube Music web app (mixins/desktop/webapps.nix). Chromium names a shared-profile
 -- --app window after its URL and profile, not the launcher's --class.
 hl.window_rule({ match = { class = "^(chrome-music.youtube.com__-Default)$" }, workspace = "8" })
