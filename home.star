@@ -503,6 +503,14 @@ def _nvim():
         pkg("vscode-langservers-extracted", version = "4.10.0", source = npm("vscode-langservers-extracted")),
     ]
 
+KOPUZ_BUILD = """set -e
+cd "$FSPEC_SRC"
+chmod +x kopuz
+./kopuz --appimage-extract >/dev/null
+install -Dm755 squashfs-root/usr/bin/kopuz "$FSPEC_OUT/bin/kopuz"
+install -Dm644 squashfs-root/usr/lib/libxdo.so.3 "$FSPEC_OUT/lib/libxdo.so.3"
+"""
+
 # The asar keeps each file at a fixed offset and size, so the stub is padded to the size of the
 # module it replaces and the header stays valid. Electron checks asar integrity only on macOS and
 # Windows.
@@ -540,7 +548,14 @@ def _apps():
         pkg("claude", source = url("https://registry.npmjs.org/@anthropic-ai/claude-code-linux-x64/-/claude-code-linux-x64-2.1.310.tgz")),
         # kopuzd below opens the same ~/.config/kopuz/kopuz.db, and an app older than the daemon
         # refuses the schema it migrated: bump the two together, never the daemon past the app.
-        pkg("kopuz", version = "0.67.0", source = github("Kopuz-org/kopuz", asset = "Kopuz_*_x86_64.AppImage")),
+        # Releases after 0.22.0 ship Linux only as an AppImage, whose Ubuntu WebKit spawns its
+        # helpers from /usr/lib/x86_64-linux-gnu, so the binary runs on Tumbleweed's WebKit and
+        # keeps only libxdo, which Tumbleweed does not package.
+        pkg(
+            "kopuz",
+            source = url("https://github.com/Kopuz-org/kopuz/releases/download/v0.67.0/Kopuz_0.67.0_x86_64.AppImage"),
+            build = ["sh", "-c", KOPUZ_BUILD],
+        ),
         # mixins/apps/beeper.nix: nixpkgs' AppImage, extracted, with registerLinuxConfig stubbed as
         # nixpkgs does: on every launch it rewrote ~/.local/share/applications/Beeper.desktop and
         # deleted the entry home/ ships.
