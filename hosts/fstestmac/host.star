@@ -46,6 +46,7 @@ WLRCTL = pkg(
 ROOTFS = tree(["hosts/fstestmac/rootfs/"]) + [
     file("/etc/ssh/sshd_config.d/10-fspec.conf", src = "modules/linux/rootfs/etc/ssh/sshd_config.d/10-fspec.conf"),
     file("/etc/pam.d/formalshell-lock", src = "modules/linux/rootfs/etc/pam.d/formalshell-lock"),
+    file("/etc/profile.d/fspec-store.sh", src = "modules/linux/rootfs/etc/profile.d/fspec-store.sh"),
     # A null sink, since the guest has no sound card and the legs play through the default one.
     file("/etc/pipewire/pipewire.conf.d/10-virtual-sink.conf", src = "hosts/fstestvm/rootfs/etc/pipewire/pipewire.conf.d/10-virtual-sink.conf"),
     file(LIBEXEC + "/formalshell-rig-passwords", src = "hosts/g815/rootfs/usr/local/libexec/formalshell-rig-passwords", perms = "0755"),
