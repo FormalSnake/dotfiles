@@ -1218,5 +1218,11 @@ snapshot = "20261024"
 [zypper.fstestvm1]
 snapshot = "20261024"
 
+[zypper.fstestvm2]
+snapshot = "20261024"
+
+[zypper.fstestvm3]
+snapshot = "20261024"
+
 [zypper.g815]
 snapshot = "20261024"
