@@ -26,7 +26,7 @@ PACKAGES = [
     # What a remote apply and git(...) packages need on the host.
     "tar", "oras", "shadow", "sudo", "system-group-wheel", "openssh-server", "git-core", "curl",
     "NetworkManager", "wpa_supplicant", "hostapd", "dnsmasq", "iw", "iproute2", "openssl",
-    "bluez", "upower", "power-profiles-daemon", "polkit", "geoclue2",
+    "bluez", "upower", "power-profiles-daemon", "polkit", "pkexec", "geoclue2",
     "pipewire", "pipewire-pulseaudio", "wireplumber", "pulseaudio-utils", "pipewire-tools",
     "seatd", "greetd", "sway", "hyprland", "hyprland-guiutils", "uwsm", "foot", "grim", "slurp", "wtype", "wl-clipboard", "wlrctl",
     "wf-recorder", "wlsunset", "brightnessctl", "ddcutil", "libnotify-tools", "dbus-1-daemon",

@@ -3,3 +3,8 @@
 polkit.addRule(function(action, subject) {
   if (action.id.indexOf("org.freedesktop.NetworkManager.") === 0) return polkit.Result.YES;
 });
+
+// openSUSE's 50-default.rules makes root the only admin unless its groups list says otherwise, and
+// the shell's agent authenticates as the user alone, so an auth_admin action (pkexec, a power-off
+// past another session) had nobody to ask. This file loads after it.
+polkit._suse_admin_groups = ["wheel"];
