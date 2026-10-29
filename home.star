@@ -513,7 +513,9 @@ def _apps():
         # The platform tarball holds the real binary; the main npm package's bin is a stub its
         # postinstall replaces.
         pkg("claude", source = url("https://registry.npmjs.org/@anthropic-ai/claude-code-linux-x64/-/claude-code-linux-x64-2.1.310.tgz")),
-        pkg("kopuz", version = "0.22.0", source = github("Kopuz-org/kopuz", asset = "kopuz_v*_x86_64-linux.tar.gz")),
+        # kopuzd below opens the same ~/.config/kopuz/kopuz.db, and an app older than the daemon
+        # refuses the schema it migrated: bump the two together, never the daemon past the app.
+        pkg("kopuz", version = "0.67.0", source = github("Kopuz-org/kopuz", asset = "Kopuz_*_x86_64.AppImage")),
         # mixins/apps/beeper.nix: nixpkgs' AppImage, extracted, with registerLinuxConfig stubbed as
         # nixpkgs does: on every launch it rewrote ~/.local/share/applications/Beeper.desktop and
         # deleted the entry home/ ships.
