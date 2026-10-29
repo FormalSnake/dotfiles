@@ -70,7 +70,7 @@ g815 = host(
         sync_items(),
         home(),
         tools,
-        fastfetch("g815"),
+        fastfetch,
         boot(entries = [WINDOWS_BOOT]),
     ],
 )

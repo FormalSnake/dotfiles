@@ -62,5 +62,5 @@ macbook = host(
     name = "macbook",
     platform = "aarch64-darwin",
     users = [user("kyandesutter", uid = 502, shell = "/opt/homebrew/bin/fish")],
-    modules = [tools, BREW, STORE, home(linked = LINKED), HOME_FILES, fastfetch("macbook"), ROOT_FILES, SECRETS, SYSTEM, SERVICES, storage_gc()],
+    modules = [tools, BREW, STORE, home(linked = LINKED), HOME_FILES, fastfetch, ROOT_FILES, SECRETS, SYSTEM, SERVICES, storage_gc()],
 )

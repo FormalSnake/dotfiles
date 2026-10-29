@@ -30,7 +30,7 @@ def fastfetch(host):
         "modules": [
             "break",
             _edge("┏", "┓"),
-            _sh("user", "echo $USER@" + host),
+            _sh("user", "echo $USER@" + host.name),
             _row("distro", "os", "{name>24}"),
             _row("kernel", "kernel", "{release>24}"),
             _row("wm", "wm", "{pretty-name>24}"),
@@ -46,5 +46,5 @@ def fastfetch(host):
     }
     return [
         file("~/.config/fastfetch/config.jsonc", content = config, format = "json"),
-        file("~/.config/fastfetch/logo.txt", src = "modules/fastfetch/logos/%s.txt" % host),
+        file("~/.config/fastfetch/logo.txt", src = "modules/fastfetch/logos/%s.txt" % host.name),
     ]

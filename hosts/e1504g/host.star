@@ -46,7 +46,7 @@ e1504g = host(
         sync_items(),
         home(),
         tools,
-        fastfetch("e1504g"),
+        fastfetch,
         boot(),
     ],
 )
