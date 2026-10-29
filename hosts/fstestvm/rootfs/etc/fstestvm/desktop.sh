@@ -1,6 +1,7 @@
 #!/bin/sh
-# What the greeter starts on a login: Hyprland on the VM's display, in software, running the shell
-# as the owner's session does. vkms is the smoke rig's card.
+# What the greeter starts on a login: Hyprland on the VM's display, in software, running the shell,
+# started the way the real hosts' session entry starts it (uwsm, start-hyprland), so its output
+# goes to the journal and not onto the VT. vkms is the smoke rig's card.
 card=
 for c in /sys/class/drm/card*; do
   case ${c##*/} in *-*) continue ;; esac
@@ -9,5 +10,5 @@ for c in /sys/class/drm/card*; do
 done
 [ -n "$card" ] && export AQ_DRM_DEVICES=$card
 # libseat would try fstestvm-seatd first; this session is logind's, on seat0.
-export LIBSEAT_BACKEND=logind LIBGL_ALWAYS_SOFTWARE=1 XDG_SESSION_TYPE=wayland XDG_CURRENT_DESKTOP=Hyprland
-exec Hyprland --config /etc/fstestvm/hyprland.lua
+export LIBSEAT_BACKEND=logind LIBGL_ALWAYS_SOFTWARE=1 XDG_SESSION_TYPE=wayland
+exec uwsm start -e -D Hyprland -- hyprland.desktop -- --config /etc/fstestvm/hyprland.lua

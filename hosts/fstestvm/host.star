@@ -28,7 +28,7 @@ PACKAGES = [
     "NetworkManager", "wpa_supplicant", "hostapd", "dnsmasq", "iw", "iproute2", "openssl",
     "bluez", "upower", "power-profiles-daemon", "polkit", "geoclue2",
     "pipewire", "pipewire-pulseaudio", "wireplumber", "pulseaudio-utils", "pipewire-tools",
-    "seatd", "greetd", "sway", "hyprland", "hyprland-guiutils", "foot", "grim", "slurp", "wtype", "wl-clipboard", "wlrctl",
+    "seatd", "greetd", "sway", "hyprland", "hyprland-guiutils", "uwsm", "foot", "grim", "slurp", "wtype", "wl-clipboard", "wlrctl",
     "wf-recorder", "wlsunset", "brightnessctl", "ddcutil", "libnotify-tools", "dbus-1-daemon",
     "mpv", "mpv-mpris", "ffmpeg-8", "cava", "qrencode", "ImageMagick", "tesseract-ocr",
     "tesseract-ocr-traineddata-eng", "python313", "python313-gobject", "python313-evdev",
@@ -54,6 +54,19 @@ def _services():
             "fstestvm-modules",
             "/bin/sh -c '/usr/lib/systemd/systemd-modules-load && udevadm settle'",
             "Load the rig's kernel modules without a reboot",
+        ),
+        # plymouth draws on every DRM card and centres on a mix of their sizes, so the smoke rig's
+        # vkms card comes after the boot splash and goes before the shutdown one. A stop and a
+        # start ordered either way run stop first.
+        oneshot(
+            "fstestvm-vkms",
+            "/usr/sbin/modprobe vkms",
+            "The smoke rig's vkms card, outside plymouth's splashes",
+            unit = {
+                "After": "plymouth-quit-wait.service",
+                "Before": ["plymouth-poweroff.service", "plymouth-reboot.service", "plymouth-halt.service", "plymouth-kexec.service"],
+            },
+            ExecStop = "-/usr/sbin/modprobe -r vkms",
         ),
         oneshot(
             "fstestvm-eap-cert",
