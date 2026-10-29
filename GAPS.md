@@ -52,8 +52,8 @@ earlier Fedora Atomic image and nothing loads it.
   copies now, so an edit there needs a re-apply here.
 - Store tools live in `/opt/fspec/current/bin`, which `environment.d` and fish put on PATH;
   Hyprland binds, meshtop's entries and the scripts call them there.
-- `dualsense-herdr` and `streamdeck-keys` keep `/etc/profiles/per-user/kyandesutter/bin/herdr`:
-  the macbook's path, reached over ssh.
+- `dualsense-agents` and `streamdeck-keys` run `~/.local/bin/t3-agents` on each T3 Code server
+  (macbook, g815) over ssh.
 - Units are `fspec-<name>.service` and exec directly instead of `bash -lc`.
 - ananicy-cpp and asusd run from a `service()` with the store path, since their upstream units
   name `/usr/bin`; asusd's dbus policy is linked from its package with `etc`.

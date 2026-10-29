@@ -1,0 +1,86 @@
+#!/usr/bin/python3
+"""Print this host's T3 Code thread state as one JSON line every two seconds.
+
+    {"environment": "<id>", "threads": [{"id", "title", "project", "status", "seq"}]}
+
+status is "blocked", "working" or "done", following the desktop app's own
+agent-awareness phases (resolveThreadAwarenessPhaseV2): a pending request
+blocks, a live run works, an unsettled completed or failed run is done.
+Subagent, archived and settled threads are left out. A line reading `null`
+means the state database could not be read.
+
+The T3 server has no unscoped thread list (`t3 thread list` takes one
+project), so this reads its sqlite projection read-only. Consumers run it
+over ssh: the Stream Deck, the DualSense lightbar and FormalShell's badges.
+"""
+import json
+import os
+import sqlite3
+import sys
+import time
+
+USERDATA = os.path.expanduser(os.environ.get("T3CODE_HOME", "~/.t3") + "/userdata")
+INTERVAL = 2
+
+QUERY = """
+select t.thread_id, t.title, coalesce(p.title, ''), r.status, t.updated_at,
+       json_extract(t.payload_json, '$.settledAt'),
+       json_extract(t.payload_json, '$.settledOverride'),
+       (select q.kind from orchestration_v2_projection_runtime_requests q
+         where q.thread_id = t.thread_id and q.status = 'pending' and q.kind != 'auth_refresh'
+         limit 1)
+from orchestration_v2_projection_threads t
+join orchestration_v2_projection_runs r on r.thread_id = t.thread_id
+ and r.ordinal = (select max(ordinal) from orchestration_v2_projection_runs where thread_id = t.thread_id)
+left join projection_projects p on p.project_id = t.project_id
+where t.archived_at is null and t.deleted_at is null
+  and json_extract(t.payload_json, '$.lineage.relationshipToParent') is not 'subagent'
+"""
+
+
+def status(run, settled_at, override, pending):
+    if pending is not None:
+        return "blocked"
+    if run in ("preparing", "starting", "running", "waiting"):
+        return "working"
+    if run in ("completed", "failed"):
+        if override == "settled" or (settled_at is not None and override != "unsettled"):
+            return None
+        return "done"
+    return None
+
+
+def snapshot(db, environment):
+    threads = []
+    for tid, title, project, run, updated, settled_at, override, pending in db.execute(QUERY):
+        s = status(run, settled_at, override, pending)
+        if s is not None:
+            threads.append({"id": tid, "title": title, "project": project, "status": s, "seq": updated})
+    return {"environment": environment, "threads": threads}
+
+
+def main():
+    db = None
+    while True:
+        try:
+            if db is None:
+                with open(USERDATA + "/environment-id") as f:
+                    environment = f.read().strip()
+                db = sqlite3.connect(f"file:{USERDATA}/statev2.sqlite?mode=ro", uri=True, timeout=5)
+            line = json.dumps(snapshot(db, environment))
+        except (OSError, sqlite3.Error):
+            if db is not None:
+                db.close()
+            db = None
+            line = "null"
+        try:
+            print(line, flush=True)
+        except BrokenPipeError:
+            return
+        if "--once" in sys.argv:
+            return
+        time.sleep(INTERVAL)
+
+
+if __name__ == "__main__":
+    main()

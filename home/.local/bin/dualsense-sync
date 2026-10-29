@@ -13,7 +13,7 @@ base="${lightbar%:rgb:indicator}"
 # Agent state outranks the wallpaper accent: the lightbar is the only
 # thing on the desk that can say "an agent is waiting on you" while the
 # screen shows something else.
-case "$(cat "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/dualsense-herdr" 2>/dev/null || true)" in
+case "$(cat "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/dualsense-agents" 2>/dev/null || true)" in
   blocked) colour=D14D41 ;;
   working) colour=D0A215 ;;
   # Rendered by matugen's [templates.dualsense] block (dms.nix) on every

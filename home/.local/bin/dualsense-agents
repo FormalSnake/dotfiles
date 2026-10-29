@@ -5,28 +5,55 @@ set -o pipefail
 
 export PATH="$HOME/.local/bin:$PATH"
 
-# The mac's login shell is fish, which can't parse a `while :; do` loop,
-# so the remote side is handed to bash explicitly. Absolute path for the
-# same reason as any non-interactive ssh command: minimal
-# PATH.
-herdr=/opt/homebrew/bin/herdr
-last=""
-ssh -o BatchMode=yes -o ClearAllForwardings=yes -o ConnectTimeout=10 \
-    -o ServerAliveInterval=15 -o ServerAliveCountMax=2 macbook \
-    "bash -c 'while :; do $herdr agent list 2>/dev/null || echo null; sleep 2; done'" |
-while read -r line; do
-  state="$(printf '%s' "$line" | jq -r '
-    [.result.agents[]?.agent_status] as $s
-    | if ($s | index("blocked")) then "blocked"
-      elif ($s | index("working")) then "working"
-      else "idle" end' 2>/dev/null || echo idle)"
-  [ "$state" != "$last" ] || continue
-  last="$state"
-  printf '%s\n' "$state" > "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/dualsense-herdr"
+# One t3-agents stream per T3 Code server, each landing in its own file;
+# the lightbar shows the worst state across all of them.
+runtime="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+export runtime
+
+combine() {
+  local state=idle
+  if cat "$runtime"/t3-agents.* 2>/dev/null | grep -qx blocked; then state=blocked
+  elif cat "$runtime"/t3-agents.* 2>/dev/null | grep -qx working; then state=working; fi
+  [ "$state" != "$(cat "$runtime/dualsense-agents" 2>/dev/null || true)" ] || return 0
+  printf '%s\n' "$state" > "$runtime/dualsense-agents"
   dualsense-sync || true
   # Only on the way into blocked: a buzz every poll would be a pager.
   if [ "$state" = blocked ]; then
     dualsense-rumble || true
   fi
-done
+}
+export -f combine
 
+# Both watchers call combine; the lock keeps one rumble per transition.
+recombine() {
+  flock "$runtime/dualsense-agents.lock" bash -c combine
+}
+
+watch() {
+  local host="$1" last=""
+  while :; do
+    ssh -n -o BatchMode=yes -o ClearAllForwardings=yes -o ConnectTimeout=10 \
+        -o ServerAliveInterval=15 -o ServerAliveCountMax=2 "$host" .local/bin/t3-agents 2>/dev/null |
+    while read -r line; do
+      state="$(printf '%s' "$line" | jq -r '
+        [.threads[]?.status] as $s
+        | if ($s | index("blocked")) then "blocked"
+          elif ($s | index("working")) then "working"
+          else "idle" end' 2>/dev/null || echo idle)"
+      [ "$state" != "$last" ] || continue
+      last="$state"
+      printf '%s\n' "$state" > "$runtime/t3-agents.$host"
+      recombine
+    done || true
+    rm -f "$runtime/t3-agents.$host"
+    recombine
+    last=""
+    sleep 30
+  done
+}
+
+rm -f "$runtime"/t3-agents.*
+for host in macbook g815; do
+  watch "$host" &
+done
+wait

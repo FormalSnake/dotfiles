@@ -151,7 +151,7 @@ def _store():
         ),
         pkg("kopuz", version = "0.67.0", source = github("Kopuz-org/kopuz", asset = "Kopuz_*_aarch64.dmg"), apps = ["Kopuz.app"]),
         _nd_app("messages", "Messages", "FormalStudio/messages", "29ac1eeedd10745377486851075691e0ec45800e", "packaging/linux/dev.formalsnake.messages.png"),
-        _nd_app("formalmusic", "FormalMusic", "FormalStudio/formalmusic", "ddf544d6228105dfd84c059d28d36f9cc147f59a", "packaging/icon.png"),
+        _nd_app("formalmusic", "FormalMusic", "FormalStudio/formalmusic", "4aeef799e584f6a69a40eef9fb69d92f73b1611d", "packaging/icon.png"),
         pkg(
             "kopuzd",
             source = git("https://github.com/Kopuz-org/kopuz", rev = "735a22898992c4b09de2a65323039220db32750b"),

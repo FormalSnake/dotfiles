@@ -65,5 +65,11 @@
   },
   "usage": {
     "codex": false
+  },
+  "workspaces": {
+    "agentHosts": [
+      "macbook",
+      "g815"
+    ]
   }
 }
