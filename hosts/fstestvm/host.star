@@ -44,6 +44,8 @@ ROOTFS = tree(["hosts/fstestvm/rootfs/"], perms = {
     "/etc/fstestvm/eap-users": "0600",
 })
 
+# fspec names each unit fspec-<name>, which is what their dependencies on each other name. A $ in
+# an ExecStart is systemd's variable expansion, hence the $$ in the password hash.
 def _services():
     return [
         oneshot(
@@ -59,8 +61,8 @@ def _services():
             description = "hostapd on the hwsim radio " + w,
             systemd = {"unit": {
                 "BindsTo": "sys-subsystem-net-devices-" + w + ".device",
-                "After": ["sys-subsystem-net-devices-" + w + ".device", "fstestvm-eap-cert.service"],
-                "Wants": "fstestvm-eap-cert.service",
+                "After": ["sys-subsystem-net-devices-" + w + ".device", "fspec-fstestvm-eap-cert.service"],
+                "Wants": "fspec-fstestvm-eap-cert.service",
             }},
         )
         for w in ["wlan1", "wlan2"]
@@ -70,16 +72,16 @@ def _services():
             "fstestvm-ap-addrs",
             "/bin/sh -c 'ip addr replace 10.90.1.1/24 dev wlan1 && ip addr replace 10.90.2.1/24 dev wlan2'",
             "Static addresses on the hwsim AP interfaces",
-            unit = {"After": ["fstestvm-hostapd-wlan1.service", "fstestvm-hostapd-wlan2.service"], "Requires": ["fstestvm-hostapd-wlan1.service", "fstestvm-hostapd-wlan2.service"]},
+            unit = {"After": ["fspec-fstestvm-hostapd-wlan1.service", "fspec-fstestvm-hostapd-wlan2.service"], "Requires": ["fspec-fstestvm-hostapd-wlan1.service", "fspec-fstestvm-hostapd-wlan2.service"]},
         ),
         service(
             "fstestvm-dhcp",
             exec = "/usr/sbin/dnsmasq -k --conf-file=/etc/fstestvm/dnsmasq.conf",
             restart = "on_failure",
             description = "DHCP on the hwsim AP interfaces",
-            systemd = {"unit": {"After": "fstestvm-ap-addrs.service", "Requires": "fstestvm-ap-addrs.service"}},
+            systemd = {"unit": {"After": "fspec-fstestvm-ap-addrs.service", "Requires": "fspec-fstestvm-ap-addrs.service"}},
         ),
-        oneshot("fstestvm-password", "/usr/sbin/usermod -p '" + PASSWORD + "' " + VM_USER, "Set the rig user's lock-screen password"),
+        oneshot("fstestvm-password", "/usr/sbin/usermod -p '" + PASSWORD.replace("$", "$$") + "' " + VM_USER, "Set the rig user's lock-screen password"),
         service("sshd"),
         service("NetworkManager"),
         service("bluetooth"),
