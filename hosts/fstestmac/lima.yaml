@@ -1,0 +1,42 @@
+# FormalShell's night rig: a Tumbleweed guest on the macbook's Virtualization framework, for the
+# hours the g815 is off. FormalShell's dev/mac-vm.sh creates and starts it from this file
+# (fspec's vm() drives qemu on a KVM host only), and `fspec apply --host fstestmac` makes it the
+# rig hosts/fstestmac/host.star says.
+minimumLimaVersion: 2.0.0
+vmType: vz
+arch: aarch64
+# Two cores and half the memory stay with the macbook's agents.
+cpus: 8
+memory: 16GiB
+disk: 120GiB
+images:
+- location: https://download.opensuse.org/ports/aarch64/tumbleweed/appliances/openSUSE-Tumbleweed-Minimal-VM.aarch64-Cloud.qcow2
+  arch: aarch64
+# The tree reaches the slot users over rsync, as on the g815; nothing of the mac is mounted.
+mounts: []
+containerd:
+  system: false
+  user: false
+video:
+  display: none
+user:
+  name: kyan
+  uid: 1000
+  home: /home/kyan.linux
+ssh:
+  localPort: 60922
+  # The macbook key the slot users' authorized_keys carry also lets fspec in as kyan.
+  loadDotSSHPubKeys: true
+  forwardAgent: false
+provision:
+# fspec is not packaged; the first apply needs one on the guest's PATH, and from then on the spec
+# keeps it at the locked rev.
+- mode: system
+  script: |
+    #!/bin/bash
+    set -eux
+    command -v fspec >/dev/null && exit 0
+    zypper -n --gpg-auto-import-keys install -y rustup gcc git-core tar zstd
+    export RUSTUP_HOME=/opt/rustup CARGO_HOME=/opt/cargo
+    rustup default stable
+    cargo install --locked --root /usr/local --git https://github.com/FormalStudio/formalspec fspec

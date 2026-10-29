@@ -1,0 +1,19 @@
+#!/bin/sh
+# One vkms card per slot user, named vkms-<user>, so their Hyprland sessions run side by side: a
+# card has one DRM master, and dev/smoke.sh takes the card named after the user running it.
+set -eu
+modprobe vkms
+mountpoint -q /sys/kernel/config || mount -t configfs none /sys/kernel/config
+for u in $(getent passwd | cut -d: -f1 | grep -E '^fstest[0-9]+$'); do
+	d=/sys/kernel/config/vkms/vkms-$u
+	[ -d "$d" ] && continue
+	mkdir "$d"
+	mkdir "$d/planes/primary" "$d/planes/cursor" "$d/crtcs/crtc" "$d/encoders/encoder" "$d/connectors/connector"
+	echo 1 > "$d/planes/primary/type"
+	echo 2 > "$d/planes/cursor/type"
+	ln -s "$d/crtcs/crtc" "$d/planes/primary/possible_crtcs"
+	ln -s "$d/crtcs/crtc" "$d/planes/cursor/possible_crtcs"
+	ln -s "$d/crtcs/crtc" "$d/encoders/encoder/possible_crtcs"
+	ln -s "$d/encoders/encoder" "$d/connectors/connector/possible_encoders"
+	echo 1 > "$d/enabled"
+done
