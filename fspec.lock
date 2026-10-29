@@ -547,11 +547,7 @@ version = "0.67.0"
 url = "https://github.com/Kopuz-org/kopuz/releases/download/v0.67.0/Kopuz_0.67.0_aarch64.dmg"
 hash = "sha256-lma4Lifukg9JJZ8QUCWkdoGieFUqqy/Ema6/qceF6e4="
 
-[[pkg]]
-name = "kopuz"
-source = "url:https://github.com/Kopuz-org/kopuz/releases/download/v0.67.0/Kopuz_0.67.0_x86_64.AppImage"
-
-[pkg.any]
+[pkg.x86_64-linux]
 url = "https://github.com/Kopuz-org/kopuz/releases/download/v0.67.0/Kopuz_0.67.0_x86_64.AppImage"
 hash = "sha256-a4EzyKPiHIs69YiyP8axrWUBfHuFx76Q4RYY80b1ITs="
 

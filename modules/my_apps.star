@@ -93,12 +93,12 @@ def my_apps(host):
     linux = host.platform.is_linux
     kopuzd_build = {"image": TUMBLEWEED, "deps": ["rustup", "gcc", "cmake", "make", "pkgconf", "alsa-devel", "dbus-1-devel", "libopenssl-devel", "git-core", "gcc-c++"]} if linux else {}
     return [_nd_app(host, name, app) for name, app in APPS.items()] + [
-        # A build runs for url() sources only, so Linux names the AppImage.
         pkg(
             "kopuz",
-            source = url("https://github.com/Kopuz-org/kopuz/releases/download/v%s/Kopuz_%s_x86_64.AppImage" % (KOPUZ, KOPUZ)),
-            build = ["sh", "-c", KOPUZ_LINUX],
-        ) if linux else pkg("kopuz", version = KOPUZ, source = github("Kopuz-org/kopuz", asset = "Kopuz_*_aarch64.dmg"), apps = ["Kopuz.app"]),
+            version = KOPUZ,
+            source = github("Kopuz-org/kopuz", asset = "Kopuz_*_x86_64.AppImage" if linux else "Kopuz_*_aarch64.dmg"),
+            **({"build": ["sh", "-c", KOPUZ_LINUX]} if linux else {"apps": ["Kopuz.app"]})
+        ),
         pkg(
             "kopuzd",
             source = git("https://github.com/Kopuz-org/kopuz", rev = "v" + KOPUZ, **kopuzd_build),
