@@ -1,7 +1,24 @@
 
 vim.g.loaded_node_provider=0;vim.g.loaded_perl_provider=0;vim.g.loaded_ruby_provider=0;vim.g.loaded_python3_provider=0
--- Plugins come from vim.pack at the revisions in nvim-pack-lock.json, parsers from
--- nvim-treesitter's own installer; language servers come from the system.
+-- Plugins install through vim.pack at the revisions in nvim-pack-lock.json, which sits next to
+-- this file. nvim-treesitter compiles its parsers with tree-sitter-cli; language servers come
+-- from Homebrew and the fspec store.
+local gh = function(x) return "https://github.com/" .. x end
+vim.pack.add({
+  { src = gh("folke/snacks.nvim"), version = "882c996cf28183f4d63640de0b4c02ec886d01f2" },
+  { src = gh("folke/which-key.nvim"), version = "3aab2147e74890957785941f0c1ad87d0a44c15a" },
+  { src = gh("folke/flash.nvim"), version = "5f0f270fdc7c5b0c21d903ee85b9cb06f2ac636a" },
+  { src = gh("folke/persistence.nvim"), version = "b20b2a7887bd39c1a356980b45e03250f3dce49c" },
+  { src = gh("folke/lazydev.nvim"), version = "ff2cbcba459b637ec3fd165a2be59b7bbaeedf0d" },
+  { src = gh("nvim-mini/mini.icons"), version = "v0.18.0" },
+  { src = gh("lewis6991/gitsigns.nvim"), version = "a462f416e2ce4744531c6256252dee99a7d34a83" },
+  { src = gh("Saghen/blink.cmp"), version = "v1.10.2" },
+  { src = gh("MeanderingProgrammer/render-markdown.nvim"), version = "v8.14.0" },
+  { src = gh("neovim/nvim-lspconfig"), version = "v2.12.0" },
+  { src = gh("nvim-treesitter/nvim-treesitter"), version = "e289100ff98969e118c702199d88b764ce9e7fdf" },
+}, { confirm = false })
+-- Skips parsers that are already installed.
+require("nvim-treesitter").install("all")
 
 -- astro-ls needs a TypeScript SDK and a project without node_modules has none: take the one
 -- from the typescript pkg, whose tsc links to <pkg>/package/bin/tsc.
@@ -9,10 +26,9 @@ local tsc = vim.fn.exepath("tsc")
 if tsc ~= "" then
   vim.g.tsdk = vim.fs.dirname(vim.fs.dirname(vim.fn.resolve(tsc))) .. "/lib"
 end
--- rust-analyzer's std sources, from the distro's rust-src, unless the toolchain points elsewhere.
-local rust_src = "/usr/lib/rustlib/src/rust/library"
-if not vim.env.RUST_SRC_PATH and vim.uv.fs_stat(rust_src) then
-  vim.env.RUST_SRC_PATH = rust_src
+-- rust-analyzer's std sources, from rustup's rust-src component, unless the toolchain points elsewhere.
+if not vim.env.RUST_SRC_PATH and vim.fn.executable("rustc") == 1 then
+  vim.env.RUST_SRC_PATH = vim.trim(vim.fn.system({ "rustc", "--print", "sysroot" })) .. "/lib/rustlib/src/rust/library"
 end
 
 vim.g.mapleader = " "
@@ -132,22 +148,6 @@ vim.diagnostic.config({
 
 -- Plugins ---------------------------------------------------------------------
 
-local gh = function(repo) return "https://github.com/" .. repo end
-vim.pack.add({
-  gh("folke/snacks.nvim"),
-  gh("folke/which-key.nvim"),
-  gh("folke/flash.nvim"),
-  gh("folke/persistence.nvim"),
-  gh("folke/lazydev.nvim"),
-  gh("nvim-mini/mini.icons"),
-  gh("lewis6991/gitsigns.nvim"),
-  -- A release tag, so blink downloads its prebuilt fuzzy matcher instead of building it.
-  { src = gh("Saghen/blink.cmp"), version = vim.version.range("1.*") },
-  gh("MeanderingProgrammer/render-markdown.nvim"),
-  gh("neovim/nvim-lspconfig"),
-  { src = gh("nvim-treesitter/nvim-treesitter"), version = "main" },
-}, { confirm = false })
-
 require("mini.icons").setup()
 MiniIcons.mock_nvim_web_devicons()
 
@@ -255,10 +255,6 @@ require("blink.cmp").setup({
 })
 
 -- Treesitter ------------------------------------------------------------------
-
--- install() skips parsers already present, so after the first run this costs a
--- directory listing. It compiles with tree-sitter and a C compiler.
-vim.schedule(function() require("nvim-treesitter").install("all") end)
 
 -- nvim-treesitter's main branch only ships parsers and queries; starting the
 -- highlighter and indent is left to the user.

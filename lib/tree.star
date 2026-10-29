@@ -1,12 +1,12 @@
-def tree(roots, dest = "/", perms = {}, skip = []):
-    """Every file under `roots` at the same path under `dest`. A later root wins."""
+def tree(roots, dest = "/", perms = {}, skip = [], rename = {}):
+    """Every file under `roots` at the same path under `dest`, or at rename[path]. A later root wins."""
     files = {}
     for root in roots:
         for src in glob(root + "**/*"):
             rel = src.removeprefix(root)
             if any([rel == s or rel.startswith(s + "/") for s in skip]):
                 continue
-            path = dest + rel
+            path = dest + rename.get(rel, rel)
             files[rel] = file(path, src = src, perms = perms.get(path))
     return list(files.values())
 

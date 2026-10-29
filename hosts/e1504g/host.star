@@ -43,7 +43,7 @@ e1504g = host(
         swapfile(),
         linux_secrets("e1504g"),
         sync_items(),
-        home("e1504g"),
+        home(),
         fastfetch("e1504g"),
         boot(),
     ],

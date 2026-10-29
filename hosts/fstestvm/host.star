@@ -94,7 +94,7 @@ def _services():
 
 def _fstestvm(h):
     return [FORMALSHELL] + ROOTFS + _services() + [
-        file("/etc/ssh/ssh_known_hosts", src = "rootfs/etc/ssh/ssh_known_hosts", perms = "0644"),
+        file("/etc/ssh/ssh_known_hosts", src = "modules/linux/rootfs/etc/ssh/ssh_known_hosts", perms = "0644"),
         # The lingering manager runs the headless parent dev/smoke.sh nests in.
         file("/etc/systemd/user/default.target.wants/fstestvm-parent.service", mode = "link", target = "/etc/systemd/user/fstestvm-parent.service"),
     ] + formalos_boot(

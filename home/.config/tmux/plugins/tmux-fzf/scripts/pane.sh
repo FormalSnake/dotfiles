@@ -64,10 +64,10 @@ else
         target_origin=${target_origin/\[current\]/$current_pane_origin}
     fi
     [[ "$target_origin" == "[cancel]" || -z "$target_origin" ]] && exit
-    target=$(echo "$target_origin" | /usr/bin/sed 's/: .*//')
+    target=$(echo "$target_origin" | sed 's/: .*//')
     if [[ "$action" == "switch" ]]; then
-        echo "$target" | /usr/bin/sed -E 's/:.*//g' | xargs -I{} tmux switch-client -t {}
-        echo "$target" | /usr/bin/sed -E 's/\..*//g' | xargs -I{} tmux select-window -t {}
+        echo "$target" | sed -E 's/:.*//g' | xargs -I{} tmux switch-client -t {}
+        echo "$target" | sed -E 's/\..*//g' | xargs -I{} tmux select-window -t {}
         echo "$target" | xargs -I{} tmux select-pane -t {}
     elif [[ "$action" == "kill" ]]; then
         echo "$target" | sort -r | xargs -I{} tmux kill-pane -t {}
@@ -76,13 +76,13 @@ else
         FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --header='Select another target pane.'"
         target_swap_origin=$(printf "%s\n[cancel]" "$panes" | eval "$TMUX_FZF_BIN $TMUX_FZF_OPTIONS $TMUX_FZF_PREVIEW_OPTIONS")
         [[ "$target_swap_origin" == "[cancel]" || -z "$target_swap_origin" ]] && exit
-        target_swap=$(echo "$target_swap_origin" | /usr/bin/sed 's/: .*//')
+        target_swap=$(echo "$target_swap_origin" | sed 's/: .*//')
         tmux swap-pane -s "$target" -t "$target_swap"
     elif [[ "$action" == "join" ]]; then
         echo "$target" | sort -r | xargs -I{} tmux move-pane -s {}
     elif [[ "$action" == "break" ]]; then
-        cur_ses=$(tmux display-message -p | /usr/bin/sed -e 's/^.//' -e 's/].*//')
-        last_win_num=$(tmux list-windows | sort -nr | head -1 | /usr/bin/sed 's/:.*//')
+        cur_ses=$(tmux display-message -p | sed -e 's/^.//' -e 's/].*//')
+        last_win_num=$(tmux list-windows | sort -nr | head -1 | sed 's/:.*//')
         ((last_win_num_after = last_win_num + 1))
         tmux break-pane -s "$target" -t "$cur_ses":"$last_win_num_after"
     fi

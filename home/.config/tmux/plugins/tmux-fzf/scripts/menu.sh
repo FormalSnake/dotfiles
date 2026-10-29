@@ -18,10 +18,10 @@ target=$(printf "%s[cancel]" "$front_end_list" | eval "$TMUX_FZF_BIN $TMUX_FZF_O
 # get the next line in $TMUX_FZF_MENU and execute
 
 if [[ -z "$TMUX_FZF_MENU_POPUP" ]]; then
-    echo -e "$TMUX_FZF_MENU" | /usr/bin/sed -n "/$target/{n;p;}" | xargs -I{} tmux -c {}
+    echo -e "$TMUX_FZF_MENU" | sed -n "/$target/{n;p;}" | xargs -I{} tmux -c {}
 else
     echo -e "$TMUX_FZF_MENU" |
-        /usr/bin/sed -n "/$target/{n;p;}" |
+        sed -n "/$target/{n;p;}" |
         xargs -I{} tmux popup \
             -xC \
             -yC \

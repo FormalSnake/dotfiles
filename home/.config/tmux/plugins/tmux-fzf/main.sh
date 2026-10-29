@@ -8,7 +8,7 @@ items_origin="$(echo $TMUX_FZF_ORDER | tr '|' '\n')"
 
 # remove copy-mode from options if we aren't in copy-mode
 if [ "$(tmux display-message -p '#{pane_in_mode}')" -eq 0 ]; then
-    items_origin="$(echo "${items_origin}" | /usr/bin/sed '/copy-mode/d')"
+    items_origin="$(echo "${items_origin}" | sed '/copy-mode/d')"
 fi
 
 if [[ ! -z "$TMUX_FZF_MENU" ]]; then

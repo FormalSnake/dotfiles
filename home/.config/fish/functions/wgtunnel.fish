@@ -1,4 +1,4 @@
-function wgtunnel --description="WireGuard-over-wstunnel client (endpoint + path prefix from /run/fspec/secrets)"
+function wgtunnel --description="WireGuard-over-wstunnel client (endpoint + path prefix from fspec)"
     if not set -q WSTUNNEL_ENDPOINT; or not set -q WSTUNNEL_PATH_PREFIX
         echo "WSTUNNEL_ENDPOINT / WSTUNNEL_PATH_PREFIX not set (fspec secret missing?)" >&2
         return 1

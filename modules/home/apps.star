@@ -154,18 +154,3 @@ TOOLS = [
         bins = ["clipssh"],
     ),
 ]
-
-# The second Claude Code profile. Its .claude.json is seeded with only the trust flag, since
-# patch keys split on dots and the project path has one.
-def claude_pulse(home):
-    return [file(
-        "~/.claude-pulse/.claude.json",
-        mode = "seed",
-        perms = "0600",
-        content = '{"mcpServers": {}, "projects": {"%s/.config/formalspec": {"hasTrustDialogAccepted": true}}}\n' % home,
-    )]
-
-CLAUDE_PULSE = claude_pulse(HOME) + [
-    file("~/.claude-pulse/skills", mode = "link", target = HOME + "/.claude/skills"),
-    file("~/.claude-pulse/plugins", mode = "link", target = HOME + "/.claude/plugins"),
-]

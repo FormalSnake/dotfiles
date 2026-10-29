@@ -1,8 +1,0 @@
-/target
-/bin
-.DS_Store
-.worktrees
-.claude/*.lock
-dist
-.astro
-node_modules

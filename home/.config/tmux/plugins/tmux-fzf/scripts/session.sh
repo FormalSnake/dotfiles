@@ -10,7 +10,7 @@ else
 fi
 
 if [[ -z "$TMUX_FZF_SWITCH_CURRENT" ]]; then
-    current_session=$(tmux display-message -p | /usr/bin/sed -e 's/^\[//' -e 's/\].*//')
+    current_session=$(tmux display-message -p | sed -e 's/^\[//' -e 's/\].*//')
     sessions=$(echo "$sessions" | grep -v "^$current_session: ")
 fi
 
@@ -32,7 +32,7 @@ if [[ "$action" != "detach" ]]; then
         target_origin=$(printf "%s\n[cancel]" "$sessions" | eval "$TMUX_FZF_BIN $TMUX_FZF_OPTIONS $TMUX_FZF_PREVIEW_SESSION_OPTIONS")
     elif [[ "$action" != "new" ]]; then
         target_origin=$(printf "[current]\n%s\n[cancel]" "$sessions" | eval "$TMUX_FZF_BIN $TMUX_FZF_OPTIONS $TMUX_FZF_PREVIEW_SESSION_OPTIONS")
-        target_origin=$(echo "$target_origin" | /usr/bin/sed -E "s/\[current\]/$current_session:/")
+        target_origin=$(echo "$target_origin" | sed -E "s/\[current\]/$current_session:/")
     fi
     if [[ "$action" == "new" || "$action" == "rename" ]]; then
         mkfifo /tmp/tmux_fzf_session_name
@@ -48,14 +48,14 @@ if [[ "$action" != "detach" ]]; then
         fi
     fi
 else
-    tmux_attached_sessions=$(tmux list-sessions | grep 'attached' | grep -o '^[[:alpha:][:digit:]_-]*:' | /usr/bin/sed 's/.$//g')
+    tmux_attached_sessions=$(tmux list-sessions | grep 'attached' | grep -o '^[[:alpha:][:digit:]_-]*:' | sed 's/.$//g')
     sessions=$(echo "$sessions" | grep "^$tmux_attached_sessions")
     FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --header='Select target session(s). Press TAB to mark multiple items.'"
     target_origin=$(printf "[current]\n%s\n[cancel]" "$sessions" | eval "$TMUX_FZF_BIN $TMUX_FZF_OPTIONS $TMUX_FZF_PREVIEW_SESSION_OPTIONS")
-    target_origin=$(echo "$target_origin" | /usr/bin/sed -E "s/\[current\]/$current_session:/")
+    target_origin=$(echo "$target_origin" | sed -E "s/\[current\]/$current_session:/")
 fi
 [[ "$target_origin" == "[cancel]" || -z "$target_origin" ]] && exit
-target=$(echo "$target_origin" | /usr/bin/sed -e 's/:.*$//')
+target=$(echo "$target_origin" | sed -e 's/:.*$//')
 if [[ "$action" == "switch" ]]; then
     tmux switch-client -t "$target"
 elif [[ "$action" == "detach" ]]; then

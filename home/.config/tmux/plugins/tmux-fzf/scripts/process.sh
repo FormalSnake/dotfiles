@@ -18,7 +18,7 @@ fi
 
 content_raw="$(ps aux)"
 header=$(echo "$content_raw" | head -n 1)
-content=$(echo "$content_raw" | /usr/bin/sed 1d)
+content=$(echo "$content_raw" | sed 1d)
 FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --header='$header'"
 ps_selected=$(printf "[cancel]\n$content" | eval "$TMUX_FZF_BIN $TMUX_FZF_OPTIONS")
 [[ "$ps_selected" == "[cancel]" || -z "$ps_selected" ]] && exit

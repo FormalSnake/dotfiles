@@ -28,22 +28,22 @@ fi
 
 [[ "$action" == "[cancel]" || -z "$action" ]] && exit
 if [[ "$action" == "link" ]]; then
-    cur_ses=$(tmux display-message -p | /usr/bin/sed -e 's/^.//' -e 's/].*//')
-    last_win_num=$(tmux list-windows | sort -r | /usr/bin/sed '2,$d' | /usr/bin/sed 's/:.*//')
+    cur_ses=$(tmux display-message -p | sed -e 's/^.//' -e 's/].*//')
+    last_win_num=$(tmux list-windows | sort -r | sed '2,$d' | sed 's/:.*//')
     windows=$(echo "$windows" | grep -v "^$cur_ses")
     FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --header='Select source window.'"
     src_win_origin=$(printf "%s\n[cancel]" "$windows" | eval "$TMUX_FZF_BIN $TMUX_FZF_OPTIONS $TMUX_FZF_PREVIEW_OPTIONS")
     [[ "$src_win_origin" == "[cancel]" || -z "$src_win_origin" ]] && exit
-    src_win=$(echo "$src_win_origin" | /usr/bin/sed 's/: .*//')
+    src_win=$(echo "$src_win_origin" | sed 's/: .*//')
     tmux link-window -a -s "$src_win" -t "$cur_ses"
 elif [[ "$action" == "move" ]]; then
-    cur_ses=$(tmux display-message -p | /usr/bin/sed -e 's/^.//' -e 's/].*//')
-    last_win_num=$(tmux list-windows | sort -r | /usr/bin/sed '2,$d' | /usr/bin/sed 's/:.*//')
+    cur_ses=$(tmux display-message -p | sed -e 's/^.//' -e 's/].*//')
+    last_win_num=$(tmux list-windows | sort -r | sed '2,$d' | sed 's/:.*//')
     windows=$(echo "$windows" | grep -v "^$cur_ses")
     FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --header='Select source window.'"
     src_win_origin=$(printf "%s\n[cancel]" "$windows" | eval "$TMUX_FZF_BIN $TMUX_FZF_OPTIONS $TMUX_FZF_PREVIEW_OPTIONS")
     [[ "$src_win_origin" == "[cancel]" || -z "$src_win_origin" ]] && exit
-    src_win=$(echo "$src_win_origin" | /usr/bin/sed 's/: .*//')
+    src_win=$(echo "$src_win_origin" | sed 's/: .*//')
     tmux move-window -a -s "$src_win" -t "$cur_ses"
 else
     if [[ "$action" == "kill" ]]; then
@@ -61,7 +61,7 @@ else
         target_origin=$(printf "%s\n[cancel]" "$windows" | eval "$TMUX_FZF_BIN $TMUX_FZF_OPTIONS $TMUX_FZF_PREVIEW_OPTIONS")
     fi
     [[ "$target_origin" == "[cancel]" || -z "$target_origin" ]] && exit
-    target=$(echo "$target_origin" | /usr/bin/sed 's/: .*//')
+    target=$(echo "$target_origin" | sed 's/: .*//')
     if [[ "$action" == "kill" ]]; then
         echo "$target" | sort -r | xargs -I{} tmux unlink-window -k -t {}
     elif [[ "$action" == "rename" ]]; then
@@ -78,10 +78,10 @@ else
         FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS --header='Select another target window.'"
         target_swap_origin=$(printf "%s\n[cancel]" "$windows" | eval "$TMUX_FZF_BIN $TMUX_FZF_OPTIONS $TMUX_FZF_PREVIEW_OPTIONS")
         [[ "$target_swap_origin" == "[cancel]" || -z "$target_swap_origin" ]] && exit
-        target_swap=$(echo "$target_swap_origin" | /usr/bin/sed 's/: .*//')
+        target_swap=$(echo "$target_swap_origin" | sed 's/: .*//')
         tmux swap-window -s "$target" -t "$target_swap"
     elif [[ "$action" == "switch" ]]; then
-        echo "$target" | /usr/bin/sed 's/:.*//g' | xargs -I{} tmux switch-client -t {}
+        echo "$target" | sed 's/:.*//g' | xargs -I{} tmux switch-client -t {}
         echo "$target" | xargs -I{} tmux select-window -t {}
     fi
 fi

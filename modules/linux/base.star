@@ -1,4 +1,5 @@
-load("//lib/paths.star", "LIBEXEC", "STORE")
+load("//lib/keys.star", "AUTHORIZED_KEYS")
+load("//lib/paths.star", "LIBEXEC", "STORE", "USER")
 load("//lib/tree.star", "tree")
 load("//lib/units.star", "oneshot")
 
@@ -36,8 +37,10 @@ def firewall(tcp = [], udp = [], udp_ranges = []):
     ] + ports + ["</zone>", ""]))
 
 def rootfs(host):
-    """rootfs/ and hosts/<host>/rootfs/, each a mirror of /."""
-    return tree(["rootfs/", "hosts/%s/rootfs/" % host], perms = {"/etc/sudoers.d/10-fspec": "0440"})
+    """modules/linux/rootfs/ and hosts/<host>/rootfs/, each a mirror of /."""
+    return tree(["modules/linux/rootfs/", "hosts/%s/rootfs/" % host], perms = {"/etc/sudoers.d/10-fspec": "0440"}) + [
+        file("/etc/ssh/authorized_keys.d/" + USER, content = AUTHORIZED_KEYS),
+    ]
 
 FILES = [
     file("/etc/localtime", mode = "link", src = "/usr/share/zoneinfo/Atlantic/Canary"),

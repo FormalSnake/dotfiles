@@ -1,0 +1,4 @@
+font-family = GeistMono Nerd Font Mono
+keybind = global:cmd+shift+space=toggle_quick_terminal
+macos-titlebar-style = tabs
+theme = light:Flexoki Light,dark:Flexoki Dark

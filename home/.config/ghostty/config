@@ -5,8 +5,6 @@ clipboard-write = allow
 confirm-close-surface = false
 cursor-style = block
 cursor-style-blink = false
-font-codepoint-map = U+23FA=Noto Sans Symbols 2
-font-family = GeistMono Nerd Font
 font-size = 10
 font-style = Medium
 keybind = shift+enter=text:\x1b\r
@@ -14,6 +12,6 @@ mouse-hide-while-typing = true
 resize-overlay = never
 shell-integration = fish
 shell-integration-features = cursor,sudo,title,ssh-env,no-ssh-terminfo
-theme = Matugen
 window-colorspace = display-p3
 window-decoration = auto
+config-file = ?platform

@@ -1,9 +1,0 @@
-#:schema https://fut.sh/schemas/config.json
-
-[ui.bindings]
-open_command_bar = "space"
-enter_copy_mode = "y"
-open_right_sidebar = "e"
-split_pane_right = "v"
-split_pane_down = "-"
-focus_previous_pane = ","

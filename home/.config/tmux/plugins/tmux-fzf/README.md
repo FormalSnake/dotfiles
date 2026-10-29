@@ -23,7 +23,7 @@
 - [CopyQ](https://github.com/hluk/CopyQ/) (optional): Access system clipboard, fallback to builtin tmux buffers if copyq is not executable.
 - [pstree](https://gitlab.com/psmisc/psmisc/) (optional): Display process tree.
 
-**Note:** Please use this command to check whether tmux is able to find /usr/bin/fzf [#1](https://github.com/sainnhe/tmux-fzf/issues/1): `tmux run-shell -b 'command -v fzf'`
+**Note:** Please use this command to check whether tmux is able to find fzf [#1](https://github.com/sainnhe/tmux-fzf/issues/1): `tmux run-shell -b 'command -v fzf'`
 
 ## Install via [TPM](https://github.com/tmux-plugins/tpm/)
 
@@ -45,7 +45,7 @@ Most of the features work out of the box, but there are some features that need 
 
 ## Kill Window(s)
 
-The `kill` action in tmux-/usr/bin/fzf actually uses `tmux unlink-window -k` instead of `tmux kill-window`.
+The `kill` action in tmux-fzf actually uses `tmux unlink-window -k` instead of `tmux kill-window`.
 
 The main difference between `unlink-window -k` and `kill-window` is that `kill-window` will kill current window and all other windows linked to it, while `unlink-window -k` will only kill current window.
 
@@ -106,7 +106,7 @@ nil--\n\n"          <- this is required
 
 ### Menu Popup
 
-You can configure the menu ou/usr/bin/tput to appear on a popup window instead of the current pane you're on.
+You can configure the menu output to appear on a popup window instead of the current pane you're on.
 
 To enable this set the `TMUX_FZF_MENU_POPUP=1` variable.
 
@@ -137,7 +137,7 @@ TMUX_FZF_LAUNCH_KEY="C-f"
 
 ## Fzf Behavior
 
-This plugin will read [/usr/bin/fzf environment variables](https://github.com/junegunn/fzf/#environment-variables), so you can use these variables to customize the behavior of /usr/bin/fzf (e.g. prompt and color).
+This plugin will read [fzf environment variables](https://github.com/junegunn/fzf/#environment-variables), so you can use these variables to customize the behavior of fzf (e.g. prompt and color).
 
 In addition, this plugin supports customizing the options of `fzf-tmux` command which is [bundled with fzf](https://github.com/junegunn/fzf#fzf-tmux-script), you can customize them by adding something like this to `~/.tmux.conf`
 
@@ -161,7 +161,7 @@ TMUX_FZF_PREVIEW=0
 
 Then the preview window will be hidden until `toggle-preview` is triggered.
 
-By default, the preview window will try to "follow" the content (see description in [the /usr/bin/fzf docs](https://github.com/junegunn/fzf/blob/master/ADVANCED.md#log-tailing)). You can opt out this behavior using the following:
+By default, the preview window will try to "follow" the content (see description in [the fzf docs](https://github.com/junegunn/fzf/blob/master/ADVANCED.md#log-tailing)). You can opt out this behavior using the following:
 
 ```tmux
 TMUX_FZF_PREVIEW_FOLLOW=0
@@ -216,7 +216,7 @@ To use this filtering feature, set the variable `TMUX_FZF_WINDOW_FILTER` to the 
 
 **A:** Because the performance of tmux options is very bad. I pushed a branch named `tmux-options` to demonstrate how bad the performance will be if we use tmux options to customize this plugin, you can checkout this branch and get it a try.
 
-**Q: How to launch tmux-/usr/bin/fzf with preselected action?**
+**Q: How to launch tmux-fzf with preselected action?**
 
 **A:** See [#6](https://github.com/sainnhe/tmux-fzf/issues/6).
 
@@ -224,7 +224,7 @@ To use this filtering feature, set the variable `TMUX_FZF_WINDOW_FILTER` to the 
 
 **A:** See this [post](https://www.sainnhe.dev/post/status-line-config/).
 
-**Q: What's the color scheme u/usr/bin/sed in the screenshot?**
+**Q: What's the color scheme used in the screenshot?**
 
 **A:** [Gruvbox Material](https://github.com/sainnhe/gruvbox-material)
 
@@ -234,6 +234,6 @@ To use this filtering feature, set the variable `TMUX_FZF_WINDOW_FILTER` to the 
 
 # License
 
-The code of [/scripts/.fzf-tmux](./scripts/.fzf-tmux) is copied from [junegunn/fzf](https://github.com/junegunn/fzf#license) which is licen/usr/bin/sed under [MIT](https://github.com/junegunn/fzf/blob/master/LICENSE).
+The code of [/scripts/.fzf-tmux](./scripts/.fzf-tmux) is copied from [junegunn/fzf](https://github.com/junegunn/fzf#license) which is licensed under [MIT](https://github.com/junegunn/fzf/blob/master/LICENSE).
 
 Other code is distributed under [MIT](./LICENSE) && [Anti-996](./Anti-996-LICENSE).

@@ -67,7 +67,7 @@ g815 = host(
         swapfile(),
         linux_secrets("g815"),
         sync_items(),
-        home("g815"),
+        home(),
         fastfetch("g815"),
         boot(entries = [WINDOWS_BOOT]),
     ],
