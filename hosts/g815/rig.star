@@ -3,8 +3,11 @@ load("//lib/units.star", "oneshot")
 load("//modules/home/kde.star", "hide_app")
 
 # FormalShell's smoke rig runs as throwaway users, one per slot, each with a headless labwc its
-# Hyprland nests in (etc/systemd/user/formalshell-rig-*.service, kept to their group).
-RIG_USERS = ["fstest0", "fstest1"]
+# Hyprland nests in (etc/systemd/user/formalshell-rig-*.service, kept to their group). A running
+# slot holds about 550 MB and one to two cores, so eight leave the desktop most of the machine.
+# The uids are pinned for the slice drop-ins below; dev/remote.sh's FS_G815_SLOTS matches the count.
+RIG_USERS = ["fstest%d" % n for n in range(8)]
+RIG_UID = 1001
 RIG_KEY = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJi88WllIdjMaW5UJYbT7+NRYzSCrnKKYjGR7wL4n4io macbook"
 
 # The rig's legs drive foot windows; the desktop terminal is Ghostty, so foot stays out of the launcher.
@@ -40,7 +43,11 @@ RIG = [
         file("/var/lib/systemd/linger/" + u, content = ""),
         file("/etc/ssh/authorized_keys.d/" + u, content = RIG_KEY + "\n"),
     ]
+] + [
+    # A slot's builds and sessions yield to the desktop when the two compete; idle, nothing changes.
+    file("/etc/systemd/system/user-%d.slice.d/50-formalshell-rig.conf" % (RIG_UID + n), content = "[Slice]\nCPUWeight=20\nIOWeight=20\n")
+    for n in range(len(RIG_USERS))
 ] + [hide_app(id) for id in ["foot", "footclient", "foot-server"]]
 
 def rig_users():
-    return [user(u, groups = ["fstest", "render", "video"]) for u in RIG_USERS]
+    return [user(u, uid = RIG_UID + n, groups = ["fstest", "render", "video"]) for n, u in enumerate(RIG_USERS)]
