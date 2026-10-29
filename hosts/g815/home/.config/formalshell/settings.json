@@ -51,6 +51,9 @@
   "menu": {
     "appGrid": true
   },
+  "motion": {
+    "morph": false
+  },
   "notifications": {
     "position": "bottom-right"
   },
@@ -59,9 +62,6 @@
   },
   "screensaver": {
     "timeoutSeconds": 600
-  },
-  "theme": {
-    "preset": "pantheon"
   },
   "usage": {
     "codex": false
