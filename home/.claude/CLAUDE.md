@@ -216,7 +216,8 @@ only what the task needs. A local edit does not trigger an audit.
 | Apple platforms | `Apple-Hig-Designer`, `swiftui-ui-patterns`, `write-swift`, `apple-design` |
 | Cloudflare | `cloudflare`, `wrangler`, `workers-best-practices`, `durable-objects`, `agents-sdk` |
 | My services | `canaryllm-api`, `gem0-api`, `kangaplanner-api` |
-| Review | `deep-review`, `react-doctor`, `web-quality-audit`; `better-call-sol` for a Codex review |
+| Writing or restructuring code | `codebase-slop`: check new code against its indicators before handing back |
+| Review, audits | `deep-review`, `codebase-slop`, `react-doctor`, `web-quality-audit`; `better-call-sol` for a Codex review |
 | Carrying work to the end | `completion-boundaries`, `ecosystem-delivery` |
 | Machines, rebuilds, disk | `host-ops` |
 | Prose shipping under my name | `humanizer` |
