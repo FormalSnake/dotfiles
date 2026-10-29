@@ -416,7 +416,7 @@ build = "a43ebaad"
 [[pkg]]
 name = "fspec"
 source = "git:https://github.com/FormalStudio/formalspec@main"
-rev = "9e93d9f305f07da7a5b47d7a212fd1085eaca629"
+rev = "353f439ce33758cf81d4fdbdc6ef08b239dbdd45"
 
 [pkg.x86_64-linux]
 oci = "ghcr.io/formalsnake/fspec-cache/fspec@sha256:c893b7a94bb4c6eb89f8b24fd859f6a2789668803895098921875ad9880bd3d9"
