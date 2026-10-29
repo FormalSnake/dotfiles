@@ -1,0 +1,3 @@
+#!/bin/sh
+[ "$1" = post ] && systemctl try-restart fspec-power-cap.service
+exit 0

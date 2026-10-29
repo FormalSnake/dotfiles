@@ -366,14 +366,14 @@ git-tracked files. Details and the sudo mesh live in that repo's own CLAUDE.md.
 e1504g runs openSUSE Tumbleweed managed by fspec, with fish as the login
 shell. No `nixos-rebuild`, no `/etc/static`, no NixOS modules: anything in
 `~/.config/nix` or a repo's `nixosModules` does not reach it. Its whole
-config is the `formalspec` branch of this dotfiles repo, checked out at
-`~/.config/nix-wt/formalspec` (`/etc` files, PAM included, in
-`system.star`); store packages live under
+config is the `main` branch of this dotfiles repo, checked out at
+`~/.config/formalspec` (`/etc` files, PAM included, under `rootfs/`,
+the packages in `modules/linux/`); store packages live under
 `/opt/fspec`. Assume Debian or NixOS conventions are wrong there and check
 `/etc/os-release` before guessing.
 
 To ship a `git(...)` package such as FormalShell: push the repo, bump its
-`rev` in `system.star`, `fspec update <pkg>` from that worktree, commit and
+`rev` in `modules/linux/store.star`, `fspec update <pkg>` from the checkout, commit and
 push the branch, then `fspec apply --host e1504g` there. Don't wait on CI:
 g815 is e1504g's `builder(...)`, so the apply compiles there and ships the
 result. Never compile on e1504g itself (8 GB RAM, slow disk); checks and

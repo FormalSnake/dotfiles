@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Plasma (Wayland)
+Comment=Plasma by KDE
+Exec=/usr/bin/startplasma-wayland
+TryExec=/usr/bin/startplasma-wayland
+DesktopNames=KDE
+Type=Application

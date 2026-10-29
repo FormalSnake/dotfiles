@@ -1,0 +1,10 @@
+{
+  "greeter": {
+    "sessionDirs": [
+      "/etc/formalshell-greeter/wayland-sessions"
+    ],
+    "sessionCommand": [
+      "/usr/bin/uwsm start -e -D Hyprland hyprland.desktop"
+    ]
+  }
+}

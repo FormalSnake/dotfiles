@@ -1,0 +1,11 @@
+[Unit]
+Description=Swapfile in @swap
+Requires=swap.mount
+After=swap.mount
+
+[Swap]
+What=/swap/swapfile
+Priority=1
+
+[Install]
+WantedBy=swap.target

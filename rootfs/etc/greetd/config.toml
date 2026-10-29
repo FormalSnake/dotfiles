@@ -1,0 +1,13 @@
+[terminal]
+vt = 1
+
+[general]
+runfile = "/run/session-switch/greetd.run"
+
+[default_session]
+command = "/etc/greetd/formalshell-session.sh"
+user = "greeter"
+
+[initial_session]
+command = "/usr/local/libexec/session-switch-login"
+user = "kyandesutter"

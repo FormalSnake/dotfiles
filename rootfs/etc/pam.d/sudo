@@ -1,0 +1,7 @@
+#%PAM-1.0
+auth     sufficient     pam_ssh_agent_auth.so file=/etc/ssh/authorized_keys.d/kyandesutter
+auth     include        common-auth
+account  include        common-account
+password include        common-password
+session  optional       pam_keyinit.so revoke
+session  include        common-session-nonlogin

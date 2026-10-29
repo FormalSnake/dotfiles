@@ -1,0 +1,11 @@
+[Unit]
+Description=The @swap subvolume
+
+[Mount]
+What=UUID=1a10e345-3d66-4bde-9f6b-55d43e6f7e0d
+Where=/swap
+Type=btrfs
+Options=subvol=@swap,noatime
+
+[Install]
+WantedBy=local-fs.target

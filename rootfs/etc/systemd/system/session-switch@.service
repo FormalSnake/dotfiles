@@ -1,0 +1,6 @@
+[Unit]
+Description=Log into the %i session
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/libexec/session-switch-run %i

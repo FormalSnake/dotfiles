@@ -1,0 +1,12 @@
+[Unit]
+Description=NTFS volume at /mnt/games
+ConditionPathExists=!/run/windows-vm.running
+
+[Mount]
+What=/dev/disk/by-uuid/017BFE6375CF515B
+Where=/mnt/games
+Type=ntfs3
+Options=rw,uid=1000,gid=100,umask=022,windows_names,noatime,nofail
+
+[Install]
+WantedBy=local-fs.target

@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Epic Games Launcher
+Exec=/usr/local/bin/epic-games-launcher %U
+Terminal=false
+Categories=Game;

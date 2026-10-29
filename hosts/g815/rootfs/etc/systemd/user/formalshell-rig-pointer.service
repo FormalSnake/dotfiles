@@ -1,0 +1,9 @@
+[Unit]
+Description=virtual pointer held on the FormalShell rig's headless labwc
+ConditionGroup=fstest
+PartOf=formalshell-rig-parent.service
+
+[Service]
+ExecStart=/usr/local/libexec/formalshell-rig-pointer
+Restart=on-failure
+RestartSec=2

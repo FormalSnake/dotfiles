@@ -1,0 +1,11 @@
+[Unit]
+Description=NTFS volume at /mnt/steamlib
+
+[Mount]
+What=/dev/disk/by-uuid/7ED4F163D4F11E59
+Where=/mnt/steamlib
+Type=ntfs3
+Options=rw,uid=1000,gid=100,umask=022,windows_names,noatime,nofail,x-systemd.device-timeout=5s
+
+[Install]
+WantedBy=local-fs.target

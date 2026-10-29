@@ -1,0 +1,6 @@
+[Unit]
+Description=One-shot reboot into Windows via UEFI BootNext
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/libexec/reboot-to-windows

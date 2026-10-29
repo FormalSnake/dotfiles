@@ -1,0 +1,13 @@
+[Unit]
+Description=Bare-metal Windows 11 as a KVM guest over a throwaway overlay
+After=mnt-windows.mount mnt-games.mount
+
+[Service]
+ExecStartPre=/usr/bin/touch /run/windows-vm.running
+ExecStartPre=/usr/bin/systemctl stop mnt-windows.mount mnt-games.mount
+ExecStart=/usr/local/libexec/windows-vm
+ExecStopPost=/usr/bin/rm -f /run/windows-vm.running /var/lib/windows-vm/overlay/overlay.qcow2
+ExecStopPost=-/usr/bin/systemctl start --no-block mnt-windows.mount mnt-games.mount
+KillSignal=SIGINT
+KillMode=mixed
+TimeoutStopSec=30

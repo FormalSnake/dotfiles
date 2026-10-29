@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Name=Switch to Hyprland
+Exec=/usr/local/bin/session-switch hyprland-uwsm
+Icon=hyprland

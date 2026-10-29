@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Discord
+GenericName=Instant Messenger
+Exec=/home/kyandesutter/.local/bin/discord
+Icon=/opt/fspec/current/pkgs/discord/files/discord.png
+Categories=Network;InstantMessaging;
+MimeType=x-scheme-handler/discord;
+StartupWMClass=discord

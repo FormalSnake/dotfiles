@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Name=Xwayland Video Bridge
+Exec=xwaylandvideobridge --autostart
+OnlyShowIn=KDE;

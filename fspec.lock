@@ -837,11 +837,7 @@ version = "2.2.5,21124"
 name = "pam_ssh_agent_auth"
 source = "git:https://github.com/jbeverly/pam_ssh_agent_auth@7ff785809f6ecad45051e333c0ffa72e15ba4f2a"
 rev = "7ff785809f6ecad45051e333c0ffa72e15ba4f2a"
-patches = "sha256-ovQrzhqdk4eXj+xFd1ZI8LNIPMdjPo+ufm4WzSNbSvg="
-
-[pkg.aarch64-darwin]
-oci = "ghcr.io/formalsnake/fspec-cache/pam_ssh_agent_auth@sha256:2c9592c2a820bba0941a91243ac593437feef543f31332422ff85dc333887506"
-build = "7a5fcabe"
+patches = "sha256-oxGJzyFcA3ZmOSOkNxetKDFh5LlZTk4Ke2cdQhL+JCw="
 
 [[pkg]]
 name = "parsec"

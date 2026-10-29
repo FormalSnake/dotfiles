@@ -1,0 +1,5 @@
+[Desktop Entry]
+Name=Waylandcraft
+Comment=Minecraft as the desktop, hosted by cage
+Exec=/usr/local/libexec/waylandcraft-session
+Type=Application

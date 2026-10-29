@@ -1,0 +1,3 @@
+[Environment]
+MANGOHUD=1
+MANGOHUD_CONFIG=fps_only,font_size=32,position=top-right

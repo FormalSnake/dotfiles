@@ -1,0 +1,10 @@
+#!/bin/sh
+set -e
+dir="${XDG_DATA_HOME:-$HOME/.local/share}/epic-games-launcher"
+img="$dir/EpicGamesLauncher-x86_64.AppImage"
+if [ ! -e "$img" ]; then
+	mkdir -p "$dir"
+	install -m 755 /opt/fspec/current/bin/epic-games-launcher-appimage "$img"
+fi
+export WEBKIT_DISABLE_DMABUF_RENDERER=1
+exec "$img" "$@"

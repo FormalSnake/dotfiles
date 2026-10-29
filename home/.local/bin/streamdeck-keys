@@ -10,7 +10,7 @@ import time
 import urllib.error
 import urllib.request
 
-# system.star's python-streamdeck pkg: 0.10.0 knows the desk deck's PID 0x00b3.
+# modules/linux/store.star's python-streamdeck pkg: 0.10.0 knows the desk deck's PID 0x00b3.
 sys.path.insert(0, "/usr/local/share/python/streamdeck")
 
 from fontTools.ttLib import TTFont

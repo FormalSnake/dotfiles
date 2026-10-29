@@ -1,0 +1,14 @@
+[Unit]
+Description=NTFS volume at /mnt/windows
+Requires=clear-ntfs-dirty.service
+After=clear-ntfs-dirty.service
+ConditionPathExists=!/run/windows-vm.running
+
+[Mount]
+What=/dev/disk/by-uuid/D0409F99409F84BE
+Where=/mnt/windows
+Type=ntfs3
+Options=rw,uid=1000,gid=100,umask=022,windows_names,noatime,nofail
+
+[Install]
+WantedBy=local-fs.target

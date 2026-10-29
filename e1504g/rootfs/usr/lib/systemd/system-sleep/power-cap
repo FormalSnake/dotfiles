@@ -1,4 +1,0 @@
-#!/bin/sh
-# RAPL limits do not reliably survive suspend.
-[ "$1" = post ] && systemctl try-restart power-cap.service
-exit 0

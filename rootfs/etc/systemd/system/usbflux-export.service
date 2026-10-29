@@ -1,0 +1,13 @@
+[Unit]
+Description=Bridge the usbflux TCP port to usbmuxd's unix socket
+Requires=usbmuxd.service
+After=usbmuxd.service
+
+[Service]
+ExecStart=/usr/lib/systemd/systemd-socket-proxyd /run/usbmuxd
+User=usbmux
+Group=usbmux
+PrivateDevices=true
+ProtectHome=true
+NoNewPrivileges=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=macOS Mavericks
+Comment=OS X 10.9 guest (QEMU/KVM)
+Exec=/usr/local/bin/macos-vm
+Icon=computer
+Terminal=false
+Categories=System;
+StartupWMClass=qemu-system-x86_64

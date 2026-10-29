@@ -1,0 +1,7 @@
+[Path]
+PathChanged=/home/kyandesutter/.local/state/formalshell/state.json
+PathChanged=/home/kyandesutter/.local/state/formalshell/theme.json
+PathChanged=/home/kyandesutter/.face
+
+[Install]
+WantedBy=multi-user.target

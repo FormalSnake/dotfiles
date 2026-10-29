@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Modrinth App
+Exec=env WEBKIT_DISABLE_DMABUF_RENDERER=1 /opt/fspec/current/bin/modrinth-app
+Icon=ModrinthApp
+Categories=Game;

@@ -1,0 +1,7 @@
+[Unit]
+Description=Copy kyandesutter's FormalShell wallpaper and theme to the greeter
+After=systemd-tmpfiles-setup.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/libexec/formalshell-greeter-mirror

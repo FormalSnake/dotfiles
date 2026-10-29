@@ -1,0 +1,10 @@
+[Unit]
+Description=Clear a stale NTFS dirty flag on the Windows volume
+DefaultDependencies=false
+Before=mnt-windows.mount shutdown.target
+Conflicts=shutdown.target
+After=dev-disk-by\x2duuid-D0409F99409F84BE.device
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/libexec/clear-ntfs-dirty

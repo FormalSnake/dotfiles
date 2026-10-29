@@ -19,24 +19,6 @@ set -gx XCURSOR_THEME Bibata-Modern-Classic
 set -gx PORTLESS_TAILSCALE 1
 set -gx FZF_DEFAULT_OPTS '--color bg:#100F0F,bg+:#1C1B1A,border:#AF3029,fg:#878580,fg+:#878580,gutter:#100F0F,header:#CECDC3,hl:#CECDC3,hl+:#CECDC3,info:#24837B,marker:#AF3029,pointer:#AD8301,prompt:#AD8301,separator:#1C1B1A,spinner:#24837B'
 
-# Secrets written by fspec at /run/fspec/secrets/<name>.
-function __load_fspec_secret -a env_name file
-    if test -r "/run/fspec/secrets/$file"
-        set -gx $env_name (cat "/run/fspec/secrets/$file")
-    end
-end
-__load_fspec_secret OPENAI_API_KEY openai
-# Deliberately NOT loading ANTHROPIC_API_KEY (Claude Code prefers it over
-# the claude.ai OAuth session, so every terminal ran on API billing
-# instead of the Max plan).
-__load_fspec_secret GEMINI_API_KEY gemini
-__load_fspec_secret DEEPSEEK_API_KEY deepseek
-__load_fspec_secret NUCLEO_LICENSE_KEY nucleo-license
-__load_fspec_secret NPM_GITHUB_TOKEN npm-github-token
-__load_fspec_secret NPM_REGISTRY_TOKEN npm-registry-token
-__load_fspec_secret WSTUNNEL_PATH_PREFIX wstunnel-path-prefix
-__load_fspec_secret WSTUNNEL_ENDPOINT wstunnel-endpoint
-
 # Lumen reuses the OpenAI key under a different name
 if set -q OPENAI_API_KEY
     set -gx LUMEN_AI_PROVIDER openai

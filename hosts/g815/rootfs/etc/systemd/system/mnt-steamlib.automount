@@ -1,0 +1,8 @@
+[Unit]
+Description=Automount the USB SSD's Steam library
+
+[Automount]
+Where=/mnt/steamlib
+
+[Install]
+WantedBy=local-fs.target

@@ -1,0 +1,1 @@
+EARLYOOM_ARGS="-n -m 10 -s 70 --avoid '^(Hyprland|hyprland|\.dms-wrapped|dms|\.quickshell-wra|quickshell|qs|polkit-kde-aut|sshd|systemd)$'"

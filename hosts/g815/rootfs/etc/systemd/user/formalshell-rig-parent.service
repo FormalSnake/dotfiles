@@ -1,0 +1,14 @@
+[Unit]
+Description=headless labwc the FormalShell smoke rig nests Hyprland in
+ConditionGroup=fstest
+
+[Service]
+Environment=WLR_BACKENDS=headless
+Environment=WLR_RENDERER=gles2
+Environment=WLR_RENDER_DRM_DEVICE=/dev/dri/by-path/pci-0000:00:02.0-render
+Environment=WLR_LIBINPUT_NO_DEVICES=1
+ExecStart=/usr/bin/labwc -s /usr/local/libexec/formalshell-rig-export-display
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

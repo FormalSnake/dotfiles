@@ -1,0 +1,13 @@
+[Unit]
+Description=Prepare a fresh Windows guest overlay
+After=windows-vm.service
+BindsTo=windows-vm.service
+
+[Service]
+Type=oneshot
+User=kyandesutter
+Environment=SSH_AUTH_SOCK=/run/user/1000/gcr/ssh
+ExecStart=/usr/local/libexec/windows-vm-prep
+
+[Install]
+WantedBy=windows-vm.service

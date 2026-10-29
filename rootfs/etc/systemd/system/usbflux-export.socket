@@ -1,0 +1,8 @@
+[Unit]
+Description=usbmuxd TCP export for remote Xcode
+
+[Socket]
+ListenStream=5000
+
+[Install]
+WantedBy=sockets.target
