@@ -4,6 +4,7 @@ load("//modules/fastfetch/fastfetch.star", "fastfetch")
 load("//modules/home/home.star", "home")
 load("//modules/secrets.star", "secrets")
 load("//modules/t3code/t3code.star", "agents")
+load("//modules/tools.star", "tools")
 load("//hosts/macbook/defaults.star", "SYSTEM")
 load("//hosts/macbook/packages.star", "BREW", "STORE")
 load("//hosts/macbook/services.star", "SERVICES")
@@ -61,5 +62,5 @@ macbook = host(
     name = "macbook",
     platform = "aarch64-darwin",
     users = [user("kyandesutter", uid = 502, shell = "/opt/homebrew/bin/fish")],
-    modules = [BREW, STORE, home(linked = LINKED), HOME_FILES, fastfetch("macbook"), ROOT_FILES, SECRETS, SYSTEM, SERVICES],
+    modules = [tools, BREW, STORE, home(linked = LINKED), HOME_FILES, fastfetch("macbook"), ROOT_FILES, SECRETS, SYSTEM, SERVICES],
 )

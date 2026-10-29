@@ -38,14 +38,6 @@ FORMALSHELL = pkg(
 )
 
 STORE = [
-    # The CLI's %post runs groupadd, so it installs after shadow.
-    pkg("1password", source = zypper(repo = "1password")),
-    pkg("1password-cli", source = zypper(repo = "1password")),
-    pkg(
-        "nordvpn",
-        source = zypper(repo = "nordvpn"),
-        services = [service("nordvpnd.socket"), service("nordvpnd"), service("nordvpnd-killswitch")],
-    ),
     # 0.10.0 is the first with the Stream Deck Mini Discord Edition; Tumbleweed has 0.9.8.
     pkg(
         "python-streamdeck",
@@ -83,7 +75,6 @@ STORE = [
         share = {"fonts/GeistMonoNerdFont": "."},
     ),
     FORMALSHELL,
-    pkg("herdr", version = "0.9.3", source = github("ogulcancelik/herdr", asset = "herdr-linux-*")),
     # helium-wrapper sets LD_LIBRARY_PATH to its own directory.
     pkg(
         "helium",
@@ -92,7 +83,6 @@ STORE = [
         links = {"helium": "helium-wrapper"},
     ),
     pkg("matugen", version = "4.2.0", source = github("InioX/matugen", asset = "matugen-*-x86_64.tar.gz")),
-    pkg("meshtop", source = git("https://github.com/FormalSnake/meshtop", rev = "69f954dca8ac24b7e5b269f486f3dae3fc2ec7b5")),
     pkg("wl-clip-persist", source = git("https://github.com/Linus789/wl-clip-persist", rev = "v0.5.0")),
     pkg("wl-gammarelay-rs", source = git("https://github.com/MaxVerevkin/wl-gammarelay-rs", rev = "v1.0.1")),
     pkg(

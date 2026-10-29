@@ -1,29 +1,20 @@
 # Homebrew stays Homebrew; the store carries what has no formula or cask.
 
 FORMULAE = [
-    # shell and terminal
-    "fish", "tmux", "mosh", "bat", "btop", "lsd", "fd", "fzf", "ripgrep", "zoxide", "yazi", "fastfetch",
-    "direnv", "just", "jq", "wget", "coreutils", "stow", "chafa", "watchman", "terminal-notifier",
-    # git and dev
-    "git", "git-lfs", "gh", "lazygit", "lazydocker", "neovim", "cmake", "go", "zig", "deno", "bun",
-    "node@24", "uv", "python@3.14", "pillow", "lua", "opencode", "herdr", "dipc", "ffmpeg", "imagemagick",
-    "cocoapods", "fastlane", "xcbeautify", "mas", "libadwaita",
-    # nvim's language servers, formatters and parser builds
-    "lua-language-server", "rust-analyzer", "gopls", "marksman", "taplo", "nixfmt", "yaml-language-server",
-    "tailwindcss-language-server", "vscode-langservers-extracted", "dockerfile-language-server", "vtsls",
-    "tree-sitter-cli", "ghostscript",
-    # clipssh's clipboard images; an older remote's locked fspec
-    "pngpaste", "oras",
+    "coreutils", "stow", "watchman", "terminal-notifier", "cmake", "go", "zig", "deno", "python@3.14",
+    "pillow", "opencode", "dipc", "ffmpeg", "cocoapods", "fastlane", "xcbeautify", "mas", "libadwaita",
+    # clipssh's clipboard images
+    "pngpaste",
     # network, remote iPhone, VPN
-    "tailscale", "wireguard-tools", "libimobiledevice", "ideviceinstaller", "openssl@3",
+    "wireguard-tools", "libimobiledevice", "ideviceinstaller", "openssl@3",
     # Obsidian LiveSync's backend
     "couchdb",
 ]
 
 CASKS = [
-    "1password", "1password-cli", "aldente", "android-studio", "betterdisplay", "bluebubbles",
+    "aldente", "android-studio", "betterdisplay", "bluebubbles",
     "clop", "codex", "font-sf-pro", "ghostty", "google-chrome", "gstreamer-runtime",
-    "jump-desktop-connect", "nordvpn", "orbstack", "parsec", "syncthing-app", "t3-code",
+    "jump-desktop-connect", "orbstack", "syncthing-app", "t3-code",
     "terminal-browser", "the-unarchiver", "zulu@21",
 ]
 
@@ -77,37 +68,12 @@ def nd_app(name, title, repo, rev, icon):
     )
 
 STORE = [
-    pkg("fut", version = "0.24", source = github("mikker/fut", asset = "fut-macos-arm64.tar.gz")),
-    # Its releases ship Linux binaries only.
-    pkg("tmux-agent-sidebar", source = git("https://github.com/hiroppy/tmux-agent-sidebar", rev = "2cff1cb955363394f8dd9c52d040d027536cfbd8")),
-    pkg("t3", version = "0.1.3", source = github("pingdotgg/t3code", asset = "t3-*-darwin-arm64.tar.gz")),
     pkg("pi", version = "1.1.0", source = github("badlogic/pi-mono", asset = "pi-darwin-arm64.tar.gz")),
     pkg("stripe", version = "1.43.2", source = github("stripe/stripe-cli", asset = "stripe_*_mac-os_arm64.tar.gz")),
-    # Claude Code updates itself from the platform tarball's binary.
-    pkg("claude", source = url("https://registry.npmjs.org/@anthropic-ai/claude-code-darwin-arm64/-/claude-code-darwin-arm64-2.1.310.tgz"), mode = "self_managed"),
     pkg("portless", version = "0.15.4", source = npm("portless")),
-    # astro-ls's SDK fallback; 7.x dropped tsserverlibrary.js.
-    pkg("typescript", version = "5.9.3", source = npm("typescript")),
-    pkg("astro-ls", version = "2.16.10", source = npm("@astrojs/language-server")),
-    pkg("docker-compose-langserver", version = "0.2.0", source = npm("@microsoft/compose-language-service")),
-    pkg("meshtop", source = git("https://github.com/FormalSnake/meshtop", rev = "69f954dca8ac24b7e5b269f486f3dae3fc2ec7b5")),
-    pkg("fetch", source = git("https://github.com/areofyl/fetch", rev = "7b19d22c2d8e4b7b2295cc625c9fdf87adcabbcd")),
-    pkg("fast", source = git("https://github.com/maaslalani/fast", rev = "26d8fc9c189ba748c68f8930af11dee5c2467f7e", deps = ["go"])),
-    pkg(
-        "clipssh",
-        source = git("https://github.com/samuellawrentz/clipssh", rev = "c7f4e8ddcf102302c6375ba51534c7505ddc2616"),
-        build = ["sh", "-c", "mkdir -p $FSPEC_OUT/bin && install -m755 $FSPEC_SRC/clipssh $FSPEC_OUT/bin/clipssh"],
-        bins = ["clipssh"],
-    ),
     pkg("kopuz", version = "0.67.0", source = github("Kopuz-org/kopuz", asset = "Kopuz_*_aarch64.dmg"), apps = ["Kopuz.app"]),
     nd_app("messages", "Messages", "FormalStudio/messages", "29ac1eeedd10745377486851075691e0ec45800e", "packaging/linux/dev.formalsnake.messages.png"),
     nd_app("formalmusic", "FormalMusic", "FormalStudio/formalmusic", "4aeef799e584f6a69a40eef9fb69d92f73b1611d", "packaging/icon.png"),
-    pkg(
-        "kopuzd",
-        source = git("https://github.com/Kopuz-org/kopuz", rev = "735a22898992c4b09de2a65323039220db32750b"),
-        build_flags = ["-p", "kopuz-kopuzd", "-p", "kopuz-ctl"],
-        bins = ["kopuzd", "kopuzctl"],
-    ),
     # The macOS release carries only usbfluxctl. Built as nixpkgs does, against Homebrew's
     # libplist with the format constants libplist 2.3 renamed.
     pkg(

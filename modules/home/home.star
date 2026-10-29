@@ -1,5 +1,5 @@
 load("//lib/tree.star", "tree")
-load("//modules/home/apps.star", "FLATPAKS", "NVIM", "TOOLS")
+load("//modules/home/apps.star", "FLATPAKS", "TOOLS")
 load("//modules/home/claude.star", "claude")
 load("//modules/home/discord.star", "DISCORD")
 load("//modules/home/kde.star", "KDE")
@@ -25,7 +25,7 @@ def home(linked = []):
         files += [file("~/" + d, src = src, mode = "link") for src, d in dests.items()]
         files += claude(host)
         if linux:
-            files += SERVICES + KDE + FLATPAKS + DISCORD + t3code(host.name) + TOOLS + NVIM
+            files += SERVICES + KDE + FLATPAKS + DISCORD + t3code(host.name) + TOOLS
         return files
     return module
 

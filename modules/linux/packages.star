@@ -1,4 +1,6 @@
-# Tumbleweed packages both Linux hosts install. A `!name` removes one.
+load("//modules/tools.star", "cli")
+
+# Tumbleweed packages both Linux hosts install, beside modules/tools.star's. A `!name` removes one.
 
 DESKTOP = [
     "hyprland", "uwsm", "xdg-desktop-portal-hyprland", "xdg-desktop-portal-gtk", "greetd", "sway",
@@ -30,23 +32,20 @@ RUNTIME = [
 SYSTEM = [
     # The minimal base ships these two, which conflict with tuned-ppd and with fish's gzip.
     "!power-profiles-daemon", "!busybox-gzip",
-    "tailscale", "syncthing", "docker", "tuned", "tuned-ppd", "fish", "sshfs", "usbmuxd",
+    "syncthing", "docker", "tuned", "tuned-ppd", "sshfs", "usbmuxd",
     "imobiledevice-tools", "ifuse", "smartmontools", "pam_ssh_agent_auth", "sof-firmware", "bluez",
     "chrony", "fwupd", "glibc-locale", "system-group-wheel", "system-group-hardware", "cnf",
-    # A remote apply unpacks the spec with tar; the store pulls CI builds with oras.
-    "tar", "oras", "shadow",
+    # A remote apply unpacks the spec with tar.
+    "tar", "shadow",
     "intel-media-driver", "libva-utils", "irqbalance", "avahi", "nss-mdns", "cups-filters-cups-browsed",
     "traceroute", "mtr", "usbutils", "alsa-utils", "i2c-tools", "gnome-control-center", "earlyoom",
     "scx", "firewalld", "python313",
 ]
 
 CLI = [
-    "neovim", "ripgrep", "fd", "bat", "btop", "zoxide", "fzf", "git", "git-lfs", "gh", "jq", "tmux",
-    "direnv", "just", "fastfetch", "lsd", "lazygit", "yazi", "mosh", "wget", "ImageMagick", "chafa",
-    "lua54", "bun", "nodejs24", "npm24", "gcc", "ghostscript", "gopls", "tree-sitter", "make",
-    "pkgconf",
+    "gcc", "tree-sitter", "make", "pkgconf",
     # Not the distro's rust-src: it pulls in a toolchain that conflicts with rustup.
     "rustup",
 ]
 
-PACKAGES = DESKTOP + RUNTIME + SYSTEM + CLI
+PACKAGES = DESKTOP + RUNTIME + SYSTEM + CLI + cli("linux")

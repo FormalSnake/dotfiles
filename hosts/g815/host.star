@@ -7,6 +7,7 @@ load("//modules/linux/linux.star", "linux")
 load("//modules/linux/packages.star", "PACKAGES")
 load("//modules/linux/secrets.star", "linux_secrets")
 load("//modules/sync.star", "sync_items")
+load("//modules/tools.star", "tools")
 load("//hosts/g815/gaming.star", "GAMING")
 load("//hosts/g815/hardware.star", "HARDWARE")
 load("//hosts/g815/rig.star", "RIG", "rig_users")
@@ -68,6 +69,7 @@ g815 = host(
         linux_secrets("g815"),
         sync_items(),
         home(),
+        tools,
         fastfetch("g815"),
         boot(entries = [WINDOWS_BOOT]),
     ],

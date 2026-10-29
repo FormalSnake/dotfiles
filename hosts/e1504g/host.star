@@ -7,6 +7,7 @@ load("//modules/linux/linux.star", "linux")
 load("//modules/linux/packages.star", "PACKAGES")
 load("//modules/linux/secrets.star", "linux_secrets")
 load("//modules/sync.star", "sync_items")
+load("//modules/tools.star", "tools")
 
 SERVICES = [
     service("systemd-oomd"),
@@ -44,6 +45,7 @@ e1504g = host(
         linux_secrets("e1504g"),
         sync_items(),
         home(),
+        tools,
         fastfetch("e1504g"),
         boot(),
     ],
