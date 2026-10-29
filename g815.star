@@ -36,6 +36,8 @@ PACKAGES = [
     "qemu-ui-opengl", "qemu-hw-display-virtio-vga", "qemu-hw-display-virtio-gpu-pci",
     # What the FormalShell smoke rig's slot users run besides the shared desktop packages.
     "labwc", "foot", "rsync", "mpv-mpris", "libnotify-tools", "pulseaudio-utils",
+    # The smoke legs' own tools: wlrctl, strace (--idle), hostapd (--wifi), dbus-run-session.
+    "wlrctl", "strace", "hostapd", "dbus-1-daemon",
     # The compiler host builds FormalShell: what its dev.star asks the system for.
     "pkgconfig(libpipewire-0.3)", "pkgconfig(libspa-0.2)", "pkgconfig(wayland-client)", "pkgconfig(xkbcommon)", "pkgconfig(fontconfig)", "pkgconfig(pam)", "pkgconfig(pam_misc)", "clang",
 ]

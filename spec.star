@@ -59,7 +59,7 @@ g815 = host(
         "nvidia-drm.modeset=1", "acpi_backlight=native", "cfg80211.ieee80211_regdom=ES", "mitigations=off",
         "quiet", "splash", "loglevel=3", "udev.log_level=3",
     ]),
-    users = [user("kyandesutter", uid = 1000, shell = "fish", groups = GROUPS + ["gamemode", "libvirt"])] + [user(u, groups = ["fstest"]) for u in RIG_USERS],
+    users = [user("kyandesutter", uid = 1000, shell = "fish", groups = GROUPS + ["gamemode", "libvirt"])] + [user(u, groups = ["fstest", "render", "video"]) for u in RIG_USERS],
     modules = secrets() + sync_items() + [system, home, g815, boot(entries = [WINDOWS_BOOT])],
 )
 
