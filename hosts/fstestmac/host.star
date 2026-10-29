@@ -39,6 +39,8 @@ WLRCTL = pkg(
         image = TUMBLEWEED,
         deps = ["meson", "ninja", "gcc", "pkgconf", "pkgconfig(wayland-client)", "pkgconfig(wayland-protocols)", "pkgconfig(xkbcommon)", "wayland-devel"],
     ),
+    # char is unsigned on aarch64, so its `str[i] < 0` ASCII check trips -Werror=type-limits.
+    build_flags = ["-Dwerror=false"],
 )
 
 ROOTFS = tree(["hosts/fstestmac/rootfs/"]) + [
