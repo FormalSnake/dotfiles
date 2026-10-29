@@ -17,7 +17,8 @@ KEYS = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGxYo1mVlFzYfDSiHH4nWXYs+ZFz29vYlkRkWxQKxMFv kyandesutter@g815",
 ]
 VM_USER = "kyan"
-STATE = "/var/lib/fstestvm"
+# Made at boot, beside the config: SELinux keeps hostapd out of /var/lib.
+EAP = "/etc/fstestvm/eap"
 
 PACKAGES = [
     # The cloud image boots kernel-default-base, which has no mac80211_hwsim or vkms.
@@ -50,7 +51,7 @@ def _services():
     return [
         oneshot(
             "fstestvm-eap-cert",
-            "/bin/sh -c 'test -s " + STATE + "/eap/server.pem || { mkdir -p " + STATE + "/eap && openssl req -x509 -newkey rsa:2048 -nodes -keyout " + STATE + "/eap/server.key -out " + STATE + "/eap/server.pem -days 3650 -subj /CN=formaltest-eap; }'",
+            "/bin/sh -c 'test -s " + EAP + "/server.pem || { mkdir -p " + EAP + " && openssl req -x509 -newkey rsa:2048 -nodes -keyout " + EAP + "/server.key -out " + EAP + "/server.pem -days 3650 -subj /CN=formaltest-eap; }'",
             "Make the FORMALTEST-EAP network's self-signed certificate",
         ),
     ] + [
