@@ -2,7 +2,7 @@
 
 Source: `darwinConfigurations.macbook` in ~/.config/nix at 98ca1b6c, brought up to 244dbeca, and the live machine (Home
 Manager generation `pvy93i9lkhxfxz0byv8n80y0h2zmi7sz`). The spec is `hosts/macbook/`, loaded
-from `spec.star`: `fspec plan --host macbook --local`, run from the spec.
+from `spec.star`: `fspec plan`, run from the spec on the macbook.
 
 ## Not verified
 
@@ -71,8 +71,8 @@ Secret-carrying state `fspec sync` can carry, still to be declared with the macb
   `~/.local/bin` instead of running from `~/.config/nix/scripts`.
 - Jobs are `fspec.<name>` (were `kyan.<name>` and `org.nix-community.home.<name>`).
 - `JAVA_HOME` is the zulu@21 cask's JDK; tools run from `/opt/fspec/current/bin` and Homebrew.
-- The host's own name is `MacBook-Pro-2`, so `fspec plan --host macbook` without `--local`
-  tries ssh to `macbook` and fails.
+- The host's own name is `MacBook-Pro-2`, so `/etc/fspec/host` (from `modules/fspec.star`) tells
+  fspec it is `macbook`.
 
 ## Cutover
 
