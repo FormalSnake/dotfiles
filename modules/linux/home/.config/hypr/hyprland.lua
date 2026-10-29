@@ -53,13 +53,14 @@ do
 end
 local function fsColor(c) return fsColors[c] or c end
 
--- Per-host layout: monitors, which workspaces sit on which output, window opacity and GPU
--- environment. host.lua comes from fspec's <host>/home overlay and returns a table with any of
+-- Per-host layout: monitors, which workspaces sit on which output, window opacity, direct
+-- scanout and GPU environment. host.lua comes from fspec's <host>/home overlay and returns a table with any of
 -- these keys; without it the internal panel is all there is.
 local host = {
   monitors = { { output = "eDP-1", mode = "preferred", position = "auto", scale = 1.0 } },
   workspaces = {},
   opacity = 1.0,
+  direct_scanout = 1,
   env = {},
 }
 do
@@ -244,7 +245,7 @@ hl.config({
     vrr = 0,
   },
   render = {
-    direct_scanout = 1,
+    direct_scanout = host.direct_scanout,
     -- Auto-HDR: the desktop stays SDR/8-bit at all times; when a fullscreen
     -- app requests an HDR swapchain, Hyprland flips that output to HDR for
     -- the duration and reverts on exit. 1 = generic BT.2020+PQ; bump to 2

@@ -16,6 +16,9 @@ return {
   workspaces = workspaces,
   -- Slight transparency so the backdrop blur has something to show through (dGPU only).
   opacity = 0.96,
+  -- Direct scanout on the NVIDIA driver marks a fullscreen Vulkan swapchain out of date about once
+  -- a second (Sober recreated it 235 times in 15 minutes), which shows as black flashes and stutter.
+  direct_scanout = 0,
   -- The VA-API and GLX vendor picks are also in uwsm/env-hyprland, so user services get them.
   env = {
     __GL_GSYNC_ALLOWED = "1",
