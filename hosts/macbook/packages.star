@@ -9,6 +9,8 @@ FORMULAE = [
     "wireguard-tools", "libimobiledevice", "ideviceinstaller", "openssl@3",
     # Obsidian LiveSync's backend
     "couchdb",
+    # FormalShell's night rig, hosts/fstestmac
+    "lima",
 ]
 
 CASKS = [

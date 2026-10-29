@@ -604,6 +604,11 @@ oci = "ghcr.io/formalsnake/fspec-cache/librepods@sha256:a936269ce24cb44d2550c62f
 build = "0b5d3e53"
 
 [[pkg]]
+name = "lima"
+source = "brew"
+version = "2.2.1"
+
+[[pkg]]
 name = "limine"
 source = "zypper:"
 
