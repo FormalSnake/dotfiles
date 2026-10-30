@@ -1,0 +1,5 @@
+#!/bin/sh
+# What pkexec runs for fspec's system scope. pkexec matches the policy's exec.path after
+# resolving links, and /opt/fspec/current/bin/fspec resolves into the store, so the policy
+# names this file instead.
+exec /opt/fspec/current/bin/fspec "$@"

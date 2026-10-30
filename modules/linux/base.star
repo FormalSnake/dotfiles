@@ -38,7 +38,7 @@ def firewall(tcp = [], udp = [], udp_ranges = []):
 
 def rootfs(host):
     """modules/linux/rootfs/ and hosts/<host>/rootfs/, each a mirror of /."""
-    return tree(["modules/linux/rootfs/", "hosts/%s/rootfs/" % host], perms = {"/etc/sudoers.d/10-fspec": "0440"}) + [
+    return tree(["modules/linux/rootfs/", "hosts/%s/rootfs/" % host], perms = {"/etc/sudoers.d/10-fspec": "0440", "/usr/libexec/fspec/fspec": "0755"}) + [
         file("/etc/ssh/authorized_keys.d/" + USER, content = AUTHORIZED_KEYS),
     ]
 
