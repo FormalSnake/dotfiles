@@ -23,4 +23,4 @@ for c in /sys/class/drm/card*-*; do
   break
 done
 printf '%s' "$picture" > "$XDG_RUNTIME_DIR/formalshell/login-lock"
-exec uwsm start -e -D Hyprland -- hyprland.desktop -- --config /etc/fstestvm/hyprland.lua --locked-cmd 'systemctl --user import-environment WAYLAND_DISPLAY HYPRLAND_INSTANCE_SIGNATURE XDG_CURRENT_DESKTOP XDG_SESSION_TYPE && systemctl --user start formalshell.service'
+exec uwsm start -g -1 -e -D Hyprland -- hyprland.desktop -- --config /etc/fstestvm/hyprland.lua --locked-cmd 'systemctl --user import-environment WAYLAND_DISPLAY HYPRLAND_INSTANCE_SIGNATURE XDG_CURRENT_DESKTOP XDG_SESSION_TYPE && systemctl --user start formalshell.service'
