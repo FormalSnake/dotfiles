@@ -243,6 +243,9 @@ hl.config({
     -- the background. Honour the request instead.
     focus_on_activate = true,
     anr_missed_pings = 3,
+    -- FormalShell restarted while locked (an apply, a crash) takes the lock
+    -- back instead of leaving Hyprland's dead-locker screen.
+    allow_session_lock_restore = true,
     -- Default off for outputs without a rule; the g815 pair pins vrr = 3
     -- in its monitor rules in outputs.nix.
     vrr = 0,
