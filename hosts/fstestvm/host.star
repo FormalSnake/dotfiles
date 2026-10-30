@@ -28,7 +28,7 @@ PACKAGES = [
     "NetworkManager", "wpa_supplicant", "hostapd", "dnsmasq", "iw", "iproute2", "openssl",
     "bluez", "upower", "power-profiles-daemon", "polkit", "pkexec", "geoclue2",
     "pipewire", "pipewire-pulseaudio", "wireplumber", "pulseaudio-utils", "pipewire-tools",
-    "seatd", "greetd", "sway", "swaybg", "hyprland", "hyprland-guiutils", "uwsm", "foot", "grim", "slurp", "wtype", "wl-clipboard", "wlrctl",
+    "seatd", "greetd", "sway", "swaybg", "hyprland", "binutils", "hyprland-guiutils", "uwsm", "foot", "grim", "slurp", "wtype", "wl-clipboard", "wlrctl",
     "wf-recorder", "wlsunset", "brightnessctl", "ddcutil", "libnotify-tools", "dbus-1-daemon",
     "mpv", "mpv-mpris", "ffmpeg-8", "cava", "qrencode", "ImageMagick", "tesseract-ocr",
     "tesseract-ocr-traineddata-eng", "python313", "python313-gobject", "python313-evdev",
