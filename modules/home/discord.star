@@ -13,15 +13,21 @@ MODULES = {
 PKG = "/opt/fspec/current/pkgs/discord"
 
 # Discord loads its modules from the config dir and would update itself into the read-only store,
-# so the modules are links there and the host update is skipped.
+# so the host update is skipped. The modules are copies, not links: since 1.0.168 Discord refuses a
+# native module whose real path is outside the modules dir. Recopied only when the package changes.
 LAUNCHER = """#!/bin/sh
 conf="${XDG_CONFIG_HOME:-$HOME/.config}/discord"
 mods="$conf/%s/modules"
-rm -rf "$mods"
-mkdir -p "$mods"
-for m in %s/modules/*; do
-	ln -sn "$m/files" "$mods/${m##*/}"
-done
+src=$(readlink -f %s/modules)
+if [ "$(cat "$mods/.src" 2>/dev/null)" != "$src" ]; then
+	rm -rf "$mods"
+	mkdir -p "$mods"
+	for m in "$src"/*; do
+		cp -r --reflink=auto "$m/files" "$mods/${m##*/}"
+	done
+	chmod -R u+w "$mods"
+	printf '%%s' "$src" >"$mods/.src"
+fi
 printf '%%s' '%s' >"$mods/installed.json"
 
 # moonlight runs from a writable copy, so moonbase can update it in place and this keeps it on
