@@ -20,9 +20,9 @@ if [ ! -e "$XDG_RUNTIME_DIR/booted" ]; then
     break
   done
 fi
-# sway draws its pointer over the splash before the greeter maps and hides it: the seat starts
-# on a theme whose every cursor is one transparent pixel, and takes the real one back once the
-# greeter covers the screen.
+# sway draws its pointer over the splash, and the greeter only takes it over once it moves: the
+# seat starts on a theme whose every cursor is one transparent pixel, sway hides the still pointer
+# at three seconds, and the real theme comes back after that, so the next move shows it.
 blank=$HOME/icons/formalos-blank/cursors
 if [ ! -e "$blank/default" ]; then
   mkdir -p "$blank"
@@ -30,7 +30,7 @@ if [ ! -e "$blank/default" ]; then
   for n in left_ptr arrow top_left_arrow text xterm pointer hand2; do ln -sf default "$blank/$n"; done
 fi
 export XCURSOR_PATH=$HOME/icons:/usr/share/icons
-printf 'output * bg %s\nseat * xcursor_theme formalos-blank 24\ninput type:keyboard {\n  xkb_layout es\n  xkb_options caps:escape\n}\n' "$bg" > "$HOME/sway.conf"
+printf 'output * bg %s\nseat * xcursor_theme formalos-blank 24\nseat * hide_cursor 3000\ninput type:keyboard {\n  xkb_layout es\n  xkb_options caps:escape\n}\n' "$bg" > "$HOME/sway.conf"
 # A compositor killed with greetd leaves its socket; the wait below would take it.
 rm -f "$XDG_RUNTIME_DIR"/wayland-*
 sway --config "$HOME/sway.conf" &
@@ -44,9 +44,10 @@ export WAYLAND_DISPLAY=$(basename "$socket")
 /opt/fspec/current/bin/formalshell-greeter &
 greeter=$!
 # Once the greeter covers it, the splash under it goes black, so the moment between the greeter's
-# exit and sway's is black too, and the pointer takes its real theme for the greeter's own.
+# exit and sway's is black too.
 (sleep 3; ipc=$(find "$XDG_RUNTIME_DIR" -maxdepth 1 -name 'sway-ipc.*.sock' -print -quit)
   swaymsg -s "$ipc" 'output * bg #000000 solid_color' >/dev/null 2>&1
+  sleep 1
   swaymsg -s "$ipc" 'seat * xcursor_theme default 24' >/dev/null 2>&1) &
 wait "$greeter"
 kill "$compositor" 2>/dev/null
