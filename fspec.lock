@@ -377,6 +377,10 @@ source = "brew"
 version = "9.0.2"
 
 [[pkg]]
+name = "figlet"
+source = "zypper:figlet"
+
+[[pkg]]
 name = "fish"
 source = "brew"
 version = "4.9.3"
