@@ -42,6 +42,17 @@ local fsChrome = {
   shadowOffset = { 0, 0 },
   shadowColor = "rgba(000000ed)",
   shadowInactiveColor = "rgba(000000ed)",
+  -- The shell's two clock families (its motion.rs), each a bezier's control
+  -- points and its duration in ds; `enabled` is the shell's motion.enabled.
+  motion = {
+    enabled = true,
+    spatialFast = { curve = { { 0.42, 1.67 }, { 0.21, 0.9 } }, speed = 3.5 },
+    spatial = { curve = { { 0.38, 1.21 }, { 0.22, 1 } }, speed = 5 },
+    spatialSlow = { curve = { { 0.39, 1.29 }, { 0.35, 0.98 } }, speed = 6.5 },
+    effectsFast = { curve = { { 0.31, 0.94 }, { 0.34, 1 } }, speed = 1.5 },
+    effects = { curve = { { 0.34, 0.8 }, { 0.34, 1 } }, speed = 2 },
+    effectsSlow = { curve = { { 0.34, 0.88 }, { 0.34, 1 } }, speed = 3 },
+  },
 }
 do
   local ok, loaded = pcall(dofile, os.getenv("HOME") .. "/.config/hypr/formalshell-chrome.lua")
@@ -230,7 +241,7 @@ hl.config({
       new_optimizations = true,
     },
   },
-  animations = { enabled = true },
+  animations = { enabled = fsChrome.motion.enabled },
   misc = {
     disable_hyprland_logo = true,
     disable_splash_rendering = true,
@@ -281,33 +292,26 @@ hl.device({
   sensitivity = 0.7,
 })
 
--- Animations: spring physics for anything that moves
--- The old `snappy` bezier put 75% of the distance into the first 15% of the
--- duration. That fast part is too quick to read as travel, so the only
--- motion actually perceived was the shallow tail, which is why everything
--- looked linear. A spring starts from rest, accelerates, then decelerates
--- into the target, so the whole path is legible.
--- At mass 1: zeta = dampening / (2 * sqrt(stiffness)) sets the bounce and
--- settle time is roughly 4.6 / (zeta * sqrt(stiffness)). `glide` is zeta
--- 0.85 (~1% overshoot, ~255ms), `firm` is critically damped (no bounce,
--- ~230ms). A spring derives its duration from those numbers and ignores
--- `speed`, but hl.animation still rejects the call without one, so each
--- spring leaf carries the speed matching its settle time.
-hl.curve("glide", { type = "spring", mass = 1, stiffness = 450, dampening = 36 })
-hl.curve("firm",  { type = "spring", mass = 1, stiffness = 400, dampening = 40 })
--- Opacity and border colour must not overshoot, so they stay on a bezier.
--- Durations are in ds (1 ds = 100ms).
-hl.curve("eased", { type = "bezier", points = { { 0.4, 0 }, { 0.2, 1 } } })
-
--- Workspaces slide vertically, matching niri's stacked-workspace model:
--- switching pushes the next one up or down.
-hl.animation({ leaf = "windows",          enabled = true, spring = "glide", speed = 2.6 })
-hl.animation({ leaf = "windowsOut",       enabled = true, spring = "firm",  speed = 2.3, style = "popin 90%" })
-hl.animation({ leaf = "layers",           enabled = true, spring = "firm",  speed = 2.3 })
-hl.animation({ leaf = "fade",             enabled = true, bezier = "eased", speed = 2.5 })
-hl.animation({ leaf = "border",           enabled = true, bezier = "eased", speed = 5 })
-hl.animation({ leaf = "workspaces",       enabled = true, spring = "glide", speed = 2.6, style = "slidevert" })
-hl.animation({ leaf = "specialWorkspace", enabled = true, spring = "glide", speed = 2.6, style = "slidevert" })
+-- Animations: the shell's own curves, so windows move the way its cards do.
+-- Anything with a position or a size rides a spatial curve, which carries it
+-- a few pixels past its place and back; opacity and border colour ride an
+-- effects curve, which never overshoots. Workspaces slide vertically,
+-- matching niri's stacked-workspace model.
+for _, family in ipairs({ "spatialFast", "spatial", "spatialSlow", "effectsFast", "effects", "effectsSlow" }) do
+  hl.curve("formalshell_" .. family, { type = "bezier", points = fsChrome.motion[family].curve })
+end
+local function fsAnimation(leaf, family, style)
+  hl.animation({ leaf = leaf, enabled = true, bezier = "formalshell_" .. family, speed = fsChrome.motion[family].speed, style = style })
+end
+fsAnimation("windows", "spatial")
+fsAnimation("windowsOut", "spatialFast", "popin 90%")
+fsAnimation("layers", "spatial")
+fsAnimation("layersOut", "spatialFast")
+fsAnimation("fade", "effects")
+fsAnimation("fadeOut", "effectsFast")
+fsAnimation("border", "effectsSlow")
+fsAnimation("workspaces", "spatial", "slidevert")
+fsAnimation("specialWorkspace", "spatial", "slidevert")
 
 -- Trackpad gestures (niri's set, 1:1 under the fingers)
 -- Horizontal scrolls the tape, vertical walks workspaces: the same split
