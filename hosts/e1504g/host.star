@@ -2,6 +2,7 @@ load("//lib/paths.star", "LIBEXEC", "USER")
 load("//modules/boot/boot.star", "boot")
 load("//modules/fastfetch/fastfetch.star", "fastfetch")
 load("//modules/fspec.star", "fspec")
+load("//modules/apps.star", "apps")
 load("//modules/my_apps.star", "my_apps")
 load("//modules/home/home.star", "home")
 load("//modules/linux/base.star", "GROUPS", "swapfile")
@@ -49,6 +50,7 @@ e1504g = host(
         home(),
         tools,
         my_apps,
+        apps,
         fspec,
         fastfetch,
         boot(),
