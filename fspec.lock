@@ -199,6 +199,14 @@ oci = "ghcr.io/formalsnake/fspec-cache/colloid-icon-theme@sha256:b7a6050f6a061ed
 build = "4c44efd0"
 
 [[pkg]]
+name = "com.github.tchx84.Flatseal"
+source = "flatpak:com.github.tchx84.Flatseal"
+version = "2.4.1"
+
+[pkg.any]
+commit = "ef9fe38e9cb96c170ea579fe1bbf8c76011255d4962d7fc4b3aa4e0a6063f8ae"
+
+[[pkg]]
 name = "coreutils"
 source = "brew"
 version = "9.12"
