@@ -3,10 +3,10 @@ load("//lib/units.star", "oneshot")
 
 # nixpkgs' Discord with moonlight: Discord's own distro tarball, one more per module, and
 # moonlight's release dist. The patch moves app.asar aside for moonlight's injector.
-VERSION = "1.0.160"
+VERSION = "1.0.168"
 DISTRO = "https://stable.dl2.discordapp.net/distro/app/stable/linux/x64/" + VERSION
 MODULES = {
-    "discord_cloudsync": 1, "discord_desktop_core": 2, "discord_dispatch": 1, "discord_erlpack": 1,
+    "discord_cloudsync": 1, "discord_desktop_core": 1, "discord_dispatch": 1, "discord_erlpack": 1,
     "discord_game_utils": 1, "discord_krisp": 1, "discord_modules": 1, "discord_rpc": 1,
     "discord_spellcheck": 1, "discord_sysimg": 1, "discord_utils": 1, "discord_voice": 1, "discord_zstd": 1,
 }
