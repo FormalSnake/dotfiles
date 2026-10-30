@@ -2,6 +2,12 @@
 APPS = {
     "g815": [
         {
+            "name": "com.github.tchx84.Flatseal",
+            "source": "flatpak",
+            "ref": "com.github.tchx84.Flatseal",
+            "added": "2026-10-30"
+        },
+        {
             "name": "figlet",
             "source": "zypper",
             "ref": "figlet",
