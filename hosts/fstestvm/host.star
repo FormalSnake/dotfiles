@@ -2,7 +2,7 @@ load("//lib/paths.star", "STORE")
 load("//lib/tree.star", "tree")
 load("//lib/units.star", "oneshot")
 load("//modules/boot/boot.star", "FORMALOS", "QUIET_ARGS", "formalos_boot")
-load("//modules/linux/store.star", "FORMALSHELL")
+load("//modules/linux/store.star", "FORMALSHELL", "HYPREXPO")
 
 # FormalShell's VM rig: two Tumbleweed guests on the g815 (`fspec vm start fstestvm0`), one per
 # slot, carrying what its old nix/testvm.nix did: the real system daemons the `leg_<n>_vm_only`
@@ -120,7 +120,7 @@ def _services():
     ]
 
 def _fstestvm(h):
-    return [FORMALSHELL] + ROOTFS + _services() + [
+    return [FORMALSHELL, HYPREXPO] + ROOTFS + _services() + [
         file("/etc/ssh/ssh_known_hosts", src = "modules/linux/rootfs/etc/ssh/ssh_known_hosts", perms = "0644"),
         # Tumbleweed starts bluetoothd from bluetooth.target, which only an adapter brings up.
         file("/etc/systemd/system/multi-user.target.wants/bluetooth.service", mode = "link", target = "/usr/lib/systemd/system/bluetooth.service"),

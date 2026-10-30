@@ -1,7 +1,7 @@
 load("//lib/paths.star", "LIBEXEC", "TUMBLEWEED")
 load("//lib/tree.star", "tree")
 load("//lib/units.star", "oneshot")
-load("//modules/linux/store.star", "FORMALSHELL")
+load("//modules/linux/store.star", "FORMALSHELL", "HYPREXPO")
 
 # FormalShell's night rig: a Tumbleweed guest on the macbook (hosts/fstestmac/lima.yaml, started
 # by FormalShell's dev/mac-vm.sh), for building and smoking the shell while the g815 is off. Slot
@@ -53,7 +53,7 @@ ROOTFS = tree(["hosts/fstestmac/rootfs/"]) + [
 ]
 
 def _fstestmac(h):
-    return [FORMALSHELL, WLRCTL] + ROOTFS + [
+    return [FORMALSHELL, HYPREXPO, WLRCTL] + ROOTFS + [
         oneshot("formalshell-rig-passwords", LIBEXEC + "/formalshell-rig-passwords", "Set the FormalShell rig users' lock-screen password"),
         oneshot("formalshell-rig-vkms", LIBEXEC + "/formalshell-rig-vkms", "One vkms card per FormalShell rig slot"),
         service("sshd"),

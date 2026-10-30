@@ -514,6 +514,11 @@ url = "https://github.com/herdrdev/herdr/releases/download/v0.9.3/herdr-linux-x8
 hash = "sha256-GKjcZfHC+khYhDRDVt6hz9kRxvBs9G+njhk/QIf026c="
 
 [[pkg]]
+name = "hyprexpo"
+source = "git:https://github.com/sandwichfarm/hyprexpo@59bf4d378cecde9ed849e9c562306738b1583016"
+rev = "59bf4d378cecde9ed849e9c562306738b1583016"
+
+[[pkg]]
 name = "ideviceinstaller"
 source = "brew"
 version = "1.2.0"
