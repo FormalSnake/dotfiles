@@ -234,6 +234,9 @@ hl.config({
   misc = {
     disable_hyprland_logo = true,
     disable_splash_rendering = true,
+    -- Black under everything, so the session arrives out of the greeter's
+    -- black (FormalShell's docs/superpowers/specs/2026-10-30-seams.md).
+    background_color = "rgb(000000)",
     -- When an app opens a link, the browser requests focus via
     -- xdg-activation. Hyprland ignores activation requests by default
     -- (anti-focus-steal), so the link would open with the browser left in
@@ -315,6 +318,21 @@ hl.animation({ leaf = "specialWorkspace", enabled = true, spring = "glide", spee
 hl.gesture({ fingers = 3, direction = "horizontal", action = "scroll_move" })
 hl.gesture({ fingers = 3, direction = "vertical", action = "workspace" })
 
+-- The pointer stays hidden until the shell has faded the desktop in; the
+-- shell then writes its marker for this instance and shows it, so a reload
+-- after that (the shell's own after each publish) leaves it shown. A shell
+-- that never starts gets it back ten seconds in, marker and all.
+local arrived = (os.getenv("XDG_RUNTIME_DIR") or "") .. "/formalshell/arrived-" .. (os.getenv("HYPRLAND_INSTANCE_SIGNATURE") or "")
+local marker = io.open(arrived, "r")
+if marker then
+  marker:close()
+else
+  hl.config({ cursor = { invisible = true } })
+end
+hl.on("hyprland.start", function()
+  hl.exec_cmd([==[sleep 10 && mkdir -p "$XDG_RUNTIME_DIR/formalshell" && touch "$XDG_RUNTIME_DIR/formalshell/arrived-$HYPRLAND_INSTANCE_SIGNATURE" && hyprctl eval 'hl.config({ cursor = { invisible = false } })']==])
+end)
+
 -- Keybinds (mirror the macOS/aerospace muscle memory, SUPER as mod)
 -- FormalShell IPC. `menu toggle` is the no-argument verb M13 added for
 -- exactly this bind: root summon when closed, close when already open.
@@ -334,6 +352,8 @@ hl.bind(mod .. " + plus", hl.dsp.exec_cmd("/opt/fspec/current/bin/formalshell ip
 hl.bind(mod .. " + SHIFT + T", hl.dsp.exec_cmd("/opt/fspec/current/bin/formalshell theme mode toggle"))
 -- Sleep: lock then suspend on demand, so resume lands on the lock screen
 -- (exec_cmd runs through sh -c).
+-- Logout through the shell, which fades the desktop to black and then exits Hyprland.
+hl.bind(mod .. " + SHIFT + E", hl.dsp.exec_cmd("/opt/fspec/current/bin/formalshell ipc --any-display call power logout"))
 hl.bind(mod .. " + SHIFT + Escape", hl.dsp.exec_cmd("/opt/fspec/current/bin/formalshell ipc --any-display call lock lock && systemctl suspend"))
 
 -- Screenshots via the shell (M12 screenshot IPC target: grim/slurp on the
@@ -555,4 +575,6 @@ hl.layer_rule({ match = { namespace = "^(formalshell:plugin-overlay)$" }, blur =
 hl.layer_rule({ match = { namespace = "^(formalshell:radio)$" }, blur = true, ignore_alpha = 0.6, no_anim = true })
 -- Opaque by design, so it takes the animation rule alone.
 hl.layer_rule({ match = { namespace = "^(formalshell:notifications)$" }, no_anim = true })
+-- The arrival and departure veil fades itself.
+hl.layer_rule({ match = { namespace = "^(formalshell:veil)$" }, no_anim = true })
 
