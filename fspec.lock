@@ -369,10 +369,6 @@ source = "brew"
 version = "9.0.2"
 
 [[pkg]]
-name = "figlet"
-source = "zypper:figlet"
-
-[[pkg]]
 name = "fish"
 source = "brew"
 version = "4.9.3"
@@ -410,12 +406,8 @@ build = "67889dec"
 
 [[pkg]]
 name = "formalshell"
-source = "git:https://github.com/FormalStudio/FormalShell@9958788cc63e84d01c6f39a739d9a75be1649620"
-rev = "9958788cc63e84d01c6f39a739d9a75be1649620"
-
-[pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/formalshell@sha256:7713a4b3133fa4d80268b585999d154799e9c6d46a062f157d39e063838d6130"
-build = "4cad0ff5"
+source = "git:https://github.com/FormalStudio/FormalShell@95648e93e4d1d56492d2b864978efb91b2d9a73a"
+rev = "95648e93e4d1d56492d2b864978efb91b2d9a73a"
 
 [[pkg]]
 name = "fspec"
