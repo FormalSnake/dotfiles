@@ -47,7 +47,12 @@ for _ in $(seq 100); do
   sleep 0.1
 done
 export WAYLAND_DISPLAY=$(basename "$socket")
-/opt/fspec/current/bin/formalshell-greeter
+/opt/fspec/current/bin/formalshell-greeter &
+greeter=$!
+# Once the greeter covers it, the splash under it goes black, so the moment between the greeter's
+# exit and sway's is black too.
+(sleep 3; swaymsg -s "$(find "$XDG_RUNTIME_DIR" -maxdepth 1 -name 'sway-ipc.*.sock' -print -quit)" 'output * bg #000000 solid_color' >/dev/null 2>&1) &
+wait "$greeter"
 grim /tmp/formalshell-greeter-post-auth.png
 kill "$compositor" 2>/dev/null
 wait "$compositor" 2>/dev/null
