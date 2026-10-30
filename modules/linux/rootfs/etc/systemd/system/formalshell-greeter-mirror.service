@@ -1,6 +1,9 @@
 [Unit]
 Description=Copy kyandesutter's FormalShell wallpaper and theme to the greeter
 After=systemd-tmpfiles-setup.service
+# The shell rewrites state.json in bursts (a wallpaper pick, a theme flip), past the default
+# five starts in ten seconds, and a start limit hit fails the path unit with it.
+StartLimitIntervalSec=0
 
 [Service]
 Type=oneshot
