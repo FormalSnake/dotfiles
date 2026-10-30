@@ -199,14 +199,6 @@ oci = "ghcr.io/formalsnake/fspec-cache/colloid-icon-theme@sha256:b7a6050f6a061ed
 build = "4c44efd0"
 
 [[pkg]]
-name = "com.github.tchx84.Flatseal"
-source = "flatpak:com.github.tchx84.Flatseal"
-version = "2.4.1"
-
-[pkg.any]
-commit = "ef9fe38e9cb96c170ea579fe1bbf8c76011255d4962d7fc4b3aa4e0a6063f8ae"
-
-[[pkg]]
 name = "coreutils"
 source = "brew"
 version = "9.12"
@@ -377,10 +369,6 @@ source = "brew"
 version = "9.0.2"
 
 [[pkg]]
-name = "figlet"
-source = "zypper:figlet"
-
-[[pkg]]
 name = "fish"
 source = "brew"
 version = "4.9.3"
@@ -418,8 +406,8 @@ build = "67889dec"
 
 [[pkg]]
 name = "formalshell"
-source = "git:https://github.com/FormalStudio/FormalShell@7e1221840e3631cbe7bc35282c41e1712dbb0335"
-rev = "7e1221840e3631cbe7bc35282c41e1712dbb0335"
+source = "git:https://github.com/FormalStudio/FormalShell@9ee5014c506993d1ccbc3e8b3b5ff1f3264d2f6d"
+rev = "9ee5014c506993d1ccbc3e8b3b5ff1f3264d2f6d"
 
 [[pkg]]
 name = "fspec"
