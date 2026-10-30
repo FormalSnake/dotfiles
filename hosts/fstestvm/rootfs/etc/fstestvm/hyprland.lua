@@ -8,7 +8,7 @@ local arrived = (os.getenv("XDG_RUNTIME_DIR") or "") .. "/formalshell/arrived-" 
 local marker = io.open(arrived, "r")
 if marker then marker:close() else hl.config({ cursor = { invisible = true } }) end
 hl.on("hyprland.start", function()
-  hl.exec_cmd([==[sleep 10 && hyprctl eval 'hl.config({ cursor = { invisible = false } })']==])
+  hl.exec_cmd([==[sleep 10 && mkdir -p "$XDG_RUNTIME_DIR/formalshell" && touch "$XDG_RUNTIME_DIR/formalshell/arrived-$HYPRLAND_INSTANCE_SIGNATURE" && hyprctl eval 'hl.config({ cursor = { invisible = false } })']==])
 end)
 hl.layer_rule({ name = "formalshell-veil", match = { namespace = "formalshell:veil" }, no_anim = true })
 hl.on("hyprland.start", function() hl.exec_cmd([==[/opt/fspec/current/bin/formalshell]==]) end)
