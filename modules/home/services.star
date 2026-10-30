@@ -9,6 +9,18 @@ SERVICES = [
     service("formalshell-watchdog.timer", user = True),
     # Serves ~/.ssh/id_ed25519, which sudo's pam_ssh_agent_auth and the other hosts accept.
     service("gcr-ssh-agent.socket", user = True),
+    # The spec checkout FSPEC_SPEC names, which `fspec app` commits installs from the shell to and
+    # fast-forwards before each one. Cloned over https since the repo is public; pushes
+    # authenticate through gh.
+    oneshot(
+        "formalspec-checkout",
+        "/usr/bin/sh -c 'test -d " + HOME + "/.config/formalspec/.git || git clone -q " +
+        "-c credential.helper= -c \"credential.helper=!gh auth git-credential\" " +
+        "https://github.com/FormalSnake/dotfiles.git " + HOME + "/.config/formalspec'",
+        "Clone the spec that installs from the shell commit to",
+        user = True,
+        unit = {"After": "network-online.target"},
+    ),
 
     autostart("discord", BIN + "/discord --start-minimized", "Discord (minimized to tray)", hyprland = True),
     autostart("beeper", STORE + "/beeper", "Beeper", needs = STORE + "/beeper"),

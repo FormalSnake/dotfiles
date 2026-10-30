@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policyconfig PUBLIC "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
+  "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
+<!-- What fspec's system scope asks for when it runs through pkexec, as an install from the
+     shell does. auth_admin_keep holds the answer five minutes, so an install and its undo ask once. -->
+<policyconfig>
+  <vendor>FormalSpec</vendor>
+  <action id="dev.formalsnake.fspec.system-scope">
+    <description>Change system software</description>
+    <message>Authentication is required to install or remove software</message>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/opt/fspec/current/bin/fspec</annotate>
+  </action>
+</policyconfig>
