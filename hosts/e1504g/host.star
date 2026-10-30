@@ -1,5 +1,5 @@
 load("//lib/paths.star", "LIBEXEC", "USER")
-load("//modules/boot/boot.star", "boot")
+load("//modules/boot/boot.star", "QUIET_ARGS", "boot")
 load("//modules/fastfetch/fastfetch.star", "fastfetch")
 load("//modules/fspec.star", "fspec")
 load("//modules/apps.star", "apps")
@@ -34,9 +34,8 @@ e1504g = host(
         packages = PACKAGES + ["systemd-experimental"],
         # The initrd loads both blacklisted modules before /etc/modprobe.d applies.
         kernel_args = [
-            "mitigations=off", "intel_iommu=on", "quiet", "splash", "udev.log_level=3",
-            "module_blacklist=ucsi_acpi,intel_ish_ipc",
-        ],
+            "mitigations=off", "intel_iommu=on", "module_blacklist=ucsi_acpi,intel_ish_ipc",
+        ] + QUIET_ARGS,
     ),
     users = [user(USER, uid = 1000, shell = "fish", groups = GROUPS)],
     # Builds what CI has not on the g815, over the tailnet, then the LAN.

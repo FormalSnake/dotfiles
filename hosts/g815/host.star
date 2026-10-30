@@ -1,5 +1,5 @@
 load("//lib/paths.star", "USER")
-load("//modules/boot/boot.star", "boot")
+load("//modules/boot/boot.star", "QUIET_ARGS", "boot")
 load("//modules/fastfetch/fastfetch.star", "fastfetch")
 load("//modules/fspec.star", "fspec")
 load("//modules/apps.star", "apps")
@@ -56,8 +56,8 @@ g815 = host(
         packages = PACKAGES + GAMING_PACKAGES + VM_PACKAGES + DEV_PACKAGES + ["systemd-resolved"],
         kernel_args = [
             "nvidia-drm.modeset=1", "acpi_backlight=native", "cfg80211.ieee80211_regdom=ES",
-            "mitigations=off", "quiet", "splash", "loglevel=3", "udev.log_level=3",
-        ],
+            "mitigations=off",
+        ] + QUIET_ARGS,
     ),
     users = [user(USER, uid = 1000, shell = "fish", groups = GROUPS + ["gamemode", "libvirt"])] + rig_users(),
     modules = [

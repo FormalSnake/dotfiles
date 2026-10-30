@@ -1,7 +1,7 @@
 load("//lib/paths.star", "STORE")
 load("//lib/tree.star", "tree")
 load("//lib/units.star", "oneshot")
-load("//modules/boot/boot.star", "FORMALOS", "formalos_boot")
+load("//modules/boot/boot.star", "FORMALOS", "QUIET_ARGS", "formalos_boot")
 load("//modules/linux/store.star", "FORMALSHELL")
 
 # FormalShell's VM rig: two Tumbleweed guests on the g815 (`fspec vm start fstestvm0`), one per
@@ -28,7 +28,7 @@ PACKAGES = [
     "NetworkManager", "wpa_supplicant", "hostapd", "dnsmasq", "iw", "iproute2", "openssl",
     "bluez", "upower", "power-profiles-daemon", "polkit", "pkexec", "geoclue2",
     "pipewire", "pipewire-pulseaudio", "wireplumber", "pulseaudio-utils", "pipewire-tools",
-    "seatd", "greetd", "sway", "hyprland", "hyprland-guiutils", "uwsm", "foot", "grim", "slurp", "wtype", "wl-clipboard", "wlrctl",
+    "seatd", "greetd", "sway", "swaybg", "hyprland", "hyprland-guiutils", "uwsm", "foot", "grim", "slurp", "wtype", "wl-clipboard", "wlrctl",
     "wf-recorder", "wlsunset", "brightnessctl", "ddcutil", "libnotify-tools", "dbus-1-daemon",
     "mpv", "mpv-mpris", "ffmpeg-8", "cava", "qrencode", "ImageMagick", "tesseract-ocr",
     "tesseract-ocr-traineddata-eng", "python313", "python313-gobject", "python313-evdev",
@@ -137,7 +137,7 @@ fstestvm = [
         name = "fstestvm%d" % n,
         platform = "x86_64-linux",
         # e1504g's and the g815's quiet boot, so the splash is all that shows.
-        system = tumbleweed(packages = PACKAGES, kernel_args = ["quiet", "splash", "loglevel=3", "udev.log_level=3"]),
+        system = tumbleweed(packages = PACKAGES, kernel_args = QUIET_ARGS),
         users = [user(VM_USER, uid = 1000, shell = "bash", groups = ["wheel", "video", "render", "input", "audio"])],
         builders = [builder("g815")],
         # A leg's session holds about 550 MB; four slots this size leave the g815's desktop its

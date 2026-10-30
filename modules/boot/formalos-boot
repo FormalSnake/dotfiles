@@ -14,7 +14,7 @@ limine=$esp/EFI/limine
 mkdir -p "$state" "$limine"
 
 sum=$(cat "$src"/* /etc/plymouth/plymouthd.conf | sha256sum | cut -d ' ' -f 1)
-if [ "$sum" != "$(cat "$state/theme.sum" 2>/dev/null)" ] || [ ! -f "$limine/$name.png" ]; then
+if [ "$sum" != "$(cat "$state/theme.sum" 2>/dev/null)" ] || [ ! -f "$limine/$name.png" ] || [ ! -f "$theme/greeter-1.png" ]; then
 	# Without the dracut hook the rebuilt initrds would carry no splash, and the sum would hide it.
 	[ -x /usr/libexec/plymouth/plymouth-populate-initrd ] || {
 		echo "formalos-boot: plymouth-dracut is not installed" >&2
@@ -30,6 +30,20 @@ if [ "$sum" != "$(cat "$state/theme.sum" 2>/dev/null)" ] || [ ! -f "$limine/$nam
 	done
 	magick -size 1x1 "xc:#$track" "$theme.new/track.png"
 	magick -size 1x1 "xc:#$fill" "$theme.new/fill.png"
+	# The splash's finished frame (fill.png at 13 steps) on the script's own grid round a canvas
+	# centre, for the first greeter's sway to show centred over the frame plymouth leaves.
+	for s in 1 2 3 4; do
+		c=$((200 * s))
+		lw=$(magick identify -format %w "$theme.new/logo-$s.png")
+		lh=$(magick identify -format %h "$theme.new/logo-$s.png")
+		ww=$(magick identify -format %w "$theme.new/wordmark-$s.png")
+		magick -size $((2 * c))x$((2 * c)) "xc:#$backdrop" \
+			"$theme.new/logo-$s.png" -geometry +$((c - lw / 2))+$((c - 66 * s - lh / 2)) -composite \
+			"$theme.new/wordmark-$s.png" -geometry +$((c - ww / 2))+$((c + 2 * s)) -composite \
+			-fill "#$track" -draw "rectangle $((c - 81 * s)),$((c + 43 * s)) $((c + 81 * s - 1)),$((c + 55 * s - 1))" \
+			-fill "#$fill" -draw "rectangle $((c - 78 * s)),$((c + 46 * s)) $((c + 78 * s - 1)),$((c + 52 * s - 1))" \
+			"png24:$theme.new/greeter-$s.png"
+	done
 	cp "$src/splash.script" "$theme.new/$name.script"
 	printf '[Plymouth Theme]\nName=%s\nDescription=The %s boot splash\nModuleName=script\n\n[script]\nImageDir=%s\nScriptFile=%s/%s.script\n' \
 		"$branding" "$branding" "$theme" "$theme" "$name" >"$theme.new/$name.plymouth"

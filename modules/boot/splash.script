@@ -42,9 +42,37 @@ fun progress_callback(duration, progress) {
   }
 }
 
-# Shutdown and reboot have no meaningful progress; the logo and name stay.
-if (Plymouth.GetMode() == "boot") {
-  Plymouth.SetBootProgressFunction(progress_callback);
-} else {
-  track.SetOpacity(0);
+# greetd's start says the boot is done: the bar fills, the frame the greeter's background repeats.
+fun status_callback(status) {
+  if (status == "formalos-done") {
+    global.steps = 13;
+    global.fill.SetImage(global.fill_image.Scale(13 * 12 * global.s, 6 * global.s));
+  }
 }
+Plymouth.SetUpdateStatusFunction(status_callback);
+
+# Shutdown and reboot have no meaningful progress; the logo and name stay.
+boot = Plymouth.GetMode() == "boot";
+if (boot) Plymouth.SetBootProgressFunction(progress_callback);
+
+# Everything fades in over 15 refreshes (300 ms at plymouth's 50 Hz) instead of cutting in.
+shown = 0;
+fun show(a) {
+  global.logo_sprite.SetOpacity(a);
+  global.wordmark_sprite.SetOpacity(a);
+  if (global.boot) {
+    global.track.SetOpacity(a);
+    global.fill.SetOpacity(a);
+  } else {
+    global.track.SetOpacity(0);
+    global.fill.SetOpacity(0);
+  }
+}
+show(0);
+fun refresh_callback() {
+  if (global.shown < 15) {
+    global.shown = global.shown + 1;
+    show(global.shown / 15);
+  }
+}
+Plymouth.SetRefreshFunction(refresh_callback);

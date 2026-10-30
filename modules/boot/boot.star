@@ -1,8 +1,18 @@
-# The FormalOS boot look: Limine's menu over a centred logo, then a plymouth splash with the logo,
-# the wordmark and a progress bar. Limine has no boot counting, so its default entry chainloads
-# systemd-boot, which counts tries for fspec-boot-guard behind a zero timeout.
+# The FormalOS boot look: a silent Limine (any key in its second shows the menu over a centred
+# logo), then a plymouth splash with the logo, the wordmark and a progress bar, held on screen into
+# the greeter. Limine has no boot counting, so its default entry chainloads systemd-boot, which
+# counts tries for fspec-boot-guard behind a zero timeout. FormalShell's
+# docs/superpowers/specs/2026-10-30-seams.md is the whole chain.
 
 ASSETS = "modules/boot/"
+
+# Every host's quiet boot. fbcon=vc:2-6 leaves VT1, greetd's, on the dummy console, so nothing a
+# session or systemd writes there is ever drawn; tty2 keeps its getty.
+QUIET_ARGS = [
+    "quiet", "splash", "loglevel=3", "rd.udev.log_level=3", "udev.log_level=3",
+    "systemd.show_status=false", "rd.systemd.show_status=false",
+    "vt.global_cursor_default=0", "fbcon=vc:2-6",
+]
 ESP = "/boot/efi"
 # Outside /etc, which SUSE's ImageMagick policy refuses to read.
 SRC = "/usr/local/share/formalos-boot"
@@ -16,7 +26,7 @@ def boot_theme(
         colours,
         palette,
         palette_bright,
-        timeout = 4,
+        timeout = 1,
         wallpaper_size = "400x560",
         wallpaper_scale = 4,
         preferred = "tumbleweed-*",
@@ -80,6 +90,7 @@ def _limine_conf(t, entries):
     c = t["colours"]
     return "\n".join([
         "timeout: %d" % t["timeout"],
+        "quiet: yes",
         "editor_enabled: no",
         "graphics: yes",
         "wallpaper: boot():/EFI/limine/%s.png" % t["name"],
@@ -146,6 +157,42 @@ def formalos_boot(t, entries = []):
             file("/etc/plymouth/plymouthd.conf", content = "[Daemon]\nTheme=%s\nShowDelay=0\nDeviceTimeout=8\n" % t["name"]),
         ]),
         pkg("plymouth-plugin-script", source = zypper()),
+        # The splash's finished frame stays on screen, plymouthd deactivated, until sway has drawn
+        # the same picture over it (formalos-boot's greeter-<s>.png); quitting earlier drops it.
+        # Tumbleweed's greetd.service waits for plymouth-quit-wait, which a drop-in cannot take
+        # back, so this is the package's unit without that.
+        file("/etc/systemd/system/greetd.service", content = """[Unit]
+Description=Greeter daemon
+After=systemd-user-sessions.service plymouth-start.service
+After=getty@tty1.service
+Conflicts=getty@tty1.service
+
+[Service]
+Type=simple
+ExecStartPre=-/usr/bin/plymouth update --status=formalos-done
+ExecStartPre=-/usr/bin/sleep 0.15
+ExecStartPre=-/usr/bin/plymouth deactivate
+ExecStart=greetd
+IgnoreSIGPIPE=no
+SendSIGHUP=yes
+TimeoutStopSec=30s
+KeyringMode=shared
+Restart=always
+RestartSec=1
+StartLimitBurst=5
+StartLimitInterval=30
+
+[Install]
+Alias=display-manager.service
+"""),
+        file("/etc/systemd/system/plymouth-quit.service.d/formalos-splash.conf", content = """[Unit]
+After=display-manager.service
+
+[Service]
+ExecStartPre=-/usr/bin/sleep 3
+ExecStart=
+ExecStart=-/usr/bin/plymouth quit --retain-splash
+"""),
         pkg("plymouth-dracut", source = zypper()),
         # fspec-esp-sync writes this header to the ESP with a Kernels submenu under it.
         pkg("limine", source = zypper(), files = [
