@@ -8,7 +8,6 @@ unset XDG_CONFIG_HOME XDG_STATE_HOME XDG_CACHE_HOME XDG_DATA_HOME
 export XDG_SESSION_TYPE=wayland
 # The first greeter since boot repeats the splash's finished frame, which plymouth leaves on the
 # display: the greeter then fades in over the same picture. The scale is the splash script's own.
-# sway draws its pointer before the greeter can hide it; it goes after three still seconds.
 bg='#000000 solid_color'
 if [ ! -e "$XDG_RUNTIME_DIR/booted" ]; then
   touch "$XDG_RUNTIME_DIR/booted"
@@ -21,7 +20,17 @@ if [ ! -e "$XDG_RUNTIME_DIR/booted" ]; then
     break
   done
 fi
-printf 'output * bg %s\nseat * hide_cursor 3000\ninput type:keyboard {\n  xkb_layout es\n  xkb_options caps:escape\n}\n' "$bg" > "$HOME/sway.conf"
+# sway draws its pointer over the splash before the greeter maps and hides it: the seat starts
+# on a theme whose every cursor is one transparent pixel, and takes the real one back once the
+# greeter covers the screen.
+blank=$HOME/icons/formalos-blank/cursors
+if [ ! -e "$blank/default" ]; then
+  mkdir -p "$blank"
+  echo WGN1chAAAAAAAAEAAQAAAAIA/f8YAAAAHAAAACQAAAACAP3/GAAAAAEAAAABAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAA= | base64 -d > "$blank/default"
+  for n in left_ptr arrow top_left_arrow text xterm pointer hand2; do ln -sf default "$blank/$n"; done
+fi
+export XCURSOR_PATH=$HOME/icons:/usr/share/icons
+printf 'output * bg %s\nseat * xcursor_theme formalos-blank 24\ninput type:keyboard {\n  xkb_layout es\n  xkb_options caps:escape\n}\n' "$bg" > "$HOME/sway.conf"
 # A compositor killed with greetd leaves its socket; the wait below would take it.
 rm -f "$XDG_RUNTIME_DIR"/wayland-*
 sway --config "$HOME/sway.conf" &
@@ -35,8 +44,10 @@ export WAYLAND_DISPLAY=$(basename "$socket")
 /opt/fspec/current/bin/formalshell-greeter &
 greeter=$!
 # Once the greeter covers it, the splash under it goes black, so the moment between the greeter's
-# exit and sway's is black too.
-(sleep 3; swaymsg -s "$(find "$XDG_RUNTIME_DIR" -maxdepth 1 -name 'sway-ipc.*.sock' -print -quit)" 'output * bg #000000 solid_color' >/dev/null 2>&1) &
+# exit and sway's is black too, and the pointer takes its real theme for the greeter's own.
+(sleep 3; ipc=$(find "$XDG_RUNTIME_DIR" -maxdepth 1 -name 'sway-ipc.*.sock' -print -quit)
+  swaymsg -s "$ipc" 'output * bg #000000 solid_color' >/dev/null 2>&1
+  swaymsg -s "$ipc" 'seat * xcursor_theme default 24' >/dev/null 2>&1) &
 wait "$greeter"
 kill "$compositor" 2>/dev/null
 wait "$compositor" 2>/dev/null
