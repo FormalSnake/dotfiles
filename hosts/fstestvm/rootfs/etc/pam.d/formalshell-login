@@ -1,0 +1,9 @@
+#%PAM-1.0
+auth     requisite      pam_nologin.so
+auth     include        common-auth
+account  include        common-account
+password include        common-password
+session  required       pam_env.so readenv=0 conffile=/etc/formalshell/login-env.conf
+session  required       pam_loginuid.so
+session  optional       pam_keyinit.so force revoke
+session  include        common-session

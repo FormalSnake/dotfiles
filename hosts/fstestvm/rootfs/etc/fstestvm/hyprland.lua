@@ -1,6 +1,7 @@
 hl.monitor({ output = "", mode = "preferred", position = "0x0", scale = 1 })
 hl.config({
-  misc = { disable_watchdog_warning = true, disable_hyprland_logo = true, force_default_wallpaper = 0, background_color = "rgb(000000)" },
+  -- A restarted shell takes back the lock its predecessor held, the locked login's included.
+  misc = { disable_watchdog_warning = true, disable_hyprland_logo = true, force_default_wallpaper = 0, background_color = "rgb(000000)", allow_session_lock_restore = true },
 })
 -- FormalShell's include does the same (docs/examples/hyprland/formalshell.lua).
 -- The pointer stays hidden until the shell has faded the desktop in. Hidden
@@ -63,7 +64,7 @@ hl.on("hyprland.start", function()
   hl.exec_cmd([==[sleep 10 && mkdir -p "$XDG_RUNTIME_DIR/formalshell" && touch "$XDG_RUNTIME_DIR/formalshell/arrived-$HYPRLAND_INSTANCE_SIGNATURE" && hyprctl eval 'formalshell_arrived()']==])
 end)
 hl.layer_rule({ name = "formalshell-veil", match = { namespace = "formalshell:veil" }, no_anim = true })
-hl.on("hyprland.start", function() hl.exec_cmd([==[/opt/fspec/current/bin/formalshell]==]) end)
+hl.on("hyprland.start", function() hl.exec_cmd([==[systemctl --user import-environment WAYLAND_DISPLAY HYPRLAND_INSTANCE_SIGNATURE XDG_CURRENT_DESKTOP XDG_SESSION_TYPE && systemctl --user start formalshell.service]==]) end)
 hl.bind("SUPER + Return", hl.dsp.exec_cmd("foot"))
 hl.bind("SUPER + Space", hl.dsp.exec_cmd([==[/opt/fspec/current/bin/formalshell ipc --any-display call menu toggle]==]))
 hl.bind("SUPER + SHIFT + E", hl.dsp.exec_cmd([==[/opt/fspec/current/bin/formalshell ipc --any-display call power logout]==]))

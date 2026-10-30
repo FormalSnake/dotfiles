@@ -1,6 +1,17 @@
 [terminal]
 vt = 1
 
+# greetd opens initial_session and the greeter's logins under this service: greetd's own stack
+# with the session type set, which initial_session passes nothing of.
+[general]
+service = "formalshell-login"
+
 [default_session]
 command = "/etc/greetd/formalshell-session.sh"
 user = "greeter"
+
+# The locked login (FormalShell's 2026-10-30-locked-login.md), once per boot; dev/seams.sh films
+# it, and `just greeter` restarts greetd, which never runs it again.
+[initial_session]
+command = "/etc/greetd/formalshell-login.sh"
+user = "kyan"

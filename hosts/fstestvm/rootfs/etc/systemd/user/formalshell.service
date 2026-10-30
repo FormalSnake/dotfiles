@@ -1,0 +1,12 @@
+# The shell's only launcher, as on the real hosts: the locked login's --locked-cmd and
+# hyprland.lua's start both start it, and a second start of a running unit does nothing.
+[Unit]
+Description=FormalShell
+ConditionEnvironment=XDG_CURRENT_DESKTOP=Hyprland
+PartOf=graphical-session.target
+
+[Service]
+ExecStart=/opt/fspec/current/bin/formalshell
+KillMode=process
+Restart=on-failure
+Slice=session.slice

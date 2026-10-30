@@ -3,6 +3,9 @@ vt = 1
 
 [general]
 runfile = "/run/session-switch/greetd.run"
+# greetd opens initial_session and the greeter's logins under this service: greetd's own stack
+# with the session type set, which initial_session passes nothing of.
+service = "formalshell-login"
 
 [default_session]
 command = "/etc/greetd/formalshell-session.sh"
