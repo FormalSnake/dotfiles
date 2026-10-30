@@ -606,9 +606,7 @@ hl.window_rule({
 -- the top of it (the toast stack's resize against Hyprland's `layers`
 -- spring).
 hl.layer_rule({ match = { namespace = "^(formalshell:bar)$" }, blur = true, ignore_alpha = 0.2, no_anim = true })
-hl.layer_rule({ match = { namespace = "^(formalshell:frame)$" }, blur = true, ignore_alpha = 0.2, no_anim = true })
 hl.layer_rule({ match = { namespace = "^(formalshell:panel)$" }, blur = true, ignore_alpha = 0.2, no_anim = true })
-hl.layer_rule({ match = { namespace = "^(formalshell:notifications-center)$" }, blur = true, ignore_alpha = 0.2, no_anim = true })
 hl.layer_rule({ match = { namespace = "^(formalshell:tooltip)$" }, blur = true, ignore_alpha = 0.2, no_anim = true })
 hl.layer_rule({ match = { namespace = "^(formalshell:osd)$" }, blur = true, ignore_alpha = 0.2, no_anim = true })
 -- The window switcher draws its card at 0.6, so without the blur under
