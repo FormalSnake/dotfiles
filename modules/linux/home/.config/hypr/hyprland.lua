@@ -573,8 +573,9 @@ hl.layer_rule({ match = { namespace = "^(formalshell:menu)$" }, blur = true, ign
 hl.layer_rule({ match = { namespace = "^(formalshell:polkit)$" }, blur = true, ignore_alpha = 0.6, no_anim = true })
 hl.layer_rule({ match = { namespace = "^(formalshell:plugin-overlay)$" }, blur = true, ignore_alpha = 0.6, no_anim = true })
 hl.layer_rule({ match = { namespace = "^(formalshell:radio)$" }, blur = true, ignore_alpha = 0.6, no_anim = true })
--- Opaque by design, so it takes the animation rule alone.
-hl.layer_rule({ match = { namespace = "^(formalshell:notifications)$" }, no_anim = true })
+-- The toast cards are drawn at surfaceOpacity too; the clear layer between
+-- them falls under the 0.2 mark.
+hl.layer_rule({ match = { namespace = "^(formalshell:notifications)$" }, blur = true, ignore_alpha = 0.2, no_anim = true })
 -- The arrival and departure veil fades itself.
 hl.layer_rule({ match = { namespace = "^(formalshell:veil)$" }, no_anim = true })
 
