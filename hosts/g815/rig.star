@@ -34,6 +34,15 @@ RIG = [
         build_flags = ["-DCMAKE_INSTALL_LIBDIR=lib"],
         share = {"formalshell-rig/aquamarine": "lib"},
     ),
+    # Each slot user installs its own rustup toolchain and cargo registry, the same 1.8G eight
+    # times over. duperemove (DEV_PACKAGES) shares their identical extents on btrfs and leaves
+    # every file where and whose it is, so a slot's toolchain bump or registry fetch works as before.
+    timer(
+        "formalshell-rig-dedupe",
+        exec = "/usr/bin/duperemove -dr -q --hashfile=/var/cache/formalshell-rig-dedupe.hash " +
+               " ".join(["/home/%s/%s" % (u, d) for u in RIG_USERS for d in [".rustup", ".cargo/registry"]]),
+        schedule = "20 */4 * * *",
+    ),
     oneshot("formalshell-rig-passwords", LIBEXEC + "/formalshell-rig-passwords", "Set the FormalShell rig users' lock-screen password"),
     # The fstestvm slots boot the same system; KSM shares the pages they hold alike.
     oneshot("ksm", "/bin/sh -c 'echo 1 > /sys/kernel/mm/ksm/run'", "Merge the identical pages of the fstestvm guests"),

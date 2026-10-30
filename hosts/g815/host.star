@@ -39,7 +39,7 @@ DEV_PACKAGES = [
     "labwc", "foot", "rsync", "mpv-mpris", "libnotify-tools", "pulseaudio-utils", "wlrctl", "strace",
     "hostapd", "dbus-1-daemon", "pkgconfig(libpipewire-0.3)", "pkgconfig(libspa-0.2)",
     "pkgconfig(wayland-client)", "pkgconfig(xkbcommon)", "pkgconfig(fontconfig)", "pkgconfig(pam)",
-    "pkgconfig(pam_misc)", "clang",
+    "pkgconfig(pam_misc)", "clang", "duperemove",
 ]
 
 # Steam Remote Play and transfers, NordVPN's OpenVPN and meshnet.

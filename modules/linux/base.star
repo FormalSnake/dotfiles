@@ -3,6 +3,8 @@ load("//lib/paths.star", "LIBEXEC", "STORE", "USER")
 load("//lib/tree.star", "tree")
 load("//lib/units.star", "oneshot")
 
+PODMAN_PRUNE = "/bin/sh -c 'command -v podman >/dev/null || exit 0; exec podman image prune -af --filter until=72h'"
+
 GROUPS = ["wheel", "video", "audio", "input", "docker", "uinput", "i2c", "nordvpn", "ancs4linux"]
 
 # Both vendors document these baseurls for openSUSE. fspec imports a key only when its
@@ -109,6 +111,10 @@ SERVICES = [service(s) for s in [
     ),
     timer("docker-prune", exec = "/usr/bin/docker system prune -f --all --filter until=72h", schedule = "0 0 * * *"),
     timer("fspec-gc", exec = "/usr/local/bin/fspec gc --older-than 14d", schedule = "30 0 * * *"),
+    # fspec builds in root's and the user's rootless podman, each its own image store; every base
+    # image a build pulled stays there after its tag moves on.
+    timer("podman-prune", exec = PODMAN_PRUNE, schedule = "15 0 * * *"),
+    timer("podman-prune", exec = PODMAN_PRUNE, schedule = "15 0 * * *", user = True),
 ]
 
 def swapfile():

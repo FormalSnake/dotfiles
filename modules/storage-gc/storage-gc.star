@@ -29,5 +29,7 @@ def storage_gc(low_free_gb = None):
                 user = True,
                 env = {"LOW_FREE_GB": str(low_free_gb)} if low_free_gb else {},
             ),
+            # Root's own fspec build dirs, which the run above cannot see.
+            timer("fspec-build-gc-root", exec = LIBEXEC + "/fspec-build-gc-root", schedule = "30 * * * *"),
         ]
     return module

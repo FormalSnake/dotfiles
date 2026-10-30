@@ -1,0 +1,11 @@
+#!/bin/sh
+# The system scope's packages build as root, each with a cargo target of its own under
+# /root/.cache/fspec/build, which the user's storage-gc cannot see. Only those build dirs go:
+# one idle for a week, and never while fspec holds the `<dir>.lock` it builds under.
+cd /root/.cache/fspec/build 2>/dev/null || exit 0
+for d in */; do
+  d=${d%/}
+  [ -z "$(find "$d" -maxdepth 1 -newermt '-7 days' -print -quit)" ] || continue
+  flock -n "$d.lock" rm -rf "$d"
+done
+exit 0
