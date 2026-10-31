@@ -1,5 +1,7 @@
 [Unit]
 Description=NTFS volume at /mnt/steamlib
+Requires=clear-ntfs-dirty@7ED4F163D4F11E59.service
+After=clear-ntfs-dirty@7ED4F163D4F11E59.service
 
 [Mount]
 What=/dev/disk/by-uuid/7ED4F163D4F11E59

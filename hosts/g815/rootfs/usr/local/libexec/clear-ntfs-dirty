@@ -3,8 +3,7 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-
-dev="/dev/disk/by-uuid/D0409F99409F84BE"
+dev="$1"
 [ -b "$dev" ] || exit 0
 # Never touch a mounted volume: the force flag below opens one happily,
 # and ntfs3 keeps the dirty bit set for as long as it holds the volume
@@ -19,7 +18,7 @@ flags=$(ntfsinfo -f -m "$dev" 2>/dev/null | awk '/Volume Flags:/ { print $3 }') 
 [ $(( flags & 1 )) -eq 1 ] || exit 0
 
 if ! ntfsfix -n "$dev" >/dev/null 2>&1; then
-  echo "$dev is dirty and the ntfsfix check pass failed: leaving it, boot Windows" >&2
+  echo "$dev is dirty and the ntfsfix check pass failed: leaving it, run chkdsk from Windows" >&2
   exit 0
 fi
 echo "$dev carries a stale dirty flag, clearing it"
