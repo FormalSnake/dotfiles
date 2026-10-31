@@ -42,8 +42,9 @@ SYSTEM = [
     "scx", "firewalld", "python313",
 ]
 
+# binutils: gcc and clang link through its ld; without it zypper removes both.
 CLI = [
-    "gcc", "tree-sitter", "make", "pkgconf",
+    "gcc", "binutils", "tree-sitter", "make", "pkgconf",
     # Not the distro's rust-src: it pulls in a toolchain that conflicts with rustup.
     "rustup",
 ]
