@@ -13,6 +13,7 @@ from evdev import ecodes as e
 PAD = "DualSense Wireless Controller"
 HYPRCTL = "/usr/bin/hyprctl"
 WPCTL = "/usr/bin/wpctl"
+OSK = "wvkbd-mobintl"
 
 TICK = 1.0 / 60
 # Sticks rest at 128 and jitter a point or two either side, so the
@@ -119,6 +120,10 @@ def pump(dev, pointer):
                         pointer.write(e.EV_KEY, CLICKS[event.code], event.value)
                         pointer.syn()
                     elif event.value == 1 and event.code in BUTTONS:
+                        # Circle is back: with the keyboard up it closes the
+                        # keyboard, never the window under it.
+                        if event.code == e.BTN_EAST and subprocess.run(["pkill", "-x", OSK], check=False).returncode == 0:
+                            continue
                         subprocess.run(BUTTONS[event.code], check=False)
 
         carry[e.REL_X] += curve(axes[e.ABS_RX]) * POINTER_PX_S * TICK
