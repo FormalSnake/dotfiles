@@ -412,12 +412,8 @@ build = "67889dec"
 
 [[pkg]]
 name = "formalshell"
-source = "git:https://github.com/FormalStudio/FormalShell@befc5f0048a5c8f46833f5b7f3ec3ae851ef3b87"
-rev = "befc5f0048a5c8f46833f5b7f3ec3ae851ef3b87"
-
-[pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/formalshell@sha256:50f477d9d8b3a9857e2634537f932b2f96d6fdd0ff3a380fcb4779c9551a1d95"
-build = "04b9d8be"
+source = "git:https://github.com/FormalStudio/FormalShell@f01c96da6075f93a8b03d826c9bdf061771a4f15"
+rev = "f01c96da6075f93a8b03d826c9bdf061771a4f15"
 
 [[pkg]]
 name = "fspec"
@@ -530,12 +526,6 @@ version = "0.9.3"
 [pkg.x86_64-linux]
 url = "https://github.com/herdrdev/herdr/releases/download/v0.9.3/herdr-linux-x86_64"
 hash = "sha256-GKjcZfHC+khYhDRDVt6hz9kRxvBs9G+njhk/QIf026c="
-
-[[pkg]]
-name = "hyprexpo"
-source = "git:https://github.com/sandwichfarm/hyprexpo@59bf4d378cecde9ed849e9c562306738b1583016"
-rev = "59bf4d378cecde9ed849e9c562306738b1583016"
-patches = "sha256-drTwUiSVCWJCgLu3V6/FaFq+6ihvjv3z9CwGpmHakdU="
 
 [[pkg]]
 name = "ideviceinstaller"

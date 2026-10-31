@@ -3,7 +3,7 @@ load("//lib/tree.star", "tree")
 load("//lib/units.star", "oneshot")
 load("//modules/boot/boot.star", "FORMALOS", "QUIET_ARGS", "formalos_boot")
 load("//modules/apps.star", "apps")
-load("//modules/linux/store.star", "FORMALSHELL", "HYPREXPO")
+load("//modules/linux/store.star", "FORMALSHELL")
 
 # FormalShell's VM rig: two Tumbleweed guests on the g815 (`fspec vm start fstestvm0`), one per
 # slot, carrying what its old nix/testvm.nix did: the real system daemons the `leg_<n>_vm_only`
@@ -29,7 +29,7 @@ PACKAGES = [
     "NetworkManager", "wpa_supplicant", "hostapd", "dnsmasq", "iw", "iproute2", "openssl",
     "bluez", "upower", "power-profiles-daemon", "polkit", "pkexec", "geoclue2",
     "pipewire", "pipewire-pulseaudio", "wireplumber", "pulseaudio-utils", "pipewire-tools",
-    "seatd", "greetd", "sway", "swaybg", "hyprland", "binutils", "hyprland-guiutils", "uwsm", "foot", "grim", "slurp", "wtype", "wl-clipboard", "wlrctl",
+    "seatd", "greetd", "sway", "swaybg", "hyprland", "hyprland-guiutils", "uwsm", "foot", "grim", "slurp", "wtype", "wl-clipboard", "wlrctl",
     "wf-recorder", "wlsunset", "brightnessctl", "ddcutil", "libnotify-tools", "dbus-1-daemon",
     "mpv", "mpv-mpris", "ffmpeg-8", "cava", "qrencode", "ImageMagick", "tesseract-ocr",
     "tesseract-ocr-traineddata-eng", "python313", "python313-gobject", "python313-evdev",
@@ -125,7 +125,7 @@ def _services():
     ]
 
 def _fstestvm(h):
-    return [FORMALSHELL, HYPREXPO] + ROOTFS + _services() + [
+    return [FORMALSHELL] + ROOTFS + _services() + [
         file("/etc/ssh/ssh_known_hosts", src = "modules/linux/rootfs/etc/ssh/ssh_known_hosts", perms = "0644"),
         # Tumbleweed starts bluetoothd from bluetooth.target, which only an adapter brings up.
         file("/etc/systemd/system/multi-user.target.wants/bluetooth.service", mode = "link", target = "/usr/lib/systemd/system/bluetooth.service"),

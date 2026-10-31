@@ -2,9 +2,8 @@ load("//modules/tools.star", "cli")
 
 # Tumbleweed packages both Linux hosts install, beside modules/tools.star's. A `!name` removes one.
 
-# binutils: Hyprland runs `nm` on itself to find the functions a plugin hooks (hyprexpo).
 DESKTOP = [
-    "hyprland", "binutils", "uwsm", "xdg-desktop-portal-hyprland", "xdg-desktop-portal-gtk", "greetd", "sway", "swaybg",
+    "hyprland", "uwsm", "xdg-desktop-portal-hyprland", "xdg-desktop-portal-gtk", "greetd", "sway", "swaybg",
     "swayidle", "wl-clipboard", "grim", "slurp", "wf-recorder", "brightnessctl", "ddcutil", "wlsunset",
     "cava", "playerctl", "mpv", "qrencode", "wtype", "tesseract-ocr", "tesseract-ocr-traineddata-eng",
     "xdg-utils", "evolution-data-server", "geoclue2", "libgtk-4-1", "libadwaita-1-0", "python313-gobject",

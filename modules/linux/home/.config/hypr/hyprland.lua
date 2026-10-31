@@ -495,48 +495,10 @@ end
 
 hl.bind(mod .. " + Tab", hl.dsp.focus({ workspace = "previous" }))
 
--- Workspace overview: HyprExpo, the fspec package `hyprexpo`. A plugin
--- built against other headers takes the compositor down, so it loads only
--- while this Hyprland is the one its hyprland-version file names; after a
--- Hyprland update it logs the mismatch to the journal and the bind does
--- nothing until the package's pin is bumped.
--- FormalShell's minimap opens it too (a long press, or an icon dragged off
--- its row).
-do
-  local dir = "/opt/fspec/current/pkgs/hyprexpo"
-  local f = io.open(dir .. "/hyprland-version")
-  local built = f and f:read("l")
-  if f then f:close() end
-  if built == hl.version() then
-    hl.plugin.load(dir .. "/hyprexpo.so")
-  else
-    io.stderr:write("hyprexpo: built for Hyprland ", tostring(built), ", running ", hl.version(), ": not loaded\n")
-  end
-end
--- Set on the reload Hyprland runs once the plugin has loaded, so a skipped
--- load leaves no unknown keys.
-if hl.plugin.hyprexpo then
-  hl.config({
-    plugin = {
-      hyprexpo = { columns = 3, gaps_in = 8, gaps_out = 24, keynav_enable = 1, keynav_wrap_h = 1, keynav_wrap_v = 1 },
-    },
-  })
-end
-local function expo(fn, arg)
-  return function()
-    if hl.plugin.hyprexpo then hl.plugin.hyprexpo[fn](arg) end
-  end
-end
-hl.bind(mod .. " + O", expo("expo", "toggle"))
-hl.define_submap("hyprexpo", function()
-  hl.bind("left", expo("kb_focus", "left"))
-  hl.bind("right", expo("kb_focus", "right"))
-  hl.bind("up", expo("kb_focus", "up"))
-  hl.bind("down", expo("kb_focus", "down"))
-  hl.bind("return", expo("kb_confirm"))
-  hl.bind("escape", expo("expo", "cancel"))
-  hl.bind(mod .. " + O", expo("expo", "toggle"))
-end)
+-- Workspace overview: FormalShell's own, niri's look. The top-left hot
+-- corner and the minimap (a long press, or an icon dragged out past the
+-- column) open it too.
+hl.bind(mod .. " + O", hl.dsp.exec_cmd("/opt/fspec/current/bin/formalshell ipc --any-display call workspaces overview toggle"))
 
 -- Alt-Tab. Hyprland has no most-recently-used hold-and-cycle switcher
 -- (niri's `recent-windows`). Under FormalShell the shell draws one

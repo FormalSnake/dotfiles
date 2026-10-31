@@ -31,37 +31,10 @@ FORMALSHELL = pkg(
     "formalshell",
     source = git(
         "https://github.com/FormalStudio/FormalShell",
-        rev = "befc5f0048a5c8f46833f5b7f3ec3ae851ef3b87",
+        rev = "f01c96da6075f93a8b03d826c9bdf061771a4f15",
         image = "docker.io/library/debian:bookworm",
     ),
     build = sh('WORK="$FSPEC_CACHE" bash "$FSPEC_SRC/dev/tarball.sh" "$FSPEC_OUT.tar" && tar -xzf "$FSPEC_OUT.tar"/formalshell-*-linux.tar.gz -C "$FSPEC_OUT" && rm -rf "$FSPEC_OUT.tar"'),
-)
-
-# The pin is hyprexpo's own hyprpm.toml entry for Hyprland 0.56.2 (efb5099). A plugin built
-# against other headers crashes the compositor, so the build refuses them, and hyprland.lua loads
-# the .so only while hl.version() matches the hyprland-version file written beside it.
-HYPREXPO_HYPRLAND = "0.56.2"
-HYPREXPO = pkg(
-    "hyprexpo",
-    source = git(
-        "https://github.com/sandwichfarm/hyprexpo",
-        rev = "59bf4d378cecde9ed849e9c562306738b1583016",
-        image = TUMBLEWEED,
-        deps = [
-            "gcc-c++", "make", "pkgconf", "git-core", "hyprland-devel", "pkgconfig(pixman-1)", "pkgconfig(libdrm)",
-            "pkgconfig(pangocairo)", "pkgconfig(libinput)", "pkgconfig(libudev)", "pkgconfig(wayland-server)",
-            "pkgconfig(xkbcommon)", "pkgconfig(lua5.4)", "glslang-devel",
-        ],
-    ),
-    patches = glob("patches/hyprexpo-*.patch"),
-    build = sh('''set -e
-cd "$FSPEC_SRC"
-v="$(pkg-config --modversion hyprland)"
-[ "$v" = "%s" ] || { echo "hyprexpo is pinned to Hyprland %s, these headers are $v: bump the pin" >&2; exit 1; }
-make all
-install -Dm755 hyprexpo.so "$FSPEC_OUT/hyprexpo.so"
-printf '%%s\\n' "$v" > "$FSPEC_OUT/hyprland-version"
-''' % (HYPREXPO_HYPRLAND, HYPREXPO_HYPRLAND)),
 )
 
 STORE = [
@@ -102,7 +75,6 @@ STORE = [
         share = {"fonts/GeistMonoNerdFont": "."},
     ),
     FORMALSHELL,
-    HYPREXPO,
     # helium-wrapper sets LD_LIBRARY_PATH to its own directory.
     pkg(
         "helium",
