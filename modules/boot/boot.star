@@ -158,9 +158,9 @@ def formalos_boot(t, entries = []):
         ]),
         pkg("plymouth-plugin-script", source = zypper()),
         # plymouthd quits before greetd starts the session's compositor. Left alive (deactivated)
-        # it still held its framebuffer while Hyprland took the nvidia card over at login, and
-        # its exit seconds later left HDMI-A-1 scanning out with the monitor in standby
-        # (2026-10-31, g815). Tumbleweed's greetd.service waits for plymouth-quit-wait, which a
+        # it held its DRM fds while Hyprland took the nvidia card over at login, and its exit
+        # 1.5s later is the suspected trigger for HDMI-A-1 scanning out to a monitor in standby
+        # (2026-10-31, g815). `quit` returns on acknowledgement, `--wait` once the daemon is gone. Tumbleweed's greetd.service waits for plymouth-quit-wait, which a
         # drop-in cannot take back, so this is the package's unit without that.
         file("/etc/systemd/system/greetd.service", content = """[Unit]
 Description=Greeter daemon
@@ -173,6 +173,7 @@ Type=simple
 ExecStartPre=-/usr/bin/plymouth update --status=formalos-done
 ExecStartPre=-/usr/bin/sleep 0.15
 ExecStartPre=-/usr/bin/plymouth quit --retain-splash
+ExecStartPre=-/usr/bin/plymouth --wait
 ExecStart=greetd
 IgnoreSIGPIPE=no
 SendSIGHUP=yes
