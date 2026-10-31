@@ -157,10 +157,11 @@ def formalos_boot(t, entries = []):
             file("/etc/plymouth/plymouthd.conf", content = "[Daemon]\nTheme=%s\nShowDelay=0\nDeviceTimeout=8\n" % t["name"]),
         ]),
         pkg("plymouth-plugin-script", source = zypper()),
-        # The splash's finished frame stays on screen, plymouthd deactivated, until sway has drawn
-        # the same picture over it (formalos-boot's greeter-<s>.png); quitting earlier drops it.
-        # Tumbleweed's greetd.service waits for plymouth-quit-wait, which a drop-in cannot take
-        # back, so this is the package's unit without that.
+        # plymouthd quits before greetd starts the session's compositor. Left alive (deactivated)
+        # it still held its framebuffer while Hyprland took the nvidia card over at login, and
+        # its exit seconds later left HDMI-A-1 scanning out with the monitor in standby
+        # (2026-10-31, g815). Tumbleweed's greetd.service waits for plymouth-quit-wait, which a
+        # drop-in cannot take back, so this is the package's unit without that.
         file("/etc/systemd/system/greetd.service", content = """[Unit]
 Description=Greeter daemon
 After=systemd-user-sessions.service plymouth-start.service
@@ -171,7 +172,7 @@ Conflicts=getty@tty1.service
 Type=simple
 ExecStartPre=-/usr/bin/plymouth update --status=formalos-done
 ExecStartPre=-/usr/bin/sleep 0.15
-ExecStartPre=-/usr/bin/plymouth deactivate
+ExecStartPre=-/usr/bin/plymouth quit --retain-splash
 ExecStart=greetd
 IgnoreSIGPIPE=no
 SendSIGHUP=yes
@@ -189,7 +190,6 @@ Alias=display-manager.service
 After=display-manager.service
 
 [Service]
-ExecStartPre=-/usr/bin/sleep 3
 ExecStart=
 ExecStart=-/usr/bin/plymouth quit --retain-splash
 """),
