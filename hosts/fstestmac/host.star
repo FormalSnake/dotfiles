@@ -31,7 +31,7 @@ PACKAGES = [
     "pkgconfig(libpipewire-0.3)", "pkgconfig(libspa-0.2)", "pkgconfig(wayland-client)",
     "pkgconfig(xkbcommon)", "pkgconfig(fontconfig)", "pkgconfig(pam)", "pkgconfig(pam_misc)", "clang",
     # The hosts' keyring, for fs-auth's keyring and prompter probes.
-    "gnome-keyring", "secret-tool",
+    "gnome-keyring",
 ]
 
 # Tumbleweed carries wlrctl for x86_64 only.
