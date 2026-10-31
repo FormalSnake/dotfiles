@@ -73,6 +73,7 @@ local host = {
   opacity = 1.0,
   direct_scanout = 1,
   env = {},
+  xwayland_primary = nil,
 }
 do
   local ok, loaded = pcall(dofile, os.getenv("HOME") .. "/.config/hypr/host.lua")
@@ -379,6 +380,13 @@ if arriving then
   hl.on("hyprland.start", function()
     hl.env("FORMALSHELL_CURSOR_STARTED", "1")
     hl.env("XCURSOR_THEME", real_cursor_theme())
+  end)
+end
+-- XWayland lists the outputs in its own order with no primary, and Wine sizes fullscreen games
+-- to the first one, so a game on another output renders shifted. Xwayland is up shortly after start.
+if host.xwayland_primary then
+  hl.on("hyprland.start", function()
+    hl.exec_cmd("for i in $(seq 40); do xrandr --output " .. host.xwayland_primary .. " --primary 2>/dev/null && break; sleep 0.5; done")
   end)
 end
 hl.on("hyprland.start", function()

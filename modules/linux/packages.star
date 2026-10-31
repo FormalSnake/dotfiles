@@ -13,7 +13,7 @@ DESKTOP = [
     "gnome-keyring-pam", "hyprland-guiutils", "apparmor-abstractions", "gvfs", "tumbler", "nautilus",
     "qt6ct", "qt5ct", "dconf", "gsettings-backend-dconf", "glib2-tools", "adwaita-fonts",
     "google-noto-sans-symbols2-fonts", "google-noto-coloremoji-fonts", "google-noto-sans-cjk-fonts",
-    "liberation-fonts", "easyeffects", "pipewire-tools", "wvkbd", "dualsensectl", "flatpak",
+    "liberation-fonts", "easyeffects", "pipewire-tools", "wvkbd", "dualsensectl", "flatpak", "xrandr",
     "papers", "loupe", "gnome-text-editor", "celluloid",
     "patterns-kde-kde_plasma", "kscreen6", "kf6-kconfig",
 ]

@@ -14,6 +14,8 @@ return {
     { output = panel, mode = "2560x1600@240", position = "2560x0", scale = 1.25, vrr = 3 },
   },
   workspaces = workspaces,
+  -- Games go fullscreen on the HDMI monitor.
+  xwayland_primary = "HDMI-A-1",
   -- Slight transparency so the backdrop blur has something to show through (dGPU only).
   opacity = 0.96,
   -- Direct scanout on the NVIDIA driver marks a fullscreen Vulkan swapchain out of date about once
