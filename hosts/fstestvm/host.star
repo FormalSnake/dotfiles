@@ -36,6 +36,8 @@ PACKAGES = [
     "jetbrains-mono-fonts", "google-noto-coloremoji-fonts", "adwaita-icon-theme", "fontconfig",
     # g815's sans families, so sans-serif is not the mono face, and the legs' PIL.
     "adwaita-fonts", "liberation-fonts", "google-noto-sans-symbols2-fonts", "python313-Pillow",
+    # The hosts' keyring, started by the login's PAM session as on g815 and e1504g.
+    "gnome-keyring", "gnome-keyring-pam",
 ]
 
 # dev/smoke.d/lock.sh and dev/smoke-greeter.sh type "formalshell-test", the password the old
