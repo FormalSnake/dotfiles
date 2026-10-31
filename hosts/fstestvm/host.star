@@ -2,6 +2,7 @@ load("//lib/paths.star", "STORE")
 load("//lib/tree.star", "tree")
 load("//lib/units.star", "oneshot")
 load("//modules/boot/boot.star", "FORMALOS", "QUIET_ARGS", "formalos_boot")
+load("//modules/apps.star", "apps")
 load("//modules/linux/store.star", "FORMALSHELL", "HYPREXPO")
 
 # FormalShell's VM rig: two Tumbleweed guests on the g815 (`fspec vm start fstestvm0`), one per
@@ -147,7 +148,8 @@ fstestvm = [
         # A leg's session holds about 550 MB; four slots this size leave the g815's desktop its
         # memory, and KSM there merges what the four guests share.
         vm = vm("g815", port = 2222 + n, cpus = 4, memory_gib = 3, disk_gib = 40, authorized_keys = KEYS),
-        modules = [_fstestvm],
+        # `apps` is what lets --firefox-install's `fspec app install` write this host's entry.
+        modules = [_fstestvm, apps],
     )
     for n in range(4)
 ]
