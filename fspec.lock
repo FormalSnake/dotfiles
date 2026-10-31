@@ -414,8 +414,8 @@ build = "67889dec"
 
 [[pkg]]
 name = "formalshell"
-source = "git:https://github.com/FormalStudio/FormalShell@2f68e4dc5d9369a900d6e66f72e1e0e75ee34aa1"
-rev = "2f68e4dc5d9369a900d6e66f72e1e0e75ee34aa1"
+source = "git:https://github.com/FormalStudio/FormalShell@ff349dc7d2193e7c4063df74b39341fb19f27a66"
+rev = "ff349dc7d2193e7c4063df74b39341fb19f27a66"
 
 [[pkg]]
 name = "fspec"
