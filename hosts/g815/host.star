@@ -23,6 +23,8 @@ HOST_PACKAGES = [
     "xwayland-satellite", "cage",
     # UxPlay's runtime.
     "libdns_sd", "gstreamer-plugins-ugly",
+    # ntfsinfo and ntfsfix, for clear-ntfs-dirty.
+    "ntfsprogs",
 ]
 
 VM_PACKAGES = [
@@ -56,6 +58,8 @@ g815 = host(
         kernel_args = [
             "nvidia-drm.modeset=1", "acpi_backlight=native", "cfg80211.ieee80211_regdom=ES",
             "mitigations=off",
+            # Steam's HTTP threads trip split-lock traps, and each trap stalls the thread.
+            "split_lock_detect=off",
         ] + QUIET_ARGS,
     ),
     users = [user(USER, uid = 1000, shell = "fish", groups = GROUPS + ["gamemode", "libvirt"])] + rig_users(),
