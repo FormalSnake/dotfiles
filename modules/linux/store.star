@@ -53,6 +53,7 @@ HYPREXPO = pkg(
             "pkgconfig(xkbcommon)", "pkgconfig(lua5.4)", "glslang-devel",
         ],
     ),
+    patches = glob("patches/hyprexpo-*.patch"),
     build = sh('''set -e
 cd "$FSPEC_SRC"
 v="$(pkg-config --modversion hyprland)"

@@ -537,6 +537,7 @@ hash = "sha256-GKjcZfHC+khYhDRDVt6hz9kRxvBs9G+njhk/QIf026c="
 name = "hyprexpo"
 source = "git:https://github.com/sandwichfarm/hyprexpo@59bf4d378cecde9ed849e9c562306738b1583016"
 rev = "59bf4d378cecde9ed849e9c562306738b1583016"
+patches = "sha256-drTwUiSVCWJCgLu3V6/FaFq+6ihvjv3z9CwGpmHakdU="
 
 [[pkg]]
 name = "ideviceinstaller"
