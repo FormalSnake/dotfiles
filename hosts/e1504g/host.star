@@ -31,7 +31,10 @@ e1504g = host(
     name = "e1504g",
     platform = "x86_64-linux",
     system = tumbleweed(
-        packages = PACKAGES + ["systemd-experimental"],
+        # foot, strace and dbus-1-daemon: FormalShell's nested smoke run
+        # (dev/smoke.sh with a g815 build in FS_RESULT), what reads the
+        # shell's numbers on this machine's own GPU.
+        packages = PACKAGES + ["systemd-experimental", "foot", "strace", "dbus-1-daemon"],
         # The initrd loads both blacklisted modules before /etc/modprobe.d applies.
         kernel_args = [
             "mitigations=off", "intel_iommu=on", "module_blacklist=ucsi_acpi,intel_ish_ipc",
