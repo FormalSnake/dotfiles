@@ -25,6 +25,8 @@ PACKAGES = [
     "tesseract-ocr-traineddata-eng", "python313", "python313-gobject", "python313-evdev",
     "evolution-data-server", "jq", "just", "rsync", "strace", "socat", "xdg-utils",
     "jetbrains-mono-fonts", "google-noto-coloremoji-fonts", "adwaita-icon-theme", "fontconfig",
+    # g815's sans families, so sans-serif is not the mono face, and the legs' PIL.
+    "adwaita-fonts", "liberation-fonts", "google-noto-sans-symbols2-fonts", "python313-Pillow",
     # What dev.star's cargo build links and runs.
     "pkgconfig(libpipewire-0.3)", "pkgconfig(libspa-0.2)", "pkgconfig(wayland-client)",
     "pkgconfig(xkbcommon)", "pkgconfig(fontconfig)", "pkgconfig(pam)", "pkgconfig(pam_misc)", "clang",
