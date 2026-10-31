@@ -112,9 +112,10 @@ SERVICES = [service(s) for s in [
     timer("docker-prune", exec = "/usr/bin/docker system prune -f --all --filter until=72h", schedule = "0 0 * * *"),
     timer("fspec-gc", exec = "/usr/local/bin/fspec gc --older-than 14d", schedule = "30 0 * * *"),
     # fspec builds in root's and the user's rootless podman, each its own image store; every base
-    # image a build pulled stays there after its tag moves on.
+    # image a build pulled stays there after its tag moves on. A timer's name is its key across
+    # both scopes, so the user one needs its own.
     timer("podman-prune", exec = PODMAN_PRUNE, schedule = "15 0 * * *"),
-    timer("podman-prune", exec = PODMAN_PRUNE, schedule = "15 0 * * *", user = True),
+    timer("podman-prune-user", exec = PODMAN_PRUNE, schedule = "15 0 * * *", user = True),
 ]
 
 def swapfile():
