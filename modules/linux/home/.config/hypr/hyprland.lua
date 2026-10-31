@@ -278,6 +278,10 @@ hl.config({
   xwayland = {
     force_zero_scaling = true,
   },
+  -- Games played on a controller never hide the pointer Wine left on screen.
+  cursor = {
+    inactive_timeout = 3,
+  },
 })
 
 -- The DualSense touchpad lands in Hyprland's Mouse list, not the touchpad

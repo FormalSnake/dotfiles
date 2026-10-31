@@ -35,7 +35,7 @@ def _mangohud(fps):
         "show_fps_limit",
         "toggle_hud=Shift_R+F12",
         # early holds the frametime flat at the cost of a frame of latency.
-        "fps_limit=%d,120,60,0" % fps,
+        "fps_limit=%d,120,90,72,60,0" % fps,
         "fps_limit_method=early",
         "toggle_fps_limit=Shift_L+F1",
         "gpu_temp",
