@@ -9,9 +9,12 @@ return {
   -- vrr = 1 on HDMI-A-1 comes up black at boot: the link trains, EDID and ELD read fine, the CRTC
   -- goes active at 144, and no picture ever lands. 3 holds VRR off until a fullscreen game or
   -- video asks for it.
+  -- Hyprland lays XWayland's outputs out in connection order, so the panel (always first) is at
+  -- x 0 there. Starting HDMI at 2560 puts it at the same coordinates in both layouts, which is
+  -- what keeps fullscreen Wine games on it from sizing themselves to the panel.
   monitors = {
-    { output = "HDMI-A-1", mode = "2560x1440@144", position = "0x0", scale = 1.0, vrr = 3 },
-    { output = panel, mode = "2560x1600@240", position = "2560x0", scale = 1.25, vrr = 3 },
+    { output = "HDMI-A-1", mode = "2560x1440@144", position = "2560x0", scale = 1.0, vrr = 3 },
+    { output = panel, mode = "2560x1600@240", position = "5120x0", scale = 1.25, vrr = 3 },
   },
   workspaces = workspaces,
   -- Games go fullscreen on the HDMI monitor.
