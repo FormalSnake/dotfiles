@@ -412,17 +412,13 @@ build = "67889dec"
 
 [[pkg]]
 name = "formalshell"
-source = "git:https://github.com/FormalStudio/FormalShell@572cb30d9f8c7d73f4d745128814222a4b267dc8"
-rev = "572cb30d9f8c7d73f4d745128814222a4b267dc8"
+source = "git:https://github.com/FormalStudio/FormalShell@5e007e2ee629e23a9b8dd4c76f72741e9a18b829"
+rev = "5e007e2ee629e23a9b8dd4c76f72741e9a18b829"
 
 [[pkg]]
 name = "fspec"
 source = "git:https://github.com/FormalStudio/formalspec@main"
-rev = "88306050e7242a9ddc3c09b5af82f685c7141c63"
-
-[pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/fspec@sha256:277fb266a261a7528cc3514e6a4809996e3d0dda2f2bc81329c5362f8ade0d89"
-build = "0ddf50e8"
+rev = "83c8628c501bf64c0e1a7f78aae1e57deead62a3"
 
 [[pkg]]
 name = "fut"
