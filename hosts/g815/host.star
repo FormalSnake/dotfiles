@@ -11,16 +11,15 @@ load("//modules/linux/packages.star", "PACKAGES")
 load("//modules/linux/secrets.star", "linux_secrets")
 load("//modules/sync.star", "sync_items")
 load("//modules/tools.star", "tools")
-load("//hosts/g815/gaming.star", "GAMING")
+load("//modules/gaming/gaming.star", "GAMING_PACKAGES", "gaming")
+load("//hosts/g815/airplay.star", "AIRPLAY")
 load("//hosts/g815/hardware.star", "HARDWARE")
 load("//hosts/g815/rig.star", "RIG", "rig_users")
 load("//hosts/g815/windows.star", "VMS", "WINDOWS", "WINDOWS_BOOT")
 
 # The compiler, tester and GPU host: always on the charger, never asleep, dual-booting Windows.
 
-GAMING_PACKAGES = [
-    "steam", "gamemode", "gamescope", "mangohud", "heroic-games-launcher", "protontricks",
-    "gamescope-session-steam", "steam-devices", "prismlauncher", "java-21-openjdk",
+HOST_PACKAGES = [
     "xwayland-satellite", "cage",
     # UxPlay's runtime.
     "libdns_sd", "gstreamer-plugins-ugly",
@@ -53,7 +52,7 @@ g815 = host(
     name = "g815",
     platform = "x86_64-linux",
     system = tumbleweed(
-        packages = PACKAGES + GAMING_PACKAGES + VM_PACKAGES + DEV_PACKAGES + ["systemd-resolved"],
+        packages = PACKAGES + GAMING_PACKAGES + HOST_PACKAGES + VM_PACKAGES + DEV_PACKAGES + ["systemd-resolved"],
         kernel_args = [
             "nvidia-drm.modeset=1", "acpi_backlight=native", "cfg80211.ieee80211_regdom=ES",
             "mitigations=off",
@@ -64,7 +63,8 @@ g815 = host(
         # The 256 GB root counts as low under 45 GB.
         linux("g815", gaming = True, ports = PORTS, low_free_gb = 45),
         HARDWARE,
-        GAMING,
+        gaming(fps = 138),
+        AIRPLAY,
         WINDOWS,
         VMS,
         RIG,

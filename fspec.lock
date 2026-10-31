@@ -494,6 +494,14 @@ source = "brew"
 version = "0.24.0"
 
 [[pkg]]
+name = "gpu-screen-recorder"
+source = "flatpak:com.dec05eba.gpu_screen_recorder"
+version = "6.1.6"
+
+[pkg.any]
+commit = "ee2c756eb0536e5c1cd844720986c530be2139f16a64dfdb9760a85d110db389"
+
+[[pkg]]
 name = "gstreamer-runtime"
 source = "brew:cask"
 version = "1.28.6"
