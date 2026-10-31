@@ -1,0 +1,4 @@
+// openSUSE's 50-default.rules makes root the only admin identity and its admin rule always
+// answers, so a later polkit.addAdminRule never runs. Its groups list is the hook: a wheel member
+// authenticates as themselves. This file loads after it.
+polkit._suse_admin_groups = ["wheel"];
