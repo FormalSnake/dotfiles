@@ -1,0 +1,14 @@
+--- a/00-default/Games/launchers.rules
++++ b/00-default/Games/launchers.rules
+@@ -74,9 +74,8 @@
+ { "name": "QtWebEngineProcess.exe", "type": "BG_CPUIO" }
+ 
+ # Rules for Steam
+-# Steam client
+-{ "name": "steam", "type": "Launcher" }
+-{ "name": "steam.sh", "type": "Launcher" }
++# The Steam client stays at default priority: at nice 16 and idle I/O its UI stutters under any
++# load, and games it spawns inherit the nice value.
+ 
+ # Steam integrated web browser
+ { "name": "steamwebhelper", "type": "Doc-View" }

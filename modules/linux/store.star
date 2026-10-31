@@ -172,8 +172,14 @@ STORE = [
     ),
     pkg(
         "ananicy-rules",
-        source = url("https://github.com/CachyOS/ananicy-rules/archive/03ef03fbf7e834385377432ccecaedd32e3414bb.tar.gz"),
-        share = {"ananicy-rules/cachyos": "ananicy-rules-03ef03fbf7e834385377432ccecaedd32e3414bb"},
+        source = git(
+            "https://github.com/CachyOS/ananicy-rules",
+            rev = "03ef03fbf7e834385377432ccecaedd32e3414bb",
+            image = TUMBLEWEED,
+        ),
+        patches = ["patches/ananicy-rules-steam.patch"],
+        build = sh('mkdir -p "$FSPEC_OUT/rules" && cp -a "$FSPEC_SRC"/. "$FSPEC_OUT/rules/" && rm -rf "$FSPEC_OUT/rules/.git"'),
+        share = {"ananicy-rules/cachyos": "rules"},
     ),
     pkg(
         "steamed",

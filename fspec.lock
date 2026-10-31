@@ -49,11 +49,9 @@ build = "265747c3"
 
 [[pkg]]
 name = "ananicy-rules"
-source = "url:https://github.com/CachyOS/ananicy-rules/archive/03ef03fbf7e834385377432ccecaedd32e3414bb.tar.gz"
-
-[pkg.any]
-url = "https://github.com/CachyOS/ananicy-rules/archive/03ef03fbf7e834385377432ccecaedd32e3414bb.tar.gz"
-hash = "sha256-Yr9RvRfH9NMw8sb6el+OHE4SC4CUr0HofWgb5JA0Bv4="
+source = "git:https://github.com/CachyOS/ananicy-rules@03ef03fbf7e834385377432ccecaedd32e3414bb"
+rev = "03ef03fbf7e834385377432ccecaedd32e3414bb"
+patches = "sha256-FMlLfQnAuRjaLnqZPRnyk37Hcg05Wk1FZwvSi2bWXkI="
 
 [[pkg]]
 name = "ancs4linux"
