@@ -1,4 +1,5 @@
 load("//lib/tree.star", "tree")
+load("//lib/units.star", "oneshot")
 
 # Steam, launchers and frame pacing for a Linux gaming host. docs/gaming.md has the commands.
 
@@ -64,6 +65,18 @@ def gaming(fps):
         pkg("sober", source = flatpak("org.vinegarhq.Sober")),
         pkg("mangohud-vulkan-layer", source = flatpak("org.freedesktop.Platform.VulkanLayer.MangoHud/x86_64/25.08")),
         pkg("adwsteamgtk", source = flatpak("io.github.Foldex.AdwSteamGtk")),
+        oneshot("adwsteam-repatch", "/usr/local/libexec/adwsteam-repatch", "Reapply Adwaita-for-Steam", user = True, remain = False),
+        file("~/.config/systemd/user/adwsteam-repatch.path", content = """[Unit]
+Description=Reapply Adwaita-for-Steam after a Steam update
+
+[Path]
+PathChanged=%h/.local/share/Steam/steamui/css/library.css
+Unit=fspec-adwsteam-repatch.service
+
+[Install]
+WantedBy=default.target
+"""),
+        service("adwsteam-repatch.path", user = True),
         # NVENC capture with a replay buffer; Alt+Z opens its overlay.
         pkg("gpu-screen-recorder", source = flatpak("com.dec05eba.gpu_screen_recorder")),
         # Plasma is the gaming desktop: Steam opens with it.

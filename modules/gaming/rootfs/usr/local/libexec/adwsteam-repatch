@@ -1,0 +1,7 @@
+#!/bin/sh
+# Steam client updates restore the stock CSS that Adwaita-for-Steam patches. The installer's
+# own writes also trigger the path unit, so the header check is what stops the loop.
+css="$HOME/.local/share/Steam/steamui/css/library.css"
+[ -f "$css" ] || exit 0
+head -c 24 "$css" | grep -q 'Adwaita-for-Steam' && exit 0
+exec flatpak run io.github.Foldex.AdwSteamGtk --install
