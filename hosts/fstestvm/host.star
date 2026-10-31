@@ -34,6 +34,8 @@ PACKAGES = [
     "tesseract-ocr-traineddata-eng", "python313", "python313-gobject", "python313-evdev",
     "evolution-data-server", "podman", "jq", "just", "rsync", "strace", "socat", "v4l-utils", "xdg-utils",
     "jetbrains-mono-fonts", "google-noto-coloremoji-fonts", "adwaita-icon-theme", "fontconfig",
+    # g815's sans families, so sans-serif is not the mono face, and the legs' PIL.
+    "adwaita-fonts", "liberation-fonts", "google-noto-sans-symbols2-fonts", "python313-Pillow",
 ]
 
 # dev/smoke.d/lock.sh and dev/smoke-greeter.sh type "formalshell-test", the password the old
