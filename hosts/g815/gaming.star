@@ -28,6 +28,7 @@ GAMING = [
     pkg("epic-games-launcher-appimage", source = url("https://content-download-egs.distro.on.epicgames.com/Builds/EGLv2/0.95.2%2Bgfa9ad49/Linux/EpicGamesLauncher-x86_64.AppImage")),
     pkg("modrinth-app", version = "0.21.6", source = github("modrinth/code", asset = "Modrinth.App_*_amd64.AppImage")),
     pkg("sober", source = flatpak("org.vinegarhq.Sober")),
+    pkg("adwsteamgtk", source = flatpak("io.github.Foldex.AdwSteamGtk")),
     pkg("mangohud-vulkan-layer", source = flatpak("org.freedesktop.Platform.VulkanLayer.MangoHud/x86_64/25.08")),
     # Plasma is the gaming desktop: Steam opens with it.
     service(
