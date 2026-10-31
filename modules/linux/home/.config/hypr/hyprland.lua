@@ -278,10 +278,6 @@ hl.config({
   xwayland = {
     force_zero_scaling = true,
   },
-  -- Games played on a controller never hide the pointer Wine left on screen.
-  cursor = {
-    inactive_timeout = 3,
-  },
 })
 
 -- The DualSense touchpad lands in Hyprland's Mouse list, not the touchpad
@@ -608,6 +604,12 @@ hl.window_rule({ match = { class = "^(dev.formalsnake.formalmusic)$" }, workspac
 hl.window_rule({ match = { class = "^(org.vinegarhq.Sober)$" }, content = "game" })
 -- Nor do Proton games under XWayland, which Steam classes steam_app_<appid>.
 hl.window_rule({ match = { class = "^(steam_app_[0-9]+)$" }, content = "game" })
+-- Wine leaves the pointer on screen in a game played on a controller, so an idle pointer hides
+-- while a Steam game has focus, and only then.
+hl.on("window.active", function(w)
+  local game = w ~= nil and (w.class or ""):match("^steam_app_%d+$") ~= nil
+  hl.config({ cursor = { inactive_timeout = game and 3 or 0 } })
+end)
 -- YouTube Music web app (mixins/desktop/webapps.nix). Chromium names a shared-profile
 -- --app window after its URL and profile, not the launcher's --class.
 hl.window_rule({ match = { class = "^(chrome-music.youtube.com__-Default)$" }, workspace = "8" })
