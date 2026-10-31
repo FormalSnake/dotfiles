@@ -8,14 +8,15 @@ The setup lives in `modules/gaming/`. g815 loads it with `gaming(fps = 138)` in
 - DXVK and VKD3D cap every D3D game at 138 fps (`/etc/environment.d/80-gaming.conf`), under the
   VRR ceiling, so the panel stays in its VRR range instead of falling back to vsync.
 - `/etc/dxvk.conf` queues one frame instead of three, which cuts input latency.
-- MangoHud (`/etc/MangoHud.conf`) uses the early limiter, which holds frametime flat. It also
+- MangoHud (`~/.config/MangoHud/MangoHud.conf`, since games run in Steam's runtime container
+  and never see the host's `/etc`) uses the early limiter, which holds frametime flat. It also
   covers native Vulkan and OpenGL games, which the DXVK cap misses.
 - `PROTON_ENABLE_NVAPI=1` turns on DLSS and Reflex. If a game offers Reflex, use it and turn
   off the in-game frame cap.
 
 | Key | What it does |
 | --- | --- |
-| `Shift_R+F12` | Show or hide the MangoHud overlay |
+| `Shift_R+F12` | Hide or show the MangoHud strip (on by default, it shows the active cap) |
 | `Shift_L+F1` | Cycle the cap: 138, 120, 60, unlimited (the DXVK cap still holds 138) |
 | `Alt+Z` | GPU Screen Recorder overlay, replay buffer and clips |
 

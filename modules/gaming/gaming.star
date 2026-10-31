@@ -29,8 +29,10 @@ def _env(fps):
 
 def _mangohud(fps):
     return "\n".join([
-        # Hidden until Shift_R+F12; the limiter runs either way.
-        "no_display",
+        # A compact strip with the active cap; Shift_R+F12 hides it.
+        "horizontal",
+        "hud_compact",
+        "show_fps_limit",
         "toggle_hud=Shift_R+F12",
         # early holds the frametime flat at the cost of a frame of latency.
         "fps_limit=%d,120,60,0" % fps,
@@ -38,11 +40,8 @@ def _mangohud(fps):
         "toggle_fps_limit=Shift_L+F1",
         "gpu_temp",
         "cpu_temp",
-        "vram",
-        "ram",
         "frametime",
         "frame_timing",
-        "fps_metrics=avg,0.01",
         "position=top-left",
         "",
     ])
@@ -51,7 +50,8 @@ def gaming(fps):
     """`fps` is the cap, a few frames under the display's VRR ceiling."""
     return tree(["modules/gaming/rootfs/"]) + [
         file("/etc/environment.d/80-gaming.conf", content = _env(fps)),
-        file("/etc/MangoHud.conf", content = _mangohud(fps)),
+        # Games run in Steam's runtime container, which has its own /etc but sees the home.
+        file("~/.config/MangoHud/MangoHud.conf", content = _mangohud(fps)),
         pkg(
             "proton-ge",
             version = PROTON_GE,
