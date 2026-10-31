@@ -602,6 +602,8 @@ hl.window_rule({ match = { class = "^([Kk]opuz)$" }, workspace = "8" })
 hl.window_rule({ match = { class = "^(dev.formalsnake.formalmusic)$" }, workspace = "8" })
 -- Sober sends no content type, so vrr = 3 outputs never switch VRR on for it.
 hl.window_rule({ match = { class = "^(org.vinegarhq.Sober)$" }, content = "game" })
+-- Nor do Proton games under XWayland, which Steam classes steam_app_<appid>.
+hl.window_rule({ match = { class = "^(steam_app_[0-9]+)$" }, content = "game" })
 -- YouTube Music web app (mixins/desktop/webapps.nix). Chromium names a shared-profile
 -- --app window after its URL and profile, not the launcher's --class.
 hl.window_rule({ match = { class = "^(chrome-music.youtube.com__-Default)$" }, workspace = "8" })
