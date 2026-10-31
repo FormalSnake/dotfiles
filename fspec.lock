@@ -26,6 +26,14 @@ url = "https://github.com/lassekongo83/adw-gtk3/releases/download/v6.5/adw-gtk3v
 hash = "sha256-qBeA+t/EMr4Pw9icTrtBqijk8DLULDb5eJxX3RDPpBw="
 
 [[pkg]]
+name = "adwsteamgtk"
+source = "flatpak:io.github.Foldex.AdwSteamGtk"
+version = "0.9.0"
+
+[pkg.any]
+commit = "7c8c965963d53bc90fa607f55e384e1c42c87dd9daa7912899ce5215a883b191"
+
+[[pkg]]
 name = "aldente"
 source = "brew:cask"
 version = "1.40"
