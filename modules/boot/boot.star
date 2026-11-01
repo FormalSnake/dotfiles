@@ -164,17 +164,21 @@ def formalos_boot(t, entries = []):
         # launcher, ~1s of black on fstestvm, so each compositor a boot can start runs this
         # first: Hyprland from the top of its hyprland.lua, which it reads before opening the
         # card, and the greeter's sway from formalshell-session.sh. `quit` returns on
-        # acknowledgement, `--wait` once the daemon is gone.
+        # acknowledgement, `--wait` once the daemon is gone. One that never answers is killed:
+        # a compositor held back by a hung splash would be no desktop at all, and the fds have to
+        # close either way. plymouthd unlinks its pid file on exit, and the comm check keeps a
+        # stale file's pid, reused by something else, alive.
         file("/etc/systemd/system/formalos-splash-quit.service", content = """[Unit]
 Description=End the boot splash before a compositor takes the display
+ConditionPathExists=/run/plymouth/pid
 
 [Service]
 Type=oneshot
-ExecCondition=/usr/bin/plymouth --ping
-ExecStart=-/usr/bin/plymouth update --status=formalos-done
+ExecStart=-/usr/bin/timeout 2 /usr/bin/plymouth update --status=formalos-done
 ExecStart=-/usr/bin/sleep 0.15
-ExecStart=-/usr/bin/plymouth quit --retain-splash
-ExecStart=-/usr/bin/plymouth --wait
+ExecStart=-/usr/bin/timeout 5 /usr/bin/plymouth quit --retain-splash
+ExecStart=-/usr/bin/timeout 5 /usr/bin/plymouth --wait
+ExecStart=/bin/sh -c 'p=$$(cat /run/plymouth/pid 2>/dev/null) && [ "$$(cat /proc/$$p/comm 2>/dev/null)" = plymouthd ] || exit 0; kill -9 $$p; while [ -e /proc/$$p ]; do sleep 0.05; done'
 """),
         # Any account: the greeter's and the user manager's processes are in no logind session,
         # and all the unit does is end a splash a compositor is about to cover.
