@@ -32,7 +32,7 @@ RUNTIME = [
 SYSTEM = [
     # The minimal base ships these two, which conflict with tuned-ppd and with fish's gzip.
     "!power-profiles-daemon", "!busybox-gzip",
-    "syncthing", "docker", "tuned", "tuned-ppd", "sshfs", "usbmuxd",
+    "syncthing", "docker", "iputils", "iperf", "tuned", "tuned-ppd", "sshfs", "usbmuxd",
     "imobiledevice-tools", "ifuse", "smartmontools", "pam_ssh_agent_auth", "sof-firmware", "bluez",
     "chrony", "fwupd", "glibc-locale", "system-group-wheel", "system-group-hardware", "cnf",
     # A remote apply unpacks the spec with tar.
