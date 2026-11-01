@@ -32,6 +32,9 @@ PACKAGES = [
     "pkgconfig(xkbcommon)", "pkgconfig(fontconfig)", "pkgconfig(pam)", "pkgconfig(pam_misc)", "clang",
     # The hosts' keyring, for fs-auth's keyring and prompter probes.
     "gnome-keyring",
+    # --launcher-apps' third hicolor app icon beside mpv and foot; steam has
+    # no aarch64 build.
+    "celluloid",
 ]
 
 # Tumbleweed carries wlrctl for x86_64 only.
