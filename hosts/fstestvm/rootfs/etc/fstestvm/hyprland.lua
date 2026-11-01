@@ -8,6 +8,9 @@ if splash then
 end
 
 hl.monitor({ output = "", mode = "preferred", position = "0x0", scale = 1 })
+-- A new output's zoom from 2x stays off: at boot it runs over the lock's first frames, so the
+-- splash picture landed at twice the size plymouth drew it.
+hl.animation({ leaf = "monitorAdded", enabled = false })
 hl.config({
   -- A restarted shell takes back the lock its predecessor held, the locked login's included.
   misc = { disable_watchdog_warning = true, disable_hyprland_logo = true, force_default_wallpaper = 0, background_color = "rgb(000000)", allow_session_lock_restore = true },

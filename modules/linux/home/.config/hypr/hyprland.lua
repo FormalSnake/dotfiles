@@ -322,6 +322,9 @@ fsAnimation("fadeOut", "effectsFast")
 fsAnimation("border", "effectsSlow")
 fsAnimation("workspaces", "spatial", "slidevert")
 fsAnimation("specialWorkspace", "spatial", "slidevert")
+-- A new output's zoom from 2x stays off: at boot it runs over the lock's first
+-- frames, so the splash picture landed at twice the size plymouth drew it.
+hl.animation({ leaf = "monitorAdded", enabled = false })
 
 -- Trackpad gestures (niri's set, 1:1 under the fingers)
 -- Horizontal scrolls the tape, vertical walks workspaces: the same split
