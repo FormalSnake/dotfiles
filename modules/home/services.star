@@ -69,7 +69,6 @@ SERVICES = [
         RestartSec = 5,
     ),
     gui("dualsense-agents", BIN + "/dualsense-agents", "Mirror T3 Code agent state onto the DualSense lightbar", restart = "always", RestartSec = 30),
-    gui("dualsense-pad", BIN + "/dualsense-pad", "DualSense D-pad as a window and workspace remote", restart = "always", RestartSec = 5),
     timer("dualsense-battery", exec = BIN + "/dualsense-sync", schedule = "*/2 * * * *", user = True),
     gui("streamdeck-keys", BIN + "/streamdeck-keys", "Stream Deck keys for T3 Code agents, system and Discord controls", restart = "always", RestartSec = 5),
     # Without a delay it burns its start limit while the compositor goes away at logout.

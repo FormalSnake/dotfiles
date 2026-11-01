@@ -1,4 +1,4 @@
-# dualsense-pad drives a virtual pointer; the session user writes the lightbar LEDs.
+# uinput for the session user; the session user writes the lightbar LEDs.
 KERNEL=="uinput", SUBSYSTEM=="misc", GROUP="uinput", MODE="0660", OPTIONS+="static_node=uinput"
 ACTION=="add", SUBSYSTEM=="leds", DRIVERS=="playstation", RUN+="/usr/local/libexec/dualsense-led-perms /sys%p"
 SUBSYSTEM=="hidraw", ATTRS{idVendor}=="0fd9", TAG+="uaccess"
