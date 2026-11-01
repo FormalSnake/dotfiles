@@ -416,7 +416,7 @@ source = "git:https://github.com/FormalStudio/FormalShell@74fe7e1fa86196201a7d8c
 rev = "74fe7e1fa86196201a7d8cf0e65a4f488d012f49"
 
 [pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/formalshell@sha256:72252179039f0138e3e0ce0a89d94af89c380f2381da83d27a4350fc1f35c79c"
+oci = "ghcr.io/formalsnake/fspec-cache/formalshell@sha256:9c39b478dfa29d3903e856265dd3a6a1197e3acb2db48a985392e04165c09840"
 build = "b16650e6"
 
 [[pkg]]
