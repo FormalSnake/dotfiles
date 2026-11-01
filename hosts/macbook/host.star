@@ -60,9 +60,15 @@ SECRETS = secrets(
     service("secrets", exec = "/usr/local/bin/fspec secret install"),
 ]
 
+# Cloudflare over IPv4 only: IPv6 DNS times out on the network the macbook sits on.
+DNS = [
+    service("dns-" + s.lower().replace(" ", "-"), exec = "/usr/sbin/networksetup -setdnsservers '%s' 1.1.1.1 1.0.0.1" % s)
+    for s in ["Wi-Fi", "Display Ethernet"]
+]
+
 macbook = host(
     name = "macbook",
     platform = "aarch64-darwin",
     users = [user("kyandesutter", uid = 502, shell = "/opt/homebrew/bin/fish")],
-    modules = [fspec, tools, my_apps, BREW, STORE, home(linked = LINKED), HOME_FILES, fastfetch, ROOT_FILES, SECRETS, SYSTEM, SERVICES, storage_gc()],
+    modules = [fspec, tools, my_apps, BREW, STORE, home(linked = LINKED), HOME_FILES, fastfetch, ROOT_FILES, SECRETS, DNS, SYSTEM, SERVICES, storage_gc()],
 )
