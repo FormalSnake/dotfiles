@@ -1,3 +1,12 @@
+-- The boot splash ends here, before Hyprland opens the card: this file runs ahead of the DRM
+-- backend, and plymouthd alive under the first modeset left g815's HDMI-A-1 dark. Ended any
+-- earlier, the splash is gone through uwsm and start-hyprland too. A reload finds no pid file.
+local splash = io.open("/run/plymouth/pid")
+if splash then
+  splash:close()
+  os.execute("systemctl start formalos-splash-quit.service")
+end
+
 -- Window colours
 -- FormalShell's ThemeEngine renders the live wallpaper palette to
 -- ~/.config/hypr/formalshell-colors.lua on every wallpaper and mode change

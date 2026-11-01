@@ -160,10 +160,11 @@ def formalos_boot(t, entries = []):
         # plymouthd is gone before a compositor opens the card. Left alive (deactivated) it held
         # its DRM fds while Hyprland took the nvidia card over at login, and its exit 1.5s later
         # is the suspected trigger for HDMI-A-1 scanning out to a monitor in standby (2026-10-31,
-        # g815). Quit as greetd started, the splash went before greetd, PAM and uwsm, ~650ms of
-        # black on fstestvm, so each compositor a boot can start runs this first: uwsm's
-        # Hyprland (the user drop-in below) and the greeter's sway (formalshell-session.sh).
-        # `quit` returns on acknowledgement, `--wait` once the daemon is gone.
+        # g815). Quit as greetd started, the splash went before greetd, PAM, uwsm and Hyprland's
+        # launcher, ~1s of black on fstestvm, so each compositor a boot can start runs this
+        # first: Hyprland from the top of its hyprland.lua, which it reads before opening the
+        # card, and the greeter's sway from formalshell-session.sh. `quit` returns on
+        # acknowledgement, `--wait` once the daemon is gone.
         file("/etc/systemd/system/formalos-splash-quit.service", content = """[Unit]
 Description=End the boot splash before a compositor takes the display
 
@@ -174,9 +175,6 @@ ExecStart=-/usr/bin/plymouth update --status=formalos-done
 ExecStart=-/usr/bin/sleep 0.15
 ExecStart=-/usr/bin/plymouth quit --retain-splash
 ExecStart=-/usr/bin/plymouth --wait
-"""),
-        file("/etc/systemd/user/wayland-wm@hyprland.desktop.service.d/formalos-splash.conf", content = """[Service]
-ExecStartPre=-/usr/bin/systemctl start formalos-splash-quit.service
 """),
         # Any account: the greeter's and the user manager's processes are in no logind session,
         # and all the unit does is end a splash a compositor is about to cover.
