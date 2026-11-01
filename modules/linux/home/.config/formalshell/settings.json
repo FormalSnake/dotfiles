@@ -48,9 +48,6 @@
     "appleMusicArt": true,
     "visualizerStyle": "redsector"
   },
-  "menu": {
-    "appGrid": true
-  },
   "motion": {
     "morph": false
   },
