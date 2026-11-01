@@ -3,6 +3,8 @@ Description=Automount the USB SSD's Steam library
 
 [Automount]
 Where=/mnt/steamlib
+# ntfs3 holds the volume dirty while mounted, so an unplug only does damage while it is mounted.
+TimeoutIdleSec=2min
 
 [Install]
 WantedBy=local-fs.target

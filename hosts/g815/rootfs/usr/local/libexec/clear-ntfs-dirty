@@ -18,8 +18,13 @@ flags=$(ntfsinfo -f -m "$dev" 2>/dev/null | awk '/Volume Flags:/ { print $3 }') 
 [ $(( flags & 1 )) -eq 1 ] || exit 0
 
 if ! ntfsfix -n "$dev" >/dev/null 2>&1; then
-  echo "$dev is dirty and the ntfsfix check pass failed: leaving it, run chkdsk from Windows" >&2
-  exit 0
+  # A USB disk pulled mid-write leaves $MFTMirr behind $MFT, which ntfsfix repairs. The internal
+  # volumes are Windows's own, so their damage waits for chkdsk.
+  if [ "$(lsblk -dno HOTPLUG "$dev")" != 1 ]; then
+    echo "$dev is dirty and the ntfsfix check pass failed: leaving it, run chkdsk from Windows" >&2
+    exit 0
+  fi
+  echo "$dev is a removable volume left inconsistent, repairing it with ntfsfix"
 fi
 echo "$dev carries a stale dirty flag, clearing it"
 ntfsfix -d "$dev" || echo "ntfsfix -d failed, the mount will refuse the volume" >&2

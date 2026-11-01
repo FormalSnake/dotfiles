@@ -3,8 +3,11 @@ Description=Clear a stale NTFS dirty flag on volume %i
 DefaultDependencies=false
 Before=shutdown.target
 Conflicts=shutdown.target
+# Once per plug: an automount retriggers the check on every access and hits the start limit.
+BindsTo=dev-disk-by\x2duuid-%i.device
 After=dev-disk-by\x2duuid-%i.device
 
 [Service]
 Type=oneshot
+RemainAfterExit=yes
 ExecStart=/usr/local/libexec/clear-ntfs-dirty /dev/disk/by-uuid/%i
