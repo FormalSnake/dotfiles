@@ -1,7 +1,8 @@
-// The VM has no seat a polkit session could be active on, so NetworkManager's own allow_active
-// rules never apply.
+// The VM has no seat a polkit session could be active on, so NetworkManager's and
+// power-profiles-daemon's own allow_active rules never apply.
 polkit.addRule(function(action, subject) {
   if (action.id.indexOf("org.freedesktop.NetworkManager.") === 0) return polkit.Result.YES;
+  if (action.id === "org.freedesktop.UPower.PowerProfiles.switch-profile") return polkit.Result.YES;
 });
 
 // openSUSE's 50-default.rules makes root the only admin unless its groups list says otherwise, and
