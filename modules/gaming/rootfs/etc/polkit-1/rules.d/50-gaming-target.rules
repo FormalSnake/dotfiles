@@ -1,0 +1,8 @@
+// gamemoded runs its start and end hooks from the user manager, outside any logind session.
+polkit.addRule(function(action, subject) {
+  if (action.id == "org.freedesktop.systemd1.manage-units" &&
+      action.lookup("unit") == "gaming.target" &&
+      subject.isInGroup("gamemode")) {
+    return polkit.Result.YES;
+  }
+});

@@ -43,6 +43,16 @@ RIG = [
                " ".join(["/home/%s/%s" % (u, d) for u in RIG_USERS for d in [".rustup", ".cargo/registry"]]),
         schedule = "20 */4 * * *",
     ),
+    # sched_ext ignores CPUWeight, so while a game runs the slots' builds would take every core.
+    # gamemode raises gaming.target and the slots keep four E-cores until it drops.
+    oneshot(
+        "formalshell-rig-yield",
+        LIBEXEC + "/formalshell-rig-yield 20-23",
+        "Hold the FormalShell rig slots to four E-cores while a game runs",
+        unit = {"PartOf": "gaming.target"},
+        install = {"WantedBy": "gaming.target"},
+        ExecStop = LIBEXEC + "/formalshell-rig-yield",
+    ),
     oneshot("formalshell-rig-passwords", LIBEXEC + "/formalshell-rig-passwords", "Set the FormalShell rig users' lock-screen password"),
     # The fstestvm slots boot the same system; KSM shares the pages they hold alike.
     oneshot("ksm", "/bin/sh -c 'echo 1 > /sys/kernel/mm/ksm/run'", "Merge the identical pages of the fstestvm guests"),

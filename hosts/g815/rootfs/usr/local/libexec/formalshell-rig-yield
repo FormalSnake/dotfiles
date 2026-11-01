@@ -1,0 +1,6 @@
+#!/bin/bash
+# Pins every rig slot's slice to the CPU list in $1, or back to all CPUs without it.
+# A slot with no running user manager has no slice loaded; skip it.
+for uid in $(seq 1001 1008); do
+  systemctl set-property --runtime "user-$uid.slice" "AllowedCPUs=${1:-}" 2>/dev/null || true
+done
