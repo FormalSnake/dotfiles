@@ -8,7 +8,11 @@ load("//modules/home/kde.star", "hide_app")
 # The uids are pinned for the slice drop-ins below; dev/remote.sh's FS_G815_SLOTS matches the count.
 RIG_USERS = ["fstest%d" % n for n in range(8)]
 RIG_UID = 1001
-RIG_KEY = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJi88WllIdjMaW5UJYbT7+NRYzSCrnKKYjGR7wL4n4io macbook"
+# The mac and g815 itself both start rig runs (dev/remote.sh).
+RIG_KEYS = [
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJi88WllIdjMaW5UJYbT7+NRYzSCrnKKYjGR7wL4n4io macbook",
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGxYo1mVlFzYfDSiHH4nWXYs+ZFz29vYlkRkWxQKxMFv kyandesutter@g815",
+]
 
 # The rig's legs drive foot windows; the desktop terminal is Ghostty, so foot stays out of the launcher.
 RIG = [
@@ -62,7 +66,7 @@ RIG = [
     for u in RIG_USERS
     for f in [
         file("/var/lib/systemd/linger/" + u, content = ""),
-        file("/etc/ssh/authorized_keys.d/" + u, content = RIG_KEY + "\n"),
+        file("/etc/ssh/authorized_keys.d/" + u, content = "\n".join(RIG_KEYS) + "\n"),
     ]
 ] + [
     # A slot's builds and sessions yield to the desktop when the two compete; idle, nothing changes.
