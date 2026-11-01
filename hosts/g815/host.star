@@ -41,6 +41,10 @@ DEV_PACKAGES = [
     "hostapd", "dbus-1-daemon", "pkgconfig(libpipewire-0.3)", "pkgconfig(libspa-0.2)",
     "pkgconfig(wayland-client)", "pkgconfig(xkbcommon)", "pkgconfig(fontconfig)", "pkgconfig(pam)",
     "pkgconfig(pam_misc)", "clang", "duperemove",
+    # NativeDesktop apps (trove, messages, formalmusic): GPUI's link and dlopen set, dev.star's LIBS.
+    "pkgconfig(xcb)", "pkgconfig(xkbcommon-x11)", "pkgconfig(wayland-protocols)", "pkgconfig(vulkan)",
+    "pkgconfig(x11)", "pkgconfig(xcursor)", "pkgconfig(xi)", "pkgconfig(xrandr)", "pkgconfig(egl)",
+    "pkgconfig(alsa)", "pkgconfig(libnotify)",
 ]
 
 # Steam Remote Play and transfers, NordVPN's OpenVPN and meshnet.
