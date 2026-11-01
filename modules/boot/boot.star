@@ -157,11 +157,39 @@ def formalos_boot(t, entries = []):
             file("/etc/plymouth/plymouthd.conf", content = "[Daemon]\nTheme=%s\nShowDelay=0\nDeviceTimeout=8\n" % t["name"]),
         ]),
         pkg("plymouth-plugin-script", source = zypper()),
-        # plymouthd quits before greetd starts the session's compositor. Left alive (deactivated)
-        # it held its DRM fds while Hyprland took the nvidia card over at login, and its exit
-        # 1.5s later is the suspected trigger for HDMI-A-1 scanning out to a monitor in standby
-        # (2026-10-31, g815). `quit` returns on acknowledgement, `--wait` once the daemon is gone. Tumbleweed's greetd.service waits for plymouth-quit-wait, which a
-        # drop-in cannot take back, so this is the package's unit without that.
+        # plymouthd is gone before a compositor opens the card. Left alive (deactivated) it held
+        # its DRM fds while Hyprland took the nvidia card over at login, and its exit 1.5s later
+        # is the suspected trigger for HDMI-A-1 scanning out to a monitor in standby (2026-10-31,
+        # g815). Quit as greetd started, the splash went before greetd, PAM and uwsm, ~650ms of
+        # black on fstestvm, so each compositor a boot can start runs this first: uwsm's
+        # Hyprland (the user drop-in below) and the greeter's sway (formalshell-session.sh).
+        # `quit` returns on acknowledgement, `--wait` once the daemon is gone.
+        file("/etc/systemd/system/formalos-splash-quit.service", content = """[Unit]
+Description=End the boot splash before a compositor takes the display
+
+[Service]
+Type=oneshot
+ExecCondition=/usr/bin/plymouth --ping
+ExecStart=-/usr/bin/plymouth update --status=formalos-done
+ExecStart=-/usr/bin/sleep 0.15
+ExecStart=-/usr/bin/plymouth quit --retain-splash
+ExecStart=-/usr/bin/plymouth --wait
+"""),
+        file("/etc/systemd/user/wayland-wm@hyprland.desktop.service.d/formalos-splash.conf", content = """[Service]
+ExecStartPre=-/usr/bin/systemctl start formalos-splash-quit.service
+"""),
+        # Any account: the greeter's and the user manager's processes are in no logind session,
+        # and all the unit does is end a splash a compositor is about to cover.
+        file("/etc/polkit-1/rules.d/50-formalos-splash-quit.rules", content = """polkit.addRule(function(action, subject) {
+  if (action.id == "org.freedesktop.systemd1.manage-units" &&
+      action.lookup("unit") == "formalos-splash-quit.service" &&
+      action.lookup("verb") == "start") {
+    return polkit.Result.YES;
+  }
+});
+"""),
+        # Tumbleweed's greetd.service waits for plymouth-quit-wait, which a drop-in cannot take
+        # back, so this is the package's unit without that.
         file("/etc/systemd/system/greetd.service", content = """[Unit]
 Description=Greeter daemon
 After=systemd-user-sessions.service plymouth-start.service
@@ -170,10 +198,6 @@ Conflicts=getty@tty1.service
 
 [Service]
 Type=simple
-ExecStartPre=-/usr/bin/plymouth update --status=formalos-done
-ExecStartPre=-/usr/bin/sleep 0.15
-ExecStartPre=-/usr/bin/plymouth quit --retain-splash
-ExecStartPre=-/usr/bin/plymouth --wait
 ExecStart=greetd
 IgnoreSIGPIPE=no
 SendSIGHUP=yes
@@ -187,12 +211,15 @@ StartLimitInterval=30
 [Install]
 Alias=display-manager.service
 """),
+        # The session quits the splash; this only ends one no compositor came to cover.
         file("/etc/systemd/system/plymouth-quit.service.d/formalos-splash.conf", content = """[Unit]
 After=display-manager.service
 
 [Service]
 ExecStart=
+ExecStart=-/usr/bin/timeout 30 /usr/bin/plymouth --wait
 ExecStart=-/usr/bin/plymouth quit --retain-splash
+TimeoutStartSec=45
 """),
         pkg("plymouth-dracut", source = zypper()),
         # fspec-esp-sync writes this header to the ESP with a Kernels submenu under it.

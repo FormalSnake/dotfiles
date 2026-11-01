@@ -33,6 +33,9 @@ export XCURSOR_PATH=$HOME/icons:/usr/share/icons
 printf 'output * bg %s\nseat * xcursor_theme formalos-blank 24\nseat * hide_cursor 3000\ninput type:keyboard {\n  xkb_layout es\n  xkb_options caps:escape\n}\n' "$bg" > "$HOME/sway.conf"
 # A compositor killed with greetd leaves its socket; the wait below would take it.
 rm -f "$XDG_RUNTIME_DIR"/wayland-*
+# A greeter at boot (no initial_session ran) ends the splash itself; plymouthd is gone before sway
+# opens the card (boot.star).
+systemctl start formalos-splash-quit.service
 sway --config "$HOME/sway.conf" &
 compositor=$!
 for _ in $(seq 100); do
