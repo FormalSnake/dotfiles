@@ -1,9 +1,8 @@
+load("//artcraft.star", "ARTCRAFT")
 load("//modules/linux/store.star", "sh")
 
-# ArtCraft's Craft apps (getartcraft.com), from each app's GitHub release rather than the ArtCraft
-# Launcher. Its flatpak remote serves from private ghcr packages, so anonymous installs get a 401.
-# The office suite (WordCraft, GridCraft, DeckCraft) and PdfCraft.
-CRAFTS = ["wordcraft", "gridcraft", "deckcraft", "pdfcraft"]
+# From each app's GitHub release rather than the ArtCraft Launcher. Its flatpak remote serves
+# from private ghcr packages, so anonymous installs get a 401.
 
 # The tarball is a prefix inside a versioned top directory; lifting it keeps the share paths fixed.
 LIFT = 'cp -a "$FSPEC_SRC"/*/. "$FSPEC_OUT/"'
@@ -20,4 +19,4 @@ def _craft(name):
     )
 
 def artcraft(host):
-    return [_craft(n) for n in CRAFTS] if host.platform.is_linux else []
+    return [_craft(n) for n, on in ARTCRAFT.items() if on] if host.platform.is_linux else []
