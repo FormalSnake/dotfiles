@@ -9,13 +9,13 @@ for i = 1, 9 do
 end
 return {
   -- vrr = 1 on the ASUS over HDMI-A-1 came up black at boot: the link trains, EDID and ELD read fine, the CRTC
-  -- goes active at 144, and no picture ever lands. 3 holds VRR off until a fullscreen game or
-  -- video asks for it.
+  -- goes active at 144, and no picture ever lands. 2 holds VRR off until a window goes fullscreen:
+  -- 3 waits for a game or video content type, which Proton games and Sober never send.
   -- Hyprland lays XWayland's outputs out in connection order, so the panel (always first) is at
   -- x 0 there. Starting the ASUS at 2560 puts it at the same coordinates in both layouts, which is
   -- what keeps fullscreen Wine games on it from sizing themselves to the panel.
   monitors = {
-    { output = desk, mode = "2560x1440@144", position = "2560x0", scale = 1.0, vrr = 3 },
+    { output = desk, mode = "2560x1440@144", position = "2560x0", scale = 1.0, vrr = 2 },
     { output = panel, mode = "2560x1600@240", position = "5120x0", scale = 1.25, vrr = 3 },
   },
   workspaces = workspaces,
