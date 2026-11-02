@@ -3,6 +3,7 @@ load("//modules/boot/boot.star", "QUIET_ARGS", "boot")
 load("//modules/fastfetch/fastfetch.star", "fastfetch")
 load("//modules/fspec.star", "fspec")
 load("//modules/apps.star", "apps")
+load("//modules/artcraft.star", "artcraft")
 load("//modules/my_apps.star", "my_apps")
 load("//modules/home/home.star", "home")
 load("//modules/linux/base.star", "GROUPS", "firewall", "swapfile")
@@ -82,6 +83,7 @@ g815 = host(
         home(),
         tools,
         my_apps,
+        artcraft,
         apps,
         fspec,
         fastfetch,
