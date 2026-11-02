@@ -1,0 +1,4 @@
+# FormalDisk and SteamLib mount through mnt-formaldisk.automount and mnt-steamlib.automount.
+device_config:
+- id_uuid: [6E76-D733, 7ED4F163D4F11E59]
+  ignore: true

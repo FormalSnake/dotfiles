@@ -26,6 +26,9 @@ SERVICES = [
     autostart("beeper", STORE + "/beeper", "Beeper", needs = STORE + "/beeper"),
     autostart("flare", "/usr/bin/flatpak run de.schmidhuberj.Flare", "Flare (Signal)"),
     autostart("messages", STORE + "/messages", "Messages", needs = STORE + "/messages"),
+    # Mounts any drive plugged in under /run/media. A host's ~/.config/udiskie/config.yml skips the
+    # volumes it mounts with units of its own.
+    gui("udiskie", "/usr/bin/udiskie --automount --no-tray", "udiskie (automount removable drives)", restart = "on_failure", needs = "/usr/bin/udiskie"),
     gui("1password", "/usr/bin/1password --silent", "1Password (tray)", restart = "on_failure", needs = "/usr/bin/1password", RestartSec = 2),
     gui(
         "wl-clip-persist",
