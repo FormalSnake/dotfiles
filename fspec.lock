@@ -135,15 +135,6 @@ source = "brew"
 version = "1.4.4"
 
 [[pkg]]
-name = "cadcraft"
-source = "github:storytold/cadcraft"
-version = "0.16.0"
-
-[pkg.x86_64-linux]
-url = "https://github.com/storytold/cadcraft/releases/download/v0.16.0/cadcraft-0.16.0-linux-x86_64.tar.gz"
-hash = "sha256-FJggs9Dh5ymiJW40RSO5gFhx057jnJ4IX1B3B/c8y9Q="
-
-[[pkg]]
 name = "chafa"
 source = "brew"
 version = "1.18.3"
@@ -228,15 +219,6 @@ hash = "sha256-6Gx/oOy1XxpVPuQluT3P3IBrezeY8nK0Hx0f90rFwSo="
 name = "deno"
 source = "brew"
 version = "2.9.8"
-
-[[pkg]]
-name = "designcraft"
-source = "github:storytold/designcraft"
-version = "0.16.0"
-
-[pkg.x86_64-linux]
-url = "https://github.com/storytold/designcraft/releases/download/v0.16.0/designcraft-0.16.0-linux-x86_64.tar.gz"
-hash = "sha256-pIb8Q83I8kXtr3N8uxyaMoYO4YqNyhuv4IERAU4vFXY="
 
 [[pkg]]
 name = "dipc"
@@ -337,15 +319,6 @@ source = "brew"
 version = "0.15.0"
 
 [[pkg]]
-name = "effectcraft"
-source = "github:storytold/effectcraft"
-version = "0.20.0"
-
-[pkg.x86_64-linux]
-url = "https://github.com/storytold/effectcraft/releases/download/v0.20.0/effectcraft-0.20.0-linux-x86_64.tar.gz"
-hash = "sha256-JXMQCgos4HppJXvaf6an1SUtO00y3+86H20slby42iM="
-
-[[pkg]]
 name = "efibootmgr"
 source = "zypper:"
 
@@ -401,24 +374,6 @@ build = "b3e44545"
 name = "ffmpeg"
 source = "brew"
 version = "9.0.2"
-
-[[pkg]]
-name = "figcraft"
-source = "github:storytold/figcraft"
-version = "0.14.0"
-
-[pkg.x86_64-linux]
-url = "https://github.com/storytold/figcraft/releases/download/v0.14.0/figcraft-0.14.0-linux-x86_64.tar.gz"
-hash = "sha256-DqSJzimSOK+WEGlAzdtCCRw+uhCcBf34Q7Tn+OuXCCk="
-
-[[pkg]]
-name = "filmcraft"
-source = "github:storytold/filmcraft"
-version = "0.16.0"
-
-[pkg.x86_64-linux]
-url = "https://github.com/storytold/filmcraft/releases/download/v0.16.0/filmcraft-0.16.0-linux-x86_64.tar.gz"
-hash = "sha256-WIOQ7uXX4WNPBXlMT4d93ylJTZz3RAURHWfBbL4hWuk="
 
 [[pkg]]
 name = "fish"
@@ -682,15 +637,6 @@ oci = "ghcr.io/formalsnake/fspec-cache/librepods@sha256:a936269ce24cb44d2550c62f
 build = "0b5d3e53"
 
 [[pkg]]
-name = "lightcraft"
-source = "github:storytold/lightcraft"
-version = "0.17.0"
-
-[pkg.x86_64-linux]
-url = "https://github.com/storytold/lightcraft/releases/download/v0.17.0/lightcraft-0.17.0-linux-x86_64.tar.gz"
-hash = "sha256-0Yf1oVktSGYiDE0SfW5aPaT/p8lmzIffj0nnNcB88sE="
-
-[[pkg]]
 name = "lima"
 source = "brew"
 version = "2.2.1"
@@ -946,15 +892,6 @@ url = "https://github.com/storytold/pdfcraft/releases/download/v0.17.0/pdfcraft-
 hash = "sha256-+YFKegr3e5Ba26HDB5yu3uU3WGeXBDz1r5UDkU9qvsU="
 
 [[pkg]]
-name = "photocraft"
-source = "github:storytold/photocraft"
-version = "0.19.0"
-
-[pkg.x86_64-linux]
-url = "https://github.com/storytold/photocraft/releases/download/v0.19.0/photocraft-0.19.0-linux-x86_64.tar.gz"
-hash = "sha256-EjOFsXMKzhjxK8D0lGBuakzT9KuJH5MDbNTnG4rqcPc="
-
-[[pkg]]
 name = "pi"
 source = "github:badlogic/pi-mono"
 version = "1.1.0"
@@ -1043,15 +980,6 @@ version = "1.8.0"
 
 [pkg.any]
 commit = "7b6430c703e8178baa536062099fc5a1e0c7cf213c0789695fa7660b62cb9d26"
-
-[[pkg]]
-name = "soundcraft"
-source = "github:storytold/soundcraft"
-version = "0.16.0"
-
-[pkg.x86_64-linux]
-url = "https://github.com/storytold/soundcraft/releases/download/v0.16.0/soundcraft-0.16.0-linux-x86_64.tar.gz"
-hash = "sha256-Jcawy4kkGY8i46bydx19zJ4EGjJEpL5EXL3p0A59wZ4="
 
 [[pkg]]
 name = "steamed"
@@ -1152,15 +1080,6 @@ source = "brew"
 version = "3.1.0"
 
 [[pkg]]
-name = "texturecraft"
-source = "github:storytold/texturecraft"
-version = "0.2.0"
-
-[pkg.x86_64-linux]
-url = "https://github.com/storytold/texturecraft/releases/download/v0.2.0/texturecraft-0.2.0-linux-x86_64.tar.gz"
-hash = "sha256-mRkGixPYgNUS1qmVQzRGyfzLPgtEf9zix3FuE5PXz7I="
-
-[[pkg]]
 name = "the-unarchiver"
 source = "brew:cask"
 version = "4.3.9,147,1742287964"
@@ -1245,15 +1164,6 @@ rev = "df67c212a433cf6dda3676dd40c097900d24e645"
 [pkg.x86_64-linux]
 oci = "ghcr.io/formalsnake/fspec-cache/uxplay@sha256:253caa6997a06e820905a5d066830b9099c9dd0bef39110dfc5fc4317ea952ea"
 build = "51a3c855"
-
-[[pkg]]
-name = "vectorcraft"
-source = "github:storytold/vectorcraft"
-version = "0.20.0"
-
-[pkg.x86_64-linux]
-url = "https://github.com/storytold/vectorcraft/releases/download/v0.20.0/vectorcraft-0.20.0-linux-x86_64.tar.gz"
-hash = "sha256-042D2eWf3PehAEFOIrMJQJT+T+LdQ6EF8EKXgBJhDoY="
 
 [[pkg]]
 name = "vscode-langservers-extracted"
