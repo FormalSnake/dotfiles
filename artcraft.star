@@ -5,6 +5,7 @@ ARTCRAFT = {
     "gridcraft": True,
     "deckcraft": True,
     "pdfcraft": True,
+    "craft-anything": True,
     "photocraft": False,
     "vectorcraft": False,
     "filmcraft": False,

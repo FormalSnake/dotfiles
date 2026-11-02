@@ -207,6 +207,15 @@ source = "brew"
 version = "3.5.3"
 
 [[pkg]]
+name = "craft-anything"
+source = "github:storytold/craft-anything"
+version = "0.2.0"
+
+[pkg.x86_64-linux]
+url = "https://github.com/storytold/craft-anything/releases/download/v0.2.0/craft-anything-0.2.0-linux-x86_64.tar.gz"
+hash = "sha256-qmcMFmtTJl03pk7FRM98q+z5k4AsJ8RzN0b3sWwSyyE="
+
+[[pkg]]
 name = "deckcraft"
 source = "github:storytold/deckcraft"
 version = "0.14.1"
