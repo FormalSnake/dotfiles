@@ -395,11 +395,14 @@ if arriving then
   end)
 end
 -- XWayland lists the outputs in its own order with no primary, and Wine sizes fullscreen games
--- to the first one, so a game on another output renders shifted. Xwayland is up shortly after start.
+-- to the first one, so a game on another output renders shifted. Xwayland is up shortly after start,
+-- and a monitor plugged in later (g815's USB-C DisplayPort) is set again as it arrives.
 if host.xwayland_primary then
-  hl.on("hyprland.start", function()
+  local function set_primary()
     hl.exec_cmd("for i in $(seq 40); do xrandr --output " .. host.xwayland_primary .. " --primary 2>/dev/null && break; sleep 0.5; done")
-  end)
+  end
+  hl.on("hyprland.start", set_primary)
+  hl.on("monitor.added", set_primary)
 end
 hl.on("hyprland.start", function()
   hl.exec_cmd([==[sleep 10 && mkdir -p "$XDG_RUNTIME_DIR/formalshell" && touch "$XDG_RUNTIME_DIR/formalshell/arrived-$HYPRLAND_INSTANCE_SIGNATURE" && hyprctl eval 'formalshell_arrived()']==])
