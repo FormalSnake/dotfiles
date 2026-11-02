@@ -4,12 +4,6 @@ set -e
 # The effect, colour and brightness are asusd's to keep across reboots (FormalShell's
 # lights service sets them); nothing here sets them again.
 /opt/fspec/current/bin/asusctl battery limit 80 || true
-# Kill the red breathing "slash" pulse the Aura zones run while the
-# laptop is suspended. The power-state flags are all-or-nothing: any
-# flag omitted is set false. So re-assert boot/awake/shutdown and drop
-# --sleep for every zone. Not all zones exist on every chassis: `|| true`.
-for zone in keyboard logo lightbar lid rear-glow; do
-  /opt/fspec/current/bin/asusctl aura power "$zone" --boot --awake --shutdown || true
-done
-
-
+# The zones' power states (lit at boot, awake, asleep, shutdown) are asusd's too, kept in
+# /etc/asusd/aura_19b6.ron: every one off since 2026-11-02, which also keeps the red breathing
+# "slash" pulse off while suspended. Re-asserting them here lit the lights at every boot.
