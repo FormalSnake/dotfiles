@@ -19,6 +19,8 @@ return {
     { output = panel, mode = "2560x1600@240", position = "5120x0", scale = 1.25, vrr = 3 },
   },
   workspaces = workspaces,
+  -- Off with the lid shut, its workspaces moving to the ASUS.
+  lid_output = panel,
   -- Games go fullscreen on the ASUS. xrandr takes a connector name, not a desc: the USB-C
   -- DisplayPort it is on now.
   xwayland_primary = "DP-3",

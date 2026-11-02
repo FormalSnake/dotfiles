@@ -83,6 +83,7 @@ local host = {
   direct_scanout = 1,
   env = {},
   xwayland_primary = nil,
+  lid_output = nil,
 }
 do
   local ok, loaded = pcall(dofile, os.getenv("HOME") .. "/.config/hypr/host.lua")
@@ -91,8 +92,26 @@ do
   end
 end
 
--- Monitors
-for _, m in ipairs(host.monitors) do hl.monitor(m) end
+-- Monitors. A host's `lid_output` is off while the lid is shut, read at every load so a reload or a
+-- login with the lid closed keeps it dark; the lid switch reloads to flip it.
+local function lid_shut()
+  local f = io.open("/proc/acpi/button/lid/LID0/state")
+  if not f then return false end
+  local state = f:read("a")
+  f:close()
+  return state:find("closed") ~= nil
+end
+for _, m in ipairs(host.monitors) do
+  if host.lid_output and m.output == host.lid_output and lid_shut() then
+    hl.monitor({ output = m.output, disabled = true })
+  else
+    hl.monitor(m)
+  end
+end
+if host.lid_output then
+  hl.bind("switch:on:Lid Switch", hl.dsp.exec_cmd("hyprctl reload"), { locked = true })
+  hl.bind("switch:off:Lid Switch", hl.dsp.exec_cmd("hyprctl reload"), { locked = true })
+end
 
 -- Catch-all: any other external display at its highest refresh rate
 -- ("highrr" forces the panel's max, unlike "preferred" which is usually

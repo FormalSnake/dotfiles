@@ -58,7 +58,7 @@ ASUS = [
     oneshot(
         "asus-aura",
         LIBEXEC + "/asus-aura",
-        "Aura keyboard accent seed + 80% charge limit",
+        "Aura zone power states + 80% charge limit",
         unit = {"After": "fspec-asusd.service", "Requires": "fspec-asusd.service"},
     ),
 ]
