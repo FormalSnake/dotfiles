@@ -5,6 +5,7 @@ clipboard-write = allow
 confirm-close-surface = false
 cursor-style = block
 cursor-style-blink = false
+font-family = Geist Mono
 font-size = 10
 font-style = Medium
 keybind = shift+enter=text:\x1b\r

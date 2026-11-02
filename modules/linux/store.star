@@ -69,6 +69,12 @@ STORE = [
         share = {"themes/adw-gtk3": "adw-gtk3", "themes/adw-gtk3-dark": "adw-gtk3-dark"},
     ),
     pkg(
+        "geist-font",
+        version = "1.9.0",
+        source = github("vercel/geist-font", asset = "geist-font-v*.zip"),
+        share = {"fonts/" + f: "geist-font/%s/ttf" % f for f in ["Geist", "GeistMono", "GeistSerif", "GeistPixel"]},
+    ),
+    pkg(
         "geist-mono-nerd-font",
         version = "3.4.0",
         source = github("ryanoasis/nerd-fonts", asset = "GeistMono.tar.xz"),

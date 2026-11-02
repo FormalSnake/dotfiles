@@ -15,7 +15,7 @@ FORMULAE = [
 
 CASKS = [
     "aldente", "android-studio", "betterdisplay", "bluebubbles",
-    "clop", "codex", "font-sf-pro", "ghostty", "google-chrome", "gstreamer-runtime",
+    "clop", "codex", "font-geist", "font-geist-mono", "font-geist-serif", "font-sf-pro", "ghostty", "google-chrome", "gstreamer-runtime",
     "jump-desktop-connect", "orbstack", "syncthing-app", "t3-code",
     "terminal-browser", "the-unarchiver", "zulu@21",
 ]

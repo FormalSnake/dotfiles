@@ -439,6 +439,15 @@ source = "brew"
 version = "0.74.5"
 
 [[pkg]]
+name = "geist-font"
+source = "github:vercel/geist-font"
+version = "1.9.0"
+
+[pkg.x86_64-linux]
+url = "https://github.com/vercel/geist-font/releases/download/v1.9.0/geist-font-v1.9.0.zip"
+hash = "sha256-Hy3Z6pDmjQNYodI0pfFWgHssPg4pXXjYeYCm260fpYw="
+
+[[pkg]]
 name = "geist-mono-nerd-font"
 source = "github:ryanoasis/nerd-fonts"
 version = "3.4.0"
