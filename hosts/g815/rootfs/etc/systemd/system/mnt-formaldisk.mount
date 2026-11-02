@@ -1,0 +1,8 @@
+[Unit]
+Description=exFAT volume at /mnt/formaldisk
+
+[Mount]
+What=/dev/disk/by-uuid/6E76-D733
+Where=/mnt/formaldisk
+Type=exfat
+Options=rw,uid=1000,gid=100,umask=022,noatime,nofail,x-systemd.device-timeout=5s

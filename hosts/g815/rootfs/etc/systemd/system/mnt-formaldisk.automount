@@ -1,0 +1,9 @@
+[Unit]
+Description=Automount the USB SSD's FormalDisk partition
+
+[Automount]
+Where=/mnt/formaldisk
+TimeoutIdleSec=2min
+
+[Install]
+WantedBy=local-fs.target
