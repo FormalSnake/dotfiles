@@ -7,7 +7,7 @@ APPS = {
     "messages": {"title": "Messages", "rev": "52c563b95cac01962e30a0c5c9a56bcf808094ce", "icon": "packaging/linux/dev.formalsnake.messages.png", "rust": "rustup"},
     "formalmusic": {"title": "FormalMusic", "rev": "4aeef799e584f6a69a40eef9fb69d92f73b1611d", "icon": "packaging/icon.png", "rust": "cargo"},
     # Linux only for now: its file system crates read procfs and watch with inotify.
-    "trove": {"title": "Trove", "rev": "13057f87efe56e1fb90a81760b49cc75ed3d2935", "icon": "packaging/icon.png", "rust": "rustup", "linux_only": True, "desktop": "dev.formalsnake.trove"},
+    "trove": {"title": "Trove", "rev": "7e953e71d59d4ceca64063a0775d867397e2c5d9", "icon": "packaging/icon.png", "rust": "rustup", "linux_only": True, "desktop": "dev.formalsnake.trove"},
 }
 
 # kopuzd opens the app's database, and an app older than the daemon refuses its schema, so both
