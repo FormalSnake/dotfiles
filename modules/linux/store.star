@@ -1,4 +1,4 @@
-load("//lib/paths.star", "TUMBLEWEED")
+load("//lib/paths.star", "LIBEXEC", "TUMBLEWEED")
 
 # What no Tumbleweed repo carries: vendor repos, upstream releases and source builds.
 
@@ -25,6 +25,17 @@ STEAMED = "Steamed-14e8a1c0db188870ab3ac2059dbf941fad9c3065"
 
 def sh(script):
     return ["sh", "-c", script]
+
+HELIUM_BUILD = """set -e
+cp -a "$FSPEC_SRC"/. "$FSPEC_OUT/"
+mkdir -p "$FSPEC_OUT/bin"
+wrapper=$(cd "$FSPEC_OUT" && echo helium-*_linux/helium-wrapper)
+cat > "$FSPEC_OUT/bin/helium" <<EOF
+#!/bin/sh
+exec """ + LIBEXEC + """/helium-guard "\\$(dirname "\\$(readlink -f "\\$0")")/../$wrapper" "\\$@"
+EOF
+chmod +x "$FSPEC_OUT/bin/helium"
+"""
 
 # dev/tarball.sh is upstream's release build. WORK in the cache keeps rev bumps incremental.
 FORMALSHELL = pkg(
@@ -81,12 +92,13 @@ STORE = [
         share = {"fonts/GeistMonoNerdFont": "."},
     ),
     FORMALSHELL,
-    # helium-wrapper sets LD_LIBRARY_PATH to its own directory.
+    # helium-wrapper sets LD_LIBRARY_PATH to its own directory. bin/helium hands it to the guard
+    # every launch goes through (modules/linux/rootfs/usr/local/libexec/helium-guard).
     pkg(
         "helium",
         version = "0.19.4.1",
         source = github("imputnet/helium-linux", asset = "helium-*_linux.tar.xz"),
-        links = {"helium": "helium-wrapper"},
+        build = sh(HELIUM_BUILD),
     ),
     pkg("matugen", version = "4.2.0", source = github("InioX/matugen", asset = "matugen-*-x86_64.tar.gz")),
     pkg("wl-clip-persist", source = git("https://github.com/Linus789/wl-clip-persist", rev = "v0.5.0")),

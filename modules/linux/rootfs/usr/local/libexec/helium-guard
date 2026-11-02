@@ -1,0 +1,123 @@
+#!/bin/bash
+# Every launch of Helium goes through here: the package's bin/helium calls it with the real
+# helium-wrapper first. The user-data dir live-syncs between g815 and e1504g over syncthing (folder
+# helium-profile), which only holds while one browser has it open, so a launch first quits the
+# peer's browser and waits for its last writes to arrive. Any failure (peer off, ssh or syncthing
+# down) launches anyway; the guard never strands the browser.
+#
+# --password-store=basic: Chromium encrypts cookies with a key from the desktop keyring, which
+# differs per machine, so a synced Cookies file is unreadable on the peer and every site there
+# reads as logged out. The basic store's key is fixed, so logins follow the profile.
+set -u
+real="$1"
+shift
+profile="$HOME/.config/net.imput.helium"
+config="$HOME/.config/syncthing/config.xml"
+case "$(hostname)" in
+  g815) peer=e1504g ;;
+  e1504g) peer=g815 ;;
+  *) exec "$real" --password-store=basic "$@" ;;
+esac
+
+# Every Helium process is named helium; the browser is the one without --type=.
+browser_pids() {
+  for p in $(pgrep -x helium); do
+    c=$(tr '\0' ' ' < /proc/$p/cmdline 2>/dev/null) || continue
+    case "$c" in
+      *_linux/helium*--type=*) ;;
+      *_linux/helium*) echo "$p" ;;
+    esac
+  done
+}
+
+# A running browser takes the request over its singleton; the peer was handled when it started.
+if [ -n "$(browser_pids)" ]; then
+  exec "$real" --password-store=basic "$@"
+fi
+
+# A launch with a user-data dir of its own never opens the synced profile, and --version is what
+# tools probe; neither may quit the peer's browser.
+for arg in "$@"; do
+  case "$arg" in
+    --version | -version) exec "$real" --version ;;
+    --user-data-dir="$profile" | --user-data-dir="$profile"/) ;;
+    --user-data-dir=* | --user-data-dir) exec "$real" "$@" ;;
+  esac
+done
+
+apikey() { sed -n 's/.*<apikey>\(.*\)<\/apikey>.*/\1/p' "$config" | head -n1; }
+key=$(apikey)
+myid=""
+[ -n "$key" ] && myid=$(curl -s -m 2 -H "X-API-Key: $key" http://127.0.0.1:8384/rest/system/status | jq -r '.myID // empty' 2>/dev/null)
+
+# On the peer: SIGTERM is a clean Chromium shutdown (session saved, databases closed); one that
+# never lands is killed, since a browser still writing while this side opens the profile is what
+# leaves sync-conflict copies. Then a rescan, and a wait until the peer reports this device fully
+# in sync. Prints "took" only when it quit something.
+remote_script=$(cat <<'REMOTE'
+myid="$1"
+browser_pids() {
+  for p in $(pgrep -x helium); do
+    c=$(tr '\0' ' ' < /proc/$p/cmdline 2>/dev/null) || continue
+    case "$c" in
+      *_linux/helium*--type=*) ;;
+      *_linux/helium*) echo "$p" ;;
+    esac
+  done
+}
+pids=$(browser_pids)
+[ -n "$pids" ] || exit 0
+kill -TERM $pids 2>/dev/null || true
+i=0
+while [ -n "$(browser_pids)" ] && [ "$i" -lt 120 ]; do sleep 0.25; i=$((i+1)); done
+remaining=$(browser_pids)
+if [ -n "$remaining" ]; then
+  kill -KILL $remaining 2>/dev/null || true
+  i=0
+  while [ -n "$(browser_pids)" ] && [ "$i" -lt 20 ]; do sleep 0.25; i=$((i+1)); done
+fi
+echo took
+key=$(sed -n 's/.*<apikey>\(.*\)<\/apikey>.*/\1/p' "$HOME/.config/syncthing/config.xml" | head -n1)
+[ -n "$key" ] && [ -n "$myid" ] || exit 0
+curl -s -m 5 -X POST -H "X-API-Key: $key" "http://127.0.0.1:8384/rest/db/scan?folder=helium-profile" >/dev/null 2>&1 || exit 0
+i=0
+while [ "$i" -lt 40 ]; do
+  c=$(curl -s -m 2 -H "X-API-Key: $key" "http://127.0.0.1:8384/rest/db/completion?folder=helium-profile&device=$myid" | jq -r '.completion // 0')
+  case "$c" in 100|100.0*) break ;; esac
+  sleep 0.5; i=$((i+1))
+done
+exit 0
+REMOTE
+)
+
+# Two tries, since a tailnet hiccup right after wake looks like a peer that is off, and that is
+# the case where its browser may still be writing.
+reachable=1
+took=""
+for attempt in 1 2; do
+  if took=$(ssh -o BatchMode=yes -o ConnectTimeout=4 "$peer" /bin/bash -s "$myid" <<<"$remote_script" 2>/dev/null); then
+    reachable=0
+    break
+  fi
+done
+if [ "$reachable" -ne 0 ]; then
+  took=""
+  notify-send -u critical Helium "Could not confirm $peer's browser is closed, launching anyway." 2>/dev/null || true
+fi
+
+# After a takeover, wait until nothing is left to pull for two polls in a row (one 0 right after
+# the peer's rescan can be an index not announced yet), capped at 10s.
+if [ -n "$took" ] && [ -n "$key" ]; then
+  ok=0 i=0
+  while [ "$i" -lt 20 ]; do
+    if curl -s -m 2 -H "X-API-Key: $key" "http://127.0.0.1:8384/rest/db/status?folder=helium-profile" \
+      | jq -e '.needTotalItems == 0 and .state == "idle"' >/dev/null 2>&1; then
+      ok=$((ok+1))
+      [ "$ok" -ge 2 ] && break
+    else
+      ok=0
+    fi
+    sleep 0.5; i=$((i+1))
+  done
+fi
+exec "$real" --password-store=basic "$@"

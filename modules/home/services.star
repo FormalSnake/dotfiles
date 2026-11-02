@@ -38,14 +38,6 @@ SERVICES = [
         needs = STORE + "/wl-clip-persist",
     ),
     gui(
-        "helium",
-        STORE + "/helium",
-        "Helium (Chromium): waits for FormalShell's notification daemon",
-        needs = STORE + "/helium",
-        unit = {"After": ["formalshell.service", "graphical-session.target"], "Wants": "formalshell.service"},
-        ExecStartPre = "/usr/bin/bash -c 'for i in $(seq 50); do busctl --user call org.freedesktop.DBus /org/freedesktop/DBus org.freedesktop.DBus NameHasOwner s org.freedesktop.Notifications 2>/dev/null | grep -q true && break; sleep 0.2; done'",
-    ),
-    gui(
         "librepods",
         STORE + "/librepods --headless",
         "librepods AirPods daemon (omarchy-pods build, headless)",

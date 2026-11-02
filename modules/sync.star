@@ -6,10 +6,6 @@ load("//lib/paths.star", "STORE")
 
 PAIR = ["g815", "e1504g"]
 
-# Chromium apps encrypt cookies and logins with this key.
-def _safe_storage(application):
-    return keyring(schema = "chrome_libsecret_os_crypt_password_v2", attrs = {"application": application})
-
 def _portal(app_id):
     return keyring(schema = "org.freedesktop.portal.Secret", attrs = {"app_id": app_id})
 
@@ -40,8 +36,6 @@ def _helium():
             mode = "seed",
             unless_running = ["helium"],
         ),
-        # Its own item, so the profile still moves while the other host's keyring is locked.
-        sync("helium-key", peers = PAIR, keyring = [_safe_storage("chromium")], mode = "seed", after = ["helium"]),
     ]
 
 def _seeded():
