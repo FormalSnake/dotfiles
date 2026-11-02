@@ -6,6 +6,8 @@ load("//lib/paths.star", "TUMBLEWEED")
 APPS = {
     "messages": {"title": "Messages", "rev": "52c563b95cac01962e30a0c5c9a56bcf808094ce", "icon": "packaging/linux/dev.formalsnake.messages.png", "rust": "rustup"},
     "formalmusic": {"title": "FormalMusic", "rev": "4aeef799e584f6a69a40eef9fb69d92f73b1611d", "icon": "packaging/icon.png", "rust": "cargo"},
+    # Linux only for now: its file system crates read procfs and watch with inotify.
+    "trove": {"title": "Trove", "rev": "13057f87efe56e1fb90a81760b49cc75ed3d2935", "icon": "packaging/icon.png", "rust": "rustup", "linux_only": True, "desktop": "dev.formalsnake.trove"},
 }
 
 # kopuzd opens the app's database, and an app older than the daemon refuses its schema, so both
@@ -59,15 +61,27 @@ def _nd_app(host, name, app):
     the bare binary on Linux."""
     url = "https://github.com/FormalStudio/" + name
     if host.platform.is_linux:
+        steps = [
+            'mkdir -p "$FSPEC_SRC.zig"',
+            'curl -fsSL %s | tar -xJ -C "$FSPEC_SRC.zig" --strip-components 1' % ZIG,
+            'PATH="$FSPEC_SRC.zig:$PATH" cargo build --release --locked --package ' + name,
+            'install -Dm755 target/release/%s "$FSPEC_OUT/bin/%s"' % (name, name),
+        ]
+        share = {}
+        desktop = app.get("desktop")
+        if desktop:
+            entry = "applications/%s.desktop" % desktop
+            icon = "icons/hicolor/512x512/apps/%s.png" % desktop
+            steps += [
+                'install -Dm644 packaging/linux/%s.png "$FSPEC_OUT/%s"' % (desktop, icon),
+                'install -Dm644 packaging/linux/%s.desktop "$FSPEC_OUT/%s"' % (desktop, entry),
+            ]
+            share = {entry: entry, icon: icon}
         return pkg(
             name,
             source = git(url, rev = app["rev"], image = TUMBLEWEED, deps = [app["rust"]] + ND_DEPS),
-            build = _sh(
-                'mkdir -p "$FSPEC_SRC.zig"',
-                'curl -fsSL %s | tar -xJ -C "$FSPEC_SRC.zig" --strip-components 1' % ZIG,
-                'PATH="$FSPEC_SRC.zig:$PATH" cargo build --release --locked --package ' + name,
-                'install -Dm755 target/release/%s "$FSPEC_OUT/bin/%s"' % (name, name),
-            ),
+            build = _sh(*steps),
+            share = share,
         )
     title, icon = app["title"], app["icon"]
     contents = "$FSPEC_OUT/%s.app/Contents" % title
@@ -92,7 +106,7 @@ def _nd_app(host, name, app):
 def my_apps(host):
     linux = host.platform.is_linux
     kopuzd_build = {"image": TUMBLEWEED, "deps": ["rustup", "gcc", "cmake", "make", "pkgconf", "alsa-devel", "dbus-1-devel", "libopenssl-devel", "git-core", "gcc-c++"]} if linux else {}
-    return [_nd_app(host, name, app) for name, app in APPS.items()] + [
+    return [_nd_app(host, name, app) for name, app in APPS.items() if linux or not app.get("linux_only")] + [
         pkg(
             "kopuz",
             version = KOPUZ,
