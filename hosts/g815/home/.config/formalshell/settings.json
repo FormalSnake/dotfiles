@@ -33,7 +33,7 @@
   },
   "display": {
     "outputPriority": [
-      "HDMI",
+      "external",
       "internal"
     ]
   },

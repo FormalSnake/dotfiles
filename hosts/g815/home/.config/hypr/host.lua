@@ -1,24 +1,27 @@
--- The g815: HDMI-A-1 on the left, the internal 240 Hz panel (matched by desc, since its connector
--- name follows the driver) on the right, both scanned out by the RTX 5070.
+-- The g815: the ASUS PA278CGV on the left, the internal 240 Hz panel on the right, both scanned
+-- out by the RTX 5070. Both are matched by desc: the panel's connector name follows the driver,
+-- and the ASUS has been on HDMI-A-1 and on USB-C DisplayPort (DP-3).
 local panel = "desc:BOE NE180QDM-NZC"
+local desk = "desc:ASUSTek COMPUTER INC PA278CGV T1LMQS063802"
 local workspaces = {}
 for i = 1, 9 do
-  workspaces[i] = { monitor = (i == 4 or i == 8) and panel or "HDMI-A-1", default = (i == 1 or i == 4) }
+  workspaces[i] = { monitor = (i == 4 or i == 8) and panel or desk, default = (i == 1 or i == 4) }
 end
 return {
-  -- vrr = 1 on HDMI-A-1 comes up black at boot: the link trains, EDID and ELD read fine, the CRTC
+  -- vrr = 1 on the ASUS over HDMI-A-1 came up black at boot: the link trains, EDID and ELD read fine, the CRTC
   -- goes active at 144, and no picture ever lands. 3 holds VRR off until a fullscreen game or
   -- video asks for it.
   -- Hyprland lays XWayland's outputs out in connection order, so the panel (always first) is at
-  -- x 0 there. Starting HDMI at 2560 puts it at the same coordinates in both layouts, which is
+  -- x 0 there. Starting the ASUS at 2560 puts it at the same coordinates in both layouts, which is
   -- what keeps fullscreen Wine games on it from sizing themselves to the panel.
   monitors = {
-    { output = "HDMI-A-1", mode = "2560x1440@144", position = "2560x0", scale = 1.0, vrr = 3 },
+    { output = desk, mode = "2560x1440@144", position = "2560x0", scale = 1.0, vrr = 3 },
     { output = panel, mode = "2560x1600@240", position = "5120x0", scale = 1.25, vrr = 3 },
   },
   workspaces = workspaces,
-  -- Games go fullscreen on the HDMI monitor.
-  xwayland_primary = "HDMI-A-1",
+  -- Games go fullscreen on the ASUS. xrandr takes a connector name, not a desc: the USB-C
+  -- DisplayPort it is on now.
+  xwayland_primary = "DP-3",
   -- Slight transparency so the backdrop blur has something to show through (dGPU only).
   opacity = 0.96,
   -- Direct scanout on the NVIDIA driver marks a fullscreen Vulkan swapchain out of date about once
