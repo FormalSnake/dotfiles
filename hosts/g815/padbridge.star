@@ -7,7 +7,7 @@ load("//modules/linux/store.star", "sh")
 PADBRIDGE = [
     pkg(
         "padbridge",
-        source = git("https://github.com/FormalStudio/padbridge", rev = "c61e30a36682117dcf0f58e04c8f27ab740cd23d"),
+        source = git("https://github.com/FormalStudio/padbridge", rev = "48779ef110c5962b3d5ec94a17e7b017083840fe"),
         build = sh('install -Dm755 "$FSPEC_SRC/padbridge.py" "$FSPEC_OUT/bin/padbridge"'),
     ),
     gui(
