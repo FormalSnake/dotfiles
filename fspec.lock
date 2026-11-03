@@ -646,6 +646,10 @@ source = "git:https://github.com/thisisgm/omarchy-pods@307c5a6d2109f088d8e6a558c
 rev = "307c5a6d2109f088d8e6a558c933ebe4f6b1db01"
 patches = "sha256-bizsyzUE3gSqcTrHy8Z49MBgwU2LW9AJ6mxVhnUkIqo="
 
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/librepods@sha256:9be414288011d2bd2556b0c65c6992a547e7c93a28eed0fe9c2d874234fa048b"
+build = "12d193b0"
+
 [[pkg]]
 name = "lima"
 source = "brew"
