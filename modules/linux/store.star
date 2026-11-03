@@ -171,6 +171,9 @@ STORE = [
         build = sh('mkdir -p "$FSPEC_OUT/rules" && cp -a "$FSPEC_SRC"/. "$FSPEC_OUT/rules/" && rm -rf "$FSPEC_OUT/rules/.git"'),
         share = {"ananicy-rules/cachyos": "rules"},
     ),
+]
+
+KDE_STORE = [
     pkg(
         "steamed",
         source = url("https://github.com/gaspar-of-time/Steamed/archive/14e8a1c0db188870ab3ac2059dbf941fad9c3065.tar.gz"),

@@ -7,6 +7,8 @@ The g815 login screen offers Hyprland and Steam Gaming Mode. Gaming Mode runs
 `gamescope-session-plus steam`; the desktop launcher uses
 `session-switch gamescope-session-steam`. Plasma and the Waylandcraft session are removed.
 The greeter uses Sway with `--unsupported-gpu` so it can start on NVIDIA.
+KDE desktop apps and the Steamed theme are excluded on g815. EasyEffects keeps
+the KDE Frameworks libraries it requires.
 
 ## Frame pacing
 

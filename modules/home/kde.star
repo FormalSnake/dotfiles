@@ -70,4 +70,5 @@ KDE_SERVICES = [
     autostart("discord-kde", BIN + "/discord", "Discord", unit = {"ConditionEnvironment": ["WAYLAND_DISPLAY", "XDG_CURRENT_DESKTOP=KDE"]}),
 ]
 
-KDE_APPS = [kde_only(id, *entry) for id, entry in KDE_ONLY.items()] + [hide_app(id) for id in HIDDEN]
+KDE_APPS = [kde_only(id, *entry) for id, entry in KDE_ONLY.items()]
+HIDDEN_APPS = [hide_app(id) for id in HIDDEN]
