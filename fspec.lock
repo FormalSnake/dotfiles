@@ -761,6 +761,14 @@ url = "https://github.com/modrinth/code/releases/download/v0.21.6/Modrinth.App_0
 hash = "sha256-jSaNdcui+T3hXcI3OaOg6FR0a8Of7nUZ8wxU+YB7OXY="
 
 [[pkg]]
+name = "moonlight"
+source = "flatpak:com.moonlight_stream.Moonlight"
+version = "6.2.0"
+
+[pkg.any]
+commit = "d46a012e142b9b5eaad94e5549c042964f3029b03d555d3d5088057cd1ba6b9f"
+
+[[pkg]]
 name = "mosh"
 source = "brew"
 version = "1.4.0"
