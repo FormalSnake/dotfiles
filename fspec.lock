@@ -1151,8 +1151,8 @@ version = "0.27.1"
 
 [[pkg]]
 name = "trove"
-source = "git:https://github.com/FormalStudio/trove@fdbaf26e74878eb7219c74318464ec4c150e9f45"
-rev = "fdbaf26e74878eb7219c74318464ec4c150e9f45"
+source = "git:https://github.com/FormalStudio/trove@a3736cb2be74018024dacf4ed5b45691d709d4d9"
+rev = "a3736cb2be74018024dacf4ed5b45691d709d4d9"
 
 [[pkg]]
 name = "typescript"
