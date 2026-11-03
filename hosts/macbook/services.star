@@ -43,6 +43,11 @@ SERVICES = [
         restart = "always",
         launchd = logs("couchdb", {"LimitLoadToSessionType": ["Aqua", "Background", "LoginWindow", "StandardIO", "System"]}),
     ),
+    # Lid closed, it stays awake. pmset's disablesleep is missing from `pmset -g custom`, so a
+    # setting() cannot read it back.
+    service("lid-awake", exec = "/usr/bin/pmset -a disablesleep 1", launchd = {"KeepAlive": False}),
+    # The display Sunshine captures while the lid is closed.
+    service("headless-screen", exec = "/bin/bash " + BIN + "/headless-screen.sh", user = True, launchd = logs("headless-screen", {"KeepAlive": False})),
     # Moonlight's host for remote desktop. Pairs by PIN, no account.
     agent("sunshine", BREW + "/sunshine", ThrottleInterval = 10),
     # Keeps ~/Notes current off CouchDB's _changes feed without Obsidian open.
