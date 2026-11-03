@@ -26,6 +26,15 @@ url = "https://github.com/lassekongo83/adw-gtk3/releases/download/v6.5/adw-gtk3v
 hash = "sha256-qBeA+t/EMr4Pw9icTrtBqijk8DLULDb5eJxX3RDPpBw="
 
 [[pkg]]
+name = "agent-desktop"
+source = "npm:agent-desktop"
+version = "1.1.0"
+
+[pkg.any]
+url = "https://registry.npmjs.org/agent-desktop/-/agent-desktop-1.1.0.tgz"
+hash = "sha512-4aITRplPcbV6xBFNKeehMbxSN0/L+IOhnn6LBuPXezoyr08Xl73Y6rwZiR4sM4rM/eBO6iJMoKL+IvFQvHwLEw=="
+
+[[pkg]]
 name = "aldente"
 source = "brew:cask"
 version = "1.40"

@@ -43,6 +43,8 @@ def tools(host):
             services = [service("nordvpnd.socket"), service("nordvpnd"), service("nordvpnd-killswitch")],
         ), cask = True),
         brew_or("parsec", pkg("parsec", source = flatpak("com.parsecgaming.parsec")), cask = True),
+        # Computer use for agents, through each OS's accessibility tree.
+        pkg("agent-desktop", version = "1.1.0", source = npm("agent-desktop")),
         brew_or("uv", pkg("uv", version = "0.13.6", source = aqua("astral-sh/uv"))),
         brew_or("lazydocker", pkg("lazydocker", version = "0.25.2", source = aqua("jesseduffield/lazydocker"))),
         brew_or("herdr", pkg("herdr", version = "0.9.3", source = github("ogulcancelik/herdr", asset = "herdr-linux-*"))),
