@@ -221,6 +221,7 @@ only what the task needs. A local edit does not trigger an audit.
 | Carrying work to the end | `completion-boundaries`, `ecosystem-delivery` |
 | Machines, rebuilds, disk | `host-ops` |
 | Prose shipping under my name | `humanizer` |
+| Operating a desktop app (read UI, click, fill, screenshot) | `agent-desktop`: the CLI is on PATH on every host, run `agent-desktop status` first |
 | Library, framework, SDK or CLI question | Context7 MCP first, never memory |
 | Claude Code internals | the `claude-code-guide` agent |
 
