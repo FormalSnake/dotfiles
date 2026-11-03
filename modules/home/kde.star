@@ -32,7 +32,7 @@ def kde_only(id, name, exec, icon):
 
 IN_PLASMA = {"ConditionEnvironment": "XDG_CURRENT_DESKTOP=KDE", "PartOf": "graphical-session.target"}
 
-KDE = [
+KDE_SERVICES = [
     oneshot(
         "kde-config",
         "/usr/bin/sh -c 'kwriteconfig6 --file baloofilerc --group \"Basic Settings\" --key Indexing-Enabled false && kwriteconfig6 --file kwinrc --group EdgeBarrier --key EdgeBarrier 0 && kwriteconfig6 --file kwinrc --group EdgeBarrier --key CornerBarrier --type bool false'",
@@ -68,4 +68,6 @@ KDE = [
         install = {"WantedBy": "plasma-workspace.target"},
     ),
     autostart("discord-kde", BIN + "/discord", "Discord", unit = {"ConditionEnvironment": ["WAYLAND_DISPLAY", "XDG_CURRENT_DESKTOP=KDE"]}),
-] + [kde_only(id, *entry) for id, entry in KDE_ONLY.items()] + [hide_app(id) for id in HIDDEN]
+]
+
+KDE_APPS = [kde_only(id, *entry) for id, entry in KDE_ONLY.items()] + [hide_app(id) for id in HIDDEN]

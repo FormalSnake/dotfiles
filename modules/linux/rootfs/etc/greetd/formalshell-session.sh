@@ -36,7 +36,8 @@ rm -f "$XDG_RUNTIME_DIR"/wayland-*
 # A greeter at boot (no initial_session ran) ends the splash itself; plymouthd is gone before sway
 # opens the card (boot.star).
 systemctl start formalos-splash-quit.service
-sway --config "$HOME/sway.conf" &
+# The greeter must also start when NVIDIA drives the display.
+sway --unsupported-gpu --config "$HOME/sway.conf" &
 compositor=$!
 for _ in $(seq 100); do
   socket=$(find "$XDG_RUNTIME_DIR" -maxdepth 1 -name 'wayland-*' ! -name '*.lock' -print -quit 2>/dev/null)

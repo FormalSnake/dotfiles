@@ -66,15 +66,4 @@ def gaming(fps):
         pkg("mangohud-vulkan-layer", source = flatpak("org.freedesktop.Platform.VulkanLayer.MangoHud/x86_64/25.08")),
         # NVENC capture with a replay buffer; Alt+Z opens its overlay.
         pkg("gpu-screen-recorder", source = flatpak("com.dec05eba.gpu_screen_recorder")),
-        # Plasma is the gaming desktop: Steam opens with it.
-        service(
-            "steam",
-            exec = "/usr/bin/steam",
-            user = True,
-            description = "Steam",
-            systemd = {
-                "unit": {"ConditionEnvironment": "XDG_CURRENT_DESKTOP=KDE", "PartOf": "graphical-session.target", "After": "graphical-session.target", "RefuseManualStart": True, "RefuseManualStop": True},
-                "install": {"WantedBy": "graphical-session.target"},
-            },
-        ),
     ]

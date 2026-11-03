@@ -40,7 +40,8 @@ def firewall(tcp = [], udp = [], udp_ranges = []):
 
 def rootfs(host):
     """modules/linux/rootfs/ and hosts/<host>/rootfs/, each a mirror of /."""
-    return tree(["modules/linux/rootfs/", "hosts/%s/rootfs/" % host], perms = {"/etc/sudoers.d/10-fspec": "0440", "/usr/libexec/fspec/fspec": "0755"}) + [
+    skip = ["etc/NetworkManager/conf.d/90-kyan-dns.conf", "etc/formalshell-greeter/wayland-sessions/plasma.desktop"] if host == "g815" else []
+    return tree(["modules/linux/rootfs/", "hosts/%s/rootfs/" % host], skip = skip, perms = {"/etc/sudoers.d/10-fspec": "0440", "/usr/libexec/fspec/fspec": "0755"}) + [
         file("/etc/ssh/authorized_keys.d/" + USER, content = AUTHORIZED_KEYS),
     ]
 

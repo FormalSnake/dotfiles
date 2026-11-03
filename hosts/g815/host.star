@@ -59,7 +59,9 @@ g815 = host(
     name = "g815",
     platform = "x86_64-linux",
     system = tumbleweed(
-        packages = PACKAGES + GAMING_PACKAGES + HOST_PACKAGES + VM_PACKAGES + DEV_PACKAGES + ["systemd-resolved"],
+        packages = [p for p in PACKAGES if p != "patterns-kde-kde_plasma"] + GAMING_PACKAGES + HOST_PACKAGES + VM_PACKAGES + DEV_PACKAGES + [
+            "systemd-resolved", "!patterns-kde-kde_plasma", "!plasma6-session", "!plasma6-desktop", "!plasma6-workspace", "!kwin6",
+        ],
         kernel_args = [
             "nvidia-drm.modeset=1", "acpi_backlight=native", "cfg80211.ieee80211_regdom=ES",
             "mitigations=off",

@@ -1,9 +1,9 @@
-# Plasma beside Hyprland, with launcher entries that log straight into the other session. On a
-# gaming host Plasma is the gaming desktop.
+# Launcher entries that log straight into the other session.
 
 def sessions(gaming = False):
-    labels = {"plasma": "Gaming Mode" if gaming else "Switch to Plasma", "hyprland-uwsm": "Switch to Hyprland"}
-    icons = {"plasma": "steam" if gaming else "kde", "hyprland-uwsm": "hyprland"}
+    alternate = "gamescope-session-steam" if gaming else "plasma"
+    labels = {alternate: "Gaming Mode" if gaming else "Switch to Plasma", "hyprland-uwsm": "Switch to Hyprland"}
+    icons = {alternate: "steam" if gaming else "kde", "hyprland-uwsm": "hyprland"}
     units = ", ".join(['"session-switch@%s.service"' % s for s in labels])
     out = [file("/etc/polkit-1/rules.d/50-session-switch.rules", content = """polkit.addRule(function(action, subject) {
   if (action.id == "org.freedesktop.systemd1.manage-units" &&

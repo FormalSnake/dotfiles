@@ -3,6 +3,11 @@
 The setup lives in `modules/gaming/`. g815 loads it with `gaming(fps = 138)` in
 `hosts/g815/host.star`. Change the cap there and `fspec apply --host g815`.
 
+The g815 login screen offers Hyprland and Steam Gaming Mode. Gaming Mode runs
+`gamescope-session-plus steam`; the desktop launcher uses
+`session-switch gamescope-session-steam`. Plasma and the Waylandcraft session are removed.
+The greeter uses Sway with `--unsupported-gpu` so it can start on NVIDIA.
+
 ## Frame pacing
 
 - DXVK and VKD3D cap every D3D game at 138 fps (`/etc/environment.d/80-gaming.conf`), under the
