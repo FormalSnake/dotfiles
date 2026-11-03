@@ -18,6 +18,16 @@ NVIDIA = [
     nvidia("nvidia-gl-G07"),
     nvidia("nvidia-gl-G07-32bit"),
     nvidia("nvidia-compute-utils-G07", services = [service("nvidia-powerd")]),
+    # nvidia-powerd is what lifts the GPU from its 50 W base to 115 W (Dynamic Boost). After a
+    # burst of driver errors it exits 0, and the vendor unit then hit its start limit and stayed
+    # down, leaving games at half power until the next boot.
+    file("/etc/systemd/system/nvidia-powerd.service.d/restart.conf", content = """[Unit]
+StartLimitIntervalSec=0
+
+[Service]
+Restart=always
+RestartSec=5
+"""),
     nvidia("nvidia-settings"),
     # The ASUS MUX routes the internal panel through the dGPU; the firmware applies it next boot.
     oneshot(
