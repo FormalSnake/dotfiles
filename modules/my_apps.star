@@ -1,4 +1,4 @@
-load("//lib/paths.star", "TUMBLEWEED")
+load("//lib/paths.star", "STORE", "TUMBLEWEED")
 
 # The apps I make, one version for every host. NativeDesktop comes in through each app's Cargo.lock.
 
@@ -7,7 +7,9 @@ APPS = {
     "messages": {"title": "Messages", "rev": "52c563b95cac01962e30a0c5c9a56bcf808094ce", "icon": "packaging/linux/dev.formalsnake.messages.png", "rust": "rustup"},
     "formalmusic": {"title": "FormalMusic", "rev": "4aeef799e584f6a69a40eef9fb69d92f73b1611d", "icon": "packaging/icon.png", "rust": "cargo"},
     # Linux only for now: its file system crates read procfs and watch with inotify.
-    "trove": {"title": "Trove", "rev": "7e953e71d59d4ceca64063a0775d867397e2c5d9", "icon": "packaging/icon.png", "rust": "rustup", "linux_only": True, "desktop": "dev.formalsnake.trove"},
+    # `dbus` names D-Bus services the app ships in packaging/linux, `portal` its xdg-desktop-portal backend.
+    "trove": {"title": "Trove", "rev": "bd713aff7736aec72a615c9fa9f3549aeca64c19", "icon": "packaging/icon.png", "rust": "rustup", "linux_only": True, "desktop": "dev.formalsnake.trove",
+              "dbus": ["org.freedesktop.impl.portal.desktop.trove", "org.freedesktop.FileManager1"], "portal": "trove"},
 }
 
 # kopuzd opens the app's database, and an app older than the daemon refuses its schema, so both
@@ -76,7 +78,21 @@ def _nd_app(host, name, app):
                 'install -Dm644 packaging/linux/%s.png "$FSPEC_OUT/%s"' % (desktop, icon),
                 'install -Dm644 packaging/linux/%s.desktop "$FSPEC_OUT/%s"' % (desktop, entry),
             ]
-            share = {entry: entry, icon: icon}
+            share[entry] = entry
+            share[icon] = icon
+        # D-Bus runs Exec as written, so it names the store's link to the binary.
+        for service in app.get("dbus", []):
+            dest = "dbus-1/services/%s.service" % service
+            steps += [
+                'mkdir -p "$FSPEC_OUT/dbus-1/services"',
+                "sed 's|^Exec=/usr/bin/%s |Exec=%s/%s |' packaging/linux/%s.service > \"$FSPEC_OUT/%s\"" % (name, STORE, name, service, dest),
+            ]
+            share[dest] = dest
+        portal = app.get("portal")
+        if portal:
+            dest = "xdg-desktop-portal/portals/%s.portal" % portal
+            steps.append('install -Dm644 packaging/linux/%s.portal "$FSPEC_OUT/%s"' % (portal, dest))
+            share[dest] = dest
         return pkg(
             name,
             source = git(url, rev = app["rev"], image = TUMBLEWEED, deps = [app["rust"]] + ND_DEPS),
