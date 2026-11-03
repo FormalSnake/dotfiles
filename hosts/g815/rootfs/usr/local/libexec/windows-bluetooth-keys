@@ -11,6 +11,13 @@ hive=/mnt/windows/Windows/System32/config/SYSTEM
 cs=$(printf 'ControlSet%03d' "$(hget "$hive" '\Select' Current)")
 params="\\$cs\\Services\\BTHPORT\\Parameters"
 
+# Every Windows device BlueZ has held, one adapter/device pair per line. One
+# listed here with no directory under the adapter was forgotten in BlueZ, and
+# Windows keeps its key, so it is not brought back.
+seen=/var/lib/windows-bluetooth-keys/seen
+install -d -m 700 "$(dirname "$seen")"
+touch "$seen"
+
 for adir in /var/lib/bluetooth/??:??:??:??:??:??; do
   [ -d "$adir" ] || continue
   wa=$(basename "$adir" | tr -d : | tr A-F a-f)
@@ -24,6 +31,12 @@ for adir in /var/lib/bluetooth/??:??:??:??:??:??; do
     [ ${#key} -eq 32 ] || continue
     mac=$(echo "$wm" | tr a-f A-F | sed 's/../&:/g; s/:$//')
     info="$adir/$mac/info"
+    pair="$(basename "$adir")/$mac"
+
+    if [ ! -d "$adir/$mac" ] && grep -qxF "$pair" "$seen"; then
+      continue
+    fi
+    grep -qxF "$pair" "$seen" || echo "$pair" >> "$seen"
 
     if [ -f "$info" ]; then
       # A key BlueZ already holds is never replaced: Windows keeps stale
