@@ -63,7 +63,7 @@ g815 = host(
             "systemd-resolved", "!patterns-kde-kde_plasma", "!plasma6-session", "!plasma6-desktop", "!plasma6-workspace", "!kwin6",
             "!konsole", "!kscreen6", "!libplasma6-components", "!libplasma6-desktoptheme", "!plasma6-activities",
             "!breeze6", "!breeze6-cursors", "!breeze6-decoration", "!breeze6-style", "!breeze6-style-qt5",
-            "!breeze6-wallpapers", "!gtk2-engine-oxygen-32bit", "!kdialog", "!drkonqi6",
+            "!breeze6-wallpapers", "!kdialog", "!drkonqi6",
         ],
         kernel_args = [
             "nvidia-drm.modeset=1", "acpi_backlight=native", "cfg80211.ieee80211_regdom=ES",
