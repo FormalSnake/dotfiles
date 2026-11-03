@@ -30,6 +30,8 @@ FLATPAKS = [
     pkg("flare", source = flatpak("de.schmidhuberj.Flare")),
     pkg("obsidian", source = flatpak("md.obsidian.Obsidian")),
     pkg("apostrophe", source = flatpak("org.gnome.gitlab.somas.Apostrophe")),
+    # Remote desktop into the macbook's Sunshine.
+    pkg("moonlight", source = flatpak("com.moonlight_stream.Moonlight")),
 ]
 
 TOOLS = [

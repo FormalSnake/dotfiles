@@ -23,7 +23,8 @@ CASKS = [
 BREW = (
     [pkg(n, source = brew()) for n in FORMULAE] +
     [pkg(n, source = brew(cask = True)) for n in CASKS] +
-    [pkg("markdown-preview", source = brew(cask = True, tap = "pluk-inc/tap"))]
+    [pkg("markdown-preview", source = brew(cask = True, tap = "pluk-inc/tap"))] +
+    [pkg("sunshine", source = brew(tap = "lizardbyte/homebrew"))]
 )
 
 def sh(*steps):

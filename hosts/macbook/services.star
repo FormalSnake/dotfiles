@@ -2,7 +2,7 @@ load("//lib/launchd.star", "BIN", "BREW", "HOME", "PATH", "agent", "logs", "poll
 load("//lib/paths.star", "STORE")
 load("//modules/tailscale.star", "serve")
 
-LOGIN_APPS = {"nordvpn": "NordVPN", "aldente": "AlDente", "orbstack": "OrbStack", "betterdisplay": "BetterDisplay", "parsec": "Parsec"}
+LOGIN_APPS = {"nordvpn": "NordVPN", "aldente": "AlDente", "orbstack": "OrbStack", "betterdisplay": "BetterDisplay"}
 
 SERVICES = [
     service("login-" + k, exec = "/usr/bin/open -g -j -a /Applications/%s.app" % v, user = True)
@@ -43,6 +43,8 @@ SERVICES = [
         restart = "always",
         launchd = logs("couchdb", {"LimitLoadToSessionType": ["Aqua", "Background", "LoginWindow", "StandardIO", "System"]}),
     ),
+    # Moonlight's host for remote desktop. Pairs by PIN, no account.
+    agent("sunshine", BREW + "/sunshine", ThrottleInterval = 10),
     # Keeps ~/Notes current off CouchDB's _changes feed without Obsidian open.
     agent("obsidian-livesync-daemon", "/bin/bash " + BIN + "/obsidian-livesync-daemon.sh", ThrottleInterval = 30),
     agent("meshtop-web", STORE + "/meshtop serve --listen 127.0.0.1:7314 --allow-host macbook-pro-2.tailb24294.ts.net", ThrottleInterval = 30),
