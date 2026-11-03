@@ -15,6 +15,7 @@ load("//modules/tools.star", "tools")
 load("//modules/gaming/gaming.star", "GAMING_PACKAGES", "gaming")
 load("//hosts/g815/airplay.star", "AIRPLAY")
 load("//hosts/g815/hardware.star", "HARDWARE")
+load("//hosts/g815/padbridge.star", "PADBRIDGE")
 load("//hosts/g815/rig.star", "RIG", "rig_users")
 load("//hosts/g815/windows.star", "VMS", "WINDOWS", "WINDOWS_BOOT")
 
@@ -24,6 +25,8 @@ HOST_PACKAGES = [
     "xwayland-satellite", "cage",
     # UxPlay's runtime.
     "libdns_sd", "gstreamer-plugins-ugly",
+    # padbridge's BlueZ client.
+    "python313-dbus-python",
     # ntfsinfo and ntfsfix, for clear-ntfs-dirty.
     "ntfsprogs",
 ]
@@ -79,6 +82,7 @@ g815 = host(
         HARDWARE,
         gaming(fps = 138),
         AIRPLAY,
+        PADBRIDGE,
         WINDOWS,
         VMS,
         RIG,

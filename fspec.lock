@@ -882,6 +882,11 @@ source = "brew:cask"
 version = "2.2.5,21124"
 
 [[pkg]]
+name = "padbridge"
+source = "git:https://github.com/FormalStudio/padbridge@c61e30a36682117dcf0f58e04c8f27ab740cd23d"
+rev = "c61e30a36682117dcf0f58e04c8f27ab740cd23d"
+
+[[pkg]]
 name = "pam_ssh_agent_auth"
 source = "git:https://github.com/jbeverly/pam_ssh_agent_auth@7ff785809f6ecad45051e333c0ffa72e15ba4f2a"
 rev = "7ff785809f6ecad45051e333c0ffa72e15ba4f2a"
