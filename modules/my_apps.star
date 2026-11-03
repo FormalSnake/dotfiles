@@ -8,7 +8,7 @@ APPS = {
     "formalmusic": {"title": "FormalMusic", "rev": "4aeef799e584f6a69a40eef9fb69d92f73b1611d", "icon": "packaging/icon.png", "rust": "cargo"},
     # Linux only for now: its file system crates read procfs and watch with inotify.
     # `dbus` names D-Bus services the app ships in packaging/linux, `portal` its xdg-desktop-portal backend.
-    "trove": {"title": "Trove", "rev": "bd713aff7736aec72a615c9fa9f3549aeca64c19", "icon": "packaging/icon.png", "rust": "rustup", "linux_only": True, "desktop": "dev.formalsnake.trove",
+    "trove": {"title": "Trove", "rev": "779772472c7041d2fdc1e541643e42fc7e88266f", "icon": "packaging/icon.png", "rust": "rustup", "linux_only": True, "desktop": "dev.formalsnake.trove",
               "dbus": ["org.freedesktop.impl.portal.desktop.trove", "org.freedesktop.FileManager1"], "portal": "trove"},
 }
 
