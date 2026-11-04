@@ -883,8 +883,8 @@ version = "2.2.5,21124"
 
 [[pkg]]
 name = "padbridge"
-source = "git:https://github.com/FormalStudio/padbridge@a25547dacf938c31b371bc7ea6cd58f0159f45a7"
-rev = "a25547dacf938c31b371bc7ea6cd58f0159f45a7"
+source = "git:https://github.com/FormalStudio/padbridge@f4f18ad96403753e86a5e6065090998ebb73fb0d"
+rev = "f4f18ad96403753e86a5e6065090998ebb73fb0d"
 
 [[pkg]]
 name = "pam_ssh_agent_auth"
