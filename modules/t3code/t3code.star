@@ -48,6 +48,21 @@ def t3code(host):
                 "version": 1,
                 "records": [_environment(name, s) for name, s in SERVERS.items()],
             }),
+            # The launcher's entry. The app only writes a NoDisplay one for its URL scheme, and its
+            # windows carry com.t3tools.T3Code, not the t3code class older releases registered.
+            file("~/.local/share/applications/t3code.desktop", content = "\n".join([
+                "[Desktop Entry]",
+                "Type=Application",
+                "Name=T3 Code",
+                "Comment=Minimal web GUI for coding agents",
+                "Exec=" + home + "/.local/bin/t3code-desktop %U",
+                "Icon=t3code",
+                "StartupWMClass=com.t3tools.T3Code",
+                "Terminal=false",
+                "Categories=Development;",
+                "MimeType=x-scheme-handler/t3code;",
+                "",
+            ])),
         ]
     if host.name in SERVERS:
         exec = STORE + "/t3 serve --host 127.0.0.1 --port 3773 " + home + "/Developer"
