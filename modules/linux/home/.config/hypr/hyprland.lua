@@ -657,6 +657,11 @@ hl.window_rule({
   no_blur = true,
 })
 
+-- Atoll runs Mac apps, whose windows are sized by the app and draw their own
+-- title bar. Every Atoll window carries the xdg-toplevel-tag "atoll" (its class
+-- is the app's bundle identifier), so they float at their own size.
+hl.window_rule({ match = { xdg_tag = "^atoll$" }, float = true })
+
 -- Blur behind the shell's own layer surfaces: FormalShell paints its cards
 -- at theme.surfaceOpacity, so the blur under them is what shows through.
 -- ignore_alpha 0.2 keeps the fully transparent gaps in the bar unblurred.
