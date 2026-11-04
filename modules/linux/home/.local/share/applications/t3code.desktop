@@ -1,10 +1,10 @@
 [Desktop Entry]
 Type=Application
-Name=T3 Code (Alpha)
+Name=T3 Code
 Comment=Minimal web GUI for coding agents
 Exec=/home/kyandesutter/.local/bin/t3code-desktop %U
 Icon=t3code
-StartupWMClass=t3code
+StartupWMClass=com.t3tools.T3Code
 Terminal=false
 Categories=Development;
 MimeType=x-scheme-handler/t3code;
