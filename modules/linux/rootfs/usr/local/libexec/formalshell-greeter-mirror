@@ -17,7 +17,8 @@ copy() {
     rm -f "$tmp" "$greeter/$2"
   fi
 }
-wallpaper=$(runuser -u kyandesutter -- jq -r '.wallpaper // empty' "$state/state.json" 2>/dev/null || true)
+# The half the session's mode shows: wallpaperDark in dark mode when set.
+wallpaper=$(runuser -u kyandesutter -- jq -r 'if .mode == "dark" and (.wallpaperDark // "") != "" then .wallpaperDark else .wallpaper // empty end' "$state/state.json" 2>/dev/null || true)
 copy "${wallpaper:-/nonexistent}" wallpaper
 copy "$state/theme.json" theme.json
 copy "$home/.face" avatars/kyandesutter
