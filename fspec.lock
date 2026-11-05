@@ -437,15 +437,7 @@ rev = "eda23f802d58e295462720eba0142878892990de"
 [[pkg]]
 name = "fspec"
 source = "git:https://github.com/FormalStudio/formalspec@main"
-rev = "552590ac09c879ea3cf457e872c13aa7d9a80f43"
-
-[pkg.aarch64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/fspec@sha256:bda103b36d928644e0ab8a31c5439719181586492b2e624d8bb9eac296f50c22"
-build = "0c0ee7fc"
-
-[pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/fspec@sha256:a2d2265c2e28eb55434320b1096835a704908ed3329698f12677b30e1e9c3031"
-build = "0c0ee7fc"
+rev = "5f314b23ef65131d52c81084cee4233eea82346f"
 
 [[pkg]]
 name = "fut"
