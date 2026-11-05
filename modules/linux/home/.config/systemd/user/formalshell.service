@@ -1,4 +1,7 @@
 [Unit]
+# uwsm puts XDG_CURRENT_DESKTOP in the manager only just before the target, and the condition is
+# checked when the job runs: unordered, it runs first and the shell is skipped for the session.
+After=graphical-session.target
 ConditionEnvironment=XDG_CURRENT_DESKTOP=Hyprland
 Description=FormalShell
 PartOf=graphical-session.target
