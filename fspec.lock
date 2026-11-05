@@ -595,6 +595,11 @@ url = "https://github.com/Kopuz-org/kopuz/releases/download/v0.67.0/Kopuz_0.67.0
 hash = "sha256-a4EzyKPiHIs69YiyP8axrWUBfHuFx76Q4RYY80b1ITs="
 
 [[pkg]]
+name = "kopuz-native"
+source = "git:https://github.com/Kopuz-org/kopuz-native@9b09ff274c127e4e69a0da64aed1b1d1d0d12759"
+rev = "9b09ff274c127e4e69a0da64aed1b1d1d0d12759"
+
+[[pkg]]
 name = "kopuzd"
 source = "git:https://github.com/Kopuz-org/kopuz@v0.67.0"
 rev = "7c25238faece34ac40196affaa3340e83c6a77cc"

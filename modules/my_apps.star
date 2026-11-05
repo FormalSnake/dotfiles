@@ -10,6 +10,9 @@ APPS = {
     # `dbus` names D-Bus services the app ships in packaging/linux, `portal` its xdg-desktop-portal backend.
     "trove": {"title": "Trove", "rev": "3c9d47e27a59af7602f883c45cf48a75720156c0", "icon": "packaging/icon.png", "rust": "rustup", "linux_only": True, "desktop": "dev.formalsnake.trove",
               "dbus": ["org.freedesktop.impl.portal.desktop.trove", "org.freedesktop.FileManager1"], "portal": "trove"},
+    # Kopuz's native frontend; it attaches to kopuzd below, or starts it from PATH.
+    "kopuz-native": {"title": "Kopuz", "repo": "Kopuz-org/kopuz-native", "rev": "9b09ff274c127e4e69a0da64aed1b1d1d0d12759", "icon": "packaging/icon.png", "rust": "cargo",
+                     "linux_only": True, "desktop": "moe.kopuz.native"},
 }
 
 # kopuzd opens the app's database, and an app older than the daemon refuses its schema, so both
@@ -61,7 +64,7 @@ def _plist(name, title):
 def _nd_app(host, name, app):
     """A NativeDesktop app built from source: a bundle like its nix package made on the macbook,
     the bare binary on Linux."""
-    url = "https://github.com/FormalStudio/" + name
+    url = "https://github.com/" + app.get("repo", "FormalStudio/" + name)
     if host.platform.is_linux:
         steps = [
             'mkdir -p "$FSPEC_SRC.zig"',
