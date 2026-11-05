@@ -73,6 +73,9 @@ g815 = host(
             "mitigations=off",
             # Steam's HTTP threads trip split-lock traps, and each trap stalls the thread.
             "split_lock_detect=off",
+            # The SanDisk Portable SSD stalls I/O under uas (30 s aborts and a host reset), which
+            # holds lvm2-monitor and so graphical.target for a minute, and uwsm waits on that.
+            "usb-storage.quirks=0781:55bb:u",
         ] + QUIET_ARGS,
     ),
     users = [user(USER, uid = 1000, shell = "fish", groups = GROUPS + ["gamemode", "libvirt"])] + rig_users(),
