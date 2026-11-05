@@ -637,6 +637,10 @@ name = "librepods"
 source = "git:https://github.com/FormalSnake/omarchy-pods@3a4c9adf790f081f3589da8e7a4ad4a3599b786f"
 rev = "3a4c9adf790f081f3589da8e7a4ad4a3599b786f"
 
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/librepods@sha256:3c59bfe42ef4f31713f3820956530c070ee93a59c8ccea6659df25ba07e5005d"
+build = "ddd4488c"
+
 [[pkg]]
 name = "lima"
 source = "brew"
