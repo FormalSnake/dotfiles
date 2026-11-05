@@ -413,8 +413,16 @@ done < <("$FIND" "$tmp_root" -mindepth 1 -maxdepth 1 -type d -empty -mtime +0 -p
 
 # Chromium and CEF (ndshell's cefdev) leave a SingletonSocket dir per launch and
 # never remove it when killed: 3.4k of them in Oct 2026. A dir is stale once no
-# process holds its socket.
-live_sockets=$(lsof -U -Fn 2>/dev/null | sed -n 's/^n//p' || true)
+# process holds its socket. Linux reads /proc/net/unix: Tumbleweed ships no lsof,
+# and an empty list here deleted the socket of a running Discord, so the next launch
+# started a second instance.
+if [[ "$OS" == Darwin ]]; then
+  live_sockets=$(lsof -U -Fn 2>/dev/null | sed -n 's/^n//p')
+else
+  live_sockets=$(awk 'NR > 1 && $8 { print $8 }' /proc/net/unix)
+fi
+singleton_skip=0
+[[ -n "$live_sockets" ]] || singleton_skip=1
 singleton_dirs=0
 while IFS= read -r -d '' sock; do
   d=${sock%/SingletonSocket}
@@ -425,7 +433,7 @@ while IFS= read -r -d '' sock; do
     rmdir -- "$d" 2>/dev/null || continue
   fi
   singleton_dirs=$(( singleton_dirs + 1 ))
-done < <("$FIND" "$tmp_root" -mindepth 2 -maxdepth 2 -name SingletonSocket -type s -mtime +0 -print0 2>/dev/null)
+done < <((( singleton_skip )) || "$FIND" "$tmp_root" -mindepth 2 -maxdepth 2 -name SingletonSocket -type s -mtime +0 -print0 2>/dev/null)
 (( singleton_dirs > 0 )) && plan+=("0|tmp-singleton-dirs|$singleton_dirs stale Chromium singleton dirs")
 
 ### 4. Package manager caches
