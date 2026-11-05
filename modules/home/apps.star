@@ -28,6 +28,11 @@ chmod +x "$FSPEC_OUT/bin/beeper"
 
 FLATPAKS = [
     pkg("signal", source = flatpak("org.signal.Signal")),
+    # Keeps Signal's database key in gnome-keyring, which the login unlocks, instead of plaintext.
+    file(
+        "~/.local/share/flatpak/overrides/org.signal.Signal",
+        content = "[Environment]\nSIGNAL_PASSWORD_STORE=gnome-libsecret\n",
+    ),
     pkg("obsidian", source = flatpak("md.obsidian.Obsidian")),
     pkg("apostrophe", source = flatpak("org.gnome.gitlab.somas.Apostrophe")),
     # Remote desktop into the macbook's Sunshine.
