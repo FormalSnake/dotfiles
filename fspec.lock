@@ -54,6 +54,10 @@ source = "git:https://github.com/CachyOS/ananicy-rules@03ef03fbf7e834385377432cc
 rev = "03ef03fbf7e834385377432ccecaedd32e3414bb"
 patches = "sha256-FMlLfQnAuRjaLnqZPRnyk37Hcg05Wk1FZwvSi2bWXkI="
 
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/ananicy-rules@sha256:87de812738d43cebe21be94f079a46664261db9b9913b1283d6b728488bed5ef"
+build = "fb781da6"
+
 [[pkg]]
 name = "ancs4linux"
 source = "git:https://github.com/pzmarzly/ancs4linux@138451721ff10d3c8634b32656ae3d38a99b9163"
@@ -82,6 +86,10 @@ name = "aquamarine-rig"
 source = "git:https://github.com/hyprwm/aquamarine@f31c47a1b9d300847d8fc3108ad959448103dfc1"
 rev = "f31c47a1b9d300847d8fc3108ad959448103dfc1"
 patches = "sha256-y8Oysf+wH6P9PKZ9HysqvWCFn95eUH50UJ4gEFqYDiE="
+
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/aquamarine-rig@sha256:f262df783848f2fc5b15cfc255fbbf6e44caeab7a283969f790ba2ff0b501ce3"
+build = "137ee5f2"
 
 [[pkg]]
 name = "astro-ls"
@@ -882,6 +890,10 @@ name = "padbridge"
 source = "git:https://github.com/FormalStudio/padbridge@f4f18ad96403753e86a5e6065090998ebb73fb0d"
 rev = "f4f18ad96403753e86a5e6065090998ebb73fb0d"
 
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/padbridge@sha256:8955c7f30b90baa096cec2a95c38900e17f70aad19672a1f0d95174b1be4521d"
+build = "4ba98166"
+
 [[pkg]]
 name = "pam_ssh_agent_auth"
 source = "git:https://github.com/jbeverly/pam_ssh_agent_auth@7ff785809f6ecad45051e333c0ffa72e15ba4f2a"
@@ -1261,6 +1273,10 @@ build = "4e782afc"
 name = "wlrctl"
 source = "git:https://git.sr.ht/~brocellous/wlrctl@afe60da062ea315b92f2a9857e50b77e0b3a4b7e"
 rev = "afe60da062ea315b92f2a9857e50b77e0b3a4b7e"
+
+[pkg.aarch64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/wlrctl@sha256:9b5220de580e1dc4dd9cb5d406a6a40dd0fb5f93f13e60de35fd7bca1b7149b9"
+build = "83dbb0e3"
 
 [[pkg]]
 name = "wordcraft"
