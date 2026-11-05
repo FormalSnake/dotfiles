@@ -145,7 +145,7 @@ SERVICES = [
         exec = BIN + "/audio-autoswitch",
         user = True,
         restart = "always",
-        description = "Switch default output to newly-connected audio devices",
+        description = "Move Bluetooth audio cards that come up profile-less to A2DP",
         systemd = {"RestartSec": 3, "unit": {"After": "wireplumber.service"}, "install": {"WantedBy": "pipewire.service"}},
     ),
 ]
