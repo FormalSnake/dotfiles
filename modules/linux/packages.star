@@ -35,7 +35,8 @@ SYSTEM = [
     # FormalShell serves org.freedesktop.Notifications. swaync's D-Bus activation takes the name
     # whenever a notification lands while the shell is down, and keeps it after the shell is back.
     # openSUSE's sway branding requires it; the greeter's sway runs its own config.
-    "!SwayNotificationCenter", "!sway-branding-openSUSE", "sway-branding-upstream",
+    "!SwayNotificationCenter", "!SwayNotificationCenter-bash-completion",
+    "!SwayNotificationCenter-fish-completion", "!sway-branding-openSUSE", "sway-branding-upstream",
     "syncthing", "docker", "iputils", "iperf", "tuned", "tuned-ppd", "sshfs", "usbmuxd",
     "imobiledevice-tools", "ifuse", "smartmontools", "pam_ssh_agent_auth", "sof-firmware", "bluez",
     "chrony", "fwupd", "glibc-locale", "system-group-wheel", "system-group-hardware", "cnf",
