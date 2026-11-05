@@ -24,7 +24,7 @@ SERVICES = [
 
     autostart("discord", BIN + "/discord --start-minimized", "Discord (minimized to tray)", hyprland = True),
     autostart("beeper", STORE + "/beeper", "Beeper", needs = STORE + "/beeper"),
-    autostart("flare", "/usr/bin/flatpak run de.schmidhuberj.Flare", "Flare (Signal)"),
+    autostart("signal", "/usr/bin/flatpak run org.signal.Signal --start-in-tray", "Signal (tray)"),
     autostart("messages", STORE + "/messages", "Messages", needs = STORE + "/messages"),
     # Mounts any drive plugged in under /run/media. A host's ~/.config/udiskie/config.yml skips the
     # volumes it mounts with units of its own.

@@ -399,14 +399,6 @@ source = "brew"
 version = "4.9.3"
 
 [[pkg]]
-name = "flare"
-source = "flatpak:de.schmidhuberj.Flare"
-version = "0.22.7"
-
-[pkg.any]
-commit = "1c01fcf684499f04b6770a39fccf711ae4c19c263fa17fe380c1fd98e4622adb"
-
-[[pkg]]
 name = "font-sf-pro"
 source = "brew:cask"
 version = "latest"
@@ -999,6 +991,14 @@ bins = ["rust-analyzer"]
 name = "rust-analyzer"
 source = "brew"
 version = "2026-10-26"
+
+[[pkg]]
+name = "signal"
+source = "flatpak:org.signal.Signal"
+version = "8.33.0"
+
+[pkg.any]
+commit = "a97de2f8a57c2dc2129b5af451b9eb9a693df17ee2a4455f534f18541929de4c"
 
 [[pkg]]
 name = "sober"

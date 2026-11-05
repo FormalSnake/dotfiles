@@ -27,7 +27,7 @@ chmod +x "$FSPEC_OUT/bin/beeper"
 """
 
 FLATPAKS = [
-    pkg("flare", source = flatpak("de.schmidhuberj.Flare")),
+    pkg("signal", source = flatpak("org.signal.Signal")),
     pkg("obsidian", source = flatpak("md.obsidian.Obsidian")),
     pkg("apostrophe", source = flatpak("org.gnome.gitlab.somas.Apostrophe")),
     # Remote desktop into the macbook's Sunshine.

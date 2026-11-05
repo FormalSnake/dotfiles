@@ -2,7 +2,7 @@ load("//lib/paths.star", "STORE")
 
 # App data `fspec sync` moves between the Linux pair. `live` items merge both ways, newest wins;
 # `seed` items copy whole to a host that has none, since single-writer databases and rotating
-# tokens break when two copies diverge. Flare, Beeper and 1Password link per device instead.
+# tokens break when two copies diverge. Signal, Beeper and 1Password link per device instead.
 
 PAIR = ["g815", "e1504g"]
 
