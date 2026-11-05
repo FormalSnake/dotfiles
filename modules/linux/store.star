@@ -106,8 +106,8 @@ STORE = [
     pkg(
         "librepods",
         source = git(
-            "https://github.com/thisisgm/omarchy-pods",
-            rev = "307c5a6d2109f088d8e6a558c933ebe4f6b1db01",
+            "https://github.com/FormalSnake/omarchy-pods",
+            rev = "3a4c9adf790f081f3589da8e7a4ad4a3599b786f",
             image = TUMBLEWEED,
             deps = [
                 "cmake", "make", "gcc-c++", "pkgconf", "qt6-base-devel", "qt6-declarative-devel",
@@ -115,7 +115,6 @@ STORE = [
                 "qt6-linguist-devel", "libopenssl-devel", "libpulse-devel",
             ],
         ),
-        patches = glob("patches/librepods-*.patch"),
         build = sh('cmake -S "$FSPEC_SRC/daemon" -B "$FSPEC_CACHE/build" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$FSPEC_OUT" && cmake --build "$FSPEC_CACHE/build" -j && cmake --install "$FSPEC_CACHE/build"'),
     ),
     # No Linux release, and its build script asks nix for its builtins. Tumbleweed's nix segfaults

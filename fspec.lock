@@ -634,13 +634,8 @@ version = "1.4.0"
 
 [[pkg]]
 name = "librepods"
-source = "git:https://github.com/thisisgm/omarchy-pods@307c5a6d2109f088d8e6a558c933ebe4f6b1db01"
-rev = "307c5a6d2109f088d8e6a558c933ebe4f6b1db01"
-patches = "sha256-bizsyzUE3gSqcTrHy8Z49MBgwU2LW9AJ6mxVhnUkIqo="
-
-[pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/librepods@sha256:9be414288011d2bd2556b0c65c6992a547e7c93a28eed0fe9c2d874234fa048b"
-build = "12d193b0"
+source = "git:https://github.com/FormalSnake/omarchy-pods@3a4c9adf790f081f3589da8e7a4ad4a3599b786f"
+rev = "3a4c9adf790f081f3589da8e7a4ad4a3599b786f"
 
 [[pkg]]
 name = "lima"
