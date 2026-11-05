@@ -107,7 +107,7 @@ STORE = [
         "librepods",
         source = git(
             "https://github.com/FormalSnake/omarchy-pods",
-            rev = "3a4c9adf790f081f3589da8e7a4ad4a3599b786f",
+            rev = "1e59faf50261e1c308e24f1ee333b7475a48922d",
             image = TUMBLEWEED,
             deps = [
                 "cmake", "make", "gcc-c++", "pkgconf", "qt6-base-devel", "qt6-declarative-devel",
