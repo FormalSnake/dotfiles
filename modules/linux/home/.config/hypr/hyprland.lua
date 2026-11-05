@@ -670,7 +670,6 @@ hl.window_rule({ match = { xdg_tag = "^atoll$" }, float = true })
 -- the top of it (the toast stack's resize against Hyprland's `layers`
 -- spring).
 hl.layer_rule({ match = { namespace = "^(formalshell:bar)$" }, blur = true, ignore_alpha = 0.2, no_anim = true })
-hl.layer_rule({ match = { namespace = "^(formalshell:panel)$" }, blur = true, ignore_alpha = 0.2, no_anim = true })
 hl.layer_rule({ match = { namespace = "^(formalshell:tooltip)$" }, blur = true, ignore_alpha = 0.2, no_anim = true })
 hl.layer_rule({ match = { namespace = "^(formalshell:osd)$" }, blur = true, ignore_alpha = 0.2, no_anim = true })
 -- The window switcher draws its card at 0.6, so without the blur under
@@ -683,9 +682,11 @@ hl.layer_rule({ match = { namespace = "^(formalshell:menu)$" }, blur = true, ign
 hl.layer_rule({ match = { namespace = "^(formalshell:polkit)$" }, blur = true, ignore_alpha = 0.6, no_anim = true })
 hl.layer_rule({ match = { namespace = "^(formalshell:plugin-overlay)$" }, blur = true, ignore_alpha = 0.6, no_anim = true })
 hl.layer_rule({ match = { namespace = "^(formalshell:radio)$" }, blur = true, ignore_alpha = 0.6, no_anim = true })
--- The toast cards are drawn at surfaceOpacity too; the clear layer between
--- them falls under the 0.2 mark.
-hl.layer_rule({ match = { namespace = "^(formalshell:notifications)$" }, blur = true, ignore_alpha = 0.2, no_anim = true })
+-- Panels and toasts hang a five-layer cast whose sum passes 0.2 just outside
+-- the card, so at 0.2 the blur frosts a halo round every one of them. The
+-- cast stays under 0.6 and the 0.85 card over it.
+hl.layer_rule({ match = { namespace = "^(formalshell:panel)$" }, blur = true, ignore_alpha = 0.6, no_anim = true })
+hl.layer_rule({ match = { namespace = "^(formalshell:notifications)$" }, blur = true, ignore_alpha = 0.6, no_anim = true })
 -- The arrival and departure veil fades itself.
 hl.layer_rule({ match = { namespace = "^(formalshell:veil)$" }, no_anim = true })
 
