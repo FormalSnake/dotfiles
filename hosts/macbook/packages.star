@@ -7,6 +7,8 @@ FORMULAE = [
     "pngpaste",
     # network, remote iPhone, VPN
     "wireguard-tools", "libimobiledevice", "ideviceinstaller", "openssl@3",
+    # CanaryPulse DB tunnel (yarn tunnel:db)
+    "cloudflared",
     # Obsidian LiveSync's backend
     "couchdb",
     # FormalShell's night rig, hosts/fstestmac
