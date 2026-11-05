@@ -572,7 +572,7 @@ hl.bind(mod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 -- its assigned workspace. No terminal rule: ghostty opens where you are.
 hl.window_rule({ match = { class = "^([Hh]elium)$" }, workspace = "1" })
 hl.window_rule({ match = { class = "^([Cc]ode|[Zz]ed|dev.zed.Zed)$" }, workspace = "3" })
-hl.window_rule({ match = { class = "^([Ss]lack|WhatsApp|discord|[Bb]eeper|de.schmidhuberj.Flare)$" }, workspace = "4" })
+hl.window_rule({ match = { class = "^([Ss]lack|WhatsApp|discord|[Bb]eeper|org.signal.Signal)$" }, workspace = "4" })
 -- Messages (GPUI) sets no Wayland app-id, so its rule matches the title.
 hl.window_rule({ match = { title = "^(Messages)$" }, workspace = "4" })
 -- Beeper (Electron) maps its main window floating, so it never tiles.
