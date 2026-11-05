@@ -53,6 +53,9 @@ DEFAULTS = {
     "com.apple.AppleMultitouchTrackpad": {"TrackpadThreeFingerDrag": False},
     "com.apple.driver.AppleBluetoothMultitouch.trackpad": {"TrackpadThreeFingerDrag": False},
     "com.apple.WindowManager": {"GloballyEnabled": False},
+    # Crash alerts stack up unattended and sit above the windows screen-region goldens capture.
+    # Reports still land in ~/Library/Logs/DiagnosticReports.
+    "com.apple.CrashReporter": {"DialogType": "none"},
     "com.apple.dt.Xcode": {"IDECustomDerivedDataLocation": "/Volumes/Kyan Drive/DerivedData"},
 }
 
