@@ -611,6 +611,10 @@ name = "kopuz-native"
 source = "git:https://github.com/Kopuz-org/kopuz-native@9b09ff274c127e4e69a0da64aed1b1d1d0d12759"
 rev = "9b09ff274c127e4e69a0da64aed1b1d1d0d12759"
 
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/kopuz-native@sha256:bff7cce61162b79063871a38f5029fdc67ba8783ca2e04e24f606d4dd0f4abb4"
+build = "e45c6835"
+
 [[pkg]]
 name = "kopuzd"
 source = "git:https://github.com/Kopuz-org/kopuz@v0.67.0"
@@ -1174,6 +1178,10 @@ name = "trove"
 source = "git:https://github.com/FormalStudio/trove@3c9d47e27a59af7602f883c45cf48a75720156c0"
 rev = "3c9d47e27a59af7602f883c45cf48a75720156c0"
 
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/trove@sha256:718b2227d3091cd7a0bece39bfaef8682dd802ceb058862927466c0298a37785"
+build = "f63d8fb8"
+
 [[pkg]]
 name = "typescript"
 source = "npm:typescript"
@@ -1187,6 +1195,10 @@ hash = "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4b
 name = "usbfluxd"
 source = "git:https://github.com/corellium/usbfluxd@422734fd2b01ad4fefeefb9c8c4e65a5abd69f0f"
 rev = "422734fd2b01ad4fefeefb9c8c4e65a5abd69f0f"
+
+[pkg.aarch64-darwin]
+oci = "ghcr.io/formalsnake/fspec-cache/usbfluxd@sha256:8feccc1639194beecbfe73c5ff79007259fc2b09b3c672e713c6f60a95e56f7a"
+build = "55c5394f"
 
 [[pkg]]
 name = "uv"
