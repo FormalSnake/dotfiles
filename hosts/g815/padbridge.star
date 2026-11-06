@@ -9,7 +9,7 @@ PADBRIDGE = [
         "padbridge",
         source = git(
             "https://github.com/FormalStudio/padbridge",
-            rev = "0acafb99ec7561167e52d8440d8cb6660b6e3442",
+            rev = "532bbeb808fa3ca5b19552c19b359a79b18c28c6",
             image = TUMBLEWEED,
             deps = ["cargo", "gcc"],
         ),
