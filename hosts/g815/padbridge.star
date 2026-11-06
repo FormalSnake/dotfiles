@@ -1,4 +1,4 @@
-load("//lib/paths.star", "STORE")
+load("//lib/paths.star", "STORE", "TUMBLEWEED")
 load("//lib/units.star", "gui")
 load("//modules/linux/store.star", "sh")
 
@@ -7,8 +7,13 @@ load("//modules/linux/store.star", "sh")
 PADBRIDGE = [
     pkg(
         "padbridge",
-        source = git("https://github.com/FormalStudio/padbridge", rev = "f4f18ad96403753e86a5e6065090998ebb73fb0d"),
-        build = sh('install -Dm755 "$FSPEC_SRC/padbridge.py" "$FSPEC_OUT/bin/padbridge"'),
+        source = git(
+            "https://github.com/FormalStudio/padbridge",
+            rev = "71636408df10bdb41d390150d16afe040a70c1cf",
+            image = TUMBLEWEED,
+            deps = ["cargo", "gcc"],
+        ),
+        build = sh('cargo build --release --locked && install -Dm755 target/release/padbridge "$FSPEC_OUT/bin/padbridge"'),
     ),
     gui(
         "padbridge",
