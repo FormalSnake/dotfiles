@@ -895,8 +895,8 @@ version = "2.2.5,21124"
 
 [[pkg]]
 name = "padbridge"
-source = "git:https://github.com/FormalStudio/padbridge@532bbeb808fa3ca5b19552c19b359a79b18c28c6"
-rev = "532bbeb808fa3ca5b19552c19b359a79b18c28c6"
+source = "git:https://github.com/FormalStudio/padbridge@b8815ceefcbff6e0fc9bf3c22a83b5e9c7d7b09b"
+rev = "b8815ceefcbff6e0fc9bf3c22a83b5e9c7d7b09b"
 
 [pkg.x86_64-linux]
 oci = "ghcr.io/formalsnake/fspec-cache/padbridge@sha256:5b8897d1a1451cb481796fced184f3f577dad9d7579ca607a297358785002004"
