@@ -1,5 +1,5 @@
 load("//lib/paths.star", "STORE", "TUMBLEWEED")
-load("//lib/units.star", "gui")
+load("//lib/units.star", "gui", "oneshot")
 load("//modules/linux/store.star", "sh")
 
 # Hands the mouse and keyboard to the iPad left of the monitor, as a BLE HID device, and plays
@@ -9,7 +9,7 @@ PADBRIDGE = [
         "padbridge",
         source = git(
             "https://github.com/FormalStudio/padbridge",
-            rev = "486bf9c5ffab1c771b9a77e7a327150409cb3c60",
+            rev = "1a4b45ca66ca47254bd990578226ff688cd95b6e",
             image = TUMBLEWEED,
             deps = ["cargo", "gcc"],
         ),
@@ -23,5 +23,15 @@ PADBRIDGE = [
         hyprland = True,
         needs = STORE + "/padbridge",
         RestartSec = 2,
+    ),
+    # The iPad parks an idle link in sniff mode, where g815 may send one report per ~38ms and
+    # motion arrives late. The adapter's default policy is reapplied on every power up.
+    oneshot(
+        "padbridge-no-sniff",
+        STORE + "/padbridge --no-sniff",
+        "Keep Bluetooth links out of sniff mode for the iPad's input",
+        unit = {"After": "bluetooth.service", "ConditionPathExists": STORE + "/padbridge"},
+        remain = False,
+        install = {"WantedBy": ["bluetooth.service"]},
     ),
 ]
