@@ -11,13 +11,13 @@ APPS = {
     "trove": {"title": "Trove", "rev": "3c9d47e27a59af7602f883c45cf48a75720156c0", "icon": "packaging/icon.png", "rust": "rustup", "linux_only": True, "desktop": "dev.formalsnake.trove",
               "dbus": ["org.freedesktop.impl.portal.desktop.trove", "org.freedesktop.FileManager1"], "portal": "trove"},
     # Kopuz's native frontend; it attaches to kopuzd below, or starts it from PATH.
-    "kopuz-native": {"title": "Kopuz", "repo": "Kopuz-org/kopuz-native", "rev": "9b09ff274c127e4e69a0da64aed1b1d1d0d12759", "icon": "packaging/icon.png", "rust": "cargo",
+    "kopuz-native": {"title": "Kopuz", "repo": "Kopuz-org/kopuz-native", "rev": "628185d4ec3a61488bde0c5fab34708926c76bdf", "icon": "packaging/icon.png", "rust": "cargo",
                      "linux_only": True, "desktop": "moe.kopuz.native"},
 }
 
 # kopuzd opens the app's database, and an app older than the daemon refuses its schema, so both
 # come from one release.
-KOPUZ = "0.67.0"
+KOPUZ = "0.67.1"
 
 ND_DEPS = [
     "gcc", "gcc-c++", "make", "pkgconf", "git-core", "curl", "tar", "xz", "fontconfig-devel",
