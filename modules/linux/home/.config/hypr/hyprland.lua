@@ -533,9 +533,6 @@ hl.bind(mod .. " + Tab", hl.dsp.focus({ workspace = "previous" }))
 -- corner and the minimap (a long press, or an icon dragged out past the
 -- column) open it too.
 hl.bind(mod .. " + O", hl.dsp.exec_cmd("/opt/fspec/current/bin/formalshell ipc --any-display call workspaces overview toggle"))
--- The Keychron's task view and launchpad keys (70-keychron-k2-he.hwdb).
-hl.bind("XF86LaunchA", hl.dsp.exec_cmd("/opt/fspec/current/bin/formalshell ipc --any-display call workspaces overview toggle"))
-hl.bind("XF86LaunchB", hl.dsp.exec_cmd("/opt/fspec/current/bin/formalshell ipc --any-display call menu toggle"))
 
 -- Alt-Tab. Hyprland has no most-recently-used hold-and-cycle switcher
 -- (niri's `recent-windows`). Under FormalShell the shell draws one
