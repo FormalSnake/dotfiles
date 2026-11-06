@@ -1,2 +1,4 @@
 # The iPad moves fewer points per count than Hyprland's adaptive profile does here.
 sensitivity = 2.0
+# Counted after sensitivity, so it doubles with it to keep the same shove back.
+return_push = 600.0
