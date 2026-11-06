@@ -611,10 +611,18 @@ name = "kopuz-native"
 source = "git:https://github.com/Kopuz-org/kopuz-native@628185d4ec3a61488bde0c5fab34708926c76bdf"
 rev = "628185d4ec3a61488bde0c5fab34708926c76bdf"
 
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/kopuz-native@sha256:726fbf37ecca4be875ffd2c87651bf8021fa60ab73c953e603e145010f9c44a9"
+build = "2f6d507c"
+
 [[pkg]]
 name = "kopuzd"
 source = "git:https://github.com/Kopuz-org/kopuz@v0.67.1"
 rev = "7a3474e9aa880f7ddc4e68a8846c48b23e13302c"
+
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/kopuzd@sha256:c13af687d1d2d643d33a8864bc16664fb29ab0daa44ae277e0ca4dddf07e9279"
+build = "3b5532a5"
 
 [[pkg]]
 name = "lazydocker"
