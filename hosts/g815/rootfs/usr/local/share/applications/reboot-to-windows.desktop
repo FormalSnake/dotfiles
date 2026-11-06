@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Reboot to Windows
+Exec=systemctl start reboot-to-windows.service
+Icon=system-reboot
+Categories=System;

@@ -1,5 +1,5 @@
 # The FormalOS boot look: a silent Limine (any key in its second shows the menu over a centred
-# logo), then a plymouth splash with the logo, the wordmark and a progress bar, held on screen into
+# logo; a host with another OS shows it for four), then a plymouth splash with the logo, the wordmark and a progress bar, held on screen into
 # the greeter. Limine has no boot counting, so its default entry chainloads systemd-boot, which
 # counts tries for fspec-boot-guard behind a zero timeout. FormalShell's
 # docs/superpowers/specs/2026-10-30-seams.md is the whole chain.
@@ -27,6 +27,7 @@ def boot_theme(
         palette,
         palette_bright,
         timeout = 1,
+        menu_timeout = 4,
         wallpaper_size = "400x560",
         wallpaper_scale = 4,
         preferred = "tumbleweed-*",
@@ -41,6 +42,7 @@ def boot_theme(
         "palette": palette,
         "palette_bright": palette_bright,
         "timeout": timeout,
+        "menu_timeout": menu_timeout,
         "wallpaper_size": wallpaper_size,
         "wallpaper_scale": wallpaper_scale,
         "preferred": preferred,
@@ -89,8 +91,10 @@ def limine_entry(name, comment, path, protocol = "efi"):
 def _limine_conf(t, entries):
     c = t["colours"]
     return "\n".join([
-        "timeout: %d" % t["timeout"],
-        "quiet: yes",
+        # A host with another OS to boot shows the menu, so picking it needs no key timed into
+        # the quiet second.
+        "timeout: %d" % (t["menu_timeout"] if entries else t["timeout"]),
+        "quiet: %s" % ("no" if entries else "yes"),
         "editor_enabled: no",
         "graphics: yes",
         "wallpaper: boot():/EFI/limine/%s.png" % t["name"],
