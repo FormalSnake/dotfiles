@@ -16,8 +16,11 @@ if (s == 2) { logo = Image("logo-2.png"); wordmark = Image("wordmark-2.png"); }
 if (s == 3) { logo = Image("logo-3.png"); wordmark = Image("wordmark-3.png"); }
 if (s == 4) { logo = Image("logo-4.png"); wordmark = Image("wordmark-4.png"); }
 
-cx = Window.GetX() + Math.Int(Window.GetWidth() / 2);
-cy = Window.GetY() + Math.Int(Window.GetHeight() / 2);
+# Plymouth centres every display in one box, so any display's own centre is the box's.
+# Without an index GetX/GetY are the smallest display's offset and GetWidth/GetHeight the
+# largest display's size, which put the logo in a corner with two displays of different size.
+cx = Window.GetX(0) + Math.Int(Window.GetWidth(0) / 2);
+cy = Window.GetY(0) + Math.Int(Window.GetHeight(0) / 2);
 
 logo_sprite = Sprite(logo);
 logo_sprite.SetPosition(cx - Math.Int(logo.GetWidth() / 2), cy - 66 * s - Math.Int(logo.GetHeight() / 2), 1);

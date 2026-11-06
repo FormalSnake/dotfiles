@@ -154,7 +154,9 @@ def _chime(c):
 def formalos_boot(t, entries = []):
     return (_chime(t["chime"]) if t["chime"] else []) + [
         pkg("plymouth", source = zypper(), files = [
-            file("/etc/plymouth/plymouthd.conf", content = "[Daemon]\nTheme=%s\nShowDelay=0\nDeviceTimeout=8\n" % t["name"]),
+            # DeviceScale pins 1: plymouth guesses a HiDPI scale per panel off its EDID size, and
+            # g815's 2560x1600 panel taken at 2 shrank the splash on every display beside it.
+            file("/etc/plymouth/plymouthd.conf", content = "[Daemon]\nTheme=%s\nShowDelay=0\nDeviceTimeout=8\nDeviceScale=1\n" % t["name"]),
         ]),
         pkg("plymouth-plugin-script", source = zypper()),
         # plymouthd is gone before a compositor opens the card. Left alive (deactivated) it held
