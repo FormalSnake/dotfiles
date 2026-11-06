@@ -536,8 +536,8 @@ hl.bind(mod .. " + O", hl.dsp.exec_cmd("/opt/fspec/current/bin/formalshell ipc -
 -- The Keychron K2 HE's fn+F4 (Windows mode) is a Super+E chord.
 hl.bind("SUPER + E", hl.dsp.exec_cmd("/opt/fspec/current/bin/formalshell ipc --any-display call workspaces overview toggle"))
 
--- Zen: the focused window floated alone and centred on an empty workspace,
--- the sidebar on its rail. Again puts it back in its column.
+-- Zen: the focused window floated and centred, the rest of the tape slid
+-- off screen and the sidebar on its rail. Again puts it back in its column.
 hl.bind(mod .. " + Z", hl.dsp.exec_cmd("/opt/fspec/current/bin/formalshell ipc --any-display call zen toggle"))
 
 -- Alt-Tab. Hyprland has no most-recently-used hold-and-cycle switcher
