@@ -1,0 +1,24 @@
+# Keychron K2 HE in Windows mode sends F1..F12 on the top row and the media
+# keys only under fn. Swap the two so the row works as printed, with F-keys
+# under fn. F3 and F4 under fn are Win+Tab and Win+E chords, so the plain keys
+# become KEY_SCALE and KEY_DASHBOARD (XF86LaunchA/B: overview and launcher in
+# hyprland.lua). F5 and F6 drive the board's own backlight under fn and stay.
+evdev:input:b0003v3434p0E21*
+ KEYBOARD_KEY_7003a=brightnessdown
+ KEYBOARD_KEY_7003b=brightnessup
+ KEYBOARD_KEY_7003c=scale
+ KEYBOARD_KEY_7003d=dashboard
+ KEYBOARD_KEY_70040=previoussong
+ KEYBOARD_KEY_70041=playpause
+ KEYBOARD_KEY_70042=nextsong
+ KEYBOARD_KEY_70043=mute
+ KEYBOARD_KEY_70044=volumedown
+ KEYBOARD_KEY_70045=volumeup
+ KEYBOARD_KEY_c0070=f1
+ KEYBOARD_KEY_c006f=f2
+ KEYBOARD_KEY_c00b6=f7
+ KEYBOARD_KEY_c00cd=f8
+ KEYBOARD_KEY_c00b5=f9
+ KEYBOARD_KEY_c00e2=f10
+ KEYBOARD_KEY_c00ea=f11
+ KEYBOARD_KEY_c00e9=f12
