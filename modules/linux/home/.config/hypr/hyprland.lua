@@ -533,6 +533,8 @@ hl.bind(mod .. " + Tab", hl.dsp.focus({ workspace = "previous" }))
 -- corner and the minimap (a long press, or an icon dragged out past the
 -- column) open it too.
 hl.bind(mod .. " + O", hl.dsp.exec_cmd("/opt/fspec/current/bin/formalshell ipc --any-display call workspaces overview toggle"))
+-- The Keychron K2 HE's fn+F4 (Windows mode) is a Super+E chord.
+hl.bind("SUPER + E", hl.dsp.exec_cmd("/opt/fspec/current/bin/formalshell ipc --any-display call workspaces overview toggle"))
 
 -- Alt-Tab. Hyprland has no most-recently-used hold-and-cycle switcher
 -- (niri's `recent-windows`). Under FormalShell the shell draws one
