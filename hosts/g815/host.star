@@ -62,7 +62,7 @@ g815 = host(
     name = "g815",
     platform = "x86_64-linux",
     system = tumbleweed(
-        packages = [p for p in PACKAGES if p not in ["patterns-kde-kde_plasma", "kscreen6"]] + GAMING_PACKAGES + HOST_PACKAGES + VM_PACKAGES + DEV_PACKAGES + [
+        packages = PACKAGES + GAMING_PACKAGES + HOST_PACKAGES + VM_PACKAGES + DEV_PACKAGES + [
             "systemd-resolved", "!patterns-kde-kde_plasma", "!plasma6-session", "!plasma6-desktop", "!plasma6-workspace", "!kwin6",
             "!konsole", "!kscreen6", "!libplasma6-components", "!libplasma6-desktoptheme", "!plasma6-activities",
             "!breeze6", "!breeze6-cursors", "!breeze6-decoration", "!breeze6-style", "!breeze6-style-qt5",

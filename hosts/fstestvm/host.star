@@ -11,7 +11,7 @@ load("//modules/linux/store.star", "FORMALSHELL")
 # mac80211_hwsim, BlueZ, UPower, polkit, logind, PAM, pipewire), and a headless sway parent that
 # dev/smoke.sh nests Hyprland in on the vkms software KMS card. Beside that, the real hosts' boot
 # on the VM's own display, which `fspec vm record --boot` films: Limine, the FormalOS splash, the
-# FormalShell greeter and a desktop. docs/fstestvm.md is the hand-off.
+# FormalShell greeter and a desktop. formalspec's docs/formalshell-vm-rig.md is the hand-off.
 
 KEYS = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJi88WllIdjMaW5UJYbT7+NRYzSCrnKKYjGR7wL4n4io macbook",
@@ -49,6 +49,12 @@ ROOTFS = tree(["hosts/fstestvm/rootfs/"], perms = {
     "/etc/sudoers.d/90-fstestvm": "0440",
     "/etc/fstestvm/eap-users": "0600",
 })
+
+# The FormalShell greeter and lock screen files the Tumbleweed hosts carry.
+SHARED = [
+    file("/" + p, src = "modules/linux/rootfs/" + p)
+    for p in ["etc/formalshell/login-env.conf", "etc/pam.d/formalshell-lock", "etc/pam.d/formalshell-login", "etc/tmpfiles.d/formalshell-greeter.conf"]
+]
 
 # fspec names each unit fspec-<name>, which is what their dependencies on each other name. A $ in
 # an ExecStart is systemd's variable expansion, hence the $$ in the password hash.
@@ -125,7 +131,7 @@ def _services():
     ]
 
 def _fstestvm(h):
-    return [FORMALSHELL] + ROOTFS + _services() + [
+    return [FORMALSHELL] + ROOTFS + SHARED + _services() + [
         file("/etc/ssh/ssh_known_hosts", src = "modules/linux/rootfs/etc/ssh/ssh_known_hosts", perms = "0644"),
         # Tumbleweed starts bluetoothd from bluetooth.target, which only an adapter brings up.
         file("/etc/systemd/system/multi-user.target.wants/bluetooth.service", mode = "link", target = "/usr/lib/systemd/system/bluetooth.service"),

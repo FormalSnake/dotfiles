@@ -1,3 +1,4 @@
+load("//lib/paths.star", "KDE_HOSTS")
 load("//lib/tree.star", "tree")
 load("//modules/home/apps.star", "FLATPAKS", "TOOLS")
 load("//modules/home/claude.star", "claude")
@@ -26,7 +27,7 @@ def home(linked = []):
         files += claude(host) + t3code(host)
         if linux:
             files += SERVICES + HIDDEN_APPS + FLATPAKS + DISCORD + TOOLS
-            if host.name != "g815":
+            if host.name in KDE_HOSTS:
                 files += KDE_SERVICES + KDE_APPS
         return files
     return module

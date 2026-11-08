@@ -4,6 +4,9 @@ BIN = HOME + "/.local/bin"
 STORE = "/opt/fspec/current/bin"
 LIBEXEC = "/usr/local/libexec"
 
+# The Linux hosts that run Plasma beside Hyprland.
+KDE_HOSTS = ["e1504g"]
+
 # git() builds that link system libraries run in the target's distro, so the sonames match.
 TUMBLEWEED = "registry.opensuse.org/opensuse/tumbleweed"
 

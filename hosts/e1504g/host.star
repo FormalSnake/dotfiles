@@ -7,7 +7,7 @@ load("//modules/my_apps.star", "my_apps")
 load("//modules/home/home.star", "home")
 load("//modules/linux/base.star", "GROUPS", "swapfile")
 load("//modules/linux/linux.star", "linux")
-load("//modules/linux/packages.star", "PACKAGES")
+load("//modules/linux/packages.star", "KDE_PACKAGES", "PACKAGES")
 load("//modules/linux/secrets.star", "linux_secrets")
 load("//modules/sync.star", "sync_items")
 load("//modules/tools.star", "tools")
@@ -34,7 +34,7 @@ e1504g = host(
         # foot, strace and dbus-1-daemon: FormalShell's nested smoke run
         # (dev/smoke.sh with a g815 build in FS_RESULT), what reads the
         # shell's numbers on this machine's own GPU.
-        packages = PACKAGES + ["systemd-experimental", "foot", "strace", "dbus-1-daemon"],
+        packages = PACKAGES + KDE_PACKAGES + ["systemd-experimental", "foot", "strace", "dbus-1-daemon"],
         # The initrd loads both blacklisted modules before /etc/modprobe.d applies.
         kernel_args = [
             "mitigations=off", "intel_iommu=on", "module_blacklist=ucsi_acpi,intel_ish_ipc",
