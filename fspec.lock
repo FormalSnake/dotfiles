@@ -242,11 +242,6 @@ source = "brew"
 version = "2.9.8"
 
 [[pkg]]
-name = "dipc"
-source = "brew"
-version = "1.2.0"
-
-[[pkg]]
 name = "direnv"
 source = "brew"
 version = "2.38.2"
@@ -432,15 +427,7 @@ rev = "fcf537df8c92fe00c55584291f3030c1fd7ead9b"
 [[pkg]]
 name = "fspec"
 source = "git:https://github.com/FormalStudio/formalspec@main"
-rev = "030e6b842acda49f62552b821482d820e6f2a297"
-
-[pkg.aarch64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/fspec@sha256:297d5e64cc5f65d2f8806535a5e83f5ecbb732ee04765e0d7e68536407aec91b"
-build = "6543604f"
-
-[pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/fspec@sha256:bd556e017113afd683669741f8052105bf4836fa785593c559085cf9e13f15c8"
-build = "6543604f"
+rev = "6fc36798b311a5edf8efe46dc0ee4270cb29d4cd"
 
 [[pkg]]
 name = "fut"
@@ -529,11 +516,6 @@ version = "0.15.0"
 [pkg.x86_64-linux]
 url = "https://github.com/storytold/gridcraft/releases/download/v0.15.0/gridcraft-0.15.0-linux-x86_64.tar.gz"
 hash = "sha256-aBD4znOUtafN+vOYOCV7Y4Tc65+DJQJNR124le5Z2qo="
-
-[[pkg]]
-name = "gstreamer-runtime"
-source = "brew:cask"
-version = "1.28.6"
 
 [[pkg]]
 name = "helium"
@@ -627,11 +609,6 @@ version = "0.25.2"
 name = "lazygit"
 source = "brew"
 version = "0.66.2"
-
-[[pkg]]
-name = "libadwaita"
-source = "brew"
-version = "1.10.0"
 
 [[pkg]]
 name = "libimobiledevice"
@@ -806,11 +783,6 @@ version = "24.22.1"
 
 [[pkg]]
 name = "nordvpn"
-source = "brew:cask"
-version = "10.14.0"
-
-[[pkg]]
-name = "nordvpn"
 source = "zypper:"
 
 [[pkg]]
@@ -892,11 +864,6 @@ patches = "sha256-oxGJzyFcA3ZmOSOkNxetKDFh5LlZTk4Ke2cdQhL+JCw="
 [pkg.aarch64-darwin]
 oci = "ghcr.io/formalsnake/fspec-cache/pam_ssh_agent_auth@sha256:0cf358681d2d2917bc0f66b882477cf82136b913fbf02b5982b8d70ae49bc5a8"
 build = "d5f90445"
-
-[[pkg]]
-name = "parsec"
-source = "brew:cask"
-version = "150-105c"
 
 [[pkg]]
 name = "parsec"
@@ -1022,11 +989,6 @@ url = "https://github.com/gaspar-of-time/Steamed/archive/14e8a1c0db188870ab3ac20
 hash = "sha256-roaN9JfRExKDBT+VSf1hFMhOqqpx1nxO7Dg976AvUUI="
 
 [[pkg]]
-name = "stow"
-source = "brew"
-version = "2.4.1"
-
-[[pkg]]
 name = "stripe"
 source = "github:stripe/stripe-cli"
 version = "1.43.2"
@@ -1034,11 +996,6 @@ version = "1.43.2"
 [pkg.aarch64-darwin]
 url = "https://github.com/stripe/stripe-cli/releases/download/v1.43.2/stripe_1.43.2_mac-os_arm64.tar.gz"
 hash = "sha256-9E5eUGukhGi8iJ2L+KYhEdLJaegQgVvbzfjZQ9UGtDA="
-
-[[pkg]]
-name = "syncthing-app"
-source = "brew:cask"
-version = "2.1.6-1"
 
 [[pkg]]
 name = "t3"
@@ -1052,11 +1009,6 @@ hash = "sha256-In99eeC4rvBQokMOQtlRAyZu+Kf3Iv6/6aKMstJmtHc="
 [pkg.x86_64-linux]
 url = "https://github.com/pingdotgg/t3code/releases/download/v0.1.3/t3-0.1.3-linux-x64.tar.gz"
 hash = "sha256-Y80PBUfu9iu07OJ/p3m7+eK6hTHMaFQlaLqeeIONxoQ="
-
-[[pkg]]
-name = "t3-code"
-source = "brew:cask"
-version = "0.1.3"
 
 [[pkg]]
 name = "t3code-desktop"

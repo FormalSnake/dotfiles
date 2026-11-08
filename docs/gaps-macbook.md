@@ -99,8 +99,6 @@ Found on the way:
 
 - **`t3code-cli-sync`** (`org.nix-community.home.t3code-cli-sync`): needs `t3code-cli-sync.mjs` and
   the nix-patched `t3`; the spec runs upstream 0.1.3. Dropped until the patch lands upstream.
-- `dev.formalsnake.nd-resume` in `~/Library/LaunchAgents` is a one-shot another session left; its
-  PATH names nix profile dirs. Not the spec's.
 - `~/Sync/zen-profile/*` links into the store and dangles once `/nix` is gone. Left alone: it is a
   Syncthing folder, and deleting there deletes on every peer.
 - Dead links into the store with no owner, deleted by the cutover script below:

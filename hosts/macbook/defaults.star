@@ -14,16 +14,12 @@ DEFAULTS = {
         "NSAutomaticPeriodSubstitutionEnabled": True,
         "NSAutomaticQuoteSubstitutionEnabled": False,
         "NSNavPanelExpandedStateForSaveMode": True,
-        "com.apple.trackpad.scaling": 0.6875,
         "com.apple.swipescrolldirection": True,
-        "com.apple.mouse.scaling": 1.5,
     },
     "com.apple.dock": {
         "autohide": True,
         "orientation": "bottom",
         "tilesize": 48,
-        "magnification": True,
-        "largesize": 57,
         "minimize-to-application": True,
         "persistent-apps": dock(
             "/Applications/Helium.app",
@@ -48,10 +44,8 @@ DEFAULTS = {
         "style": "window",
         "showsClicks": True,
     },
-    # Reached over ssh and VNC: a password gate or screen saver only gets in the way.
+    # Reached over ssh and Moonlight: a password gate or screen saver only gets in the way.
     "com.apple.screensaver": {"askForPassword": False, "idleTime": 0},
-    "com.apple.AppleMultitouchTrackpad": {"TrackpadThreeFingerDrag": False},
-    "com.apple.driver.AppleBluetoothMultitouch.trackpad": {"TrackpadThreeFingerDrag": False},
     "com.apple.WindowManager": {"GloballyEnabled": False},
     # Fewer blended layers per frame for Sunshine to encode.
     "com.apple.universalaccess": {"reduceTransparency": True, "reduceMotion": True},

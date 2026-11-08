@@ -1,8 +1,10 @@
 # Homebrew stays Homebrew; the store carries what has no formula or cask.
 
 FORMULAE = [
-    "coreutils", "stow", "watchman", "terminal-notifier", "cmake", "go", "zig", "deno", "python@3.14",
-    "pillow", "opencode", "dipc", "ffmpeg", "cocoapods", "fastlane", "xcbeautify", "mas", "libadwaita",
+    "coreutils", "watchman", "terminal-notifier", "cmake", "go", "zig", "deno", "python@3.14",
+    "pillow", "opencode", "ffmpeg", "cocoapods", "fastlane", "xcbeautify", "xcodegen", "mas", "yt-dlp",
+    # libghostty-vt builds with zig 0.16.0.
+    "zig@0.16",
     # clipssh's clipboard images
     "pngpaste",
     # network, remote iPhone, VPN
@@ -17,8 +19,8 @@ FORMULAE = [
 
 CASKS = [
     "aldente", "android-studio", "betterdisplay", "bluebubbles",
-    "codex", "font-geist", "font-geist-mono", "font-geist-serif", "font-sf-pro", "ghostty", "gstreamer-runtime",
-    "orbstack", "syncthing-app", "t3-code", "terminal-browser", "zulu@21",
+    "codex", "font-geist", "font-geist-mono", "font-geist-serif", "font-sf-pro", "ghostty",
+    "orbstack", "terminal-browser", "zulu@21",
 ]
 
 BREW = (

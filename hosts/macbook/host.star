@@ -1,5 +1,6 @@
 load("//lib/keys.star", "AUTHORIZED_KEYS")
 load("//lib/tree.star", "tree")
+load("//modules/apps.star", "apps")
 load("//modules/fastfetch/fastfetch.star", "fastfetch")
 load("//modules/fspec.star", "fspec")
 load("//modules/my_apps.star", "my_apps")
@@ -27,8 +28,6 @@ LINKED = [
     "home/.claude/hooks",
     "home/.claude/CLAUDE.md",
     "home/.claude/AGENTS.md",
-    "home/.claude/CLAUDE-cloudflare.md",
-    "home/.claude/CLAUDE-cloudflare-mini.md",
 ]
 
 # On the external SSD; the links dangle while it is unmounted.
@@ -70,5 +69,5 @@ macbook = host(
     name = "macbook",
     platform = "aarch64-darwin",
     users = [user("kyandesutter", uid = 502, shell = "/opt/homebrew/bin/fish")],
-    modules = [fspec, tools, my_apps, BREW, STORE, home(linked = LINKED), HOME_FILES, fastfetch, ROOT_FILES, SECRETS, DNS, SYSTEM, SERVICES, storage_gc()],
+    modules = [fspec, tools, my_apps, apps, BREW, STORE, home(linked = LINKED), HOME_FILES, fastfetch, ROOT_FILES, SECRETS, DNS, SYSTEM, SERVICES, storage_gc()],
 )

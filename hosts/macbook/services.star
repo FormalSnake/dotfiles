@@ -64,5 +64,4 @@ SERVICES = [
     poll("obsidian-note-watcher", "/bin/bash " + BIN + "/obsidian-note-watcher.sh", 300),
     # WatchPaths fires on the scan inbox; the interval covers missed events.
     poll("obsidian-scan-watcher", "/bin/bash " + BIN + "/obsidian-scan-watcher.sh", 600, WatchPaths = [HOME + "/Notes/_inbox/scans"], ThrottleInterval = 15),
-    poll("dev-vm-reaper", "/bin/bash " + BIN + "/dev-vm-reaper.sh", 900, env = {"PATH": "/usr/bin:/bin:/usr/sbin:/sbin", "HOME": HOME}),
 ]

@@ -37,12 +37,6 @@ def tools(host):
         # The CLI's %post runs groupadd, so it installs after shadow.
         brew_or("1password", pkg("1password", source = zypper(repo = "1password")), cask = True),
         brew_or("1password-cli", pkg("1password-cli", source = zypper(repo = "1password")), cask = True),
-        brew_or("nordvpn", pkg(
-            "nordvpn",
-            source = zypper(repo = "nordvpn"),
-            services = [service("nordvpnd.socket"), service("nordvpnd"), service("nordvpnd-killswitch")],
-        ), cask = True),
-        brew_or("parsec", pkg("parsec", source = flatpak("com.parsecgaming.parsec")), cask = True),
         # Computer use for agents, through each OS's accessibility tree.
         pkg("agent-desktop", version = "1.1.0", source = npm("agent-desktop")),
         brew_or("uv", pkg("uv", version = "0.13.6", source = aqua("astral-sh/uv"))),
@@ -97,5 +91,15 @@ def tools(host):
         ),
     ]
 
+    # The headless macbook gets in through Tailscale and Sunshine instead.
+    desktop = [] if mac else [
+        pkg(
+            "nordvpn",
+            source = zypper(repo = "nordvpn"),
+            services = [service("nordvpnd.socket"), service("nordvpnd"), service("nordvpnd-killswitch")],
+        ),
+        pkg("parsec", source = flatpak("com.parsecgaming.parsec")),
+    ]
+
     system = [pkg(n, source = brew()) for n in cli("darwin")] if mac else []
-    return system + apps + nvim + store
+    return system + apps + desktop + nvim + store
