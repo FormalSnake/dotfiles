@@ -185,11 +185,6 @@ oci = "ghcr.io/formalsnake/fspec-cache/clipssh@sha256:1c6abc7c9b383e8fae2466c842
 build = "ffe3f20b"
 
 [[pkg]]
-name = "clop"
-source = "brew:cask"
-version = "3.6.3"
-
-[[pkg]]
 name = "cmake"
 source = "brew"
 version = "4.4.5"
@@ -202,7 +197,7 @@ version = "1.17.0"
 [[pkg]]
 name = "codex"
 source = "brew:cask"
-version = "0.165.0"
+version = "0.167.0"
 
 [[pkg]]
 name = "colloid-icon-theme"
@@ -514,11 +509,6 @@ source = "brew"
 version = "1.27.3"
 
 [[pkg]]
-name = "google-chrome"
-source = "brew:cask"
-version = "156.0.8078.74"
-
-[[pkg]]
 name = "gopls"
 source = "brew"
 version = "0.24.0"
@@ -582,11 +572,6 @@ version = "7.1.2-34"
 name = "jq"
 source = "brew"
 version = "1.8.2"
-
-[[pkg]]
-name = "jump-desktop-connect"
-source = "brew:cask"
-version = "10.15.28"
 
 [[pkg]]
 name = "just"
@@ -712,10 +697,6 @@ version = "0.8.4"
 
 [pkg.any]
 commit = "5e930a39701a1883e46113a3089beb9c7e57636b961d97242f74b9265bb4e7a1"
-
-[[pkg]]
-name = "markdown-preview"
-source = "brew:cask:pluk-inc/tap"
 
 [[pkg]]
 name = "marksman"
@@ -1129,11 +1110,6 @@ version = "0.15.1"
 name = "terminal-notifier"
 source = "brew"
 version = "3.1.0"
-
-[[pkg]]
-name = "the-unarchiver"
-source = "brew:cask"
-version = "4.3.9,147,1742287964"
 
 [[pkg]]
 name = "tmux"

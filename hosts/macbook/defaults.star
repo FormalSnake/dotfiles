@@ -53,6 +53,8 @@ DEFAULTS = {
     "com.apple.AppleMultitouchTrackpad": {"TrackpadThreeFingerDrag": False},
     "com.apple.driver.AppleBluetoothMultitouch.trackpad": {"TrackpadThreeFingerDrag": False},
     "com.apple.WindowManager": {"GloballyEnabled": False},
+    # Fewer blended layers per frame for Sunshine to encode.
+    "com.apple.universalaccess": {"reduceTransparency": True, "reduceMotion": True},
     # Crash alerts stack up unattended and sit above the windows screen-region goldens capture.
     # Reports still land in ~/Library/Logs/DiagnosticReports.
     "com.apple.CrashReporter": {"DialogType": "none"},
@@ -63,6 +65,12 @@ DEFAULTS = {
 SYSTEM = [defaults(d, k, v) for d, keys in DEFAULTS.items() for k, v in keys.items()] + [
     setting("pmset", "sleep", 0),
     setting("pmset", "womp", 1),
+    # Never sleeps, so the sleepimage and dark wakes only cost disk and battery wear.
+    setting("pmset", "hibernatemode", 0),
+    setting("pmset", "standby", 0),
+    setting("pmset", "powernap", 0),
+    setting("pmset", "disksleep", 0),
+    setting("pmset", "lowpowermode", 0),
     setting("systemsetup", "restartfreeze", True),
     setting("systemsetup", "remotelogin", True),
     # It drops inbound UDP to ad-hoc-signed binaries (mosh), and its allow list stopped working in
