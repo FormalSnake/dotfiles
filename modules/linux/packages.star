@@ -41,7 +41,7 @@ SYSTEM = [
     "!SwayNotificationCenter", "!SwayNotificationCenter-bash-completion",
     "!SwayNotificationCenter-fish-completion", "!sway-branding-openSUSE", "sway-branding-upstream",
     "syncthing", "docker", "iputils", "iperf", "tuned", "tuned-ppd", "sshfs", "usbmuxd",
-    "imobiledevice-tools", "ifuse", "smartmontools", "pam_ssh_agent_auth", "sof-firmware", "bluez",
+    "imobiledevice-tools", "ifuse", "smartmontools", "sof-firmware", "bluez",
     "chrony", "fwupd", "glibc-locale", "system-group-wheel", "system-group-hardware", "cnf",
     # A remote apply unpacks the spec with tar.
     "tar", "shadow",

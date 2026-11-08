@@ -7,7 +7,7 @@ SERVICES = [
     # `formalshell install` names these units, and its watchdog restarts them by name.
     service("formalshell.service", user = True),
     service("formalshell-watchdog.timer", user = True),
-    # Serves ~/.ssh/id_ed25519, which sudo's pam_ssh_agent_auth and the other hosts accept.
+    # Serves ~/.ssh/id_ed25519, which the other hosts accept.
     service("gcr-ssh-agent.socket", user = True),
     # The spec checkout FSPEC_SPEC names, which `fspec app` commits installs from the shell to and
     # fast-forwards before each one. Cloned over https since the repo is public; pushes

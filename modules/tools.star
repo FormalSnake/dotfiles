@@ -1,4 +1,3 @@
-load("//lib/launchd.star", "BREW")
 load("//lib/paths.star", "TUMBLEWEED")
 
 # The tools every host has, each declared once. Where the platforms get one differently, on(linux,
@@ -8,7 +7,9 @@ load("//lib/paths.star", "TUMBLEWEED")
 CLI = [
     "fish", "tmux", "mosh", "bat", "btop", "lsd", "fd", "fzf", "ripgrep", "zoxide", "yazi", "fastfetch",
     "direnv", "just", "jq", "wget", "chafa", "git", "git-lfs", "gh", "lazygit", "neovim", "bun",
-    "ghostscript", "gopls", "tailscale",
+    "ghostscript", "gopls",
+    # The macbook's comes inside the App Store app, see hosts/macbook/host.star.
+    {"linux": "tailscale", "darwin": []},
     # The store pulls CI builds with it.
     "oras",
     {"linux": "ImageMagick", "darwin": "imagemagick"},
@@ -33,7 +34,6 @@ def tools(host):
         return pkg(name, source = brew(cask = cask)) if mac else linux
 
     apps = [
-        on(service("tailscaled"), service("tailscaled", exec = BREW + "/tailscaled", restart = "always")),
         # The CLI's %post runs groupadd, so it installs after shadow.
         brew_or("1password", pkg("1password", source = zypper(repo = "1password")), cask = True),
         brew_or("1password-cli", pkg("1password-cli", source = zypper(repo = "1password")), cask = True),
@@ -91,8 +91,9 @@ def tools(host):
         ),
     ]
 
-    # The headless macbook gets in through Tailscale and Sunshine instead.
-    desktop = [] if mac else [
+    # The headless macbook gets in through the Tailscale app and Sunshine instead.
+    linux_only = [] if mac else [
+        service("tailscaled"),
         pkg(
             "nordvpn",
             source = zypper(repo = "nordvpn"),
@@ -102,4 +103,4 @@ def tools(host):
     ]
 
     system = [pkg(n, source = brew()) for n in cli("darwin")] if mac else []
-    return system + apps + desktop + nvim + store
+    return system + apps + linux_only + nvim + store

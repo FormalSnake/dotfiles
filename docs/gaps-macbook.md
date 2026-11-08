@@ -6,8 +6,6 @@ from `spec.star`: `fspec plan`, run from the spec on the macbook.
 
 ## Not verified
 
-- pam_ssh_agent_auth is applied and PAM loads it, but `kyandesutter ALL=(ALL) NOPASSWD: ALL` in
-  `10-fspec` means sudo never asks it to authenticate, so the agent path is untested.
 - `ssh windows`: the PC was offline in tailscale during the cutover.
 
 ## Not in sync.star yet
@@ -82,12 +80,8 @@ fspec replaced are listed in `removed-hm-links.map` there.
 
 Found on the way:
 
-- **First apply on a Mac needs `oras` and `openssl@3` from Homebrew before it starts.** The system
-  scope runs before the user scope that installs formulae, so it cannot pull CI-built packages
-  without `oras`, and `/etc/pam.d/sudo_local` loads `pam_ssh_agent_auth.so`, which links
-  `/opt/homebrew/opt/openssl@3/lib/libcrypto.3.dylib`. Without openssl, PAM fails to initialise and
-  every `sudo` fails ("unable to initialize PAM"). Uninstalling `openssl@3` does the same; sudo then
-  needs a root shell or Recovery to fix.
+- **First apply on a Mac needs `oras` from Homebrew before it starts.** The system scope runs
+  before the user scope that installs formulae, so it cannot pull CI-built packages without it.
 - Home Manager linked whole directories (`~/.config/tmux/plugins/*`) into the read-only store, so
   fspec writing a file under them fails. Those links, and every other link at a path the spec
   manages, were removed before the apply.

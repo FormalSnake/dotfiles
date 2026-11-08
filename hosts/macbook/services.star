@@ -2,7 +2,7 @@ load("//lib/launchd.star", "BIN", "BREW", "HOME", "PATH", "agent", "logs", "poll
 load("//lib/paths.star", "STORE")
 load("//modules/tailscale.star", "serve")
 
-LOGIN_APPS = {"aldente": "AlDente", "orbstack": "OrbStack", "betterdisplay": "BetterDisplay"}
+LOGIN_APPS = {"tailscale": "Tailscale", "aldente": "AlDente", "orbstack": "OrbStack", "betterdisplay": "BetterDisplay"}
 
 SERVICES = [
     service("login-" + k, exec = "/usr/bin/open -g -j -a /Applications/%s.app" % v, user = True)

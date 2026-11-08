@@ -52,24 +52,4 @@ STORE = [
             "install -m755 usbfluxd/usbfluxd tools/usbfluxctl \"$FSPEC_OUT/bin/\"",
         ),
     ),
-    # sudo's PAM module, with nixpkgs' patches against the system OpenPAM. Modern autoconf picks
-    # gnu23, which breaks the K&R code in openbsd-compat, and the SDK's fortify macros collide
-    # with its replacements.
-    pkg(
-        "pam_ssh_agent_auth",
-        source = git("https://github.com/jbeverly/pam_ssh_agent_auth", rev = "7ff785809f6ecad45051e333c0ffa72e15ba4f2a"),
-        patches = glob("patches/pam_ssh_agent_auth-*.patch"),
-        build = sh(
-            "git clone -q https://github.com/floodyberry/ed25519-donna \"$FSPEC_SRC.donna\"",
-            "git -C \"$FSPEC_SRC.donna\" checkout -q 8757bd4cd209cb032853ece0ce413f122eef212c",
-            "mkdir -p ed25519-donna && cp -R \"$FSPEC_SRC.donna/.\" ed25519-donna/",
-            "brew install -q autoconf automake openssl@3",
-            "autoreconf -fi",
-            "ssl=$(brew --prefix openssl@3)",
-            "CFLAGS=\"-std=gnu99 -D_FORTIFY_SOURCE=0\" ./configure --without-openssl-header-check --with-cflags=\"-I$PWD -I$ssl/include\" --with-ldflags=\"-L$ssl/lib\"",
-            "make LD=cc",
-            "mkdir -p \"$FSPEC_OUT/lib\"",
-            "install -m755 pam_ssh_agent_auth.so \"$FSPEC_OUT/lib/pam_ssh_agent_auth.so\"",
-        ),
-    ),
 ]

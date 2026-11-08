@@ -37,16 +37,13 @@ ON_DRIVE = {"Movies": "Movies", ".gradle": "gradle", "Library/Developer/CoreSimu
 HOME_FILES = [file("~/" + p, mode = "link", target = DRIVE + "/" + sub) for p, sub in ON_DRIVE.items()] + [
     # The shared ssh config names the agent by the path 1Password uses on Linux.
     file("~/.1password/agent.sock", mode = "link", target = "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"),
+    # The App Store Tailscale's CLI. It must run from inside the bundle: a symlink dies on an
+    # unknown bundle identifier.
+    file("~/.local/bin/tailscale", content = "#!/bin/sh\nexec /Applications/Tailscale.app/Contents/MacOS/Tailscale \"$@\"\n", perms = "0755"),
 ]
 
 ROOT_FILES = tree([ROOT + "rootfs/"], perms = {"/etc/sudoers.d/10-fspec": "0440"}) + [
     file("/etc/ssh/authorized_keys.d/kyandesutter", content = AUTHORIZED_KEYS, perms = "0644"),
-    # Not the builder key, which would get passwordless sudo.
-    file("/etc/ssh/sudo_authorized_keys", content = AUTHORIZED_KEYS, perms = "0444"),
-    # /etc/pam.d/sudo includes sudo_local.
-    file("/etc/pam.d/sudo_local", content = "auth       sufficient     /opt/fspec/current/pkgs/pam_ssh_agent_auth/lib/pam_ssh_agent_auth.so file=/etc/ssh/sudo_authorized_keys\n"),
-    # MagicDNS for *.ts.net, which the open-source tailscaled does not write.
-    file("/etc/resolver/ts.net", content = "nameserver 100.100.100.100\n"),
 ]
 
 SECRETS = secrets(
