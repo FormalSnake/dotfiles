@@ -1,8 +1,10 @@
--- The g815: the ASUS PA278CGV on the left, the internal 240 Hz panel on the right, both scanned
--- out by the RTX 5070. Both are matched by desc: the panel's connector name follows the driver,
--- and the ASUS has been on HDMI-A-1 and on USB-C DisplayPort (DP-3).
+-- The g815: the ASUS PA278CGV as the main display, the ASUS MB16QHG portable below its right edge,
+-- the internal 240 Hz panel right of that, all scanned out by the RTX 5070. All are matched by
+-- desc: connector names follow the driver and the port, and the ASUS has been on HDMI-A-1 and on
+-- USB-C DisplayPort.
 local panel = "desc:BOE NE180QDM-NZC"
 local desk = "desc:ASUSTek COMPUTER INC PA278CGV T1LMQS063802"
+local portable = "desc:ASUSTek COMPUTER INC MB16QHG RCLMTF037964"
 local workspaces = {}
 for i = 1, 9 do
   workspaces[i] = { monitor = (i == 4 or i == 8) and panel or desk, default = (i == 1 or i == 4) }
@@ -16,14 +18,16 @@ return {
   -- what keeps fullscreen Wine games on it from sizing themselves to the panel.
   monitors = {
     { output = desk, mode = "2560x1440@144", position = "2560x0", scale = 1.0, vrr = 2 },
-    { output = panel, mode = "2560x1600@240", position = "5120x0", scale = 1.25, vrr = 3 },
+    -- 1.6 makes it 1600x1000 logical, so 5120x440 lines its bottom up with the ASUS's.
+    { output = portable, mode = "2560x1600@120", position = "5120x440", scale = 1.6 },
+    { output = panel, mode = "2560x1600@240", position = "6720x0", scale = 1.25, vrr = 3 },
   },
   workspaces = workspaces,
   -- Off with the lid shut, its workspaces moving to the ASUS.
   lid_output = panel,
-  -- Games go fullscreen on the ASUS. xrandr takes a connector name, not a desc: the USB-C
-  -- DisplayPort it is on now.
-  xwayland_primary = "DP-3",
+  -- Games go fullscreen on the ASUS. xrandr takes a connector name, not a desc: the HDMI port
+  -- it is on now.
+  xwayland_primary = "HDMI-A-1",
   -- Slight transparency so the backdrop blur has something to show through (dGPU only).
   opacity = 0.96,
   -- Direct scanout on the NVIDIA driver marks a fullscreen Vulkan swapchain out of date about once
