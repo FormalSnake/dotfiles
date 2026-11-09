@@ -35,6 +35,9 @@ RUNTIME = [
 SYSTEM = [
     # The minimal base ships these two, which conflict with tuned-ppd and with fish's gzip.
     "!power-profiles-daemon", "!busybox-gzip",
+    # Its busybox bzip2 conflicts with the real one, which rpm-build needs (cups-devel, for the
+    # dev shells' libs, pulls it in).
+    "!busybox-bzip2", "bzip2",
     # FormalShell serves org.freedesktop.Notifications. swaync's D-Bus activation takes the name
     # whenever a notification lands while the shell is down, and keeps it after the shell is back.
     # openSUSE's sway branding requires it; the greeter's sway runs its own config.
