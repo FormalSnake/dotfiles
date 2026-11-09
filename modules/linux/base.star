@@ -49,6 +49,9 @@ FILES = [
     file("/etc/localtime", mode = "link", src = "/usr/share/zoneinfo/Atlantic/Canary"),
     # A migration runbook writes this passwordless grant for the first apply.
     file("/etc/sudoers.d/99-first-apply", mode = "absent"),
+    # fspec-switch copies NixOS's `%wheel ... SETENV: ALL` here; it sorts after 10-fspec, and
+    # sudo's last match wins, so it took NOPASSWD away once pam_ssh_agent_auth was gone.
+    file("/etc/sudoers.d/50-fspec-inherit", mode = "absent"),
     # ananicy-cpp reads only /etc/ananicy.d. The target arrives with ananicy-rules, later in the apply.
     file("/etc/ananicy.d", mode = "link", target = "/usr/local/share/ananicy-rules/cachyos"),
 ]
