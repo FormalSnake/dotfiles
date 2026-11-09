@@ -6,6 +6,7 @@ load("//lib/paths.star", "STORE", "TUMBLEWEED")
 APPS = {
     "messages": {"title": "Messages", "rev": "52c563b95cac01962e30a0c5c9a56bcf808094ce", "icon": "packaging/linux/dev.formalsnake.messages.png", "rust": "rustup"},
     "formalmusic": {"title": "FormalMusic", "rev": "4aeef799e584f6a69a40eef9fb69d92f73b1611d", "icon": "packaging/icon.png", "rust": "cargo"},
+    "formalnotes": {"title": "Formal Notes", "rev": "93e24d7444e31c59d7cd7735334ab0cfed897516", "icon": "packaging/icon.png", "rust": "rustup", "desktop": "dev.formalsnake.formalnotes"},
     # Linux only for now: its file system crates read procfs and watch with inotify.
     # `dbus` names D-Bus services the app ships in packaging/linux, `portal` its xdg-desktop-portal backend.
     "trove": {"title": "Trove", "rev": "c7da2a94fd45bf554322642b24841495ddc3d86d", "icon": "packaging/icon.png", "rust": "rustup", "linux_only": True, "desktop": "dev.formalsnake.trove",
@@ -117,7 +118,7 @@ def _nd_app(host, name, app):
             "for s in 16 32 128 256 512; do sips -z $s $s %s --out \"$FSPEC_SRC.iconset/icon_${s}x${s}.png\" > /dev/null; sips -z $((s*2)) $((s*2)) %s --out \"$FSPEC_SRC.iconset/icon_${s}x${s}@2x.png\" > /dev/null; done" % (icon, icon),
             "iconutil -c icns \"$FSPEC_SRC.iconset\" -o \"%s/Resources/AppIcon.icns\"" % contents,
             "cp target/release/%s \"%s/MacOS/%s\"" % (name, contents, name),
-            "ln -s ../%s.app/Contents/MacOS/%s \"$FSPEC_OUT/bin/%s\"" % (title, name, name),
+            "ln -s \"../%s.app/Contents/MacOS/%s\" \"$FSPEC_OUT/bin/%s\"" % (title, name, name),
         ),
         apps = [title + ".app"],
     )
