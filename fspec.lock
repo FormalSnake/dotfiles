@@ -88,7 +88,7 @@ rev = "f31c47a1b9d300847d8fc3108ad959448103dfc1"
 patches = "sha256-y8Oysf+wH6P9PKZ9HysqvWCFn95eUH50UJ4gEFqYDiE="
 
 [pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/aquamarine-rig@sha256:f262df783848f2fc5b15cfc255fbbf6e44caeab7a283969f790ba2ff0b501ce3"
+oci = "ghcr.io/formalsnake/fspec-cache/aquamarine-rig@sha256:5d618814d6193300a89b1d9e3eccaf103c648fa6ffe6188de191d50ec811fe46"
 build = "137ee5f2"
 
 [[pkg]]
@@ -439,7 +439,7 @@ oci = "ghcr.io/formalsnake/fspec-cache/fspec@sha256:ffceb69f48d1a1a7ca90a451f18e
 build = "4f64f5d4"
 
 [pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/fspec@sha256:5a3d1211baf4a635da5eb7fc8eaeeb7477543caa8046305fdaca6032924b22ef"
+oci = "ghcr.io/formalsnake/fspec-cache/fspec@sha256:9fa1120cbef4f8aea59714cdfea2b4f52e66e408d62dae2084d4b7a73a57cf6b"
 build = "4f64f5d4"
 
 [[pkg]]
