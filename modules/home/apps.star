@@ -33,12 +33,6 @@ FLATPAKS = [
         "~/.local/share/flatpak/overrides/org.signal.Signal",
         content = "[Environment]\nSIGNAL_PASSWORD_STORE=gnome-libsecret\n",
     ),
-    # Settings > Hide system menu bar; Alt still shows it. Read at window creation only.
-    file(
-        "~/.var/app/org.signal.Signal/config/Signal/ephemeral.json",
-        mode = "patch",
-        owns = {"window.autoHideMenuBar": True},
-    ),
     pkg("obsidian", source = flatpak("md.obsidian.Obsidian")),
     pkg("apostrophe", source = flatpak("org.gnome.gitlab.somas.Apostrophe")),
     # Remote desktop into the macbook's Sunshine.
