@@ -7,7 +7,7 @@ local desk = "desc:ASUSTek COMPUTER INC PA278CGV T1LMQS063802"
 local portable = "desc:ASUSTek COMPUTER INC MB16QHG RCLMTF037964"
 local workspaces = {}
 for i = 1, 9 do
-  workspaces[i] = { monitor = (i == 4 or i == 8) and panel or desk, default = (i == 1 or i == 4) }
+  workspaces[i] = { monitor = (i == 4 or i == 8) and portable or desk, default = (i == 1 or i == 4) }
 end
 return {
   -- vrr = 1 on the ASUS over HDMI-A-1 came up black at boot: the link trains, EDID and ELD read fine, the CRTC
@@ -23,7 +23,7 @@ return {
     { output = panel, mode = "2560x1600@240", position = "6720x0", scale = 1.25, vrr = 3 },
   },
   workspaces = workspaces,
-  -- Off with the lid shut, its workspaces moving to the ASUS.
+  -- Off with the lid shut.
   lid_output = panel,
   -- Games go fullscreen on the ASUS. xrandr takes a connector name, not a desc: the HDMI port
   -- it is on now.
