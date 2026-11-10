@@ -376,7 +376,7 @@ history uses one. No body unless it closes an issue. Never claim co-authorship.
 
 Roles, nix rebuild commands, fspec shipping for e1504g and disk cleanup are in
 the `host-ops` skill. Short form: macbook is the always-on dev server, g815 is
-the compiler, tester, GPU host and Windows VM host, e1504g is the weak client
+the compiler, tester and GPU host, e1504g is the weak client
 and runtime tester (openSUSE under fspec, never NixOS, never compile on it).
 Rebuilds are allowed; `git add` new files first. Confirm first before
 `nix-collect-garbage -d` or network changes that can cut SSH.
