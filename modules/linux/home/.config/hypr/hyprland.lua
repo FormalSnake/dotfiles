@@ -427,7 +427,9 @@ end
 if hl.plugin.dynamic_cursors then
   hl.config({ plugin = { dynamic_cursors = {
     mode = "tilt",
-    tilt = { full = 15, activation = "quadratic" },
+    -- Quadratic stays under the plugin's 2 degree redraw threshold at ordinary
+    -- speeds, so nothing moves; negative_quadratic leans early and caps at full.
+    tilt = { full = 20, limit = 3000, activation = "negative_quadratic" },
   } } })
 end
 -- XWayland lists the outputs in its own order with no primary, and Wine sizes fullscreen games
