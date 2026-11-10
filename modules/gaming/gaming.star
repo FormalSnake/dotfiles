@@ -24,6 +24,9 @@ def _env(fps):
         # DLSS and Reflex on NVIDIA.
         "PROTON_ENABLE_NVAPI=1",
         "STEAM_EXTRA_COMPAT_TOOLS_PATHS=/usr/local/share/steam/compatibilitytools.d",
+        # SDL2 drops fullscreen when a fullscreen window loses focus, so it can minimize. Hyprland
+        # never minimizes, so SDL never sees a restore: the game (GMod) stays tiled at the wrong size.
+        "SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS=0",
         "",
     ])
 

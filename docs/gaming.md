@@ -18,6 +18,8 @@ the KDE Frameworks libraries it requires.
 - MangoHud (`~/.config/MangoHud/MangoHud.conf`, since games run in Steam's runtime container
   and never see the host's `/etc`) uses the early limiter, which holds frametime flat. It also
   covers native Vulkan and OpenGL games, which the DXVK cap misses.
+- `SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS=0` keeps native SDL games (GMod) fullscreen when another
+  window takes focus; without it SDL drops fullscreen and the game stays tiled at the wrong size.
 - `PROTON_ENABLE_NVAPI=1` turns on DLSS and Reflex. If a game offers Reflex, use it and turn
   off the in-game frame cap.
 
