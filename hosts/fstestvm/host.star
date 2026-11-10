@@ -66,16 +66,16 @@ def _services():
             "/bin/sh -c '/usr/lib/systemd/systemd-modules-load && udevadm settle'",
             "Load the rig's kernel modules without a reboot",
         ),
-        # plymouth draws on every DRM card and centres on a mix of their sizes, so the smoke rig's
-        # vkms card comes after the boot splash and goes before the shutdown one. A stop and a
-        # start ordered either way run stop first.
+        # formalboot lights every DRM card it finds and holds it as master, so the smoke rig's
+        # vkms card comes once the boot screen has gone and goes before the shutdown one. A stop
+        # and a start ordered either way run stop first.
         oneshot(
             "fstestvm-vkms",
-            "/usr/sbin/modprobe vkms",
-            "The smoke rig's vkms card, outside plymouth's splashes",
+            "/bin/sh -c '" + STORE + "/formalboot quit --patience 45; exec /usr/sbin/modprobe vkms'",
+            "The smoke rig's vkms card, outside the boot and shutdown screens",
             unit = {
-                "After": "plymouth-quit-wait.service",
-                "Before": ["plymouth-poweroff.service", "plymouth-reboot.service", "plymouth-halt.service", "plymouth-kexec.service"],
+                "After": "display-manager.service",
+                "Before": "formalboot-shutdown.service",
             },
             ExecStop = "-/usr/sbin/modprobe -r vkms",
         ),
@@ -147,7 +147,7 @@ fstestvm = [
     host(
         name = "fstestvm%d" % n,
         platform = "x86_64-linux",
-        # e1504g's and the g815's quiet boot, so the splash is all that shows.
+        # e1504g's and the g815's quiet boot, so the boot screen is all that shows.
         system = tumbleweed(packages = PACKAGES, kernel_args = QUIET_ARGS),
         users = [user(VM_USER, uid = 1000, shell = "bash", groups = ["wheel", "video", "render", "input", "audio"])],
         builders = [builder("g815")],

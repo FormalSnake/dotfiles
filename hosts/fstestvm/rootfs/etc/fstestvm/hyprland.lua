@@ -1,7 +1,7 @@
 -- The boot splash ends here, before Hyprland opens the card: this file runs ahead of the DRM
--- backend, and plymouthd alive under the first modeset left g815's HDMI-A-1 dark. Ended any
+-- backend, and a splash alive under the first modeset left g815's HDMI-A-1 dark. Ended any
 -- earlier, the splash is gone through uwsm and start-hyprland too. A reload finds no pid file.
-local splash = io.open("/run/plymouth/pid")
+local splash = io.open("/run/formalboot.pid")
 if splash then
   splash:close()
   os.execute("systemctl start formalos-splash-quit.service")
@@ -9,7 +9,7 @@ end
 
 hl.monitor({ output = "", mode = "preferred", position = "0x0", scale = 1 })
 -- A new output's zoom from 2x stays off: at boot it runs over the lock's first frames, so the
--- splash picture landed at twice the size plymouth drew it.
+-- splash picture landed at twice the size the boot screen drew it.
 hl.animation({ leaf = "monitorAdded", enabled = false })
 hl.config({
   -- A restarted shell takes back the lock its predecessor held, the locked login's included.

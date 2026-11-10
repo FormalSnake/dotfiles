@@ -402,6 +402,11 @@ source = "brew:cask"
 version = "latest"
 
 [[pkg]]
+name = "formalboot"
+source = "git:https://github.com/FormalStudio/formalboot@8a5464cae84dd64e00c5ed4ed8b4ca57fac89041"
+rev = "8a5464cae84dd64e00c5ed4ed8b4ca57fac89041"
+
+[[pkg]]
 name = "formalmusic"
 source = "git:https://github.com/FormalStudio/formalmusic@4aeef799e584f6a69a40eef9fb69d92f73b1611d"
 rev = "4aeef799e584f6a69a40eef9fb69d92f73b1611d"
@@ -890,18 +895,6 @@ hash = "sha256-NFWxPeNcFaWJPN68kiZ4GZ6Qp86ZsGy8I/N4YOkNY8c="
 name = "pillow"
 source = "brew"
 version = "13.0.0"
-
-[[pkg]]
-name = "plymouth"
-source = "zypper:"
-
-[[pkg]]
-name = "plymouth-dracut"
-source = "zypper:"
-
-[[pkg]]
-name = "plymouth-plugin-script"
-source = "zypper:"
 
 [[pkg]]
 name = "pngpaste"

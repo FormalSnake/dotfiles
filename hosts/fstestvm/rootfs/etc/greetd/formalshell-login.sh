@@ -18,7 +18,7 @@ for c in /sys/class/drm/card*-*; do
   [ "$(cat "$c/status" 2>/dev/null)" = connected ] || continue
   h=$(head -n 1 "$c/modes"); h=${h#*x}; s=$((h / 500))
   [ "$s" -lt 1 ] && s=1; [ "$s" -gt 4 ] && s=4
-  splash=/usr/share/plymouth/themes/formalos/greeter-$s.png
+  splash=/usr/share/formalboot/greeter-$s.png
   [ -f "$splash" ] && picture=$splash
   break
 done

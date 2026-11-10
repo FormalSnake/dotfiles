@@ -1,10 +1,14 @@
 # The FormalOS boot look: a silent Limine (any key in its second shows the menu over a centred
-# logo; a host with another OS shows it for four), then a plymouth splash with the logo, the wordmark and a progress bar, held on screen into
+# logo; a host with another OS shows it for four), then formalboot's screen: the logo, the
+# wordmark, a progress bar and under them the live tree of systemd's jobs, held on screen into
 # the greeter. Limine has no boot counting, so its default entry chainloads systemd-boot, which
 # counts tries for fspec-boot-guard behind a zero timeout. FormalShell's
 # docs/superpowers/specs/2026-10-30-seams.md is the whole chain.
 
+load("//lib/paths.star", "STORE", "TUMBLEWEED")
+
 ASSETS = "modules/boot/"
+FORMALBOOT = STORE + "/formalboot"
 
 # Every host's quiet boot. fbcon=vc:2-6 leaves VT1, greetd's, on the dummy console, so nothing a
 # session or systemd writes there is ever drawn; tty2 keeps its getty.
@@ -16,13 +20,13 @@ QUIET_ARGS = [
 ESP = "/boot/efi"
 # Outside /etc, which SUSE's ImageMagick policy refuses to read.
 SRC = "/usr/local/share/formalos-boot"
+DRACUT = "/usr/lib/dracut/modules.d/90formalboot"
 
 def boot_theme(
         name,
         branding,
         logo,
         wordmark,
-        splash,
         colours,
         palette,
         palette_bright,
@@ -37,7 +41,6 @@ def boot_theme(
         "branding": branding,
         "logo": logo,
         "wordmark": wordmark,
-        "splash": splash,
         "colours": colours,
         "palette": palette,
         "palette_bright": palette_bright,
@@ -71,8 +74,7 @@ FORMALOS = boot_theme(
     branding = "FormalOS",
     logo = ASSETS + "logo.png",
     wordmark = ASSETS + "wordmark.png",
-    splash = ASSETS + "splash.script",
-    colours = {"fg": "cecdc3", "accent": "879a39", "track": "2a2927", "backdrop": "000000"},
+    colours = {"fg": "cecdc3", "muted": "878580", "accent": "879a39", "error": "d14d41", "track": "2a2927", "backdrop": "000000"},
     palette = "000000;af3029;879a39;ad8301;205ea6;a02f6f;878580;878580",
     palette_bright = "575653;d14d41;a0af54;d0a215;4385be;ce5d97;3aa99f;cecdc3",
     chime = FORMALOS_CHIME,
@@ -125,6 +127,9 @@ def _theme_env(t):
     return "".join(["%s=%s\n" % kv for kv in [
         ("name", t["name"]),
         ("branding", t["branding"]),
+        ("fg", c["fg"]),
+        ("muted", c["muted"]),
+        ("error", c["error"]),
         ("track", c["track"]),
         ("fill", c["accent"]),
         ("backdrop", c["backdrop"]),
@@ -132,7 +137,7 @@ def _theme_env(t):
         ("wallpaper_scale", t["wallpaper_scale"]),
     ]])
 
-# Plays under the splash, ahead of the greeter without holding it back.
+# Plays under the boot screen, ahead of the greeter without holding it back.
 def _chime(c):
     return [
         c["pkg"],
@@ -157,38 +162,82 @@ def _chime(c):
 
 def formalos_boot(t, entries = []):
     return (_chime(t["chime"]) if t["chime"] else []) + [
-        pkg("plymouth", source = zypper(), files = [
-            # DeviceScale pins 1: plymouth guesses a HiDPI scale per panel off its EDID size, and
-            # g815's 2560x1600 panel taken at 2 shrank the splash on every display beside it.
-            file("/etc/plymouth/plymouthd.conf", content = "[Daemon]\nTheme=%s\nShowDelay=0\nDeviceTimeout=8\nDeviceScale=1\n" % t["name"]),
-        ]),
-        pkg("plymouth-plugin-script", source = zypper()),
-        # plymouthd is gone before a compositor opens the card. Left alive (deactivated) it held
-        # its DRM fds while Hyprland took the nvidia card over at login, and its exit 1.5s later
-        # is the suspected trigger for HDMI-A-1 scanning out to a monitor in standby (2026-10-31,
-        # g815). Quit as greetd started, the splash went before greetd, PAM, uwsm and Hyprland's
-        # launcher, ~1s of black on fstestvm, so each compositor a boot can start runs this
-        # first: Hyprland from the top of its hyprland.lua, which it reads before opening the
-        # card, and the greeter's sway from formalshell-session.sh. `quit` returns on
-        # acknowledgement, `--wait` once the daemon is gone. One that never answers is killed:
-        # a compositor held back by a hung splash would be no desktop at all, and the fds have to
-        # close either way. plymouthd unlinks its pid file and closes its socket before the
-        # process is gone (`--wait` returns then, with the card still held: Hyprland's TakeDevice
-        # got EBUSY on card2, 2026-11-05), so the pid is read first and waited on to the end. The
-        # comm check keeps a stale file's pid, reused by something else, alive.
-        file("/etc/systemd/system/formalos-splash-quit.service", content = """[Unit]
-Description=End the boot splash before a compositor takes the display
-ConditionPathExists=/run/plymouth/pid
+        pkg(
+            "formalboot",
+            source = git(
+                "https://github.com/FormalStudio/formalboot",
+                rev = "8a5464cae84dd64e00c5ed4ed8b4ca57fac89041",
+                image = TUMBLEWEED,
+                deps = ["cargo", "gcc"],
+            ),
+            build = ["sh", "-c", 'cargo build --release --locked && install -Dm755 target/release/formalboot "$FSPEC_OUT/bin/formalboot"'],
+        ),
+        # Started in the initrd and carried into the real root: the @ in argv[0] is what keeps
+        # systemd from killing it at the switch and at the end of a shutdown, and the real root's
+        # copy of the unit is what the state survives into. With no initrd copy it starts here.
+        file("/etc/systemd/system/formalboot.service", content = """[Unit]
+Description=The boot screen
+DefaultDependencies=no
+ConditionKernelCommandLine=splash
+ConditionVirtualization=!container
+IgnoreOnIsolate=yes
+
+[Service]
+Type=exec
+ExecStart=@%s @formalboot
+RemainAfterExit=yes
+KillMode=none
+SendSIGKILL=no
+""" % FORMALBOOT),
+        file("/etc/systemd/system/sysinit.target.wants/formalboot.service", mode = "link", target = "/etc/systemd/system/formalboot.service"),
+        # After the display manager: a stop and a start ordered either way run the stop first, so
+        # the session's compositor has let the card go.
+        file("/etc/systemd/system/formalboot-shutdown.service", content = """[Unit]
+Description=The shutdown screen
+DefaultDependencies=no
+ConditionKernelCommandLine=splash
+After=getty@tty1.service display-manager.service
+Before=systemd-poweroff.service systemd-reboot.service systemd-halt.service systemd-kexec.service
+
+[Service]
+Type=exec
+ExecStart=@%s @formalboot --shutdown
+KillMode=none
+SendSIGKILL=no
+""" % FORMALBOOT),
+    ] + [
+        file("/etc/systemd/system/%s.target.wants/formalboot-shutdown.service" % end, mode = "link", target = "/etc/systemd/system/formalboot-shutdown.service")
+        for end in ["poweroff", "reboot", "halt", "kexec"]
+    ] + [
+        file(DRACUT + "/module-setup.sh", src = ASSETS + "dracut-module-setup.sh", perms = "0755"),
+        file(DRACUT + "/formalboot-switch-root.service", content = """[Unit]
+Description=Take the boot screen into the real root
+DefaultDependencies=no
+Before=initrd-switch-root.service
 
 [Service]
 Type=oneshot
-ExecStart=/bin/sh -c 'p=$$(cat /run/plymouth/pid 2>/dev/null) && [ "$$(cat /proc/$$p/comm 2>/dev/null)" = plymouthd ] || exit 0; \
-  timeout 2 plymouth update --status=formalos-done; sleep 0.15; \
-  timeout 5 plymouth quit --retain-splash; timeout 5 plymouth --wait; \
-  [ "$$(cat /proc/$$p/comm 2>/dev/null)" = plymouthd ] && kill -9 $$p; while [ -e /proc/$$p ]; do sleep 0.05; done'
-"""),
+ExecStart=-%s newroot
+""" % FORMALBOOT),
+        # formalboot is gone before a compositor opens the card. A splash alive under Hyprland's
+        # first modeset is the suspected trigger for HDMI-A-1 scanning out to a monitor in standby
+        # (2026-10-31, g815, under plymouth), and one that still held the card got Hyprland's
+        # TakeDevice an EBUSY (2026-11-05). Quit as greetd started, the screen went before greetd,
+        # PAM, uwsm and Hyprland's launcher, ~1s of black on fstestvm, so each compositor a boot
+        # can start runs this first: Hyprland from the top of its hyprland.lua, which it reads
+        # before opening the card, and the greeter's sway from formalshell-session.sh. `quit`
+        # fills the bar, leaves the finished frame up and returns once the process is gone,
+        # killing one that never answers.
+        file("/etc/systemd/system/formalos-splash-quit.service", content = """[Unit]
+Description=End the boot screen before a compositor takes the display
+ConditionPathExists=/run/formalboot.pid
+
+[Service]
+Type=oneshot
+ExecStart=%s quit
+""" % FORMALBOOT),
         # Any account: the greeter's and the user manager's processes are in no logind session,
-        # and all the unit does is end a splash a compositor is about to cover.
+        # and all the unit does is end a screen a compositor is about to cover.
         file("/etc/polkit-1/rules.d/50-formalos-splash-quit.rules", content = """polkit.addRule(function(action, subject) {
   if (action.id == "org.freedesktop.systemd1.manage-units" &&
       action.lookup("unit") == "formalos-splash-quit.service" &&
@@ -197,40 +246,18 @@ ExecStart=/bin/sh -c 'p=$$(cat /run/plymouth/pid 2>/dev/null) && [ "$$(cat /proc
   }
 });
 """),
-        # Tumbleweed's greetd.service waits for plymouth-quit-wait, which a drop-in cannot take
-        # back, so this is the package's unit without that.
-        file("/etc/systemd/system/greetd.service", content = """[Unit]
-Description=Greeter daemon
-After=systemd-user-sessions.service plymouth-start.service
-After=getty@tty1.service
-Conflicts=getty@tty1.service
-
-[Service]
-Type=simple
-ExecStart=greetd
-IgnoreSIGPIPE=no
-SendSIGHUP=yes
-TimeoutStopSec=30s
-KeyringMode=shared
-Restart=always
-RestartSec=1
-StartLimitBurst=5
-StartLimitInterval=30
-
-[Install]
-Alias=display-manager.service
-"""),
-        # The session quits the splash; this only ends one no compositor came to cover.
-        file("/etc/systemd/system/plymouth-quit.service.d/formalos-splash.conf", content = """[Unit]
+        # The session quits the screen; this only ends one no compositor came to cover. Type=exec,
+        # so multi-user.target does not wait out the patience.
+        file("/etc/systemd/system/formalos-splash-end.service", content = """[Unit]
+Description=End a boot screen no compositor took over
 After=display-manager.service
+ConditionPathExists=/run/formalboot.pid
 
 [Service]
-ExecStart=
-ExecStart=-/usr/bin/timeout 30 /usr/bin/plymouth --wait
-ExecStart=-/usr/bin/plymouth quit --retain-splash
-TimeoutStartSec=45
-"""),
-        pkg("plymouth-dracut", source = zypper()),
+Type=exec
+ExecStart=%s quit --patience 30
+""" % FORMALBOOT),
+        file("/etc/systemd/system/multi-user.target.wants/formalos-splash-end.service", mode = "link", target = "/etc/systemd/system/formalos-splash-end.service"),
         # fspec-esp-sync writes this header to the ESP with a Kernels submenu under it.
         pkg("limine", source = zypper(), files = [
             file("/etc/fspec/limine.conf", content = _limine_conf(t, entries)),
@@ -239,7 +266,6 @@ TimeoutStartSec=45
         file(ESP + "/loader/loader.conf", content = "timeout 0\nconsole-mode keep\npreferred %s\n" % t["preferred"]),
         file(SRC + "/logo.png", src = t["logo"]),
         file(SRC + "/wordmark.png", src = t["wordmark"]),
-        file(SRC + "/splash.script", src = t["splash"]),
         file(SRC + "/theme.env", content = _theme_env(t)),
         file("/usr/local/libexec/formalos-boot", src = ASSETS + "formalos-boot", perms = "0755"),
         service(
@@ -248,18 +274,21 @@ TimeoutStartSec=45
             description = "Render the boot theme and install Limine on the ESP",
             systemd = {"Type": "oneshot", "TimeoutStartSec": "10min", "unit": {"RequiresMountsFor": ESP}},
         ),
+        # /opt/fspec, not the `current` link in it: a path unit watches what a link points at, and
+        # a new generation is a rename over the link.
         file("/etc/systemd/system/formalos-boot.path", content = """[Unit]
 Description=Re-render the boot theme when its sources or Limine change
 
 [Path]
 PathChanged=%s
-PathChanged=/etc/plymouth/plymouthd.conf
+PathChanged=%s
+PathChanged=/opt/fspec
 PathChanged=/usr/share/limine/BOOTX64.EFI
 Unit=fspec-formalos-boot.service
 
 [Install]
 WantedBy=paths.target
-""" % SRC),
+""" % (SRC, DRACUT)),
         service("formalos-boot.path"),
     ]
 
