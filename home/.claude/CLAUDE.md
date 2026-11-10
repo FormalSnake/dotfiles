@@ -383,6 +383,16 @@ Rebuilds are allowed; `git add` new files first. Confirm first before
 
 ### Subagent model routing
 
+Opus is the everyday default. Reach for `fable` (Fable 5.2, the most capable
+model) only when the work matches one of these:
+
+* A problem that spans several repos and has no clear solution yet, e.g. a
+  bug that crosses fspec, the dotfiles spec and NativeDesktop.
+* A long-running orchestrator coordinating subagents over an overnight or
+  multi-day run.
+* Interactive 3D, simulations, or motion and physics that has to be designed
+  rather than tuned (a new spring or gesture system, not a duration tweak).
+
 Reasoning-heavy (architecture, root-cause debugging, adversarial review,
 synthesis) goes to `opus`; independent review goes to Codex through
 `better-call-sol` (`claude-pulse` when Codex hits limits). Execution-heavy (specified implementation, refactors,
@@ -393,9 +403,10 @@ tree carries the uncommitted-work section above verbatim; a subagent running
 `git reset`, `stash`, `checkout --`, `restore` or `clean` is a defect in the
 prompt you wrote.
 
-When building AI features, default to the newest models: Fable 5
-(`claude-fable-5`), Opus 5 (`claude-opus-5`), Sonnet 5 (`claude-sonnet-5`),
-Haiku 4.5 (`claude-haiku-4-5-20251001`).
+When building AI features, default to Opus 5.5 (`claude-opus-5-5`), with
+Sonnet 5.5 (`claude-sonnet-5-5`) and Haiku 5.5 (`claude-haiku-5-5`) for cheaper
+or high-volume calls. Use Fable 5.2 only for the cases listed above; look its
+ID up with the `claude-api` skill before pinning it.
 
 ## Where checkouts live
 
