@@ -1,4 +1,5 @@
 load("//lib/paths.star", "TUMBLEWEED")
+load("//modules/herdr_view/herdr_view.star", "herdr_view")
 
 # The tools every host has, each declared once. Where the platforms get one differently, on(linux,
 # darwin) picks: Homebrew on the macbook, zypper, flatpak and pinned releases on Linux.
@@ -111,4 +112,4 @@ def tools(host):
     ]
 
     system = [pkg(n, source = brew()) for n in cli("darwin")] if mac else []
-    return system + apps + linux_only + nvim + store
+    return system + apps + linux_only + nvim + store + herdr_view(host)

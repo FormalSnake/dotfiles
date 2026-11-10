@@ -6,7 +6,7 @@ import { View, div, image, svg } from "gpui-kit";
 import { v_flex, h_flex } from "gpui-base";
 import { spaces, panes, agents, run, theme, shared, setShared, setAgentOrder, window, layout, props } from "herdr";
 
-const ICON = (name) => `mods/workspace-chrome/${name}.svg`;
+const ICON = (name) => (name.includes("/") ? `mods/${name}.svg` : `mods/workspace-chrome/${name}.svg`);
 
 function find(node, id) {
   if (node?.id === id) return node;
@@ -25,6 +25,12 @@ function toggleSidebar() {
   if (!narrow()) setShared("sidebar.width", width);
   setShared("sidebar.collapsed", !narrow());
   run("layout.resize", { id: "sidebar", px: narrow() ? (shared("sidebar.width") ?? 268) : window()?.platform === "macos" ? 76 : 44 });
+}
+
+// Beside the shown tab, streamed from the machine its space is on.
+function openViewer(kind) {
+  const machine = spaces().find((s) => s.active)?.machine ?? null;
+  run("pane.split", { direction: "right", mod: "viewer", props: { kind, machine } });
 }
 
 const clean = (s) => (s ?? "").replace(/^[^\p{L}\p{N}]+/u, "").trim();
@@ -238,6 +244,8 @@ export default class Threads extends View {
         .on_click(() => run("mod.open", { name: "picker" }))
         .child(svg(ICON("search")).size(15).flex_none())
         .child(div().text_size(13.5).child("Search")))
+      .child(this.iconButton("th-browser", "viewer/globe", "Browser", () => openViewer("browser")))
+      .child(this.iconButton("th-sim", "viewer/smartphone", "Simulator", () => openViewer("sim")))
       .child(this.iconButton("th-new-space", "folder-plus", "New space", () => run("space.new")))
       .child(this.iconButton("th-new-tab", "square-pen", "New tab", () => run("tab.new")));
 

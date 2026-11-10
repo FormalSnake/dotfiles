@@ -36,6 +36,8 @@ STORE = [
     pkg("pi", version = "1.1.0", source = github("badlogic/pi-mono", asset = "pi-darwin-arm64.tar.gz")),
     pkg("stripe", version = "1.43.2", source = github("stripe/stripe-cli", asset = "stripe_*_mac-os_arm64.tar.gz")),
     pkg("portless", version = "0.15.4", source = npm("portless")),
+    # Streams the booted simulator to herdr-view and drives it for agents.
+    pkg("serve-sim", version = "0.1.49", source = npm("serve-sim")),
     # The macOS release carries only usbfluxctl. Built as nixpkgs does, against Homebrew's
     # libplist with the format constants libplist 2.3 renamed.
     pkg(

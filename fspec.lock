@@ -994,6 +994,15 @@ source = "brew"
 version = "2026-10-26"
 
 [[pkg]]
+name = "serve-sim"
+source = "npm:serve-sim"
+version = "0.1.49"
+
+[pkg.any]
+url = "https://registry.npmjs.org/serve-sim/-/serve-sim-0.1.49.tgz"
+hash = "sha512-Q2SC29YDY30+qrfNA7Auv4etGqe++FYT3bionmpnKi3kd1xgisI/ohSyrrLqD9N5UsBMXjITcVecxMCQAV5sgg=="
+
+[[pkg]]
 name = "signal"
 source = "flatpak:org.signal.Signal"
 version = "8.33.0"
