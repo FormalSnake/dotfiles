@@ -1,0 +1,5 @@
+{
+  "programs": {
+    "claudepulse": { "name": "Claude Pulse", "icon": "icons/claude.svg", "run": ["claudepulse"] }
+  }
+}

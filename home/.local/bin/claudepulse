@@ -1,0 +1,4 @@
+#!/bin/sh
+# Claude Code signed in to the second claude.ai account. A script, not a fish function, so
+# Herdr's agent menu finds it.
+CLAUDE_CONFIG_DIR="$HOME/.claude-pulse" exec claude "$@"

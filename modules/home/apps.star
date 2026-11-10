@@ -50,4 +50,6 @@ TOOLS = [
         source = url("https://beeper-desktop.download.beeper.com/builds/Beeper-4.3.73-x86_64.AppImage"),
         build = sh(BEEPER_BUILD),
     ),
+    # The app rewrites the rest of the file (zoom, sounds).
+    file("~/.config/herdr-app/settings.json", mode = "patch", owns = {"theme": "flexoki-dark"}),
 ]
