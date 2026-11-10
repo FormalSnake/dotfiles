@@ -65,7 +65,7 @@ Secret-carrying state `fspec sync` can carry, still to be declared with the macb
   reads them there, fish exports `secrets.star`'s `ENV` through `conf.d/fspec-secrets.fish`, and
   `fspec-secrets` decrypts them again at boot. `livesync-passphrase` is limited to the macbook in
   `modules/secrets.star`.
-- The launchd helper scripts (storage-gc, dev-vm-reaper, the Obsidian watchers) are copies in
+- The launchd helper scripts (storage-gc, reaper, the Obsidian watchers) are copies in
   `~/.local/bin` instead of running from `~/.config/nix/scripts`.
 - Jobs are `fspec.<name>` (were `kyan.<name>` and `org.nix-community.home.<name>`).
 - `JAVA_HOME` is the zulu@21 cask's JDK; tools run from `/opt/fspec/current/bin` and Homebrew.

@@ -1,0 +1,144 @@
+#!/bin/bash
+# Keeps the macbook out of memory exhaustion. On 2026-11-10 it froze for a day
+# and needed a reboot: the fstestmac lima VM (16 GiB) had run unattended for six
+# days, and a node process under T3 leaked to 291 GB of footprint, so the kernel
+# ran out of swap and killed system daemons instead of the leak.
+#
+# Every run:
+#   1. Any process of this user over CAP_GB of footprint is killed.
+#   2. A running lima VM with no ssh client for IDLE_HOURS is stopped, measured
+#      from its last seen client or, never having had one, from its boot.
+#   3. On critical memory pressure seen on two runs in a row, a VM with no
+#      client right now is stopped, or else the largest process over
+#      PRESSURE_CAP_GB is killed. One action per run; the next run looks again.
+#
+# The Virtualization and OrbStack VM processes are exempt from the kills: their
+# footprint is guest memory, bounded by the VM's own config and handled by 2
+# and 3. So is the T3 server, which every agent session runs under.
+#
+# Run every minute by the fspec.reaper launchd agent; the log names each
+# victim with its parent chain and working directory. --dry-run reports only.
+#
+# Env: CAP_GB (default 12), PRESSURE_CAP_GB (4), IDLE_HOURS (2).
+
+set -uo pipefail
+
+CAP_GB=${CAP_GB:-12}
+PRESSURE_CAP_GB=${PRESSURE_CAP_GB:-4}
+IDLE_HOURS=${IDLE_HOURS:-2}
+EXEMPT='^(com\.apple\.Virtualization\.VirtualMachine|OrbStack Helper|t3)$'
+
+dry_run=0
+[[ ${1:-} == --dry-run ]] && dry_run=1
+state=${XDG_STATE_HOME:-$HOME/.local/state}/reaper
+mkdir -p "$state"
+now=$(date +%s)
+
+log() { echo "$(date '+%F %T') $*"; }
+
+# pid and footprint in MB of this user's processes, largest first. top's MEM is
+# the physical footprint, compressed and swapped pages included, which ps's RSS
+# leaves out: a leak deep in swap shows a small RSS.
+footprints() {
+  top -l 1 -o mem -n 30 -U "$(id -un)" -stats pid,mem 2>/dev/null | awk '
+    $1 ~ /^[0-9]+$/ {
+      v = $2; sub(/[+-]$/, "", v); u = substr(v, length(v)); n = substr(v, 1, length(v) - 1) + 0
+      mb = u == "T" ? n * 1048576 : u == "G" ? n * 1024 : u == "M" ? n : 0
+      print $1, int(mb)
+    }'
+}
+
+name_of() { basename "$(ps -o comm= -p "$1" 2>/dev/null)"; }
+
+describe() {
+  local pid=$1 chain="" p=$1 cwd
+  while [[ -n $p && $p != 1 && $p != 0 ]]; do
+    chain+=" <- [$p] $(ps -o command= -p "$p" 2>/dev/null | cut -c1-100)"
+    p=$(ps -o ppid= -p "$p" 2>/dev/null | tr -d ' ')
+  done
+  cwd=$(lsof -a -p "$pid" -d cwd -Fn 2>/dev/null | sed -n 's/^n//p')
+  echo "cwd ${cwd:-?}${chain}"
+}
+
+reap() {
+  local pid=$1 mb=$2 why=$3
+  log "killing $(name_of "$pid") (pid $pid, $((mb / 1024)) GB): $why; $(describe "$pid")"
+  ((dry_run)) && return
+  kill -TERM "$pid" 2>/dev/null || return
+  for _ in 1 2 3 4 5 6 7 8 9 10; do
+    kill -0 "$pid" 2>/dev/null || return
+    sleep 1
+  done
+  kill -KILL "$pid" 2>/dev/null
+}
+
+# Clients reach a VM through lima's ssh control master (limactl shell, ssh
+# lima-<name>) or straight to its forwarded port (rsync to the slot users). The
+# master itself and the host agent listening on the port hold connections for
+# good, so they never count.
+vm_has_client() {
+  local name=$1 port=$2 dir=$3 pid listeners
+  listeners=" $(lsof -nP -iTCP:"$port" -sTCP:LISTEN -t 2>/dev/null | tr '\n' ' ') $(cat "$dir/ha.pid" 2>/dev/null) "
+  for pid in $(pgrep -f "lima-$name( |$)|$dir/ssh\.(sock|config)|limactl (shell|cp|copy) .*$name") \
+    $(lsof -nP -iTCP:"$port" -sTCP:ESTABLISHED -t 2>/dev/null); do
+    [[ $listeners == *" $pid "* ]] && continue
+    ps -o command= -p "$pid" | grep -q '\[mux\]' && continue
+    return 0
+  done
+  return 1
+}
+
+vm_stop() {
+  log "stopping lima VM $1: $2"
+  ((dry_run)) && return
+  limactl stop "$1" >/dev/null 2>&1 || limactl stop --force "$1" >/dev/null 2>&1
+  rm -f "$state/vm-$1"
+}
+
+running_vms() {
+  limactl list --json 2>/dev/null | jq -r 'select(.status == "Running") | "\(.name) \(.sshLocalPort) \(.dir)"'
+}
+
+# 1. Runaways.
+while read -r pid mb; do
+  ((mb >= CAP_GB * 1024)) || break
+  [[ $(name_of "$pid") =~ $EXEMPT ]] && continue
+  reap "$pid" "$mb" "over the ${CAP_GB} GB cap"
+done < <(footprints)
+
+# 2. Idle VMs.
+while read -r name port dir; do
+  [[ -n $name ]] || continue
+  stamp=$state/vm-$name
+  if vm_has_client "$name" "$port" "$dir"; then
+    touch "$stamp"
+    continue
+  fi
+  since=$(stat -f %m "$dir/ha.pid" 2>/dev/null || echo "$now")
+  [[ -f $stamp ]] && since=$(( $(stat -f %m "$stamp") > since ? $(stat -f %m "$stamp") : since ))
+  idle=$((now - since))
+  ((idle >= IDLE_HOURS * 3600)) && vm_stop "$name" "no ssh client for $((idle / 60)) minutes"
+done < <(running_vms)
+
+# 3. Critical pressure: 1 normal, 2 warning, 4 critical.
+critical=$state/critical
+if [[ $(sysctl -n kern.memorystatus_vm_pressure_level) != 4 ]]; then
+  rm -f "$critical"
+  exit 0
+fi
+prev=0
+[[ -f $critical ]] && prev=$(stat -f %m "$critical")
+touch "$critical"
+((now - prev <= 150)) || exit 0
+while read -r name port dir; do
+  [[ -n $name ]] || continue
+  vm_has_client "$name" "$port" "$dir" && continue
+  vm_stop "$name" "critical memory pressure"
+  exit 0
+done < <(running_vms)
+while read -r pid mb; do
+  ((mb >= PRESSURE_CAP_GB * 1024)) || break
+  [[ $(name_of "$pid") =~ $EXEMPT ]] && continue
+  reap "$pid" "$mb" "largest process under critical memory pressure"
+  exit 0
+done < <(footprints)
