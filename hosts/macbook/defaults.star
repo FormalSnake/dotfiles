@@ -15,6 +15,8 @@ DEFAULTS = {
         "NSAutomaticQuoteSubstitutionEnabled": False,
         "NSNavPanelExpandedStateForSaveMode": True,
         "com.apple.swipescrolldirection": True,
+        # Atoll captures window references here; a wallpaper tint shifts dark backgrounds.
+        "AppleReduceDesktopTinting": True,
     },
     "com.apple.dock": {
         "autohide": True,
