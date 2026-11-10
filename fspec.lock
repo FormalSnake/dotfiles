@@ -592,6 +592,11 @@ url = "https://github.com/horizon-rust/horizon/releases/download/launcher%400.2.
 hash = "sha256-DUBAsIt3JAz9ypUQeLkpUNAHqRNUxau1tvHpk5qjoBE="
 
 [[pkg]]
+name = "hypr-dynamic-cursors"
+source = "git:https://github.com/VirtCode/hypr-dynamic-cursors@5a224284872208b5324759d535d65061043725de"
+rev = "5a224284872208b5324759d535d65061043725de"
+
+[[pkg]]
 name = "ideviceinstaller"
 source = "brew"
 version = "1.2.0"

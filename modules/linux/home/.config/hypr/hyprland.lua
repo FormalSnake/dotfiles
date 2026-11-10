@@ -413,6 +413,23 @@ if arriving then
     hl.env("XCURSOR_THEME", real_cursor_theme())
   end)
 end
+
+-- The pointer leans a little into fast horizontal movement and settles back.
+-- Hyprland loads config plugins after this file runs, so the plugin's keys
+-- only exist on the pass after it has loaded; the guard skips them until then.
+local dynamicCursors = "/opt/fspec/current/pkgs/hypr-dynamic-cursors/lib/dynamic-cursors.so"
+local plugin = io.open(dynamicCursors, "r")
+if plugin then
+  plugin:close()
+  hl.plugin.load(dynamicCursors)
+end
+if hl.plugin.dynamic_cursors then
+  hl.config({ plugin = { dynamic_cursors = {
+    mode = "tilt",
+    tilt = { full = 15, activation = "quadratic" },
+    shake = { enabled = false },
+  } } })
+end
 -- XWayland lists the outputs in its own order with no primary, and Wine sizes fullscreen games
 -- to the first one, so a game on another output renders shifted. Xwayland is up shortly after start,
 -- and a monitor plugged in later (g815's USB-C DisplayPort) is set again as it arrives.

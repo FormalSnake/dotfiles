@@ -66,6 +66,25 @@ StartupWMClass=herdr-app
 EOF
 """
 
+# A Hyprland plugin must be built against the headers of the exact Hyprland it loads into, and
+# the image's live repos are already past the hosts' locked snapshot. The build takes the image
+# back to the snapshot of fspec.lock's [zypper.<host>] first. Both it and the rev move with each
+# Hyprland bump: the rev is upstream's hyprpm.toml pin for that Hyprland. hyprland-devel requires
+# none of glslang-devel, lua55-devel and libgbm-devel, though its headers include all three, and
+# its pkg-config file leaves out lua's include directory.
+DYNAMIC_CURSORS_SNAPSHOT = "20261024"
+
+DYNAMIC_CURSORS_BUILD = """set -e
+zypper -q mr -d -a
+zypper -q ar https://download.opensuse.org/history/%s/tumbleweed/repo/oss/ fspec-oss
+zypp="zypper --non-interactive --gpg-auto-import-keys --cache-dir $FSPEC_CACHE/zypp"
+$zypp dup --allow-downgrade --no-recommends
+$zypp install --no-recommends hyprland-devel glslang-devel lua55-devel libgbm-devel gcc-c++ make pkgconf
+make -C "$FSPEC_SRC" -j"$(nproc)" all CXX=g++ EXTRA_CXXFLAGS="$(pkg-config --cflags lua5.5)"
+mkdir -p "$FSPEC_OUT/lib"
+cp "$FSPEC_SRC/out/dynamic-cursors.so" "$FSPEC_OUT/lib/"
+""" % DYNAMIC_CURSORS_SNAPSHOT
+
 STORE = [
     # Pinned rather than left to its updater, which writes under ~/.local/share.
     pkg(
@@ -198,6 +217,16 @@ STORE = [
         patches = ["patches/ananicy-rules-steam.patch"],
         build = sh('mkdir -p "$FSPEC_OUT/rules" && cp -a "$FSPEC_SRC"/. "$FSPEC_OUT/rules/" && rm -rf "$FSPEC_OUT/rules/.git"'),
         share = {"ananicy-rules/cachyos": "rules"},
+    ),
+    # Loaded by hyprland.lua from /opt/fspec/current/pkgs/hypr-dynamic-cursors/lib.
+    pkg(
+        "hypr-dynamic-cursors",
+        source = git(
+            "https://github.com/VirtCode/hypr-dynamic-cursors",
+            rev = "5a224284872208b5324759d535d65061043725de",
+            image = TUMBLEWEED,
+        ),
+        build = sh(DYNAMIC_CURSORS_BUILD),
     ),
 ]
 
