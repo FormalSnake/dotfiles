@@ -559,12 +559,12 @@ url = "https://github.com/herdrdev/herdr/releases/download/v0.9.3/herdr-linux-x8
 hash = "sha256-GKjcZfHC+khYhDRDVt6hz9kRxvBs9G+njhk/QIf026c="
 
 [[pkg]]
-name = "herdr-app"
-source = "url:https://releases.herdr.dev/app/Herdr.dmg"
+name = "herdr-core"
+source = "url:https://releases.herdr.dev/core/0.1.19/herdr-core-macos-aarch64.tar.gz"
 
 [pkg.any]
-url = "https://releases.herdr.dev/app/Herdr.dmg"
-hash = "sha256-Jso6s5x2wBCWch6E2TQsugvLGzN+L1x5VurIoHuZKJU="
+url = "https://releases.herdr.dev/core/0.1.19/herdr-core-macos-aarch64.tar.gz"
+hash = "sha256-UzjZAK2tttJzucjpcCckfbMXnM/+3hCheTNY8W4I1oM="
 
 [[pkg]]
 name = "horizon-launcher"
