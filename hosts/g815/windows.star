@@ -5,8 +5,8 @@ load("//modules/boot/boot.star", "limine_entry")
 # Windows shares the ESP, so boot():/ finds it.
 WINDOWS_BOOT = limine_entry("Windows 11", "Chainload the Windows Boot Manager", "boot():///EFI/Microsoft/Boot/bootmgfw.efi")
 
-# The NTFS volumes and the USB SSD's FormalDisk, the Bluetooth keys both systems share, and the same install as a KVM guest.
-WINDOWS = [service(u) for u in ["mnt-windows.mount", "mnt-games.mount", "mnt-steamlib.automount", "mnt-formaldisk.automount", "windows-vm-prep"]] + [
+# The NTFS volumes and the USB SSD's FormalDisk, and the Bluetooth keys both systems share.
+WINDOWS = [service(u) for u in ["mnt-windows.mount", "mnt-games.mount", "mnt-steamlib.automount", "mnt-formaldisk.automount"]] + [
     # Before bluetoothd, for the devices BlueZ holds no key for, so one pairing serves both.
     oneshot(
         "windows-bluetooth-keys",

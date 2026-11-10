@@ -2,7 +2,6 @@
 Description=NTFS volume at /mnt/windows
 Requires=clear-ntfs-dirty@D0409F99409F84BE.service
 After=clear-ntfs-dirty@D0409F99409F84BE.service
-ConditionPathExists=!/run/windows-vm.running
 
 [Mount]
 What=/dev/disk/by-uuid/D0409F99409F84BE

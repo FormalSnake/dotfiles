@@ -2,7 +2,6 @@
 Description=NTFS volume at /mnt/games
 Requires=clear-ntfs-dirty@017BFE6375CF515B.service
 After=clear-ntfs-dirty@017BFE6375CF515B.service
-ConditionPathExists=!/run/windows-vm.running
 
 [Mount]
 What=/dev/disk/by-uuid/017BFE6375CF515B

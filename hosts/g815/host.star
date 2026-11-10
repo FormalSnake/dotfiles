@@ -32,7 +32,7 @@ HOST_PACKAGES = [
 ]
 
 VM_PACKAGES = [
-    "qemu-x86", "qemu-ovmf-x86_64", "swtpm", "mtools", "socat", "ntfs-3g", "hivex", "xxd", "efibootmgr",
+    "qemu-x86", "qemu-ovmf-x86_64", "mtools", "socat", "ntfs-3g", "hivex", "xxd", "efibootmgr",
     "qemu-tools", "qemu-block-dmg", "qemu-ui-gtk", "qemu-audio-pipewire", "dosfstools", "gptfdisk",
     "libvirt-daemon-qemu", "virt-manager", "system-group-libvirt",
     # fspec try's virtio-gpu with GL.

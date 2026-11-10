@@ -5,7 +5,7 @@ The [FormalSpec](https://github.com/FormalStudio/formalspec) spec for my three m
 | Host | What it is | OS |
 | --- | --- | --- |
 | `macbook` | Always-on dev server, reached over ssh and mosh | macOS |
-| `g815` | Compiler, tester, GPU and Windows VM host | openSUSE Tumbleweed |
+| `g815` | Compiler, tester and GPU host | openSUSE Tumbleweed |
 | `e1504g` | Light client | openSUSE Tumbleweed |
 
 ```sh
