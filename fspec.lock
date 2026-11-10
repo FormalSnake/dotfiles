@@ -559,6 +559,14 @@ url = "https://github.com/herdrdev/herdr/releases/download/v0.9.3/herdr-linux-x8
 hash = "sha256-GKjcZfHC+khYhDRDVt6hz9kRxvBs9G+njhk/QIf026c="
 
 [[pkg]]
+name = "herdr-app"
+source = "url:https://releases.herdr.dev/app/Herdr.dmg"
+
+[pkg.any]
+url = "https://releases.herdr.dev/app/Herdr.dmg"
+hash = "sha256-Jso6s5x2wBCWch6E2TQsugvLGzN+L1x5VurIoHuZKJU="
+
+[[pkg]]
 name = "horizon-launcher"
 source = "github:horizon-rust/horizon"
 version = "launcher@0.2.58"

@@ -36,6 +36,9 @@ STORE = [
     pkg("pi", version = "1.1.0", source = github("badlogic/pi-mono", asset = "pi-darwin-arm64.tar.gz")),
     pkg("stripe", version = "1.43.2", source = github("stripe/stripe-cli", asset = "stripe_*_mac-os_arm64.tar.gz")),
     pkg("portless", version = "0.15.4", source = npm("portless")),
+    # Updates itself and installs herdr-core (hc) on first launch; the phone app reaches that core
+    # over ssh. Separate from the herdr TUI, whose sessions it does not see.
+    pkg("herdr-app", source = url("https://releases.herdr.dev/app/Herdr.dmg"), apps = ["Herdr.app"], mode = "self_managed"),
     # The macOS release carries only usbfluxctl. Built as nixpkgs does, against Homebrew's
     # libplist with the format constants libplist 2.3 renamed.
     pkg(
