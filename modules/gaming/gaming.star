@@ -65,6 +65,20 @@ def gaming(fps):
         # A Rust reimplementation of the Java Edition client; it reads the game files the official
         # launcher downloaded, so Minecraft has to have been launched once there first.
         pkg("horizon-launcher", version = "launcher@0.2.58", source = github("horizon-rust/horizon", asset = "horizon-launcher-linux-x86_64.AppImage")),
+        # The launcher writes its own entry against the versioned store path, which a bump removes.
+        # It leaves an entry alone while its Exec still exists, and the icon is the one it installs.
+        file("~/.local/share/applications/horizon-launcher.desktop", content = "\n".join([
+            "[Desktop Entry]",
+            "Type=Application",
+            "Name=Horizon",
+            "GenericName=Game launcher",
+            "Exec=/opt/fspec/current/bin/horizon-launcher",
+            "Icon=horizon",
+            "Terminal=false",
+            "Categories=Game;",
+            "StartupWMClass=horizon-launcher",
+            "",
+        ])),
         pkg("sober", source = flatpak("org.vinegarhq.Sober")),
         pkg("mangohud-vulkan-layer", source = flatpak("org.freedesktop.Platform.VulkanLayer.MangoHud/x86_64/25.08")),
         # NVENC capture with a replay buffer; Alt+Z opens its overlay.
