@@ -5,6 +5,8 @@ KEYS = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGxYo1mVlFzYfDSiHH4nWXYs+ZFz29vYlkRkWxQKxMFv kyandesutter@g815",
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOYmDpRg/oAI5/NSJbEzOZHJqEg8YoTT2Nrv5fwLLXWi kyandesutter@e1504g",
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIzOtD8dGRhHAsYHY8Mb8/sI9Oaf1k8/0iw/GGXaooFP kyandesutter@desktop-vjmk52d",
+    # The Herdr phone app.
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK0+UGG7DxrvVmmMi3wRKJInYws1hwafnnXQEFGFAk3k herdr-mobile",
 ]
 
 AUTHORIZED_KEYS = "\n".join(KEYS) + "\n"
