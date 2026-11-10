@@ -140,4 +140,7 @@ def my_apps(host):
             bins = ["kopuzd", "kopuzctl"],
         ),
         pkg("meshtop", source = git("https://github.com/FormalSnake/meshtop", rev = "69f954dca8ac24b7e5b269f486f3dae3fc2ec7b5")),
-    ]
+    ] + ([
+        # Runs Mac apps; mac(...) packages install through it.
+        pkg("atoll", version = "0.1.0", source = github("FormalStudio/atoll")),
+    ] if linux else [])

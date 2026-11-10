@@ -110,6 +110,15 @@ url = "https://github.com/OpenGamingCollective/asusctl/releases/download/6.5.0/a
 hash = "sha256-GsAvJMOKZX7p3dhXOP/3c+cu5q6OW388bAMKO+1JAjA="
 
 [[pkg]]
+name = "atoll"
+source = "github:FormalStudio/atoll"
+version = "0.1.0"
+
+[pkg.x86_64-linux]
+url = "https://github.com/FormalStudio/atoll/releases/download/v0.1.0/atoll-v0.1.0-x86_64-linux.tar.gz"
+hash = "sha256-feWosRjQFDOAZHyL/9P7E8E+88MTPRMGYLmrWZWd1Zc="
+
+[[pkg]]
 name = "bat"
 source = "brew"
 version = "0.26.1"
@@ -437,15 +446,7 @@ rev = "305239462c8c10fd79bf5c8fd70c1cc76450ac09"
 [[pkg]]
 name = "fspec"
 source = "git:https://github.com/FormalStudio/formalspec@main"
-rev = "dc42b3d5fded3977735ec9ec9b172dd970eb51d8"
-
-[pkg.aarch64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/fspec@sha256:5facaa788bcc3284cc83985690bc2cbbeab1801f8f268c150d1c1413096aaa8c"
-build = "a8560805"
-
-[pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/fspec@sha256:39937316505b3d4ab3632b3f79a0e7d7871b91de0c9fe88e83b05b08ae163483"
-build = "a8560805"
+rev = "7284fa4c07d442dcca626a89a88421e07562e844"
 
 [[pkg]]
 name = "fut"
