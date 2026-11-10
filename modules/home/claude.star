@@ -3,7 +3,7 @@ load("//modules/home/claude_settings.star", "SETTINGS")
 
 # What the second profile, ~/.claude-pulse, shares with the first; it signs in separately.
 ROLES = {
-    "macbook": "an unattended, always-on development server reached over ssh. Nobody sits at it, so its screen, cursor and desktop are not the user's",
+    "macbook": "an unattended, always-on development server reached over ssh. Nobody sits at it, so its screen, cursor and desktop are not the user's. The user sits at e1504g when meshtop hosts status shows it online, otherwise at g815; both run Linux with Hyprland",
     "g815": "the compiler, tester and GPU host",
     "e1504g": "the weak client and runtime tester. Never compile on it",
 }
