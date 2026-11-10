@@ -412,8 +412,8 @@ build = "7272611d"
 
 [[pkg]]
 name = "formalnotes"
-source = "git:https://github.com/FormalStudio/formalnotes@49ffc14bea51cf55c33104945782a746011a017c"
-rev = "49ffc14bea51cf55c33104945782a746011a017c"
+source = "git:https://github.com/FormalStudio/formalnotes@b3a3613d99fe01e4d69985e0764c13b0d98599c2"
+rev = "b3a3613d99fe01e4d69985e0764c13b0d98599c2"
 
 [[pkg]]
 name = "formalos-chime"
