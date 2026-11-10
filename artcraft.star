@@ -15,5 +15,5 @@ ARTCRAFT = {
     "figcraft": False,
     "texturecraft": False,
     "soundcraft": False,
-    "cadcraft": False,
+    "cadcraft": True,
 }

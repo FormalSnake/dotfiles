@@ -161,6 +161,15 @@ source = "brew"
 version = "1.4.4"
 
 [[pkg]]
+name = "cadcraft"
+source = "github:storytold/cadcraft"
+version = "0.19.0"
+
+[pkg.x86_64-linux]
+url = "https://github.com/storytold/cadcraft/releases/download/v0.19.0/cadcraft-0.19.0-linux-x86_64.tar.gz"
+hash = "sha256-plTfjD5EfGLEkMCoqtjEKp+vqwEMpNJbw1BO1Fs8j1E="
+
+[[pkg]]
 name = "chafa"
 source = "brew"
 version = "1.18.3"
