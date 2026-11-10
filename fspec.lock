@@ -559,6 +559,15 @@ url = "https://github.com/herdrdev/herdr/releases/download/v0.9.3/herdr-linux-x8
 hash = "sha256-GKjcZfHC+khYhDRDVt6hz9kRxvBs9G+njhk/QIf026c="
 
 [[pkg]]
+name = "horizon-launcher"
+source = "github:horizon-rust/horizon"
+version = "launcher@0.2.58"
+
+[pkg.x86_64-linux]
+url = "https://github.com/horizon-rust/horizon/releases/download/launcher%400.2.58/horizon-launcher-linux-x86_64.AppImage"
+hash = "sha256-DUBAsIt3JAz9ypUQeLkpUNAHqRNUxau1tvHpk5qjoBE="
+
+[[pkg]]
 name = "ideviceinstaller"
 source = "brew"
 version = "1.2.0"
