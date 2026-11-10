@@ -405,8 +405,8 @@ prompt you wrote.
 
 When building AI features, default to Opus 5.5 (`claude-opus-5-5`), with
 Sonnet 5.5 (`claude-sonnet-5-5`) and Haiku 5.5 (`claude-haiku-5-5`) for cheaper
-or high-volume calls. Use Fable 5.2 only for the cases listed above; look its
-ID up with the `claude-api` skill before pinning it.
+or high-volume calls. Use Fable 5.2 (`claude-fable-5-2`) only for the cases
+listed above.
 
 ## Where checkouts live
 
