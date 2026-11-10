@@ -48,7 +48,36 @@ FORMALSHELL = pkg(
     build = sh('WORK="$FSPEC_CACHE" bash "$FSPEC_SRC/dev/tarball.sh" "$FSPEC_OUT.tar" && tar -xzf "$FSPEC_OUT.tar"/formalshell-*-linux.tar.gz -C "$FSPEC_OUT" && rm -rf "$FSPEC_OUT.tar"'),
 )
 
+HERDR_APP_BUILD = """set -e
+cp -a "$FSPEC_SRC/herdr-app" "$FSPEC_OUT/lib"
+mkdir -p "$FSPEC_OUT/bin" "$FSPEC_OUT/share/applications" "$FSPEC_OUT/share/icons/hicolor/scalable/apps"
+ln -s ../lib/herdr-app "$FSPEC_OUT/bin/herdr-app"
+cp "$FSPEC_SRC/herdr-app/herdr-app.svg" "$FSPEC_OUT/share/icons/hicolor/scalable/apps/"
+cat > "$FSPEC_OUT/share/applications/herdr-app.desktop" <<EOF
+[Desktop Entry]
+Type=Application
+Name=Herdr
+Comment=Terminals and coding agents that keep running
+Exec=herdr-app
+Icon=herdr-app
+Terminal=false
+Categories=Development;
+StartupWMClass=herdr-app
+EOF
+"""
+
 STORE = [
+    # Pinned rather than left to its updater, which writes under ~/.local/share.
+    pkg(
+        "herdr-app",
+        source = url("https://releases.herdr.dev/app/0.1.14/herdr-app-linux-x86_64.tar.gz"),
+        build = sh(HERDR_APP_BUILD),
+        bins = ["herdr-app"],
+        share = {
+            "applications/herdr-app.desktop": "share/applications/herdr-app.desktop",
+            "icons/hicolor/scalable/apps/herdr-app.svg": "share/icons/hicolor/scalable/apps/herdr-app.svg",
+        },
+    ),
     # 0.10.0 is the first with the Stream Deck Mini Discord Edition; Tumbleweed has 0.9.8.
     pkg(
         "python-streamdeck",

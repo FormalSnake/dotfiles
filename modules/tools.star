@@ -41,6 +41,14 @@ def tools(host):
         pkg("agent-desktop", version = "1.1.0", source = npm("agent-desktop")),
         brew_or("uv", pkg("uv", version = "0.13.6", source = aqua("astral-sh/uv"))),
         brew_or("lazydocker", pkg("lazydocker", version = "0.25.2", source = aqua("jesseduffield/lazydocker"))),
+        # The runtime the Herdr desktop and phone apps reach over ssh, on every host so each one
+        # shows up as a machine. Separate from the herdr TUI, whose sessions they do not see.
+        pkg(
+            "herdr-core",
+            source = url("https://releases.herdr.dev/core/0.1.19/herdr-core-%s.tar.gz" % on("linux-x86_64", "macos-aarch64")),
+            bins = ["herdr-core"],
+            links = {"hc": "herdr-core"},
+        ),
         brew_or("herdr", pkg("herdr", version = "0.9.3", source = github("ogulcancelik/herdr", asset = "herdr-linux-*"))),
     ]
 

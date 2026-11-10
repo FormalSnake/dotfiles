@@ -559,6 +559,22 @@ url = "https://github.com/herdrdev/herdr/releases/download/v0.9.3/herdr-linux-x8
 hash = "sha256-GKjcZfHC+khYhDRDVt6hz9kRxvBs9G+njhk/QIf026c="
 
 [[pkg]]
+name = "herdr-app"
+source = "url:https://releases.herdr.dev/app/0.1.14/herdr-app-linux-x86_64.tar.gz"
+
+[pkg.any]
+url = "https://releases.herdr.dev/app/0.1.14/herdr-app-linux-x86_64.tar.gz"
+hash = "sha256-R1o4P49DnjGRqGY1tcEobOTf0tn83x58vf3Wxxdvj/M="
+
+[[pkg]]
+name = "herdr-core"
+source = "url:https://releases.herdr.dev/core/0.1.19/herdr-core-linux-x86_64.tar.gz"
+
+[pkg.any]
+url = "https://releases.herdr.dev/core/0.1.19/herdr-core-linux-x86_64.tar.gz"
+hash = "sha256-Stz7Qj1S8kxcxKHizS/K0fYtKLt3h2rEcsKQgqPqpCQ="
+
+[[pkg]]
 name = "herdr-core"
 source = "url:https://releases.herdr.dev/core/0.1.19/herdr-core-macos-aarch64.tar.gz"
 
