@@ -6,7 +6,7 @@ load("//lib/paths.star", "STORE", "TUMBLEWEED")
 APPS = {
     "messages": {"title": "Messages", "rev": "52c563b95cac01962e30a0c5c9a56bcf808094ce", "icon": "packaging/linux/dev.formalsnake.messages.png", "rust": "rustup"},
     "formalmusic": {"title": "FormalMusic", "rev": "4aeef799e584f6a69a40eef9fb69d92f73b1611d", "icon": "packaging/icon.png", "rust": "cargo"},
-    "formalnotes": {"title": "Formal Notes", "rev": "496db16325f6035a8c77d4259590f837399fa034", "icon": "packaging/icon.png", "rust": "rustup", "desktop": "dev.formalsnake.formalnotes"},
+    "formalnotes": {"title": "Formal Notes", "rev": "3b664864da8c08cdfdd54fbd98f70bda6679a7c1", "icon": "packaging/icon.png", "rust": "rustup", "desktop": "dev.formalsnake.formalnotes"},
     # Linux only for now: its file system crates read procfs and watch with inotify.
     # `dbus` names D-Bus services the app ships in packaging/linux, `portal` its xdg-desktop-portal backend.
     "trove": {"title": "Trove", "rev": "c7da2a94fd45bf554322642b24841495ddc3d86d", "icon": "packaging/icon.png", "rust": "rustup", "linux_only": True, "desktop": "dev.formalsnake.trove",
