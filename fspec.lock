@@ -112,11 +112,11 @@ hash = "sha256-GsAvJMOKZX7p3dhXOP/3c+cu5q6OW388bAMKO+1JAjA="
 [[pkg]]
 name = "atoll"
 source = "github:FormalStudio/atoll"
-version = "0.1.2"
+version = "0.1.3"
 
 [pkg.x86_64-linux]
-url = "https://github.com/FormalStudio/atoll/releases/download/v0.1.2/atoll-v0.1.2-x86_64-linux.tar.gz"
-hash = "sha256-hlTbWVsnqfpWmkIniNgMlMtBEjXHTd1JlW8jiMzs3/A="
+url = "https://github.com/FormalStudio/atoll/releases/download/v0.1.3/atoll-v0.1.3-x86_64-linux.tar.gz"
+hash = "sha256-9ZzYnWg6ZvfAF4481uSzJepr+wdoRnWpFQLcijnCC84="
 
 [[pkg]]
 name = "bat"
@@ -230,6 +230,15 @@ build = "4c44efd0"
 name = "coreutils"
 source = "brew"
 version = "9.12"
+
+[[pkg]]
+name = "coteditor"
+source = "mac:github:coteditor/CotEditor"
+version = "7.1.3"
+
+[pkg.x86_64-linux]
+url = "https://github.com/coteditor/CotEditor/releases/download/7.1.3/CotEditor_7.1.3.dmg"
+hash = "sha256-yMvmQ3Q0UWuyP5Pv4Ff9BYrVbe1VI6wRMIGormjasYQ="
 
 [[pkg]]
 name = "couchdb"
@@ -1003,6 +1012,15 @@ hash = "sha256-+v6pGkro5xDg5fWHjTySPnQNh+Qxavgl/3osqSlI5qQ="
 name = "python@3.14"
 source = "brew"
 version = "3.14.10"
+
+[[pkg]]
+name = "rex"
+source = "mac:appcast:https://blob.superlogical.com/public/rex-app/preview/appcast.xml"
+version = "0.1.0+1925"
+
+[pkg.any]
+url = "https://blob.superlogical.com/public/rex-app/preview/Rex-0.1.0-1925.dmg"
+hash = "sha256-8ubEtR9X+mvEEjuU753QX4+pd+U4OTcXjKp0ZBVaQnk="
 
 [[pkg]]
 name = "ripgrep"
