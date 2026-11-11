@@ -467,8 +467,8 @@ build = "67889dec"
 
 [[pkg]]
 name = "formalshell"
-source = "git:https://github.com/FormalStudio/FormalShell@c5ec34cdddc38ae4933179a7944ca2ed4f886cf7"
-rev = "c5ec34cdddc38ae4933179a7944ca2ed4f886cf7"
+source = "git:https://github.com/FormalStudio/FormalShell@d7b6f4cc34d34aa79cfdb7d512417d75d575a0fd"
+rev = "d7b6f4cc34d34aa79cfdb7d512417d75d575a0fd"
 
 [[pkg]]
 name = "fspec"
@@ -533,14 +533,6 @@ version = "10.08.0"
 name = "ghostty"
 source = "brew:cask"
 version = "1.4.0"
-
-[[pkg]]
-name = "ghostty-mac"
-source = "mac:url:https://release.files.ghostty.org/1.4.0/Ghostty.dmg"
-
-[pkg.any]
-url = "https://release.files.ghostty.org/1.4.0/Ghostty.dmg"
-hash = "sha256-OgIHXb0kMY13hCavQd7lUH1T7MRXjt6WkS7Jzm0Y0+g="
 
 [[pkg]]
 name = "git"
