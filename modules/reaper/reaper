@@ -8,24 +8,28 @@
 #   1. Any process of this user over CAP_GB of footprint is killed.
 #   2. A running lima VM with no ssh client for IDLE_HOURS is stopped, measured
 #      from its last seen client or, never having had one, from its boot.
-#   3. On critical memory pressure seen on two runs in a row, a VM with no
+#   3. A lima VM declared with more than VM_CPUS vCPUs is cut to VM_CPUS in its
+#      instance config, which takes effect at its next boot. On 2026-11-11 an
+#      8-vCPU rig build held the host at 700% CPU.
+#   4. On critical memory pressure seen on two runs in a row, a VM with no
 #      client right now is stopped, or else the largest process over
 #      PRESSURE_CAP_GB is killed. One action per run; the next run looks again.
 #
 # The Virtualization and OrbStack VM processes are exempt from the kills: their
 # footprint is guest memory, bounded by the VM's own config and handled by 2
-# and 3. So is the T3 server, which every agent session runs under.
+# and 4. So is the T3 server, which every agent session runs under.
 #
 # Run every minute by the fspec.reaper launchd agent; the log names each
 # victim with its parent chain and working directory. --dry-run reports only.
 #
-# Env: CAP_GB (default 12), PRESSURE_CAP_GB (4), IDLE_HOURS (2).
+# Env: CAP_GB (default 12), PRESSURE_CAP_GB (4), IDLE_HOURS (2), VM_CPUS (4).
 
 set -uo pipefail
 
 CAP_GB=${CAP_GB:-12}
 PRESSURE_CAP_GB=${PRESSURE_CAP_GB:-4}
 IDLE_HOURS=${IDLE_HOURS:-2}
+VM_CPUS=${VM_CPUS:-4}
 EXEMPT='^(com\.apple\.Virtualization\.VirtualMachine|OrbStack Helper|t3)$'
 
 dry_run=0
@@ -120,7 +124,15 @@ while read -r name port dir; do
   ((idle >= IDLE_HOURS * 3600)) && vm_stop "$name" "no ssh client for $((idle / 60)) minutes"
 done < <(running_vms)
 
-# 3. Critical pressure: 1 normal, 2 warning, 4 critical.
+# 3. VM size.
+while read -r name cpus dir; do
+  [[ -n $name ]] || continue
+  ((cpus > VM_CPUS)) || continue
+  log "cutting lima VM $name from $cpus to $VM_CPUS vCPUs from its next boot"
+  ((dry_run)) || sed -i '' -E "s/^cpus: [0-9]+$/cpus: $VM_CPUS/" "$dir/lima.yaml"
+done < <(limactl list --json 2>/dev/null | jq -r '"\(.name) \(.cpus) \(.dir)"')
+
+# 4. Critical pressure: 1 normal, 2 warning, 4 critical.
 critical=$state/critical
 if [[ $(sysctl -n kern.memorystatus_vm_pressure_level) != 4 ]]; then
   rm -f "$critical"
