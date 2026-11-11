@@ -267,6 +267,10 @@ ExecStart=%s quit --patience 30
         file(SRC + "/logo.png", src = t["logo"]),
         file(SRC + "/wordmark.png", src = t["wordmark"]),
         file(SRC + "/theme.env", content = _theme_env(t)),
+        # fspec switch builds the root in a container and writes hostonly="no" for that build. Kept
+        # on the real machine, every initrd carries all firmware (~290 MB, NVIDIA's GSP alone is
+        # 100 MB), and two kernels no longer fit the 1 GB ESP (e1504g, 2026-11-11).
+        file("/etc/dracut.conf.d/60-formalos-hostonly.conf", content = 'hostonly="yes"\n'),
         file("/usr/local/libexec/formalos-boot", src = ASSETS + "formalos-boot", perms = "0755"),
         service(
             "formalos-boot",
@@ -277,11 +281,12 @@ ExecStart=%s quit --patience 30
         # /opt/fspec, not the `current` link in it: a path unit watches what a link points at, and
         # a new generation is a rename over the link.
         file("/etc/systemd/system/formalos-boot.path", content = """[Unit]
-Description=Re-render the boot theme when its sources or Limine change
+Description=Re-render the boot theme when its sources, dracut's config or Limine change
 
 [Path]
 PathChanged=%s
 PathChanged=%s
+PathChanged=/etc/dracut.conf.d
 PathChanged=/opt/fspec
 PathChanged=/usr/share/limine/BOOTX64.EFI
 Unit=fspec-formalos-boot.service

@@ -1,7 +1,7 @@
 #!/bin/sh
 # Renders the boot theme in /usr/local/share/formalos-boot into the greeter's copy of the boot
-# screen's finished frame and Limine's wallpaper, rebuilds the initrds when the theme or formalboot
-# changed, and keeps Limine's EFI binary on the ESP current.
+# screen's finished frame and Limine's wallpaper, rebuilds the initrds when the theme, formalboot
+# or dracut's config changed, and keeps Limine's EFI binary on the ESP current.
 # Limine goes first in the firmware boot order only after a boot came through it; until then it
 # gets a single BootNext try, so a Limine that cannot boot leaves systemd-boot first.
 set -eu
@@ -21,7 +21,7 @@ for _ in $(seq 120); do
 done
 mkdir -p "$state" "$limine"
 
-sum=$(cat "$src"/* "$formalboot" "$dracut"/* /etc/systemd/system/formalboot.service | sha256sum | cut -d ' ' -f 1)
+sum=$(cat "$src"/* "$formalboot" "$dracut"/* /etc/dracut.conf.d/* /etc/systemd/system/formalboot.service | sha256sum | cut -d ' ' -f 1)
 if [ "$sum" != "$(cat "$state/theme.sum" 2>/dev/null)" ] || [ ! -f "$limine/$name.png" ] || [ ! -f "$frames/greeter-1.png" ]; then
 	# The finished frame at each scale formalboot draws at, for the first greeter's sway and the
 	# session's lock to show centred over the frame formalboot leaves.
