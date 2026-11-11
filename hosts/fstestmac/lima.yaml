@@ -5,8 +5,9 @@
 minimumLimaVersion: 2.0.0
 vmType: vz
 arch: aarch64
-# Two cores and half the memory stay with the macbook's agents.
-cpus: 8
+# Half the cores and memory stay with the macbook's agents: at 8 vCPUs a rig build held
+# the host at 700% CPU.
+cpus: 4
 memory: 16GiB
 disk: 120GiB
 images:
