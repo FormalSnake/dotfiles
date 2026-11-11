@@ -6,7 +6,6 @@ MAC_APPS = [
     # Electron: atoll install swaps in the matching Linux Electron.
     pkg("notion", source = mac(url("https://desktop-release.notion-static.com/Notion-7.43.0-universal.dmg"))),
     # Test targets. Installed so their progress shows here; not all of them start yet.
-    pkg("ghostty-mac", source = mac(url("https://release.files.ghostty.org/1.4.0/Ghostty.dmg"))),
     # arm64 only: needs the arm64 translator (atoll spec 3.1.2).
     pkg("dia", source = mac(appcast = "https://releases.diabrowser.com/BoostBrowser-updates.xml")),
     pkg("netnewswire", source = mac(github("Ranchero-Software/NetNewsWire", asset = "NetNewsWire*.zip"))),
