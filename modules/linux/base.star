@@ -120,6 +120,11 @@ SERVICES = [service(s) for s in [
     # both scopes, so the user one needs its own.
     timer("podman-prune", exec = PODMAN_PRUNE, schedule = "15 0 * * *"),
     timer("podman-prune-user", exec = PODMAN_PRUNE, schedule = "15 0 * * *", user = True),
+    # Full debuginfo is most of a dev target/ (kopuz: 20 of 30 GB in deps). Cargo reads the
+    # .cargo/config.toml of every parent directory, so this one covers each user's checkouts,
+    # the rig slots' included. Line tables keep backtraces readable; a debugger session needs
+    # `debug = true` back for that run.
+    file("/home/.cargo/config.toml", content = '[profile.dev]\ndebug = "line-tables-only"\n'),
     # An app update leaves its old runtime installed; on the g815 that was 3 runtimes nobody used.
     timer("flatpak-prune", exec = "/usr/bin/flatpak uninstall --unused -y --noninteractive", schedule = "45 0 * * *"),
 ]

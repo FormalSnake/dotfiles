@@ -55,6 +55,18 @@ RIG = [
         schedule = "40 * * * *",
         env = {"ROOTS": " ".join(["/home/" + u for u in RIG_USERS]), "TARGET_AGE_DAYS": "1", "HOME": "/root"},
     ),
+    # The slots' rootless podman keeps every exited build container and pulled base image;
+    # podman-prune-user only reaches the desktop user's.
+    file(LIBEXEC + "/podman-prune-rig", perms = "0755", content = "\n".join([
+        "#!/bin/sh",
+        "cd /",
+        "for u in %s; do" % " ".join(RIG_USERS),
+        "  runuser -u \"$u\" -- env XDG_RUNTIME_DIR=/run/user/$(id -u \"$u\") \\",
+        "    sh -c 'podman container prune -f --filter until=24h && podman image prune -af --filter until=72h'",
+        "done",
+        "",
+    ])),
+    timer("podman-prune-rig", exec = LIBEXEC + "/podman-prune-rig", schedule = "20 0 * * *"),
     # sched_ext ignores CPUWeight, so while a game runs the slots' builds would take every core.
     # gamemode raises gaming.target and the slots keep four E-cores until it drops.
     oneshot(
