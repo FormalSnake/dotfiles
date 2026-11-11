@@ -1,4 +1,6 @@
-// The VM over the real hosts' settings.json: foot, as its Hyprland binds it.
+// The VM over the real hosts' settings.json: foot, as its Hyprland binds it, and the us layout
+// `fspec vm type` types through, as the greeter keeps it.
 {
-  "terminal": "foot"
+  "terminal": "foot",
+  "input": { "keyboard": { "layout": "us" } }
 }
