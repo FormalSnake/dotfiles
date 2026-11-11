@@ -3,7 +3,7 @@ load("//lib/tree.star", "tree")
 load("//lib/units.star", "oneshot")
 load("//modules/boot/boot.star", "FORMALOS", "QUIET_ARGS", "formalos_boot")
 load("//modules/apps.star", "apps")
-load("//modules/linux/store.star", "FORMALSHELL")
+load("//modules/linux/store.star", "FORMALSHELL", "SHOJI")
 
 # FormalShell's VM rig: two Tumbleweed guests on the g815 (`fspec vm start fstestvm0`), one per
 # slot, carrying what its old nix/testvm.nix did: the real system daemons the `leg_<n>_vm_only`
@@ -39,7 +39,13 @@ PACKAGES = [
     "adwaita-fonts", "liberation-fonts", "google-noto-sans-symbols2-fonts", "python313-Pillow",
     # The hosts' keyring, started by the login's PAM session as on g815 and e1504g.
     "gnome-keyring", "gnome-keyring-pam",
+    # The formalwm session's, as modules/linux/packages.star has them for the real hosts.
+    "xdg-desktop-portal", "xdg-desktop-portal-gtk", "xdg-desktop-portal-wlr", "xwayland",
 ]
+
+# The session a slot's boot logs into, locked, as `session` in the real hosts' linux(). Slot 3
+# proves the formalwm session; the rest boot into Hyprland.
+SESSIONS = {3: "formalwm"}
 
 # dev/smoke.d/lock.sh and dev/smoke-greeter.sh type "formalshell-test", the password the old
 # testvm gave its user; the g815 rig sets the same hash on its slot users.
@@ -53,8 +59,36 @@ ROOTFS = tree(["hosts/fstestvm/rootfs/"], perms = {
 # The FormalShell greeter and lock screen files the Tumbleweed hosts carry.
 SHARED = [
     file("/" + p, src = "modules/linux/rootfs/" + p)
-    for p in ["etc/formalshell/login-env.conf", "etc/pam.d/formalshell-lock", "etc/pam.d/formalshell-login", "etc/tmpfiles.d/formalshell-greeter.conf"]
+    for p in [
+        "etc/formalshell/login-env.conf", "etc/pam.d/formalshell-lock", "etc/pam.d/formalshell-login",
+        "etc/tmpfiles.d/formalshell-greeter.conf", "usr/local/share/wayland-sessions/formalwm.desktop",
+        "etc/xdg-desktop-portal/shojiwm-portals.conf",
+    ]
+] + [
+    file("/usr/local/libexec/formalwm-session", src = "modules/linux/rootfs/usr/local/libexec/formalwm-session", perms = "0755"),
+    file("~/.config/formalwm/settings.json", src = "modules/linux/home/.config/formalwm/settings.json"),
+    file("~/.config/formalwm/formalshell-start.sh", src = "modules/linux/home/.config/formalwm/formalshell-start.sh"),
+    file("~/.config/formalwm/host.json", src = "hosts/fstestvm/home/.config/formalwm/host.json"),
 ]
+
+# The greeter lists the VM's sessions, the slot's default first.
+def _session(n):
+    default = SESSIONS.get(n, "formalshell")
+    return [
+        file("/etc/fstestvm/default-session", content = default + "\n"),
+        file("/var/lib/formalshell-greeter/.config/formalshell/settings.json", content = """{
+  "greeter": {
+    "sessionDirs": [
+      "/etc/fstestvm/wayland-sessions"
+    ],
+    "sessionCommand": [
+      "/etc/fstestvm/desktop.sh"
+    ],
+    "defaultSession": "%s"
+  }
+}
+""" % default),
+    ]
 
 # fspec names each unit fspec-<name>, which is what their dependencies on each other name. A $ in
 # an ExecStart is systemd's variable expansion, hence the $$ in the password hash.
@@ -131,7 +165,7 @@ def _services():
     ]
 
 def _fstestvm(h):
-    return [FORMALSHELL] + ROOTFS + SHARED + _services() + [
+    return [FORMALSHELL] + SHOJI + ROOTFS + SHARED + _session(int(h.name.removeprefix("fstestvm"))) + _services() + [
         file("/etc/ssh/ssh_known_hosts", src = "modules/linux/rootfs/etc/ssh/ssh_known_hosts", perms = "0644"),
         # Tumbleweed starts bluetoothd from bluetooth.target, which only an adapter brings up.
         file("/etc/systemd/system/multi-user.target.wants/bluetooth.service", mode = "link", target = "/usr/lib/systemd/system/bluetooth.service"),

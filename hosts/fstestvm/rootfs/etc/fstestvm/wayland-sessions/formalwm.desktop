@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=formalwm
+Comment=formalwm on the VM's display
+Exec=/etc/fstestvm/formalwm.sh
+DesktopNames=ShojiWM
+Type=Application

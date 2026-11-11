@@ -1,0 +1,4 @@
+// The VM over the real hosts' settings.json: foot, as its Hyprland binds it.
+{
+  "terminal": "foot"
+}

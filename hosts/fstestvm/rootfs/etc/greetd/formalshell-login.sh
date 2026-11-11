@@ -23,4 +23,6 @@ for c in /sys/class/drm/card*-*; do
   break
 done
 printf '%s' "$picture" > "$XDG_RUNTIME_DIR/formalshell/login-lock"
+# The slot's default session (host.star), formalwm started locked as on the real hosts.
+[ "$(cat /etc/fstestvm/default-session 2>/dev/null)" = formalwm ] && exec /etc/fstestvm/formalwm.sh --locked
 exec uwsm start -g -1 -e -D Hyprland -- hyprland.desktop -- --config /etc/fstestvm/hyprland.lua --locked-cmd 'systemctl --user import-environment WAYLAND_DISPLAY HYPRLAND_INSTANCE_SIGNATURE XDG_CURRENT_DESKTOP XDG_SESSION_TYPE && systemctl --user start formalshell.service'
