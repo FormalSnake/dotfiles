@@ -467,8 +467,13 @@ build = "67889dec"
 
 [[pkg]]
 name = "formalshell"
-source = "git:https://github.com/FormalStudio/FormalShell@b2f1ae4e0368a1a0788df7e3300dc99903bf5ec6"
-rev = "b2f1ae4e0368a1a0788df7e3300dc99903bf5ec6"
+source = "git:https://github.com/FormalStudio/FormalShell@a344918deee95ac6e9c5c16cf074b9de4e08377c"
+rev = "a344918deee95ac6e9c5c16cf074b9de4e08377c"
+
+[[pkg]]
+name = "formalwm"
+source = "git:https://github.com/FormalStudio/FormalShell@d6a00b445ccc6c8f0093f69da18523e403974b48"
+rev = "d6a00b445ccc6c8f0093f69da18523e403974b48"
 
 [[pkg]]
 name = "fspec"
@@ -1393,6 +1398,11 @@ version = "3.2.1"
 name = "xcodegen"
 source = "brew"
 version = "2.46.0"
+
+[[pkg]]
+name = "xdg-desktop-portal-shojiwm"
+source = "git:https://github.com/FormalSnake/ShojiWM@8709f3ce139faa2b7649daa6be2092eeeb486f49"
+rev = "8709f3ce139faa2b7649daa6be2092eeeb486f49"
 
 [[pkg]]
 name = "yaml-language-server"

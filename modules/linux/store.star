@@ -42,11 +42,68 @@ FORMALSHELL = pkg(
     "formalshell",
     source = git(
         "https://github.com/FormalStudio/FormalShell",
-        rev = "b2f1ae4e0368a1a0788df7e3300dc99903bf5ec6",
+        rev = "a344918deee95ac6e9c5c16cf074b9de4e08377c",
         image = "docker.io/library/debian:bookworm",
     ),
     build = sh('WORK="$FSPEC_CACHE" bash "$FSPEC_SRC/dev/tarball.sh" "$FSPEC_OUT.tar" && tar -xzf "$FSPEC_OUT.tar"/formalshell-*-linux.tar.gz -C "$FSPEC_OUT" && rm -rf "$FSPEC_OUT.tar"'),
 )
+
+# formalwm (FormalShell's wm/, the compositor of the ShojiWM session) and ShojiWM's portal from
+# the rev formalwm's Cargo.lock pins. Both link Smithay's system libraries, too new for the
+# shell's Debian image. The toolchain, cargo's registry and target live in the cache, so a rev
+# bump builds incrementally.
+SHOJI_REV = "8709f3ce139faa2b7649daa6be2092eeeb486f49"
+
+SHOJI_DEPS = [
+    "rustup", "clang", "gcc", "gcc-c++", "make", "cmake", "pkgconf", "git-core", "wayland-devel",
+    "wayland-protocols-devel", "libxkbcommon-devel", "systemd-devel", "libinput-devel", "libgbm-devel",
+    "Mesa-libEGL-devel", "libglvnd-devel", "libpixman-1-0-devel", "seatd-devel", "libdrm-devel",
+    "liblcms2-devel", "libxcb-devel", "xcb-util-cursor-devel", "dbus-1-devel", "pipewire-devel",
+]
+
+def _cargo(manifest, package):
+    return """set -e
+export RUSTUP_HOME="$FSPEC_CACHE/rustup" CARGO_HOME="$FSPEC_CACHE/cargo"
+rustup -q default stable
+cargo build --release --locked --manifest-path "$FSPEC_SRC/%s" --target-dir "$FSPEC_CACHE/target" -p %s
+install -Dm755 "$FSPEC_CACHE/target/release/%s" "$FSPEC_OUT/bin/%s"
+""" % (manifest, package, package, package)
+
+# D-Bus and systemd run Exec as written, so both name the store's link to the binary.
+SHOJI_PORTAL_BUILD = _cargo("Cargo.toml", "xdg-desktop-portal-shojiwm") + """cd "$FSPEC_SRC/dist"
+install -Dm644 shojiwm.portal "$FSPEC_OUT/xdg-desktop-portal/portals/shojiwm.portal"
+mkdir -p "$FSPEC_OUT/dbus-1/services" "$FSPEC_OUT/systemd/user"
+sed 's|/usr/bin/|%s/|' org.freedesktop.impl.portal.desktop.shojiwm.service > "$FSPEC_OUT/dbus-1/services/org.freedesktop.impl.portal.desktop.shojiwm.service"
+sed 's|/usr/bin/|%s/|' xdg-desktop-portal-shojiwm.service > "$FSPEC_OUT/systemd/user/xdg-desktop-portal-shojiwm.service"
+""" % ("/opt/fspec/current/bin", "/opt/fspec/current/bin")
+
+SHOJI = [
+    pkg(
+        "formalwm",
+        source = git(
+            "https://github.com/FormalStudio/FormalShell",
+            rev = "d6a00b445ccc6c8f0093f69da18523e403974b48",
+            image = TUMBLEWEED,
+            deps = SHOJI_DEPS,
+        ),
+        build = sh(_cargo("wm/Cargo.toml", "formalwm")),
+    ),
+    pkg(
+        "xdg-desktop-portal-shojiwm",
+        source = git("https://github.com/FormalSnake/ShojiWM", rev = SHOJI_REV, image = TUMBLEWEED, deps = SHOJI_DEPS),
+        build = sh(SHOJI_PORTAL_BUILD),
+        share = {
+            "xdg-desktop-portal/portals/shojiwm.portal": "xdg-desktop-portal/portals/shojiwm.portal",
+            "dbus-1/services/org.freedesktop.impl.portal.desktop.shojiwm.service": "dbus-1/services/org.freedesktop.impl.portal.desktop.shojiwm.service",
+        },
+    ),
+    # The user manager reads /etc/systemd/user, not /usr/local/share.
+    file(
+        "/etc/systemd/user/xdg-desktop-portal-shojiwm.service",
+        mode = "link",
+        target = "/opt/fspec/current/pkgs/xdg-desktop-portal-shojiwm/systemd/user/xdg-desktop-portal-shojiwm.service",
+    ),
+]
 
 HERDR_APP_BUILD = """set -e
 cp -a "$FSPEC_SRC/herdr-app" "$FSPEC_OUT/lib"
