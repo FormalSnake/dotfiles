@@ -3,7 +3,7 @@ load("//lib/tree.star", "tree")
 load("//lib/units.star", "oneshot")
 load("//modules/boot/boot.star", "FORMALOS", "QUIET_ARGS", "formalos_boot")
 load("//modules/apps.star", "apps")
-load("//modules/linux/store.star", "FORMALSHELL", "SHOJI")
+load("//modules/linux/store.star", "BIBATA", "FORMALSHELL", "SHOJI")
 
 # FormalShell's VM rig: two Tumbleweed guests on the g815 (`fspec vm start fstestvm0`), one per
 # slot, carrying what its old nix/testvm.nix did: the real system daemons the `leg_<n>_vm_only`
@@ -69,6 +69,7 @@ SHARED = [
     file("~/.config/formalwm/settings.json", src = "modules/linux/home/.config/formalwm/settings.json"),
     file("~/.config/formalwm/formalshell-start.sh", src = "modules/linux/home/.config/formalwm/formalshell-start.sh"),
     file("~/.config/formalwm/host.json", src = "hosts/fstestvm/home/.config/formalwm/host.json"),
+    file("~/.config/environment.d/10-cursor.conf", src = "hosts/fstestvm/home/.config/environment.d/10-cursor.conf"),
 ]
 
 # The greeter lists the VM's sessions, the slot's default first.
@@ -165,7 +166,7 @@ def _services():
     ]
 
 def _fstestvm(h):
-    return [FORMALSHELL] + SHOJI + ROOTFS + SHARED + _session(int(h.name.removeprefix("fstestvm"))) + _services() + [
+    return [FORMALSHELL, BIBATA] + SHOJI + ROOTFS + SHARED + _session(int(h.name.removeprefix("fstestvm"))) + _services() + [
         file("/etc/ssh/ssh_known_hosts", src = "modules/linux/rootfs/etc/ssh/ssh_known_hosts", perms = "0644"),
         # Tumbleweed starts bluetoothd from bluetooth.target, which only an adapter brings up.
         file("/etc/systemd/system/multi-user.target.wants/bluetooth.service", mode = "link", target = "/usr/lib/systemd/system/bluetooth.service"),

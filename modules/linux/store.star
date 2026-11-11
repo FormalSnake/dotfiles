@@ -142,6 +142,13 @@ mkdir -p "$FSPEC_OUT/lib"
 cp "$FSPEC_SRC/out/dynamic-cursors.so" "$FSPEC_OUT/lib/"
 """ % DYNAMIC_CURSORS_SNAPSHOT
 
+BIBATA = pkg(
+    "bibata",
+    version = "2.0.7",
+    source = github("ful1e5/Bibata_Cursor", asset = "Bibata-Modern-Classic.tar.xz"),
+    share = {"icons/Bibata-Modern-Classic": "Bibata-Modern-Classic"},
+)
+
 STORE = [
     # Pinned rather than left to its updater, which writes under ~/.local/share.
     pkg(
@@ -160,12 +167,7 @@ STORE = [
         source = url("https://files.pythonhosted.org/packages/e9/c2/f6ffbad24afae8a19692edf68011cad105832f7b8a460be051fec9455c20/streamdeck-0.10.0.tar.gz"),
         share = {"python/streamdeck": "streamdeck-0.10.0/src"},
     ),
-    pkg(
-        "bibata",
-        version = "2.0.7",
-        source = github("ful1e5/Bibata_Cursor", asset = "Bibata-Modern-Classic.tar.xz"),
-        share = {"icons/Bibata-Modern-Classic": "Bibata-Modern-Classic"},
-    ),
+    BIBATA,
     pkg(
         "colloid-icon-theme",
         source = git(
