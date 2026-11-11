@@ -471,7 +471,7 @@ oci = "ghcr.io/formalsnake/fspec-cache/fspec@sha256:e0ccead95444ab50bd49237e2881
 build = "da26972f"
 
 [pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/fspec@sha256:36d50adfb9da97b3122ae0714c0afbdcb03b59c44d909124e3a0dc7618de6a9c"
+oci = "ghcr.io/formalsnake/fspec-cache/fspec@sha256:fff3c98a474a69eb2aa9da447af7cc2fba619c5f103ac1cbbf203ed9b652377a"
 build = "da26972f"
 
 [[pkg]]
