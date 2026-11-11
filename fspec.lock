@@ -269,6 +269,15 @@ source = "brew"
 version = "2.9.8"
 
 [[pkg]]
+name = "dia"
+source = "mac:appcast:https://releases.diabrowser.com/BoostBrowser-updates.xml"
+version = "1.56.2 (90792)+90792"
+
+[pkg.any]
+url = "https://releases.diabrowser.com/release/Dia-1.56.2-90792.zip"
+hash = "sha256-6rR9Sh7+9/Z5CNB11CnRM242WJbCKAj+aGhPqXrWfWo="
+
+[[pkg]]
 name = "direnv"
 source = "brew"
 version = "2.38.2"
@@ -526,6 +535,14 @@ source = "brew:cask"
 version = "1.4.0"
 
 [[pkg]]
+name = "ghostty-mac"
+source = "mac:url:https://release.files.ghostty.org/1.4.0/Ghostty.dmg"
+
+[pkg.any]
+url = "https://release.files.ghostty.org/1.4.0/Ghostty.dmg"
+hash = "sha256-OgIHXb0kMY13hCavQd7lUH1T7MRXjt6WkS7Jzm0Y0+g="
+
+[[pkg]]
 name = "git"
 source = "brew"
 version = "2.56.0"
@@ -610,6 +627,15 @@ url = "https://releases.herdr.dev/core/0.1.19/herdr-core-macos-aarch64.tar.gz"
 hash = "sha256-UzjZAK2tttJzucjpcCckfbMXnM/+3hCheTNY8W4I1oM="
 
 [[pkg]]
+name = "hexfiend"
+source = "mac:github:HexFiend/HexFiend"
+version = "2.18.1"
+
+[pkg.x86_64-linux]
+url = "https://github.com/HexFiend/HexFiend/releases/download/v2.18.1/Hex_Fiend_2.18.1.dmg"
+hash = "sha256-g3BBYjoh6q5ZubbAu391Uzk4q5ZYCGHufidruSbg4HY="
+
+[[pkg]]
 name = "horizon-launcher"
 source = "github:horizon-rust/horizon"
 version = "launcher@0.2.58"
@@ -629,9 +655,27 @@ source = "brew"
 version = "1.2.0"
 
 [[pkg]]
+name = "iina"
+source = "mac:github:iina/iina"
+version = "1.5.1"
+
+[pkg.x86_64-linux]
+url = "https://github.com/iina/iina/releases/download/v1.5.1/IINA.v1.5.1.dmg"
+hash = "sha256-9BRQfsYLz+2jqfU590RwJT4xthnQMeep6acVGdoVmM0="
+
+[[pkg]]
 name = "imagemagick"
 source = "brew"
 version = "7.1.2-34"
+
+[[pkg]]
+name = "itsycal"
+source = "mac:appcast:https://s3.amazonaws.com/itsycal/itsycal.xml"
+version = "0.28.0+7006"
+
+[pkg.any]
+url = "https://s3.amazonaws.com/itsycal/Itsycal-0.28.0.zip"
+hash = "sha256-KraOCiDFQeqzH9iZgL2r/vYjtzsru+pchixz147lL6s="
 
 [[pkg]]
 name = "jq"
@@ -642,6 +686,15 @@ version = "1.8.2"
 name = "just"
 source = "brew"
 version = "1.59.0"
+
+[[pkg]]
+name = "keka"
+source = "mac:github:aonez/Keka"
+version = "1.6.8"
+
+[pkg.x86_64-linux]
+url = "https://github.com/aonez/Keka/releases/download/v1.6.8/Keka-1.6.8.dmg"
+hash = "sha256-JaTa8EkrfjvKBDyKe6Gul1B92Nv4coEdr3SwHxahISU="
 
 [[pkg]]
 name = "kopuz"
@@ -837,6 +890,15 @@ source = "brew"
 version = "0.12.6"
 
 [[pkg]]
+name = "netnewswire"
+source = "mac:github:Ranchero-Software/NetNewsWire"
+version = "mac-7.2.1"
+
+[pkg.x86_64-linux]
+url = "https://github.com/Ranchero-Software/NetNewsWire/releases/download/mac-7.2.1/NetNewsWire7.2.1.zip"
+hash = "sha256-lFmJblFqxsNGhbOBEdxFaj0aTknJZOQLyPivj9w7F9s="
+
+[[pkg]]
 name = "nil"
 source = "git:https://github.com/oxalica/nil@dbbb5c24f9215476992aa1bd305f8e5398e89654"
 rev = "dbbb5c24f9215476992aa1bd305f8e5398e89654"
@@ -1012,6 +1074,15 @@ hash = "sha256-+v6pGkro5xDg5fWHjTySPnQNh+Qxavgl/3osqSlI5qQ="
 name = "python@3.14"
 source = "brew"
 version = "3.14.10"
+
+[[pkg]]
+name = "rectangle"
+source = "mac:github:rxhanson/Rectangle"
+version = "2.0.4"
+
+[pkg.x86_64-linux]
+url = "https://github.com/rxhanson/Rectangle/releases/download/v2.0.4/Rectangle2.0.4.dmg"
+hash = "sha256-n4IKLla9LCfN2k+0VW3jy8/LrAUtnushedSeLa4nerw="
 
 [[pkg]]
 name = "rex"
