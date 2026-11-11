@@ -1,8 +1,9 @@
 #!/bin/sh
-# greetd's initial_session at boot, through session-switch-login: Hyprland locked before its first
-# output (--locked-cmd), its locked command starting the shell, which finds the marker and takes
-# the lock over the splash's finished frame (FormalShell's 2026-10-30-locked-login.md). The
-# picture is picked as the greeter session script picks its own.
+# greetd's initial_session at boot, through session-switch-login: the host's default session
+# (sessions.star) locked before its first output, the shell finding the marker and taking the lock
+# over the splash's finished frame (FormalShell's 2026-10-30-locked-login.md). Hyprland locks with
+# --locked-cmd, which starts the shell; formalwm with --locked, and starts it itself. The picture
+# is picked as the greeter session script picks its own.
 mkdir -p "$XDG_RUNTIME_DIR/formalshell"
 picture=
 for c in /sys/class/drm/card*-*; do
@@ -14,4 +15,7 @@ for c in /sys/class/drm/card*-*; do
   break
 done
 printf '%s' "$picture" > "$XDG_RUNTIME_DIR/formalshell/login-lock"
+if [ "$(cat /etc/formalshell-greeter/default-session 2>/dev/null)" = formalwm-uwsm ]; then
+  exec /usr/bin/uwsm start -g -1 -e -D ShojiWM -- formalwm.desktop --locked
+fi
 exec /usr/bin/uwsm start -g -1 -e -D Hyprland -- hyprland.desktop -- --locked-cmd 'systemctl --user import-environment WAYLAND_DISPLAY HYPRLAND_INSTANCE_SIGNATURE XDG_CURRENT_DESKTOP XDG_SESSION_TYPE && systemctl --user start formalshell.service'

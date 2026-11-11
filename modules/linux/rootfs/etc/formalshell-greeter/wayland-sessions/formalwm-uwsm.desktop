@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=formalwm (uwsm-managed)
+Comment=FormalShell's window manager on ShojiWM
+Exec=/usr/bin/uwsm start -e -D ShojiWM formalwm.desktop
+TryExec=/usr/bin/uwsm
+DesktopNames=ShojiWM
+Type=Application

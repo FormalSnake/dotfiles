@@ -1,0 +1,42 @@
+// g815: the desk monitor, the portable one beside it, the laptop's own panel.
+{
+  "outputs": [
+    {
+      "description": "ASUSTek COMPUTER INC PA278CGV T1LMQS063802",
+      "mode": "2560x1440@144",
+      "position": [2560, 0],
+      "scale": 1.0,
+      "vrr": 2,
+      "workspaces": [1, 2, 3, 5, 6, 7, 9],
+      "defaultWorkspace": 1
+    },
+    {
+      "description": "ASUSTek COMPUTER INC MB16QHG RCLMTF037964",
+      "mode": "2560x1600@120",
+      "position": [5120, 440],
+      "scale": 1.6,
+      "workspaces": [4, 8],
+      "defaultWorkspace": 4
+    },
+    {
+      "description": "BOE NE180QDM-NZC",
+      "mode": "2560x1600@240",
+      "position": [6720, 0],
+      "scale": 1.25,
+      "vrr": 3
+    }
+  ],
+  // Goes dark with the lid.
+  "lidOutput": "BOE NE180QDM-NZC",
+  // Wine sizes a fullscreen game to XWayland's first output.
+  "xwaylandPrimary": "HDMI-A-1",
+  // A little see-through on every window, so the blur behind has something to show.
+  "opacity": 0.96,
+  "directScanout": false,
+  "env": {
+    "__GL_GSYNC_ALLOWED": "1",
+    "LIBVA_DRIVER_NAME": "nvidia",
+    "NVD_BACKEND": "direct",
+    "__GLX_VENDOR_LIBRARY_NAME": "nvidia"
+  }
+}

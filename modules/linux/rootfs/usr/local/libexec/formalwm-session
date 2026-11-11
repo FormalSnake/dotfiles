@@ -1,0 +1,7 @@
+#!/bin/sh
+# formalwm.desktop's command, what uwsm runs as the session's compositor. The boot screen ends
+# before formalwm opens the card (boot.star). `--locked` is the boot's locked login
+# (formalshell-login.sh): nothing but the shell's lock is drawn until it unlocks.
+systemctl start formalos-splash-quit.service
+[ "$1" = --locked ] && export FORMALWM_START_LOCKED=1
+exec /opt/fspec/current/bin/formalwm --tty

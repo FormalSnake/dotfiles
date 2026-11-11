@@ -1,6 +1,6 @@
 #!/bin/sh
 # greetd's initial_session: start the session session-switch picked, as its .desktop entry does,
-# and at boot, with nothing picked, the locked login into Hyprland.
+# and at boot, with nothing picked, the locked login into the host's default session.
 target=$(cat /run/session-switch/target 2>/dev/null) || exec /etc/greetd/formalshell-login.sh
 desktop=/etc/formalshell-greeter/wayland-sessions/$target.desktop
 [ -f "$desktop" ] || exec /etc/greetd/formalshell-login.sh

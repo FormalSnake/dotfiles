@@ -20,7 +20,7 @@ PADBRIDGE = [
         STORE + "/padbridge",
         "Share the mouse and keyboard with the iPad",
         restart = "always",
-        hyprland = True,
+        formalshell = True,
         needs = STORE + "/padbridge",
         RestartSec = 2,
     ),

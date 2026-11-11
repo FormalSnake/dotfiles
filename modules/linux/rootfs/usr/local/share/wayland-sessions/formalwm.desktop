@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=formalwm
+Comment=FormalShell's window manager on ShojiWM
+Exec=/usr/local/libexec/formalwm-session
+TryExec=/opt/fspec/current/bin/formalwm
+DesktopNames=ShojiWM
+Type=Application

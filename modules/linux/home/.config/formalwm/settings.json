@@ -1,0 +1,182 @@
+// formalwm's settings: ~/.config/formalwm/settings.json. Read at start and
+// again on `formalwm --reload`; a file with a mistake is refused whole and the
+// running settings stand. What differs per machine goes in host.json beside it.
+{
+  // What the bar renders on each pill. Binds and rules address the number.
+  "workspaces": [" web", " term", " dev", " chat", " prod", " print", "󰚩 ai", " media", " game"],
+  "terminal": "ghostty",
+  // Half-width columns, the widths SUPER+R walks. A lone column keeps its
+  // width and sits centred.
+  "layout": { "columnWidth": 0.5, "presets": [0.333, 0.5, 0.667, 1.0] },
+  "input": {
+    // caps:escape: Caps Lock is Escape.
+    "keyboard": { "layout": "es", "options": "caps:escape", "repeatRate": 40, "repeatDelay": 250 },
+    "pointer": { "accel": "adaptive", "sensitivity": 0.2 },
+    "touchpad": {
+      "accel": "adaptive",
+      "sensitivity": 0.2,
+      "naturalScroll": true,
+      // A two-finger press is the right button, a three-finger one the middle.
+      "clickfinger": true,
+      "disableWhileTyping": false,
+      "scrollFactor": 0.5
+    },
+    "devices": {
+      "dualsense-wireless-controller-touchpad": { "accel": "flat", "sensitivity": 0.7 }
+    }
+  },
+  "cursor": { "theme": "Bibata-Modern-Classic", "size": 24 },
+  "env": {
+    "XCURSOR_THEME": "Bibata-Modern-Classic",
+    "XCURSOR_SIZE": "24",
+    "QS_ICON_THEME": "Colloid-Dark",
+    "QT_QPA_PLATFORMTHEME": "qt6ct"
+  },
+  // The laptop panel at its own mode; anything else to the right of what
+  // precedes it at the highest refresh rate it has, which a monitor's
+  // preferred mode usually is not.
+  "outputs": [
+    { "name": "eDP-1", "scale": 1 },
+    { "mode": "highrr", "scale": 1 }
+  ],
+  "rules": [
+    // An app's window takes the view to its workspace. No terminal rule: ghostty opens where you are.
+    {"match": {"appId": "[Hh]elium"}, "workspace": 1},
+    {"match": {"appId": "[Cc]ode|[Zz]ed|dev.zed.Zed"}, "workspace": 3},
+    {"match": {"appId": "[Ss]lack|WhatsApp|discord|[Bb]eeper|org.signal.Signal"}, "workspace": 4},
+    // Messages (GPUI) sets no app id.
+    {"match": {"title": "Messages"}, "workspace": 4},
+    // Beeper maps its main window floating.
+    {"match": {"appId": "[Bb]eeper"}, "float": false},
+    // Sushi sizes itself to what it previews.
+    {"match": {"appId": "org.gnome.NautilusPreviewer"}, "float": true, "position": {"anchor": "center"}},
+    // The quake console maps parked on its overlay; the shell places and shows it.
+    {"match": {"appId": "dev.formalshell.console"}, "overlay": "formalshell-console", "float": true},
+    {"match": {"appId": "[Oo]bsidian"}, "workspace": 5},
+    {"match": {"appId": "[Cc]laude"}, "workspace": 7},
+    {"match": {"appId": "[Kk]opuz"}, "workspace": 8},
+    {"match": {"appId": "dev.formalsnake.formalmusic"}, "workspace": 8},
+    // Neither sends a content type, so a VRR output would never switch on for them.
+    {"match": {"appId": "org.vinegarhq.Sober"}, "content": "game"},
+    // Wine leaves the pointer on screen in a game played on a controller.
+    {"match": {"appId": "steam_app_[0-9]+"}, "content": "game", "idlePointer": 3},
+    // YouTube Music, a Chromium app window named after its URL.
+    {"match": {"appId": "chrome-music.youtube.com__-Default"}, "workspace": 8},
+    // Minecraft locks the pointer with an X11 grab and a recentring warp.
+    {"match": {"appId": "Minecraft.*"}, "confinePointer": true},
+    // helium's video picture-in-picture: no app id, this title.
+    {"match": {"title": "[Pp]icture[ -][Ii]n[ -][Pp]icture"}, "float": true, "pin": true, "size": ["28%", "28%"], "position": {"anchor": "bottom-right", "inset": 16}},
+    // Its document picture-in-picture and any other popup it maps floating.
+    {"match": {"appId": "helium", "floating": true}, "pin": true, "size": ["28%", "28%"], "position": {"anchor": "bottom-right", "inset": 16}},
+    // Chrome's built-in notification: no app id and no title.
+    {"match": {"appId": "", "title": ""}, "float": true, "pin": true, "position": {"anchor": "top-right", "inset": 16}},
+    // NativeDesktop's popovers leave a transparent margin the blur would frost.
+    {"match": {"appId": "nd-hello", "title": "nd-hello", "xwayland": true, "floating": true}, "noBlur": true},
+    // Atoll's Mac windows size themselves.
+    {"match": {"tag": "atoll"}, "float": true}
+  ],
+  "layers": [
+    // The shell's surfaces animate themselves. 0.2 keeps the bar's clear gaps unblurred.
+    {"namespace": "formalshell:bar", "blur": true, "alphaThreshold": 0.2, "animate": false},
+    {"namespace": "formalshell:tooltip", "blur": true, "alphaThreshold": 0.2, "animate": false},
+    {"namespace": "formalshell:osd", "blur": true, "alphaThreshold": 0.2, "animate": false},
+    {"namespace": "formalshell:switcher", "blur": true, "alphaThreshold": 0.2, "animate": false},
+    // 0.6 leaves a modal's scrim and a card's cast under the blur and the card over it.
+    {"namespace": "formalshell:menu", "blur": true, "alphaThreshold": 0.6, "animate": false},
+    {"namespace": "formalshell:polkit", "blur": true, "alphaThreshold": 0.6, "animate": false},
+    {"namespace": "formalshell:plugin-overlay", "blur": true, "alphaThreshold": 0.6, "animate": false},
+    {"namespace": "formalshell:radio", "blur": true, "alphaThreshold": 0.6, "animate": false},
+    {"namespace": "formalshell:panel", "blur": true, "alphaThreshold": 0.6, "animate": false},
+    {"namespace": "formalshell:notifications", "blur": true, "alphaThreshold": 0.6, "animate": false},
+    // The arrival and departure veil fades itself.
+    {"namespace": "formalshell:veil", "animate": false}
+  ],
+  "binds": [
+    // The shell, over its own IPC.
+    {"chord": "SUPER+Space", "action": "spawn", "args": ["/opt/fspec/current/bin/formalshell", "ipc", "--any-display", "call", "menu", "toggle"], "title": "Menu"},
+    {"chord": "SUPER+period", "action": "spawn", "args": ["/opt/fspec/current/bin/formalshell", "ipc", "--any-display", "call", "menu", "summon", "emoji"], "title": "Emoji picker"},
+    // ñ is a key of its own on the es layout.
+    {"chord": "SUPER+ntilde", "action": "spawn", "args": ["/opt/fspec/current/bin/formalshell", "ipc", "--any-display", "call", "menu", "summon", "clipboard"], "title": "Clipboard"},
+    // The quake console. `+` is unshifted on the es layout.
+    {"chord": "SUPER+plus", "action": "spawn", "args": ["/opt/fspec/current/bin/formalshell", "ipc", "--any-display", "call", "console", "toggle"], "title": "Console"},
+    {"chord": "SUPER+SHIFT+T", "action": "spawn", "args": ["/opt/fspec/current/bin/formalshell", "theme", "mode", "toggle"], "title": "Light or dark"},
+    {"chord": "SUPER+SHIFT+E", "action": "spawn", "args": ["/opt/fspec/current/bin/formalshell", "ipc", "--any-display", "call", "power", "logout"], "title": "Log out"},
+    // Lock, then suspend, so resume lands on the lock screen.
+    {"chord": "SUPER+SHIFT+Escape", "action": "sh", "args": ["/opt/fspec/current/bin/formalshell ipc --any-display call lock lock && systemctl suspend"], "title": "Sleep"},
+    {"chord": "Print", "action": "spawn", "args": ["/opt/fspec/current/bin/formalshell", "ipc", "--any-display", "call", "screenshot", "full", "default"], "title": "Screenshot"},
+    {"chord": "SUPER+SHIFT+S", "action": "spawn", "args": ["/opt/fspec/current/bin/formalshell", "ipc", "--any-display", "call", "screenshot", "pick", "smart", "default"], "title": "Capture picker"},
+    // Volume straight to PipeWire, brightness and media through the shell.
+    {"chord": "XF86AudioRaiseVolume", "action": "spawn", "args": ["/usr/bin/wpctl", "set-volume", "-l", "1.0", "@DEFAULT_AUDIO_SINK@", "3%+"], "locked": true, "repeat": true},
+    {"chord": "XF86AudioLowerVolume", "action": "spawn", "args": ["/usr/bin/wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", "3%-"], "locked": true, "repeat": true},
+    {"chord": "XF86AudioMute", "action": "spawn", "args": ["/usr/bin/wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@", "toggle"]},
+    {"chord": "XF86AudioMicMute", "action": "spawn", "args": ["/usr/bin/wpctl", "set-mute", "@DEFAULT_AUDIO_SOURCE@", "toggle"]},
+    {"chord": "XF86MonBrightnessUp", "action": "spawn", "args": ["/opt/fspec/current/bin/formalshell", "ipc", "--any-display", "call", "display", "brightnessStep", "5"], "locked": true, "repeat": true},
+    {"chord": "XF86MonBrightnessDown", "action": "spawn", "args": ["/opt/fspec/current/bin/formalshell", "ipc", "--any-display", "call", "display", "brightnessStep", "-5"], "locked": true, "repeat": true},
+    {"chord": "XF86AudioPlay", "action": "spawn", "args": ["/opt/fspec/current/bin/formalshell", "ipc", "--any-display", "call", "media", "playPause"]},
+    {"chord": "XF86AudioPause", "action": "spawn", "args": ["/opt/fspec/current/bin/formalshell", "ipc", "--any-display", "call", "media", "playPause"]},
+    {"chord": "XF86AudioNext", "action": "spawn", "args": ["/opt/fspec/current/bin/formalshell", "ipc", "--any-display", "call", "media", "next"]},
+    {"chord": "XF86AudioPrev", "action": "spawn", "args": ["/opt/fspec/current/bin/formalshell", "ipc", "--any-display", "call", "media", "previous"]},
+    // Windows.
+    {"chord": "SUPER+Return", "action": "terminal", "title": "Terminal"},
+    // The laptop's Copilot key sends Meta+Shift+F23.
+    {"chord": "SUPER+SHIFT+F23", "action": "spawn", "args": ["ghostty", "--working-directory=/home/kyandesutter/.config/formalspec", "-e", "claude"], "title": "Claude"},
+    {"chord": "SUPER+Q", "action": "close", "title": "Close"},
+    {"chord": "SUPER+SHIFT+F", "action": "fullscreen", "title": "Fullscreen"},
+    {"chord": "SUPER+V", "action": "float", "title": "Float"},
+    {"chord": "SUPER+B", "action": "spawn", "args": ["/opt/fspec/current/bin/helium"], "title": "Browser"},
+    // H and L walk columns and wrap, J and K the windows stacked in one.
+    {"chord": "SUPER+H", "action": "focus-column", "args": ["left"]},
+    {"chord": "SUPER+L", "action": "focus-column", "args": ["right"]},
+    {"chord": "SUPER+J", "action": "focus-window", "args": ["down"]},
+    {"chord": "SUPER+K", "action": "focus-window", "args": ["up"]},
+    {"chord": "SUPER+SHIFT+H", "action": "swap-column", "args": ["left"]},
+    {"chord": "SUPER+SHIFT+L", "action": "swap-column", "args": ["right"]},
+    {"chord": "SUPER+SHIFT+J", "action": "swap-window", "args": ["down"]},
+    {"chord": "SUPER+SHIFT+K", "action": "swap-window", "args": ["up"]},
+    // F is the full width with gaps, M to the edges, R walks the presets.
+    {"chord": "SUPER+F", "action": "column-width", "args": ["1.0"]},
+    {"chord": "SUPER+M", "action": "maximize"},
+    {"chord": "SUPER+R", "action": "column-width", "args": ["cycle"]},
+    {"chord": "SUPER+minus", "action": "column-width", "args": ["-0.1"]},
+    {"chord": "SUPER+plus", "action": "column-width", "args": ["+0.1"]},
+    {"chord": "SUPER+C", "action": "fit"},
+    {"chord": "SUPER+comma", "action": "consume-or-expel", "args": ["prev"]},
+    {"chord": "SUPER+SHIFT+comma", "action": "consume-or-expel", "args": ["next"]},
+    // Workspaces by keycode, so the es layout's shifted number row holds.
+    {"chord": "SUPER+code:10", "action": "workspace", "args": ["1"]},
+    {"chord": "SUPER+SHIFT+code:10", "action": "move-to-workspace", "args": ["1"]},
+    {"chord": "SUPER+code:11", "action": "workspace", "args": ["2"]},
+    {"chord": "SUPER+SHIFT+code:11", "action": "move-to-workspace", "args": ["2"]},
+    {"chord": "SUPER+code:12", "action": "workspace", "args": ["3"]},
+    {"chord": "SUPER+SHIFT+code:12", "action": "move-to-workspace", "args": ["3"]},
+    {"chord": "SUPER+code:13", "action": "workspace", "args": ["4"]},
+    {"chord": "SUPER+SHIFT+code:13", "action": "move-to-workspace", "args": ["4"]},
+    {"chord": "SUPER+code:14", "action": "workspace", "args": ["5"]},
+    {"chord": "SUPER+SHIFT+code:14", "action": "move-to-workspace", "args": ["5"]},
+    {"chord": "SUPER+code:15", "action": "workspace", "args": ["6"]},
+    {"chord": "SUPER+SHIFT+code:15", "action": "move-to-workspace", "args": ["6"]},
+    {"chord": "SUPER+code:16", "action": "workspace", "args": ["7"]},
+    {"chord": "SUPER+SHIFT+code:16", "action": "move-to-workspace", "args": ["7"]},
+    {"chord": "SUPER+code:17", "action": "workspace", "args": ["8"]},
+    {"chord": "SUPER+SHIFT+code:17", "action": "move-to-workspace", "args": ["8"]},
+    {"chord": "SUPER+code:18", "action": "workspace", "args": ["9"]},
+    {"chord": "SUPER+SHIFT+code:18", "action": "move-to-workspace", "args": ["9"]},
+    {"chord": "SUPER+Tab", "action": "workspace", "args": ["previous"]},
+    // Super+E is the Keychron K2 HE's fn+F4.
+    {"chord": "SUPER+O", "action": "overview", "title": "Overview"},
+    {"chord": "SUPER+E", "action": "overview"},
+    {"chord": "SUPER+Z", "action": "zen", "title": "Zen"},
+    // The shell's switcher: each press steps, letting Alt go commits.
+    {"chord": "ALT+Tab", "action": "spawn", "args": ["/opt/fspec/current/bin/formalshell", "ipc", "--any-display", "call", "switcher", "next"], "repeat": true},
+    {"chord": "ALT+SHIFT+Tab", "action": "spawn", "args": ["/opt/fspec/current/bin/formalshell", "ipc", "--any-display", "call", "switcher", "prev"], "repeat": true},
+    {"chord": "ALT+Alt_L", "action": "spawn", "args": ["/opt/fspec/current/bin/formalshell", "ipc", "--any-display", "call", "switcher", "commit"], "release": true, "passthrough": true},
+    {"chord": "ALT+Alt_R", "action": "spawn", "args": ["/opt/fspec/current/bin/formalshell", "ipc", "--any-display", "call", "switcher", "commit"], "release": true, "passthrough": true},
+    // The MX Master's thumb buttons: the gesture button is Super, back and forward arrive as F13 and F14, which the es layout names XF86Tools and XF86Launch5.
+    {"chord": "SUPER+mouse_down", "action": "workspace", "args": ["e+1"]},
+    {"chord": "SUPER+mouse_up", "action": "workspace", "args": ["e-1"]},
+    {"chord": "XF86Tools", "action": "focus-column", "args": ["left"]},
+    {"chord": "XF86Launch5", "action": "focus-column", "args": ["right"]},
+    {"chord": "SUPER+mouse:272", "action": "move-window"},
+    {"chord": "SUPER+mouse:273", "action": "resize-window"}
+  ]
+}

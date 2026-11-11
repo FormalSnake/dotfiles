@@ -22,7 +22,7 @@ SERVICES = [
         unit = {"After": "network-online.target"},
     ),
 
-    autostart("discord", BIN + "/discord --start-minimized", "Discord (minimized to tray)", hyprland = True),
+    autostart("discord", BIN + "/discord --start-minimized", "Discord (minimized to tray)", formalshell = True),
     autostart("beeper", STORE + "/beeper", "Beeper", needs = STORE + "/beeper"),
     autostart("signal", "/usr/bin/flatpak run org.signal.Signal --start-in-tray", "Signal (tray)"),
     autostart("messages", STORE + "/messages", "Messages", needs = STORE + "/messages"),
@@ -34,7 +34,7 @@ SERVICES = [
         "wl-clip-persist",
         STORE + "/wl-clip-persist --clipboard regular",
         "wl-clip-persist (keep regular clipboard alive)",
-        hyprland = True,
+        formalshell = True,
         needs = STORE + "/wl-clip-persist",
     ),
     gui(
@@ -80,7 +80,7 @@ SERVICES = [
         STORE + "/wl-gammarelay-rs run",
         "Punchier panel gamma via wl-gammarelay-rs",
         restart = "on_failure",
-        hyprland = True,
+        formalshell = True,
         needs = STORE + "/wl-gammarelay-rs",
         Type = "dbus",
         BusName = "rs.wl-gammarelay",
@@ -91,11 +91,11 @@ SERVICES = [
     oneshot(
         "gtk-session-css",
         BIN + "/gtk-session-css",
-        "Point GTK's session.css at the Hyprland theme",
+        "Point GTK's session.css at the FormalShell desktop's theme",
         user = True,
         remain = False,
-        unit = {"Before": "wayland-session-pre@hyprland.desktop.target"},
-        install = {"WantedBy": "wayland-session-pre@hyprland.desktop.target"},
+        unit = {"Before": ["wayland-session-pre@hyprland.desktop.target", "wayland-session-pre@formalwm.desktop.target"]},
+        install = {"WantedBy": ["wayland-session-pre@hyprland.desktop.target", "wayland-session-pre@formalwm.desktop.target"]},
     ),
     gui(
         "nordvpn-tray-off",

@@ -1,0 +1,4 @@
+# Hyprland's session on the NVIDIA card, which formalwm takes by SHOJI_TTY_DRM_DEVICE.
+. "$HOME/.config/uwsm/env-hyprland"
+export SHOJI_TTY_DRM_DEVICE="$AQ_DRM_DEVICES"
+unset AQ_DRM_DEVICES

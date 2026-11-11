@@ -1,8 +1,10 @@
 [Unit]
 # uwsm puts XDG_CURRENT_DESKTOP in the manager only just before the target, and the condition is
 # checked when the job runs: unordered, it runs first and the shell is skipped for the session.
+# Either FormalShell desktop, never Plasma or Gaming Mode.
 After=graphical-session.target
-ConditionEnvironment=XDG_CURRENT_DESKTOP=Hyprland
+ConditionEnvironment=|XDG_CURRENT_DESKTOP=Hyprland
+ConditionEnvironment=|XDG_CURRENT_DESKTOP=ShojiWM
 Description=FormalShell
 PartOf=graphical-session.target
 

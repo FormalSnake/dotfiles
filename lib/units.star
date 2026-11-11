@@ -11,14 +11,14 @@ def oneshot(name, exec, description = None, user = False, remain = True, unit = 
         systemd["install"] = install
     return service(name, exec = exec, user = user, description = description, systemd = systemd)
 
-def gui(name, exec, description, restart = "no", hyprland = False, needs = None, unit = {}, env = {}, **keys):
+def gui(name, exec, description, restart = "no", formalshell = False, needs = None, unit = {}, env = {}, **keys):
     """A user service that runs with the graphical session."""
 
     # The target can be up without the compositor's environment (a bare Hyprland session), where
     # Restart= would loop the app, so it skips instead.
     u = {"After": "graphical-session.target", "PartOf": "graphical-session.target", "ConditionEnvironment": ["WAYLAND_DISPLAY"]}
-    if hyprland:
-        u["ConditionEnvironment"] = ["WAYLAND_DISPLAY", "XDG_CURRENT_DESKTOP=Hyprland"]
+    if formalshell:
+        u["ConditionEnvironment"] = ["WAYLAND_DISPLAY", "|XDG_CURRENT_DESKTOP=Hyprland", "|XDG_CURRENT_DESKTOP=ShojiWM"]
     if needs:
         u["ConditionPathExists"] = needs
     systemd = merge({"unit": merge(u, unit), "install": {"WantedBy": "graphical-session.target"}}, keys)
