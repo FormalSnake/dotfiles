@@ -120,6 +120,8 @@ SERVICES = [service(s) for s in [
     # both scopes, so the user one needs its own.
     timer("podman-prune", exec = PODMAN_PRUNE, schedule = "15 0 * * *"),
     timer("podman-prune-user", exec = PODMAN_PRUNE, schedule = "15 0 * * *", user = True),
+    # An app update leaves its old runtime installed; on the g815 that was 3 runtimes nobody used.
+    timer("flatpak-prune", exec = "/usr/bin/flatpak uninstall --unused -y --noninteractive", schedule = "45 0 * * *"),
 ]
 
 def swapfile():
