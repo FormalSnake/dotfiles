@@ -39,7 +39,7 @@ Engine paths are in FormalStudio/FormalShell, `wm/`, at the rev `formalwm` is pi
 | 95-114 | The lid output dark while shut, flipped by the lid switch | engine: `lidOutput` (`core/src/settings.rs`, `formalwm/src/session.rs`), the core's lid switch. Proven headless only |
 | 119 | Any other display at its highest refresh rate | settings: the catch-all `{ "mode": "highrr" }` |
 | 122-135 | Nine named workspaces, the host's pins | settings, host.json |
-| 138-151 | `XCURSOR_*`, `QS_ICON_THEME`, `QT_QPA_PLATFORMTHEME`, the host's GPU variables | engine: settings `env` and host.json `env` (`formalwm/src/session.rs`, `COMPOSITOR.env.apply`); for services, the same in `uwsm/env` and g815's `env-shojiwm` |
+| 138-151 | `XCURSOR_*`, `QS_ICON_THEME`, `QT_QPA_PLATFORMTHEME`, the host's GPU variables | engine: settings `env` and host.json `env` (`formalwm/src/session.rs`, `COMPOSITOR.env.apply`), which reach only what formalwm starts itself. Before formalwm starts: the cursor variables from `environment.d/10-session.conf` in the user manager, the rest from `uwsm/env` and g815's `env-shojiwm` |
 | 155-183 | Keyboard, repeat, pointer and touchpad | settings `input`. Handed to the core's libinput; not proven on a real device |
 | 184-308 | Gaps, border, tape, gestures, decoration, dim, opacity, blur | engine and settings. Group colours have no counterpart (no groups). Window opacity let less through than set in every engine build before the locked start's (0.5 came out as 0.75, g815's 0.96 near opaque): judge it only on that rev or later |
 | 279 | Black under everything | missing: the core clears to its own 20 26 33 (`CLEAR_COLOR` in ShojiWM's `backend/tty.rs`). Proposal: a clear colour in the core's config, core agent |
@@ -52,7 +52,7 @@ Engine paths are in FormalStudio/FormalShell, `wm/`, at the rev `formalwm` is pi
 | 318-322 | The DualSense touchpad: flat, 0.7 | settings `input.devices`. Not proven on the device |
 | 329-346 | Animations on the shell's curves, no zoom on a new output | engine motion; nothing animates an output |
 | 357-358 | Three-finger gestures | engine (`formalwm/src/gestures.rs`). Proven headless only |
-| 360-415, 445-447 | The pointer hidden until the shell arrives, back after ten seconds without one | engine: `cursor_hidden` from the start, `wait_for_shell` (`formalwm/src/session.rs`) |
+| 360-415, 445-447 | The pointer hidden until the shell arrives, back after ten seconds without one | engine: `cursor_hidden` from the start, `wait_for_shell` (`formalwm/src/session.rs`), through the core's cursor override. No blank theme: the `formalos-blank` swap is Hyprland's alone |
 | 417-434 | hypr-dynamic-cursors: lean and shake to find | missing: the core draws the cursor untransformed. Proposal: a cursor transform in the core, then the engine; core agent, after the switch. The `hypr-dynamic-cursors` package stays for Hyprland |
 | 435-444 | XWayland's primary output, again on every new output | engine: `xwayland_primary` runs `xrandr` (`formalwm/src/session.rs`); `xrandr` is in `packages.star` |
 | 452-593 | Every bind: the shell's IPC, volume, brightness, media, screenshots, the Copilot key (SUPER+SHIFT+F23), helium, lock and suspend, the MX Master's buttons | settings `binds`. SUPER+plus is bound twice in `hyprland.lua` (console and +10% width) and both are kept |
@@ -86,3 +86,28 @@ which costs a distro package and takes shots over wlr-screencopy only, with none
 own capture paths. A Screenshot interface in ShojiWM's portal is a candidate upstream patch;
 once its rev is pinned here, `shojiwm-portals.conf` names `shojiwm` for Screenshot and
 `xdg-desktop-portal-wlr` leaves `packages.star`.
+
+## Proven on the VM
+
+fstestvm3 on g815, software rendering, with the spec of this branch.
+
+| What | How |
+| --- | --- |
+| Boot into formalwm, locked | the boot's autologin, the shell's lock through the login-lock marker (the engine's locked start not yet pinned) |
+| The greeter offers formalwm | preselected after a logout, beside Hyprland's entry |
+| A greeter login reaches the bar over a window | foot from SUPER+Return, `graphical-session.target` and `formalshell.service` active with `XDG_CURRENT_DESKTOP=ShojiWM` and `SHOJIWM_SOCKET` |
+| The Screenshot portal | answers through `xdg-desktop-portal-wlr`; ShojiWM's own portal is activated for ScreenCast |
+| Lock and unlock | the shell's lock, unlocked by password |
+| Logout | back to the greeter; no formalwm, Xwayland, shell, portal or client left, `SHOJIWM_SOCKET` gone from the user manager |
+| Hyprland from the same greeter | logs in, the shell runs with `XDG_CURRENT_DESKTOP=Hyprland` |
+| The pointer | Bibata-Modern-Classic, the arrow on the desktop and its text beam over foot |
+
+![formalwm's pointer on Bibata-Modern-Classic](shoji-session/cursor.png)
+
+With no theme found under `XCURSOR_PATH` (and openSUSE ships no `default` theme), the core draws its
+own outline glyph (`fallback_cursor_image` in ShojiWM's `src/shojiwm_lib/src/cursor.rs`), as the VM
+did before it had the `bibata` package and the cursor variables
+([shoji-session/fallback-cursor.png](shoji-session/fallback-cursor.png), at the centre). Hyprland
+falls back to its own logo there. The real hosts carry both, so the owner's first login gets
+Bibata; after the switch, check the pointer once on each host. A fallback to an installed theme
+such as Adwaita before the glyph is a candidate core patch.
