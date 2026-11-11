@@ -21,7 +21,8 @@ DESKTOP = [
 KDE_PACKAGES = ["patterns-kde-kde_plasma", "kscreen6"]
 
 # What the store's apps load at runtime: Messages, librepods, kopuz, formalmusic, the Electron
-# apps, ancs4linux and ananicy-cpp. atoll install fetches Linux Electron with curl.
+# apps, ancs4linux and ananicy-cpp. atoll install fetches Linux Electron with curl, and atoll's
+# WebKit.framework dlopens WPE WebKit.
 RUNTIME = [
     "ffmpeg-8", "libnotify4", "libvulkan1", "gstreamer-plugins-good", "gstreamer-plugins-bad",
     "gstreamer-plugins-libav", "libQt6Core6", "libQt6DBus6", "libQt6Bluetooth6", "libpulse0",
@@ -30,6 +31,7 @@ RUNTIME = [
     "mozilla-nss", "libatk-bridge-2_0-0", "libcups2", "libXcomposite1", "libXdamage1", "libXrandr2",
     "libsecret-1-0", "secret-tool", "libpipewire-0_3-0", "libxshmfence1", "python313-dasbus",
     "python313-typer", "libfmt12", "libspdlog1_17", "libpcre2-8-0", "libbpf1", "libelf1", "curl",
+    "libWPEWebKit-2_0-1",
 ]
 
 SYSTEM = [
