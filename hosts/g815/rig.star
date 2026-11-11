@@ -53,7 +53,7 @@ RIG = [
         "storage-gc-rig",
         exec = LIBEXEC + "/storage-gc --apply",
         schedule = "40 * * * *",
-        env = {"ROOTS": " ".join(["/home/" + u for u in RIG_USERS]), "TARGET_AGE_DAYS": "1"},
+        env = {"ROOTS": " ".join(["/home/" + u for u in RIG_USERS]), "TARGET_AGE_DAYS": "1", "HOME": "/root"},
     ),
     # sched_ext ignores CPUWeight, so while a game runs the slots' builds would take every core.
     # gamemode raises gaming.target and the slots keep four E-cores until it drops.
