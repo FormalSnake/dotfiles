@@ -34,6 +34,13 @@ RUNTIME = [
     "libWPEWebKit-2_0-1",
 ]
 
+# What formalwm, its in-process xwayland-satellite and ShojiWM's portal load, and wlr's portal,
+# which answers Screenshot in that session (rootfs/etc/xdg-desktop-portal/shojiwm-portals.conf).
+SHOJI_RUNTIME = [
+    "xwayland", "xdg-desktop-portal-wlr", "libxcb-cursor0", "libseat1", "libinput10", "liblcms2-2",
+    "libpixman-1-0", "libgbm1", "libxkbcommon0",
+]
+
 SYSTEM = [
     # The minimal base ships these two, which conflict with tuned-ppd and with fish's gzip.
     "!power-profiles-daemon", "!busybox-gzip",
@@ -62,4 +69,4 @@ CLI = [
     "rustup",
 ]
 
-PACKAGES = DESKTOP + RUNTIME + SYSTEM + CLI + cli("linux")
+PACKAGES = DESKTOP + RUNTIME + SHOJI_RUNTIME + SYSTEM + CLI + cli("linux")
