@@ -460,3 +460,17 @@ Read the active context file first where it exists, and maintain them with the
 One pass, always `-x`: `df -h /`, then `du -xh -d 1` into the largest child.
 Delete-without-asking and ask-first lists are in `host-ops`. Stop once the
 target is met.
+
+What you leave behind is what fills the disks. storage-gc on every host only
+sees what follows these rules:
+
+* Build output stays in the repo's own git-ignored `target/` (or `~/build`).
+  Never copy a repo loose into `~` to build it. Run artifacts go in a dir
+  named `*-runs` or `*-shots`.
+* Containers run with `--rm`. Remove the volumes and images you created.
+* No toolchain for a one-off check: `cargo +nightly` installs one for good.
+  `rustup toolchain uninstall` anything you added.
+* Stop the VMs you started when you are done with them.
+* Dev builds use line-table debuginfo (`/home/.cargo/config.toml` on Linux).
+  Don't set `debug = true` back in a repo to get a debugger; pass it for
+  that one run.

@@ -139,11 +139,13 @@ if [[ "$OS" == Darwin ]]; then
   STAT=/usr/bin/stat
   DU=/usr/bin/du
   STAT_MTIME=(-f '%m')
+  STAT_DEV=(-f '%d')
 else
   FIND=find
   STAT=stat
   DU=du
   STAT_MTIME=(-c '%Y')
+  STAT_DEV=(-c '%d')
 fi
 
 NOW=$(date +%s)
@@ -314,6 +316,30 @@ for root in "${SCAN_ROOTS[@]}" "$HOME"; do
   done < <("$FIND" "$root" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null)
 done
 
+### 1b'. Build caches left loose in the home dir
+
+# An agent that builds outside ~/Developer (a ~/<project>-task5 copy) leaves a
+# cargo or zig cache nothing above scans. Only the CACHEDIR.TAG'd dir goes,
+# never what holds it, so a project unpacked in ~/Downloads keeps its source.
+# A top dir on another filesystem is a mount (~/OrbStack holds live docker
+# volumes), not this disk.
+home_dev=$("$STAT" "${STAT_DEV[@]}" "$HOME")
+while IFS= read -r -d '' tag; do
+  dir=$(dirname "$tag")
+  is_cachedir "$dir" || continue
+  rc=0; git_ignored "$dir" || rc=$?
+  (( rc == 1 )) && continue
+  (( $(newest_age_hours "$dir") >= TARGET_CUT_H )) || continue
+  queue "loose-cache" "$dir"
+done < <(
+  for top in "$HOME"/*/; do
+    top=${top%/}
+    case " ${SCAN_ROOTS[*]} $HOME/Developer $HOME/Library " in *" $top "*) continue ;; esac
+    [[ $("$STAT" "${STAT_DEV[@]}" "$top" 2>/dev/null) == "$home_dev" ]] || continue
+    "$FIND" "$top" -maxdepth 4 -type d -name .git -prune -o -type f -name CACHEDIR.TAG -print0 2>/dev/null
+  done
+)
+
 ### 1c. Agent worktrees that are finished
 
 # Only the dirs agents create for themselves. Worktrees the owner checked out
@@ -448,6 +474,30 @@ else
   queue "cargo-src" "$HOME/.cargo/registry/src"
 fi
 queue "cargo-git" "$HOME/.cargo/git/checkouts"
+
+# A rustup toolchain no checkout pins, installed over TARGET_AGE_DAYS ago and
+# not the default: `cargo +nightly` once auto-installs one for good.
+if command -v rustup >/dev/null 2>&1 && [[ -d $HOME/.rustup/toolchains ]]; then
+  pins=" $(
+    for root in "$HOME/Developer" "${SCAN_ROOTS[@]}"; do
+      [[ -d $root ]] || continue
+      "$FIND" "$root" -maxdepth 5 -type d \( -name .git -o -name node_modules -o -name target \) -prune -o \
+        -type f \( -name rust-toolchain.toml -o -name rust-toolchain \) -print 2>/dev/null
+    done | while read -r f; do
+      sed -nE 's/^[[:space:]]*channel[[:space:]]*=[[:space:]]*"([^"]+)".*/\1/p; /^[A-Za-z0-9.-]+$/p' "$f" | head -1
+    done | sort -u | tr '\n' ' '
+  ) "
+  default=$(rustup default 2>/dev/null | awk '{print $1}')
+  for tc in "$HOME"/.rustup/toolchains/*/; do
+    tc=${tc%/}; name=$(basename "$tc")
+    [[ $name == "$default" || $name == stable-* ]] && continue
+    pinned=0
+    for c in $pins; do [[ $name == "$c"-* ]] && pinned=1; done
+    (( pinned )) && continue
+    (( ($NOW - $("$STAT" "${STAT_MTIME[@]}" "$tc")) / 86400 >= TARGET_AGE_DAYS )) || continue
+    run_cmd "rustup-$name" "$tc" rustup toolchain uninstall "$name"
+  done
+fi
 
 if [[ "$OS" == Darwin ]]; then
   # Streamed audio only; Spotify refills it as tracks play. 8.7 GB in Oct 2026.
