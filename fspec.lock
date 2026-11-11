@@ -112,11 +112,11 @@ hash = "sha256-GsAvJMOKZX7p3dhXOP/3c+cu5q6OW388bAMKO+1JAjA="
 [[pkg]]
 name = "atoll"
 source = "github:FormalStudio/atoll"
-version = "0.1.1"
+version = "0.1.2"
 
 [pkg.x86_64-linux]
-url = "https://github.com/FormalStudio/atoll/releases/download/v0.1.1/atoll-v0.1.1-x86_64-linux.tar.gz"
-hash = "sha256-IRzMo8C+CmtfORMoPdKAkUOCr8wVMKedJLPlFaFWlOo="
+url = "https://github.com/FormalStudio/atoll/releases/download/v0.1.2/atoll-v0.1.2-x86_64-linux.tar.gz"
+hash = "sha256-hlTbWVsnqfpWmkIniNgMlMtBEjXHTd1JlW8jiMzs3/A="
 
 [[pkg]]
 name = "bat"
@@ -230,6 +230,15 @@ build = "4c44efd0"
 name = "coreutils"
 source = "brew"
 version = "9.12"
+
+[[pkg]]
+name = "coteditor"
+source = "mac:github:coteditor/CotEditor"
+version = "7.1.3"
+
+[pkg.x86_64-linux]
+url = "https://github.com/coteditor/CotEditor/releases/download/7.1.3/CotEditor_7.1.3.dmg"
+hash = "sha256-yMvmQ3Q0UWuyP5Pv4Ff9BYrVbe1VI6wRMIGormjasYQ="
 
 [[pkg]]
 name = "couchdb"
@@ -858,6 +867,14 @@ version = "24.22.1"
 [[pkg]]
 name = "nordvpn"
 source = "zypper:"
+
+[[pkg]]
+name = "notion"
+source = "mac:url:https://desktop-release.notion-static.com/Notion-7.43.0-universal.dmg"
+
+[pkg.any]
+url = "https://desktop-release.notion-static.com/Notion-7.43.0-universal.dmg"
+hash = "sha256-789pUEFi8zSaw3ktEAmxkGyYOBZnRj/UJkf4iG/UOM4="
 
 [[pkg]]
 name = "nvidia-compute-utils-G07"

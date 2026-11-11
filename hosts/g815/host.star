@@ -15,6 +15,7 @@ load("//modules/tools.star", "tools")
 load("//modules/gaming/gaming.star", "GAMING_PACKAGES", "gaming")
 load("//hosts/g815/airplay.star", "AIRPLAY")
 load("//hosts/g815/hardware.star", "HARDWARE")
+load("//hosts/g815/mac_apps.star", "MAC_APPS")
 load("//hosts/g815/padbridge.star", "PADBRIDGE")
 load("//hosts/g815/rig.star", "RIG", "rig_users")
 load("//hosts/g815/windows.star", "VMS", "WINDOWS", "WINDOWS_BOOT")
@@ -95,6 +96,7 @@ g815 = host(
         home(),
         tools,
         my_apps,
+        MAC_APPS,
         artcraft,
         apps,
         fspec,
