@@ -39,12 +39,12 @@ RIG = [
         share = {"formalshell-rig/aquamarine": "lib"},
     ),
     # Each slot user installs its own rustup toolchain and cargo registry, the same 1.8G eight
-    # times over. duperemove (DEV_PACKAGES) shares their identical extents on btrfs and leaves
+    # times over, beside the desktop user's own. duperemove (DEV_PACKAGES) shares their identical extents on btrfs and leaves
     # every file where and whose it is, so a slot's toolchain bump or registry fetch works as before.
     timer(
         "formalshell-rig-dedupe",
         exec = "/usr/bin/duperemove -dr -q --hashfile=/var/cache/formalshell-rig-dedupe.hash " +
-               " ".join(["/home/%s/%s" % (u, d) for u in RIG_USERS for d in [".rustup", ".cargo/registry"]]),
+               " ".join(["/home/%s/%s" % (u, d) for u in RIG_USERS + ["kyandesutter"] for d in [".rustup", ".cargo/registry"]]),
         schedule = "20 */4 * * *",
     ),
     # Every slot builds its own formalshell and atoll target/, 5 to 13 GB each, and the user

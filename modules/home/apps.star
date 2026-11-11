@@ -43,6 +43,9 @@ TOOLS = [
     pkg("t3code-desktop", version = "0.1.3", source = github("pingdotgg/t3code", asset = "T3-Code-*-x86_64.AppImage")),
     # The distro's rustup starts with no default toolchain.
     file("~/.rustup/settings.toml", mode = "patch", owns = {"default_toolchain": "stable-x86_64-unknown-linux-gnu"}),
+    # Full debuginfo is most of a dev target/ (kopuz: 20 of 30 GB in deps). Line tables keep
+    # backtraces and panics readable; a debugger session needs `debug = true` back for that run.
+    file("~/.cargo/config.toml", mode = "patch", owns = {"profile.dev.debug": "line-tables-only"}),
     # Its releases carry only darwin assets.
     pkg("lumen", source = git("https://github.com/jnsahaj/lumen", rev = "4ad27231c3614e3f2acbc07bc794a4e8fde06fbf")),
     pkg(
