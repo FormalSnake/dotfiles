@@ -2,4 +2,5 @@
 Name=FormalShell
 Comment=Hyprland on the VM's display
 Exec=/etc/fstestvm/desktop.sh
+DesktopNames=Hyprland
 Type=Application

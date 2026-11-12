@@ -41,6 +41,11 @@
     "radius": 20,
     "thickness": 6
   },
+  "greeter": {
+    "sessionDirs": [
+      "/etc/formalshell-greeter/wayland-sessions"
+    ]
+  },
   "localsend": {
     "receive": true
   },

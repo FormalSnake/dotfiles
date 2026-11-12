@@ -72,11 +72,20 @@ SHARED = [
     file("~/.config/environment.d/10-cursor.conf", src = "hosts/fstestvm/home/.config/environment.d/10-cursor.conf"),
 ]
 
-# The greeter lists the VM's sessions, the slot's default first.
+# The greeter lists the VM's sessions, the slot's default first. The boot lock lists them from
+# the user's own settings, since the greeter's are not readable to it.
 def _session(n):
     default = SESSIONS.get(n, "formalshell")
     return [
         file("/etc/fstestvm/default-session", content = default + "\n"),
+        file("~/.config/formalshell/settings.json", content = """{
+  "greeter": {
+    "sessionDirs": [
+      "/etc/fstestvm/wayland-sessions"
+    ]
+  }
+}
+"""),
         file("/var/lib/formalshell-greeter/.config/formalshell/settings.json", content = """{
   "greeter": {
     "sessionDirs": [
