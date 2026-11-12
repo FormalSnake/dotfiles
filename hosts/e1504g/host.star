@@ -44,7 +44,7 @@ e1504g = host(
     # Builds what CI has not on the g815, over the tailnet, then the LAN.
     builders = [builder("g815", routes = ["g815", "192.168.86.95"])],
     modules = [
-        linux("e1504g"),
+        linux("e1504g", session = "formalwm-uwsm"),
         SERVICES,
         swapfile(),
         linux_secrets("e1504g"),

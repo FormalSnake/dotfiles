@@ -82,7 +82,7 @@ g815 = host(
     users = [user(USER, uid = 1000, shell = "fish", groups = GROUPS + ["gamemode", "libvirt"])] + rig_users(),
     modules = [
         # The 256 GB root counts as low under 45 GB.
-        linux("g815", gaming = True, ports = PORTS, low_free_gb = 45),
+        linux("g815", gaming = True, ports = PORTS, low_free_gb = 45, session = "formalwm-uwsm"),
         HARDWARE,
         gaming(fps = 138),
         AIRPLAY,
