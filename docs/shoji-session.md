@@ -33,32 +33,33 @@ Engine paths are in FormalStudio/FormalShell, `wm/`, at the rev `formalwm` is pi
 | Lines | What | Under formalwm |
 | --- | --- | --- |
 | 1-8 | The boot splash ends before the compositor opens the card | spec: `formalwm-session` starts `formalos-splash-quit.service` before `formalwm` |
-| 10-32 | Window colours from `formalshell-colors.lua`, `hyprctl reload` | engine: the shell's `theme.set` on every connect and theme change (`formalwm/src/ipc.rs`); the fallback is `fs-wm-proto`'s `Theme::default()` |
-| 34-73 | Rounding, blur, gaps, border, shadow, motion from `formalshell-chrome.lua` | engine: the same `theme.set` |
-| 76-93 | Per-host `host.lua` | spec: `hosts/g815/home/.config/formalwm/host.json`, read by `core/src/settings.rs` over `settings.json`. e1504g has no `host.lua`, so it gets no `host.json`: the defaults (the laptop panel `eDP-1`, opacity 1) are what `hyprland.lua` gives it |
-| 95-114 | The lid output dark while shut, flipped by the lid switch | engine: `lidOutput` (`core/src/settings.rs`, `formalwm/src/session.rs`), the core's lid switch. Proven headless only |
-| 119 | Any other display at its highest refresh rate | settings: the catch-all `{ "mode": "highrr" }` |
-| 122-135 | Nine named workspaces, the host's pins | settings, host.json |
-| 138-151 | `XCURSOR_*`, `QS_ICON_THEME`, `QT_QPA_PLATFORMTHEME`, the host's GPU variables | engine: settings `env` and host.json `env` (`formalwm/src/session.rs`, `COMPOSITOR.env.apply`), which reach only what formalwm starts itself. Before formalwm starts: the cursor variables from `environment.d/10-session.conf` in the user manager, the rest from `uwsm/env` and g815's `env-shojiwm` |
-| 155-183 | Keyboard, repeat, pointer and touchpad | settings `input`. Handed to the core's libinput; not proven on a real device |
-| 184-308 | Gaps, border, tape, gestures, decoration, dim, opacity, blur | engine and settings. Group colours have no counterpart (no groups). Window opacity let less through than set in every engine build before `6f82047c`, the one pinned here (0.5 came out as 0.75, g815's 0.96 near opaque) |
-| 279 | Black under everything | engine: `COMPOSITOR.output.set_clear_color` black (`formalwm/src/session.rs`), from the first frame |
-| 284 | `focus_on_activate` | engine |
-| 285 | `anr_missed_pings` | missing: the core has no dialog for a client that stopped answering. Proposal: drop, nothing depends on it |
-| 288 | A restarted shell takes the lock back | core's session lock; lock and unlock proven, a restart while locked not yet |
-| 294 | `direct_scanout = 0` on g815 (NVIDIA marks a fullscreen Vulkan swapchain out of date, black flashes in Sober) | missing: the core has no switch and the engine reads `directScanout` and ignores it. Proposal: a per-output scanout switch in the core, core agent. Watch Sober on g815 after the switch |
-| 299 | `cm_auto_hdr = 1` | missing: the core has no automatic HDR. Proposal: core agent, after the switch |
-| 306-308 | `xwayland.force_zero_scaling` | missing as a setting: X11 goes through the core's in-process xwayland-satellite, which scales on its own. Check an X11 app on g815's 1.25 panel after the switch |
-| 318-322 | The DualSense touchpad: flat, 0.7 | settings `input.devices`. Not proven on the device |
-| 329-346 | Animations on the shell's curves, no zoom on a new output | engine motion; nothing animates an output |
-| 357-358 | Three-finger gestures | engine (`formalwm/src/gestures.rs`). Proven headless only |
-| 360-415, 445-447 | The pointer hidden until the shell arrives, back after ten seconds without one | engine: `cursor_hidden` from the start, `wait_for_shell` (`formalwm/src/session.rs`), through the core's cursor override. No blank theme: the `formalos-blank` swap is Hyprland's alone |
-| 417-434 | hypr-dynamic-cursors: lean and shake to find | missing: the core draws the cursor untransformed. Proposal: a cursor transform in the core, then the engine; core agent, after the switch. The `hypr-dynamic-cursors` package stays for Hyprland |
-| 435-444 | XWayland's primary output, again on every new output | engine: `xwayland_primary` runs `xrandr` (`formalwm/src/session.rs`); `xrandr` is in `packages.star` |
-| 452-593 | Every bind: the shell's IPC, volume, brightness, media, screenshots, the Copilot key (SUPER+SHIFT+F23), helium, lock and suspend, the MX Master's buttons | settings `binds`. SUPER+plus is bound twice in `hyprland.lua` (console and +10% width) and both are kept |
-| 598-688 | Window rules: workspaces, floats, pins, Sober and Steam as games, Steam's idle pointer, picture in picture, Atoll's tag | settings `rules` |
-| 643 | Minecraft confines the pointer | missing: no core hook for an X11 grab. Proposal: core agent, after the switch |
-| 697-716 | Blur and alpha threshold per shell layer, no layer animation | settings `layers` (`formalwm/src/layers.rs`) |
+| 10-155 | Mac apps under atoll: while one has focus the shell switches to the submap `mac`, every bind but the SUPER and SUPER+SHIFT chords not in `macApps.reservedBinds`, so those reach the app as Command | missing: the engine has no submap and no per-window bind passthrough, so formalwm keeps every SUPER chord over a Mac window. Proposal: engine agent, before g815 relies on Mac apps under formalwm |
+| 156-178 | Window colours from `formalshell-colors.lua`, `hyprctl reload` | engine: the shell's `theme.set` on every connect and theme change (`formalwm/src/ipc.rs`); the fallback is `fs-wm-proto`'s `Theme::default()` |
+| 180-219 | Rounding, blur, gaps, border, shadow, motion from `formalshell-chrome.lua` | engine: the same `theme.set` |
+| 222-239 | Per-host `host.lua` | spec: `hosts/g815/home/.config/formalwm/host.json`, read by `core/src/settings.rs` over `settings.json`. e1504g has no `host.lua`, so it gets no `host.json`: the defaults (the laptop panel `eDP-1`, opacity 1) are what `hyprland.lua` gives it |
+| 241-260 | The lid output dark while shut, flipped by the lid switch | engine: `lidOutput` (`core/src/settings.rs`, `formalwm/src/session.rs`), the core's lid switch. Proven headless only |
+| 265 | Any other display at its highest refresh rate | settings: the catch-all `{ "mode": "highrr" }` |
+| 268-281 | Nine named workspaces, the host's pins | settings, host.json |
+| 284-297 | `XCURSOR_*`, `QS_ICON_THEME`, `QT_QPA_PLATFORMTHEME`, the host's GPU variables | engine: settings `env` and host.json `env` (`formalwm/src/session.rs`, `COMPOSITOR.env.apply`), which reach only what formalwm starts itself. Before formalwm starts: the cursor variables from `environment.d/10-session.conf` in the user manager, the rest from `uwsm/env` and g815's `env-shojiwm` |
+| 301-329 | Keyboard, repeat, pointer and touchpad | settings `input`. Handed to the core's libinput; not proven on a real device |
+| 330-454 | Gaps, border, tape, gestures, decoration, dim, opacity, blur | engine and settings. Group colours have no counterpart (no groups). Window opacity let less through than set in every engine build before `6f82047c`, the one pinned here (0.5 came out as 0.75, g815's 0.96 near opaque) |
+| 425 | Black under everything | engine: `COMPOSITOR.output.set_clear_color` black (`formalwm/src/session.rs`), from the first frame |
+| 430 | `focus_on_activate` | engine |
+| 431 | `anr_missed_pings` | missing: the core has no dialog for a client that stopped answering. Proposal: drop, nothing depends on it |
+| 434 | A restarted shell takes the lock back | core's session lock; lock and unlock proven, a restart while locked not yet |
+| 440 | `direct_scanout = 0` on g815 (NVIDIA marks a fullscreen Vulkan swapchain out of date, black flashes in Sober) | engine: host.json `directScanout` false, handed to the core per output (`formalwm/src/session.rs`). Watch Sober on g815 after the switch |
+| 445 | `cm_auto_hdr = 1` | engine: every output SDR until a fullscreen window shows HDR content (`formalwm/src/session.rs`). Not proven on an HDR panel |
+| 452-454 | `xwayland.force_zero_scaling` | missing as a setting: X11 goes through the core's in-process xwayland-satellite, which scales on its own. Check an X11 app on g815's 1.25 panel after the switch |
+| 464-468 | The DualSense touchpad: flat, 0.7 | settings `input.devices`. Not proven on the device |
+| 475-492 | Animations on the shell's curves, no zoom on a new output | engine motion; nothing animates an output |
+| 503-504 | Three-finger gestures | engine (`formalwm/src/gestures.rs`). Proven headless only |
+| 506-561, 591-593 | The pointer hidden until the shell arrives, back after ten seconds without one | engine: `cursor_hidden` from the start, `wait_for_shell` (`formalwm/src/session.rs`), through the core's cursor override. No blank theme: the `formalos-blank` swap is Hyprland's alone |
+| 563-580 | hypr-dynamic-cursors: lean and shake to find | engine: settings `cursor.dynamic` (stretch, tilt 20 at 3000, shake on), `formalwm/src/cursor.rs`. The `hypr-dynamic-cursors` package stays for Hyprland |
+| 581-590 | XWayland's primary output, again on every new output | engine: `xwayland_primary` runs `xrandr` (`formalwm/src/session.rs`); `xrandr` is in `packages.star` |
+| 598-739 | Every bind: the shell's IPC, volume, brightness, media, screenshots, the Copilot key (SUPER+SHIFT+F23), helium, lock and suspend, the MX Master's buttons | settings `binds`. SUPER+plus is bound twice in `hyprland.lua` (console and +10% width) and both are kept |
+| 744-834 | Window rules: workspaces, floats, pins, Sober and Steam as games, Steam's idle pointer, picture in picture, Atoll's tag | settings `rules` |
+| 789 | Minecraft confines the pointer | settings: the `confinePointer` rule on `Minecraft.*` |
+| 843-862 | Blur and alpha threshold per shell layer, no layer animation | settings `layers` (`formalwm/src/layers.rs`) |
 
 ## Outside hyprland.lua
 
