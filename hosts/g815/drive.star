@@ -7,7 +7,12 @@ load("//lib/units.star", "gui")
 
 MOUNT = HOME + "/.drive"
 
-DRIVE = [
+# The root's own overflow: an 80 GB btrfs image on the USB SSD's exFAT partition, which builds
+# as fast as the NVMe. It holds only fspec's build dirs, which rebuild from nothing: without the
+# SSD the mounts fail and the builds land in the directories underneath, on the root.
+OVERFLOW = [service(u) for u in ["mnt-overflow.mount", "home-kyandesutter-.cache-fspec-build.mount", "root-.cache-fspec-build.mount"]]
+
+DRIVE = OVERFLOW + [
     gui(
         "drive-mount",
         "/usr/bin/sshfs -f -o reconnect -o ServerAliveInterval=15 -o ServerAliveCountMax=3 -o ConnectTimeout=10 -o idmap=user macbook:drive/g815 " + MOUNT,

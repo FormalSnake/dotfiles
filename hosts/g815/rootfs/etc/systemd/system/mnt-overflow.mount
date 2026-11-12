@@ -1,0 +1,13 @@
+[Unit]
+Description=btrfs volume for build caches, an image file on the USB SSD's FormalDisk partition
+RequiresMountsFor=/mnt/formaldisk
+
+[Mount]
+What=/mnt/formaldisk/g815-overflow.img
+Where=/mnt/overflow
+Type=btrfs
+Options=loop,noatime,compress=zstd:1
+TimeoutSec=20
+
+[Install]
+WantedBy=multi-user.target

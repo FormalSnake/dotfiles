@@ -1,0 +1,13 @@
+[Unit]
+Description=the desktop user's fspec build dirs on the overflow volume
+BindsTo=mnt-overflow.mount
+After=mnt-overflow.mount
+
+[Mount]
+What=/mnt/overflow/build-user
+Where=/home/kyandesutter/.cache/fspec/build
+Type=none
+Options=bind
+
+[Install]
+WantedBy=mnt-overflow.mount

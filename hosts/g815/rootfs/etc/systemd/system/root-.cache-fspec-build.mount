@@ -1,0 +1,13 @@
+[Unit]
+Description=root's fspec build dirs on the overflow volume
+BindsTo=mnt-overflow.mount
+After=mnt-overflow.mount
+
+[Mount]
+What=/mnt/overflow/build-root
+Where=/root/.cache/fspec/build
+Type=none
+Options=bind
+
+[Install]
+WantedBy=mnt-overflow.mount
