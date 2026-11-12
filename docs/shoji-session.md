@@ -86,14 +86,15 @@ ShojiWM's own portal answers Screenshot as well as ScreenCast from ShojiWM `85f7
 
 ## Proven on the VM
 
-fstestvm3 on g815, software rendering, with the spec of this branch.
+fstestvm3 on g815, software rendering, with the spec of this branch: formalwm at FormalShell `6f82047c`,
+ShojiWM at `85f78ef`, the shell at `ffb11cc3`.
 
 | What | How |
 | --- | --- |
-| Boot into formalwm, locked | the boot's autologin, the shell's lock through the login-lock marker (the engine's locked start not yet pinned) |
+| Boot into formalwm, locked | the boot's autologin with `FORMALWM_START_LOCKED=1`, recorded every 200 ms from power on: the boot splash, then black only, then the shell's boot lock (the splash's last picture dissolving into the backdrop, then the card). No frame shows the bar, a window or the wallpaper before it. The start script ran (it alone starts `formalshell.service`, which has no `WantedBy`), and the password opens the desktop |
 | The greeter offers formalwm | preselected after a logout, beside Hyprland's entry |
 | A greeter login reaches the bar over a window | foot from SUPER+Return, `graphical-session.target` and `formalshell.service` active with `XDG_CURRENT_DESKTOP=ShojiWM` and `SHOJIWM_SOCKET` |
-| The Screenshot portal | answers through `xdg-desktop-portal-wlr`; ShojiWM's own portal is activated for ScreenCast |
+| The Screenshot portal | answered by ShojiWM's own portal ("serving ScreenCast and Screenshot"), with no wlr portal installed; the picture shows the bar over foot |
 | Lock and unlock | the shell's lock, unlocked by password |
 | Logout | back to the greeter; no formalwm, Xwayland, shell, portal or client left, `SHOJIWM_SOCKET` gone from the user manager |
 | Hyprland from the same greeter | logs in, the shell runs with `XDG_CURRENT_DESKTOP=Hyprland` |
