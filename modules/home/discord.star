@@ -89,5 +89,17 @@ DISCORD = [
     # matugen rewrites it on every re-theme; moonlight-css drops a path it cannot stat.
     file("~/.config/moonlight-mod/matugen.css", mode = "seed", content = ""),
     # stable.json carries the Last.fm key, so it renders at login instead of shipping.
-    oneshot("moonlight-config", BIN + "/moonlight-config", "Render moonlight's stable.json with the Last.fm key", user = True),
+    # Not RemainAfterExit: a path unit cannot start a unit that still counts as active.
+    oneshot("moonlight-config", BIN + "/moonlight-config", "Render moonlight's stable.json with the Last.fm key", user = True, remain = False),
+    file("~/.config/systemd/user/moonlight-config.path", content = """[Unit]
+Description=Render moonlight's stable.json again when its template changes
+
+[Path]
+PathChanged=%h/.config/moonlight-mod/stable.json.tmpl
+Unit=fspec-moonlight-config.service
+
+[Install]
+WantedBy=paths.target
+"""),
+    service("moonlight-config.path", user = True),
 ]
