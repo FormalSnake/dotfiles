@@ -14,4 +14,6 @@ MAC_APPS = [
     pkg("rectangle", source = mac(github("rxhanson/Rectangle", asset = "*.dmg"))),
     pkg("keka", source = mac(github("aonez/Keka", asset = "*.dmg"))),
     pkg("iina", source = mac(github("iina/iina", asset = "*.dmg"))),
+    # Installs as "Ghostty (Mac)" beside the native Ghostty.
+    pkg("ghostty-mac", source = mac(url("https://release.files.ghostty.org/1.4.0/Ghostty.dmg"))),
 ]

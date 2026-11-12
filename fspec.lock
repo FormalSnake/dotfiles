@@ -112,11 +112,11 @@ hash = "sha256-GsAvJMOKZX7p3dhXOP/3c+cu5q6OW388bAMKO+1JAjA="
 [[pkg]]
 name = "atoll"
 source = "github:FormalStudio/atoll"
-version = "0.1.3"
+version = "0.1.4"
 
 [pkg.x86_64-linux]
-url = "https://github.com/FormalStudio/atoll/releases/download/v0.1.3/atoll-v0.1.3-x86_64-linux.tar.gz"
-hash = "sha256-9ZzYnWg6ZvfAF4481uSzJepr+wdoRnWpFQLcijnCC84="
+url = "https://github.com/FormalStudio/atoll/releases/download/v0.1.4/atoll-v0.1.4-x86_64-linux.tar.gz"
+hash = "sha256-Uk0z8M1Gb7EWmHy7G00FOij+AeoGzyZFXblNLMYdXkg="
 
 [[pkg]]
 name = "bat"
@@ -533,6 +533,14 @@ version = "10.08.0"
 name = "ghostty"
 source = "brew:cask"
 version = "1.4.0"
+
+[[pkg]]
+name = "ghostty-mac"
+source = "mac:url:https://release.files.ghostty.org/1.4.0/Ghostty.dmg"
+
+[pkg.any]
+url = "https://release.files.ghostty.org/1.4.0/Ghostty.dmg"
+hash = "sha256-OgIHXb0kMY13hCavQd7lUH1T7MRXjt6WkS7Jzm0Y0+g="
 
 [[pkg]]
 name = "git"
