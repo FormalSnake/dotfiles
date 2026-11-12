@@ -110,10 +110,10 @@ fi
 # and Claude check out throwaway branches, and they accumulate their own
 # node_modules and target/ copies. Scanning them reclaims that without touching
 # the worktrees themselves, which may hold another agent's uncommitted work.
-# dev-cache.noindex on the external SSD is where the nativedesktop worktrees
-# point their cargo target dirs (per-worktree .cargo/config.toml), next to the
-# CEF downloads, sccache and zed caches; it is dev overflow on a drive meant
-# for personal data, so it is swept as hard as ~/Developer.
+# dev-cache.noindex on the external SSD holds every cargo build dir on the
+# macbook (~/.cargo/config.toml, and nativedesktop's own per-worktree config),
+# next to the CEF downloads, sccache and zed caches. The g815 keeps cold data
+# on the same drive, so it is swept as hard as ~/Developer.
 if [[ -n "${ROOTS:-}" ]]; then
   read -r -a SCAN_ROOTS <<<"$ROOTS"
 else

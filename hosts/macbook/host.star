@@ -31,11 +31,27 @@ LINKED = [
     "home/.claude/AGENTS.md",
 ]
 
-# On the external SSD; the links dangle while it is unmounted.
+# On the external SSD; the links dangle while it is unmounted. A directory still on the internal
+# disk is moved there by the apply, so stop what writes to it before adding one.
 DRIVE = "/Volumes/Kyan Drive"
-ON_DRIVE = {"Movies": "Movies", ".gradle": "gradle", "Library/Developer/CoreSimulator": "CoreSimulator"}
+ON_DRIVE = {
+    "Movies": "Movies",
+    ".gradle": "gradle",
+    "Library/Developer/CoreSimulator": "CoreSimulator",
+    ".android/avd": "android-avd",
+    "Library/Android/sdk": "android-sdk",
+}
 
-HOME_FILES = [file("~/" + p, mode = "link", target = DRIVE + "/" + sub) for p, sub in ON_DRIVE.items()] + [
+# cargo expands {workspace-path-hash}, so each workspace gets its own directory and two builds
+# never share a lock. storage-gc sweeps them by the CACHEDIR.TAG cargo writes.
+CARGO = """[build]
+build-dir = "%s/dev-cache.noindex/cargo-build/{workspace-path-hash}"
+""" % DRIVE
+
+HOME_FILES = [file("~/" + p, mode = "link", target = DRIVE + "/" + sub, move = True) for p, sub in ON_DRIVE.items()] + [
+    file("~/.cargo/config.toml", content = CARGO),
+    # sshfs on the g815 mounts the drive through this: its remote path cannot hold a space.
+    file("~/drive", mode = "link", target = DRIVE),
     # The shared ssh config names the agent by the path 1Password uses on Linux.
     file("~/.1password/agent.sock", mode = "link", target = "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"),
     # The App Store Tailscale's CLI. It must run from inside the bundle: a symlink dies on an

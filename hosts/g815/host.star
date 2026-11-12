@@ -14,6 +14,7 @@ load("//modules/sync.star", "sync_items")
 load("//modules/tools.star", "tools")
 load("//modules/gaming/gaming.star", "GAMING_PACKAGES", "gaming")
 load("//hosts/g815/airplay.star", "AIRPLAY")
+load("//hosts/g815/drive.star", "DRIVE")
 load("//hosts/g815/hardware.star", "HARDWARE")
 load("//hosts/g815/mac_apps.star", "MAC_APPS")
 load("//hosts/g815/padbridge.star", "PADBRIDGE")
@@ -90,6 +91,7 @@ g815 = host(
         WINDOWS,
         VMS,
         RIG,
+        DRIVE,
         swapfile(),
         linux_secrets("g815"),
         sync_items(),
