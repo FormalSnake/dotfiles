@@ -1401,8 +1401,8 @@ version = "2.46.0"
 
 [[pkg]]
 name = "xdg-desktop-portal-shojiwm"
-source = "git:https://github.com/FormalSnake/ShojiWM@85f78ef7fc1930f5d41c0ec6aea0a2120ab6b061"
-rev = "85f78ef7fc1930f5d41c0ec6aea0a2120ab6b061"
+source = "git:https://github.com/FormalSnake/ShojiWM@e6493f8d62a57a4cb2725b78bd43e75c4752e819"
+rev = "e6493f8d62a57a4cb2725b78bd43e75c4752e819"
 
 [[pkg]]
 name = "yaml-language-server"
