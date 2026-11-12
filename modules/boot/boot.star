@@ -166,7 +166,7 @@ def formalos_boot(t, entries = []):
             "formalboot",
             source = git(
                 "https://github.com/FormalStudio/formalboot",
-                rev = "8a5464cae84dd64e00c5ed4ed8b4ca57fac89041",
+                rev = "3e4243a360467a8610bba648743e968915fe4a05",
                 image = TUMBLEWEED,
                 deps = ["cargo", "gcc"],
             ),
