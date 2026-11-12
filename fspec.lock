@@ -442,6 +442,10 @@ name = "formalboot"
 source = "git:https://github.com/FormalStudio/formalboot@3e4243a360467a8610bba648743e968915fe4a05"
 rev = "3e4243a360467a8610bba648743e968915fe4a05"
 
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/formalboot@sha256:5bbca371b74bcbdc05de2f83688ae66c322fb24905466a5623288ab462b0e8fd"
+build = "b7157f2d"
+
 [[pkg]]
 name = "formalmusic"
 source = "git:https://github.com/FormalStudio/formalmusic@4aeef799e584f6a69a40eef9fb69d92f73b1611d"
@@ -455,6 +459,10 @@ build = "7272611d"
 name = "formalnotes"
 source = "git:https://github.com/FormalStudio/formalnotes@3b664864da8c08cdfdd54fbd98f70bda6679a7c1"
 rev = "3b664864da8c08cdfdd54fbd98f70bda6679a7c1"
+
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/formalnotes@sha256:db5c89eac84fd9784323f95e027de983269fed936369ca90cbbf276c92b115c3"
+build = "be2193d6"
 
 [[pkg]]
 name = "formalos-chime"
@@ -474,6 +482,10 @@ rev = "4631ff3719afae2c4321afcf16e27c946e92ebfe"
 name = "formalwm"
 source = "git:https://github.com/FormalStudio/FormalShell@4631ff3719afae2c4321afcf16e27c946e92ebfe"
 rev = "4631ff3719afae2c4321afcf16e27c946e92ebfe"
+
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/formalwm@sha256:f2bbd39ac86ff4919819708f1418e30f7078c3f4cc7f8ac13a40a29bb77cbd08"
+build = "52169b50"
 
 [[pkg]]
 name = "fspec"
@@ -653,6 +665,10 @@ hash = "sha256-DUBAsIt3JAz9ypUQeLkpUNAHqRNUxau1tvHpk5qjoBE="
 name = "hypr-dynamic-cursors"
 source = "git:https://github.com/VirtCode/hypr-dynamic-cursors@5a224284872208b5324759d535d65061043725de"
 rev = "5a224284872208b5324759d535d65061043725de"
+
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/hypr-dynamic-cursors@sha256:babb466d2b722810ac0eb006a0b10bd9e87b8d409cfcb74f8611857d513fd7ae"
+build = "7d822249"
 
 [[pkg]]
 name = "ideviceinstaller"
@@ -1403,6 +1419,10 @@ version = "2.46.0"
 name = "xdg-desktop-portal-shojiwm"
 source = "git:https://github.com/FormalSnake/ShojiWM@b62cbf73dc934b22cd512e08cd012e75bd867a44"
 rev = "b62cbf73dc934b22cd512e08cd012e75bd867a44"
+
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/xdg-desktop-portal-shojiwm@sha256:51e00ebf0297a93ef81d5da07951b5d31899f83148e53861061ff80edf7b6259"
+build = "0e33ff78"
 
 [[pkg]]
 name = "yaml-language-server"
