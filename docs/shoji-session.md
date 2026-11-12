@@ -14,6 +14,7 @@ now lives.
 | Greeter entry | `wayland-sessions/hyprland-uwsm.desktop` | `wayland-sessions/formalwm-uwsm.desktop` |
 | What uwsm starts | `hyprland.desktop` (the distro's) | `/usr/local/share/wayland-sessions/formalwm.desktop`, which runs `/usr/local/libexec/formalwm-session`, which runs `formalwm --tty` |
 | Boot, nothing picked | `formalshell-login.sh`: uwsm, Hyprland with `--locked-cmd` | `formalshell-login.sh` reads `/etc/formalshell-greeter/default-session`: uwsm, `formalwm.desktop --locked`, which sets `FORMALWM_START_LOCKED=1` |
+| Boot, another session picked on the lock | the boot lock's session chip lists `greeter.sessionDirs` from the user's own settings (the greeter's are 0700); with another session picked the password is checked, the lock stays, answers the keyring, writes `$XDG_RUNTIME_DIR/formalshell/login-session` and ends Hyprland, and `formalshell-login.sh` starts that session in the same login, taking the marker only from a runtime directory no other user can reach | the same, ending formalwm |
 | Environment | `~/.config/uwsm/env`, `env-hyprland` (g815: the NVIDIA card as `AQ_DRM_DEVICES`) | `~/.config/uwsm/env`, `env-shojiwm` (g815: sources `env-hyprland`, the card as `SHOJI_TTY_DRM_DEVICE`) |
 | `XDG_CURRENT_DESKTOP` | `Hyprland` | `ShojiWM`, which the core sets whatever uwsm says |
 | The shell | `formalshell.service` from `graphical-session.target`, or the locked login's `--locked-cmd` | `~/.config/formalwm/formalshell-start.sh`, which formalwm runs once its socket is up |
@@ -73,6 +74,7 @@ Engine paths are in FormalStudio/FormalShell, `wm/`, at the rev `formalwm` is pi
 | The greeter's default | spec: `greeter.defaultSession` per host; needs the shell at or past FormalShell `b8e8eb0e` |
 | Starting locked | engine: `FORMALWM_START_LOCKED=1` drives `ConfigBuilder::start_locked`: nothing but the lock surface is drawn, the start script still runs and starts the shell, which takes the lock on `$XDG_RUNTIME_DIR/formalshell/login-lock` as under Hyprland (`formalshell-login.sh` writes it for both). Until the shell locks the screen is black and takes no input; with no shell it stays so and binds do nothing |
 | logind's `Desktop` at the boot login | `/etc/formalshell/login-env.conf` defaults `XDG_SESSION_DESKTOP` to Hyprland, so a formalwm boot login is recorded as Hyprland in `loginctl`. Cosmetic: uwsm and the core set the desktop the session uses |
+| The login keyring at an autologin | spec: `gnome-keyring-daemon.socket` in the user manager. The daemon PAM starts for a login with no password has no pkcs11 or secrets part (`module_instances: assertion 'funcs != NULL'`), so it refused the boot lock's unlock under either compositor, and the distro's autostart entries that add those parts show only under GNOME, MATE and Xfce. The socket's daemon carries both from the start |
 | `~/.config/hypr/formalshell.lua` | the shell installer's Hyprland include, which `hyprland.lua` does not load. Nothing to move |
 
 The shell matches on no desktop name: its OnlyShowIn and NotShowIn filter reads whatever
@@ -100,6 +102,19 @@ ShojiWM at `85f78ef`, the shell at `ffb11cc3`.
 | Logout | back to the greeter; no formalwm, Xwayland, shell, portal or client left, `SHOJIWM_SOCKET` gone from the user manager |
 | Hyprland from the same greeter | logs in, the shell runs with `XDG_CURRENT_DESKTOP=Hyprland` |
 | The pointer | Bibata-Modern-Classic, the arrow on the desktop and its text beam over foot |
+
+The boot lock's session pick, with the shell at `4c5821f3`:
+
+| What | How |
+| --- | --- |
+| The chip on the boot lock | lists FormalShell and formalwm, the running one ticked, over formalwm's locked boot and over Hyprland's |
+| formalwm to Hyprland | Tab, Return, FormalShell, Return, the password: the lock holds until formalwm has gone, then Hyprland comes up unlocked in the same seat0 login (`loginctl` shows the one session, the login script's uwsm starts `hyprland.desktop`), no formalwm left, the marker gone |
+| Hyprland to formalwm | the same from a boot with Hyprland as the slot's default, into formalwm with `SHOJIWM_SOCKET` |
+| Logout after a pick | back to the greeter, from either direction |
+| A wrong password with another session picked | "Wrong password", the pick kept, the compositor still running, no marker |
+| The screen between the two compositors | QEMU screendumps at about 90 a second: the lock ("Unlocking…"), then black alone (one colour, no console text) for 1.1 s towards Hyprland and 3.1 s towards formalwm, then the destination's own fade in, unlocked |
+| The login keyring | unlocked after a plain boot-lock unlock and after a pick in either direction (`org.freedesktop.Secret.Collection` `Locked` false) |
+| Mac apps' hand over | `dev/mac-stub.py` focused under formalwm gets SUPER+Q and quits; the reserved SUPER+H stays formalwm's (the stub sees its release, not its press) |
 
 ![formalwm's pointer on Bibata-Modern-Classic](shoji-session/cursor.png)
 
