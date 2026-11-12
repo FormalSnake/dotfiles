@@ -157,6 +157,8 @@ ps -U "$(id -u)" -o pid=,time=,comm= | awk -v prev="$spin" -v elapsed=$((now - s
 mv "$spin.new" "$spin"
 while read -r pid _ runs; do
   ((runs >= SPIN_MINUTES)) || continue
+  # A VM under load is not a stuck agent, and nothing restarts it.
+  [[ $(name_of "$pid") =~ $EXEMPT ]] && continue
   log "restarting $(name_of "$pid") (pid $pid): over ${SPIN_PCT}% CPU for $runs runs; $(describe "$pid")"
   ((dry_run)) || kill -TERM "$pid" 2>/dev/null
 done <"$spin"
