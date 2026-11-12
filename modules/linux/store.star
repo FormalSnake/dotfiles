@@ -82,7 +82,7 @@ SHOJI = [
         "formalwm",
         source = git(
             "https://github.com/FormalStudio/FormalShell",
-            rev = "6f82047c325b4517cfec57d2bcfb9c72dff5f24f",
+            rev = "0bdedfe7cbdfebc3efb52701fe622032035dd4c1",
             image = TUMBLEWEED,
             deps = SHOJI_DEPS,
         ),

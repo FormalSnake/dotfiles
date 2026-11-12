@@ -472,8 +472,8 @@ rev = "ffb11cc38f59cbbb7d70295ace543c42626b50d6"
 
 [[pkg]]
 name = "formalwm"
-source = "git:https://github.com/FormalStudio/FormalShell@6f82047c325b4517cfec57d2bcfb9c72dff5f24f"
-rev = "6f82047c325b4517cfec57d2bcfb9c72dff5f24f"
+source = "git:https://github.com/FormalStudio/FormalShell@0bdedfe7cbdfebc3efb52701fe622032035dd4c1"
+rev = "0bdedfe7cbdfebc3efb52701fe622032035dd4c1"
 
 [[pkg]]
 name = "fspec"
