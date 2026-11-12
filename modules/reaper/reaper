@@ -1,5 +1,5 @@
 #!/bin/bash
-# Keeps the macbook out of memory exhaustion. On 2026-11-10 it froze for a day
+# Keeps the macbook out of memory and CPU exhaustion. On 2026-11-10 it froze for a day
 # and needed a reboot: the fstestmac lima VM (16 GiB) had run unattended for six
 # days, and a node process under T3 leaked to 291 GB of footprint, so the kernel
 # ran out of swap and killed system daemons instead of the leak.
@@ -11,18 +11,23 @@
 #   3. A lima VM declared with more than VM_CPUS vCPUs is cut to VM_CPUS in its
 #      instance config, which takes effect at its next boot. On 2026-11-11 an
 #      8-vCPU rig build held the host at 700% CPU.
-#   4. On critical memory pressure seen on two runs in a row, a VM with no
+#   4. An Apple agent of this user (under /System or /usr/libexec) over
+#      SPIN_PCT of a core for SPIN_MINUTES runs in a row is sent TERM; launchd
+#      restarts it. On 2026-11-12 contactsd, Phone and searchpartyuseragent sat
+#      in sync loops for two days, together near 100% CPU.
+#   5. On critical memory pressure seen on two runs in a row, a VM with no
 #      client right now is stopped, or else the largest process over
 #      PRESSURE_CAP_GB is killed. One action per run; the next run looks again.
 #
 # The Virtualization and OrbStack VM processes are exempt from the kills: their
 # footprint is guest memory, bounded by the VM's own config and handled by 2
-# and 4. So is the T3 server, which every agent session runs under.
+# and 5. So is the T3 server, which every agent session runs under.
 #
 # Run every minute by the fspec.reaper launchd agent; the log names each
 # victim with its parent chain and working directory. --dry-run reports only.
 #
-# Env: CAP_GB (default 12), PRESSURE_CAP_GB (4), IDLE_HOURS (2), VM_CPUS (4).
+# Env: CAP_GB (default 12), PRESSURE_CAP_GB (4), IDLE_HOURS (2), VM_CPUS (4),
+# SPIN_PCT (20), SPIN_MINUTES (10).
 
 set -uo pipefail
 
@@ -30,6 +35,8 @@ CAP_GB=${CAP_GB:-12}
 PRESSURE_CAP_GB=${PRESSURE_CAP_GB:-4}
 IDLE_HOURS=${IDLE_HOURS:-2}
 VM_CPUS=${VM_CPUS:-4}
+SPIN_PCT=${SPIN_PCT:-20}
+SPIN_MINUTES=${SPIN_MINUTES:-10}
 EXEMPT='^(com\.apple\.Virtualization\.VirtualMachine|OrbStack Helper|t3)$'
 
 dry_run=0
@@ -132,7 +139,29 @@ while read -r name cpus dir; do
   ((dry_run)) || sed -i '' -E "s/^cpus: [0-9]+$/cpus: $VM_CPUS/" "$dir/lima.yaml"
 done < <(limactl list --json 2>/dev/null | jq -r '"\(.name) \(.cpus) \(.dir)"')
 
-# 4. Critical pressure: 1 normal, 2 warning, 4 critical.
+# 4. Spinning agents. The state file holds pid, CPU seconds and the count of
+# consecutive runs over SPIN_PCT. ps reports CPU time as [[d-]h:]m:ss.cc.
+spin=$state/spin
+since=$(stat -f %m "$spin" 2>/dev/null || echo "$now")
+ps -U "$(id -u)" -o pid=,time=,comm= | awk -v prev="$spin" -v elapsed=$((now - since)) -v pct="$SPIN_PCT" '
+  BEGIN { while ((getline l < prev) > 0) { split(l, f, " "); secs[f[1]] = f[2]; runs[f[1]] = f[3] } }
+  {
+    path = $0; sub(/^ *[0-9]+ +[^ ]+ +/, "", path)
+    if (path !~ /^\/(System|usr\/libexec)\//) next
+    n = split($2, t, ":"); s = t[n] + t[n - 1] * 60
+    if (n > 2) { d = split(t[n - 2], h, "-"); s += d > 1 ? h[1] * 86400 + h[2] * 3600 : h[1] * 3600 }
+    r = 0
+    if ($1 in secs && elapsed > 0 && s - secs[$1] >= elapsed * pct / 100) r = runs[$1] + 1
+    print $1, s, r
+  }' >"$spin.new"
+mv "$spin.new" "$spin"
+while read -r pid _ runs; do
+  ((runs >= SPIN_MINUTES)) || continue
+  log "restarting $(name_of "$pid") (pid $pid): over ${SPIN_PCT}% CPU for $runs runs; $(describe "$pid")"
+  ((dry_run)) || kill -TERM "$pid" 2>/dev/null
+done <"$spin"
+
+# 5. Critical pressure: 1 normal, 2 warning, 4 critical.
 critical=$state/critical
 if [[ $(sysctl -n kern.memorystatus_vm_pressure_level) != 4 ]]; then
   rm -f "$critical"
