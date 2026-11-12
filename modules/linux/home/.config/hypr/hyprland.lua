@@ -7,6 +7,152 @@ if splash then
   os.execute("systemctl start formalos-splash-quit.service")
 end
 
+-- MAC APPS
+-- A Mac app under atoll takes SUPER as Command, and Hyprland takes a bound
+-- SUPER chord before any window sees it. While a Mac window has focus the
+-- shell switches to the submap `mac`, which holds every bind of the default
+-- map except the SUPER and SUPER + SHIFT chords the user has not reserved
+-- (settings.json `macApps.reservedBinds`), so those reach the app.
+--
+-- Lua cannot list the binds with their actions, so they are recorded as the
+-- config makes them: load this file before any bind that should keep
+-- working over a Mac window. The names are global because the shell calls
+-- them through `hyprctl eval`. A reload runs this file again in a new Lua
+-- state: the globals and the `hl.on` handlers of the one before are gone
+-- with its binds (dev/smoke.d/mac_faults.sh counts them).
+formalshell_binds = {}
+if not formalshell_raw then
+  formalshell_raw = { bind = hl.bind, unbind = hl.unbind, define_submap = hl.define_submap }
+  formalshell_submap_depth = 0
+  hl.bind = function(chord, action, opts)
+    local handle = formalshell_raw.bind(chord, action, opts)
+    if formalshell_submap_depth == 0 then
+      formalshell_binds[#formalshell_binds + 1] = { chord = chord, action = action, opts = opts, handle = handle }
+    end
+    return handle
+  end
+  hl.unbind = function(chord)
+    for i = #formalshell_binds, 1, -1 do
+      if formalshell_binds[i].chord == chord then
+        table.remove(formalshell_binds, i)
+      end
+    end
+    return formalshell_raw.unbind(chord)
+  end
+  hl.define_submap = function(...)
+    formalshell_submap_depth = formalshell_submap_depth + 1
+    local ok, err = pcall(formalshell_raw.define_submap, ...)
+    formalshell_submap_depth = formalshell_submap_depth - 1
+    if not ok then
+      error(err, 0)
+    end
+  end
+end
+
+-- "SUPER + SHIFT + code:10" and "super+shift+1" are one chord: modifiers
+-- upper case and sorted, the key lower case, a digit row keycode as its digit.
+local function mac_chord(chord)
+  local mods, key = {}, ""
+  for part in tostring(chord):gmatch("[^+]+") do
+    local word = part:match("^%s*(.-)%s*$")
+    local upper = word:upper()
+    if upper == "CONTROL" then
+      upper = "CTRL"
+    end
+    if upper == "SUPER" or upper == "SHIFT" or upper == "CTRL" or upper == "ALT" then
+      mods[#mods + 1] = upper
+    else
+      key = word:lower()
+    end
+  end
+  local code = tonumber(key:match("^code:(%d+)$"))
+  if code and code >= 10 and code <= 19 then
+    key = tostring((code - 9) % 10)
+  end
+  table.sort(mods)
+  return table.concat(mods, "+"), key
+end
+
+-- SUPER alone or with SHIFT on a key: the two layers Mac key equivalents use.
+local function mac_handed(mods, key)
+  if mods ~= "SUPER" and mods ~= "SHIFT+SUPER" then
+    return false
+  end
+  return not (key:match("^mouse") or key:match("^switch:"))
+end
+
+-- Builds the submap from the recorded binds, replacing the one before, and
+-- answers how many binds were recorded.
+function formalshell_mac_keys(reserved)
+  for _, handle in ipairs(formalshell_mac_binds or {}) do
+    handle:remove()
+  end
+  formalshell_mac_binds = {}
+  local keep = {}
+  for _, chord in ipairs(reserved) do
+    local mods, key = mac_chord(chord)
+    keep[mods .. "+" .. key] = true
+  end
+  formalshell_raw.define_submap("mac", function()
+    for _, bind in ipairs(formalshell_binds) do
+      local mods, key = mac_chord(bind.chord)
+      if not mac_handed(mods, key) or keep[mods .. "+" .. key] then
+        formalshell_mac_binds[#formalshell_mac_binds + 1] = formalshell_raw.bind(bind.chord, bind.action, bind.opts)
+      end
+    end
+  end)
+  return #formalshell_binds
+end
+
+-- The submap while `window` is the one the shell last called a Mac window,
+-- the default map over any other, leaving a submap of the user's own alone.
+local function mac_follow(window)
+  local over = window ~= nil and window.address == formalshell_mac_window
+  local current = hl.get_current_submap()
+  if over and current == "" then
+    hl.dispatch(hl.dsp.submap("mac"))
+  elseif not over and current == "mac" then
+    hl.dispatch(hl.dsp.submap("reset"))
+  end
+end
+
+-- The shell says whether the window it found in front, `selector`, is a Mac
+-- window; no selector is no window in front. Focus may have moved since the
+-- shell looked: what it says is kept for the window it looked at, and the
+-- map is left as it is unless that window is still the one in front, or
+-- its answer would land on another. `window.active` applies it when focus
+-- comes back; the shell does not ask twice about one window.
+function formalshell_mac_focus(on, selector)
+  local window = hl.get_active_window()
+  local asked = window
+  if selector then
+    asked = hl.get_window(selector)
+  end
+  formalshell_mac_window = on and asked and asked.address or nil
+  if selector and not (window and asked and asked.address == window.address) then
+    return
+  end
+  mac_follow(window)
+end
+
+-- A reload drops every bind, the submap's with them, and leaves the session
+-- in the submap it was in: with a Mac window in front that is `mac` with no
+-- bind in it and every key dead. Out of it here; a running shell builds the
+-- submap and asks again after each reload.
+mac_follow(nil)
+
+-- Focus moves without the shell saying so when the shell has exited, and
+-- when a window takes focus and gives it back between two of its looks: the
+-- map follows the window here, so no key is left dead waiting on the shell.
+hl.on("window.active", mac_follow)
+-- The last window closing moves focus to none, which is no `window.active`.
+hl.on("window.close", function(window)
+  if window ~= nil and window.address == formalshell_mac_window then
+    formalshell_mac_window = nil
+    mac_follow(nil)
+  end
+end)
+
 -- Window colours
 -- FormalShell's ThemeEngine renders the live wallpaper palette to
 -- ~/.config/hypr/formalshell-colors.lua on every wallpaper and mode change
