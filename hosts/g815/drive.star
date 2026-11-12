@@ -1,16 +1,11 @@
 load("//lib/paths.star", "HOME")
 load("//lib/units.star", "gui")
 
-# The g815's share of the macbook's external SSD, over sshfs. The 256 GB root is shared with
-# Windows, so what is read rarely and can take a network round trip lives there instead.
+# The g815's folder on the macbook's external SSD, over sshfs. The 256 GB root is shared with
+# Windows, so archives and anything else read rarely go here. The g815 reaches the macbook over
+# wifi at about 10 MB/s: nothing a build or an app reads live belongs on it.
 
 MOUNT = HOME + "/.drive"
-
-# Made on the macbook before each mount, so it exists only while mounted: a move into it fails
-# on an unmounted drive instead of filling the directory under the mount point.
-COLD = MOUNT + "/cold"
-
-ON_DRIVE = {".cache/huggingface": "huggingface"}
 
 DRIVE = [
     gui(
@@ -23,8 +18,8 @@ DRIVE = [
         ExecStartPre = [
             "-/usr/bin/fusermount3 -uz " + MOUNT,
             "/usr/bin/mkdir -p " + MOUNT,
-            "/usr/bin/ssh -o ConnectTimeout=10 macbook mkdir -p drive/g815/cold",
+            "/usr/bin/ssh -o ConnectTimeout=10 macbook mkdir -p drive/g815",
         ],
         ExecStopPost = "-/usr/bin/fusermount3 -uz " + MOUNT,
     ),
-] + [file("~/" + p, mode = "link", target = COLD + "/" + sub, move = True) for p, sub in ON_DRIVE.items()]
+]
