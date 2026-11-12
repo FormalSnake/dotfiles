@@ -34,11 +34,10 @@ RUNTIME = [
     "libWPEWebKit-2_0-1",
 ]
 
-# What formalwm, its in-process xwayland-satellite and ShojiWM's portal load, and wlr's portal,
-# which answers Screenshot in that session (rootfs/etc/xdg-desktop-portal/shojiwm-portals.conf).
+# What formalwm, its in-process xwayland-satellite and ShojiWM's portal load.
 SHOJI_RUNTIME = [
-    "xwayland", "xdg-desktop-portal-wlr", "libxcb-cursor0", "libseat1", "libinput10", "liblcms2-2",
-    "libpixman-1-0", "libgbm1", "libxkbcommon0",
+    "xwayland", "libxcb-cursor0", "libseat1", "libinput10", "liblcms2-2", "libpixman-1-0", "libgbm1",
+    "libxkbcommon0",
 ]
 
 SYSTEM = [

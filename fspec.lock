@@ -467,13 +467,13 @@ build = "67889dec"
 
 [[pkg]]
 name = "formalshell"
-source = "git:https://github.com/FormalStudio/FormalShell@b8e8eb0eae5bb2dea54693ca6072eba641e642ba"
-rev = "b8e8eb0eae5bb2dea54693ca6072eba641e642ba"
+source = "git:https://github.com/FormalStudio/FormalShell@ffb11cc38f59cbbb7d70295ace543c42626b50d6"
+rev = "ffb11cc38f59cbbb7d70295ace543c42626b50d6"
 
 [[pkg]]
 name = "formalwm"
-source = "git:https://github.com/FormalStudio/FormalShell@d6a00b445ccc6c8f0093f69da18523e403974b48"
-rev = "d6a00b445ccc6c8f0093f69da18523e403974b48"
+source = "git:https://github.com/FormalStudio/FormalShell@6f82047c325b4517cfec57d2bcfb9c72dff5f24f"
+rev = "6f82047c325b4517cfec57d2bcfb9c72dff5f24f"
 
 [[pkg]]
 name = "fspec"
@@ -1401,8 +1401,8 @@ version = "2.46.0"
 
 [[pkg]]
 name = "xdg-desktop-portal-shojiwm"
-source = "git:https://github.com/FormalSnake/ShojiWM@8709f3ce139faa2b7649daa6be2092eeeb486f49"
-rev = "8709f3ce139faa2b7649daa6be2092eeeb486f49"
+source = "git:https://github.com/FormalSnake/ShojiWM@85f78ef7fc1930f5d41c0ec6aea0a2120ab6b061"
+rev = "85f78ef7fc1930f5d41c0ec6aea0a2120ab6b061"
 
 [[pkg]]
 name = "yaml-language-server"

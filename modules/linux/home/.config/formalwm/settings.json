@@ -25,7 +25,18 @@
       "dualsense-wireless-controller-touchpad": { "accel": "flat", "sensitivity": 0.7 }
     }
   },
-  "cursor": { "theme": "Bibata-Modern-Classic", "size": 24 },
+  "cursor": {
+    "theme": "Bibata-Modern-Classic",
+    "size": 24,
+    // The pointer stretches along the way it travels and grows while it is
+    // shaken, so it is easy to find. `mode` is "stretch", "tilt" (it leans
+    // into sideways travel instead) or "none"; `shake.enabled` false stops
+    // the growing. The tilt's numbers are the ones it has when it is the mode.
+    "dynamic": {
+      "mode": "stretch",
+      "tilt": { "full": 20, "limit": 3000, "activation": "negativeQuadratic" },
+    },
+  },
   "env": {
     "XCURSOR_THEME": "Bibata-Modern-Classic",
     "XCURSOR_SIZE": "24",

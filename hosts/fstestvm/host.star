@@ -40,7 +40,7 @@ PACKAGES = [
     # The hosts' keyring, started by the login's PAM session as on g815 and e1504g.
     "gnome-keyring", "gnome-keyring-pam",
     # The formalwm session's, as modules/linux/packages.star has them for the real hosts.
-    "xdg-desktop-portal", "xdg-desktop-portal-gtk", "xdg-desktop-portal-wlr", "xwayland", "libxcb-cursor0",
+    "xdg-desktop-portal", "xdg-desktop-portal-gtk", "xwayland", "libxcb-cursor0",
 ]
 
 # The session a slot's boot logs into, locked, as `session` in the real hosts' linux(). Slot 3

@@ -41,8 +41,8 @@ Engine paths are in FormalStudio/FormalShell, `wm/`, at the rev `formalwm` is pi
 | 122-135 | Nine named workspaces, the host's pins | settings, host.json |
 | 138-151 | `XCURSOR_*`, `QS_ICON_THEME`, `QT_QPA_PLATFORMTHEME`, the host's GPU variables | engine: settings `env` and host.json `env` (`formalwm/src/session.rs`, `COMPOSITOR.env.apply`), which reach only what formalwm starts itself. Before formalwm starts: the cursor variables from `environment.d/10-session.conf` in the user manager, the rest from `uwsm/env` and g815's `env-shojiwm` |
 | 155-183 | Keyboard, repeat, pointer and touchpad | settings `input`. Handed to the core's libinput; not proven on a real device |
-| 184-308 | Gaps, border, tape, gestures, decoration, dim, opacity, blur | engine and settings. Group colours have no counterpart (no groups). Window opacity let less through than set in every engine build before the locked start's (0.5 came out as 0.75, g815's 0.96 near opaque): judge it only on that rev or later |
-| 279 | Black under everything | missing: the core clears to its own 20 26 33 (`CLEAR_COLOR` in ShojiWM's `backend/tty.rs`). Proposal: a clear colour in the core's config, core agent |
+| 184-308 | Gaps, border, tape, gestures, decoration, dim, opacity, blur | engine and settings. Group colours have no counterpart (no groups). Window opacity let less through than set in every engine build before `6f82047c`, the one pinned here (0.5 came out as 0.75, g815's 0.96 near opaque) |
+| 279 | Black under everything | engine: `COMPOSITOR.output.set_clear_color` black (`formalwm/src/session.rs`), from the first frame |
 | 284 | `focus_on_activate` | engine |
 | 285 | `anr_missed_pings` | missing: the core has no dialog for a client that stopped answering. Proposal: drop, nothing depends on it |
 | 288 | A restarted shell takes the lock back | core's session lock; lock and unlock proven, a restart while locked not yet |
@@ -68,9 +68,9 @@ Engine paths are in FormalStudio/FormalShell, `wm/`, at the rev `formalwm` is pi
 | `gui(..., hyprland = True)` units (Discord, wl-clip-persist, panel-gamma, padbridge) | spec: `formalshell = True`, either desktop. panel-gamma needs wlr-gamma-control, which the core has (`gamma_control.rs`) |
 | `gtk-session-css` before the session | spec: wanted by both sessions' pre targets |
 | earlyoom's list of processes it spares | spec: `formalwm` added |
-| Screencast and screenshot portals | spec: ShojiWM's portal for ScreenCast, wlr's for Screenshot, gtk for the rest, gnome-keyring and trove as for Hyprland |
+| Screencast and screenshot portals | spec: ShojiWM's portal for ScreenCast and Screenshot, gtk for the rest, gnome-keyring and trove as for Hyprland |
 | The greeter's default | spec: `greeter.defaultSession` per host; needs the shell at or past FormalShell `b8e8eb0e` |
-| Starting locked | engine: `FORMALWM_START_LOCKED=1` drives `ConfigBuilder::start_locked`: nothing but the lock surface is drawn, the start script still runs and starts the shell, which takes the lock on `$XDG_RUNTIME_DIR/formalshell/login-lock` as under Hyprland (`formalshell-login.sh` writes it for both). Until the shell locks, 140 to 350 ms, the screen is the core's clear colour (20 26 33, not black); with no shell it stays so and binds do nothing |
+| Starting locked | engine: `FORMALWM_START_LOCKED=1` drives `ConfigBuilder::start_locked`: nothing but the lock surface is drawn, the start script still runs and starts the shell, which takes the lock on `$XDG_RUNTIME_DIR/formalshell/login-lock` as under Hyprland (`formalshell-login.sh` writes it for both). Until the shell locks the screen is black and takes no input; with no shell it stays so and binds do nothing |
 | logind's `Desktop` at the boot login | `/etc/formalshell/login-env.conf` defaults `XDG_SESSION_DESKTOP` to Hyprland, so a formalwm boot login is recorded as Hyprland in `loginctl`. Cosmetic: uwsm and the core set the desktop the session uses |
 | `~/.config/hypr/formalshell.lua` | the shell installer's Hyprland include, which `hyprland.lua` does not load. Nothing to move |
 
@@ -81,11 +81,8 @@ through the toplevel capture protocol), so the portals only matter to other apps
 
 ## The Screenshot portal
 
-ShojiWM's own portal answers ScreenCast only. Screenshot goes to `xdg-desktop-portal-wlr`,
-which costs a distro package and takes shots over wlr-screencopy only, with none of ShojiWM's
-own capture paths. A Screenshot interface in ShojiWM's portal is a candidate upstream patch;
-once its rev is pinned here, `shojiwm-portals.conf` names `shojiwm` for Screenshot and
-`xdg-desktop-portal-wlr` leaves `packages.star`.
+ShojiWM's own portal answers Screenshot as well as ScreenCast from ShojiWM `85f78ef` on
+(`4d0514924`), so `shojiwm-portals.conf` names `shojiwm` for both and no wlr portal is installed.
 
 ## Proven on the VM
 
