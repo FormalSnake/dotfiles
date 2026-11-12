@@ -90,6 +90,15 @@ RIG = [
     ]
 ] + [
     # A slot's builds and sessions yield to the desktop when the two compete; idle, nothing changes.
+    # IOWeight only acts under bfq or iocost, and the NVMe runs kyber, so iocost is switched on
+    # below. The drive sustains about 130 MB/s, and without the latency targets one slot's flush
+    # held a 4 KB fsync from the desktop for seconds.
+    oneshot(
+        "rig-iocost",
+        "/bin/sh -c 'echo \"$$(cat /sys/block/nvme0n1/dev) enable=1 ctrl=user rpct=95.00 rlat=5000 wpct=95.00 wlat=10000 min=10.00 max=100.00\" > /sys/fs/cgroup/io.cost.qos'",
+        "Throttle low-weight cgroups when NVMe latency rises",
+    ),
+] + [
     file("/etc/systemd/system/user-%d.slice.d/50-formalshell-rig.conf" % (RIG_UID + n), content = "[Slice]\nCPUWeight=20\nIOWeight=20\n")
     for n in range(len(RIG_USERS))
 ] + [hide_app(id) for id in ["foot", "footclient", "foot-server"]]
