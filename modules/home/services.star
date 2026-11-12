@@ -9,6 +9,10 @@ SERVICES = [
     service("formalshell-watchdog.timer", user = True),
     # Serves ~/.ssh/id_ed25519, which the other hosts accept.
     service("gcr-ssh-agent.socket", user = True),
+    # The keyring with its pkcs11 and secrets parts. The daemon PAM starts for an autologin has
+    # neither, so it refuses the boot lock's unlock, and the distro's autostart entries that add
+    # them show only under GNOME, MATE and Xfce.
+    service("gnome-keyring-daemon.socket", user = True),
     # The spec checkout FSPEC_SPEC names, which `fspec app` commits installs from the shell to and
     # fast-forwards before each one. Cloned over https since the repo is public; pushes
     # authenticate through gh.

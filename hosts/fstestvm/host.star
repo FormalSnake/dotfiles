@@ -172,6 +172,8 @@ def _services():
             description = "seatd for the smoke rig's Hyprland on the vkms card",
         ),
         service("greetd", display_manager = True),
+        # The real hosts' keyring (modules/home/services.star).
+        service("gnome-keyring-daemon.socket", user = True),
     ]
 
 def _fstestvm(h):
