@@ -15,7 +15,7 @@ OVERFLOW = [service(u) for u in ["mnt-overflow.mount", "home-kyandesutter-.cache
 DRIVE = OVERFLOW + [
     gui(
         "drive-mount",
-        "/usr/bin/sshfs -f -o reconnect -o ServerAliveInterval=15 -o ServerAliveCountMax=3 -o ConnectTimeout=10 -o idmap=user macbook:drive/g815 " + MOUNT,
+        "/usr/bin/sshfs -f -o reconnect -o ServerAliveInterval=15 -o ServerAliveCountMax=3 -o ConnectTimeout=10 -o idmap=user macbook-drive:drive/g815 " + MOUNT,
         "SSHFS mount of the g815's folder on the macbook's external SSD at ~/.drive",
         restart = "on_failure",
         unit = {"After": ["graphical-session.target", "fspec-1password.service"], "Wants": "fspec-1password.service", "StartLimitIntervalSec": 0},
@@ -23,7 +23,7 @@ DRIVE = OVERFLOW + [
         ExecStartPre = [
             "-/usr/bin/fusermount3 -uz " + MOUNT,
             "/usr/bin/mkdir -p " + MOUNT,
-            "/usr/bin/ssh -o ConnectTimeout=10 macbook mkdir -p drive/g815",
+            "/usr/bin/ssh -o ConnectTimeout=10 macbook-drive mkdir -p drive/g815",
         ],
         ExecStopPost = "-/usr/bin/fusermount3 -uz " + MOUNT,
     ),
