@@ -53,7 +53,7 @@ if [ -n "$tag" ] && [ "$tag" != "$(cat "$dist/.tag" 2>/dev/null)" ]; then
 	rm -rf "$dist.new"
 fi
 
-python3 - "$conf/settings.json" <<'PY'
+python3 - "$conf/settings.json" "$@" <<'PY'
 import json, sys
 path = sys.argv[1]
 try:
@@ -62,6 +62,10 @@ try:
 except (OSError, ValueError):
     settings = {}
 settings["SKIP_HOST_UPDATE"] = True
+# Discord makes its main window hidden and then calls maximize(), which on Linux maps it: a
+# start to the tray would put a window on screen before the app has drawn anything.
+if "--start-minimized" in sys.argv[2:]:
+    settings["IS_MAXIMIZED"] = False
 with open(path, "w") as f:
     json.dump(settings, f, indent=2)
 PY
