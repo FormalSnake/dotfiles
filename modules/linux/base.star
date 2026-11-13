@@ -22,6 +22,17 @@ REPOS = [
         key = "https://repo.nordvpn.com/gpg/nordvpn_public.asc",
         fingerprint = "BC5480EFEC5C081CE5BCFBE26B219E535C964CA1",
     ),
+    # Tumbleweed's ffmpeg decodes h264 only through libopenh264, and its own libopenh264-8 is
+    # the noopenh264 stub, so FormalShell's animated album covers (h264 mp4s) never decode.
+    # openSUSE builds the real one; Cisco hosts it (the patent licence covers only their
+    # binaries). Same vendor and a newer version than the stub, so it replaces it in place.
+    repo(
+        "openh264",
+        url = "https://codecs.opensuse.org/openh264/openSUSE_Tumbleweed",
+        key = "https://codecs.opensuse.org/openh264/openSUSE_Tumbleweed/repodata/repomd.xml.key",
+        fingerprint = "AD485664E901B867051AB15F35A2F86E29B700A4",
+    ),
+    pkg("libopenh264-8", source = zypper(repo = "openh264")),
 ]
 
 # sshd, syncthing, LocalSend, UxPlay and mDNS. The tailnet is trusted (rootfs/etc/firewalld).
