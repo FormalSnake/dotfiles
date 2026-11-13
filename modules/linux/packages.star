@@ -34,10 +34,11 @@ RUNTIME = [
     "libWPEWebKit-2_0-1",
 ]
 
-# What formalwm, its in-process xwayland-satellite and ShojiWM's portal load.
+# What formalwm, its in-process xwayland-satellite and ShojiWM's portal load. hwdata's pnp.ids
+# names a display's maker, which a host.json `description` matches.
 SHOJI_RUNTIME = [
     "xwayland", "libxcb-cursor0", "libseat1", "libinput10", "liblcms2-2", "libpixman-1-0", "libgbm1",
-    "libxkbcommon0",
+    "libxkbcommon0", "hwdata",
 ]
 
 SYSTEM = [
