@@ -9,7 +9,7 @@ APPS = {
     "formalnotes": {"title": "Formal Notes", "rev": "3b664864da8c08cdfdd54fbd98f70bda6679a7c1", "icon": "packaging/icon.png", "rust": "rustup", "desktop": "dev.formalsnake.formalnotes"},
     # Linux only for now: its file system crates read procfs and watch with inotify.
     # `dbus` names D-Bus services the app ships in packaging/linux, `portal` its xdg-desktop-portal backend.
-    "trove": {"title": "Trove", "rev": "c7da2a94fd45bf554322642b24841495ddc3d86d", "icon": "packaging/icon.png", "rust": "rustup", "linux_only": True, "desktop": "dev.formalsnake.trove",
+    "trove": {"title": "Trove", "rev": "17bfc7f0f246936b9e0f259daf6b897b2e3b6741", "icon": "packaging/icon.png", "rust": "rustup", "linux_only": True, "desktop": "dev.formalsnake.trove",
               "dbus": ["org.freedesktop.impl.portal.desktop.trove", "org.freedesktop.FileManager1"], "portal": "trove"},
     # Kopuz's native frontend; it attaches to kopuzd below, or starts it from PATH.
     "kopuz-native": {"title": "Kopuz", "repo": "Kopuz-org/kopuz-native", "rev": "628185d4ec3a61488bde0c5fab34708926c76bdf", "icon": "packaging/icon.png", "rust": "cargo",
