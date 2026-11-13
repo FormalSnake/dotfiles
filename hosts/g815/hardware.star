@@ -29,6 +29,15 @@ Restart=always
 RestartSec=5
 """),
     nvidia("nvidia-settings"),
+    # Flip stamps and events come from this kernel thread; see the script. Not left active, so
+    # the udev rule (rootfs) can run it again when nvidia_modeset is reloaded.
+    oneshot(
+        "nvidia-modeset-rt",
+        LIBEXEC + "/nvidia-modeset-rt",
+        "Run nvidia-modeset/kthread_q at SCHED_FIFO 2",
+        remain = False,
+        unit = {"After": "systemd-modules-load.service", "Before": "greetd.service"},
+    ),
     # The ASUS MUX routes the internal panel through the dGPU; the firmware applies it next boot.
     oneshot(
         "gpu-mux-dgpu",
