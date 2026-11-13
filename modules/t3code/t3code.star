@@ -35,6 +35,10 @@ def agents(host):
 # The macbook's server drives its iOS simulators and devices.
 DEVICES = {"enableDeviceSupport": True, "deviceOnboardingCompleted": True, "enableAgentDeviceAccess": True}
 
+# A new thread with no model given (Poke's, the composer's) moves to Claude Pulse while the
+# default's usage window is exhausted.
+FALLBACK = {"fallbackModelSelection": {"instanceId": "claude-pulse", "model": "claude-opus-5-5"}}
+
 def t3code(host):
     """The desktop app on Linux, and the server on each host in SERVERS."""
     mac = host.platform.is_darwin
@@ -52,7 +56,7 @@ def t3code(host):
     if host.name in SERVERS:
         exec = STORE + "/t3 serve --host 127.0.0.1 --port 3773 " + home + "/Developer"
         out += [
-            file("~/.t3/userdata/settings.json", mode = "patch", owns = dict(pulse, **DEVICES) if mac else pulse),
+            file("~/.t3/userdata/settings.json", mode = "patch", owns = dict(dict(pulse, **FALLBACK), **DEVICES) if mac else dict(pulse, **FALLBACK)),
             agent("t3code", exec, env = {"PATH": PATH, "SHELL": BREW + "/fish"}, WorkingDirectory = home) if mac else service(
                 "t3code",
                 exec = exec,
