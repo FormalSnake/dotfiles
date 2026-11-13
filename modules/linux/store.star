@@ -42,7 +42,7 @@ FORMALSHELL = pkg(
     "formalshell",
     source = git(
         "https://github.com/FormalStudio/FormalShell",
-        rev = "67d3bad972492e54cc92585de430c5c70d5c93cc",
+        rev = "eae4a09af070fae9a1c01665aa500c7ab4242a0d",
         image = "docker.io/library/debian:bookworm",
     ),
     build = sh('WORK="$FSPEC_CACHE" bash "$FSPEC_SRC/dev/tarball.sh" "$FSPEC_OUT.tar" && tar -xzf "$FSPEC_OUT.tar"/formalshell-*-linux.tar.gz -C "$FSPEC_OUT" && rm -rf "$FSPEC_OUT.tar"'),
@@ -52,7 +52,7 @@ FORMALSHELL = pkg(
 # the rev formalwm's Cargo.lock pins. Both link Smithay's system libraries, too new for the
 # shell's Debian image. The toolchain, cargo's registry and target live in the cache, so a rev
 # bump builds incrementally.
-SHOJI_REV = "68c25adab4f6b151744882f1fdc193672e95d7ae"
+SHOJI_REV = "9dc4c012b248eed2ea278f91506d0bdcde08209c"
 
 SHOJI_DEPS = [
     "rustup", "clang", "gcc", "gcc-c++", "make", "cmake", "pkgconf", "git-core", "wayland-devel",
@@ -82,7 +82,7 @@ SHOJI = [
         "formalwm",
         source = git(
             "https://github.com/FormalStudio/FormalShell",
-            rev = "67d3bad972492e54cc92585de430c5c70d5c93cc",
+            rev = "eae4a09af070fae9a1c01665aa500c7ab4242a0d",
             image = TUMBLEWEED,
             deps = SHOJI_DEPS,
         ),
