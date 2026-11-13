@@ -1,7 +1,7 @@
 load("//secrets.star", "ENV", "FILES")
 
 # Hosts a secret is limited to; the rest go everywhere.
-ONLY = {"livesync-passphrase": ["macbook"]}
+ONLY = {"livesync-passphrase": ["macbook"], "cloudflared-t3": ["macbook"], "poke-api-key": ["macbook"]}
 
 def secrets(host, dir, owner, identities):
     """Every secret in secrets.star decrypted into `dir`, and a fish conf.d file exporting ENV."""

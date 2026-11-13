@@ -17,6 +17,6 @@ ENV = {
 
 # Read from their files only. anthropic stays out of the shell: Claude Code prefers an
 # ANTHROPIC_API_KEY over the claude.ai login and bills the API.
-FILES = ["anthropic", "couchdb-admin", "lastfm-api-key", "livesync-passphrase"]
+FILES = ["anthropic", "couchdb-admin", "lastfm-api-key", "livesync-passphrase", "cloudflared-t3", "poke-api-key"]
 
 secrets = {"secrets/%s.age" % n: [kyan] for n in list(ENV) + FILES}

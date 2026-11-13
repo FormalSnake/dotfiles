@@ -2,6 +2,15 @@ load("//lib/launchd.star", "BIN", "BREW", "HOME", "PATH", "agent", "logs", "poll
 load("//lib/paths.star", "STORE")
 load("//modules/tailscale.star", "serve")
 
+T3_TUNNEL_ID = "eb661e38-6dcf-4ef6-8f86-fb843f464201"
+T3_TUNNEL = """tunnel: %s
+credentials-file: /var/run/fspec/secrets/cloudflared-t3
+ingress:
+  - hostname: t3.formalsnake.dev
+    service: http://127.0.0.1:3773
+  - service: http_status:404
+""" % T3_TUNNEL_ID
+
 LOGIN_APPS = {"tailscale": "Tailscale", "aldente": "AlDente", "orbstack": "OrbStack", "betterdisplay": "BetterDisplay"}
 
 SERVICES = [
@@ -61,6 +70,12 @@ SERVICES = [
         WorkingDirectory = HOME + "/Developer/ecosystem/messages/apps/mac-agent",
     ),
     serve("obsidian-livesync-serve", 443, "http://127.0.0.1:5984"),
+    # t3.formalsnake.dev, so Poke can reach T3's MCP server. Cloudflare Access apps (made by hand,
+    # CanaryCoders account) let /mcp, /oauth/mcp and /.well-known through, since T3's OAuth guards
+    # them, and put an email login in front of the rest. Approving a client needs the web app on
+    # this origin: /connect-agent, after pairing with `t3 pair`.
+    file("~/.cloudflared/t3.yml", content = T3_TUNNEL),
+    agent("cloudflared-t3", BREW + "/cloudflared tunnel --no-autoupdate --config " + HOME + "/.cloudflared/t3.yml run", ThrottleInterval = 10),
     poll("obsidian-note-watcher", "/bin/bash " + BIN + "/obsidian-note-watcher.sh", 300),
     # WatchPaths fires on the scan inbox; the interval covers missed events.
     poll("obsidian-scan-watcher", "/bin/bash " + BIN + "/obsidian-scan-watcher.sh", 600, WatchPaths = [HOME + "/Notes/_inbox/scans"], ThrottleInterval = 15),

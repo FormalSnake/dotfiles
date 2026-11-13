@@ -1,0 +1,9 @@
+#!/bin/sh
+# Texts Poke, which relays to the user: poke-me "build finished on g815".
+# The body is forwarded to Poke as context, so a plain {"message": ...} is enough.
+set -eu
+[ $# -gt 0 ] || { echo "usage: poke-me <message>" >&2; exit 2; }
+key=$(cat /var/run/fspec/secrets/poke-api-key)
+jq -n --arg m "$*" '{message: $m}' |
+  curl -fsS -X POST https://poke.com/api/v1/inbound/api-message \
+    -H "Authorization: Bearer $key" -H 'Content-Type: application/json' --data-binary @- >/dev/null
