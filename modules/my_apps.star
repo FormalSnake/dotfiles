@@ -8,7 +8,7 @@ APPS = {
     "formalmusic": {"title": "FormalMusic", "rev": "4aeef799e584f6a69a40eef9fb69d92f73b1611d", "icon": "packaging/icon.png", "rust": "cargo"},
     "formalnotes": {"title": "Formal Notes", "rev": "3b664864da8c08cdfdd54fbd98f70bda6679a7c1", "icon": "packaging/icon.png", "rust": "rustup", "desktop": "dev.formalsnake.formalnotes"},
     # `dbus` names D-Bus services the app ships in packaging/linux, `portal` its xdg-desktop-portal backend.
-    "trove": {"title": "Trove", "rev": "168a062230a1db423a714f44d627aa65dcb32b91", "icon": "packaging/icon.png", "rust": "rustup", "desktop": "dev.formalsnake.trove",
+    "trove": {"title": "Trove", "rev": "1e3ad680cc0e96436e5ae751bfa2019e449ec1fa", "icon": "packaging/icon.png", "rust": "rustup", "desktop": "dev.formalsnake.trove",
               "dbus": ["org.freedesktop.impl.portal.desktop.trove", "org.freedesktop.FileManager1"], "portal": "trove"},
     # Kopuz's native frontend; it attaches to kopuzd below, or starts it from PATH.
     "kopuz-native": {"title": "Kopuz", "repo": "Kopuz-org/kopuz-native", "rev": "628185d4ec3a61488bde0c5fab34708926c76bdf", "icon": "packaging/icon.png", "rust": "cargo",
