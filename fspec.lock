@@ -1276,6 +1276,10 @@ name = "trove"
 source = "git:https://github.com/FormalStudio/trove@f3e32ffb5838ca7b4e6cd187e5b2e9732fecc995"
 rev = "f3e32ffb5838ca7b4e6cd187e5b2e9732fecc995"
 
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/trove@sha256:8060f57fbc6d648f77dddac17c8549362b4644ffa75770286a9cb690c48a7d6c"
+build = "4b714044"
+
 [[pkg]]
 name = "typescript"
 source = "npm:typescript"
