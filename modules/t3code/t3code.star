@@ -1,4 +1,4 @@
-load("//lib/launchd.star", "BREW", "PATH", "agent")
+load("//lib/launchd.star", "BREW", "PATH", "agent", "poll", MAC_BIN = "BIN")
 load("//lib/paths.star", "BIN", "STORE", "home_of")
 load("//modules/tailscale.star", "serve")
 
@@ -35,9 +35,13 @@ def agents(host):
 # The macbook's server drives its iOS simulators and devices.
 DEVICES = {"enableDeviceSupport": True, "deviceOnboardingCompleted": True, "enableAgentDeviceAccess": True}
 
-# A new thread with no model given (Poke's, the composer's) moves to Claude Pulse while the
-# default's usage window is exhausted.
-FALLBACK = {"fallbackModelSelection": {"instanceId": "claude-pulse", "model": "claude-opus-5-5"}}
+# New threads (Poke's, the composer's) go to whichever Claude account has usage left.
+# t3-pick-claude owns defaultModelSelection and fallbackModelSelection on the macbook.
+def pick_claude():
+    return [
+        file("~/.local/bin/t3-pick-claude.ts", src = "modules/t3code/t3-pick-claude.ts", perms = "0755"),
+        poll("t3-pick-claude", BREW + "/bun " + MAC_BIN + "/t3-pick-claude.ts", 600),
+    ]
 
 def t3code(host):
     """The desktop app on Linux, and the server on each host in SERVERS."""
@@ -56,7 +60,7 @@ def t3code(host):
     if host.name in SERVERS:
         exec = STORE + "/t3 serve --host 127.0.0.1 --port 3773 " + home + "/Developer"
         out += [
-            file("~/.t3/userdata/settings.json", mode = "patch", owns = dict(dict(pulse, **FALLBACK), **DEVICES) if mac else dict(pulse, **FALLBACK)),
+            file("~/.t3/userdata/settings.json", mode = "patch", owns = dict(pulse, **DEVICES) if mac else pulse),
             agent("t3code", exec, env = {"PATH": PATH, "SHELL": BREW + "/fish"}, WorkingDirectory = home) if mac else service(
                 "t3code",
                 exec = exec,
@@ -68,5 +72,5 @@ def t3code(host):
                 systemd = {"RestartSec": 5, "WorkingDirectory": home, "unit": {"ConditionPathExists": STORE + "/t3"}},
             ),
             serve("t3code-serve", 8773, "http://127.0.0.1:3773"),
-        ]
+        ] + (pick_claude() if mac else [])
     return out + agents(host.name)
