@@ -483,6 +483,10 @@ name = "formalwm"
 source = "git:https://github.com/FormalStudio/FormalShell@8151bed1a74298b2403ec1592cf18d406fde21e3"
 rev = "8151bed1a74298b2403ec1592cf18d406fde21e3"
 
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/formalwm@sha256:80c4f1d185b34898d7a837ba626aba363b03885eb12ad183023eb50dcd5f671a"
+build = "951485f1"
+
 [[pkg]]
 name = "fspec"
 source = "git:https://github.com/FormalStudio/formalspec@main"
@@ -1276,6 +1280,10 @@ name = "trove"
 source = "git:https://github.com/FormalStudio/trove@168a062230a1db423a714f44d627aa65dcb32b91"
 rev = "168a062230a1db423a714f44d627aa65dcb32b91"
 
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/trove@sha256:a9bbf953063699b7817d0995b12144125764a1832c00741ed8268875c5f9b666"
+build = "e67dd543"
+
 [[pkg]]
 name = "typescript"
 source = "npm:typescript"
@@ -1411,6 +1419,10 @@ version = "2.46.0"
 name = "xdg-desktop-portal-shojiwm"
 source = "git:https://github.com/FormalSnake/ShojiWM@e97664e50a3ab0310dedad29413e5809daa68820"
 rev = "e97664e50a3ab0310dedad29413e5809daa68820"
+
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/xdg-desktop-portal-shojiwm@sha256:0a29625f5820ccb15c24ea6e249a630377f30edbe22bd7629a5f536a776cd01d"
+build = "f97c4387"
 
 [[pkg]]
 name = "yaml-language-server"
