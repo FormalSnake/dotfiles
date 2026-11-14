@@ -9,8 +9,8 @@ if [ -n "${num:-}" ]; then
   efibootmgr --bootnext "$num" >/dev/null
 else
   # No firmware entry yet: create a one-shot one pointing at the Windows
-  # bootloader on the ESP.
-  src=$(findmnt -no SOURCE "$(bootctl -p)")
+  # bootloader on the WD disk's ESP, which is not the one Linux boots from.
+  src=$(readlink -f /dev/disk/by-partuuid/b101475e-fbad-42b8-9f8d-d4ee039d46d5)
   bn=$(basename "$src")
   part=$(cat "/sys/class/block/$bn/partition")
   disk=$(lsblk -no PKNAME "$src" | head -1)

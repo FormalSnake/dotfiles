@@ -2,8 +2,8 @@ load("//lib/paths.star", "LIBEXEC")
 load("//lib/units.star", "oneshot")
 load("//modules/boot/boot.star", "limine_entry")
 
-# Windows shares the ESP, so boot():/ finds it.
-WINDOWS_BOOT = limine_entry("Windows 11", "Chainload the Windows Boot Manager", "boot():///EFI/Microsoft/Boot/bootmgfw.efi")
+# Windows keeps its own ESP on the WD disk, named by its GPT partition GUID. Linux boots from the Kingston's.
+WINDOWS_BOOT = limine_entry("Windows 11", "Chainload the Windows Boot Manager", "guid(b101475e-fbad-42b8-9f8d-d4ee039d46d5):/EFI/Microsoft/Boot/bootmgfw.efi")
 
 # The NTFS volumes and the USB SSD's FormalDisk, and the Bluetooth keys both systems share.
 WINDOWS = [service(u) for u in ["mnt-windows.mount", "mnt-games.mount", "mnt-steamlib.automount", "mnt-formaldisk.automount"]] + [
