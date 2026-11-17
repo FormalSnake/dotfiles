@@ -1006,6 +1006,10 @@ url = "https://github.com/acidanthera/OpenCorePkg/releases/download/1.0.7/OpenCo
 hash = "sha256-L/q26/WMeu+wvLOho4XSB3RoI9bdh9RL1mbhKGk5lD4="
 
 [[pkg]]
+name = "openscad"
+source = "zypper:openscad"
+
+[[pkg]]
 name = "openssl@3"
 source = "brew"
 version = "3.5.9"
