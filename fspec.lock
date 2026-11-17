@@ -227,6 +227,14 @@ oci = "ghcr.io/formalsnake/fspec-cache/colloid-icon-theme@sha256:b7a6050f6a061ed
 build = "4c44efd0"
 
 [[pkg]]
+name = "com.bambulab.BambuStudio"
+source = "flatpak:com.bambulab.BambuStudio"
+version = "2.9.1 Public Release"
+
+[pkg.any]
+commit = "2ad55e9c1c3bdf86df0eebc73952e41c83c4a5c9e76cfc1f4f0ed01d85814b09"
+
+[[pkg]]
 name = "coreutils"
 source = "brew"
 version = "9.12"

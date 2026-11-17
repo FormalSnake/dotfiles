@@ -2,6 +2,12 @@
 APPS = {
     "g815": [
         {
+            "name": "com.bambulab.BambuStudio",
+            "source": "flatpak",
+            "ref": "com.bambulab.BambuStudio",
+            "added": "2026-11-17"
+        },
+        {
             "name": "openscad",
             "source": "zypper",
             "ref": "openscad",
