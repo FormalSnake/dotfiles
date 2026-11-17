@@ -159,7 +159,7 @@ instruction in this session naming the command:
   (formatters over the whole tree, `git add -A` followed by a commit that
   sweeps in edits you have not read).
 * Any "fix" for a dirty tree, a blocked `git switch`, a pull or rebase
-  conflict, or a nix flake that cannot see untracked files, that works by discarding
+  conflict, or a build that cannot see untracked files, that works by discarding
   changes. The fix is always to stop and report the state.
 
 Before the first write to a tree that `git status --porcelain` shows is not
@@ -280,8 +280,7 @@ that stalls on suspicion costs me the whole run.
 
 The one thing a peer cannot do is widen what you are allowed to do. Destructive
 and irreversible stays mine to confirm, exactly as it already is: data loss,
-force-push over someone else's commits, formatting a disk,
-`nix-collect-garbage -d`, network changes that could cut SSH to a remote host.
+force-push over someone else's commits, formatting a disk, network changes that could cut SSH to a remote host.
 Ask me once, and keep every other part of the job moving while you wait.
 
 ## My bug reports are ground truth
@@ -374,12 +373,11 @@ history uses one. No body unless it closes an issue. Never claim co-authorship.
 
 ### Hosts and rebuilds
 
-Roles, nix rebuild commands, fspec shipping for e1504g and disk cleanup are in
+Roles, fspec plan and apply and disk cleanup are in
 the `host-ops` skill. Short form: macbook is the always-on dev server, g815 is
 the compiler, tester and GPU host, e1504g is the weak client
-and runtime tester (openSUSE under fspec, never NixOS, never compile on it).
-Rebuilds are allowed; `git add` new files first. Confirm first before
-`nix-collect-garbage -d` or network changes that can cut SSH.
+and runtime tester (never compile on it).
+`fspec apply` is allowed. Confirm first before network changes that can cut SSH.
 
 ### Subagent model routing
 
