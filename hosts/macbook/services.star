@@ -8,6 +8,8 @@ credentials-file: /var/run/fspec/secrets/cloudflared-t3
 ingress:
   - hostname: t3.formalsnake.dev
     service: http://127.0.0.1:3773
+  - hostname: mesh.formalsnake.dev
+    service: http://127.0.0.1:7314
   - service: http_status:404
 """ % T3_TUNNEL_ID
 
@@ -61,7 +63,7 @@ SERVICES = [
     agent("sunshine", BREW + "/sunshine", ThrottleInterval = 10),
     # Keeps ~/Notes current off CouchDB's _changes feed without Obsidian open.
     agent("obsidian-livesync-daemon", "/bin/bash " + BIN + "/obsidian-livesync-daemon.sh", ThrottleInterval = 30),
-    agent("meshtop-web", STORE + "/meshtop serve --listen 127.0.0.1:7314 --allow-host macbook-pro-2.tailb24294.ts.net", ThrottleInterval = 30),
+    agent("meshtop-web", STORE + "/meshtop serve --listen 127.0.0.1:7314 --allow-host macbook-pro-2.tailb24294.ts.net --allow-host mesh.formalsnake.dev", ThrottleInterval = 30),
     serve("meshtop-web-serve", 8314, "http://127.0.0.1:7314"),
     agent(
         "messages-agent",
@@ -74,6 +76,8 @@ SERVICES = [
     # CanaryCoders account) let /mcp, /oauth/mcp and /.well-known through, since T3's OAuth guards
     # them, and put an email login in front of the rest. Approving a client needs the web app on
     # this origin: /connect-agent, after pairing with `t3 pair`.
+    # mesh.formalsnake.dev rides the same tunnel. meshtop drops its token for an --allow-host name,
+    # so its Access app (email login on the whole host) has to exist before the DNS route does.
     file("~/.cloudflared/t3.yml", content = T3_TUNNEL),
     agent("cloudflared-t3", BREW + "/cloudflared tunnel --no-autoupdate --config " + HOME + "/.cloudflared/t3.yml run", ThrottleInterval = 10),
     poll("obsidian-note-watcher", "/bin/bash " + BIN + "/obsidian-note-watcher.sh", 300),
