@@ -13,37 +13,46 @@
 #      8-vCPU rig build held the host at 700% CPU.
 #   4. An Apple agent of this user (under /System or /usr/libexec) over
 #      SPIN_PCT of a core for SPIN_MINUTES runs in a row is sent TERM; launchd
-#      restarts it. On 2026-11-12 contactsd, Phone and searchpartyuseragent sat
-#      in sync loops for two days, together near 100% CPU.
-#   5. On critical memory pressure seen on two runs in a row, a VM with no
+#      restarts it, and one still there on the next run gets KILL. On 2026-11-12
+#      contactsd, Phone and searchpartyuseragent sat in sync loops for two days,
+#      together near 100% CPU; on 2026-11-18 mediaanalysisd ignored 49 TERMs.
+#   5. An Apple agent over AGENT_CAP_GB of footprint is restarted. On 2026-11-18
+#      chronod (widgets) had grown to 2 GB in eight days, nearly all of it in swap.
+#   6. Find My stays off: its agents are disabled in launchd and stopped, and the
+#      app is quit. searchpartyuseragent kept a core busy in bursts that never
+#      lasted long enough for 4.
+#   7. On critical memory pressure seen on two runs in a row, a VM with no
 #      client right now is stopped, or else the largest process over
 #      PRESSURE_CAP_GB is killed. One action per run; the next run looks again.
 #
 # The Virtualization and OrbStack VM processes are exempt from the kills: their
 # footprint is guest memory, bounded by the VM's own config and handled by 2
-# and 5. So is the T3 server, which every agent session runs under.
+# and 7. So is the T3 server, which every agent session runs under.
 #
 # Run every minute by the fspec.reaper launchd agent; the log names each
 # victim with its parent chain and working directory. --dry-run reports only.
 #
-# Env: CAP_GB (default 12), PRESSURE_CAP_GB (4), IDLE_HOURS (2), VM_CPUS (4),
-# SPIN_PCT (20), SPIN_MINUTES (10).
+# Env: CAP_GB (default 12), PRESSURE_CAP_GB (4), AGENT_CAP_GB (1), IDLE_HOURS (2),
+# VM_CPUS (4), SPIN_PCT (20), SPIN_MINUTES (10).
 
 set -uo pipefail
 
 CAP_GB=${CAP_GB:-12}
 PRESSURE_CAP_GB=${PRESSURE_CAP_GB:-4}
+AGENT_CAP_GB=${AGENT_CAP_GB:-1}
 IDLE_HOURS=${IDLE_HOURS:-2}
 VM_CPUS=${VM_CPUS:-4}
 SPIN_PCT=${SPIN_PCT:-20}
 SPIN_MINUTES=${SPIN_MINUTES:-10}
 EXEMPT='^(com\.apple\.Virtualization\.VirtualMachine|OrbStack Helper|t3)$'
+FINDMY=(com.apple.icloud.searchpartyuseragent com.apple.findmy.findmylocateagent)
 
 dry_run=0
 [[ ${1:-} == --dry-run ]] && dry_run=1
 state=${XDG_STATE_HOME:-$HOME/.local/state}/reaper
 mkdir -p "$state"
 now=$(date +%s)
+gui=gui/$(id -u)
 
 log() { echo "$(date '+%F %T') $*"; }
 
@@ -60,6 +69,8 @@ footprints() {
 }
 
 name_of() { basename "$(ps -o comm= -p "$1" 2>/dev/null)"; }
+
+is_apple() { [[ $(ps -o comm= -p "$1" 2>/dev/null) =~ ^/(System|usr/libexec)/ ]]; }
 
 describe() {
   local pid=$1 chain="" p=$1 cwd
@@ -159,11 +170,37 @@ while read -r pid _ runs; do
   ((runs >= SPIN_MINUTES)) || continue
   # A VM under load is not a stuck agent, and nothing restarts it.
   [[ $(name_of "$pid") =~ $EXEMPT ]] && continue
-  log "restarting $(name_of "$pid") (pid $pid): over ${SPIN_PCT}% CPU for $runs runs; $(describe "$pid")"
-  ((dry_run)) || kill -TERM "$pid" 2>/dev/null
+  sig=TERM
+  ((runs > SPIN_MINUTES)) && sig=KILL
+  log "restarting $(name_of "$pid") (pid $pid, $sig): over ${SPIN_PCT}% CPU for $runs runs; $(describe "$pid")"
+  ((dry_run)) || kill -"$sig" "$pid" 2>/dev/null
 done <"$spin"
 
-# 5. Critical pressure: 1 normal, 2 warning, 4 critical.
+# 5. Bloated agents.
+while read -r pid mb; do
+  ((mb >= AGENT_CAP_GB * 1024)) || break
+  is_apple "$pid" || continue
+  log "restarting $(name_of "$pid") (pid $pid, $mb MB): over the ${AGENT_CAP_GB} GB agent cap; $(describe "$pid")"
+  ((dry_run)) || kill -TERM "$pid" 2>/dev/null
+done < <(footprints)
+
+# 6. Find My.
+for label in "${FINDMY[@]}"; do
+  if ! launchctl print-disabled "$gui" | grep -q "\"$label\" => disabled"; then
+    log "disabling $label"
+    ((dry_run)) || launchctl disable "$gui/$label"
+  fi
+  if launchctl print "$gui/$label" 2>/dev/null | grep -q '^	state = running'; then
+    log "stopping $label"
+    ((dry_run)) || launchctl bootout "$gui/$label" 2>/dev/null
+  fi
+done
+if pgrep -x FindMy >/dev/null; then
+  log "quitting FindMy"
+  ((dry_run)) || pkill -x FindMy
+fi
+
+# 7. Critical pressure: 1 normal, 2 warning, 4 critical.
 critical=$state/critical
 if [[ $(sysctl -n kern.memorystatus_vm_pressure_level) != 4 ]]; then
   rm -f "$critical"

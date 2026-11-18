@@ -67,6 +67,8 @@ SYSTEM = [defaults(d, k, v) for d, keys in DEFAULTS.items() for k, v in keys.ite
     setting("pmset", "powernap", 0),
     setting("pmset", "disksleep", 0),
     setting("pmset", "lowpowermode", 0),
+    # Nobody searches on this server, and the indexers held several cores between them.
+    setting("mdutil", "indexing", False),
     setting("systemsetup", "restartfreeze", True),
     setting("systemsetup", "remotelogin", True),
     # It drops inbound UDP to ad-hoc-signed binaries (mosh), and its allow list stopped working in
