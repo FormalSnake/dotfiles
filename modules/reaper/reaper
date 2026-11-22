@@ -180,6 +180,8 @@ done <"$spin"
 while read -r pid mb; do
   ((mb >= AGENT_CAP_GB * 1024)) || break
   is_apple "$pid" || continue
+  # The VZ service lives under /System and its footprint is guest RAM; TERM kills the VM.
+  [[ $(name_of "$pid") =~ $EXEMPT ]] && continue
   log "restarting $(name_of "$pid") (pid $pid, $mb MB): over the ${AGENT_CAP_GB} GB agent cap; $(describe "$pid")"
   ((dry_run)) || kill -TERM "$pid" 2>/dev/null
 done < <(footprints)
