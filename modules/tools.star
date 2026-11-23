@@ -82,7 +82,7 @@ def tools(host):
             mode = on("pinned", "self_managed"),
         ),
         # A coding agent for the open-weight models behind CanaryLLM (CANARYLLM_API_KEY).
-        pkg("canarycode", version = "0.4.1", source = github("CanaryCoders/CanaryCodeCli", asset = on("canarycode-linux-x64", "canarycode-darwin-arm64"))),
+        pkg("canarycode", version = "0.4.2", source = github("CanaryCoders/CanaryCodeCli", asset = on("canarycode-linux-x64", "canarycode-darwin-arm64"))),
         pkg("fut", version = "0.24", source = on(github("mikker/fut"), github("mikker/fut", asset = "fut-macos-arm64.tar.gz"))),
         pkg("fast", source = git("https://github.com/maaslalani/fast", rev = "26d8fc9c189ba748c68f8930af11dee5c2467f7e", **on({}, {"deps": ["go"]}))),
         pkg("fetch", source = git("https://github.com/areofyl/fetch", rev = "7b19d22c2d8e4b7b2295cc625c9fdf87adcabbcd")),

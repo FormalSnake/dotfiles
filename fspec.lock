@@ -172,15 +172,15 @@ hash = "sha256-plTfjD5EfGLEkMCoqtjEKp+vqwEMpNJbw1BO1Fs8j1E="
 [[pkg]]
 name = "canarycode"
 source = "github:CanaryCoders/CanaryCodeCli"
-version = "0.4.1"
+version = "0.4.2"
 
 [pkg.aarch64-darwin]
-url = "https://github.com/CanaryCoders/CanaryCodeCli/releases/download/v0.4.1/canarycode-darwin-arm64"
-hash = "sha256-sOSsUDnPjq/BQ7zJmo3TYHUuyjYaLh7opbX0AnGvXTA="
+url = "https://github.com/CanaryCoders/CanaryCodeCli/releases/download/v0.4.2/canarycode-darwin-arm64"
+hash = "sha256-FtawP2XekztdejP7QOREnDwvjG9b8HLSePdepSIFF8g="
 
 [pkg.x86_64-linux]
-url = "https://github.com/CanaryCoders/CanaryCodeCli/releases/download/v0.4.1/canarycode-linux-x64"
-hash = "sha256-+PLFMa9zRBFtGCx3GZIIR/HvX6n2MWgL8JZwMovsbIY="
+url = "https://github.com/CanaryCoders/CanaryCodeCli/releases/download/v0.4.2/canarycode-linux-x64"
+hash = "sha256-b2Yts3QZh6tthCH7o7WyJWIPQxffl4WZM3NYIDAqJ3o="
 
 [[pkg]]
 name = "chafa"
