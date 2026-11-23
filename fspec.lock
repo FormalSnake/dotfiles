@@ -511,15 +511,7 @@ build = "7a82e8aa"
 [[pkg]]
 name = "fspec"
 source = "git:https://github.com/FormalStudio/formalspec@main"
-rev = "2ad4fe2f4439c90846d015a3ec6adb1ef078d06b"
-
-[pkg.aarch64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/fspec@sha256:0d257ce3053049aa9225598f829db766d1b3a4d5bb2ed03760382786e32c7639"
-build = "55829cb2"
-
-[pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/fspec@sha256:ec549387c51e79d46c2d1e2eb7697440ddc234c293eca84d49eb3faf367a0e96"
-build = "55829cb2"
+rev = "45739fbed95ec9305497c455e4c58d4098beca30"
 
 [[pkg]]
 name = "fut"
@@ -750,6 +742,13 @@ hash = "sha256-xzceIEvInTf1GSU1MmjonnPA8HS1ociJUBB08g37Dg0="
 [pkg.x86_64-linux]
 url = "https://github.com/Kopuz-org/kopuz/releases/download/v1.0.1/Kopuz_1.0.1_x86_64.AppImage"
 hash = "sha256-/dturcTBgozF12FghalfB5pu5GeIRL7efxyF812nBgA="
+
+[[pkg]]
+name = "ladybird"
+source = "flatpak:org.ladybird.Ladybird"
+
+[pkg.any]
+commit = "c41bc2d88174fc30c83001c6e8cd9fc53aafc3c0365983cb55d7dcd37343bf99"
 
 [[pkg]]
 name = "lazydocker"
