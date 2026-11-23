@@ -1,0 +1,14 @@
+# What `formalshell install` writes on the real hosts: formalwm's formalshell-start.sh starts it
+# beside the shell, and a start naming a unit that is missing starts nothing.
+[Unit]
+Description=FormalShell liveness probe
+PartOf=graphical-session.target
+
+[Timer]
+AccuracySec=5s
+OnActiveSec=30s
+OnUnitActiveSec=30s
+Unit=formalshell-watchdog.service
+
+[Install]
+WantedBy=graphical-session.target
