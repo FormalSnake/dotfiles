@@ -172,15 +172,15 @@ hash = "sha256-plTfjD5EfGLEkMCoqtjEKp+vqwEMpNJbw1BO1Fs8j1E="
 [[pkg]]
 name = "canarycode"
 source = "github:CanaryCoders/CanaryCodeCli"
-version = "0.4.0"
+version = "0.4.1"
 
 [pkg.aarch64-darwin]
-url = "https://github.com/CanaryCoders/CanaryCodeCli/releases/download/v0.4.0/canarycode-darwin-arm64"
-hash = "sha256-dWTS+kT6bGVLQ/fLaefmqkvLzdgrUgIYHocRygxwcWs="
+url = "https://github.com/CanaryCoders/CanaryCodeCli/releases/download/v0.4.1/canarycode-darwin-arm64"
+hash = "sha256-sOSsUDnPjq/BQ7zJmo3TYHUuyjYaLh7opbX0AnGvXTA="
 
 [pkg.x86_64-linux]
-url = "https://github.com/CanaryCoders/CanaryCodeCli/releases/download/v0.4.0/canarycode-linux-x64"
-hash = "sha256-zdNHEsMvOhcjJzvHzhmAknIljmhIQBjEvjnR7FwdTiU="
+url = "https://github.com/CanaryCoders/CanaryCodeCli/releases/download/v0.4.1/canarycode-linux-x64"
+hash = "sha256-+PLFMa9zRBFtGCx3GZIIR/HvX6n2MWgL8JZwMovsbIY="
 
 [[pkg]]
 name = "chafa"
@@ -750,11 +750,6 @@ hash = "sha256-xzceIEvInTf1GSU1MmjonnPA8HS1ociJUBB08g37Dg0="
 [pkg.x86_64-linux]
 url = "https://github.com/Kopuz-org/kopuz/releases/download/v1.0.1/Kopuz_1.0.1_x86_64.AppImage"
 hash = "sha256-/dturcTBgozF12FghalfB5pu5GeIRL7efxyF812nBgA="
-
-[[pkg]]
-name = "kopuzd"
-source = "git:https://github.com/Kopuz-org/kopuz@v1.0.1"
-rev = "e15c2da8a83d5ee1346ff95efb2f4eec1dfe1f8b"
 
 [[pkg]]
 name = "lazydocker"
