@@ -37,6 +37,9 @@ else
   /usr/bin/uwsm start -g -1 -e -D Hyprland -- hyprland.desktop -- --locked-cmd 'systemctl --user import-environment WAYLAND_DISPLAY HYPRLAND_INSTANCE_SIGNATURE XDG_CURRENT_DESKTOP XDG_SESSION_TYPE && systemctl --user start formalshell.service'
 fi
 status=$?
+# A compositor that ended before the shell took its lock leaves the marker, and the
+# shell of the next session would lock on it.
+rm -f "$runtime/formalshell/login-lock"
 # The boot lock leaves the session picked on it once the password has been
 # checked, then ends the compositor: its environment a line each, then its command.
 [ -n "$next" ] && private "$runtime" && private "$runtime/formalshell" &&
