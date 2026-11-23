@@ -460,12 +460,8 @@ version = "latest"
 
 [[pkg]]
 name = "formalboot"
-source = "git:https://github.com/FormalStudio/formalboot@3e4243a360467a8610bba648743e968915fe4a05"
-rev = "3e4243a360467a8610bba648743e968915fe4a05"
-
-[pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/formalboot@sha256:5bbca371b74bcbdc05de2f83688ae66c322fb24905466a5623288ab462b0e8fd"
-build = "b7157f2d"
+source = "git:https://github.com/FormalStudio/formalboot@e8b4b1a349e5993adac7a64a2d4fea00ebd44287"
+rev = "e8b4b1a349e5993adac7a64a2d4fea00ebd44287"
 
 [[pkg]]
 name = "formalmusic"
