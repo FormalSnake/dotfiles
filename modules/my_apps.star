@@ -10,14 +10,11 @@ APPS = {
     # `dbus` names D-Bus services the app ships in packaging/linux, `portal` its xdg-desktop-portal backend.
     "trove": {"title": "Trove", "rev": "f3e32ffb5838ca7b4e6cd187e5b2e9732fecc995", "icon": "packaging/icon.png", "rust": "rustup", "desktop": "dev.formalsnake.trove",
               "dbus": ["org.freedesktop.impl.portal.desktop.trove", "org.freedesktop.FileManager1"], "portal": "trove"},
-    # Kopuz's native frontend; it attaches to kopuzd below, or starts it from PATH.
-    "kopuz-native": {"title": "Kopuz", "repo": "Kopuz-org/kopuz-native", "rev": "628185d4ec3a61488bde0c5fab34708926c76bdf", "icon": "packaging/icon.png", "rust": "cargo",
-                     "linux_only": True, "desktop": "moe.kopuz.native"},
 }
 
 # kopuzd opens the app's database, and an app older than the daemon refuses its schema, so both
-# come from one release.
-KOPUZ = "0.67.1"
+# come from one release. The Linux AppImage carries its own kopuzd.
+KOPUZ = "1.0.1"
 
 ND_DEPS = [
     "gcc", "gcc-c++", "make", "pkgconf", "git-core", "curl", "tar", "xz", "fontconfig-devel",
@@ -28,14 +25,16 @@ ND_DEPS = [
 # libghostty-vt builds with zig 0.16.0.
 ZIG = "https://ziglang.org/download/0.16.0/zig-x86_64-linux-0.16.0.tar.xz"
 
-# The AppImage's WebKit only works from Ubuntu's paths, so only the binary and libxdo are kept.
+# The AppImage's bundled libs are older copies of the distro's, so only the binaries are kept.
 KOPUZ_LINUX = """set -e
 cd "$FSPEC_SRC"
 chmod +x kopuz
 ./kopuz --appimage-extract >/dev/null
-install -Dm755 squashfs-root/usr/bin/kopuz "$FSPEC_OUT/bin/kopuz"
-install -Dm644 squashfs-root/usr/lib/libxdo.so.3 "$FSPEC_OUT/lib/libxdo.so.3"
+for b in kopuz kopuzd kopuzctl; do install -Dm755 squashfs-root/usr/bin/$b "$FSPEC_OUT/bin/$b"; done
+install -Dm644 squashfs-root/kopuz.desktop "$FSPEC_OUT/applications/kopuz.desktop"
+install -Dm644 squashfs-root/usr/share/icons/hicolor/440x440/apps/kopuz.png "$FSPEC_OUT/icons/hicolor/440x440/apps/kopuz.png"
 """
+KOPUZ_SHARE = ["applications/kopuz.desktop", "icons/hicolor/440x440/apps/kopuz.png"]
 
 def _sh(*steps):
     return ["sh", "-c", " && ".join(["set -e", 'cd "$FSPEC_SRC"'] + list(steps))]
@@ -124,20 +123,21 @@ def _nd_app(host, name, app):
 
 def my_apps(host):
     linux = host.platform.is_linux
-    kopuzd_build = {"image": TUMBLEWEED, "deps": ["rustup", "gcc", "cmake", "make", "pkgconf", "alsa-devel", "dbus-1-devel", "libopenssl-devel", "git-core", "gcc-c++"]} if linux else {}
     return [_nd_app(host, name, app) for name, app in APPS.items() if linux or not app.get("linux_only")] + [
         pkg(
             "kopuz",
             version = KOPUZ,
             source = github("Kopuz-org/kopuz", asset = "Kopuz_*_x86_64.AppImage" if linux else "Kopuz_*_aarch64.dmg"),
-            **({"build": ["sh", "-c", KOPUZ_LINUX]} if linux else {"apps": ["Kopuz.app"]})
+            **({"build": ["sh", "-c", KOPUZ_LINUX], "share": {p: p for p in KOPUZ_SHARE}} if linux else {"apps": ["Kopuz.app"]})
         ),
+    ] + ([] if linux else [
         pkg(
             "kopuzd",
-            source = git("https://github.com/Kopuz-org/kopuz", rev = "v" + KOPUZ, **kopuzd_build),
+            source = git("https://github.com/Kopuz-org/kopuz", rev = "v" + KOPUZ),
             build_flags = ["-p", "kopuz-kopuzd", "-p", "kopuz-ctl"],
             bins = ["kopuzd", "kopuzctl"],
         ),
+    ]) + [
         pkg("meshtop", source = git("https://github.com/FormalSnake/meshtop", rev = "69f954dca8ac24b7e5b269f486f3dae3fc2ec7b5")),
     ] + ([
         # Runs Mac apps; mac(...) packages install through it.

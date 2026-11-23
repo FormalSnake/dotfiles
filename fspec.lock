@@ -728,33 +728,20 @@ hash = "sha256-JaTa8EkrfjvKBDyKe6Gul1B92Nv4coEdr3SwHxahISU="
 [[pkg]]
 name = "kopuz"
 source = "github:Kopuz-org/kopuz"
-version = "0.67.1"
+version = "1.0.1"
 
 [pkg.aarch64-darwin]
-url = "https://github.com/Kopuz-org/kopuz/releases/download/v0.67.1/Kopuz_0.67.1_aarch64.dmg"
-hash = "sha256-h66se7UHDwEj0Mp8M28956LYSSfB3RphW8+Id/JK9t0="
+url = "https://github.com/Kopuz-org/kopuz/releases/download/v1.0.1/Kopuz_1.0.1_aarch64.dmg"
+hash = "sha256-xzceIEvInTf1GSU1MmjonnPA8HS1ociJUBB08g37Dg0="
 
 [pkg.x86_64-linux]
-url = "https://github.com/Kopuz-org/kopuz/releases/download/v0.67.1/Kopuz_0.67.1_x86_64.AppImage"
-hash = "sha256-z/zOw6lLJbTD4Wiq7Qo3F2/EaNZLiFtj2lLoEiMkUsc="
-
-[[pkg]]
-name = "kopuz-native"
-source = "git:https://github.com/Kopuz-org/kopuz-native@628185d4ec3a61488bde0c5fab34708926c76bdf"
-rev = "628185d4ec3a61488bde0c5fab34708926c76bdf"
-
-[pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/kopuz-native@sha256:726fbf37ecca4be875ffd2c87651bf8021fa60ab73c953e603e145010f9c44a9"
-build = "2f6d507c"
+url = "https://github.com/Kopuz-org/kopuz/releases/download/v1.0.1/Kopuz_1.0.1_x86_64.AppImage"
+hash = "sha256-/dturcTBgozF12FghalfB5pu5GeIRL7efxyF812nBgA="
 
 [[pkg]]
 name = "kopuzd"
-source = "git:https://github.com/Kopuz-org/kopuz@v0.67.1"
-rev = "7a3474e9aa880f7ddc4e68a8846c48b23e13302c"
-
-[pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/kopuzd@sha256:c13af687d1d2d643d33a8864bc16664fb29ab0daa44ae277e0ca4dddf07e9279"
-build = "3b5532a5"
+source = "git:https://github.com/Kopuz-org/kopuz@v1.0.1"
+rev = "e15c2da8a83d5ee1346ff95efb2f4eec1dfe1f8b"
 
 [[pkg]]
 name = "lazydocker"
