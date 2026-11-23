@@ -513,6 +513,14 @@ name = "fspec"
 source = "git:https://github.com/FormalStudio/formalspec@main"
 rev = "2ad4fe2f4439c90846d015a3ec6adb1ef078d06b"
 
+[pkg.aarch64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/fspec@sha256:0d257ce3053049aa9225598f829db766d1b3a4d5bb2ed03760382786e32c7639"
+build = "55829cb2"
+
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/fspec@sha256:ec549387c51e79d46c2d1e2eb7697440ddc234c293eca84d49eb3faf367a0e96"
+build = "55829cb2"
+
 [[pkg]]
 name = "fut"
 source = "github:mikker/fut"
@@ -1278,6 +1286,10 @@ version = "0.27.1"
 name = "trove"
 source = "git:https://github.com/FormalStudio/trove@f4b2889e9d81dda0b2c253545b8def33314f27dd"
 rev = "f4b2889e9d81dda0b2c253545b8def33314f27dd"
+
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/trove@sha256:ce689aba983977c5794b48c27b6d332819b9bdd68baa2a3a09697295b0e4cc0f"
+build = "c421977d"
 
 [[pkg]]
 name = "typescript"
