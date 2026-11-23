@@ -1,0 +1,27 @@
+name: fspec snapshots
+
+# openSUSE keeps about a month of Tumbleweed snapshots, and an apply against a pin it has dropped
+# fails in zypper. A weekly move keeps every pin well inside that month.
+on:
+  schedule:
+    - cron: "17 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  snapshots:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo install --locked --git https://github.com/FormalStudio/formalspec fspec
+      - run: fspec --spec spec.star update --snapshots
+      - uses: stefanzweifel/git-auto-commit-action@d0b01107b5db882071f96de5dd4b54961ea93f4c # v7.2.1
+        with:
+          commit_message: "chore(kyan): move the tumbleweed snapshot pins"
+          file_pattern: fspec.lock
