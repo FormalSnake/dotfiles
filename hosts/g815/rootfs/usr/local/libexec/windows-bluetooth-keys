@@ -11,9 +11,9 @@ hive=/mnt/windows/Windows/System32/config/SYSTEM
 cs=$(printf 'ControlSet%03d' "$(hget "$hive" '\Select' Current)")
 params="\\$cs\\Services\\BTHPORT\\Parameters"
 
-# Every Windows device BlueZ has held, one adapter/device pair per line. One
-# listed here with no directory under the adapter was forgotten in BlueZ, and
-# Windows keeps its key, so it is not brought back.
+# Every Windows device BlueZ has held, one "adapter/device windows-key" line
+# each. One listed here with no directory under the adapter was forgotten in
+# BlueZ, and Windows keeps its key, so it is not brought back.
 seen=/var/lib/windows-bluetooth-keys/seen
 install -d -m 700 "$(dirname "$seen")"
 touch "$seen"
@@ -33,15 +33,25 @@ for adir in /var/lib/bluetooth/??:??:??:??:??:??; do
     info="$adir/$mac/info"
     pair="$(basename "$adir")/$mac"
 
-    if [ ! -d "$adir/$mac" ] && grep -qxF "$pair" "$seen"; then
+    line=$(grep -m1 "^$pair\( \|\$\)" "$seen") || true
+    if [ ! -d "$adir/$mac" ] && [ -n "$line" ]; then
       continue
     fi
-    grep -qxF "$pair" "$seen" || echo "$pair" >> "$seen"
+    last=${line#"$pair"}
+    last=${last# }
+    sed -i "\#^$pair\( \|\$\)#d" "$seen"
+    echo "$pair $key" >> "$seen"
 
     if [ -f "$info" ]; then
-      # A key BlueZ already holds is never replaced: Windows keeps stale
-      # keys for devices that have since re-paired here.
-      grep -q '^\[LinkKey\]' "$info" && continue
+      if grep -q '^\[LinkKey\]' "$info"; then
+        # Windows keeps stale keys for devices that have since re-paired here,
+        # so only a key that changed in Windows since the last boot, a fresh
+        # pairing there, replaces the one BlueZ holds.
+        [ -n "$last" ] && [ "$key" != "$last" ] || continue
+        sed -i "/^\[LinkKey\]/,/^\[/ s/^Key=.*/Key=$key/" "$info"
+        echo "$mac: link key replaced from Windows"
+        continue
+      fi
       printf '\n[LinkKey]\nKey=%s\nType=4\nPINLength=0\n' "$key" >> "$info"
       echo "$mac: link key added from Windows"
     else
