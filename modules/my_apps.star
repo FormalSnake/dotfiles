@@ -12,8 +12,7 @@ APPS = {
               "dbus": ["org.freedesktop.impl.portal.desktop.trove", "org.freedesktop.FileManager1"], "portal": "trove"},
 }
 
-# kopuzd opens the app's database, and an app older than the daemon refuses its schema, so both
-# come from one release. The Linux AppImage carries its own kopuzd.
+# The AppImage carries its own kopuzd.
 KOPUZ = "1.0.1"
 
 ND_DEPS = [
@@ -123,21 +122,16 @@ def _nd_app(host, name, app):
 
 def my_apps(host):
     linux = host.platform.is_linux
-    return [_nd_app(host, name, app) for name, app in APPS.items() if linux or not app.get("linux_only")] + [
+    return [_nd_app(host, name, app) for name, app in APPS.items() if linux or not app.get("linux_only")] + ([
+        # A desktop music player: not on the headless macbook.
         pkg(
             "kopuz",
             version = KOPUZ,
-            source = github("Kopuz-org/kopuz", asset = "Kopuz_*_x86_64.AppImage" if linux else "Kopuz_*_aarch64.dmg"),
-            **({"build": ["sh", "-c", KOPUZ_LINUX], "share": {p: p for p in KOPUZ_SHARE}} if linux else {"apps": ["Kopuz.app"]})
+            source = github("Kopuz-org/kopuz", asset = "Kopuz_*_x86_64.AppImage"),
+            build = ["sh", "-c", KOPUZ_LINUX],
+            share = {p: p for p in KOPUZ_SHARE},
         ),
-    ] + ([] if linux else [
-        pkg(
-            "kopuzd",
-            source = git("https://github.com/Kopuz-org/kopuz", rev = "v" + KOPUZ),
-            build_flags = ["-p", "kopuz-kopuzd", "-p", "kopuz-ctl"],
-            bins = ["kopuzd", "kopuzctl"],
-        ),
-    ]) + [
+    ] if linux else []) + [
         pkg("meshtop", source = git("https://github.com/FormalSnake/meshtop", rev = "69f954dca8ac24b7e5b269f486f3dae3fc2ec7b5")),
     ] + ([
         # Runs Mac apps; mac(...) packages install through it.
