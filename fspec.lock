@@ -463,6 +463,10 @@ name = "formalboot"
 source = "git:https://github.com/FormalStudio/formalboot@e8b4b1a349e5993adac7a64a2d4fea00ebd44287"
 rev = "e8b4b1a349e5993adac7a64a2d4fea00ebd44287"
 
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/formalboot@sha256:dae9b4f11725b041fe05144505f28ee088bdf990a0d5d12d3df65b77996884b2"
+build = "0abc3206"
+
 [[pkg]]
 name = "formalmusic"
 source = "git:https://github.com/FormalStudio/formalmusic@4aeef799e584f6a69a40eef9fb69d92f73b1611d"
@@ -508,6 +512,14 @@ build = "7a82e8aa"
 name = "fspec"
 source = "git:https://github.com/FormalStudio/formalspec@main"
 rev = "96917588b9fcb72e1025d3f338cf240378407fd3"
+
+[pkg.aarch64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/fspec@sha256:441a48a5d7468c8a4fa0fdda56113c524f9b2abaae3662c02ee13263833bd2b0"
+build = "b0efcd37"
+
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/fspec@sha256:474a51f56254a713bf176459307500e9f82e4af6288a98b783ec689ee45dc6a5"
+build = "b0efcd37"
 
 [[pkg]]
 name = "fut"
