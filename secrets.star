@@ -8,6 +8,7 @@ ENV = {
     "openai": "OPENAI_API_KEY",
     "gemini": "GEMINI_API_KEY",
     "deepseek": "DEEPSEEK_API_KEY",
+    "canaryllm": "CANARYLLM_API_KEY",
     "nucleo-license": "NUCLEO_LICENSE_KEY",
     "npm-github-token": "NPM_GITHUB_TOKEN",
     "npm-registry-token": "NPM_REGISTRY_TOKEN",
