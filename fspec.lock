@@ -112,11 +112,11 @@ hash = "sha256-GsAvJMOKZX7p3dhXOP/3c+cu5q6OW388bAMKO+1JAjA="
 [[pkg]]
 name = "atoll"
 source = "github:FormalStudio/atoll"
-version = "0.1.8"
+version = "0.1.9"
 
 [pkg.x86_64-linux]
-url = "https://github.com/FormalStudio/atoll/releases/download/v0.1.8/atoll-v0.1.8-x86_64-linux.tar.gz"
-hash = "sha256-3mJFhh8kCfsiYxHwe1T7Bzduha65H9H+d4gWpLemXR0="
+url = "https://github.com/FormalStudio/atoll/releases/download/v0.1.9/atoll-v0.1.9-x86_64-linux.tar.gz"
+hash = "sha256-vN4laJffAV/Bf3IARQC54j/k7jbTvh0Dr77V6WoVWX0="
 
 [[pkg]]
 name = "bat"
