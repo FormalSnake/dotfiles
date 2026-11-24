@@ -504,6 +504,10 @@ name = "formalwm"
 source = "git:https://github.com/FormalStudio/FormalShell@a6e822981bedc17d5758c92b7b0a4252a868e07b"
 rev = "a6e822981bedc17d5758c92b7b0a4252a868e07b"
 
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/formalwm@sha256:f9b44afee10bde3dbe6733e616bbaa6429f9b4d0d7128696be3dff5d005d4948"
+build = "8e5222ed"
+
 [[pkg]]
 name = "fspec"
 source = "git:https://github.com/FormalStudio/formalspec@main"
