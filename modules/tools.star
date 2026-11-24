@@ -73,7 +73,7 @@ def tools(host):
     ]
 
     store = [
-        pkg("t3", version = "0.1.3", source = github("pingdotgg/t3code", asset = on("t3-*-linux-x64.tar.gz", "t3-*-darwin-arm64.tar.gz"))),
+        pkg("t3", version = "0.1.11", source = github("pingdotgg/t3code", asset = on("t3-*-linux-x64.tar.gz", "t3-*-darwin-arm64.tar.gz"))),
         # The platform tarball holds the real binary; the main package's bin is a postinstall stub.
         # On the macbook Claude Code updates itself.
         pkg(

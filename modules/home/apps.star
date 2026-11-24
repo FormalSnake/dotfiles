@@ -45,7 +45,7 @@ FLATPAKS = [
 ]
 
 TOOLS = [
-    pkg("t3code-desktop", version = "0.1.3", source = github("pingdotgg/t3code", asset = "T3-Code-*-x86_64.AppImage")),
+    pkg("t3code-desktop", version = "0.1.11", source = github("pingdotgg/t3code", asset = "T3-Code-x86_64.AppImage")),
     # The distro's rustup starts with no default toolchain.
     file("~/.rustup/settings.toml", mode = "patch", owns = {"default_toolchain": "stable-x86_64-unknown-linux-gnu"}),
     # Its releases carry only darwin assets.
