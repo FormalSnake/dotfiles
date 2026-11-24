@@ -496,8 +496,8 @@ build = "67889dec"
 
 [[pkg]]
 name = "formalshell"
-source = "git:https://github.com/FormalStudio/FormalShell@bd43aad9635a7bcc818614ca7fc8d651803ef95c"
-rev = "bd43aad9635a7bcc818614ca7fc8d651803ef95c"
+source = "git:https://github.com/FormalStudio/FormalShell@b43c1d9f88ef89d1dbfdc601c37b93cc3b09c73d"
+rev = "b43c1d9f88ef89d1dbfdc601c37b93cc3b09c73d"
 
 [[pkg]]
 name = "formalwm"
