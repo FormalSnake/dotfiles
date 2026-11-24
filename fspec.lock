@@ -509,6 +509,14 @@ name = "fspec"
 source = "git:https://github.com/FormalStudio/formalspec@main"
 rev = "6a7796905e4e11c6578b018a19c634e8cbef57d7"
 
+[pkg.aarch64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/fspec@sha256:c45911c1f96c7874d8e63415bf6e88c4899e87f1cde96e21b1b1c044e6003302"
+build = "bab69aaf"
+
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/fspec@sha256:ef50eac7f65108fab16fa88968a4937c70c45634c6a5ffaaa25d2e6686b9c990"
+build = "bab69aaf"
+
 [[pkg]]
 name = "fut"
 source = "github:mikker/fut"
@@ -877,6 +885,10 @@ name = "messages"
 source = "git:https://github.com/FormalStudio/messages@75c3ed654c98df54d127ac6b3336fb57d3b53ff5"
 rev = "75c3ed654c98df54d127ac6b3336fb57d3b53ff5"
 
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/messages@sha256:7ec10bba0a0b90d0066554ae633ee97bb87eab89141c466e20c6e7e312a618ab"
+build = "b79abc5b"
+
 [[pkg]]
 name = "modrinth-app"
 source = "github:modrinth/code"
@@ -1022,6 +1034,10 @@ version = "2.2.5,21124"
 name = "padbridge"
 source = "git:https://github.com/FormalStudio/padbridge@a03d36b3f308777730d7513bf41501432002d475"
 rev = "a03d36b3f308777730d7513bf41501432002d475"
+
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/padbridge@sha256:defb26c7553f3f89d1248af7a64bc9efae8e1e5b9537e138a5b29a064c22c44e"
+build = "4da205d4"
 
 [[pkg]]
 name = "parsec"
