@@ -62,6 +62,9 @@
   "picker": {
     "directory": "/home/kyandesutter/Pictures/Wallpapers"
   },
+  "render": {
+    "backend": "gpu"
+  },
   "screensaver": {
     "timeoutSeconds": 600
   },
