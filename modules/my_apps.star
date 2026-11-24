@@ -4,7 +4,7 @@ load("//lib/paths.star", "STORE", "TUMBLEWEED")
 
 # `rust` is what builds it on Linux: rustup follows a rust-toolchain.toml, else the distro's cargo.
 APPS = {
-    "messages": {"title": "Messages", "rev": "52c563b95cac01962e30a0c5c9a56bcf808094ce", "icon": "packaging/linux/dev.formalsnake.messages.png", "rust": "rustup"},
+    "messages": {"title": "Messages", "rev": "75c3ed654c98df54d127ac6b3336fb57d3b53ff5", "icon": "packaging/linux/dev.formalsnake.messages.png", "rust": "rustup"},
     "formalmusic": {"title": "FormalMusic", "rev": "4aeef799e584f6a69a40eef9fb69d92f73b1611d", "icon": "packaging/icon.png", "rust": "cargo"},
     "formalnotes": {"title": "Formal Notes", "rev": "3b664864da8c08cdfdd54fbd98f70bda6679a7c1", "icon": "packaging/icon.png", "rust": "rustup", "desktop": "dev.formalsnake.formalnotes"},
     # `dbus` names D-Bus services the app ships in packaging/linux, `portal` its xdg-desktop-portal backend.
