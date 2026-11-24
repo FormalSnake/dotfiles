@@ -228,7 +228,7 @@ version = "1.17.0"
 [[pkg]]
 name = "codex"
 source = "brew:cask"
-version = "0.170.0"
+version = "0.172.0"
 
 [[pkg]]
 name = "colloid-icon-theme"

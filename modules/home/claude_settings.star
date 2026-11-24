@@ -200,6 +200,7 @@ SETTINGS = {
         "mode": "append",
         "verbs": ["Gooning", "Jorking it"],
     },
+    "switchModelsOnFlag": True,
     "tui": "fullscreen",
     "statusLine": {
         "type": "command",
