@@ -3,13 +3,14 @@ load("//lib/units.star", "gui", "oneshot")
 load("//modules/linux/store.star", "sh")
 
 # Hands the mouse and keyboard to the iPad left of the monitor, as a BLE HID device, and plays
-# its audio here. A new iPad pairs with `padbridge --pair` while the service is stopped.
+# its audio here, only while the iPad is on USB: off it, the iPad is away from the desk and
+# stays blocked in BlueZ. A new iPad pairs with `padbridge --pair` while the service is stopped.
 PADBRIDGE = [
     pkg(
         "padbridge",
         source = git(
             "https://github.com/FormalStudio/padbridge",
-            rev = "f88add474cad1f31bf9c6f988a3ba571ccf5d67f",
+            rev = "a03d36b3f308777730d7513bf41501432002d475",
             image = TUMBLEWEED,
             deps = ["cargo", "gcc"],
         ),
@@ -17,7 +18,7 @@ PADBRIDGE = [
     ),
     gui(
         "padbridge",
-        STORE + "/padbridge",
+        STORE + "/padbridge --usb-only",
         "Share the mouse and keyboard with the iPad",
         restart = "always",
         formalshell = True,
