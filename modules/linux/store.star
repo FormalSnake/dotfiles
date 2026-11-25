@@ -102,6 +102,11 @@ SHOJI = [
         "/etc/systemd/user/xdg-desktop-portal-shojiwm.service",
         mode = "link",
         target = "/opt/fspec/current/pkgs/xdg-desktop-portal-shojiwm/systemd/user/xdg-desktop-portal-shojiwm.service",
+    ),    # A link rather than the formalshell pkg's share: changing that pkg restarts the running shell.
+    file(
+        "/usr/local/share/applications/formalshell-iphone-mirror.desktop",
+        mode = "link",
+        target = "/opt/fspec/current/pkgs/formalshell/formalshell/share/applications/formalshell-iphone-mirror.desktop",
     ),
 ]
 
