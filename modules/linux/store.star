@@ -42,7 +42,7 @@ FORMALSHELL = pkg(
     "formalshell",
     source = git(
         "https://github.com/FormalStudio/FormalShell",
-        rev = "fcf7083190cc91bc7a7ca661cffd02daf9a15064",
+        rev = "74c5477532e86ce6b349faa05b3a04c46f81b447",
         image = "docker.io/library/debian:bookworm",
     ),
     build = sh('WORK="$FSPEC_CACHE" bash "$FSPEC_SRC/dev/tarball.sh" "$FSPEC_OUT.tar" && tar -xzf "$FSPEC_OUT.tar"/formalshell-*-linux.tar.gz -C "$FSPEC_OUT" && rm -rf "$FSPEC_OUT.tar"'),
@@ -82,7 +82,7 @@ SHOJI = [
         "formalwm",
         source = git(
             "https://github.com/FormalStudio/FormalShell",
-            rev = "fcf7083190cc91bc7a7ca661cffd02daf9a15064",
+            rev = "74c5477532e86ce6b349faa05b3a04c46f81b447",
             image = TUMBLEWEED,
             deps = SHOJI_DEPS,
         ),
