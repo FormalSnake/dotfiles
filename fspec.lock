@@ -882,12 +882,8 @@ build = "baedf5de"
 
 [[pkg]]
 name = "messages"
-source = "git:https://github.com/FormalStudio/messages@75c3ed654c98df54d127ac6b3336fb57d3b53ff5"
-rev = "75c3ed654c98df54d127ac6b3336fb57d3b53ff5"
-
-[pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/messages@sha256:7ec10bba0a0b90d0066554ae633ee97bb87eab89141c466e20c6e7e312a618ab"
-build = "b79abc5b"
+source = "git:https://github.com/FormalStudio/messages@c51a96332f874a9665a8b81be81763ea70ff12b5"
+rev = "c51a96332f874a9665a8b81be81763ea70ff12b5"
 
 [[pkg]]
 name = "modrinth-app"
