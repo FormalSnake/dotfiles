@@ -504,6 +504,10 @@ name = "formalwm"
 source = "git:https://github.com/FormalStudio/FormalShell@ecc4d79996691a82de4ddc20393fc4dda6da930b"
 rev = "ecc4d79996691a82de4ddc20393fc4dda6da930b"
 
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/formalwm@sha256:b8c24330c8cbee36808e7a82d69cc287ac0f29391b3c76f8edc0bd172eba127b"
+build = "e25d8321"
+
 [[pkg]]
 name = "fspec"
 source = "git:https://github.com/FormalStudio/formalspec@main"
@@ -884,6 +888,10 @@ build = "baedf5de"
 name = "messages"
 source = "git:https://github.com/FormalStudio/messages@c51a96332f874a9665a8b81be81763ea70ff12b5"
 rev = "c51a96332f874a9665a8b81be81763ea70ff12b5"
+
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/messages@sha256:02084fbff6ee35b38800b974d2de895236f4ca4bd8e2b483a8bc8c37308b98f6"
+build = "59954cbf"
 
 [[pkg]]
 name = "modrinth-app"
