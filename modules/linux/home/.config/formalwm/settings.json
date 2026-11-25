@@ -63,9 +63,8 @@
     {"match": {"appId": "org.gnome.NautilusPreviewer"}, "float": true, "position": {"anchor": "center"}},
     // The quake console maps parked on its overlay; the shell places and shows it.
     {"match": {"appId": "dev.formalshell.console"}, "overlay": "formalshell-console", "float": true},
-    // iPhone Mirroring draws its own rounded shape and shadow. "frame": false
-    // waits for a formalwm that knows the key; this one refuses it.
-    {"match": {"appId": "formalshell-iphone-mirror"}, "float": true, "noBlur": true, "position": {"anchor": "center"}},
+    // iPhone Mirroring draws its own rounded shape and shadow.
+    {"match": {"appId": "formalshell-iphone-mirror"}, "float": true, "frame": false, "keepAspect": true, "noBlur": true, "position": {"anchor": "center"}},
     {"match": {"appId": "[Oo]bsidian"}, "workspace": 5},
     {"match": {"appId": "[Cc]laude"}, "workspace": 7},
     {"match": {"appId": "[Kk]opuz"}, "workspace": 8},
