@@ -33,6 +33,19 @@ REPOS = [
         fingerprint = "AD485664E901B867051AB15F35A2F86E29B700A4",
     ),
     pkg("libopenh264-8", source = zypper(repo = "openh264")),
+    # openSUSE strips HEVC from its ffmpeg, so mpv cannot play the iPhone mirror stream.
+    # Packman Essentials builds the same ffmpeg version with it; zypper(repo = ...) installs
+    # with --from, which moves the already-installed openSUSE libs over to Packman.
+    repo(
+        "packman-essentials",
+        url = "https://ftp.gwdg.de/pub/linux/misc/packman/suse/openSUSE_Tumbleweed/Essentials",
+        key = "https://ftp.gwdg.de/pub/linux/misc/packman/suse/openSUSE_Tumbleweed/Essentials/repodata/repomd.xml.key",
+        fingerprint = "F8875B880D518B6B8C530D1345A1D0671ABD1AFB",
+    ),
+    pkg("ffmpeg-packman", source = zypper([
+        "ffmpeg-8", "libavcodec62", "libavdevice62", "libavfilter11", "libavformat62",
+        "libavutil60", "libswresample6", "libswscale9",
+    ], repo = "packman-essentials")),
 ]
 
 # sshd, syncthing, LocalSend, UxPlay and mDNS. The tailnet is trusted (rootfs/etc/firewalld).
