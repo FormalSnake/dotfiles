@@ -496,13 +496,13 @@ build = "67889dec"
 
 [[pkg]]
 name = "formalshell"
-source = "git:https://github.com/FormalStudio/FormalShell@fc6a13b17710167e777e370aeb5beabf0382fc54"
-rev = "fc6a13b17710167e777e370aeb5beabf0382fc54"
+source = "git:https://github.com/FormalStudio/FormalShell@fcf7083190cc91bc7a7ca661cffd02daf9a15064"
+rev = "fcf7083190cc91bc7a7ca661cffd02daf9a15064"
 
 [[pkg]]
 name = "formalwm"
-source = "git:https://github.com/FormalStudio/FormalShell@fc6a13b17710167e777e370aeb5beabf0382fc54"
-rev = "fc6a13b17710167e777e370aeb5beabf0382fc54"
+source = "git:https://github.com/FormalStudio/FormalShell@fcf7083190cc91bc7a7ca661cffd02daf9a15064"
+rev = "fcf7083190cc91bc7a7ca661cffd02daf9a15064"
 
 [[pkg]]
 name = "fspec"
