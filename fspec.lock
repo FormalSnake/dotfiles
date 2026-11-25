@@ -496,17 +496,13 @@ build = "67889dec"
 
 [[pkg]]
 name = "formalshell"
-source = "git:https://github.com/FormalStudio/FormalShell@627fc7a278580107450e53365298b9d733ac9575"
-rev = "627fc7a278580107450e53365298b9d733ac9575"
+source = "git:https://github.com/FormalStudio/FormalShell@6b80de29b453ed44596052da057ed8b0e53bea49"
+rev = "6b80de29b453ed44596052da057ed8b0e53bea49"
 
 [[pkg]]
 name = "formalwm"
-source = "git:https://github.com/FormalStudio/FormalShell@627fc7a278580107450e53365298b9d733ac9575"
-rev = "627fc7a278580107450e53365298b9d733ac9575"
-
-[pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/formalwm@sha256:4a91d4f413631a5a5a14fe7a24f83b10844ad89bc9d4a254aed164e735b57b45"
-build = "e6cdbf16"
+source = "git:https://github.com/FormalStudio/FormalShell@6b80de29b453ed44596052da057ed8b0e53bea49"
+rev = "6b80de29b453ed44596052da057ed8b0e53bea49"
 
 [[pkg]]
 name = "fspec"
