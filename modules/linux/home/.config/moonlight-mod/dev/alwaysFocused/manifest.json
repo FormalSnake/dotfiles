@@ -1,0 +1,12 @@
+{
+  "$schema": "https://moonlight-mod.github.io/manifest.schema.json",
+  "id": "alwaysFocused",
+  "version": "1.0.0",
+  "apiLevel": 2,
+  "meta": {
+    "name": "Always Focused",
+    "tagline": "Keeps Discord reporting its window as focused and visible",
+    "authors": ["FormalSnake"],
+    "tags": ["qol"]
+  }
+}
