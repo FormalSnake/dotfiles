@@ -511,7 +511,7 @@ build = "8b2cbc46"
 [[pkg]]
 name = "fspec"
 source = "git:https://github.com/FormalStudio/formalspec@main"
-rev = "94e5e08e16db770ff57ec9fd521b77517d5e70ea"
+rev = "40fe69aec11cab1feffc032025df6a3932e8e8cf"
 
 [[pkg]]
 name = "fut"
