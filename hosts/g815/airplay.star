@@ -6,7 +6,7 @@ AIRPLAY = [
         "uxplay",
         source = git(
             "https://github.com/FDH2/UxPlay",
-            rev = "df67c212a433cf6dda3676dd40c097900d24e645",
+            rev = "fbd040e70e754e01fa7e6df810fecd08b6484ada",
             image = TUMBLEWEED,
             deps = [
                 "cmake", "make", "gcc-c++", "pkgconf", "libopenssl-devel", "libplist-2_0-devel",

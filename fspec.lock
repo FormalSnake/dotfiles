@@ -496,17 +496,13 @@ build = "67889dec"
 
 [[pkg]]
 name = "formalshell"
-source = "git:https://github.com/FormalStudio/FormalShell@34640cb69c3216445732c084aca63efddf7b45a5"
-rev = "34640cb69c3216445732c084aca63efddf7b45a5"
+source = "git:https://github.com/FormalStudio/FormalShell@56557db3080bbb08c2aef14c58691a54ad9b143c"
+rev = "56557db3080bbb08c2aef14c58691a54ad9b143c"
 
 [[pkg]]
 name = "formalwm"
-source = "git:https://github.com/FormalStudio/FormalShell@34640cb69c3216445732c084aca63efddf7b45a5"
-rev = "34640cb69c3216445732c084aca63efddf7b45a5"
-
-[pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/formalwm@sha256:a6dae9873a3c7cad5ccbcc2ff26e1d066c45c328f78fe428893c2c7f5b5bd734"
-build = "7000aa16"
+source = "git:https://github.com/FormalStudio/FormalShell@56557db3080bbb08c2aef14c58691a54ad9b143c"
+rev = "56557db3080bbb08c2aef14c58691a54ad9b143c"
 
 [[pkg]]
 name = "fspec"
@@ -1333,12 +1329,8 @@ version = "0.13.6"
 
 [[pkg]]
 name = "uxplay"
-source = "git:https://github.com/FDH2/UxPlay@df67c212a433cf6dda3676dd40c097900d24e645"
-rev = "df67c212a433cf6dda3676dd40c097900d24e645"
-
-[pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/uxplay@sha256:253caa6997a06e820905a5d066830b9099c9dd0bef39110dfc5fc4317ea952ea"
-build = "51a3c855"
+source = "git:https://github.com/FDH2/UxPlay@fbd040e70e754e01fa7e6df810fecd08b6484ada"
+rev = "fbd040e70e754e01fa7e6df810fecd08b6484ada"
 
 [[pkg]]
 name = "vscode-langservers-extracted"
