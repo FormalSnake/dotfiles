@@ -7,6 +7,8 @@ FORMULAE = [
     "zig@0.16",
     # clipssh's clipboard images
     "pngpaste",
+    # vpk packs the lynk AppImage with mksquashfs
+    "squashfs",
     # network, remote iPhone, VPN
     "wireguard-tools", "libimobiledevice", "ideviceinstaller", "openssl@3",
     # CanaryPulse DB tunnel (yarn tunnel:db)
