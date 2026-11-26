@@ -466,14 +466,21 @@ fi
 if (( DEEP )); then run_cmd "go-modcache" "$HOME/go/pkg/mod" go clean -modcache; fi
 
 # cargo-cache prunes the registry by itself when installed; otherwise the
-# documented dirs go, same as on the mac.
+# documented dirs go, same as on the mac. A build reads registry/src and
+# git/checkouts the whole time it compiles, and reusing an unpacked crate
+# touches nothing there, so none of it goes while cargo or rustc runs, and only
+# once the newest entry sat for the target cutoff.
+cargo_idle() {
+  ! pgrep -u "$(id -u)" -x 'cargo|rustc' >/dev/null 2>&1 &&
+    (( $(newest_age_hours "$1") >= TARGET_CUT_H ))
+}
 if [[ "$OS" != Darwin ]] && command -v cargo-cache >/dev/null 2>&1; then
-  run_cmd "cargo-cache" "$HOME/.cargo/registry" cargo-cache --autoclean
+  cargo_idle "$HOME/.cargo/registry" && run_cmd "cargo-cache" "$HOME/.cargo/registry" cargo-cache --autoclean
 else
   queue "cargo-registry" "$HOME/.cargo/registry/cache"
-  queue "cargo-src" "$HOME/.cargo/registry/src"
+  cargo_idle "$HOME/.cargo/registry/src" && queue "cargo-src" "$HOME/.cargo/registry/src"
 fi
-queue "cargo-git" "$HOME/.cargo/git/checkouts"
+cargo_idle "$HOME/.cargo/git/checkouts" && queue "cargo-git" "$HOME/.cargo/git/checkouts"
 
 # A rustup toolchain no checkout pins, installed over TARGET_AGE_DAYS ago and
 # not the default: `cargo +nightly` once auto-installs one for good.
