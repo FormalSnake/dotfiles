@@ -1,0 +1,81 @@
+{
+  "airplay": {
+    "enable": true
+  },
+  "bar": {
+    "layout": {
+      "right": [
+        "display",
+        "dualsense",
+        "tailscale",
+        "github",
+        "usage",
+        "chevron",
+        "tray",
+        "weather",
+        "battery",
+        "earbuds",
+        "iphone",
+        "audio",
+        "network",
+        "bluetooth",
+        "bell",
+        "indicators"
+      ]
+    },
+    "position": "top"
+  },
+  "caffeinate": {
+    "onStartup": true
+  },
+  "desktopClock": {
+    "enabled": true
+  },
+  "display": {
+    "outputPriority": [
+      "HDMI",
+      "internal"
+    ]
+  },
+  "frame": {
+    "radius": 20,
+    "thickness": 6
+  },
+  "greeter": {
+    "sessionDirs": [
+      "/etc/formalshell-greeter/wayland-sessions"
+    ]
+  },
+  "localsend": {
+    "receive": true
+  },
+  "media": {
+    "appleMusicArt": true,
+    "visualizerStyle": "redsector"
+  },
+  "motion": {
+    "morph": false
+  },
+  "notifications": {
+    "position": "bottom-right"
+  },
+  "picker": {
+    "directory": "/home/kyandesutter/Pictures/Wallpapers"
+  },
+  "screensaver": {
+    "timeoutSeconds": 600
+  },
+  "usage": {
+    "codex": false
+  },
+  "workspaces": {
+    "agentHosts": [
+      "macbook",
+      "g815"
+    ]
+  },
+  "layout": "sidebar",
+  "theme": {
+    "blur": false
+  }
+}

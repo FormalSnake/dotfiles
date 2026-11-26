@@ -1,17 +1,27 @@
 #!/bin/sh
-# Per-profile RAPL package caps (PL1/PL2 in W), following power-profiles-daemon's ActiveProfile.
+# Per-profile RAPL package caps (PL1/PL2 in W) and the GPU's lowest clock, following
+# power-profiles-daemon's ActiveProfile. i915 picks a clock from how busy the GPU was, and a
+# compositor that draws a frame and sleeps reads as idle: left at the hardware floor it drew
+# formalwm's frames at 300 to 450 MHz of 1250, 3.4 ms of GPU time where the top clock takes 1.4.
+# The floor is free at rest, where RC6 powers the GPU down whatever its clock.
 ppd="--system --dest net.hadess.PowerProfiles --object-path /net/hadess/PowerProfiles"
 apply() {
   case $1 in
-    performance) pl1=15 pl2=35 ;;
-    balanced)    pl1=8  pl2=14 ;;
-    power-saver) pl1=5  pl2=8  ;;
+    performance) pl1=15 pl2=35 gpu=100 ;;
+    balanced)    pl1=8  pl2=14 gpu=50 ;;
+    power-saver) pl1=5  pl2=8  gpu=0 ;;
     *) return 0 ;;
   esac
   for d in /sys/class/powercap/intel-rapl:0 /sys/class/powercap/intel-rapl-mmio:0; do
     [ -d "$d" ] || continue
     echo $((pl1 * 1000000)) >"$d/constraint_0_power_limit_uw"
     echo $((pl2 * 1000000)) >"$d/constraint_1_power_limit_uw"
+  done
+  # The floor as a share of the way from the lowest clock (RPn) to the highest (RP0).
+  for d in /sys/class/drm/card[0-9]; do
+    [ -f "$d/gt_min_freq_mhz" ] || continue
+    low=$(cat "$d/gt_RPn_freq_mhz") high=$(cat "$d/gt_RP0_freq_mhz")
+    echo $((low + (high - low) * gpu / 100)) >"$d/gt_min_freq_mhz"
   done
 }
 # shellcheck disable=SC2086

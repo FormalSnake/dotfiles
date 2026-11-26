@@ -33,8 +33,9 @@ e1504g = host(
     system = tumbleweed(
         # foot, strace and dbus-1-daemon: FormalShell's nested smoke run
         # (dev/smoke.sh with a g815 build in FS_RESULT), what reads the
-        # shell's numbers on this machine's own GPU.
-        packages = PACKAGES + KDE_PACKAGES + ["systemd-experimental", "foot", "strace", "dbus-1-daemon"],
+        # shell's numbers on this machine's own GPU. perf: wm/dev/hostbench.sh
+        # there, the frame costs of formalwm and the shell nested in the session.
+        packages = PACKAGES + KDE_PACKAGES + ["systemd-experimental", "foot", "strace", "dbus-1-daemon", "perf"],
         # The initrd loads both blacklisted modules before /etc/modprobe.d applies.
         kernel_args = [
             "mitigations=off", "intel_iommu=on", "module_blacklist=ucsi_acpi,intel_ish_ipc",
