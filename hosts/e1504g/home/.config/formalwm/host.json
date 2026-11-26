@@ -1,0 +1,6 @@
+// e1504g: a moving pointer that stretches is drawn into the frame, a frame
+// behind the hand on this GPU; left as it is, it stays on its own plane.
+// Shaking it still grows it.
+{
+  "cursor": { "dynamic": { "mode": "none" } }
+}
