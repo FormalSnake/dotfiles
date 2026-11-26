@@ -35,7 +35,9 @@ e1504g = host(
         # (dev/smoke.sh with a g815 build in FS_RESULT), what reads the
         # shell's numbers on this machine's own GPU. perf: wm/dev/hostbench.sh
         # there, the frame costs of formalwm and the shell nested in the session.
-        packages = PACKAGES + KDE_PACKAGES + ["systemd-experimental", "foot", "strace", "dbus-1-daemon", "perf"],
+        # labwc: the headless parent nd's test Hyprland nests in, for Lynk's
+        # low-end benchmark (scripts/linux-gate bench e1504g).
+        packages = PACKAGES + KDE_PACKAGES + ["systemd-experimental", "foot", "strace", "dbus-1-daemon", "perf", "labwc"],
         # The initrd loads both blacklisted modules before /etc/modprobe.d applies.
         kernel_args = [
             "mitigations=off", "intel_iommu=on", "module_blacklist=ucsi_acpi,intel_ish_ipc",
