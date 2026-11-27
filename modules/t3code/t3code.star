@@ -61,7 +61,7 @@ def t3code(host):
         exec = STORE + "/t3 serve --host 127.0.0.1 --port 3773 " + home + "/Developer"
         out += [
             file("~/.t3/userdata/settings.json", mode = "patch", owns = dict(pulse, **DEVICES) if mac else pulse),
-            agent("t3code", exec, env = {"PATH": PATH, "SHELL": BREW + "/fish"}, WorkingDirectory = home) if mac else service(
+            agent("t3code", exec, env = {"PATH": PATH, "SHELL": BREW + "/fish"}, WorkingDirectory = home, ProcessType = "Interactive") if mac else service(
                 "t3code",
                 exec = exec,
                 user = True,
