@@ -27,6 +27,20 @@ SERVICES = [
     ),
 ]
 
+# What NativeDesktop's dev.star asks the system for, so nd and lynk build here while g815 is away.
+ND_BUILD_PACKAGES = [
+    "clang", "wayland-devel", "weston", "rsync", "pkgconfig(wayland-client)", "pkgconfig(xkbcommon)",
+    "pkgconfig(vulkan)", "pkgconfig(x11)", "pkgconfig(xcb)", "pkgconfig(xcursor)", "pkgconfig(xi)",
+    "pkgconfig(xrandr)", "pkgconfig(xkbfile)", "pkgconfig(fontconfig)", "pkgconfig(freetype2)",
+    "pkgconfig(alsa)", "pkgconfig(openssl)", "pkgconfig(gbm)", "pkgconfig(egl)", "pkgconfig(glib-2.0)",
+    "pkgconfig(nss)", "pkgconfig(nspr)", "pkgconfig(atk)", "pkgconfig(atk-bridge-2.0)", "pkgconfig(libdrm)",
+    "pkgconfig(expat)", "pkgconfig(gtk+-3.0)", "pkgconfig(pango)", "pkgconfig(cairo)", "pkgconfig(dbus-1)",
+    "pkgconfig(atspi-2)", "pkgconfig(cups)", "pkgconfig(gl)", "pkgconfig(libudev)", "pkgconfig(libsystemd)",
+    "pkgconfig(xcomposite)", "pkgconfig(xdamage)", "pkgconfig(xext)", "pkgconfig(xfixes)",
+    "pkgconfig(xshmfence)", "pkgconfig(gstreamer-1.0)", "pkgconfig(gstreamer-plugins-base-1.0)",
+    "pkgconfig(gstreamer-plugins-bad-1.0)",
+]
+
 e1504g = host(
     name = "e1504g",
     platform = "x86_64-linux",
@@ -37,7 +51,7 @@ e1504g = host(
         # there, the frame costs of formalwm and the shell nested in the session.
         # labwc: the headless parent nd's test Hyprland nests in, for Lynk's
         # low-end benchmark (scripts/linux-gate bench e1504g).
-        packages = PACKAGES + KDE_PACKAGES + ["systemd-experimental", "foot", "strace", "dbus-1-daemon", "perf", "labwc"],
+        packages = PACKAGES + KDE_PACKAGES + ["systemd-experimental", "foot", "strace", "dbus-1-daemon", "perf", "labwc"] + ND_BUILD_PACKAGES,
         # The initrd loads both blacklisted modules before /etc/modprobe.d applies.
         kernel_args = [
             "mitigations=off", "intel_iommu=on", "module_blacklist=ucsi_acpi,intel_ish_ipc",
