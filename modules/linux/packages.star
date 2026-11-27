@@ -14,7 +14,7 @@ DESKTOP = [
     "google-noto-sans-symbols2-fonts", "google-noto-coloremoji-fonts", "google-noto-sans-cjk-fonts",
     "liberation-fonts", "easyeffects", "pipewire-tools", "wvkbd", "dualsensectl", "flatpak", "xrandr",
     "at-spi2-core", "papers", "loupe", "gnome-text-editor", "celluloid", "udiskie",
-    "kf6-kconfig",
+    "kf6-kconfig", "qbittorrent",
 ]
 
 # Only on lib/paths.star's KDE_HOSTS.

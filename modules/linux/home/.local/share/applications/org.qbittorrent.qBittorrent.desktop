@@ -1,0 +1,12 @@
+[Desktop Entry]
+Categories=Network;FileTransfer;P2P;Qt;
+Comment=Download and share files over BitTorrent
+Exec=/home/kyandesutter/.local/bin/qbittorrent %U
+GenericName=BitTorrent client
+Icon=qbittorrent
+MimeType=application/x-bittorrent;x-scheme-handler/magnet;
+Name=qBittorrent
+Terminal=false
+Type=Application
+StartupNotify=false
+StartupWMClass=qbittorrent

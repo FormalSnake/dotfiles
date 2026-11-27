@@ -1,0 +1,35 @@
+#!/usr/bin/bash
+set -o nounset
+set -o pipefail
+
+# qBittorrent rewrites its config on exit, so the binding to NordVPN's interface is set on every
+# launch. Bound to nordlynx, libtorrent has no socket on the real interface: with the VPN down
+# torrents stall, they never fall back to the home address.
+/usr/bin/python3 - "${XDG_CONFIG_HOME:-$HOME/.config}/qBittorrent/qBittorrent.conf" <<'PY'
+import configparser, os, sys
+
+path = sys.argv[1]
+conf = configparser.RawConfigParser(delimiters=("=",), comment_prefixes=(), strict=False)
+conf.optionxform = str
+conf.read(path)
+if not conf.has_section("BitTorrent"):
+    conf.add_section("BitTorrent")
+before = dict(conf["BitTorrent"])
+conf["BitTorrent"]["Session\\Interface"] = "nordlynx"
+conf["BitTorrent"]["Session\\InterfaceName"] = "nordlynx"
+conf["BitTorrent"]["Session\\InterfaceAddress"] = ""
+# Local peer discovery multicasts from every interface, whatever the binding.
+conf["BitTorrent"]["Session\\LSDEnabled"] = "false"
+if dict(conf["BitTorrent"]) != before:
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path + ".tmp", "w") as f:
+        conf.write(f, space_around_delimiters=False)
+    os.replace(path + ".tmp", path)
+PY
+
+if /usr/bin/nordvpn status 2>/dev/null | grep -q 'Status: Disconnected'; then
+  /usr/bin/nordvpn connect >/dev/null 2>&1 ||
+    notify-send -a qBittorrent 'NordVPN did not connect' 'Torrents stay paused until it does.'
+fi
+
+exec /usr/bin/qbittorrent "$@"
