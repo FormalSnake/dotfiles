@@ -500,17 +500,21 @@ source = "git:https://github.com/FormalStudio/FormalShell@bc4e9f7bf71475d2d2d8bf
 rev = "bc4e9f7bf71475d2d2d8bfd3cdf34bdaf0116287"
 
 [pkg.aarch64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/formalshell@sha256:53e6051b726a67f1df8b84ed64b83ecb9b1205bdfb7984658ff2568b711c1e9e"
+oci = "ghcr.io/formalsnake/fspec-cache/formalshell@sha256:be3273a56fb4a4b9954a837540faaff3aae54e2cb2374474daf0efb261509e60"
 build = "bbe579c4"
 
 [pkg.x86_64-linux]
-oci = "ghcr.io/formalsnake/fspec-cache/formalshell@sha256:6880e04a3abb4448420eef70f61926c3599689ee4da4029c134f9a09e21a1c4d"
+oci = "ghcr.io/formalsnake/fspec-cache/formalshell@sha256:497a9950384aa93f7d309c1148d5bbbf8ef1225347623004271a9a2ffb73419e"
 build = "bbe579c4"
 
 [[pkg]]
 name = "formalwm"
 source = "git:https://github.com/FormalStudio/FormalShell@b0dfebb1ab570c139d1b3edebe5db85e1d933544"
 rev = "b0dfebb1ab570c139d1b3edebe5db85e1d933544"
+
+[pkg.x86_64-linux]
+oci = "ghcr.io/formalsnake/fspec-cache/formalwm@sha256:02645f16d84cb0feeba48190a8eb19249e3865e62cb94777a753452070283ad0"
+build = "e762ac72"
 
 [[pkg]]
 name = "fspec"
